@@ -1,0 +1,7 @@
+FIND_PACKAGE(BISON)
+FIND_PACKAGE(FLEX)
+
+BISON_TARGET(GenParser parser.yy ${PROJECT_BINARY_DIR}/parser.cpp)
+FLEX_TARGET(GenLexer lexer.ll ${PROJECT_BINARY_DIR}/lexer.cpp)
+ADD_FLEX_BISON_DEPENDENCY(GenLexer GenParser)
+

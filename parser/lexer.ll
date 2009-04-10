@@ -5,11 +5,11 @@
 
 #include <string>
 
-#include "scanner.h"
+#include "lexer.h"
 
 /* import the parser's token type into a local typedef */
-typedef example::Parser::token token;
-typedef example::Parser::token_type token_type;
+typedef G3nom::Parser::token token;
+typedef G3nom::Parser::token_type token_type;
 
 /* By default yylex returns int, we use token_type. Unfortunately yyterminate
  * by default returns 0, which is not of token_type. */

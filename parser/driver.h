@@ -1,18 +1,14 @@
-// $Id: driver.h 17 2007-08-19 18:51:39Z tb $ 	
-/** \file driver.h Declaration of the example::Driver class. */
 
-#ifndef EXAMPLE_DRIVER_H
-#define EXAMPLE_DRIVER_H
+
+#ifndef G3NOM_DRIVER_H
+#define G3NOM_DRIVER_H
 
 #include <string>
 #include <vector>
 
-// forward declaration
-class CalcContext;
+namespace G3nom {
 
-/** The example namespace is used to encapsulate the three parser classes
- * example::Parser, example::Scanner and example::Driver */
-namespace example {
+class Lexer;
 
 /** The Driver class brings together all components. It creates an instance of
  * the Parser and Scanner classes and connects them. Then the input stream is
@@ -24,23 +20,14 @@ class Driver
 {
 public:
     /// construct a new parser driver context
-    Driver(class CalcContext& calc);
-
-    /// enable debug output in the flex scanner
-    bool trace_scanning;
-
-    /// enable debug output in the bison parser
-    bool trace_parsing;
-
-    /// stream name (file or input stream) used for error messages.
-    std::string streamname;
+    Driver();
 
     /** Invoke the scanner and parser for a stream.
      * @param in	input stream
      * @param sname	stream name for error messages
      * @return		true if successfully parsed
      */
-    bool parse_stream(std::istream& in,
+    bool parseStream(std::istream& in,
 		      const std::string& sname = "stream input");
 
     /** Invoke the scanner and parser on an input string.
@@ -48,7 +35,7 @@ public:
      * @param sname	stream name for error messages
      * @return		true if successfully parsed
      */
-    bool parse_string(const std::string& input,
+    bool parseString(const std::string& input,
 		      const std::string& sname = "string stream");
 
     /** Invoke the scanner and parser on a file. Use parse_stream with a
@@ -56,7 +43,7 @@ public:
      * @param filename	input file name
      * @return		true if successfully parsed
      */
-    bool parse_file(const std::string& filename);
+    bool parseFile(const std::string& filename);
 
     // To demonstrate pure handling of parse errors, instead of
     // simply dumping them on the standard error output, we will pass
@@ -70,15 +57,18 @@ public:
      * e.g. to a dialog box. */
     void error(const std::string& m);
 
+private:
     /** Pointer to the current lexer instance, this is used to connect the
      * parser to the scanner. It is used in the yylex macro. */
-    class Scanner* lexer;
-
-    /** Reference to the calculator context filled during parsing of the
-     * expressions. */
-    class CalcContext& calc;
+    Lexer* m_lexer;
+    /// stream name (file or input stream) used for error messages.
+    std::string m_streamName;
+    /// enable debug output in the flex scanner
+    bool m_verboseLexing;
+    /// enable debug output in the bison parser
+    bool m_verboseParsing;
 };
 
 } // namespace example
 
-#endif // EXAMPLE_DRIVER_H
+#endif // G3NOM_DRIVER_H

@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "ast.h"
-
 %}
 
 /*** yacc/bison Declarations ***/

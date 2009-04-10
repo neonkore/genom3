@@ -93,7 +93,6 @@
 %token			TASK		"task"
 %token			SERVICE		"service"
 %token			CODEL		"codel"
-%token			COMPONENT	"component"
 
 %token IN OUT INPORT OUTPORT
 // type tokens
@@ -101,20 +100,16 @@
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 
 %token <charVal>	SPECIAL_CHAR	"char"
-%token <integerVal> 	INTEGER		"integer"
-%token <doubleVal> 	DOUBLE		"double"
-%token <stringVal> 	STRING		"string literal"
-%token <stringVal> 	identifier	"identifier"
+%token <integerVal> 	INTEGERLIT	"integer"
+%token <doubleVal> 	DOUBLELIT	"double"
+%token <stringVal> 	STRINGLIT	"string literal"
+%token <stringVal> 	IDENTIFIER	"identifier"
 
-%type <portVal>		portDecl
-%type <taskVal>		taskDecl
-%type <serviceDecl>	serviceDecl
-
-%type <calcnode>	constant variable
-%type <calcnode>	atomexpr powexpr unaryexpr mulexpr addexpr expr
+%type <portVal>		port_decl
+%type <taskVal>		task_decl
+%type <serviceDecl>	service_decl
 
 %destructor { delete $$; } STRING
-%destructor { delete $$; } portVal serviceVal taskVal
 %destructor { delete $$; } port_decl service_decl task_decl
 
  /*** END EXAMPLE - Change the example grammar's tokens above ***/
@@ -135,12 +130,12 @@
 %% /*** Grammar Rules ***/
 
 start:
-   (declaration ';')+
-{
-};
+    declaration ';'
+  | start declaration ';'
+{};
 
 declaration:
-   type_dcl 
+   type_decl 
   | port_decl
 {
     driver.component().addPort($1.name, $1);
@@ -159,13 +154,19 @@ declaration:
 /*** Component information ***/
 
 component_decl:
-   COMPONENT IDENTIFIER '{' component_field+ '}'
+   COMPONENT IDENTIFIER '{' component_fields '}'
 {
     driver.component().name = $2;
 };
 
+component_fields:
+  component_field ';'
+  | component_fields component_field ';'
+{}
+
+
 component_field:
-   IDENTIFIER ':' STRING ';'
+   IDENTIFIER ':' STRINGLIT
 {
     if($1 == "language") {
 	driver.component().language = $3;
@@ -173,7 +174,7 @@ component_field:
 	driver.component().version = $3;
     }
 }
-| identifier ':' INTEGER EOL
+| IDENTIFIER ':' INTEGERLIT
 {};
 
 /*** Inport or outport declaration ***/
@@ -192,8 +193,14 @@ port_decl:
 
 /*** Task declaration ***/
 
+task_fields:
+  task_field ';'
+  | task_fields task_field ';'
+{}
+
+
 task_decl:
-  TASK IDENTIFIER '{' (task_field ';')+ '}'
+  TASK IDENTIFIER '{' task_fields '}'
 {
     Task *t = driver.currentTask();
     driver.setCurrentTask(new Task());
@@ -203,7 +210,7 @@ task_decl:
 task_field:
   CODEL IDENTIFIER ':' codel_prototype
 {}
-| IDENTIFIER ':' INTEGER 
+| IDENTIFIER ':' INTEGERLIT 
 {
     Task *t = driver.currentTask();
     if(!t) {
@@ -216,7 +223,7 @@ task_field:
     else if($1 == "period")
       t->period = $3;
     else if($1 == "staskSize")
-      t->stackSie = $3;
+      t->stackSize = $3;
 };
 
 /*** Service Declaration ***/
@@ -231,6 +238,11 @@ codel_prototype:
   IDENTIFIER
 {};
 
+/*** Type Declaration ***/
+
+type_decl:
+  IDENTIFIER
+{};
 
 %% /*** Additional Code ***/
 

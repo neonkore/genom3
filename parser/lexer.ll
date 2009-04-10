@@ -114,17 +114,17 @@ stringtext				([^\"])|(\\.)
 "0"[xX][0-9a-fA-F]+{intsuffix}? { 
    char *end;
    yylval->integerVal = strtol(yytext, &end, 0);
-   return token::INTEGER;
+   return token::INTEGERLIT;
 }
 "0"[0-7]+{intsuffix}? {
    char *end;
    yylval->integerVal = strtol(yytext, &end, 0);
-   return token::INTEGER;
+   return token::INTEGERLIT;
 }
 [0-9]+{intsuffix}? {
    char *end;
    yylval->integerVal = strtol(yytext, &end, 0);
-   return token::INTEGER;
+   return token::INTEGERLIT;
 }
 
 // doubles
@@ -132,12 +132,12 @@ stringtext				([^\"])|(\\.)
 {fracconst}{exppart}?{floatsuffix}? {
    char *end;
    yylval->dval.v = strtod(yytext, &end);
-   return token::DOUBLE;
+   return token::DOUBLELIT;
 }
 [0-9]+{exppart}{floatsuffix}? {
    char *end;
    yylval->dval.v = strtod(yytext, &end);
-   return token::DOUBLE;
+   return token::DOUBLELIT;
 }
 
 // string literals
@@ -145,7 +145,7 @@ stringtext				([^\"])|(\\.)
    /* remove quotes */
    yytext[yyleng-1] = '\0';
    yylval->stringVal = std::string(yytext + 1);
-   return token::STRING;
+   return token::STRINGLIT;
 }
 
 //identifiers

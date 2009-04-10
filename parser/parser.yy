@@ -29,7 +29,7 @@
 
 %{ /*** C/C++ Declarations ***/
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -65,7 +65,7 @@
 %initial-action
 {
     // initialize the initial location object
-    @$.begin.filename = @$.end.filename = &driver.streamname;
+    @$.begin.filename = @$.end.filename = driver.streamNamePtr();
 };
 
 /* The driver is passed by reference to the parser and to the scanner. This
@@ -83,12 +83,12 @@
     int  			integerVal;
     double 			doubleVal;
     std::string*		stringVal;
-    Port*			portVal;
-    Service*			serviceVal;
-    Task*			taskVal;
+    class Port*			portVal;
+    class Service*		serviceVal;
+    class Task*			taskVal;
 }
 
-%token			EOF	     	"end of file"
+/*%token			END	     	"end of file"*/
 %token			COMPONENT	"component"
 %token			TASK		"task"
 %token			SERVICE		"service"
@@ -107,9 +107,9 @@
 
 %type <portVal>		port_decl
 %type <taskVal>		task_decl
-%type <serviceDecl>	service_decl
+%type <serviceVal>	service_decl
 
-%destructor { delete $$; } STRING
+%destructor { delete $$.stringVal; } STRING
 %destructor { delete $$; } port_decl service_decl task_decl
 
  /*** END EXAMPLE - Change the example grammar's tokens above ***/
@@ -123,7 +123,7 @@
  * object. it defines the yylex() function call to pull the next token from the
  * current lexer object of the driver context. */
 #undef yylex
-#define yylex driver.lexer->lex
+#define yylex driver.lexer()->lex
 
 %}
 
@@ -135,20 +135,20 @@ start:
 {};
 
 declaration:
-   type_decl 
-  | port_decl
+/*    type_decl  */
+   port_decl
 {
-    driver.component().addPort($1.name, $1);
+    driver.component().addPort($1->name, $1);
 }
 | component_decl
 {}
 | task_decl
 {
-    driver.component().addTask($1.name, $1);
+    driver.component().addTask($1->name, $1);
 }
 | service_decl 
 {
-    driver.component().addService($1.name, $1);
+    driver.component().addService($1->name, $1);
 };
 
 /*** Component information ***/
@@ -156,7 +156,7 @@ declaration:
 component_decl:
    COMPONENT IDENTIFIER '{' component_fields '}'
 {
-    driver.component().name = $2;
+    driver.component().name = *$2;
 };
 
 component_fields:
@@ -168,10 +168,10 @@ component_fields:
 component_field:
    IDENTIFIER ':' STRINGLIT
 {
-    if($1 == "language") {
-	driver.component().language = $3;
-    } else if($1 == "version") {
-	driver.component().version = $3;
+    if(*$1 == "language") {
+	driver.component().pluginLanguage = *$3;
+    } else if(*$1 == "version") {
+	driver.component().version = *$3;
     }
 }
 | IDENTIFIER ':' INTEGERLIT
@@ -182,13 +182,13 @@ component_field:
 port_decl:
   INPORT IDENTIFIER IDENTIFIER
 {
-    IDLType type = driver.typeFromName($2);
-    $$ = new Port($3, type, true);
+    IDLType::Ptr type = driver.typeFromName(*$2);
+    $$ = new Port(*$3, type.get(), true);
 }
 | OUTPORT IDENTIFIER IDENTIFIER
 {
-    IDLType type = driver.typeFromName($2);
-    $$ = new Port($3, type, false);
+    IDLType::Ptr type = driver.typeFromName(*$2);
+    $$ = new Port(*$3, type.get(), false);
 };
 
 /*** Task declaration ***/
@@ -203,6 +203,7 @@ task_decl:
   TASK IDENTIFIER '{' task_fields '}'
 {
     Task *t = driver.currentTask();
+    t->name = *$2;
     driver.setCurrentTask(new Task());
     $$ = t;
 };
@@ -218,11 +219,11 @@ task_field:
       driver.setCurrentTask(t);
     }
 
-    if($1 == "priority")
+    if(*$1 == "priority")
       t->priority = $3;
-    else if($1 == "period")
+    else if(*$1 == "period")
       t->period = $3;
-    else if($1 == "staskSize")
+    else if(*$1 == "staskSize")
       t->stackSize = $3;
 };
 

@@ -62,35 +62,35 @@ void Component::debug()
     }
 
     cout << endl << "Tasks: " << tasks.size() << endl;
-    Task::Map::const_iterator it;
-    for(it = tasks.begin(); it != tasks.end(); ++it) {
-	cout << "\t" << it->first << " : " << endl;
-	it->second->debug();
+    Task::Map::const_iterator it2;
+    for(it2 = tasks.begin(); it2 != tasks.end(); ++it2) {
+	cout << "\t" << it2->first << " : " << endl;
+	it2->second->debug();
 	cout << endl;
     }
 
     cout << endl << "Ports: " << ports.size() << endl;
-    Port::Map::const_iterator it;
-    for(it = ports.begin(); it != ports.end(); ++it) {
-	cout << "\t* " << it->first << " : " << endl;
-	it->second->debug();
+    Port::Map::const_iterator it3;
+    for(it3 = ports.begin(); it3 != ports.end(); ++it3) {
+	cout << "\t* " << it3->first << " : " << endl;
+	it3->second->debug();
 	cout << endl;
     }
 }
 
 void Component::addTask(const std::string &name, Task* task)
 {
-    tasks.insert(name, task);
+    tasks[name] = task;
 }
 
 void Component::addService(const std::string &name, Service* s)
 {
-    services.insert(name, s);
+    services[name] = s;
 }
 
 void Component::addPort(const std::string &name, Port *port)
 {
-    ports.insert(name,port);
+    ports[name] = port;
 }
 
 void Port::debug()

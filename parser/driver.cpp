@@ -6,11 +6,11 @@
 
 #include "driver.h"
 #include "lexer.h"
-#include "parser.h"
+#include "parser.hpp"
 
 namespace G3nom {
 
-Driver::Driver(class CalcContext& _calc)
+Driver::Driver()
     : m_verboseLexing(false),
       m_verboseParsing(false),
       m_currentTask(0),
@@ -18,15 +18,15 @@ Driver::Driver(class CalcContext& _calc)
 {
 }
 
-bool Driver::parse_stream(std::istream& in, const std::string& sname)
+bool Driver::parseStream(std::istream& in, const std::string& sname)
 {
     m_streamName = sname;
 
     m_lexer = new Lexer(&in);
-    m_lexer.setDebug(verbose_lexing);
+    m_lexer->setDebug(m_verboseLexing);
 
     Parser parser(*this);
-    parser.setDebugLevel(m_verboseParsing);
+    parser.set_debug_level(m_verboseParsing);
     bool b = (parser.parse() == 0);
 
     delete m_lexer;

@@ -34,9 +34,9 @@
 #include <vector>
 #include <map>
 
-namespace G3nom {
+#include "idltype.h"
 
-class IDLType;
+namespace G3nom {
 
 class Port {
   public:
@@ -44,13 +44,15 @@ class Port {
     typedef std::map<std::string, Port*> Map;
 
     Port() {}
-    Port(std::string name, IDLType type, bool incoming)
-      : name(name), type(type), type(incoming ? Incoming: Outgoing)
+    Port(std::string name, IDLType* idlType, bool incoming)
+      : name(name), idlType(idlType), type(incoming ? Incoming: Outgoing)
     {}
+
+    void debug();
     
     std::string name;
     Type type;
-    IDLType idlType;
+    IDLType::Ptr idlType;
 };
 
 class Codel {
@@ -76,6 +78,7 @@ class Task {
 
     void debug();
 
+    std::string name;
     int priority;
     int period; // in ms
     int stackSize; // in kbytes
@@ -94,6 +97,7 @@ class Service {
 
     void debug();
 
+    std::string name;
     Type type;
     std::string doc;
     std::string taskName;

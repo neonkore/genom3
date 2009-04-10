@@ -22,7 +22,7 @@
 #undef yyFlexLexer
 #endif
 
-#include "parser.h"
+#include "parser.hpp"
 
 namespace G3nom {
 

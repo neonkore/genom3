@@ -5,7 +5,7 @@ set(CMAKE_MODULE_PATH "../cmake/")
 FIND_PACKAGE(BISON)
 FIND_PACKAGE(FLEX)
 
-# include_directories(lib)
+include_directories(${PROJECT_SOURCE_DIR}/parser ${PROJECT_BINARY_DIR})
 
 FLEX_TARGET(GenLexer ${PROJECT_SOURCE_DIR}/parser/lexer.ll ${PROJECT_BINARY_DIR}/lexer.cpp)
 BISON_TARGET(GenParser ${PROJECT_SOURCE_DIR}/parser/parser.yy ${PROJECT_BINARY_DIR}/parser.cpp)

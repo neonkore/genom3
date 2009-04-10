@@ -58,13 +58,17 @@ public:
      * e.g. to a dialog box. */
     void error(const std::string& m);
 
-    Component& component();
+    std::string* streamNamePtr() { return &m_streamName; }
+    Lexer* lexer() { return m_lexer; }
+    Component& component() { return m_component; }
 
     void setCurrentTask(Task *t) { m_currentTask = t; }
     Task* currentTask() { return m_currentTask; }
 
     void setCurrentService(Service *s) { m_currentService = s; }
     Service* currentService() { return m_currentService; }
+
+    IDLType::Ptr typeFromName(const std::string &name) { return IDLType::Ptr(); }
 
 private:
     /** Pointer to the current lexer instance, this is used to connect the

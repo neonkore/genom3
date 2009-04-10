@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include "ast.h"
 
 namespace G3nom {
 
@@ -57,6 +58,14 @@ public:
      * e.g. to a dialog box. */
     void error(const std::string& m);
 
+    Component& component();
+
+    void setCurrentTask(Task *t) { m_currentTask = t; }
+    Task* currentTask() { return m_currentTask; }
+
+    void setCurrentService(Service *s) { m_currentService = s; }
+    Service* currentService() { return m_currentService; }
+
 private:
     /** Pointer to the current lexer instance, this is used to connect the
      * parser to the scanner. It is used in the yylex macro. */
@@ -67,6 +76,10 @@ private:
     bool m_verboseLexing;
     /// enable debug output in the bison parser
     bool m_verboseParsing;
+
+    Component m_component;
+    Task *m_currentTask;
+    Service *m_currentService;
 };
 
 } // namespace example

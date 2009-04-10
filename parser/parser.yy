@@ -1,5 +1,31 @@
-/* $Id: parser.yy 19 2007-08-19 20:36:24Z tb $ -*- mode: c++ -*- */
-/** \file parser.yy Contains the example Bison parser source */
+/* 
+ * Copyright (c) 2002 LAAS/CNRS                       --  Tue Mar 26 2002
+ * All rights reserved.
+ *
+ * Redistribution and use  in source  and binary  forms,  with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *   1. Redistributions of  source  code must retain the  above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice,  this list of  conditions and the following disclaimer in
+ *      the  documentation  and/or  other   materials provided  with  the
+ *      distribution.
+ *
+ * THIS  SOFTWARE IS PROVIDED BY  THE  COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND  ANY  EXPRESS OR IMPLIED  WARRANTIES,  INCLUDING,  BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES  OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR  PURPOSE ARE DISCLAIMED. IN  NO EVENT SHALL THE COPYRIGHT
+ * HOLDERS OR      CONTRIBUTORS  BE LIABLE FOR   ANY    DIRECT, INDIRECT,
+ * INCIDENTAL,  SPECIAL,  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE   OF THIS SOFTWARE, EVEN   IF ADVISED OF   THE POSSIBILITY OF SUCH
+ * DAMAGE.
+ */
 
 %{ /*** C/C++ Declarations ***/
 
@@ -53,24 +79,43 @@
  /*** BEGIN EXAMPLE - Change the example grammar's tokens below ***/
 
 %union {
+    char 			charVal;
     int  			integerVal;
     double 			doubleVal;
     std::string*		stringVal;
-    CalcNode*			calcnode;
+    Port*			portVal;
+    Service*			serviceVal;
+    Task*			taskVal;
 }
 
-%token			END	     0	"end of file"
-%token			EOL		"end of line"
+%token			EOF	     	"end of file"
+%token			COMPONENT	"component"
+%token			TASK		"task"
+%token			SERVICE		"service"
+%token			CODEL		"codel"
+%token			COMPONENT	"component"
+
+%token IN OUT INPORT OUTPORT
+// type tokens
+%token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID
+%token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
+
+%token <charVal>	SPECIAL_CHAR	"char"
 %token <integerVal> 	INTEGER		"integer"
 %token <doubleVal> 	DOUBLE		"double"
-%token <stringVal> 	STRING		"string"
+%token <stringVal> 	STRING		"string literal"
+%token <stringVal> 	identifier	"identifier"
+
+%type <portVal>		portDecl
+%type <taskVal>		taskDecl
+%type <serviceDecl>	serviceDecl
 
 %type <calcnode>	constant variable
 %type <calcnode>	atomexpr powexpr unaryexpr mulexpr addexpr expr
 
 %destructor { delete $$; } STRING
-%destructor { delete $$; } constant variable
-%destructor { delete $$; } atomexpr powexpr unaryexpr mulexpr addexpr expr
+%destructor { delete $$; } portVal serviceVal taskVal
+%destructor { delete $$; } port_decl service_decl task_decl
 
  /*** END EXAMPLE - Change the example grammar's tokens above ***/
 
@@ -90,268 +135,102 @@
 %% /*** Grammar Rules ***/
 
 start:
-   declarations
-{}
-
-declarations:
-   declarations declaration ';'
-{}
+   (declaration ';')+
+{
+};
 
 declaration:
-   type_dcl | port_decl | component_decl
-   | task_decl | service_decl 
+   type_dcl 
+  | port_decl
+{
+    driver.component().addPort($1.name, $1);
+}
+| component_decl
 {}
+| task_decl
+{
+    driver.component().addTask($1.name, $1);
+}
+| service_decl 
+{
+    driver.component().addService($1.name, $1);
+};
+
+/*** Component information ***/
 
 component_decl:
-   COMPONENT identifier '{' component_fields '}'
+   COMPONENT IDENTIFIER '{' component_field+ '}'
+{
+    driver.component().name = $2;
+};
+
+component_field:
+   IDENTIFIER ':' STRING ';'
+{
+    if($1 == "language") {
+	driver.component().language = $3;
+    } else if($1 == "version") {
+	driver.component().version = $3;
+    }
+}
+| identifier ':' INTEGER EOL
+{};
+
+/*** Inport or outport declaration ***/
+
+port_decl:
+  INPORT IDENTIFIER IDENTIFIER
+{
+    IDLType type = driver.typeFromName($2);
+    $$ = new Port($3, type, true);
+}
+| OUTPORT IDENTIFIER IDENTIFIER
+{
+    IDLType type = driver.typeFromName($2);
+    $$ = new Port($3, type, false);
+};
+
+/*** Task declaration ***/
+
+task_decl:
+  TASK IDENTIFIER '{' (task_field ';')+ '}'
+{
+    Task *t = driver.currentTask();
+    driver.setCurrentTask(new Task());
+    $$ = t;
+};
+
+task_field:
+  CODEL IDENTIFIER ':' codel_prototype
 {}
+| IDENTIFIER ':' INTEGER 
+{
+    Task *t = driver.currentTask();
+    if(!t) {
+      t = new Task();
+      driver.setCurrentTask(t);
+    }
 
-component_fields:
-   identifier ':' value
-{}
+    if($1 == "priority")
+      t->priority = $3;
+    else if($1 == "period")
+      t->period = $3;
+    else if($1 == "staskSize")
+      t->stackSie = $3;
+};
 
-/* --- type declaration ---------------------------------------------- */
+/*** Service Declaration ***/
 
-type_dcl:
-   TYPEDEF alias_type_list
-   {
-   }
-   | constr_type_spec
-   {
-   }
+service_decl:
+    SERVICE IDENTIFIER '{' '}'
+{};
 
-constr_type_spec: constr_type
-   {
-   }
-;
+/*** Codel Declaration ***/
 
-constr_type: struct_type | union_type | enum_type;
+codel_prototype:
+  IDENTIFIER
+{};
 
-alias_type_list:
-   type_spec declarator
-   {
-   }
-   | alias_type_list ',' declarator
-   {
-   }
-;
-
-enum_type: ENUM IDENTIFIER '{' enumerator_list '}'
-   {
-   }
-;
-
-struct_type: STRUCT scope_push_new '{' member_list '}'
-   {
-   }
-   | STRUCT scope_push_new error '}'
-   {
-   }
-;
-
-union_type: 
-   UNION scope_push_new SWITCH '(' switch_type_spec ')' '{' switch_body '}'
-   {
-   }
-   | UNION scope_push_new error '}'
-   {
-   }
-;
-
-/* --- type declarators ---------------------------------------------- */
-
-declarator: simple_declarator | array_declarator;
-
-simple_declarator: IDENTIFIER
-   {
-   }
-;
-
-array_declarator:
-   simple_declarator fixed_array_size
-   {
-   }
-   | array_declarator fixed_array_size
-   {
-   }
-;
-
-fixed_array_size: '[' positive_int_const ']'
-   {
-   }
-;
-
-
-/* --- type specification -------------------------------------------- */
-
-/* these rules create and return an IdlerType structure */
-
-type_spec: simple_type_spec | constr_type_spec;
-
-simple_type_spec: base_type_spec | template_type_spec | named_type;
-
-named_type: scoped_name
-   {
-   }
-;
-
-base_type_spec:
-   floating_pt_type | integer_type | char_type | boolean_type
-   | octet_type | any_type;
-
-template_type_spec: sequence_type | string_type | fixed_type;
-
-floating_pt_type:
-   FLOAT
-   {
-   }
-   | DOUBLE
-   {
-   }
-;
-
-integer_type: signed_int | unsigned_int;
-
-signed_int: signed_long_int | signed_short_int;
-
-signed_long_int: LONG
-   {
-   }
-;
-
-signed_short_int: SHORT
-   {
-   }
-;
-
-unsigned_int: unsigned_long_int | unsigned_short_int;
-
-unsigned_long_int: UNSIGNED LONG
-   {
-   }
-;
-
-unsigned_short_int: UNSIGNED SHORT
-   {
-   }
-;
-
-char_type: CHAR
-   {
-   }
-;
-
-boolean_type: BOOLEAN
-   {
-   }
-;
-
-octet_type: OCTET
-   {
-   }
-;
-
-any_type: ANY
-   {
-   }
-;
-
-member_list:
-   member ';'
-   {
-   }
-   | member_list member ';'
-   {
-   }
-;
-
-member:
-   type_spec declarator
-   {
-   }
-   | member ',' declarator
-   {
-   }
-;
-
-switch_type_spec:
-   integer_type | char_type | boolean_type | enum_type
-   | scoped_name
-   {
-   }
-;
-
-switch_body: case | switch_body case
-   {
-   }
-;
-
-case: case_label_list element_spec ';'
-   {
-   }
-;
-
-case_label_list: case_label | case_label_list case_label
-   {
-   }
-;
-
-case_label:
-   CASE const_exp ':'
-   {
-   }
-   | DEFAULT ':'
-   {
-   }
-;
-
-element_spec: type_spec declarator
-   {
-   }
-;
-
-enumerator_list:
-   enumerator
-   {
-   }
-   | enumerator_list ',' enumerator
-   {
-   }
-;
-
-enumerator: IDENTIFIER
-   {
-   }
-;
-
-sequence_type:
-   SEQUENCE '<' simple_type_spec ',' positive_int_const '>'
-   {
-   }
-   | SEQUENCE '<' simple_type_spec '>'
-   {
-   }
-;
-
-string_type:
-   STRING '<' positive_int_const '>'
-   {
-   }
-   | STRING
-   {
-   }
-;
-
-fixed_type:
-   FIXED '<' positive_int_const ',' positive_int_const '>'
-   {
-      ;
-   }
-   | FIXED
-   {
-      ;
-   }
-;
 
 %% /*** Additional Code ***/
 

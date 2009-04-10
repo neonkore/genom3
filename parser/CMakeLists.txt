@@ -10,7 +10,8 @@ FLEX_TARGET(GenLexer lexer.ll ${PROJECT_BINARY_DIR}/lexer.cpp)
 ADD_FLEX_BISON_DEPENDENCY(GenLexer GenParser)
 
 set(genparser_SRCS
-    driver.cc
+    driver.cpp
+    ast.cpp
     ${LEX_GenLexer_OUTPUTS}
     ${BISON_GenParser_OUTPUTS}    
 )

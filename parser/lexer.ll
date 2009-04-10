@@ -42,6 +42,13 @@ typedef G3nom::Parser::token_type token_type;
 /* enables the use of start condition stacks */
 %option stack
 
+intsuffix				([uU][lL]?)|([lL][uU]?)
+fixedsuffix				([dD])
+fracconst				([0-9]*\.[0-9]+)|([0-9]+\.)
+exppart					[eE][-+]?[0-9]+
+floatsuffix				[fFlL]
+stringtext				([^\"])|(\\.)
+
 /* The following paragraph suffices to track locations accurately. Each time
  * yylex is invoked, the begin position is moved onto the end position. */
 %{
@@ -58,30 +65,95 @@ typedef G3nom::Parser::token_type token_type;
 
  /*** BEGIN EXAMPLE - Change the example lexer rules below ***/
 
-[0-9]+ {
-    yylval->integerVal = atoi(yytext);
-    return token::INTEGER;
-}
-
-[0-9]+"."[0-9]* {
-    yylval->doubleVal = atof(yytext);
-    return token::DOUBLE;
-}
-
-[A-Za-z][A-Za-z0-9_,.-]* {
-    yylval->stringVal = new std::string(yytext, yyleng);
-    return token::STRING;
-}
-
- /* gobble up white-spaces */
-[ \t\r]+ {
+// gobble up white-spaces
+[ \n\t\r]+ {
     yylloc->step();
 }
 
- /* gobble up end-of-lines */
-\n {
-    yylloc->lines(yyleng); yylloc->step();
-    return token::EOL;
+// special characters
+[\{\}\[\]\(\)\;\:\?\.\+\-\*\/\%\^\&\|\~\!\=\<\>\,] {
+    yylval->charVal = yytext;
+    return yytext[0]; // use keywords as token types
+}
+
+// type related keywords
+"short"			{ return token::SHORT; }
+"long"			{ return token::LONG; }
+"fixed"			{ return token::FIXED; }
+"float"			{ return token::FLOAT; }
+"double"		{ return token::DOUBLE; }
+"char"			{ return token::CHAR; }
+"wchar"			{ return token::WCHAR; }
+"string"		{ return token::STRING; }
+"wstring"		{ return token::WSTRING; }
+"boolean"		{ return token::BOOLEAN; }
+"octet"			{ return token::OCTET; }
+"any"			{ return token::ANY; }
+"void"			{ return token::VOID; }
+
+"native"		{ return token::NATIVE; }
+"enum"			{ return token::ENUM; }
+"union"			{ return token::UNION; }
+"switch"		{ return token::SWITCH; }
+"case"			{ return token::CASE; }
+"default"		{ return token::DEFAULT; }
+"struct"		{ return token::STRUCT; }
+"sequence"		{ return token::SEQUENCE; }
+
+//other keywords
+"component"		{ return token::COMPONENT; }
+"task"			{ return token::TASK; }
+"service"		{ return token::SERVICE; }
+"codel"			{ return token::CODEL; }
+"inport"		{ return token::INPORT; }
+"outport"		{ return token::OUTPORT; }
+"in"			{ return token::IN; }
+"out"			{ return token::OUT; }
+
+// ints
+"0"[xX][0-9a-fA-F]+{intsuffix}? { 
+   char *end;
+   yylval->integerVal = strtol(yytext, &end, 0);
+   return token::INTEGER;
+}
+"0"[0-7]+{intsuffix}? {
+   char *end;
+   yylval->integerVal = strtol(yytext, &end, 0);
+   return token::INTEGER;
+}
+[0-9]+{intsuffix}? {
+   char *end;
+   yylval->integerVal = strtol(yytext, &end, 0);
+   return token::INTEGER;
+}
+
+// doubles
+
+{fracconst}{exppart}?{floatsuffix}? {
+   char *end;
+   yylval->dval.v = strtod(yytext, &end);
+   return token::DOUBLE;
+}
+[0-9]+{exppart}{floatsuffix}? {
+   char *end;
+   yylval->dval.v = strtod(yytext, &end);
+   return token::DOUBLE;
+}
+
+// string literals
+"\""{stringtext}*"\"" {
+   /* remove quotes */
+   yytext[yyleng-1] = '\0';
+   yylval->stringVal = std::string(yytext + 1);
+   return token::STRING;
+}
+
+//identifiers
+
+
+[A-Za-z][A-Za-z0-9_,.-]* {
+    yylval->stringVal = new std::string(yytext, yyleng);
+    return token::IDENTIFIER;
 }
 
  /* pass all other characters up to bison */

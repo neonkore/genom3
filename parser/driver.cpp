@@ -12,7 +12,9 @@ namespace G3nom {
 
 Driver::Driver(class CalcContext& _calc)
     : m_verboseLexing(false),
-      m_verboseParsing(false)
+      m_verboseParsing(false),
+      m_currentTask(0),
+      m_currentService(0)
 {
 }
 

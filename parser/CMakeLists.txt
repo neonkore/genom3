@@ -1,4 +1,3 @@
-# project(GenParser)
 
 set(CMAKE_MODULE_PATH "../cmake/")
 
@@ -7,13 +6,13 @@ FIND_PACKAGE(FLEX)
 
 include_directories(${PROJECT_SOURCE_DIR}/parser ${PROJECT_BINARY_DIR})
 
-FLEX_TARGET(GenLexer ${PROJECT_SOURCE_DIR}/parser/lexer.ll ${PROJECT_BINARY_DIR}/lexer.cpp)
-BISON_TARGET(GenParser ${PROJECT_SOURCE_DIR}/parser/parser.yy ${PROJECT_BINARY_DIR}/parser.cpp)
+BISON_TARGET(GenParser ${PROJECT_SOURCE_DIR}/parser/parser.yy parser/parser.cpp)
+FLEX_TARGET(GenLexer ${PROJECT_SOURCE_DIR}/parser/lexer.ll parser/lexer.cpp)
 ADD_FLEX_BISON_DEPENDENCY(GenLexer GenParser)
 
 set(genparser_SRCS
     ast.cpp
-    ${LEX_GenLexer_OUTPUTS}
+    ${FLEX_GenLexer_OUTPUTS}
     ${BISON_GenParser_OUTPUTS}    
     driver.cpp
 )

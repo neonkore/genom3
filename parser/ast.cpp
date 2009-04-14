@@ -74,7 +74,7 @@ void Component::debug()
     cout << endl << "Ports: " << ports.size() << endl;
     Port::Map::const_iterator it3;
     for(it3 = ports.begin(); it3 != ports.end(); ++it3) {
-	cout << "\t* " << it3->first << " : " << endl;
+	cout << "\t* " << it3->first << " : ";
 	it3->second->debug();
 	cout << endl;
     }
@@ -100,11 +100,11 @@ void Component::addPort(const std::string &name, Port *port)
 void Port::debug()
 {
     if(type == Incoming)
-      cout << "Inport: ";
+      cout << "Inport; ";
     else
-      cout << "Outport: ";
+      cout << "Outport; ";
 
-    cout << name << " of type " << /*idlType->debug() <<*/ endl;
+    cout << "type: " << /*idlType->debug() <<*/ endl;
 }
 
 /******** Task ***************/

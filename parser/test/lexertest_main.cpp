@@ -54,9 +54,12 @@ int main(int argc, char* argv[])
 // 		  "codel start:	tstart(inout param);\n"
 // 		  "codel main:	tmain();\n"
 		  "};";
+      } else if(arg == "testPorts") {
+	 s = "outport WrappedType Toto;"
+	      "inport stringType External;";
       } else {
 	  cout << "unknown test name: " << arg << endl;
-	  return -1;
+	  return 1;
       }
 	   
     }

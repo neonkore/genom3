@@ -132,8 +132,11 @@
 %% /*** Grammar Rules ***/
 
 start:
-    declaration ';'
-  | start declaration ';'
+  declarations END
+
+declarations:
+    declaration SEMICOLON
+  | declarations declaration SEMICOLON
 {};
 
 declaration:

@@ -88,7 +88,7 @@
     class Task*			taskVal;
 }
 
-/*%token			END	     	"end of file"*/
+%token			END	     	"end of file"
 %token			COMPONENT	"component"
 %token			TASK		"task"
 %token			SERVICE		"service"
@@ -96,7 +96,7 @@
 
 %token IN OUT INPORT OUTPORT
 // type tokens
-%token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID
+%token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 
 %token <charVal>	SPECIAL_CHAR	"char"

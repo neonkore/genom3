@@ -27,7 +27,7 @@ typedef G3nom::Parser::token_type token_type;
 %option c++
 
 /* change the name of the scanner class. results in "ExampleFlexLexer" */
-%option prefix="Example"
+%option prefix="G3nom"
 
 /* the manual says "somewhat more optimized" */
 %option batch
@@ -65,18 +65,18 @@ stringtext				([^\"])|(\\.)
 
  /*** BEGIN EXAMPLE - Change the example lexer rules below ***/
 
-// gobble up white-spaces
+ /* gobble up white-spaces */
 [ \n\t\r]+ {
     yylloc->step();
 }
 
-// special characters
+ /* special characters */
 [\{\}\[\]\(\)\;\:\?\.\+\-\*\/\%\^\&\|\~\!\=\<\>\,] {
-    yylval->charVal = yytext;
-    return yytext[0]; // use keywords as token types
+    yylval->charVal = *yytext;
+    return token::SPECIAL_CHAR; // use keywords as token types
 }
 
-// type related keywords
+ /* type related keywords */
 "short"			{ return token::SHORT; }
 "long"			{ return token::LONG; }
 "fixed"			{ return token::FIXED; }
@@ -100,7 +100,7 @@ stringtext				([^\"])|(\\.)
 "struct"		{ return token::STRUCT; }
 "sequence"		{ return token::SEQUENCE; }
 
-//other keywords
+ /*other keywords  */
 "component"		{ return token::COMPONENT; }
 "task"			{ return token::TASK; }
 "service"		{ return token::SERVICE; }
@@ -110,7 +110,7 @@ stringtext				([^\"])|(\\.)
 "in"			{ return token::IN; }
 "out"			{ return token::OUT; }
 
-// ints
+ /* ints */
 "0"[xX][0-9a-fA-F]+{intsuffix}? { 
    char *end;
    yylval->integerVal = strtol(yytext, &end, 0);
@@ -127,29 +127,28 @@ stringtext				([^\"])|(\\.)
    return token::INTEGERLIT;
 }
 
-// doubles
+ /* doubles */
 
 {fracconst}{exppart}?{floatsuffix}? {
    char *end;
-   yylval->dval.v = strtod(yytext, &end);
+   yylval->doubleVal = strtod(yytext, &end);
    return token::DOUBLELIT;
 }
 [0-9]+{exppart}{floatsuffix}? {
    char *end;
-   yylval->dval.v = strtod(yytext, &end);
+   yylval->doubleVal = strtod(yytext, &end);
    return token::DOUBLELIT;
 }
 
-// string literals
+ /* string literals */
 "\""{stringtext}*"\"" {
    /* remove quotes */
    yytext[yyleng-1] = '\0';
-   yylval->stringVal = std::string(yytext + 1);
+   yylval->stringVal = new std::string(yytext + 1);
    return token::STRINGLIT;
 }
 
-//identifiers
-
+ /* identifiers */
 
 [A-Za-z][A-Za-z0-9_,.-]* {
     yylval->stringVal = new std::string(yytext, yyleng);
@@ -165,19 +164,19 @@ stringtext				([^\"])|(\\.)
 
 %% /*** Additional Code ***/
 
-namespace example {
+namespace G3nom {
 
-Scanner::Scanner(std::istream* in,
+Lexer::Lexer(std::istream* in,
 		 std::ostream* out)
-    : ExampleFlexLexer(in, out)
+    : G3nomFlexLexer(in, out)
 {
 }
 
-Scanner::~Scanner()
+Lexer::~Lexer()
 {
 }
 
-void Scanner::set_debug(bool b)
+void Lexer::setDebug(bool b)
 {
     yy_flex_debug = b;
 }
@@ -192,7 +191,7 @@ void Scanner::set_debug(bool b)
 #undef yylex
 #endif
 
-int ExampleFlexLexer::yylex()
+int G3nomFlexLexer::yylex()
 {
     std::cerr << "in ExampleFlexLexer::yylex() !" << std::endl;
     return 0;
@@ -204,7 +203,7 @@ int ExampleFlexLexer::yylex()
  * another input file, and scanning continues. If it returns true (non-zero),
  * then the scanner terminates, returning 0 to its caller. */
 
-int ExampleFlexLexer::yywrap()
+int G3nomFlexLexer::yywrap()
 {
     return 1;
 }

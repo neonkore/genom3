@@ -1,6 +1,8 @@
 
 set(CMAKE_MODULE_PATH "../cmake/")
 
+add_subdirectory(test)
+
 FIND_PACKAGE(BISON)
 FIND_PACKAGE(FLEX)
 

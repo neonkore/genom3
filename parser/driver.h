@@ -46,9 +46,7 @@ public:
      */
     bool parseFile(const std::string& filename);
 
-    // To demonstrate pure handling of parse errors, instead of
-    // simply dumping them on the standard error output, we will pass
-    // them to the driver using the following two member functions.
+    void setDebug(bool verbose);
 
     /** Error handling with associated line number. This can be modified to
      * output the error e.g. to a dialog box. */

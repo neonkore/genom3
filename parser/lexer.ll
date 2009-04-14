@@ -4,6 +4,7 @@
 %{ /*** C/C++ Declarations ***/
 
 #include <string>
+#include <iostream>
 
 #include "lexer.h"
 
@@ -70,11 +71,17 @@ stringtext				([^\"])|(\\.)
     yylloc->step();
 }
 
- /* special characters */
+ /* special characters 
 [\{\}\[\]\(\)\;\:\?\.\+\-\*\/\%\^\&\|\~\!\=\<\>\,] {
     yylval->charVal = *yytext;
     return token::SPECIAL_CHAR; // use keywords as token types
-}
+}*/
+
+ /* One char keywords */
+"{"			{ return token::LBRACE; }
+"}"			{ return token::RBRACE; }
+";"			{ return token::SEMICOLON; }
+":"			{ return token::COLON; }
 
  /* type related keywords */
 "short"			{ return token::SHORT; }
@@ -152,6 +159,7 @@ stringtext				([^\"])|(\\.)
 
 [A-Za-z][A-Za-z0-9_,.-]* {
     yylval->stringVal = new std::string(yytext, yyleng);
+    std::cout << "parsed identifier " << *(yylval->stringVal) << std::endl;
     return token::IDENTIFIER;
 }
 

@@ -58,4 +58,11 @@ void Driver::error(const std::string& m)
     std::cerr << m << std::endl;
 }
 
-} // namespace example
+void Driver::setDebug(bool verbose)
+{
+    m_verboseLexing = true;
+    m_verboseParsing = true;
+}
+
+
+} // namespace G3nom

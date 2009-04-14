@@ -33,6 +33,8 @@
 using namespace std;
 using namespace G3nom;
 
+/******** Component ***************/
+
 Component::Component() 
 {}
 
@@ -64,7 +66,7 @@ void Component::debug()
     cout << endl << "Tasks: " << tasks.size() << endl;
     Task::Map::const_iterator it2;
     for(it2 = tasks.begin(); it2 != tasks.end(); ++it2) {
-	cout << "\t" << it2->first << " : " << endl;
+	cout << "\t-- " << it2->first << " : " << endl;
 	it2->second->debug();
 	cout << endl;
     }
@@ -93,6 +95,8 @@ void Component::addPort(const std::string &name, Port *port)
     ports[name] = port;
 }
 
+/******** Port ***************/
+
 void Port::debug()
 {
     if(type == Incoming)
@@ -102,6 +106,8 @@ void Port::debug()
 
     cout << name << " of type " << /*idlType->debug() <<*/ endl;
 }
+
+/******** Task ***************/
 
 void Task::debug()
 {
@@ -115,6 +121,8 @@ void Task::debug()
     }    
 }
 
+/******** Service ***************/
+
 void Service::debug()
 {
     cout << "doc: " << doc << endl;
@@ -126,5 +134,26 @@ void Service::debug()
 	it->second->debug();
 	cout << endl;
     }    
+}
+
+/******** Codel ***************/
+
+void Codel::debug()
+{
+    cout << name << "inports: ";
+    for(vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
+	cout << *it << ", ";
+
+    cout << "; outports: ";
+    for(vector<string>::const_iterator it = outPorts.begin(); it != outPorts.end(); ++it)
+	cout << *it << ", ";
+
+    cout << "; intType: ";
+    for(vector<string>::const_iterator it = inTypes.begin(); it != inTypes.end(); ++it)
+	cout << *it << ", ";
+
+    cout << "; outTypes: ";
+    for(vector<string>::const_iterator it = outTypes.begin(); it != outTypes.end(); ++it)
+	cout << *it << ", ";    
 }
 

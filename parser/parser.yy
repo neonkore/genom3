@@ -94,6 +94,8 @@
 %token			SERVICE		"service"
 %token			CODEL		"codel"
 
+%token LBRACE RBRACE SEMICOLON COLON
+
 %token IN OUT INPORT OUTPORT
 // type tokens
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
@@ -154,19 +156,19 @@ declaration:
 /*** Component information ***/
 
 component_decl:
-   COMPONENT IDENTIFIER '{' component_fields '}'
+   COMPONENT IDENTIFIER LBRACE component_fields RBRACE
 {
     driver.component().name = *$2;
 };
 
 component_fields:
-  component_field ';'
-  | component_fields component_field ';'
+  component_field SEMICOLON
+  | component_fields component_field SEMICOLON
 {}
 
 
 component_field:
-   IDENTIFIER ':' STRINGLIT
+   IDENTIFIER COLON STRINGLIT
 {
     if(*$1 == "language") {
 	driver.component().pluginLanguage = *$3;
@@ -174,8 +176,14 @@ component_field:
 	driver.component().version = *$3;
     }
 }
-| IDENTIFIER ':' INTEGERLIT
-{};
+| IDENTIFIER COLON INTEGERLIT
+{}
+| IDENTIFIER COLON IDENTIFIER
+{
+    if(*$1 == "ids") {
+	driver.component().IDSStructName = *$3;
+    }
+};
 
 /*** Inport or outport declaration ***/
 
@@ -194,13 +202,13 @@ port_decl:
 /*** Task declaration ***/
 
 task_fields:
-  task_field ';'
-  | task_fields task_field ';'
+  task_field SEMICOLON
+  | task_fields task_field SEMICOLON
 {}
 
 
 task_decl:
-  TASK IDENTIFIER '{' task_fields '}'
+  TASK IDENTIFIER LBRACE task_fields RBRACE
 {
     Task *t = driver.currentTask();
     t->name = *$2;
@@ -209,9 +217,9 @@ task_decl:
 };
 
 task_field:
-  CODEL IDENTIFIER ':' codel_prototype
+  CODEL IDENTIFIER COLON codel_prototype
 {}
-| IDENTIFIER ':' INTEGERLIT 
+| IDENTIFIER COLON INTEGERLIT 
 {
     Task *t = driver.currentTask();
     if(!t) {
@@ -230,7 +238,7 @@ task_field:
 /*** Service Declaration ***/
 
 service_decl:
-    SERVICE IDENTIFIER '{' '}'
+    SERVICE IDENTIFIER LBRACE RBRACE
 {};
 
 /*** Codel Declaration ***/

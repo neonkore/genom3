@@ -118,6 +118,9 @@ class Component {
     void addService(const std::string& name, G3nom::Service* task);
     void addPort(const std::string& name, G3nom::Port* port);
 
+//     std::vector<std::string> services();
+//     Service* serviceByName(const std::string &name);
+
     std::string name;
     std::string pluginLanguage;
     std::string version;

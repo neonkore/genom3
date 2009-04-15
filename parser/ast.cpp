@@ -95,6 +95,14 @@ void Component::addPort(const std::string &name, Port *port)
     ports[name] = port;
 }
 
+Task* Component::task(const std::string &name)
+{
+    Task::Map::iterator it = tasks.find(name);
+    if(it != tasks.end())
+	return it->second;
+    return 0;
+}
+
 /******** Port ***************/
 
 void Port::debug()

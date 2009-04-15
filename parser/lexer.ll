@@ -4,7 +4,7 @@
 %{ /*** C/C++ Declarations ***/
 
 #include <string>
-#include <iostream>
+// #include <iostream>
 
 #include "lexer.h"
 
@@ -159,7 +159,6 @@ stringtext				([^\"])|(\\.)
 
 [A-Za-z][A-Za-z0-9_,.-]* {
     yylval->stringVal = new std::string(yytext, yyleng);
-    std::cout << "parsed identifier " << *(yylval->stringVal) << std::endl;
     return token::IDENTIFIER;
 }
 

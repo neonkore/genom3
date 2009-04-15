@@ -27,20 +27,64 @@
  * DAMAGE.
  */
 
-#ifndef G3NOM_AST_BINDING_H
-#define G3NOM_AST_BINDING_H
-
+#include "tclinterpreter.h"
 #include "ast.h"
-#include "cpptcl.h"
 
-namespace G3nom {
+#include <iostream>
 
-void setupInterpreter(Tcl::interpreter &i) 
+using namespace G3nom;
+using namespace Tcl;
+using namespace std;
+
+TclInterpreter* TclInterpreter::m_instance = 0;
+
+Component* getCurrentComponent()
 {
-    i.class_<Task>("Task")
+    TclInterpreter *i = TclInterpreter::getInstance();
+    return i->component();
+}
+
+void debug(Component *c)
+{
+    c->debug();
+}
+
+TclInterpreter::TclInterpreter() 
+{
+    m_interpreter.def("getComponent", &getCurrentComponent, factory("Component"));
+    m_interpreter.def("debugComp", &debug);
+
+    m_interpreter.class_<Component>("Component")
+	    .def("task", &Component::task, factory("Task"))
+	    .def("debug", &Component::debug);
+
+    m_interpreter.class_<Task>("Task")
            .def("debug", &Task::debug);
 }
 
+TclInterpreter* TclInterpreter::getInstance()
+{
+    if(!m_instance)
+	m_instance = new TclInterpreter();
+    return m_instance;
 }
 
-#endif 
+void TclInterpreter::start(G3nom::Component* c) 
+{
+    m_component = c;
+    m_interpreter.eval("set comp [getComponent]");
+}
+
+Component* TclInterpreter::component() 
+{
+    return m_component;
+}
+
+void G3nom::TclInterpreter::interpret(const std::string& s) 
+{
+    try {
+	m_interpreter.eval(s);
+    } catch (std::exception const &e) {
+	cerr << "Error: " << e.what() << endl;
+    }
+}

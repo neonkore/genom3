@@ -6,6 +6,7 @@ include_directories(${PROJECT_SOURCE_DIR}/parser ${TCL_INCLUDE_PATH} ${Boost_INC
 
 set(genom_tcl_binding_SRCS
   cpptcl.cc
+  tclinterpreter.cpp
   test.cpp
 )
 

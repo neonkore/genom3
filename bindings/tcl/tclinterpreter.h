@@ -27,37 +27,31 @@
  * DAMAGE.
  */
 
-#include <string>
-#include <iostream>
+#ifndef G3NOM_TCL_INTERPRETER_H
+#define G3NOM_TCL_INTERPRETER_H
 
-#include "tclinterpreter.h"
-#include "driver.h"
+#include "cpptcl.h"
 
-using namespace std;
-using namespace G3nom;
-using namespace Tcl;
+namespace G3nom {
 
-int main(int argc, char* argv[])
-{
-      string s = "task main { "
-		  "priority: 100;"
-		  "period: 5;\n"
-		  "stack:  100;"
-// 		  "codel start:	tstart(inout param);\n"
-// 		  "codel main:	tmain();\n"
-		  "};";
+class Component;
 
-      Driver d;
-//      d.setDebug(true);
-      d.parseString(s);
-//       d.component().debug();
+class TclInterpreter {
+  public:
+      TclInterpreter();
 
-      TclInterpreter *i = TclInterpreter::getInstance();
-      i->start(&(d.component()));
-//       i->interpret("set comp2 [Component];");
-//       i->interpret("debugComp $comp");
-//       i->interpret("debugComp $comp2");
-//       i->interpret("$comp debug");
-      i->interpret("set task [$comp task \"main\"]");
-      i->interpret("$task debug");
+      void start(Component *c);
+      void interpret(const std::string &s);
+      Component* component();
+
+      static TclInterpreter *getInstance();
+
+  private:
+      Tcl::interpreter m_interpreter;
+      static TclInterpreter* m_instance;
+      Component *m_component;
+};
+
 }
+
+#endif

@@ -75,11 +75,6 @@ void TclInterpreter::start(G3nom::Component* c)
     m_interpreter.eval("set comp [getComponent]");
 }
 
-Component* TclInterpreter::component() 
-{
-    return m_component;
-}
-
 void G3nom::TclInterpreter::interpret(const std::string& s) 
 {
     try {

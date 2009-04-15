@@ -105,11 +105,6 @@ void PythonInterpreter::start(G3nom::Component* c)
     interpret("comp = getComponent()");
 }
 
-Component* PythonInterpreter::component() 
-{
-    return m_component;
-}
-
 void PythonInterpreter::interpret(const std::string& s) 
 {
     try {

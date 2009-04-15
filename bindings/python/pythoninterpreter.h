@@ -33,23 +33,23 @@
 #include <string>
 #include <boost/python.hpp>
 
+#include "interpreter.h"
+
 namespace G3nom {
 
 class Component;
 
-class PythonInterpreter {
+class PythonInterpreter : public Interpreter {
   public:
       PythonInterpreter();
 
       void start(Component *c);
       void interpret(const std::string &s);
-      Component* component();
 
       static PythonInterpreter *getInstance();
 
   private:
       static PythonInterpreter* m_instance;
-      Component *m_component;
       boost::python::object m_pydict;
 };
 

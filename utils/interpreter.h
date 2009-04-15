@@ -39,9 +39,10 @@ class Component;
 class Interpreter {
   public:
       Interpreter();
+      virtual ~Interpreter();
 
       virtual void start(Component *c) = 0;
-      virtual void interpret(const std::string &s) = 0;
+      virtual std::string interpret(const std::string &s) = 0;
       Component* component();
 
   protected:

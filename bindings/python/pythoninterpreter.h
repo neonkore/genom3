@@ -31,26 +31,27 @@
 #define G3NOM_PYTHON_INTERPRETER_H
 
 #include <string>
-#include <boost/python.hpp>
 
 #include "interpreter.h"
 
 namespace G3nom {
 
 class Component;
+class PythonInterpreterPrivate;
 
 class PythonInterpreter : public Interpreter {
   public:
       PythonInterpreter();
+      ~PythonInterpreter();
 
       void start(Component *c);
-      void interpret(const std::string &s);
+      std::string interpret(const std::string &s);
 
       static PythonInterpreter *getInstance();
 
   private:
       static PythonInterpreter* m_instance;
-      boost::python::object m_pydict;
+      PythonInterpreterPrivate *d;
 };
 
 }

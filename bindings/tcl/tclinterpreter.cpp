@@ -29,6 +29,7 @@
 
 #include "tclinterpreter.h"
 #include "ast.h"
+#include "cpptcl.h"
 
 #include <iostream>
 
@@ -49,17 +50,31 @@ void debug(Component *c)
     c->debug();
 }
 
+namespace G3nom {
+class TclInterpreterPrivate {
+  public:
+    Tcl::interpreter interpreter;
+};
+}
+
 TclInterpreter::TclInterpreter() 
 {
-    m_interpreter.def("getComponent", &getCurrentComponent, factory("Component"));
-    m_interpreter.def("debugComp", &debug);
+    d = new TclInterpreterPrivate();
 
-    m_interpreter.class_<Component>("Component")
+    d->interpreter.def("getComponent", &getCurrentComponent, factory("Component"));
+    d->interpreter.def("debugComp", &debug);
+
+    d->interpreter.class_<Component>("Component")
 	    .def("task", &Component::task, factory("Task"))
 	    .def("debug", &Component::debug);
 
-    m_interpreter.class_<Task>("Task")
+    d->interpreter.class_<Task>("Task")
            .def("debug", &Task::debug);
+}
+
+TclInterpreter::~TclInterpreter() 
+{
+    delete d;
 }
 
 TclInterpreter* TclInterpreter::getInstance()
@@ -72,13 +87,14 @@ TclInterpreter* TclInterpreter::getInstance()
 void TclInterpreter::start(G3nom::Component* c) 
 {
     m_component = c;
-    m_interpreter.eval("set comp [getComponent]");
+    interpret("set comp [getComponent]");
 }
 
-void G3nom::TclInterpreter::interpret(const std::string& s) 
+std::string G3nom::TclInterpreter::interpret(const std::string& s) 
 {
     try {
-	m_interpreter.eval(s);
+	d->interpreter.eval(s);
+	return string();
     } catch (std::exception const &e) {
 	cerr << "Error: " << e.what() << endl;
     }

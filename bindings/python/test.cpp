@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
 //       i->interpret("debugComp $comp2");
 //       i->interpret("$comp debug");
 // 	  i->interpret("print 3");
+//       i->interpret("print (3+3)");
       i->interpret("task = comp.task(\"main\")");
       i->interpret("task.debug()");
 }

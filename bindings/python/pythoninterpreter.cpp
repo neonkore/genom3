@@ -31,6 +31,7 @@
 
 #include <iostream>
 #include <Python.h>
+#include <boost/python.hpp>
 
 #include "ast.h"
 
@@ -42,21 +43,21 @@ PythonInterpreter* PythonInterpreter::m_instance = 0;
 
 /********************** Python module definition ********/
 
-Component* getCurrentComponent()
+Component* pygetCurrentComponent()
 {
     PythonInterpreter *i = PythonInterpreter::getInstance();
     return i->component();
 }
 
-void debug(Component *c)
+void pydebug(Component *c)
 {
     c->debug();
 }
 
 BOOST_PYTHON_MODULE_INIT(G3nom)
 {
-    def("getComponent", &getCurrentComponent, return_value_policy<reference_existing_object>()/*, factory("Component")*/);
-    def("debugComp", &debug);
+    def("getComponent", &pygetCurrentComponent, return_value_policy<reference_existing_object>()/*, factory("Component")*/);
+    def("debugComp", &pydebug);
 
     class_<Component>("Component")
       .def("task", &Component::task, return_value_policy<reference_existing_object>()/*, factory("Task")*/)
@@ -77,19 +78,33 @@ static char* newString( const char* contents )
   return ret;
 }
 
+namespace G3nom {
+class PythonInterpreterPrivate {
+  public:
+    boost::python::object pydict;
+};
+}
+
 // See Kig source (part of KDE EDU module) for an example
 // of how to use embedded python (or Kalzium for more advanced stuff)   
 PythonInterpreter::PythonInterpreter() 
 {
+    d = new PythonInterpreterPrivate();
+
     char *s = newString("G3nom"); // we can't delete this string
     PyImport_AppendInittab(s, initG3nom);
     Py_Initialize();
 
     // create global dict object
     object main = import("__main__"); 
-    m_pydict = main.attr("__dict__"); 
+    d->pydict = main.attr("__dict__"); 
     // import our module
-    interpret("import G3nom; from G3nom import *;");
+    interpret("import G3nom;\nfrom G3nom import *;\n");
+}
+
+PythonInterpreter::~PythonInterpreter() 
+{
+    delete d;
 }
 
 PythonInterpreter* PythonInterpreter::getInstance()
@@ -102,13 +117,14 @@ PythonInterpreter* PythonInterpreter::getInstance()
 void PythonInterpreter::start(G3nom::Component* c) 
 {
     m_component = c;
-    interpret("comp = getComponent()");
+    interpret("comp = getComponent()\n");
 }
 
-void PythonInterpreter::interpret(const std::string& s) 
+std::string PythonInterpreter::interpret(const std::string& s) 
 {
     try {
-	exec(str(s), m_pydict, m_pydict);
+	exec(str(s), d->pydict, d->pydict);
+	return "";
     } catch (error_already_set const &) {
 	cerr << "Error in python interpreter: ";
 	PyErr_Print();

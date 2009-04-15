@@ -30,25 +30,27 @@
 #ifndef G3NOM_TCL_INTERPRETER_H
 #define G3NOM_TCL_INTERPRETER_H
 
-#include "cpptcl.h"
 #include "interpreter.h"
+#include <string>
 
 namespace G3nom {
 
 class Component;
+class TclInterpreterPrivate;
 
 class TclInterpreter : public Interpreter {
   public:
       TclInterpreter();
+      ~TclInterpreter();
 
       void start(Component *c);
-      void interpret(const std::string &s);
+      std::string interpret(const std::string &s);
 
       static TclInterpreter *getInstance();
 
   private:
-      Tcl::interpreter m_interpreter;
       static TclInterpreter* m_instance;
+      TclInterpreterPrivate *d;
 };
 
 }

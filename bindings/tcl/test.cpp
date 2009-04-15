@@ -35,7 +35,6 @@
 
 using namespace std;
 using namespace G3nom;
-using namespace Tcl;
 
 int main(int argc, char* argv[])
 {

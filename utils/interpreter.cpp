@@ -34,6 +34,9 @@ using namespace G3nom;
 Interpreter::Interpreter()
 {}
 
+Interpreter::~Interpreter()
+{}
+
 Component* Interpreter::component() 
 {
     return m_component;

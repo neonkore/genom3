@@ -11,8 +11,8 @@ set(genom_tcl_binding_SRCS
   tclinterpreter.cpp
 )
 
-add_library(gen_tcl_binding ${genom_tcl_binding_SRCS})
-target_link_libraries(gen_tcl_binding ${TCL_LIBRARY} genutils)
+add_library(genom_tcl_binding ${genom_tcl_binding_SRCS})
+target_link_libraries(genom_tcl_binding ${TCL_LIBRARY} genutils)
 
 # Test app
 
@@ -21,4 +21,4 @@ set(genom_tcl_test_SRCS
 )
 
 add_executable(genom_tcl_binding_test ${genom_tcl_test_SRCS})
-target_link_libraries(genom_tcl_binding_test genparser gen_tcl_binding)
+target_link_libraries(genom_tcl_binding_test genparser genom_tcl_binding)

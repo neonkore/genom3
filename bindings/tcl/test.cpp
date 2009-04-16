@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
 //       i->interpret("debugComp $comp");
 //       i->interpret("debugComp $comp2");
 //       i->interpret("$comp debug");
-      i->interpret("set task [$comp task \"main\"]");
-      i->interpret("$task debug");
+//       i->interpret("set task [$comp task \"main\"]");
+//       i->interpret("$task debug");
+	 i->interpret("foreach x taskList { puts \"task: $x\" }");
 }

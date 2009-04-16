@@ -50,6 +50,18 @@ void debug(Component *c)
     c->debug();
 }
 
+Tcl::object tasksList(interpreter &i, Component *c)
+{
+    object tab;
+
+    Task::Map map = c->tasksMap();
+    Task::Map::const_iterator it;
+    for(it = map.begin(); it != map.end(); ++it)
+	tab.append(i, object(it->first));
+
+    return tab;
+}
+
 namespace G3nom {
 class TclInterpreterPrivate {
   public:
@@ -88,9 +100,14 @@ void TclInterpreter::start(G3nom::Component* c)
 {
     m_component = c;
     interpret("set comp [getComponent]");
+
+    // create list of tasks
+    object o("set taskList");
+    o.append(d->interpreter, tasksList(d->interpreter, c));
+    d->interpreter.eval(o);
 }
 
-std::string G3nom::TclInterpreter::interpret(const std::string& s) 
+std::string TclInterpreter::interpret(const std::string& s) 
 {
     try {
 	d->interpreter.eval(s);

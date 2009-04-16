@@ -88,7 +88,7 @@
     class Task*			taskVal;
 }
 
-%token			END	     	"end of file"
+%token			ENDOFFILE 0   	"end of file"
 %token			COMPONENT	"component"
 %token			TASK		"task"
 %token			SERVICE		"service"
@@ -132,7 +132,7 @@
 %% /*** Grammar Rules ***/
 
 start:
-  declarations END
+  declarations ENDOFFILE
 
 declarations:
     declaration SEMICOLON
@@ -177,6 +177,9 @@ component_field:
 	driver.component().pluginLanguage = *$3;
     } else if(*$1 == "version") {
 	driver.component().version = *$3;
+    } else {
+      error(yyloc, std::string("Unknown component field: ") + *$1);
+      YYERROR;
     }
 }
 | IDENTIFIER COLON INTEGERLIT
@@ -185,6 +188,9 @@ component_field:
 {
     if(*$1 == "ids") {
 	driver.component().IDSStructName = *$3;
+    } else {
+      error(yyloc, std::string("Unknown component field: ") + *$1);
+      YYERROR;
     }
 };
 
@@ -204,20 +210,19 @@ port_decl:
 
 /*** Task declaration ***/
 
-task_fields:
-  task_field SEMICOLON
-  | task_fields task_field SEMICOLON
-{}
-
-
 task_decl:
   TASK IDENTIFIER LBRACE task_fields RBRACE
 {
     Task *t = driver.currentTask();
     t->name = *$2;
-    driver.setCurrentTask(new Task());
+    driver.setCurrentTask(0);
     $$ = t;
 };
+
+task_fields:
+  task_field SEMICOLON
+  | task_fields task_field SEMICOLON
+{}
 
 task_field:
   CODEL IDENTIFIER COLON codel_prototype
@@ -225,23 +230,75 @@ task_field:
 | IDENTIFIER COLON INTEGERLIT 
 {
     Task *t = driver.currentTask();
-    if(!t) {
-      t = new Task();
-      driver.setCurrentTask(t);
-    }
 
     if(*$1 == "priority")
       t->priority = $3;
     else if(*$1 == "period")
       t->period = $3;
-    else if(*$1 == "staskSize")
+    else if(*$1 == "stackSize")
       t->stackSize = $3;
+    else {
+      error(yyloc, std::string("Unknown task field: ") + *$1);
+      YYERROR;
+    }
 };
 
 /*** Service Declaration ***/
 
 service_decl:
-    SERVICE IDENTIFIER LBRACE RBRACE
+    SERVICE IDENTIFIER LBRACE service_fields RBRACE
+{
+    Service *s = driver.currentService();
+    s->name = *$2;
+    driver.setCurrentService(0);
+    $$ = s;
+};
+
+service_fields:
+  service_field SEMICOLON
+  | service_fields service_field SEMICOLON
+{}
+
+service_field:
+  CODEL IDENTIFIER COLON codel_prototype
+{}
+| IDENTIFIER COLON IDENTIFIER
+{
+    Service *s = driver.currentService();
+
+    if(*$1 == "type") {
+	if(*$3 == "init")
+	  s->type = Service::Init;
+	else if(*$3 == "control")
+	  s->type = Service::Control;
+        else if(*$3 == "exec")
+	  s->type = Service::Exec;
+	else {
+	  error(yyloc, std::string("Unknown service type: ") + *$3);
+	  YYERROR;
+	}
+    } else if(*$1 == "taskName") {
+	s->taskName = *$3;
+    } else if(*$1 == "input") {
+	s->addInput(*$3);
+    } else if(*$1 == "output") {
+	s->output = *$3;
+    } else {
+      error(yyloc, std::string("Unknown service field: ") + *$1);
+      YYERROR;
+    }
+}
+| IDENTIFIER COLON STRINGLIT 
+{
+    Service *s = driver.currentService();
+    if(*$1 == "doc") {
+      s->doc = *$3;
+    } else {
+      error(yyloc, std::string("Unknown service field: ") + *$1);
+      YYERROR;
+    }
+}
+| IDENTIFIER COLON INTEGERLIT 
 {};
 
 /*** Codel Declaration ***/

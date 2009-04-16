@@ -34,10 +34,10 @@ bool Driver::parseStream(std::istream& in, const std::string& sname)
     return b;
 }
 
-bool Driver::parseFile(const std::string &filename)
+bool Driver::parseFile(const char *filename)
 {
-    std::ifstream in(filename.c_str());
-    if (!in.good()) 
+    std::ifstream in(filename);
+    if (!in.good())
 	return false;
     return parseStream(in, filename);
 }
@@ -64,5 +64,18 @@ void Driver::setDebug(bool verbose)
     m_verboseParsing = true;
 }
 
+Service* Driver::currentService() 
+{
+    if(!m_currentService)
+	m_currentService = new Service();
+    return m_currentService; 
+}
+
+Task* Driver::currentTask() 
+{ 
+    if(!m_currentTask)
+	m_currentTask = new Task();
+    return m_currentTask; 
+}
 
 } // namespace G3nom

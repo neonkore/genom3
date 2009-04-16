@@ -38,6 +38,9 @@ using namespace G3nom;
 int main(int argc, char* argv[])
 {
     string s;
+    Driver d;
+//     d.setDebug(true);
+
     if(argc > 1) {
       string arg(argv[1]);
       if(arg == "testComponent") {
@@ -57,16 +60,17 @@ int main(int argc, char* argv[])
       } else if(arg == "testPorts") {
 	 s = "outport WrappedType Toto;"
 	      "inport stringType External;";
+      } else if(arg == "testFile") {
+	if(!d.parseFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm"))
+	    cout << "Eror parsing file " << endl;
+	 d.component().debug();
+	 return 0;
       } else {
 	  cout << "unknown test name: " << arg << endl;
 	  return 1;
       }
-	   
     }
 
-    Driver d;
-
-    d.setDebug(true);
     d.parseString(s);
     d.component().debug();
 }

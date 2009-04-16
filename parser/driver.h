@@ -44,7 +44,7 @@ public:
      * @param filename	input file name
      * @return		true if successfully parsed
      */
-    bool parseFile(const std::string& filename);
+    bool parseFile(const char* filename);
 
     void setDebug(bool verbose);
 
@@ -61,10 +61,14 @@ public:
     Component& component() { return m_component; }
 
     void setCurrentTask(Task *t) { m_currentTask = t; }
-    Task* currentTask() { return m_currentTask; }
+    /** Returns the current task, creating it if necessary
+    */
+    Task* currentTask();
 
     void setCurrentService(Service *s) { m_currentService = s; }
-    Service* currentService() { return m_currentService; }
+    /** Returns the current service, creating it if necessary
+    */
+    Service* currentService();
 
     IDLType::Ptr typeFromName(const std::string &name) { return IDLType::Ptr(); }
 

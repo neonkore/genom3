@@ -97,13 +97,17 @@ class Service {
 
     void debug();
 
+    void addInput(const std::string &s);
+
     std::string name;
     Type type;
     std::string doc;
     std::string taskName;
+    std::string output;
 
   private:
     Codel::Map codels;
+    std::vector<std::string> inputs;
     std::vector<std::string> incompatibleServices;
 };
 

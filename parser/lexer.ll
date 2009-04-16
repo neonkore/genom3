@@ -14,7 +14,7 @@ typedef G3nom::Parser::token_type token_type;
 
 /* By default yylex returns int, we use token_type. Unfortunately yyterminate
  * by default returns 0, which is not of token_type. */
-#define yyterminate() return token::END
+#define yyterminate() return token::ENDOFFILE
 
 /* This disables inclusion of unistd.h, which is not available under Visual C++
  * on Win32. The C++ scanner uses STL streams instead. */
@@ -67,7 +67,12 @@ stringtext				([^\"])|(\\.)
  /*** BEGIN EXAMPLE - Change the example lexer rules below ***/
 
  /* gobble up white-spaces */
-[ \n\t\r]+ {
+\n { 
+    yylloc->lines(yyleng); 
+    yylloc->step(); 
+}
+
+[ \t\r]+ {
     yylloc->step();
 }
 

@@ -1,7 +1,7 @@
 
 ENABLE_TESTING()
 
-include_directories(${PROJECT_SOURCE_DIR}/parser)
+include_directories(${PROJECT_SOURCE_DIR}/parser ${PROJECT_SOURCE_DIR}/utils)
 
 set(lexertest_SRCS
     lexertest_main.cpp)

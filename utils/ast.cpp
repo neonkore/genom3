@@ -160,6 +160,11 @@ void Service::debug()
     }    
 }
 
+void Service::addInput(const std::string &s)
+{
+    inputs.push_back(s);
+}
+
 /******** Codel ***************/
 
 void Codel::debug()

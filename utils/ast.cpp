@@ -103,6 +103,22 @@ Task* Component::task(const std::string &name)
     return 0;
 }
 
+Task::Map& Component::tasksMap()
+{
+    return tasks;
+}
+
+std::vector<std::string> Component::tasksList()
+{
+    vector<string> vec;
+
+    Task::Map::const_iterator it;
+    for(it = tasks.begin(); it != tasks.end(); ++it)
+	vec.push_back(it->first);
+
+    return vec;
+}
+
 /******** Port ***************/
 
 void Port::debug()

@@ -53,12 +53,8 @@ int main(int argc, char* argv[])
 
       PythonInterpreter *i = PythonInterpreter::getInstance();
       i->start(&(d.component()));
-//       i->interpret("set comp2 [Component];");
-//       i->interpret("debugComp $comp");
-//       i->interpret("debugComp $comp2");
-//       i->interpret("$comp debug");
 // 	  i->interpret("print 3");
 //       i->interpret("print (3+3)");
-      i->interpret("task = comp.task(\"main\")");
-      i->interpret("task.debug()");
+      i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
+      i->interpret("");
 }

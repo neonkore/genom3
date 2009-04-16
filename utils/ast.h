@@ -118,7 +118,8 @@ class Component {
     void addService(const std::string& name, G3nom::Service* task);
     void addPort(const std::string& name, G3nom::Port* port);
 
-//     std::vector<std::string> services();
+    Task::Map& tasksMap();
+    std::vector<std::string> tasksList();
     Task* task(const std::string &name);
 
     std::string name;

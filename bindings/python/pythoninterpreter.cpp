@@ -32,6 +32,8 @@
 #include <iostream>
 #include <Python.h>
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include "ptr_map_indexing_suite.hpp"
 
 #include "ast.h"
 
@@ -56,16 +58,25 @@ void pydebug(Component *c)
 
 BOOST_PYTHON_MODULE_INIT(G3nom)
 {
-    def("getComponent", &pygetCurrentComponent, return_value_policy<reference_existing_object>()/*, factory("Component")*/);
+    def("getComponent", &pygetCurrentComponent, return_value_policy<reference_existing_object>());
     def("debugComp", &pydebug);
 
     class_<Component>("Component")
-      .def("task", &Component::task, return_value_policy<reference_existing_object>()/*, factory("Task")*/)
-      .def("debug", &Component::debug);
+      .def("task", &Component::task, return_value_policy<reference_existing_object>())
+      .def("debug", &Component::debug)
+      .def("tasksList", &Component::tasksList)
+      .def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>());
 
     class_<Task>("Task")
       .def("debug", &Task::debug)
       .def_readwrite("priority", &Task::priority);
+
+    // vector of strings
+     class_<std::vector<std::string> >("StringVec")
+         .def(vector_indexing_suite<std::vector<std::string> >());
+
+     class_<Task::Map>("TaskMap")
+        .def(ptr_map_indexing_suite<Task::Map, true>());
 }
 
 /********************** Python interpreter ********/

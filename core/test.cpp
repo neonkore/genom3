@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
     TemplateInterpreter ti;
     ti.setInterpreter(i);
-    ti.parseFile("/home/ccpasteur/work/git/g3nom/templates/test/template1.python",
-	"/home/ccpasteur/work/git/g3nom/templates/test/template1.py.out");
+    ti.parseFile("../templates/test/template1.python",
+	"../templates/test/template1.py.out");
     return 0;
 }

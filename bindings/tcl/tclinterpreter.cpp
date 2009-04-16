@@ -50,17 +50,31 @@ void debug(Component *c)
     c->debug();
 }
 
-Tcl::object tasksList(interpreter &i, Component *c)
+string tasksList(Component *c)
 {
-    object tab;
+    string out;
 
     Task::Map map = c->tasksMap();
     Task::Map::const_iterator it;
-    for(it = map.begin(); it != map.end(); ++it)
-	tab.append(i, object(it->first));
+    for(it = map.begin(); it != map.end(); ++it) {
+	out.append(" \"").append(it->first).append("\"");
+	out.append(" \"").append(it->first).append("\"");
+    }
 
-    return tab;
+    return out;
 }
+
+// Tcl::object tasksList(interpreter &i, Component *c)
+// {
+//     object tab;
+// 
+//     Task::Map map = c->tasksMap();
+//     Task::Map::const_iterator it;
+//     for(it = map.begin(); it != map.end(); ++it)
+// 	tab.append(i, object(it->first));
+// 
+//     return tab;
+// }
 
 namespace G3nom {
 class TclInterpreterPrivate {
@@ -75,6 +89,7 @@ TclInterpreter::TclInterpreter()
 
     d->interpreter.def("getComponent", &getCurrentComponent, factory("Component"));
     d->interpreter.def("debugComp", &debug);
+    d->interpreter.def("tasksList", &tasksList);
 
     d->interpreter.class_<Component>("Component")
 	    .def("task", &Component::task, factory("Task"))
@@ -102,9 +117,9 @@ void TclInterpreter::start(G3nom::Component* c)
     interpret("set comp [getComponent]");
 
     // create list of tasks
-    object o("set taskList");
-    o.append(d->interpreter, tasksList(d->interpreter, c));
-    d->interpreter.eval(o);
+//     object o("set taskList");
+//     o.append(d->interpreter, tasksList(d->interpreter, c));
+//     d->interpreter.eval(o);
 }
 
 std::string TclInterpreter::interpret(const std::string& s) 

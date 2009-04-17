@@ -10,6 +10,9 @@
 namespace G3nom {
 
 class Lexer;
+class IdlType;
+// class Task;
+// class Service;
 
 /** The Driver class brings together all components. It creates an instance of
  * the Parser and Scanner classes and connects them. Then the input stream is
@@ -70,7 +73,10 @@ public:
     */
     Service* currentService();
 
-    IDLType::Ptr typeFromName(const std::string &name) { return IDLType::Ptr(); }
+    IdlType* currentType() const { return m_currentType; }
+    void setCurrentType(IdlType *t) { m_currentType = t; }
+
+    IdlType* typeFromName(const std::string &name) { return 0; }
 
 private:
     /** Pointer to the current lexer instance, this is used to connect the
@@ -86,6 +92,7 @@ private:
     Component m_component;
     Task *m_currentTask;
     Service *m_currentService;
+    IdlType *m_currentType;
 };
 
 } // namespace example

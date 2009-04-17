@@ -44,7 +44,7 @@ class Port {
     typedef std::map<std::string, Port*> Map;
 
     Port() {}
-    Port(std::string name, IDLType* idlType, bool incoming)
+    Port(std::string name, IdlType* idlType, bool incoming)
       : name(name), idlType(idlType), type(incoming ? Incoming: Outgoing)
     {}
 
@@ -52,7 +52,7 @@ class Port {
     
     std::string name;
     Type type;
-    IDLType::Ptr idlType;
+    IdlType *idlType;
 };
 
 class Codel {
@@ -121,6 +121,7 @@ class Component {
     void addTask(const std::string& name, G3nom::Task* task);
     void addService(const std::string& name, G3nom::Service* task);
     void addPort(const std::string& name, G3nom::Port* port);
+    void addType(IdlType* type);
 
     Task::Map& tasksMap();
     std::vector<std::string> tasksList();
@@ -132,10 +133,11 @@ class Component {
     std::string IDSStructName;
 
   private:
-    /// @todo use smart pointers or smart maps
+    /// @todo use smart pointers or smart maps ?
     Task::Map tasks;
     Service::Map services;
     Port::Map ports;
+    std::vector<IdlType*> types;
 };
 
 }

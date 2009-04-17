@@ -1,41 +1,41 @@
-// -*- c++ -*-
-//                          Package   : omniidl
-// idltype.h                Created on: 1999/10/18
-//			    Author    : Duncan Grisby (dpg1)
-//
-//    Copyright (C) 1999 AT&T Laboratories Cambridge
-//
-//  This file is part of omniidl.
-//
-//  omniidl is free software; you can redistribute it and/or modify it
-//  under the terms of the GNU General Public License as published by
-//  the Free Software Foundation; either version 2 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//  02111-1307, USA.
-//
-// Description:
-//   
-//   Type objects
+/*
+ * Copyright (c) 2009 LAAS/CNRS
+ * All rights reserved.
+ *
+ * Redistribution and use  in source  and binary  forms,  with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *   1. Redistributions of  source  code must retain the  above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice,  this list of  conditions and the following disclaimer in
+ *      the  documentation  and/or  other   materials provided  with  the
+ *      distribution.
+ *
+ * THIS  SOFTWARE IS PROVIDED BY  THE  COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND  ANY  EXPRESS OR IMPLIED  WARRANTIES,  INCLUDING,  BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES  OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR  PURPOSE ARE DISCLAIMED. IN  NO EVENT SHALL THE COPYRIGHT
+ * HOLDERS OR      CONTRIBUTORS  BE LIABLE FOR   ANY    DIRECT, INDIRECT,
+ * INCIDENTAL,  SPECIAL,  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE   OF THIS SOFTWARE, EVEN   IF ADVISED OF   THE POSSIBILITY OF SUCH
+ * DAMAGE.
+ */
 
-#ifndef G3NOM_DRIVER_H
-#define G3NOM_DRIVER_H
+#ifndef G3NOM_IDLTYPE_H
+#define G3NOM_IDLTYPE_H
 
-// #include <idlutil.h>
-// #include <idlvisitor.h>
-// #include <idlscope.h>
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
+
+#include "typevisitor.h"
 
 // Note on Type object memory management
 //
@@ -47,379 +47,391 @@
 // associated Decl object. Type objects created by Decl constructors
 // must be deleted by the Decls' destructors.
 
-namespace G3nom {
-namespace Idl {
+namespace G3nom
+{
 
-class IdlType {
-public:
+class IdlType
+{
+	public:
+		enum Kind {
+			Null, Void, Short, Long, LongLong, UShort, ULong, ULongLong,
+			Float, Double, LongDouble, Fixed, Boolean, Char, WChar, Octet, String,
+			WString, Any, Struct, Union, Enum, Sequence, Typedef
+		};
+		typedef std::map<std::string,IdlType*> Map;
 
-  enum Kind {
-    Null, Void, Short, Long, LongLong, UShort, ULong, ULongLong,
-    Float, Double, LongDouble, Fixed, Boolean, Char, WChar,Octet, String,
-    WString, Any, Struct, Union, Enum, Sequence, Typedef, Struct
-  };
+		IdlType(Kind k);
+		virtual ~IdlType() {};
 
-//     tk_TypeCode           = 12,
-//     tk_Principal          = 13,
-//     tk_objref             = 14,
-//     tk_array              = 20,
-//     tk_alias              = 21,
-//     tk_except             = 22,
-//    
-//     tk_fixed              = 28,
-//     tk_value              = 29,
-//     tk_value_box          = 30,
-//     tk_native             = 31,
-//     tk_abstract_interface = 32,
-//     tk_local_interface    = 33,
-//   };
+		Kind kind() const {
+			return m_kind;
+		}
+		std::string kindAsString() const;
 
-  IdlType(Kind k);
-  virtual ~IdlType() {};
+		/// \return an equivalent IdlType object with aliases stripped.
+		IdlType* unalias();
 
-  Kind kind() const { return m_kind; }
-  const std::string kindAsString() const;
+		virtual bool shouldDelete() = 0;
 
-  bool local() const { return m_local; }
-  void setLocal() { m_local = true; }
-  // True if this is a "local" type which must not be transmitted
-  // across the network.
+		virtual void accept(TypeVisitor& visitor) = 0;
 
-  IdlType* unalias();
-  // Return an equivalent IdlType object with aliases stripped.
+		static void init();
 
-  virtual bool shouldDelete() = 0;
-
-//   virtual void accept(TypeVisitor& visitor) = 0;
-
-  // Find a type given a name. Marks the name used in current scope
-//   static IdlType* scopedNameToType(const char* file, int line,
-// 				   const ScopedName* sn);
-  static void init();
-
-private:
-  Kind m_kind;
-  bool m_local;
+	private:
+		Kind m_kind;
 };
 
+/* Simple declarator (eg int a;) or arrray declarator (eg int a[10][10])*/
+class Declarator
+{
+	public:
+		Declarator(std::string identifier)
+				: m_identifier(identifier) {}
+		~Declarator() {}
 
-class BaseType : public IdlType {
-public:
-  BaseType(Kind k) : IdlType(k) {}
-  virtual ~BaseType() {}
+		typedef std::map<std::string, Declarator*> Map;
 
-  bool shouldDelete() { return 0; }
+		const std::string & identifier() const {
+			return m_identifier;
+		}
+		IdlType*   type()  const {
+			return m_type;
+		}
+		bool isArray() const;
+		void addBound(int b);
+		std::vector<int> & bounds();
 
-//   void accept(TypeVisitor& visitor) { visitor.visitBaseType(this); }
+	private:
+		std::string m_identifier;
+		IdlType*    m_type;
+		std::vector<int> m_bound;
+};
 
-  // Static base type singletons
-  static BaseType* nullType;
-  static BaseType* voidType;
-  static BaseType* shortType;
-  static BaseType* longType;
-  static BaseType* ushortType;
-  static BaseType* ulongType;
-  static BaseType* floatType;
-  static BaseType* doubleType;
-  static BaseType* booleanType;
-  static BaseType* charType;
-  static BaseType* octetType;
-  static BaseType* anyType;
+// typedef std::vector<Declarator*> DeclaratorVect;
+
+class DeclaratorVect : public std::vector<Declarator*> {
+	public:
+		DeclaratorVect()
+		: std::vector<Declarator*>()
+		{}
+};
+
+typedef std::pair<IdlType*, DeclaratorVect*> TypeDeclarator;
+
+/* Basic Types */
+
+class BaseType : public IdlType
+{
+	public:
+		BaseType(Kind k) : IdlType(k) {}
+		virtual ~BaseType() {}
+
+		bool shouldDelete() {
+			return false;
+		}
+
+		void accept(TypeVisitor& visitor) {
+			visitor.visitBaseType(this);
+		}
+
+		// Static base type singletons
+		static BaseType* nullType;
+		static BaseType* voidType;
+		static BaseType* shortType;
+		static BaseType* longType;
+		static BaseType* ushortType;
+		static BaseType* ulongType;
+		static BaseType* floatType;
+		static BaseType* doubleType;
+		static BaseType* booleanType;
+		static BaseType* charType;
+		static BaseType* octetType;
+		static BaseType* anyType;
 //   static BaseType* TypeCodeType;
 //   static BaseType* PrincipalType;
-  static BaseType* longlongType;
-  static BaseType* ulonglongType;
-  static BaseType* longdoubleType;
-  static BaseType* wcharType;
+		static BaseType* longlongType;
+		static BaseType* ulonglongType;
+		static BaseType* longdoubleType;
+		static BaseType* wcharType;
+};
+
+class StringType : public IdlType
+{
+	public:
+
+		StringType(int bound) : IdlType(String), m_bound(bound) { }
+		virtual ~StringType() {}
+
+		int bound() {
+			return m_bound;
+		}
+		bool shouldDelete() {
+			return m_bound > 0;
+		}
+
+		void accept(TypeVisitor& visitor) {
+			visitor.visitStringType(this);
+		}
+
+		static StringType* unboundedStringType;
+
+	private:
+		int m_bound;
 };
 
 
-//
-// Strings can be used like base types without a declaration. eg:
-//
-//   void op(in string<10> s);
-//
-// therefore, the String type must include its bound here, rather than
-// relying on looking at the corresponding declaration
-//
+class WStringType : public IdlType
+{
+	public:
+		WStringType(int bound) : IdlType(WString), m_bound(bound) { }
+		virtual ~WStringType() {}
 
-class StringType : public IdlType {
-public:
+		int bound() {
+			return m_bound;
+		}
+		bool shouldDelete() {
+			return m_bound ? 1 : 0;
+		}
 
-  StringType(int bound) : IdlType(String), m_bound(bound) { }
-  virtual ~StringType() {}
+		void accept(TypeVisitor& visitor) {
+			visitor.visitWStringType(this);
+		}
 
-  int   bound()        { return m_bound; }
-  bool shouldDelete() { return m_bound ? 1 : 0; }
+		static WStringType* unboundedWStringType;
 
-//   void accept(TypeVisitor& visitor) { visitor.visitStringType(this); }
-
-  static StringType* unboundedStringType;
-
-private:
-  int m_bound;
+	private:
+		int m_bound;
 };
 
+class SequenceType : public IdlType
+{
+	public:
+		SequenceType(IdlType* seqType, int bound) :
+				IdlType(Sequence), m_seqType(seqType), m_bound(bound) {}
+		virtual ~SequenceType() {}
 
-class WStringType : public IdlType {
-public:
-  WStringType(int bound) : IdlType(WString), m_bound(bound) { }
-  virtual ~WStringType() {}
+		IdlType* seqType() {
+			return m_seqType;
+		}
+		int bound() {
+			return m_bound;
+		}
+		bool shouldDelete() {
+			return true;
+		}
 
-  int   bound()        { return m_bound; }
-  bool shouldDelete() { return m_bound ? 1 : 0; }
+		void accept(TypeVisitor& visitor) {
+			visitor.visitSequenceType(this);
+		}
 
-//   void accept(TypeVisitor& visitor) { visitor.visitWStringType(this); }
-
-  static WStringType* unboundedWStringType;
-
-private:
-  int m_bound;
+	private:
+		IdlType*     m_seqType;
+		int m_bound;
 };
 
-class SequenceType : public IdlType {
-public:
-  SequenceType(IdlType* seqType, int bound) :
-    IdlType(Sequence), m_seqType(seqType), m_bound(bound)
-  {
-      if (seqType && seqType->local()) 
-	  setLocal();
-  }
-  virtual ~SequenceType() {}
+class FixedType : public IdlType
+{
+	public:
+		FixedType(int digits, int scale) :
+				IdlType(Fixed), m_digits(digits), m_scale(scale) { }
 
-  IdlType* seqType() { return m_seqType; }
-  int bound() { return m_bound; }
-  bool shouldDelete() { return true; }
+		virtual ~FixedType() {}
 
-//   void accept(TypeVisitor& visitor) { visitor.visitSequenceType(this); }
+		int digits() {
+			return m_digits;
+		}
+		int scale() {
+			return m_scale;
+		}
+		bool shouldDelete() {
+			return true;
+		}
 
-private:
-  IdlType*     m_seqType;
-  int m_bound;
+		void accept(TypeVisitor& visitor) {
+			visitor.visitFixedType(this);
+		}
+
+	private:
+		int m_digits;
+		int m_scale;
 };
 
-//
-// Same goes for fixed
-//
+/* More complex types*/
 
-class FixedType : public IdlType {
-public:
-  FixedType(int digits, int scale) :
-    IdlType(Fixed), m_digits(digits), m_scale(scale) { }
+class TypedefType : public IdlType
+{
+	public:
+		TypedefType(IdlType* aliasType, DeclaratorVect *declarators)
+				: IdlType(Typedef), m_declarators(declarators) {}
+		virtual ~TypedefType() {}
 
-  virtual ~FixedType() {}
+		const std::string kindAsString() const;
 
-  int digits() { return m_digits; }
-  int scale() { return m_scale; }
-  bool shouldDelete() { return true; }
+		IdlType*  aliasType() const {
+			return m_aliasType;
+		}
+		DeclaratorVect* declarators() const {
+			return m_declarators;
+		}
 
-//   void accept(TypeVisitor& visitor) { visitor.visitFixedType(this); }
+		void accept(TypeVisitor& visitor) {
+			visitor.visitTypedefType(this);
+		}
+		bool shouldDelete() {
+			return true;
+		}
 
-private:
-  int m_digits;
-  int m_scale;
+	private:
+		IdlType* m_aliasType;
+		DeclaratorVect *m_declarators;
 };
 
+class StructType : public IdlType
+{
+	public:
+		StructType()
+				: IdlType(Struct) {}
+		virtual ~StructType() {}
 
-//
-// All other types must be declared, at least implicitly, so they have
-// an associated declaration object
-//
+		const std::string kindAsString() const;
 
-// class Decl;
-// class DeclRepoId;
-// 
-// class DeclaredType : public IdlType {
+		std::string identifier() const {
+			return m_identifier;
+		}
+		void setIdentifier(const std::string &id) {
+			m_identifier = id;
+		}
+
+		void addMember(IdlType *t, DeclaratorVect *declarators);
+		const std::vector<TypeDeclarator>& members() const {
+			return m_members;
+		}
+
+		bool isRecursive() const {
+			return m_isRecursive;
+		}
+		void setRecursive() {
+			m_isRecursive = true;
+		}
+
+		void accept(TypeVisitor& visitor) {
+			visitor.visitStructType(this);
+		}
+		bool shouldDelete() {
+			return true;
+		}
+
+	private:
+		std::string m_identifier;
+		std::vector<TypeDeclarator> m_members;
+		bool m_isRecursive;
+};
+
+class EnumType : public IdlType
+{
+	public:
+		EnumType()
+				: IdlType(Enum) {}
+		virtual ~EnumType() {}
+
+		const std::string kindAsString() const;
+
+		std::string identifier() const {
+			return m_identifier;
+		}
+		void setIdentifier(const std::string &id) {
+			m_identifier = id;
+		}
+
+		void addEnumerator(const std::string &e);
+		const std::vector<std::string>& enumerators() const {
+			return m_enum;
+		}
+
+		void accept(TypeVisitor& visitor) {
+			visitor.visitEnumType(this);
+		}
+		bool shouldDelete() {
+			return true;
+		}
+
+	private:
+		std::string m_identifier;
+		std::vector<std::string> m_enum;
+};
+
+// class UnionCase {
 // public:
-//   DeclaredType(Kind k, Decl* decl, DeclRepoId* declRepoId)
-//     : IdlType(k), m_decl(decl), m_declRepoId(declRepoId) {}
-// 
-//   virtual ~DeclaredType() {}
-// 
-//   Decl* decl() { return m_decl; }
-// //   DeclRepoId* declRepoId() { return m_declRepoId; }
-// 
-//   bool shouldDelete() { return 0; }
-// 
-// //   void accept(TypeVisitor& visitor) { visitor.visitDeclaredType(this); }
-// 
-// //   static DeclaredType* corbaObjectType;
-// 
+//   typedef std::map<std::string, Member> Map;
+//
+//   UnionCase(IdlType* memberType, Declarator* declarators);
+//   virtual ~UnionCase();
+//
+// //   const char* kindAsString() const { return "member"; }
+//
+//   // Queries
+//   IdlType* caseType()  const { return m_caseType; }
+//   Declarator*  declarators() const { return m_declarators; }
+//
+// //   void accept(AstVisitor& visitor) { visitor.visitMember(this); }
+//
 // private:
-//   Decl*       m_decl;
-//   DeclRepoId* m_declRepoId;
+//   IdlType* m_caseType;
+// //   IDL_Boolean    delType_;
+//   Declarator* m_declarators;
 // };
 
-class TypedefType : public IdlType {
-public:
-  TypedefType(IdlType* aliasType, bool constrType,
-	  Declarator* declarators)
-  : IdlType(Typedef), m_isConstrType(constrType)
-  {}
-
-  virtual ~TypedefType();
-
-  const std::string kindAsString() const;
-
-  // Queries
-  IdlType*       aliasType()   const { return m_aliasType; }
-  bool    constrType()  const { return m_isConstrType; }
-  Declarator*    declarators() const { return m_declarators; }
-
-//   void accept(AstVisitor& visitor) { visitor.visitTypedef(this); }
-
-private:
-  IdlType* m_aliasType;
-//   IDL_Boolean    delType_;
-  bool m_isConstrType;
-  Declarator* m_declarators;
-};
-
-class Member {
-public:
-  typedef std::map<std::string, Member> Map;
-
-  Member(IdlType* memberType, bool constrType,
-	 Declarator* declarators);
-  virtual ~Member();
-
-//   const char* kindAsString() const { return "member"; }
-
-  // Queries
-  IdlType* memberType()  const { return m_memberType; }
-  bool constrType() const { return m_constrType; }
-  Declarator*  declarators() const { return m_declarators; }
-
-//   void accept(AstVisitor& visitor) { visitor.visitMember(this); }
-
-private:
-  IdlType* m_memberType;
-//   IDL_Boolean    delType_;
-  bool m_constrType;
-  Declarator* m_declarators;
-};
-
-class StructType : public IdlType {
-public:
-  StructType(const std::string &identifier)
-  : IdlType(Struct), m_identifier(identifier)
-  {}
-  virtual ~Struct();
-
-  const std::string kindAsString() const;
-
-  // Queries
-  Member::Map& members() const { return m_members; }
-  IdlType* thisType() const { return m_thisType; }
-  bool isRecursive() const { return m_isRecursive; }
-  bool isFinished() const { return m_isFinished; }
-
-//   void accept(AstVisitor& visitor) { visitor.visitStruct(this); }
-
-//   void finishConstruction(Member* members);
-
-  void setRecursive() { m_isRecursive = true; }
-
-private:
-  std::string m_identifier;
-  Member::Map m_members;
-  IdlType* m_thisType;
-  bool m_isRecursive;
-  bool m_isFinished;
-};
-
-class UnionCase {
-public:
-  typedef std::map<std::string, Member> Map;
-
-  UnionCase(IdlType* memberType, bool constrType,
-	 Declarator* declarators);
-  virtual ~UnionCase();
-
-//   const char* kindAsString() const { return "member"; }
-
-  // Queries
-  IdlType* caseType()  const { return m_caseType; }
-  bool constrType() const { return m_constrType; }
-  Declarator*  declarators() const { return m_declarators; }
-
-//   void accept(AstVisitor& visitor) { visitor.visitMember(this); }
-
-private:
-  IdlType* m_caseType;
-//   IDL_Boolean    delType_;
-  bool m_constrType;
-  Declarator* m_declarators;
-};
-
-class UnionType : public IdlType {
-public:
-  UnionType(const std::string &identifier)
-  : IdlType(Union), m_identifier(identifier)
-  {}
-  virtual ~UnionType();
-
-  const std::string kindAsString() const;
-
-  IdlType* switchType() const { return m_switchType; }
-  bool isConstrType() const { return m_isConstrType; }
-  UnionCase::Map& cases() const { return m_cases; }
-  IdlType* thisType()   const { return m_thisType; }
-  bool recursive() const { return m_isRecursive; }
-  bool finished() const { return m_isFinished; }
-
-//   void accept(AstVisitor& visitor) { visitor.visitUnion(this); }
-
-//   void finishConstruction(IdlType* switchType, IDL_Boolean constrType,
-// 			  UnionCase* cases);
-  void setRecursive() { m_isRecursive = true; }
-
-private:
-  std::string m_identifier;
-  IdlType* m_switchType;
-  IdlType* m_thisType;
-
-  bool m_isConstrType;
-  UnionCase::Map m_cases;
-  bool m_isRecursive;
-  bool m_isFinished;
-};
+// class UnionType : public IdlType {
+// public:
+//   UnionType(const std::string &identifier)
+//   : IdlType(Union), m_identifier(identifier)
+//   {}
+//   virtual ~UnionType();
+//
+//   const std::string kindAsString() const;
+//
+//   IdlType* switchType() const { return m_switchType; }
+//   UnionCase::Map& cases() const { return m_cases; }
+//   IdlType* thisType()   const { return m_thisType; }
+//   bool recursive() const { return m_isRecursive; }
+//   bool finished() const { return m_isFinished; }
+//
+// //   void accept(AstVisitor& visitor) { visitor.visitUnion(this); }
+//
+// //   void finishConstruction(IdlType* switchType, IDL_Boolean constrType,
+// // 			  UnionCase* cases);
+//   void setRecursive() { m_isRecursive = true; }
+//
+// private:
+//   std::string m_identifier;
+//   IdlType* m_switchType;
+//   IdlType* m_thisType;
+//
+//   Declarator::Map m_cases;
+//   bool m_isRecursive;
+//   bool m_isFinished;
+// };
 
 /*** Other classes that do not inherit Idltype */
 
 // used only to know if the type is composed
 // keep it ?
-class TypeSpec {
-public:
-  TypeSpec(IdlType* type, bool constr)
-    : m_type(type), m_constr(constr) {}
-  ~TypeSpec() {}
-
-  IdlType* type() const { return m_type; }
-  bool constr() const { return m_constr; }
-
-private:
-  IdlType* m_type;
-  bool m_constr;
-};
-
-class Declarator {
-public:
-  Declarator(std::string identifier, IdlType *type)
-  : m_identifier(identifier), m_thisType(type)
-  {}
-
-  virtual ~Declarator();
-
-  IdlType*   thisType()  const { return m_thisType; }
-
-private:
-  std::string m_identifier;
-  IdlType*    m_thisType;
-};
+// class TypeSpec {
+// public:
+//   TypeSpec(IdlType* type, bool constr)
+//     : m_type(type), m_constr(constr) {}
+//   ~TypeSpec() {}
+//
+//   IdlType* type() const { return m_type; }
+//   bool constr() const { return m_constr; }
+//
+// private:
+//   IdlType* m_type;
+//   bool m_constr;
+// };
 
 
 }
-}
 
-#endif 
+#endif
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

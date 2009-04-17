@@ -3,7 +3,7 @@ set(genutils_SRCS
   ast.cpp
   interpreter.cpp
   idltype.cpp
-  typevisitor.cpp
+  dumptypes.cpp
 )
 
 add_library(genutils ${genutils_SRCS})

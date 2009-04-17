@@ -95,6 +95,11 @@ void Component::addPort(const std::string &name, Port *port)
     ports[name] = port;
 }
 
+void Component::addType(IdlType* type)
+{
+    types.push_back(type);
+}
+
 Task* Component::task(const std::string &name)
 {
     Task::Map::iterator it = tasks.find(name);

@@ -7,6 +7,7 @@
 #include "driver.h"
 #include "lexer.h"
 #include "parser.hpp"
+#include "idltype.h"
 
 namespace G3nom {
 
@@ -14,8 +15,10 @@ Driver::Driver()
     : m_verboseLexing(false),
       m_verboseParsing(false),
       m_currentTask(0),
-      m_currentService(0)
+      m_currentService(0),
+      m_currentType(0)
 {
+    IdlType::init();
 }
 
 bool Driver::parseStream(std::istream& in, const std::string& sname)

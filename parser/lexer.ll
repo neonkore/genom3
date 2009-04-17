@@ -95,6 +95,7 @@ stringtext				([^\"])|(\\.)
 
 
  /* type related keywords */
+"unsigned"		{ return token::UNSIGNED; }
 "short"			{ return token::SHORT; }
 "long"			{ return token::LONG; }
 "fixed"			{ return token::FIXED; }
@@ -106,6 +107,7 @@ stringtext				([^\"])|(\\.)
 "wstring"		{ return token::WSTRING; }
 "boolean"		{ return token::BOOLEAN; }
 "octet"			{ return token::OCTET; }
+"object"		{ return token::OBJECT; }
 "any"			{ return token::ANY; }
 "void"			{ return token::VOID; }
 
@@ -117,6 +119,7 @@ stringtext				([^\"])|(\\.)
 "default"		{ return token::DEFAULT; }
 "struct"		{ return token::STRUCT; }
 "sequence"		{ return token::SEQUENCE; }
+"typedef"		{ return token::TYPEDEF; }
 
  /*other keywords  */
 "component"		{ return token::COMPONENT; }
@@ -168,8 +171,9 @@ stringtext				([^\"])|(\\.)
 
  /* identifiers */
 
-[A-Za-z][A-Za-z0-9_,.-]* {
+[A-Za-z][A-Za-z0-9_.]* {
     yylval->stringVal = new std::string(yytext, yyleng);
+/*    std::cout << "read identifier " << *(yylval->stringVal) << std::endl;*/
     return token::IDENTIFIER;
 }
 

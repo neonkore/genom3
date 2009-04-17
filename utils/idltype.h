@@ -59,6 +59,7 @@ class IdlType
 			WString, Any, Struct, Union, Enum, Sequence, Typedef
 		};
 		typedef std::map<std::string,IdlType*> Map;
+		typedef std::vector<IdlType*> Vector;
 
 		IdlType(Kind k);
 		virtual ~IdlType() {};
@@ -99,12 +100,12 @@ class Declarator
 		}
 		bool isArray() const;
 		void addBound(int b);
-		std::vector<int> & bounds();
+		std::vector<int> & bounds() { return m_bounds; }
 
 	private:
 		std::string m_identifier;
 		IdlType*    m_type;
-		std::vector<int> m_bound;
+		std::vector<int> m_bounds;
 };
 
 // typedef std::vector<Declarator*> DeclaratorVect;
@@ -262,7 +263,7 @@ class TypedefType : public IdlType
 {
 	public:
 		TypedefType(IdlType* aliasType, DeclaratorVect *declarators)
-				: IdlType(Typedef), m_declarators(declarators) {}
+				: IdlType(Typedef), m_aliasType(aliasType), m_declarators(declarators) {}
 		virtual ~TypedefType() {}
 
 		const std::string kindAsString() const;

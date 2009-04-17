@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 {
     string s;
     Driver d;
-//     d.setDebug(true);
+    d.setDebug(true);
 
     if(argc > 1) {
       string arg(argv[1]);
@@ -60,6 +60,12 @@ int main(int argc, char* argv[])
       } else if(arg == "testPorts") {
 	 s = "outport WrappedType Toto;"
 	      "inport stringType External;";
+      } else if(arg == "testTypes") {
+	 s = /*"struct testids {"
+		"long param; long a; string s;"
+		"};\n"
+	      "enum essai { value1, value2 }; "*/
+	      "typedef sequence<string<7>,3> intSeq;";
       } else if(arg == "testFile") {
 	if(!d.parseFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm"))
 	    cout << "Eror parsing file " << endl;

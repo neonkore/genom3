@@ -593,7 +593,7 @@ wide_string_type:
 struct_type:
   STRUCT IDENTIFIER LBRACE members RBRACE 
 {
-    StructType *s = dynamic_cast<StructType*>(driver.currentType());
+    StructType *s = static_cast<StructType*>(driver.currentType());
     if(!s) {
 	error(yyloc, "Empty struct ??");
 	YYERROR;
@@ -617,7 +617,7 @@ member:
 	s = new StructType();
 	driver.setCurrentType(s);
     }
-    s ->addMember($1, $2);
+    s->addMember($1, $2);
 };
 
 /* Union */

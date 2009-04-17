@@ -137,7 +137,7 @@ class Component {
     Task::Map tasks;
     Service::Map services;
     Port::Map ports;
-    std::vector<IdlType*> types;
+    IdlType::Vector types;
 };
 
 }

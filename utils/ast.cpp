@@ -30,6 +30,8 @@
 
 #include <iostream>
 
+#include "dumptypes.h"
+
 using namespace std;
 using namespace G3nom;
 
@@ -78,6 +80,15 @@ void Component::debug()
 	it3->second->debug();
 	cout << endl;
     }
+
+    cout << endl << "Types: " << types.size() << endl;
+    DumpType dump(cout);
+    IdlType::Vector::const_iterator it4;
+    for(it4 = types.begin(); it4 != types.end(); ++it4) {
+	cout << "* ";
+	(*it4)->accept(dump);
+	cout << endl;
+    }    
 }
 
 void Component::addTask(const std::string &name, Task* task)

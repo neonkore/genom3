@@ -61,10 +61,10 @@ int main(int argc, char* argv[])
 	 s = "outport WrappedType Toto;"
 	      "inport stringType External;";
       } else if(arg == "testTypes") {
-	 s = /*"struct testids {"
-		"long param; long a; string s;"
+	 s = "struct testids {"
+		"long param[10][10]; long a, j; string s;"
 		"};\n"
-	      "enum essai { value1, value2 }; "*/
+	      "enum essai { value1, value2 };\n"
 	      "typedef sequence<string<7>,3> intSeq;";
       } else if(arg == "testFile") {
 	if(!d.parseFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm"))

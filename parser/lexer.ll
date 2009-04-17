@@ -87,6 +87,12 @@ stringtext				([^\"])|(\\.)
 "}"			{ return token::RBRACE; }
 ";"			{ return token::SEMICOLON; }
 ":"			{ return token::COLON; }
+","			{ return token::COMMA; }
+"("			{ return token::LPAREN; }
+")"			{ return token::RPAREN; }
+"<"			{ return token::LESS_THAN; }
+">"			{ return token::GREATER_THAN; }
+
 
  /* type related keywords */
 "short"			{ return token::SHORT; }

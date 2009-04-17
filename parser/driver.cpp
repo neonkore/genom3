@@ -9,7 +9,8 @@
 #include "parser.hpp"
 #include "idltype.h"
 
-namespace G3nom {
+using namespace G3nom;
+using namespace Idl;
 
 Driver::Driver()
     : m_verboseLexing(false),
@@ -80,5 +81,3 @@ Task* Driver::currentTask()
 	m_currentTask = new Task();
     return m_currentTask; 
 }
-
-} // namespace G3nom

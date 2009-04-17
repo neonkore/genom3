@@ -50,6 +50,8 @@
 namespace G3nom
 {
 
+namespace Idl {
+
 class IdlType
 {
 	public:
@@ -94,6 +96,7 @@ class Declarator
 		~Declarator() {}
 
 		typedef std::map<std::string, Declarator*> Map;
+		typedef std::vector<Declarator*> Vect;
 
 		const std::string & identifier() const {
 			return m_identifier;
@@ -113,14 +116,14 @@ class Declarator
 
 // typedef std::vector<Declarator*> DeclaratorVect;
 
-class DeclaratorVect : public std::vector<Declarator*> {
-	public:
-		DeclaratorVect()
-		: std::vector<Declarator*>()
-		{}
-};
+// class DeclaratorVect : public std::vector<Declarator*> {
+// 	public:
+// 		DeclaratorVect()
+// 		: std::vector<Declarator*>()
+// 		{}
+// };
 
-typedef std::pair<IdlType*, DeclaratorVect*> TypeDeclarator;
+typedef std::pair<IdlType*, Declarator::Vect*> TypeDeclarator;
 
 /* Basic Types */
 
@@ -265,7 +268,7 @@ class FixedType : public IdlType
 class TypedefType : public IdlType
 {
 	public:
-		TypedefType(IdlType* aliasType, DeclaratorVect *declarators)
+		TypedefType(IdlType* aliasType, Declarator::Vect *declarators)
 				: IdlType(Typedef), m_aliasType(aliasType), m_declarators(declarators) {}
 		virtual ~TypedefType() {}
 
@@ -274,7 +277,7 @@ class TypedefType : public IdlType
 		IdlType*  aliasType() const {
 			return m_aliasType;
 		}
-		DeclaratorVect* declarators() const {
+		Declarator::Vect* declarators() const {
 			return m_declarators;
 		}
 		bool hasIdentifier(const std::string &name);
@@ -288,7 +291,7 @@ class TypedefType : public IdlType
 
 	private:
 		IdlType* m_aliasType;
-		DeclaratorVect *m_declarators;
+		Declarator::Vect *m_declarators;
 };
 
 class StructType : public IdlType
@@ -307,7 +310,7 @@ class StructType : public IdlType
 			m_identifier = id;
 		}
 
-		void addMember(IdlType *t, DeclaratorVect *declarators);
+		void addMember(IdlType *t, Declarator::Vect *declarators);
 		const std::vector<TypeDeclarator>& members() const {
 			return m_members;
 		}
@@ -435,6 +438,7 @@ class EnumType : public IdlType
 //   bool m_constr;
 // };
 
+}
 
 }
 

@@ -37,6 +37,7 @@
 #include "idltype.h"
 
 using namespace G3nom;
+using namespace Idl;
 %}
 
 /*** yacc/bison Declarations ***/
@@ -86,12 +87,12 @@ using namespace G3nom;
     int  			integerVal;
     double 			doubleVal;
     std::string*		stringVal;
-    class Port*			portVal;
-    class Service*		serviceVal;
-    class Task*			taskVal;
-    class IdlType*		typeVal;
-    class DeclaratorVect*	declaratorVectVal;
-    class Declarator*		declaratorVal;
+    Port*			portVal;
+    Service*			serviceVal;
+    Task*			taskVal;
+    Idl::IdlType*		typeVal;
+    Idl::Declarator::Vect*	declaratorVectVal;
+    Idl::Declarator*		declaratorVal;
 }
 
 %token			ENDOFFILE 0   	"end of file"
@@ -252,7 +253,7 @@ component_field:
 | IDENTIFIER COLON IDENTIFIER
 {
     if(*$1 == "ids") {
-	IdlType *t = driver.component().typeFromName(*$3);
+	Idl::IdlType *t = driver.component().typeFromName(*$3);
 	driver.component().IDSType = t;
     } else {
       error(yyloc, std::string("Unknown component field: ") + *$1);
@@ -265,12 +266,12 @@ component_field:
 port_decl:
   INPORT IDENTIFIER IDENTIFIER
 {
-    IdlType *type = driver.component().typeFromName(*$2);
+    Idl::IdlType *type = driver.component().typeFromName(*$2);
     $$ = new Port(*$3, type, true);
 }
 | OUTPORT IDENTIFIER IDENTIFIER
 {
-    IdlType *type = driver.component().typeFromName(*$2);
+    Idl::IdlType *type = driver.component().typeFromName(*$2);
     $$ = new Port(*$3, type, false);
 };
 
@@ -441,7 +442,7 @@ constr_type_spec:
 declarators:
   declarator 
 { 
-    DeclaratorVect *v = new DeclaratorVect();
+    Declarator::Vect *v = new Declarator::Vect();
     v->push_back($1);
     $$ = v;
 }

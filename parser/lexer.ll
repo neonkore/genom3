@@ -6,6 +6,11 @@
 #include <string>
 // #include <iostream>
 
+#include "ast.h"
+#include "idltype.h"
+
+using namespace G3nom::Idl;
+
 #include "lexer.h"
 
 /* import the parser's token type into a local typedef */

@@ -9,8 +9,11 @@
 
 namespace G3nom {
 
+namespace Idl {
+  class IdlType;
+}
+
 class Lexer;
-class IdlType;
 // class Task;
 // class Service;
 
@@ -73,8 +76,8 @@ public:
     */
     Service* currentService();
 
-    IdlType* currentType() const { return m_currentType; }
-    void setCurrentType(IdlType *t) { m_currentType = t; }
+    Idl::IdlType* currentType() const { return m_currentType; }
+    void setCurrentType(Idl::IdlType *t) { m_currentType = t; }
 
 private:
     /** Pointer to the current lexer instance, this is used to connect the
@@ -90,7 +93,7 @@ private:
     Component m_component;
     Task *m_currentTask;
     Service *m_currentService;
-    IdlType *m_currentType;
+    Idl::IdlType *m_currentType;
 };
 
 } // namespace example

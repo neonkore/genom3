@@ -34,6 +34,7 @@
 
 using namespace std;
 using namespace G3nom;
+using namespace Idl;
 
 /******** Component ***************/
 

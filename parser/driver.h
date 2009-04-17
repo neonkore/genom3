@@ -76,8 +76,6 @@ public:
     IdlType* currentType() const { return m_currentType; }
     void setCurrentType(IdlType *t) { m_currentType = t; }
 
-    IdlType* typeFromName(const std::string &name) { return 0; }
-
 private:
     /** Pointer to the current lexer instance, this is used to connect the
      * parser to the scanner. It is used in the yylex macro. */

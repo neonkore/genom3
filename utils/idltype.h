@@ -73,8 +73,11 @@ class IdlType
 		IdlType* unalias();
 
 		virtual bool shouldDelete() = 0;
-
 		virtual void accept(TypeVisitor& visitor) = 0;
+
+		virtual std::vector<std::string> identifiers() {
+			return std::vector<std::string>();
+		}
 
 		static void init();
 
@@ -274,6 +277,7 @@ class TypedefType : public IdlType
 		DeclaratorVect* declarators() const {
 			return m_declarators;
 		}
+		bool hasIdentifier(const std::string &name);
 
 		void accept(TypeVisitor& visitor) {
 			visitor.visitTypedefType(this);

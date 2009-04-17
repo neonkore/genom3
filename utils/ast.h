@@ -127,10 +127,12 @@ class Component {
     std::vector<std::string> tasksList();
     Task* task(const std::string &name);
 
+    IdlType* typeFromName(const std::string &name);
+
     std::string name;
     std::string pluginLanguage;
     std::string version;
-    std::string IDSStructName;
+    IdlType *IDSType;
 
   private:
     /// @todo use smart pointers or smart maps ?

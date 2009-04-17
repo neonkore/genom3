@@ -38,6 +38,7 @@ using namespace G3nom;
 /******** Component ***************/
 
 Component::Component() 
+: IDSType(0)
 {}
 
 Component::~Component() 
@@ -53,9 +54,14 @@ Component::~Component()
 
 void Component::debug()
 {
+    DumpType dump(cout);
+
     cout << "Component: " << name << " v. " << version << endl;
     cout << "\tLanguage (plugin) : " << pluginLanguage << endl;
-    cout << "\tIDS Struct Name: " << IDSStructName << endl;
+    cout << "\tIDS Struct: " << endl;
+    if(IDSType)
+	IDSType->accept(dump);
+    cout << endl;
 
     cout << endl << "Services: " << services.size() << endl;
     Service::Map::const_iterator it;
@@ -82,7 +88,6 @@ void Component::debug()
     }
 
     cout << endl << "Types: " << types.size() << endl;
-    DumpType dump(cout);
     IdlType::Vector::const_iterator it4;
     for(it4 = types.begin(); it4 != types.end(); ++it4) {
 	cout << "* ";
@@ -93,6 +98,9 @@ void Component::debug()
 
 void Component::addTask(const std::string &name, Task* task)
 {
+    /// \todo throw exception ? return code ?
+    if(tasks.find(name) != tasks.end())
+	cerr << "Warning: already existing task name: " << name << endl;
     tasks[name] = task;
 }
 
@@ -133,6 +141,32 @@ std::vector<std::string> Component::tasksList()
 	vec.push_back(it->first);
 
     return vec;
+}
+
+IdlType* Component::typeFromName(const std::string &name) 
+{ 
+    cout << "Searching type " << name << endl;
+
+    IdlType::Vector::const_iterator it4;
+    for(it4 = types.begin(); it4 != types.end(); ++it4) {
+	switch((*it4)->kind()) {
+	  case IdlType::Struct: {
+	    StructType *s = static_cast<StructType*>(*it4);
+	    if(s->identifier() == name)
+	      return s;
+	    break;
+	  }
+	  case IdlType::Typedef: {
+	    TypedefType *t = static_cast<TypedefType*>(*it4);
+	    if(t->hasIdentifier(name))
+	      return t;
+	    break;
+	  }
+	  default:
+	    break;
+	}
+    } 
+    return 0; 
 }
 
 /******** Port ***************/

@@ -252,7 +252,8 @@ component_field:
 | IDENTIFIER COLON IDENTIFIER
 {
     if(*$1 == "ids") {
-	driver.component().IDSStructName = *$3;
+	IdlType *t = driver.component().typeFromName(*$3);
+	driver.component().IDSType = t;
     } else {
       error(yyloc, std::string("Unknown component field: ") + *$1);
       YYERROR;
@@ -264,12 +265,12 @@ component_field:
 port_decl:
   INPORT IDENTIFIER IDENTIFIER
 {
-    IdlType *type = driver.typeFromName(*$2);
+    IdlType *type = driver.component().typeFromName(*$2);
     $$ = new Port(*$3, type, true);
 }
 | OUTPORT IDENTIFIER IDENTIFIER
 {
-    IdlType *type = driver.typeFromName(*$2);
+    IdlType *type = driver.component().typeFromName(*$2);
     $$ = new Port(*$3, type, false);
 };
 
@@ -407,10 +408,10 @@ type_spec:
 simple_type_spec:
   base_type_spec     { $$ = $1; }
 | template_type_spec { $$ = $1; }
-/*| scoped_name 
+| IDENTIFIER
 {
-    $$ = IdlType::scopedNameToType($1);
-}*/;
+    $$ = driver.component().typeFromName(*$1);
+};
 
 base_type_spec:
    floating_pt_type { $$ = $1; }

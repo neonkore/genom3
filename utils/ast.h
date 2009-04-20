@@ -44,7 +44,7 @@ class Port {
     typedef std::map<std::string, Port*> Map;
 
     Port() {}
-    Port(std::string name, Idl::IdlType* idlType, bool incoming)
+    Port(std::string name, Idl::IdlType::Ptr idlType, bool incoming)
       : name(name), idlType(idlType), type(incoming ? Incoming: Outgoing)
     {}
 
@@ -52,7 +52,7 @@ class Port {
     
     std::string name;
     Type type;
-    Idl::IdlType *idlType;
+    Idl::IdlType::Ptr idlType;
 };
 
 class Codel {
@@ -121,18 +121,18 @@ class Component {
     void addTask(const std::string& name, G3nom::Task* task);
     void addService(const std::string& name, G3nom::Service* task);
     void addPort(const std::string& name, G3nom::Port* port);
-    void addType(Idl::IdlType* type);
+    void addType(Idl::IdlType::Ptr type);
 
     Task::Map& tasksMap();
     std::vector<std::string> tasksList();
     Task* task(const std::string &name);
 
-    Idl::IdlType* typeFromName(const std::string &name);
+    Idl::IdlType::Ptr typeFromName(const std::string &name);
 
     std::string name;
     std::string pluginLanguage;
     std::string version;
-    Idl::IdlType *IDSType;
+    Idl::IdlType::Ptr IDSType;
 
   private:
     /// @todo use smart pointers or smart maps ?

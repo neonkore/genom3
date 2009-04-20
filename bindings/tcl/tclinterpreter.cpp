@@ -84,9 +84,8 @@ class TclInterpreterPrivate {
 }
 
 TclInterpreter::TclInterpreter() 
+: d(new TclInterpreterPrivate())
 {
-    d = new TclInterpreterPrivate();
-
     d->interpreter.def("getComponent", &getCurrentComponent, factory("Component"));
     d->interpreter.def("debugComp", &debug);
     d->interpreter.def("tasksList", &tasksList);
@@ -100,9 +99,7 @@ TclInterpreter::TclInterpreter()
 }
 
 TclInterpreter::~TclInterpreter() 
-{
-    delete d;
-}
+{}
 
 TclInterpreter* TclInterpreter::getInstance()
 {

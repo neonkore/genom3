@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+// #include <boost/variant.hpp>
 
 #include "ast.h"
 #include "idltype.h"
@@ -40,6 +41,28 @@ using namespace G3nom;
 using namespace Idl;
 %}
 
+/* this code will be placed in parser.hpp before the definition of the parser class*/
+%code requires {
+#include "ast.h"
+#include "idltype.h"
+/*
+typedef boost::variant<
+  char, int, double, std::string, Idl::IdlType::Ptr,
+    Idl::Declarator::Vect::Ptr, Idl::Declarator::Ptr> variant_type;*/
+
+struct variant_type {
+    char 			charVal;
+    int  			integerVal;
+    double 			doubleVal;
+    std::string*		stringVal;
+
+    G3nom::Idl::IdlType::Ptr		typeVal;
+    G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
+    G3nom::Idl::Declarator::Ptr		declaratorVal;
+};
+#define YYSTYPE variant_type
+
+}
 /*** yacc/bison Declarations ***/
 
 /* Require bison 2.3 or later */
@@ -82,18 +105,18 @@ using namespace Idl;
 
  /*** BEGIN EXAMPLE - Change the example grammar's tokens below ***/
 
-%union {
+/*%union {
     char 			charVal;
     int  			integerVal;
     double 			doubleVal;
     std::string*		stringVal;
-    Port*			portVal;
-    Service*			serviceVal;
-    Task*			taskVal;
+    Port::Ptr			portVal;
+    Service::Ptr		serviceVal;
+    Task::Ptr			taskVal; 
     Idl::IdlType*		typeVal;
     Idl::Declarator::Vect*	declaratorVectVal;
     Idl::Declarator*		declaratorVal;
-}
+}*/
 
 %token			ENDOFFILE 0   	"end of file"
 %token			COMPONENT	"component"
@@ -109,18 +132,22 @@ using namespace Idl;
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 %token TYPEDEF UNSIGNED OBJECT
 
+/*token SPECIAL_CHAR	"char"
+%token INTEGERLIT	"integer"
+%token DOUBLELIT	"double"
+%token STRINGLIT	"string literal"
+%token IDENTIFIER	"identifier"*/
 %token <charVal>	SPECIAL_CHAR	"char"
 %token <integerVal> 	INTEGERLIT	"integer"
 %token <doubleVal> 	DOUBLELIT	"double"
 %token <stringVal> 	STRINGLIT	"string literal"
 %token <stringVal> 	IDENTIFIER	"identifier"
 
-%type <portVal>		port_decl
-%type <taskVal>		task_decl
-%type <serviceVal>	service_decl
+/* %type <portVal>		port_decl */
+/* %type <taskVal>		task_decl */
+/* %type <serviceVal>	service_decl */
 
 %type <typeVal>			type_decl
-/* %type <typeVal> 		type_declarator */
 %type <typeVal>  		type_spec
 %type <typeVal> 		simple_type_spec
 %type <typeVal>			base_type_spec
@@ -147,12 +174,12 @@ using namespace Idl;
 %type <typeVal> 		boolean_type
 %type <typeVal> 		octet_type
 %type <typeVal> 		any_type
-/*%type <typeVal> 		object_type*/
 %type <typeVal> 		struct_type
-/*%type <intVal>			member 
-%type <intVal>			members*/
-/*%type <member_val> 		member_list
-%type <member_val> 		member*/
+%type <typeVal> 		enum_type
+%type <typeVal> 		sequence_type
+%type <typeVal> 		string_type
+%type <typeVal> 		wide_string_type
+
 /*%type <union_val> 		union_type
 %type <union_val> 		union_header
 %type <type_spec_val> 		switch_type_spec
@@ -162,17 +189,9 @@ using namespace Idl;
 %type <case_label_val> 		case_labels
 %type <case_label_val> 		case_label
 %type <union_case_val> 		element_spec*/
-%type <typeVal> 		enum_type
-/*%type <enum_val> 		enum_header */
-/*%type <enumerator_val> 		enumerators
-%type <enumerator_val> 		enumerator*/
-/*%type enumerator
-%type enumerators*/
-%type <typeVal> 		sequence_type
-%type <typeVal> 		string_type
-%type <typeVal> 		wide_string_type
 
-%destructor { delete $$; } STRINGLIT
+
+/* %destructor { delete $$; } STRINGLIT */
 /*%destructor { delete $$; } port_decl service_decl task_decl*/
 
  /*** END EXAMPLE - Change the example grammar's tokens above ***/
@@ -203,22 +222,17 @@ declarations:
 declaration:
 /*    type_decl  */
    port_decl
-{
-    driver.component().addPort($1->name, $1);
-}
+{}
 | component_decl
 {}
 | task_decl
-{
-    driver.component().addTask($1->name, $1);
-}
+{}
 | service_decl 
-{
-    driver.component().addService($1->name, $1);
-}
+{}
 | type_decl
 {
-    driver.component().addType($1);
+    IdlType::Ptr p($1);
+    driver.component().addType(p);
 }
 ;
 
@@ -253,8 +267,8 @@ component_field:
 | IDENTIFIER COLON IDENTIFIER
 {
     if(*$1 == "ids") {
-	Idl::IdlType *t = driver.component().typeFromName(*$3);
-	driver.component().IDSType = t;
+	Idl::IdlType::Ptr p(driver.component().typeFromName(*$3));
+	driver.component().IDSType = p;
     } else {
       error(yyloc, std::string("Unknown component field: ") + *$1);
       YYERROR;
@@ -266,14 +280,13 @@ component_field:
 port_decl:
   INPORT IDENTIFIER IDENTIFIER
 {
-    Idl::IdlType *type = driver.component().typeFromName(*$2);
-    $$ = new Port(*$3, type, true);
+    Idl::IdlType::Ptr type = driver.component().typeFromName(*$2);
+    driver.component().addPort(*$3, new Port(*$3, type, true));
 }
 | OUTPORT IDENTIFIER IDENTIFIER
 {
-    Idl::IdlType *type = driver.component().typeFromName(*$2);
-    $$ = new Port(*$3, type, false);
-};
+    Idl::IdlType::Ptr type = driver.component().typeFromName(*$2);
+    driver.component().addPort(*$3, new Port(*$3, type, false));};
 
 /*** Task declaration ***/
 
@@ -282,8 +295,8 @@ task_decl:
 {
     Task *t = driver.currentTask();
     t->name = *$2;
+    driver.component().addTask(t->name, t);
     driver.setCurrentTask(0);
-    $$ = t;
 };
 
 task_fields:
@@ -317,8 +330,8 @@ service_decl:
 {
     Service *s = driver.currentService();
     s->name = *$2;
+    driver.component().addService(*$2, s);
     driver.setCurrentService(0);
-    $$ = s;
 };
 
 service_fields:
@@ -378,8 +391,9 @@ codel_prototype:
 
 type_decl:
 TYPEDEF type_spec declarators
-{ 
-    $$ = new TypedefType($2, $3);
+{
+    IdlType::Ptr p(new TypedefType($2, $3));
+    $$ = p;
 }
 | struct_type              { $$ = $1; }
 /*| union_type               { $$ = $1; } */
@@ -442,7 +456,7 @@ constr_type_spec:
 declarators:
   declarator 
 { 
-    Declarator::Vect *v = new Declarator::Vect();
+    Declarator::VectPtr v(new Declarator::Vect());
     v->push_back($1);
     $$ = v;
 }
@@ -465,7 +479,8 @@ declarator:
 simple_declarator:
   IDENTIFIER 
 {
-    $$ = new Declarator(*$1);
+    Declarator::Ptr p(new Declarator(*$1));
+    $$ = p;
 };
 
 array_declarator:
@@ -498,7 +513,8 @@ floating_pt_type:
 fixed_pt_type:
   FIXED LESS_THAN INTEGERLIT COMMA INTEGERLIT GREATER_THAN
 {
-    $$ = new FixedType($3, $5);
+    IdlType::Ptr p(new FixedType($3, $5));
+    $$ = p;
 }
 | FIXED
 {};
@@ -571,7 +587,8 @@ any_type:
 string_type:
   STRING LESS_THAN INTEGERLIT GREATER_THAN 
 {
-    $$ = new StringType($3); 
+    IdlType::Ptr p(new StringType($3));
+    $$ = p; 
 }
 | STRING 
 {
@@ -581,7 +598,8 @@ string_type:
 wide_string_type:
   WSTRING LESS_THAN INTEGERLIT GREATER_THAN 
 { 
-    $$ = new WStringType($3); 
+    IdlType::Ptr p(new WStringType($3));
+    $$ = p; 
 }
 | WSTRING 
 {
@@ -595,14 +613,15 @@ wide_string_type:
 struct_type:
   STRUCT IDENTIFIER LBRACE members RBRACE 
 {
-    StructType *s = static_cast<StructType*>(driver.currentType());
+    IdlType::Ptr p = driver.currentType();
+    StructType *s = static_cast<StructType*>(p.get());
     if(!s) {
 	error(yyloc, "Empty struct ??");
 	YYERROR;
     }
     s->setIdentifier(*$2);
-    driver.setCurrentType(0);
-    $$ = s;
+    driver.setCurrentType(IdlType::Ptr());
+    $$ = p;
 };
 
 members:
@@ -614,10 +633,11 @@ members:
 member:
   type_spec declarators SEMICOLON 
 {
-    StructType *s = dynamic_cast<StructType*>(driver.currentType());
+    StructType *s = dynamic_cast<StructType*>(driver.currentType().get());
     if(!s) {
-	s = new StructType();
-	driver.setCurrentType(s);
+	IdlType::Ptr p(new StructType());
+	s = dynamic_cast<StructType*>(p.get());
+	driver.setCurrentType(p);
     }
     s->addMember($1, $2);
 };
@@ -699,14 +719,16 @@ element_spec:
 enum_type:
     ENUM IDENTIFIER LBRACE enumerators RBRACE 
 {
-    EnumType *s = dynamic_cast<EnumType*>(driver.currentType());
+    IdlType::Ptr p = driver.currentType();
+    EnumType *s = dynamic_cast<EnumType*>(p.get());
     if(!s) {
 	error(yyloc, "Empty enum ??");
 	YYERROR;
     }
     s->setIdentifier(*$2);
-    driver.setCurrentType(0);
-    $$ = s;};
+    driver.setCurrentType(IdlType::Ptr());
+    $$ = p;
+};
 
 enumerators:
   enumerator {}
@@ -716,12 +738,13 @@ enumerators:
 enumerator:
   IDENTIFIER 
 {
-    EnumType *s = dynamic_cast<EnumType*>(driver.currentType());
+    EnumType *s = dynamic_cast<EnumType*>(driver.currentType().get());
     if(!s) {
-	s = new EnumType();
-	driver.setCurrentType(s);
+	IdlType::Ptr e(new EnumType());
+	s =  dynamic_cast<EnumType*>(e.get());
+	driver.setCurrentType(e);
     }
-    s ->addEnumerator(*$1);
+    s->addEnumerator(*$1);
 };
 
 /* Sequence */
@@ -729,11 +752,13 @@ enumerator:
 sequence_type:
   SEQUENCE LESS_THAN simple_type_spec COMMA INTEGERLIT GREATER_THAN 
 {
-    $$ = new SequenceType($3, $5);
+    IdlType::Ptr p(new SequenceType($3, $5));
+    $$ = p;
 }
 | SEQUENCE LESS_THAN simple_type_spec GREATER_THAN
 {
-    $$ = new SequenceType($3, 0);
+    IdlType::Ptr p(new SequenceType($3, 0));  
+    $$ = p;
 };  
 
 %% /*** Additional Code ***/

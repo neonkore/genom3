@@ -32,6 +32,7 @@
 
 #include "interpreter.h"
 #include <string>
+#include <auto_ptr.h>
 
 namespace G3nom {
 
@@ -50,7 +51,7 @@ class TclInterpreter : public Interpreter {
 
   private:
       static TclInterpreter* m_instance;
-      TclInterpreterPrivate *d;
+      std::auto_ptr<TclInterpreterPrivate> d;
 };
 
 }

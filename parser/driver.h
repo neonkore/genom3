@@ -5,7 +5,9 @@
 
 #include <string>
 #include <vector>
+
 #include "ast.h"
+#include "idltype.h"
 
 namespace G3nom {
 
@@ -76,8 +78,8 @@ public:
     */
     Service* currentService();
 
-    Idl::IdlType* currentType() const { return m_currentType; }
-    void setCurrentType(Idl::IdlType *t) { m_currentType = t; }
+    Idl::IdlType::Ptr currentType() const { return m_currentType; }
+    void setCurrentType(Idl::IdlType::Ptr t) { m_currentType = t; }
 
 private:
     /** Pointer to the current lexer instance, this is used to connect the
@@ -93,7 +95,7 @@ private:
     Component m_component;
     Task *m_currentTask;
     Service *m_currentService;
-    Idl::IdlType *m_currentType;
+    Idl::IdlType::Ptr m_currentType;
 };
 
 } // namespace example

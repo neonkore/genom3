@@ -99,9 +99,8 @@ class PythonInterpreterPrivate {
 // See Kig source (part of KDE EDU module) for an example
 // of how to use embedded python (or Kalzium for more advanced stuff)   
 PythonInterpreter::PythonInterpreter() 
+: d(new PythonInterpreterPrivate())
 {
-    d = new PythonInterpreterPrivate();
-
     char *s = newString("G3nom"); // we can't delete this string
     PyImport_AppendInittab(s, initG3nom);
     Py_Initialize();
@@ -114,9 +113,7 @@ PythonInterpreter::PythonInterpreter()
 }
 
 PythonInterpreter::~PythonInterpreter() 
-{
-    delete d;
-}
+{}
 
 PythonInterpreter* PythonInterpreter::getInstance()
 {

@@ -34,6 +34,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 #include "typevisitor.h"
 
@@ -60,8 +61,9 @@ class IdlType
 			Float, Double, LongDouble, Fixed, Boolean, Char, WChar, Octet, String,
 			WString, Any, Struct, Union, Enum, Sequence, Typedef
 		};
-		typedef std::map<std::string,IdlType*> Map;
-		typedef std::vector<IdlType*> Vector;
+		typedef boost::shared_ptr<IdlType> Ptr;
+		typedef std::map<std::string,IdlType::Ptr> Map;
+		typedef std::vector<IdlType::Ptr> Vector;
 
 		IdlType(Kind k);
 		virtual ~IdlType() {};
@@ -72,16 +74,13 @@ class IdlType
 		std::string kindAsString() const;
 
 		/// \return an equivalent IdlType object with aliases stripped.
-		IdlType* unalias();
+// 		IdlType::Ptr unalias();
 
-		virtual bool shouldDelete() = 0;
 		virtual void accept(TypeVisitor& visitor) = 0;
 
 		virtual std::vector<std::string> identifiers() {
 			return std::vector<std::string>();
 		}
-
-		static void init();
 
 	private:
 		Kind m_kind;
@@ -95,13 +94,15 @@ class Declarator
 				: m_identifier(identifier) {}
 		~Declarator() {}
 
-		typedef std::map<std::string, Declarator*> Map;
-		typedef std::vector<Declarator*> Vect;
+		typedef boost::shared_ptr<Declarator> Ptr;
+		typedef std::map<std::string, Declarator::Ptr> Map;
+		typedef std::vector<Declarator::Ptr> Vect;
+		typedef boost::shared_ptr<Vect> VectPtr;
 
 		const std::string & identifier() const {
 			return m_identifier;
 		}
-		IdlType*   type()  const {
+		IdlType::Ptr type()  const {
 			return m_type;
 		}
 		bool isArray() const;
@@ -110,7 +111,7 @@ class Declarator
 
 	private:
 		std::string m_identifier;
-		IdlType*    m_type;
+		IdlType::Ptr    m_type;
 		std::vector<int> m_bounds;
 };
 
@@ -123,7 +124,7 @@ class Declarator
 // 		{}
 // };
 
-typedef std::pair<IdlType*, Declarator::Vect*> TypeDeclarator;
+typedef std::pair<IdlType::Ptr, Declarator::VectPtr> TypeDeclarator;
 
 /* Basic Types */
 
@@ -133,33 +134,27 @@ class BaseType : public IdlType
 		BaseType(Kind k) : IdlType(k) {}
 		virtual ~BaseType() {}
 
-		bool shouldDelete() {
-			return false;
-		}
-
 		void accept(TypeVisitor& visitor) {
 			visitor.visitBaseType(this);
 		}
 
 		// Static base type singletons
-		static BaseType* nullType;
-		static BaseType* voidType;
-		static BaseType* shortType;
-		static BaseType* longType;
-		static BaseType* ushortType;
-		static BaseType* ulongType;
-		static BaseType* floatType;
-		static BaseType* doubleType;
-		static BaseType* booleanType;
-		static BaseType* charType;
-		static BaseType* octetType;
-		static BaseType* anyType;
-//   static BaseType* TypeCodeType;
-//   static BaseType* PrincipalType;
-		static BaseType* longlongType;
-		static BaseType* ulonglongType;
-		static BaseType* longdoubleType;
-		static BaseType* wcharType;
+		static IdlType::Ptr nullType;
+		static IdlType::Ptr voidType;
+		static IdlType::Ptr shortType;
+		static IdlType::Ptr longType;
+		static IdlType::Ptr ushortType;
+		static IdlType::Ptr ulongType;
+		static IdlType::Ptr floatType;
+		static IdlType::Ptr doubleType;
+		static IdlType::Ptr booleanType;
+		static IdlType::Ptr charType;
+		static IdlType::Ptr octetType;
+		static IdlType::Ptr anyType;
+		static IdlType::Ptr longlongType;
+		static IdlType::Ptr ulonglongType;
+		static IdlType::Ptr longdoubleType;
+		static IdlType::Ptr wcharType;
 };
 
 class StringType : public IdlType
@@ -172,15 +167,12 @@ class StringType : public IdlType
 		int bound() {
 			return m_bound;
 		}
-		bool shouldDelete() {
-			return m_bound > 0;
-		}
 
 		void accept(TypeVisitor& visitor) {
 			visitor.visitStringType(this);
 		}
 
-		static StringType* unboundedStringType;
+		static StringType::Ptr unboundedStringType;
 
 	private:
 		int m_bound;
@@ -196,15 +188,12 @@ class WStringType : public IdlType
 		int bound() {
 			return m_bound;
 		}
-		bool shouldDelete() {
-			return m_bound ? 1 : 0;
-		}
 
 		void accept(TypeVisitor& visitor) {
 			visitor.visitWStringType(this);
 		}
 
-		static WStringType* unboundedWStringType;
+		static WStringType::Ptr unboundedWStringType;
 
 	private:
 		int m_bound;
@@ -213,18 +202,15 @@ class WStringType : public IdlType
 class SequenceType : public IdlType
 {
 	public:
-		SequenceType(IdlType* seqType, int bound) :
+		SequenceType(IdlType::Ptr seqType, int bound) :
 				IdlType(Sequence), m_seqType(seqType), m_bound(bound) {}
 		virtual ~SequenceType() {}
 
-		IdlType* seqType() {
+		IdlType::Ptr seqType() {
 			return m_seqType;
 		}
 		int bound() {
 			return m_bound;
-		}
-		bool shouldDelete() {
-			return true;
 		}
 
 		void accept(TypeVisitor& visitor) {
@@ -232,7 +218,7 @@ class SequenceType : public IdlType
 		}
 
 	private:
-		IdlType*     m_seqType;
+		IdlType::Ptr m_seqType;
 		int m_bound;
 };
 
@@ -250,9 +236,6 @@ class FixedType : public IdlType
 		int scale() {
 			return m_scale;
 		}
-		bool shouldDelete() {
-			return true;
-		}
 
 		void accept(TypeVisitor& visitor) {
 			visitor.visitFixedType(this);
@@ -268,16 +251,16 @@ class FixedType : public IdlType
 class TypedefType : public IdlType
 {
 	public:
-		TypedefType(IdlType* aliasType, Declarator::Vect *declarators)
+		TypedefType(IdlType::Ptr aliasType, Declarator::VectPtr declarators)
 				: IdlType(Typedef), m_aliasType(aliasType), m_declarators(declarators) {}
 		virtual ~TypedefType() {}
 
 		const std::string kindAsString() const;
 
-		IdlType*  aliasType() const {
+		IdlType::Ptr  aliasType() const {
 			return m_aliasType;
 		}
-		Declarator::Vect* declarators() const {
+		Declarator::VectPtr declarators() const {
 			return m_declarators;
 		}
 		bool hasIdentifier(const std::string &name);
@@ -285,13 +268,10 @@ class TypedefType : public IdlType
 		void accept(TypeVisitor& visitor) {
 			visitor.visitTypedefType(this);
 		}
-		bool shouldDelete() {
-			return true;
-		}
 
 	private:
-		IdlType* m_aliasType;
-		Declarator::Vect *m_declarators;
+		IdlType::Ptr m_aliasType;
+		Declarator::VectPtr m_declarators;
 };
 
 class StructType : public IdlType
@@ -310,7 +290,7 @@ class StructType : public IdlType
 			m_identifier = id;
 		}
 
-		void addMember(IdlType *t, Declarator::Vect *declarators);
+		void addMember(IdlType::Ptr t, Declarator::VectPtr declarators);
 		const std::vector<TypeDeclarator>& members() const {
 			return m_members;
 		}
@@ -324,9 +304,6 @@ class StructType : public IdlType
 
 		void accept(TypeVisitor& visitor) {
 			visitor.visitStructType(this);
-		}
-		bool shouldDelete() {
-			return true;
 		}
 
 	private:
@@ -358,9 +335,6 @@ class EnumType : public IdlType
 
 		void accept(TypeVisitor& visitor) {
 			visitor.visitEnumType(this);
-		}
-		bool shouldDelete() {
-			return true;
 		}
 
 	private:

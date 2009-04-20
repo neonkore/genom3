@@ -39,7 +39,6 @@ using namespace Idl;
 /******** Component ***************/
 
 Component::Component() 
-: IDSType(0)
 {}
 
 Component::~Component() 
@@ -115,7 +114,7 @@ void Component::addPort(const std::string &name, Port *port)
     ports[name] = port;
 }
 
-void Component::addType(IdlType* type)
+void Component::addType(IdlType::Ptr type)
 {
     types.push_back(type);
 }
@@ -144,7 +143,7 @@ std::vector<std::string> Component::tasksList()
     return vec;
 }
 
-IdlType* Component::typeFromName(const std::string &name) 
+IdlType::Ptr Component::typeFromName(const std::string &name) 
 { 
     cout << "Searching type " << name << endl;
 
@@ -152,22 +151,22 @@ IdlType* Component::typeFromName(const std::string &name)
     for(it4 = types.begin(); it4 != types.end(); ++it4) {
 	switch((*it4)->kind()) {
 	  case IdlType::Struct: {
-	    StructType *s = static_cast<StructType*>(*it4);
+	    StructType *s = static_cast<StructType*>(it4->get());
 	    if(s->identifier() == name)
-	      return s;
+	      return *it4;
 	    break;
 	  }
 	  case IdlType::Typedef: {
-	    TypedefType *t = static_cast<TypedefType*>(*it4);
+	    TypedefType *t = static_cast<TypedefType*>(it4->get());
 	    if(t->hasIdentifier(name))
-	      return t;
+	      return *it4;
 	    break;
 	  }
 	  default:
 	    break;
 	}
     } 
-    return 0; 
+    return IdlType::Ptr(); 
 }
 
 /******** Port ***************/

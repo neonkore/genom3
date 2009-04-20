@@ -31,6 +31,7 @@
 #define G3NOM_PYTHON_INTERPRETER_H
 
 #include <string>
+#include <auto_ptr.h>
 
 #include "interpreter.h"
 
@@ -51,7 +52,7 @@ class PythonInterpreter : public Interpreter {
 
   private:
       static PythonInterpreter* m_instance;
-      PythonInterpreterPrivate *d;
+      std::auto_ptr<PythonInterpreterPrivate> d;
 };
 
 }

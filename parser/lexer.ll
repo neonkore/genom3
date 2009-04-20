@@ -6,6 +6,8 @@
 #include <string>
 // #include <iostream>
 
+// these headers are here because lexer.cpp includes parser.hpp
+// which contains the %union def
 #include "ast.h"
 #include "idltype.h"
 

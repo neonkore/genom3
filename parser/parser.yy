@@ -54,7 +54,7 @@ struct variant_type {
     char 			charVal;
     int  			integerVal;
     double 			doubleVal;
-    std::string*		stringVal;
+    std::string			stringVal;
 
     G3nom::Idl::IdlType::Ptr		typeVal;
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
@@ -231,8 +231,7 @@ declaration:
 {}
 | type_decl
 {
-    IdlType::Ptr p($1);
-    driver.component().addType(p);
+    driver.component().addType($1);
 }
 ;
 
@@ -241,7 +240,7 @@ declaration:
 component_decl:
    COMPONENT IDENTIFIER LBRACE component_fields RBRACE
 {
-    driver.component().name = *$2;
+    driver.component().name = $2;
 };
 
 component_fields:
@@ -253,12 +252,12 @@ component_fields:
 component_field:
    IDENTIFIER COLON STRINGLIT
 {
-    if(*$1 == "language") {
-	driver.component().pluginLanguage = *$3;
-    } else if(*$1 == "version") {
-	driver.component().version = *$3;
+    if($1 == "language") {
+	driver.component().pluginLanguage = $3;
+    } else if($1 == "version") {
+	driver.component().version = $3;
     } else {
-      error(yyloc, std::string("Unknown component field: ") + *$1);
+      error(yyloc, std::string("Unknown component field: ") + $1);
       YYERROR;
     }
 }
@@ -266,11 +265,11 @@ component_field:
 {}
 | IDENTIFIER COLON IDENTIFIER
 {
-    if(*$1 == "ids") {
-	Idl::IdlType::Ptr p(driver.component().typeFromName(*$3));
+    if($1 == "ids") {
+	Idl::IdlType::Ptr p(driver.component().typeFromName($3));
 	driver.component().IDSType = p;
     } else {
-      error(yyloc, std::string("Unknown component field: ") + *$1);
+      error(yyloc, std::string("Unknown component field: ") + $1);
       YYERROR;
     }
 };
@@ -280,13 +279,13 @@ component_field:
 port_decl:
   INPORT IDENTIFIER IDENTIFIER
 {
-    Idl::IdlType::Ptr type = driver.component().typeFromName(*$2);
-    driver.component().addPort(*$3, new Port(*$3, type, true));
+    Idl::IdlType::Ptr type = driver.component().typeFromName($2);
+    driver.component().addPort($3, new Port($3, type, true));
 }
 | OUTPORT IDENTIFIER IDENTIFIER
 {
-    Idl::IdlType::Ptr type = driver.component().typeFromName(*$2);
-    driver.component().addPort(*$3, new Port(*$3, type, false));};
+    Idl::IdlType::Ptr type = driver.component().typeFromName($2);
+    driver.component().addPort($3, new Port($3, type, false));};
 
 /*** Task declaration ***/
 
@@ -294,7 +293,7 @@ task_decl:
   TASK IDENTIFIER LBRACE task_fields RBRACE
 {
     Task *t = driver.currentTask();
-    t->name = *$2;
+    t->name = $2;
     driver.component().addTask(t->name, t);
     driver.setCurrentTask(0);
 };
@@ -311,14 +310,14 @@ task_field:
 {
     Task *t = driver.currentTask();
 
-    if(*$1 == "priority")
+    if($1 == "priority")
       t->priority = $3;
-    else if(*$1 == "period")
+    else if($1 == "period")
       t->period = $3;
-    else if(*$1 == "stackSize")
+    else if($1 == "stackSize")
       t->stackSize = $3;
     else {
-      error(yyloc, std::string("Unknown task field: ") + *$1);
+      error(yyloc, std::string("Unknown task field: ") + $1);
       YYERROR;
     }
 };
@@ -329,8 +328,8 @@ service_decl:
     SERVICE IDENTIFIER LBRACE service_fields RBRACE
 {
     Service *s = driver.currentService();
-    s->name = *$2;
-    driver.component().addService(*$2, s);
+    s->name = $2;
+    driver.component().addService($2, s);
     driver.setCurrentService(0);
 };
 
@@ -346,35 +345,35 @@ service_field:
 {
     Service *s = driver.currentService();
 
-    if(*$1 == "type") {
-	if(*$3 == "init")
+    if($1 == "type") {
+	if($3 == "init")
 	  s->type = Service::Init;
-	else if(*$3 == "control")
+	else if($3 == "control")
 	  s->type = Service::Control;
-        else if(*$3 == "exec")
+        else if($3 == "exec")
 	  s->type = Service::Exec;
 	else {
-	  error(yyloc, std::string("Unknown service type: ") + *$3);
+	  error(yyloc, std::string("Unknown service type: ") + $3);
 	  YYERROR;
 	}
-    } else if(*$1 == "taskName") {
-	s->taskName = *$3;
-    } else if(*$1 == "input") {
-	s->addInput(*$3);
-    } else if(*$1 == "output") {
-	s->output = *$3;
+    } else if($1 == "taskName") {
+	s->taskName = $3;
+    } else if($1 == "input") {
+	s->addInput($3);
+    } else if($1 == "output") {
+	s->output = $3;
     } else {
-      error(yyloc, std::string("Unknown service field: ") + *$1);
+      error(yyloc, std::string("Unknown service field: ") + $1);
       YYERROR;
     }
 }
 | IDENTIFIER COLON STRINGLIT 
 {
     Service *s = driver.currentService();
-    if(*$1 == "doc") {
-      s->doc = *$3;
+    if($1 == "doc") {
+      s->doc = $3;
     } else {
-      error(yyloc, std::string("Unknown service field: ") + *$1);
+      error(yyloc, std::string("Unknown service field: ") + $1);
       YYERROR;
     }
 }
@@ -425,7 +424,7 @@ simple_type_spec:
 | template_type_spec { $$ = $1; }
 | IDENTIFIER
 {
-    $$ = driver.component().typeFromName(*$1);
+    $$ = driver.component().typeFromName($1);
 };
 
 base_type_spec:
@@ -479,7 +478,7 @@ declarator:
 simple_declarator:
   IDENTIFIER 
 {
-    Declarator::Ptr p(new Declarator(*$1));
+    Declarator::Ptr p(new Declarator($1));
     $$ = p;
 };
 
@@ -619,7 +618,7 @@ struct_type:
 	error(yyloc, "Empty struct ??");
 	YYERROR;
     }
-    s->setIdentifier(*$2);
+    s->setIdentifier($2);
     driver.setCurrentType(IdlType::Ptr());
     $$ = p;
 };
@@ -725,7 +724,7 @@ enum_type:
 	error(yyloc, "Empty enum ??");
 	YYERROR;
     }
-    s->setIdentifier(*$2);
+    s->setIdentifier($2);
     driver.setCurrentType(IdlType::Ptr());
     $$ = p;
 };
@@ -744,7 +743,7 @@ enumerator:
 	s =  dynamic_cast<EnumType*>(e.get());
 	driver.setCurrentType(e);
     }
-    s->addEnumerator(*$1);
+    s->addEnumerator($1);
 };
 
 /* Sequence */

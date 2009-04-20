@@ -172,14 +172,14 @@ stringtext				([^\"])|(\\.)
 "\""{stringtext}*"\"" {
    /* remove quotes */
    yytext[yyleng-1] = '\0';
-   yylval->stringVal = new std::string(yytext + 1);
+   yylval->stringVal = std::string(yytext + 1);
    return token::STRINGLIT;
 }
 
  /* identifiers */
 
 [A-Za-z][A-Za-z0-9_.]* {
-    yylval->stringVal = new std::string(yytext, yyleng);
+    yylval->stringVal = std::string(yytext, yyleng);
 /*    std::cout << "read identifier " << *(yylval->stringVal) << std::endl;*/
     return token::IDENTIFIER;
 }

@@ -189,10 +189,15 @@ void Task::debug()
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
 	for (it = codels.begin(); it != codels.end(); ++it) {
-		cout << "\t-- " << it->first << " : " << endl;
+		cout << "\t** " << it->first << " : ";
 		it->second->debug();
 		cout << endl;
 	}
+}
+
+void Task::addCodel(const std::string& name, G3nom::Codel::Ptr c)
+{
+	codels.insert(make_pair(name,c));
 }
 
 /******** Service ***************/
@@ -204,7 +209,7 @@ void Service::debug()
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
 	for (it = codels.begin(); it != codels.end(); ++it) {
-		cout << "\t-- " << it->first << " : " << endl;
+		cout << "\t** " << it->first << " : ";
 		it->second->debug();
 		cout << endl;
 	}
@@ -215,11 +220,16 @@ void Service::addInput(const std::string &s)
 	inputs.push_back(s);
 }
 
+void Service::addCodel(const std::string &name, Codel::Ptr c)
+{
+	codels.insert(make_pair(name,c));
+}
+
 /******** Codel ***************/
 
 void Codel::debug()
 {
-	cout << name << "inports: ";
+	cout << name << "( inports: ";
 	for (vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
 		cout << *it << ", ";
 
@@ -234,6 +244,28 @@ void Codel::debug()
 	cout << "; outTypes: ";
 	for (vector<string>::const_iterator it = outTypes.begin(); it != outTypes.end(); ++it)
 		cout << *it << ", ";
+	cout << ")";
 }
+
+void Codel::addInType(const std::string &t)
+{
+	inTypes.push_back(t);
+}
+
+void Codel::addOutType(const std::string &t)
+{
+	outTypes.push_back(t);
+}
+
+void Codel::addInPort(const std::string &t)
+{
+	inPorts.push_back(t);
+}
+
+void Codel::addOutPort(const std::string &t)
+{
+	outPorts.push_back(t);
+}
+
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

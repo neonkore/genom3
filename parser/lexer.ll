@@ -6,13 +6,6 @@
 #include <string>
 // #include <iostream>
 
-// these headers are here because lexer.cpp includes parser.hpp
-// which contains the %union def
-#include "ast.h"
-#include "idltype.h"
-
-using namespace G3nom::Idl;
-
 #include "lexer.h"
 
 /* import the parser's token type into a local typedef */

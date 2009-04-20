@@ -59,11 +59,19 @@ class Port
 class Codel
 {
 	public:
-		typedef std::map<std::string, Codel*> Map;
+		typedef boost::shared_ptr<Codel> Ptr;
+		typedef std::map<std::string, Ptr> Map;
 
-		Codel() {}
+		Codel(const std::string id)
+		: name(id) 
+		{}
 
 		void debug();
+
+		void addInType(const std::string &t);
+		void addOutType(const std::string &t);
+		void addInPort(const std::string &t);
+		void addOutPort(const std::string &t);
 
 		std::string name;
 		std::vector<std::string> inTypes;
@@ -80,6 +88,8 @@ class Task
 		Task() {}
 
 		void debug();
+
+		void addCodel(const std::string &name, Codel::Ptr c);
 
 		std::string name;
 		int priority;
@@ -102,6 +112,7 @@ class Service
 		void debug();
 
 		void addInput(const std::string &s);
+		void addCodel(const std::string &name, Codel::Ptr c);
 
 		std::string name;
 		Type type;

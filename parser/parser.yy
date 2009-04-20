@@ -55,7 +55,7 @@ struct variant_type {
     int  			integerVal;
     double 			doubleVal;
     std::string			stringVal;
-
+    G3nom::Codel::Ptr		codelVal;
     G3nom::Idl::IdlType::Ptr		typeVal;
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
     G3nom::Idl::Declarator::Ptr		declaratorVal;
@@ -146,6 +146,7 @@ struct variant_type {
 /* %type <portVal>		port_decl */
 /* %type <taskVal>		task_decl */
 /* %type <serviceVal>	service_decl */
+%type <codelVal>		codel_prototype;
 
 %type <typeVal>			type_decl
 %type <typeVal>  		type_spec
@@ -305,7 +306,10 @@ task_fields:
 
 task_field:
   CODEL IDENTIFIER COLON codel_prototype
-{}
+{
+    Task *t = driver.currentTask();
+    t->addCodel($2, $4);
+}
 | IDENTIFIER COLON INTEGERLIT 
 {
     Task *t = driver.currentTask();
@@ -340,7 +344,10 @@ service_fields:
 
 service_field:
   CODEL IDENTIFIER COLON codel_prototype
-{}
+{
+    Service *s = driver.currentService();
+    s->addCodel($2, $4);
+}
 | IDENTIFIER COLON IDENTIFIER
 {
     Service *s = driver.currentService();
@@ -383,8 +390,39 @@ service_field:
 /*** Codel Declaration ***/
 
 codel_prototype:
-  IDENTIFIER
+  IDENTIFIER 
+{
+    Codel::Ptr c(new Codel($1));
+    driver.setCurrentCodel(c);
+}
+  LPAREN codel_fields RPAREN
+{
+    $$ = driver.currentCodel();
+};
+
+codel_fields:
+  codel_field
+{}
+| codel_fields COMMA codel_field
 {};
+
+codel_field:
+  IN IDENTIFIER
+{
+    driver.currentCodel()->addInType($2);
+}
+| OUT IDENTIFIER
+{
+    driver.currentCodel()->addOutType($2);
+}
+| INPORT IDENTIFIER
+{
+    driver.currentCodel()->addInPort($2);
+}
+| OUTPORT IDENTIFIER
+{
+    driver.currentCodel()->addOutPort($2);
+};
 
 /*** Type Declaration ***/
 

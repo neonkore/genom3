@@ -89,6 +89,13 @@ class Driver
 		*/
 		Service* currentService();
 
+		Codel::Ptr currentCodel() const {
+			return m_currentCodel;
+		}
+		void setCurrentCodel(Codel::Ptr c) {
+			m_currentCodel = c;
+		}
+
 		Idl::IdlType::Ptr currentType() const {
 			return m_currentType;
 		}
@@ -110,6 +117,7 @@ class Driver
 		Component m_component;
 		Task *m_currentTask;
 		Service *m_currentService;
+		Codel::Ptr m_currentCodel;
 		Idl::IdlType::Ptr m_currentType;
 };
 

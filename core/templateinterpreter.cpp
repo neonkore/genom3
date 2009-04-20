@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -46,64 +46,65 @@ TemplateInterpreter::TemplateInterpreter()
 
 string readFile(const char *inFile)
 {
-    ifstream in(inFile);
-    if(!in.is_open()) {
-	cerr << "Error opening file: " << inFile << endl;
-	return string();
-    }
+	ifstream in(inFile);
+	if (!in.is_open()) {
+		cerr << "Error opening file: " << inFile << endl;
+		return string();
+	}
 
-    string str;
-    stringstream ss(str);
-    ss << in.rdbuf();
-    return ss.str();
+	string str;
+	stringstream ss(str);
+	ss << in.rdbuf();
+	return ss.str();
 }
 
-void TemplateInterpreter::parseFile(const char *infile, const char *outfile) 
+void TemplateInterpreter::parseFile(const char *infile, const char *outfile)
 {
-    ofstream out(outfile);
-    auto_ptr<char> tmpFile(new char[L_tmpnam]);
-    tmpnam(tmpFile.get());
+	ofstream out(outfile);
+	auto_ptr<char> tmpFile(new char[L_tmpnam]);
+	tmpnam(tmpFile.get());
 
-    if(!out.is_open()) {
-	cerr << "Error opening file for writing: " << outfile << endl;
-	return;
-    }
+	if (!out.is_open()) {
+		cerr << "Error opening file for writing: " << outfile << endl;
+		return;
+	}
 
-    // read whole file
-    string str = readFile(infile);
+	// read whole file
+	string str = readFile(infile);
 
-    unsigned int idx = 0, pos = 0;
-    while(pos != string::npos && pos < str.length()) {
-      pos = str.find("<?", idx);
-      out << str.substr(idx, pos-idx);
+	unsigned int idx = 0, pos = 0;
+	while (pos != string::npos && pos < str.length()) {
+		pos = str.find("<?", idx);
+		out << str.substr(idx, pos - idx);
 
-      if(pos == string::npos) {
+		if (pos == string::npos) {
 //  	  out << str.substr(idx, str.length());
-	  break;
-      }
-      idx = pos + 2;
+			break;
+		}
+		idx = pos + 2;
 
-      pos = str.find("?>", idx);
-      if(m_interpreter) {
-	  //redirect stdout to file
-	  freopen(tmpFile.get(), "w", stdout);
-	  //launch interpreter
-	  m_interpreter->interpret(str.substr(idx, pos-idx));
-	  // revert stdout
-	  freopen("CON", "w", stdout);
+		pos = str.find("?>", idx);
+		if (m_interpreter) {
+			//redirect stdout to file
+			freopen(tmpFile.get(), "w", stdout);
+			//launch interpreter
+			m_interpreter->interpret(str.substr(idx, pos - idx));
+			// revert stdout
+			freopen("CON", "w", stdout);
 
-	  // read file and output it
-	  string s = readFile(tmpFile.get());
-	  cout << "res: " << s << endl;
-	  out << s;
-      }
+			// read file and output it
+			string s = readFile(tmpFile.get());
+			cout << "res: " << s << endl;
+			out << s;
+		}
 //       out << str.substr(idx, pos-idx);
-      idx = pos + 2;
-    } 
+		idx = pos + 2;
+	}
 }
 
-void TemplateInterpreter::setInterpreter(G3nom::Interpreter* i) 
+void TemplateInterpreter::setInterpreter(G3nom::Interpreter* i)
 {
-    m_interpreter = i;
+	m_interpreter = i;
 }
 
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

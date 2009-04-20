@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -47,95 +47,98 @@ PythonInterpreter* PythonInterpreter::m_instance = 0;
 
 Component* pygetCurrentComponent()
 {
-    PythonInterpreter *i = PythonInterpreter::getInstance();
-    return i->component();
+	PythonInterpreter *i = PythonInterpreter::getInstance();
+	return i->component();
 }
 
 void pydebug(Component *c)
 {
-    c->debug();
+	c->debug();
 }
 
 BOOST_PYTHON_MODULE_INIT(G3nom)
 {
-    def("getComponent", &pygetCurrentComponent, return_value_policy<reference_existing_object>());
-    def("debugComp", &pydebug);
+	def("getComponent", &pygetCurrentComponent, return_value_policy<reference_existing_object>());
+	def("debugComp", &pydebug);
 
-    class_<Component>("Component")
-      .def("task", &Component::task, return_value_policy<reference_existing_object>())
-      .def("debug", &Component::debug)
-      .def("tasksList", &Component::tasksList)
-      .def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>());
+	class_<Component>("Component")
+	.def("task", &Component::task, return_value_policy<reference_existing_object>())
+	.def("debug", &Component::debug)
+	.def("tasksList", &Component::tasksList)
+	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>());
 
-    class_<Task>("Task")
-      .def("debug", &Task::debug)
-      .def_readwrite("priority", &Task::priority);
+	class_<Task>("Task")
+	.def("debug", &Task::debug)
+	.def_readwrite("priority", &Task::priority);
 
-    // vector of strings
-     class_<std::vector<std::string> >("StringVec")
-         .def(vector_indexing_suite<std::vector<std::string> >());
+	// vector of strings
+	class_<std::vector<std::string> >("StringVec")
+	.def(vector_indexing_suite<std::vector<std::string> >());
 
-     class_<Task::Map>("TaskMap")
-        .def(ptr_map_indexing_suite<Task::Map, true>());
+	class_<Task::Map>("TaskMap")
+	.def(ptr_map_indexing_suite<Task::Map, true>());
 }
 
 /********************** Python interpreter ********/
 
 // allocates a new string using new [], and copies contents into it..
-static char* newString( const char* contents )
+static char* newString(const char* contents)
 {
-  char* ret = new char[strlen( contents ) + 1];
-  strcpy( ret, contents );
-  return ret;
+	char* ret = new char[strlen(contents) + 1];
+	strcpy(ret, contents);
+	return ret;
 }
 
-namespace G3nom {
-class PythonInterpreterPrivate {
-  public:
-    boost::python::object pydict;
+namespace G3nom
+{
+class PythonInterpreterPrivate
+{
+	public:
+		boost::python::object pydict;
 };
 }
 
 // See Kig source (part of KDE EDU module) for an example
-// of how to use embedded python (or Kalzium for more advanced stuff)   
-PythonInterpreter::PythonInterpreter() 
-: d(new PythonInterpreterPrivate())
+// of how to use embedded python (or Kalzium for more advanced stuff)
+PythonInterpreter::PythonInterpreter()
+		: d(new PythonInterpreterPrivate())
 {
-    char *s = newString("G3nom"); // we can't delete this string
-    PyImport_AppendInittab(s, initG3nom);
-    Py_Initialize();
+	char *s = newString("G3nom"); // we can't delete this string
+	PyImport_AppendInittab(s, initG3nom);
+	Py_Initialize();
 
-    // create global dict object
-    object main = import("__main__"); 
-    d->pydict = main.attr("__dict__"); 
-    // import our module
-    interpret("import G3nom;\nfrom G3nom import *;\n");
+	// create global dict object
+	object main = import("__main__");
+	d->pydict = main.attr("__dict__");
+	// import our module
+	interpret("import G3nom;\nfrom G3nom import *;\n");
 }
 
-PythonInterpreter::~PythonInterpreter() 
+PythonInterpreter::~PythonInterpreter()
 {}
 
 PythonInterpreter* PythonInterpreter::getInstance()
 {
-    if(!m_instance)
-	m_instance = new PythonInterpreter();
-    return m_instance;
+	if (!m_instance)
+		m_instance = new PythonInterpreter();
+	return m_instance;
 }
 
-void PythonInterpreter::start(G3nom::Component* c) 
+void PythonInterpreter::start(G3nom::Component* c)
 {
-    m_component = c;
-    interpret("comp = getComponent()\n");
+	m_component = c;
+	interpret("comp = getComponent()\n");
 }
 
-std::string PythonInterpreter::interpret(const std::string& s) 
+std::string PythonInterpreter::interpret(const std::string& s)
 {
-    try {
-	exec(str(s), d->pydict, d->pydict);
-	return "";
-    } catch (error_already_set const &) {
-	cerr << "Error in python interpreter: ";
-	PyErr_Print();
-	cerr << endl;
-    }
+	try {
+		exec(str(s), d->pydict, d->pydict);
+		return "";
+	} catch (error_already_set const &) {
+		cerr << "Error in python interpreter: ";
+		PyErr_Print();
+		cerr << endl;
+	}
 }
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

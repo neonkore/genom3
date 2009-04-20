@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -38,23 +38,24 @@ using namespace G3nom;
 
 int main(int argc, char* argv[])
 {
-      string s = "task main { "
-		  "priority: 100;"
-		  "period: 5;\n"
-		  "stack:  100;"
+	string s = "task main { "
+	           "priority: 100;"
+	           "period: 5;\n"
+	           "stack:  100;"
 // 		  "codel start:	tstart(inout param);\n"
 // 		  "codel main:	tmain();\n"
-		  "};";
+	           "};";
 
-      Driver d;
+	Driver d;
 //      d.setDebug(true);
-      d.parseString(s);
+	d.parseString(s);
 //       d.component().debug();
 
-      PythonInterpreter *i = PythonInterpreter::getInstance();
-      i->start(&(d.component()));
+	PythonInterpreter *i = PythonInterpreter::getInstance();
+	i->start(&(d.component()));
 // 	  i->interpret("print 3");
 //       i->interpret("print (3+3)");
-      i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
-      i->interpret("");
+	i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
+	i->interpret("");
 }
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

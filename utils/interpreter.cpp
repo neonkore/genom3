@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -37,8 +37,9 @@ Interpreter::Interpreter()
 Interpreter::~Interpreter()
 {}
 
-Component* Interpreter::component() 
+Component* Interpreter::component()
 {
-    return m_component;
+	return m_component;
 }
 
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

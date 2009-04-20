@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -41,90 +41,93 @@ TclInterpreter* TclInterpreter::m_instance = 0;
 
 Component* getCurrentComponent()
 {
-    TclInterpreter *i = TclInterpreter::getInstance();
-    return i->component();
+	TclInterpreter *i = TclInterpreter::getInstance();
+	return i->component();
 }
 
 void debug(Component *c)
 {
-    c->debug();
+	c->debug();
 }
 
 string tasksList(Component *c)
 {
-    string out;
+	string out;
 
-    Task::Map map = c->tasksMap();
-    Task::Map::const_iterator it;
-    for(it = map.begin(); it != map.end(); ++it) {
-	out.append(" \"").append(it->first).append("\"");
-	out.append(" \"").append(it->first).append("\"");
-    }
+	Task::Map map = c->tasksMap();
+	Task::Map::const_iterator it;
+	for (it = map.begin(); it != map.end(); ++it) {
+		out.append(" \"").append(it->first).append("\"");
+		out.append(" \"").append(it->first).append("\"");
+	}
 
-    return out;
+	return out;
 }
 
 // Tcl::object tasksList(interpreter &i, Component *c)
 // {
 //     object tab;
-// 
+//
 //     Task::Map map = c->tasksMap();
 //     Task::Map::const_iterator it;
 //     for(it = map.begin(); it != map.end(); ++it)
 // 	tab.append(i, object(it->first));
-// 
+//
 //     return tab;
 // }
 
-namespace G3nom {
-class TclInterpreterPrivate {
-  public:
-    Tcl::interpreter interpreter;
+namespace G3nom
+{
+class TclInterpreterPrivate
+{
+	public:
+		Tcl::interpreter interpreter;
 };
 }
 
-TclInterpreter::TclInterpreter() 
-: d(new TclInterpreterPrivate())
+TclInterpreter::TclInterpreter()
+		: d(new TclInterpreterPrivate())
 {
-    d->interpreter.def("getComponent", &getCurrentComponent, factory("Component"));
-    d->interpreter.def("debugComp", &debug);
-    d->interpreter.def("tasksList", &tasksList);
+	d->interpreter.def("getComponent", &getCurrentComponent, factory("Component"));
+	d->interpreter.def("debugComp", &debug);
+	d->interpreter.def("tasksList", &tasksList);
 
-    d->interpreter.class_<Component>("Component")
-	    .def("task", &Component::task, factory("Task"))
-	    .def("debug", &Component::debug);
+	d->interpreter.class_<Component>("Component")
+	.def("task", &Component::task, factory("Task"))
+	.def("debug", &Component::debug);
 
-    d->interpreter.class_<Task>("Task")
-           .def("debug", &Task::debug);
+	d->interpreter.class_<Task>("Task")
+	.def("debug", &Task::debug);
 }
 
-TclInterpreter::~TclInterpreter() 
+TclInterpreter::~TclInterpreter()
 {}
 
 TclInterpreter* TclInterpreter::getInstance()
 {
-    if(!m_instance)
-	m_instance = new TclInterpreter();
-    return m_instance;
+	if (!m_instance)
+		m_instance = new TclInterpreter();
+	return m_instance;
 }
 
-void TclInterpreter::start(G3nom::Component* c) 
+void TclInterpreter::start(G3nom::Component* c)
 {
-    m_component = c;
-    interpret("set comp [getComponent]");
+	m_component = c;
+	interpret("set comp [getComponent]");
 
-    // create list of tasks
+	// create list of tasks
 //     object o("set taskList");
 //     o.append(d->interpreter, tasksList(d->interpreter, c));
 //     d->interpreter.eval(o);
 }
 
-std::string TclInterpreter::interpret(const std::string& s) 
+std::string TclInterpreter::interpret(const std::string& s)
 {
-    try {
-	d->interpreter.eval(s);
-	return string();
-    } catch (std::exception const &e) {
-	cerr << "Error: " << e.what() << endl;
-    }
+	try {
+		d->interpreter.eval(s);
+		return string();
+	} catch (std::exception const &e) {
+		cerr << "Error: " << e.what() << endl;
+	}
 }
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -32,22 +32,25 @@
 
 #include <string>
 
-namespace G3nom {
+namespace G3nom
+{
 
 class Interpreter;
 
-class TemplateInterpreter {
-  public:
-    TemplateInterpreter();
+class TemplateInterpreter
+{
+	public:
+		TemplateInterpreter();
 
-    void setInterpreter(Interpreter *i);
+		void setInterpreter(Interpreter *i);
 
-    void parseFile(const char* infile, const char* outfile);
+		void parseFile(const char* infile, const char* outfile);
 
-   private:
-     Interpreter *m_interpreter;
+	private:
+		Interpreter *m_interpreter;
 };
 
 }
 
 #endif
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

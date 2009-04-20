@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -32,23 +32,26 @@
 
 #include <string>
 
-namespace G3nom {
+namespace G3nom
+{
 
 class Component;
 
-class Interpreter {
-  public:
-      Interpreter();
-      virtual ~Interpreter();
+class Interpreter
+{
+	public:
+		Interpreter();
+		virtual ~Interpreter();
 
-      virtual void start(Component *c) = 0;
-      virtual std::string interpret(const std::string &s) = 0;
-      Component* component();
+		virtual void start(Component *c) = 0;
+		virtual std::string interpret(const std::string &s) = 0;
+		Component* component();
 
-  protected:
-      Component *m_component;
+	protected:
+		Component *m_component;
 };
 
 }
 
-#endif 
+#endif
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

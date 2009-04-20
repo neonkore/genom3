@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -34,26 +34,29 @@
 #include <string>
 #include <auto_ptr.h>
 
-namespace G3nom {
+namespace G3nom
+{
 
 class Component;
 class TclInterpreterPrivate;
 
-class TclInterpreter : public Interpreter {
-  public:
-      TclInterpreter();
-      ~TclInterpreter();
+class TclInterpreter : public Interpreter
+{
+	public:
+		TclInterpreter();
+		~TclInterpreter();
 
-      void start(Component *c);
-      std::string interpret(const std::string &s);
+		void start(Component *c);
+		std::string interpret(const std::string &s);
 
-      static TclInterpreter *getInstance();
+		static TclInterpreter *getInstance();
 
-  private:
-      static TclInterpreter* m_instance;
-      std::auto_ptr<TclInterpreterPrivate> d;
+	private:
+		static TclInterpreter* m_instance;
+		std::auto_ptr<TclInterpreterPrivate> d;
 };
 
 }
 
 #endif
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

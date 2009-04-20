@@ -62,7 +62,7 @@ class IdlType
 			WString, Any, Struct, Union, Enum, Sequence, Typedef
 		};
 		typedef boost::shared_ptr<IdlType> Ptr;
-		typedef std::map<std::string,IdlType::Ptr> Map;
+		typedef std::map<std::string, IdlType::Ptr> Map;
 		typedef std::vector<IdlType::Ptr> Vector;
 
 		IdlType(Kind k);
@@ -107,7 +107,9 @@ class Declarator
 		}
 		bool isArray() const;
 		void addBound(int b);
-		std::vector<int> & bounds() { return m_bounds; }
+		std::vector<int> & bounds() {
+			return m_bounds;
+		}
 
 	private:
 		std::string m_identifier;
@@ -417,4 +419,4 @@ class EnumType : public IdlType
 }
 
 #endif
-// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -39,20 +39,21 @@ using namespace G3nom;
 
 int main(int argc, char* argv[])
 {
-    Interpreter *i;
+	Interpreter *i;
 
-    if(argc > 1) {
-	string s(argv[1]);
-	if(s == "python")
-	    i = PythonInterpreter::getInstance();
-	else
-	    i = TclInterpreter::getInstance();
-    } else
-	i = TclInterpreter::getInstance();
+	if (argc > 1) {
+		string s(argv[1]);
+		if (s == "python")
+			i = PythonInterpreter::getInstance();
+		else
+			i = TclInterpreter::getInstance();
+	} else
+		i = TclInterpreter::getInstance();
 
-    TemplateInterpreter ti;
-    ti.setInterpreter(i);
-    ti.parseFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm",
-	"/home/ccpasteur/work/git/g3nom/templates/test/template1.py.out");
-    return 0;
+	TemplateInterpreter ti;
+	ti.setInterpreter(i);
+	ti.parseFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm",
+	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.py.out");
+	return 0;
 }
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

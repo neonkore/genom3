@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -38,27 +38,28 @@ using namespace G3nom;
 
 int main(int argc, char* argv[])
 {
-      string s = "task main { "
-		  "priority: 100;"
-		  "period: 5;\n"
-		  "stack:  100;"
+	string s = "task main { "
+	           "priority: 100;"
+	           "period: 5;\n"
+	           "stack:  100;"
 // 		  "codel start:	tstart(inout param);\n"
 // 		  "codel main:	tmain();\n"
-		  "};";
+	           "};";
 
-      Driver d;
+	Driver d;
 //      d.setDebug(true);
-      d.parseString(s);
+	d.parseString(s);
 //       d.component().debug();
 
-      TclInterpreter *i = TclInterpreter::getInstance();
-      i->start(&(d.component()));
+	TclInterpreter *i = TclInterpreter::getInstance();
+	i->start(&(d.component()));
 //       i->interpret("set comp2 [Component];");
 //       i->interpret("debugComp $comp");
 //       i->interpret("debugComp $comp2");
 //       i->interpret("$comp debug");
-       i->interpret("set task [$comp task \"main\"]");
-       i->interpret("$task debug");
-	 i->interpret("set l [tasksList $comp]");
-	 i->interpret("foreach x $l { puts \"task: $x\" }");
+	i->interpret("set task [$comp task \"main\"]");
+	i->interpret("$task debug");
+	i->interpret("set l [tasksList $comp]");
+	i->interpret("foreach x $l { puts \"task: $x\" }");
 }
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

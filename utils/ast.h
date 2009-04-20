@@ -1,5 +1,5 @@
-/* 
- * Copyright (c) 2009 LAAS/CNRS                      
+/*
+ * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -36,112 +36,118 @@
 
 #include "idltype.h"
 
-namespace G3nom {
+namespace G3nom
+{
 
-class Port {
-  public:
-    enum Type { Incoming, Outgoing};
-    typedef std::map<std::string, Port*> Map;
+class Port
+{
+	public:
+		enum Type { Incoming, Outgoing};
+		typedef std::map<std::string, Port*> Map;
 
-    Port() {}
-    Port(std::string name, Idl::IdlType::Ptr idlType, bool incoming)
-      : name(name), idlType(idlType), type(incoming ? Incoming: Outgoing)
-    {}
+		Port() {}
+		Port(std::string name, Idl::IdlType::Ptr idlType, bool incoming)
+				: name(name), idlType(idlType), type(incoming ? Incoming : Outgoing) {}
 
-    void debug();
-    
-    std::string name;
-    Type type;
-    Idl::IdlType::Ptr idlType;
+		void debug();
+
+		std::string name;
+		Type type;
+		Idl::IdlType::Ptr idlType;
 };
 
-class Codel {
-  public:
-    typedef std::map<std::string, Codel*> Map;
+class Codel
+{
+	public:
+		typedef std::map<std::string, Codel*> Map;
 
-    Codel() {}
+		Codel() {}
 
-    void debug();
+		void debug();
 
-    std::string name;
-    std::vector<std::string> inTypes;
-    std::vector<std::string> outTypes;
-    std::vector<std::string> inPorts;
-    std::vector<std::string> outPorts;
+		std::string name;
+		std::vector<std::string> inTypes;
+		std::vector<std::string> outTypes;
+		std::vector<std::string> inPorts;
+		std::vector<std::string> outPorts;
 };
 
-class Task {
-  public:
-    typedef std::map<std::string, Task*> Map;
+class Task
+{
+	public:
+		typedef std::map<std::string, Task*> Map;
 
-    Task() {}
+		Task() {}
 
-    void debug();
+		void debug();
 
-    std::string name;
-    int priority;
-    int period; // in ms
-    int stackSize; // in kbytes
+		std::string name;
+		int priority;
+		int period; // in ms
+		int stackSize; // in kbytes
 
-  private:
-    Codel::Map codels; 
-    //std::string connectedPort;
+	private:
+		Codel::Map codels;
+		//std::string connectedPort;
 };
 
-class Service {
-  public:
-    typedef std::map<std::string, Service*> Map;
-    enum Type { Control, Exec, Init };
+class Service
+{
+	public:
+		typedef std::map<std::string, Service*> Map;
+		enum Type { Control, Exec, Init };
 
-    Service() {}
+		Service() {}
 
-    void debug();
+		void debug();
 
-    void addInput(const std::string &s);
+		void addInput(const std::string &s);
 
-    std::string name;
-    Type type;
-    std::string doc;
-    std::string taskName;
-    std::string output;
+		std::string name;
+		Type type;
+		std::string doc;
+		std::string taskName;
+		std::string output;
 
-  private:
-    Codel::Map codels;
-    std::vector<std::string> inputs;
-    std::vector<std::string> incompatibleServices;
+	private:
+		Codel::Map codels;
+		std::vector<std::string> inputs;
+		std::vector<std::string> incompatibleServices;
 };
 
-class Component {
-  public:
-    Component();
-    ~Component();
+class Component
+{
+	public:
+		Component();
+		~Component();
 
-    void debug();
+		void debug();
 
-    void addTask(const std::string& name, G3nom::Task* task);
-    void addService(const std::string& name, G3nom::Service* task);
-    void addPort(const std::string& name, G3nom::Port* port);
-    void addType(Idl::IdlType::Ptr type);
+		void addTask(const std::string& name, G3nom::Task* task);
+		void addService(const std::string& name, G3nom::Service* task);
+		void addPort(const std::string& name, G3nom::Port* port);
+		void addType(Idl::IdlType::Ptr type);
 
-    Task::Map& tasksMap();
-    std::vector<std::string> tasksList();
-    Task* task(const std::string &name);
+		Task::Map& tasksMap();
+		std::vector<std::string> tasksList();
+		Task* task(const std::string &name);
 
-    Idl::IdlType::Ptr typeFromName(const std::string &name);
+		Idl::IdlType::Ptr typeFromName(const std::string &name);
 
-    std::string name;
-    std::string pluginLanguage;
-    std::string version;
-    Idl::IdlType::Ptr IDSType;
+		std::string name;
+		std::string pluginLanguage;
+		std::string version;
+		Idl::IdlType::Ptr IDSType;
 
-  private:
-    /// @todo use smart pointers or smart maps ?
-    Task::Map tasks;
-    Service::Map services;
-    Port::Map ports;
-    Idl::IdlType::Vector types;
+	private:
+		/// @todo use smart pointers or smart maps ?
+		Task::Map tasks;
+		Service::Map services;
+		Port::Map ports;
+		Idl::IdlType::Vector types;
 };
 
 }
 
 #endif // G3NOM_AST_H
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

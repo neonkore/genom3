@@ -12,68 +12,69 @@ using namespace G3nom;
 using namespace Idl;
 
 Driver::Driver()
-    : m_verboseLexing(false),
-      m_verboseParsing(false),
-      m_currentTask(0),
-      m_currentService(0)
+		: m_verboseLexing(false),
+		m_verboseParsing(false),
+		m_currentTask(0),
+		m_currentService(0)
 {}
 
 bool Driver::parseStream(std::istream& in, const std::string& sname)
 {
-    m_streamName = sname;
+	m_streamName = sname;
 
-    m_lexer = new Lexer(&in);
-    m_lexer->setDebug(m_verboseLexing);
+	m_lexer = new Lexer(&in);
+	m_lexer->setDebug(m_verboseLexing);
 
-    Parser parser(*this);
-    parser.set_debug_level(m_verboseParsing);
-    bool b = (parser.parse() == 0);
+	Parser parser(*this);
+	parser.set_debug_level(m_verboseParsing);
+	bool b = (parser.parse() == 0);
 
-    delete m_lexer;
-    m_lexer = 0;
-    return b;
+	delete m_lexer;
+	m_lexer = 0;
+	return b;
 }
 
 bool Driver::parseFile(const char *filename)
 {
-    std::ifstream in(filename);
-    if (!in.good())
-	return false;
-    return parseStream(in, filename);
+	std::ifstream in(filename);
+	if (!in.good())
+		return false;
+	return parseStream(in, filename);
 }
 
 bool Driver::parseString(const std::string &input, const std::string& sname)
 {
-    std::istringstream iss(input);
-    return parseStream(iss, sname);
+	std::istringstream iss(input);
+	return parseStream(iss, sname);
 }
 
 void Driver::error(const class location& l, const std::string& m)
 {
-    std::cerr << l << ": " << m << std::endl;
+	std::cerr << l << ": " << m << std::endl;
 }
 
 void Driver::error(const std::string& m)
 {
-    std::cerr << m << std::endl;
+	std::cerr << m << std::endl;
 }
 
 void Driver::setDebug(bool verbose)
 {
-    m_verboseLexing = true;
-    m_verboseParsing = true;
+	m_verboseLexing = true;
+	m_verboseParsing = true;
 }
 
-Service* Driver::currentService() 
+Service* Driver::currentService()
 {
-    if(!m_currentService)
-	m_currentService = new Service();
-    return m_currentService; 
+	if (!m_currentService)
+		m_currentService = new Service();
+	return m_currentService;
 }
 
-Task* Driver::currentTask() 
-{ 
-    if(!m_currentTask)
-	m_currentTask = new Task();
-    return m_currentTask; 
+Task* Driver::currentTask()
+{
+	if (!m_currentTask)
+		m_currentTask = new Task();
+	return m_currentTask;
 }
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

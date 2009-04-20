@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 	i->start(&(d.component()));
 // 	  i->interpret("print 3");
 //       i->interpret("print (3+3)");
-	i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().get().priority");
+	i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
 	i->interpret("");
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

@@ -68,12 +68,9 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.def("tasksList", &Component::tasksList)
 	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>());
 
-	class_<Task>("Task")
+	class_<Task, Task::Ptr>("Task")
 	.def("debug", &Task::debug)
 	.def_readwrite("priority", &Task::priority);
-
-	class_<Task::Ptr>("TaskPtr")
-	.def("get", &Task::Ptr::get, return_value_policy<reference_existing_object>());
 
 	// vector of strings
 	class_<std::vector<std::string> >("StringVec")

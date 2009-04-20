@@ -43,12 +43,6 @@ Component::Component()
 
 Component::~Component()
 {
-	for (Service::Map::iterator it = services.begin(); it != services.end(); ++it)
-		delete it->second;
-	for (Task::Map::iterator it2 = tasks.begin(); it2 != tasks.end(); ++it2)
-		delete it2->second;
-	for (Port::Map::iterator it3 = ports.begin(); it3 != ports.end(); ++it3)
-		delete it3->second;
 }
 
 
@@ -96,22 +90,26 @@ void Component::debug()
 	}
 }
 
-void Component::addTask(const std::string &name, Task* task)
+void Component::addTask(Task::Ptr task)
 {
 	/// \todo throw exception ? return code ?
 	if (tasks.find(name) != tasks.end())
 		cerr << "Warning: already existing task name: " << name << endl;
-	tasks[name] = task;
+	tasks[task->name] = task;
 }
 
-void Component::addService(const std::string &name, Service* s)
+void Component::addService(Service::Ptr s)
 {
-	services[name] = s;
+	if (services.find(name) != services.end())
+		cerr << "Warning: already existing service name: " << name << endl;
+	services[s->name] = s;
 }
 
-void Component::addPort(const std::string &name, Port *port)
+void Component::addPort(Port::Ptr port)
 {
-	ports[name] = port;
+	if (ports.find(name) != ports.end())
+		cerr << "Warning: already existing port name: " << name << endl;
+	ports[port->name] = port;
 }
 
 void Component::addType(IdlType::Ptr type)
@@ -123,7 +121,7 @@ Task* Component::task(const std::string &name)
 {
 	Task::Map::iterator it = tasks.find(name);
 	if (it != tasks.end())
-		return it->second;
+		return it->second.get();
 	return 0;
 }
 

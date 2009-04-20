@@ -75,19 +75,19 @@ class Driver
 			return m_component;
 		}
 
-		void setCurrentTask(Task *t) {
+		void setCurrentTask(Task::Ptr t) {
 			m_currentTask = t;
 		}
 		/** Returns the current task, creating it if necessary
 		*/
-		Task* currentTask();
+		Task::Ptr currentTask();
 
-		void setCurrentService(Service *s) {
+		void setCurrentService(Service::Ptr s) {
 			m_currentService = s;
 		}
 		/** Returns the current service, creating it if necessary
 		*/
-		Service* currentService();
+		Service::Ptr currentService();
 
 		Codel::Ptr currentCodel() const {
 			return m_currentCodel;
@@ -115,8 +115,8 @@ class Driver
 		bool m_verboseParsing;
 
 		Component m_component;
-		Task *m_currentTask;
-		Service *m_currentService;
+		Task::Ptr m_currentTask;
+		Service::Ptr m_currentService;
 		Codel::Ptr m_currentCodel;
 		Idl::IdlType::Ptr m_currentType;
 };

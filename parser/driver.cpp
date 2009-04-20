@@ -13,9 +13,7 @@ using namespace Idl;
 
 Driver::Driver()
 		: m_verboseLexing(false),
-		m_verboseParsing(false),
-		m_currentTask(0),
-		m_currentService(0)
+		m_verboseParsing(false)
 {}
 
 bool Driver::parseStream(std::istream& in, const std::string& sname)
@@ -64,17 +62,17 @@ void Driver::setDebug(bool verbose)
 	m_verboseParsing = true;
 }
 
-Service* Driver::currentService()
+Service::Ptr Driver::currentService()
 {
-	if (!m_currentService)
-		m_currentService = new Service();
+// 	if (!m_currentService)
+// 		m_currentService = new Service();
 	return m_currentService;
 }
 
-Task* Driver::currentTask()
+Task::Ptr Driver::currentTask()
 {
-	if (!m_currentTask)
-		m_currentTask = new Task();
+// 	if (!m_currentTask)
+// 		m_currentTask = new Task();
 	return m_currentTask;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

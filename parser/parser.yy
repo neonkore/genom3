@@ -281,22 +281,27 @@ port_decl:
   INPORT IDENTIFIER IDENTIFIER
 {
     Idl::IdlType::Ptr type = driver.component().typeFromName($2);
-    driver.component().addPort($3, new Port($3, type, true));
+    Port::Ptr p(new Port($3, type, true));
+    driver.component().addPort(p);
 }
 | OUTPORT IDENTIFIER IDENTIFIER
 {
     Idl::IdlType::Ptr type = driver.component().typeFromName($2);
-    driver.component().addPort($3, new Port($3, type, false));};
+    Port::Ptr p(new Port($3, type, false));
+    driver.component().addPort(p);
+};
 
 /*** Task declaration ***/
 
 task_decl:
-  TASK IDENTIFIER LBRACE task_fields RBRACE
+  TASK IDENTIFIER 
 {
-    Task *t = driver.currentTask();
-    t->name = $2;
-    driver.component().addTask(t->name, t);
-    driver.setCurrentTask(0);
+    Task::Ptr t(new Task($2));
+    driver.setCurrentTask(t);
+}
+LBRACE task_fields RBRACE
+{
+    driver.component().addTask(driver.currentTask());
 };
 
 task_fields:
@@ -307,12 +312,11 @@ task_fields:
 task_field:
   CODEL IDENTIFIER COLON codel_prototype
 {
-    Task *t = driver.currentTask();
-    t->addCodel($2, $4);
+    driver.currentTask()->addCodel($2, $4);
 }
 | IDENTIFIER COLON INTEGERLIT 
 {
-    Task *t = driver.currentTask();
+    Task::Ptr t = driver.currentTask();
 
     if($1 == "priority")
       t->priority = $3;
@@ -329,12 +333,14 @@ task_field:
 /*** Service Declaration ***/
 
 service_decl:
-    SERVICE IDENTIFIER LBRACE service_fields RBRACE
+    SERVICE IDENTIFIER
 {
-    Service *s = driver.currentService();
-    s->name = $2;
-    driver.component().addService($2, s);
-    driver.setCurrentService(0);
+    Service::Ptr s(new Service($2));
+    driver.setCurrentService(s);
+}
+ LBRACE service_fields RBRACE
+{
+    driver.component().addService(driver.currentService());
 };
 
 service_fields:
@@ -345,12 +351,11 @@ service_fields:
 service_field:
   CODEL IDENTIFIER COLON codel_prototype
 {
-    Service *s = driver.currentService();
-    s->addCodel($2, $4);
+    driver.currentService()->addCodel($2, $4);
 }
 | IDENTIFIER COLON IDENTIFIER
 {
-    Service *s = driver.currentService();
+    Service::Ptr s = driver.currentService();
 
     if($1 == "type") {
 	if($3 == "init")
@@ -376,7 +381,7 @@ service_field:
 }
 | IDENTIFIER COLON STRINGLIT 
 {
-    Service *s = driver.currentService();
+    Service::Ptr s = driver.currentService();
     if($1 == "doc") {
       s->doc = $3;
     } else {

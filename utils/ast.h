@@ -43,7 +43,8 @@ class Port
 {
 	public:
 		enum Type { Incoming, Outgoing};
-		typedef std::map<std::string, Port*> Map;
+		typedef boost::shared_ptr<Port> Ptr;
+		typedef std::map<std::string, Ptr> Map;
 
 		Port() {}
 		Port(std::string name, Idl::IdlType::Ptr idlType, bool incoming)
@@ -83,9 +84,13 @@ class Codel
 class Task
 {
 	public:
-		typedef std::map<std::string, Task*> Map;
+		typedef boost::shared_ptr<Task> Ptr;
+		typedef std::map<std::string, Ptr> Map;
 
 		Task() {}
+		Task(const std::string id)
+		: name(id)
+		{}
 
 		void debug();
 
@@ -104,10 +109,13 @@ class Task
 class Service
 {
 	public:
-		typedef std::map<std::string, Service*> Map;
+		typedef boost::shared_ptr<Service> Ptr;
+		typedef std::map<std::string, Ptr> Map;
 		enum Type { Control, Exec, Init };
 
 		Service() {}
+		Service(const std::string &id) 
+		: name(id) {}
 
 		void debug();
 
@@ -134,9 +142,9 @@ class Component
 
 		void debug();
 
-		void addTask(const std::string& name, G3nom::Task* task);
-		void addService(const std::string& name, G3nom::Service* task);
-		void addPort(const std::string& name, G3nom::Port* port);
+		void addTask(Task::Ptr task);
+		void addService(Service::Ptr task);
+		void addPort(Port::Ptr port);
 		void addType(Idl::IdlType::Ptr type);
 
 		Task::Map& tasksMap();

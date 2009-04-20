@@ -50,6 +50,8 @@ exppart					[eE][-+]?[0-9]+
 floatsuffix				[fFlL]
 stringtext				([^\"])|(\\.)
 
+%s IN_COMMENT
+
 /* The following paragraph suffices to track locations accurately. Each time
  * yylex is invoked, the begin position is moved onto the end position. */
 %{
@@ -81,6 +83,16 @@ stringtext				([^\"])|(\\.)
     yylval->charVal = *yytext;
     return token::SPECIAL_CHAR; // use keywords as token types
 }*/
+
+ /* comments*/
+<INITIAL>"/*"              { BEGIN(IN_COMMENT); }
+     
+<IN_COMMENT>{
+     "*/"      BEGIN(INITIAL);
+     [^*\n]+   // eat comment in chunks
+     "*"       // eat the lone star
+     \n        //
+}
 
  /* One char keywords */
 "{"			{ return token::LBRACE; }

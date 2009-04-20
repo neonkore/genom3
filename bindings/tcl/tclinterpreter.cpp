@@ -130,4 +130,11 @@ std::string TclInterpreter::interpret(const std::string& s)
 		cerr << "Error: " << e.what() << endl;
 	}
 }
+
+void TclInterpreter::exportVar(const std::string &name, const std::string &value)
+{
+	interpret("set " + name + " " + value);
+}
+
+
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

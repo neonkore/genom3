@@ -2,7 +2,7 @@
 FIND_PACKAGE(TCL)
 FIND_PACKAGE(Boost)
 
-include_directories(${PROJECT_SOURCE_DIR}/utils ${PROJECT_SOURCE_DIR}/parser ${TCL_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/utils ${PROJECT_SOURCE_DIR}/parsers/genom ${TCL_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
 
 # Lib
 

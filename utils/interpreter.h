@@ -45,6 +45,7 @@ class Interpreter
 
 		virtual void start(Component *c) = 0;
 		virtual std::string interpret(const std::string &s) = 0;
+		virtual void exportVar(const std::string &name, const std::string &value) = 0;
 		Component* component();
 
 	protected:

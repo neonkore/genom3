@@ -27,30 +27,37 @@
  * DAMAGE.
  */
 
-#ifndef G3NOM_TEMPLATE_INTERPRETER_H
-#define G3NOM_TEMPLATE_INTERPRETER_H
-
 #include <string>
+#include <iostream>
 
-namespace G3nom
+#include "templateinterpreter.h"
+#include "parsers/genom/driver.h"
+
+using namespace std;
+using namespace G3nom;
+
+int main(int argc, char* argv[])
 {
+	string s;
+	TemplateInterpreter ti;
+	Driver d;
+// 	d.setDebug(true);
 
-class Interpreter;
+	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/test.gnm"))
+		cout << "Error parsing gen file " << endl;
 
-class TemplateInterpreter
-{
-	public:
-		TemplateInterpreter();
+	ti.setComponent(&(d.component()));
 
-		void setInterpreter(Interpreter *i);
-
-		void parseFile(const char* infile, const char* outfile);
-
-	private:
-		Interpreter *m_interpreter;
-};
-
+	if (argc > 1) {
+		string arg(argv[1]);
+		if (arg == "testFile") {
+			if (!ti.parseInfoFile("/home/ccpasteur/work/git/g3nom/parsers/template_info/test/template.info"))
+				cout << "Error parsing info file " << endl;
+			return 0;
+		} else {
+			cout << "unknown test name: " << arg << endl;
+			return 1;
+		}
+	}
 }
-
-#endif
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

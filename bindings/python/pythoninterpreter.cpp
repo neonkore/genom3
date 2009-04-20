@@ -142,4 +142,9 @@ std::string PythonInterpreter::interpret(const std::string& s)
 		cerr << endl;
 	}
 }
+
+void PythonInterpreter::exportVar(const std::string &name, const std::string &value)
+{
+	interpret(name + " = " + value);
+}
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

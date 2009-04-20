@@ -130,6 +130,11 @@ Task::Map& Component::tasksMap()
 	return tasks;
 }
 
+Service::Map& Component::servicesMap()
+{
+	return services;
+}
+
 std::vector<std::string> Component::tasksList()
 {
 	vector<string> vec;

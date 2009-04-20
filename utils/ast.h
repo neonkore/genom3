@@ -150,6 +150,8 @@ class Component
 		Task::Map& tasksMap();
 		std::vector<std::string> tasksList();
 		Task* task(const std::string &name);
+		
+		Service::Map& servicesMap();
 
 		Idl::IdlType::Ptr typeFromName(const std::string &name);
 

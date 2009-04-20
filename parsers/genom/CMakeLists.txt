@@ -1,5 +1,5 @@
 
-set(CMAKE_MODULE_PATH "../cmake/")
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 add_subdirectory(test)
 
@@ -8,8 +8,8 @@ FIND_PACKAGE(FLEX)
 
 include_directories(${PROJECT_SOURCE_DIR}/utils)
 
-BISON_TARGET(GenParser ${PROJECT_SOURCE_DIR}/parser/parser.yy ${PROJECT_SOURCE_DIR}/parser/parser.cpp)
-FLEX_TARGET(GenLexer ${PROJECT_SOURCE_DIR}/parser/lexer.ll ${PROJECT_SOURCE_DIR}/parser/lexer.cpp)
+BISON_TARGET(GenParser ${PROJECT_SOURCE_DIR}/parsers/genom/parser.yy ${PROJECT_SOURCE_DIR}/parsers/genom/parser.cpp)
+FLEX_TARGET(GenLexer ${PROJECT_SOURCE_DIR}/parsers/genom/lexer.ll ${PROJECT_SOURCE_DIR}/parsers/genom/lexer.cpp)
 ADD_FLEX_BISON_DEPENDENCY(GenLexer GenParser)
 
 set(genparser_SRCS

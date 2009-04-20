@@ -30,7 +30,7 @@
 #include <string>
 #include <iostream>
 
-#include "templateinterpreter.h"
+#include "parsers/template_info/templateinterpreter.h"
 #include "bindings/tcl/tclinterpreter.h"
 #include "bindings/python/pythoninterpreter.h"
 
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
 	TemplateInterpreter ti;
 	ti.setInterpreter(i);
-	ti.parseFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm",
+	ti.interpretFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm",
 	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.py.out");
 	return 0;
 }

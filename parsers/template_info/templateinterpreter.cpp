@@ -36,17 +36,60 @@
 #include <auto_ptr.h>
 
 #include "utils/interpreter.h"
+#include "utils/ast.h"
+#include "parsers/template_info/lexer.h"
+#include "parsers/template_info/parser.hpp"
 
 using namespace G3nom;
 using namespace std;
 
 TemplateInterpreter::TemplateInterpreter()
+: m_interpreter(0), m_component(0), m_verboseLexing(false), m_verboseParsing(false)
+{}
+
+bool TemplateInterpreter::parseInfoStream(std::istream& in, const std::string& sname)
 {
+	m_streamName = sname;
+
+	m_lexer = new TemplateInfoLexer(&in);
+	m_lexer->setDebug(m_verboseLexing);
+
+	TemplateInfoParser parser(*this);
+	parser.set_debug_level(m_verboseParsing);
+	bool b = (parser.parse() == 0);
+
+	delete m_lexer;
+	m_lexer = 0;
+	return b;
 }
 
-string readFile(const char *inFile)
+bool TemplateInterpreter::parseInfoFile(const std::string &filename)
 {
-	ifstream in(inFile);
+	std::ifstream in(filename.c_str());
+	if (!in.good())
+		return false;
+	return parseInfoStream(in, filename);
+}
+
+void TemplateInterpreter::error(const class location& l, const std::string& m)
+{
+	std::cerr << l << ": " << m << std::endl;
+}
+
+void TemplateInterpreter::error(const std::string& m)
+{
+	std::cerr << m << std::endl;
+}
+
+void TemplateInterpreter::setDebug(bool verbose)
+{
+	m_verboseLexing = true;
+	m_verboseParsing = true;
+}
+
+string readFile(const std::string &inFile)
+{
+	ifstream in(inFile.c_str());
 	if (!in.is_open()) {
 		cerr << "Error opening file: " << inFile << endl;
 		return string();
@@ -58,9 +101,9 @@ string readFile(const char *inFile)
 	return ss.str();
 }
 
-void TemplateInterpreter::parseFile(const char *infile, const char *outfile)
+void TemplateInterpreter::interpretFileInternal(const std::string &infile, const std::string &outfile)
 {
-	ofstream out(outfile);
+	ofstream out(outfile.c_str());
 	auto_ptr<char> tmpFile(new char[L_tmpnam]);
 	tmpnam(tmpFile.get());
 
@@ -99,6 +142,54 @@ void TemplateInterpreter::parseFile(const char *infile, const char *outfile)
 		}
 //       out << str.substr(idx, pos-idx);
 		idx = pos + 2;
+	}
+}
+
+void TemplateInterpreter::interpretFile(const std::string &infile, std::string outfile)
+{
+	if(outfile.empty())
+		outfile = infile;
+	cout << "Interpreting file from " << m_source_dir + infile << " to " << m_out_dir << outfile << endl;
+// 	interpretFileInternal(m_source_dir + infile, m_out_dir + outfile);
+}
+
+void TemplateInterpreter::interpretServiceFile(const std::string &infile, std::string outfile)
+{
+	if(!m_component)
+		return;
+
+	// find the $$ to be replaced with task name
+	uint idx = outfile.find("$$");
+	if(idx == string::npos)
+		return;
+
+	Service::Map::const_iterator it = m_component->servicesMap().begin();
+	for(; it != m_component->servicesMap().end(); ++it) {
+		if(m_interpreter)
+			m_interpreter->exportVar("currentService", it->first);
+
+		string o = outfile.replace(idx, 2, it->first);
+		interpretFile(infile, o);
+	}
+}
+
+void TemplateInterpreter::interpretTaskFile(const std::string &infile, std::string outfile)
+{
+	if(!m_component)
+		return;
+
+	// find the $$ to be replaced with task name
+	uint idx = outfile.find("$$");
+	if(idx == string::npos)
+		return;
+
+	Task::Map::const_iterator it = m_component->tasksMap().begin();
+	for(; it != m_component->tasksMap().end(); ++it) {
+		if(m_interpreter)
+			m_interpreter->exportVar("currentTask", it->first);
+
+		string o = outfile.replace(idx, 2, it->first);
+		interpretFile(infile, o);
 	}
 }
 

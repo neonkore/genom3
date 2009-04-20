@@ -1,0 +1,15 @@
+/* Example of template.info file */
+language: Python; /* or Tcl */
+
+main:
+  "main.cpp" "main.h" "server/test.cpp";
+
+task:
+  "task.cpp" -> "task_$$.cpp"
+  "task.h" -> "task_$$.h"
+;
+
+service:
+  "service.cpp" -> "service_$$.cpp"
+  "service.h" -> "service_$$.h"
+;

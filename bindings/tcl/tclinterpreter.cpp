@@ -125,7 +125,17 @@ std::string TclInterpreter::interpret(const std::string& s)
 {
 	try {
 		d->interpreter.eval(s);
-		return string();
+		return "";
+	} catch (std::exception const &e) {
+		cerr << "Error: " << e.what() << endl;
+	}
+}
+
+std::string TclInterpreter::eval(const std::string& s)
+{
+	try {
+		d->interpreter.eval(s);
+		return "";
 	} catch (std::exception const &e) {
 		cerr << "Error: " << e.what() << endl;
 	}

@@ -32,7 +32,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <cstdio>
+// #include <cstdio>
 #include <auto_ptr.h>
 
 #include "utils/interpreter.h"
@@ -104,8 +104,8 @@ string readFile(const std::string &inFile)
 void TemplateInterpreter::interpretFileInternal(const std::string &infile, const std::string &outfile)
 {
 	ofstream out(outfile.c_str());
-	auto_ptr<char> tmpFile(new char[L_tmpnam]);
-	tmpnam(tmpFile.get());
+// 	auto_ptr<char> tmpFile(new char[L_tmpnam]);
+// 	tmpnam(tmpFile.get());
 
 	if (!out.is_open()) {
 		cerr << "Error opening file for writing: " << outfile << endl;
@@ -115,32 +115,44 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
 	// read whole file
 	string str = readFile(infile);
 
-	unsigned int idx = 0, pos = 0;
+	unsigned int idx = 0, pos = 0, pos2 = 0;
 	while (pos != string::npos && pos < str.length()) {
 		pos = str.find("<?", idx);
+		pos2 = str.find("<!", idx);
+		bool interpret = (pos <= pos2);
+		if(!interpret)
+			pos = pos2;
+
 		out << str.substr(idx, pos - idx);
 
 		if (pos == string::npos) {
-//  	  out << str.substr(idx, str.length());
+// 			out << str.substr(idx, str.length());
 			break;
 		}
 		idx = pos + 2;
 
-		pos = str.find("?>", idx);
+		if(interpret)
+			pos = str.find("?>", idx);
+		else
+			pos = str.find("!>", idx);
+		cout << "Interpreting " << str.substr(idx, pos - idx) << endl;
 		if (m_interpreter) {
 			//redirect stdout to file
-			freopen(tmpFile.get(), "w", stdout);
+/*			freopen(tmpFile.get(), "w", stdout);*/
 			//launch interpreter
-			m_interpreter->interpret(str.substr(idx, pos - idx));
+			if(interpret)
+				out << m_interpreter->interpret(str.substr(idx, pos - idx));
+			else
+				out << m_interpreter->eval(str.substr(idx, pos - idx));
 			// revert stdout
-			freopen("CON", "w", stdout);
+/*			freopen("CON", "w", stdout);*/
 
 			// read file and output it
-			string s = readFile(tmpFile.get());
-			cout << "res: " << s << endl;
-			out << s;
+/*			string s = readFile(tmpFile.get());*/
+// 			cout << "res: " << s << endl;
+// 			out << s;
 		}
-//       out << str.substr(idx, pos-idx);
+// 		out << str.substr(idx, pos-idx);
 		idx = pos + 2;
 	}
 }
@@ -150,7 +162,7 @@ void TemplateInterpreter::interpretFile(const std::string &infile, std::string o
 	if(outfile.empty())
 		outfile = infile;
 	cout << "Interpreting file from " << m_source_dir + infile << " to " << m_out_dir << outfile << endl;
-// 	interpretFileInternal(m_source_dir + infile, m_out_dir + outfile);
+	interpretFileInternal(m_source_dir + infile, m_out_dir + outfile);
 }
 
 void TemplateInterpreter::interpretServiceFile(const std::string &infile, std::string outfile)
@@ -196,6 +208,13 @@ void TemplateInterpreter::interpretTaskFile(const std::string &infile, std::stri
 void TemplateInterpreter::setInterpreter(G3nom::Interpreter* i)
 {
 	m_interpreter = i;
+}
+
+void TemplateInterpreter::setComponent(Component *c) 
+{
+	m_component = c;
+	if(m_interpreter)
+		m_interpreter->start(c);
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

@@ -64,7 +64,6 @@ class Codel
 		typedef std::map<std::string, Ptr> Map;
 
 		Codel(const std::string id)
-		: name(id) 
 		{}
 
 		void debug();
@@ -74,11 +73,16 @@ class Codel
 		void addInPort(const std::string &t);
 		void addOutPort(const std::string &t);
 
-		std::string name;
+		void setName(const std::string &n) { m_name = n; }
+		std::string name() { return m_name; }
+
 		std::vector<std::string> inTypes;
 		std::vector<std::string> outTypes;
 		std::vector<std::string> inPorts;
 		std::vector<std::string> outPorts;
+
+	private:
+			std::string m_name;
 };
 
 class Task
@@ -142,6 +146,9 @@ class Component
 
 		void debug();
 
+		void setName(const std::string &n) { m_name = n; }
+		std::string name() { return m_name; }
+
 		void addTask(Task::Ptr task);
 		void addService(Service::Ptr task);
 		void addPort(Port::Ptr port);
@@ -155,13 +162,13 @@ class Component
 
 		Idl::IdlType::Ptr typeFromName(const std::string &name);
 
-		std::string name;
 		std::string pluginLanguage;
 		std::string version;
 		Idl::IdlType::Ptr IDSType;
 
 	private:
-		/// @todo use smart pointers or smart maps ?
+		std::string m_name;
+
 		Task::Map tasks;
 		Service::Map services;
 		Port::Map ports;

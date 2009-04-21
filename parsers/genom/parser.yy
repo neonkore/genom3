@@ -241,7 +241,7 @@ declaration:
 component_decl:
    COMPONENT IDENTIFIER LBRACE component_fields RBRACE
 {
-    driver.component().name = $2;
+    driver.component().setName($2);
 };
 
 component_fields:

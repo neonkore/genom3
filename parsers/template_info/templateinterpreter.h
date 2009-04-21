@@ -84,9 +84,7 @@ class TemplateInterpreter
 		void setLanguage(const std::string &lang) {
 			m_language = lang;
 		}
-		void setComponent(Component *c) {
-			m_component = c;
-		}
+		void setComponent(Component *c);
 
 	protected:
 		bool parseInfoStream(std::istream& in, const std::string& sname);

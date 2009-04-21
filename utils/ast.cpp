@@ -50,7 +50,7 @@ void Component::debug()
 {
 	DumpType dump(cout);
 
-	cout << "Component: " << name << " v. " << version << endl;
+	cout << "Component: " << m_name << " v. " << version << endl;
 	cout << "\tLanguage (plugin) : " << pluginLanguage << endl;
 	cout << "\tIDS Struct: " << endl;
 	if (IDSType)
@@ -93,22 +93,22 @@ void Component::debug()
 void Component::addTask(Task::Ptr task)
 {
 	/// \todo throw exception ? return code ?
-	if (tasks.find(name) != tasks.end())
-		cerr << "Warning: already existing task name: " << name << endl;
+	if (tasks.find(task->name) != tasks.end())
+		cerr << "Warning: already existing task name: " << task->name << endl;
 	tasks[task->name] = task;
 }
 
 void Component::addService(Service::Ptr s)
 {
-	if (services.find(name) != services.end())
-		cerr << "Warning: already existing service name: " << name << endl;
+	if (services.find(s->name) != services.end())
+		cerr << "Warning: already existing service name: " << s->name << endl;
 	services[s->name] = s;
 }
 
 void Component::addPort(Port::Ptr port)
 {
-	if (ports.find(name) != ports.end())
-		cerr << "Warning: already existing port name: " << name << endl;
+	if (ports.find(port->name) != ports.end())
+		cerr << "Warning: already existing port name: " << port->name << endl;
 	ports[port->name] = port;
 }
 
@@ -232,7 +232,7 @@ void Service::addCodel(const std::string &name, Codel::Ptr c)
 
 void Codel::debug()
 {
-	cout << name << "( inports: ";
+	cout << m_name << "( inports: ";
 	for (vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
 		cout << *it << ", ";
 

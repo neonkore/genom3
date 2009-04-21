@@ -33,6 +33,7 @@
 #include "parsers/template_info/templateinterpreter.h"
 #include "bindings/tcl/tclinterpreter.h"
 #include "bindings/python/pythoninterpreter.h"
+#include "parsers/genom/driver.h"
 
 using namespace std;
 using namespace G3nom;
@@ -52,8 +53,14 @@ int main(int argc, char* argv[])
 
 	TemplateInterpreter ti;
 	ti.setInterpreter(i);
-	ti.interpretFile("/home/ccpasteur/work/git/g3nom/parser/test/test.gnm",
-	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.py.out");
+
+	Driver d;
+	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/test.gnm"))
+		cout << "Error parsing gen file " << endl;
+
+	ti.setComponent(&(d.component()));
+	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/test_script",
+	             "/home/ccpasteur/work/git/g3nom/templates/test/test_script");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

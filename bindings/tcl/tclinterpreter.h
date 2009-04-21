@@ -48,6 +48,7 @@ class TclInterpreter : public Interpreter
 
 		void start(Component *c);
 		std::string interpret(const std::string &s);
+		std::string eval(const std::string &s);
 		void exportVar(const std::string &name, const std::string &value);
 
 		static TclInterpreter *getInstance();

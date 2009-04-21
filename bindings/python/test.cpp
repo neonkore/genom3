@@ -52,10 +52,11 @@ int main(int argc, char* argv[])
 //       d.component().debug();
 
 	PythonInterpreter *i = PythonInterpreter::getInstance();
+	d.component().setName("BlaBla");
 	i->start(&(d.component()));
-// 	  i->interpret("print 3");
-//       i->interpret("print (3+3)");
-	i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
-	i->interpret("");
+	i->eval("3");
+	cout << i->eval("comp.name()");
+	cout << i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
+// 	i->interpret("");
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

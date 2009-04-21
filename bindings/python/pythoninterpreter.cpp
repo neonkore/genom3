@@ -30,6 +30,7 @@
 #include "pythoninterpreter.h"
 
 #include <iostream>
+#include <sstream>
 #include <Python.h>
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
@@ -121,7 +122,7 @@ PythonInterpreter::PythonInterpreter()
 	d->pydict = main.attr("__dict__");
 	// import our module
 	interpret("import G3nom;\nfrom G3nom import *;\n");
-	interpret("import Logger");
+	interpret("import Logger;\nfrom Logger import *");
 	interpret("import sys\nsys.stdout = Logger");
 }
 
@@ -168,5 +169,28 @@ void PythonInterpreter::writeStdout(const char *text)
 {
 	d->outbuf.append(text);
 }
+
+std::string PythonInterpreter::evalString(const std::string &s)
+{
+	return "sys.stdout.write(" + s + ")";
+}
+
+std::string PythonInterpreter::printString(const std::string &s)
+{
+	return "\nsys.stdout.write('''" + s + "''')\n";
+// 	string res = "print \"";
+// 	stringstream ss(s);
+
+// 	while(!ss.eof()) {
+// 		char buf[5000];
+// 		ss.getline(buf, 5000);
+// 		res.append(string(buf));
+// 		if(!ss.eof())
+// 			 res.append("\\n\\\n");
+// 	}
+// 	res.append("\"\n");
+// 	return res;
+}
+
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

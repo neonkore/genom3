@@ -104,11 +104,17 @@ string readFile(const std::string &inFile)
 void TemplateInterpreter::interpretFileInternal(const std::string &infile, const std::string &outfile)
 {
 	ofstream out(outfile.c_str());
+	string s;
 // 	auto_ptr<char> tmpFile(new char[L_tmpnam]);
 // 	tmpnam(tmpFile.get());
 
 	if (!out.is_open()) {
 		cerr << "Error opening file for writing: " << outfile << endl;
+		return;
+	}
+	
+	if(!m_interpreter) {
+		cerr << "No interpreter. Aborting " << endl;
 		return;
 	}
 
@@ -123,38 +129,29 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
 		if(!interpret)
 			pos = pos2;
 
-		out << str.substr(idx, pos - idx);
+		s.append(m_interpreter->printString(str.substr(idx, pos - idx)));
+// 		out << str.substr(idx, pos - idx);
 
-		if (pos == string::npos) {
-// 			out << str.substr(idx, str.length());
+		if (pos == string::npos)
 			break;
-		}
+
 		idx = pos + 2;
 
 		if(interpret)
 			pos = str.find("?>", idx);
 		else
 			pos = str.find("!>", idx);
-		cout << "Interpreting " << str.substr(idx, pos - idx) << endl;
-		if (m_interpreter) {
-			//redirect stdout to file
-/*			freopen(tmpFile.get(), "w", stdout);*/
-			//launch interpreter
-			if(interpret)
-				out << m_interpreter->interpret(str.substr(idx, pos - idx));
-			else
-				out << m_interpreter->eval(str.substr(idx, pos - idx));
-			// revert stdout
-/*			freopen("CON", "w", stdout);*/
 
-			// read file and output it
-/*			string s = readFile(tmpFile.get());*/
-// 			cout << "res: " << s << endl;
-// 			out << s;
-		}
-// 		out << str.substr(idx, pos-idx);
+		if(interpret)
+			s.append(str.substr(idx, pos - idx));
+		else
+			s.append(m_interpreter->evalString(str.substr(idx, pos - idx)));
+
 		idx = pos + 2;
 	}
+ 
+	cout << s << endl;
+ 	out << m_interpreter->interpret(s);
 }
 
 void TemplateInterpreter::interpretFile(const std::string &infile, std::string outfile)

@@ -146,5 +146,14 @@ void TclInterpreter::exportVar(const std::string &name, const std::string &value
 	interpret("set " + name + " " + value);
 }
 
+std::string TclInterpreter::printString(const std::string &s)
+{
+	return s;
+}
+
+std::string TclInterpreter::evalString(const std::string &s)
+{
+	return "puts " + s  + ";";
+}
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

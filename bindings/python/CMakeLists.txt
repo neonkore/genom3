@@ -7,6 +7,9 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/parsers/genom ${
 # Lib
 
 set(genom_python_binding_SRCS
+  export_ast.cpp
+  export_idl.cpp
+  export_containers.cpp
   pythoninterpreter.cpp
 )
 

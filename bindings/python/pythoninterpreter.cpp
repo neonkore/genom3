@@ -33,9 +33,6 @@
 #include <sstream>
 #include <Python.h>
 #include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <boost/python/suite/indexing/map_indexing_suite.hpp>
-// #include "ptr_map_indexing_suite.hpp"
 
 #include "utils/ast.h"
 #include "utils/idltype.h"
@@ -65,120 +62,17 @@ Component* pygetCurrentComponent()
 	return i->component();
 }
 
+void export_idl();
+void export_ast();
+void export_containers();
+
 BOOST_PYTHON_MODULE_INIT(G3nom)
 {
 	def("getComponent", &pygetCurrentComponent, return_value_policy<reference_existing_object>());
 
-	class_<Component>("Component")
-	.def("name", &Component::name)
-	.def_readonly("IDSType", &Component::IDSType)
-	.def_readonly("uniqueId", &Component::uniqueId)
-	.def("task", &Component::task)
-	.def("debug", &Component::debug)
-	.def("tasksList", &Component::tasksList)
-	.def("taskIndex", &Component::taskIndex)
-	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>())
-	.def("servicesMap", &Component::servicesMap, return_value_policy<reference_existing_object>())
-	.def("portsMap", &Component::portsMap, return_value_policy<reference_existing_object>())
-	.def("typesVect", &Component::typesVect, return_value_policy<reference_existing_object>())
-	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
-	.def("typeFromIdsName", &Component::typeFromIdsName);
-
-	class_<Task, Task::Ptr>("Task")
-	.def("debug", &Task::debug)
-	.def("codel", &Task::codel)
-	.def("hasCodel", &Task::hasCodel)
-	.def_readonly("name", &Task::name)
-	.def_readonly("priority", &Task::priority)
-	.def_readonly("delay", &Task::delay)
-	.def_readonly("period", &Task::period);
-
-	class_<Service, Service::Ptr>("Service")
-	.def("debug", &Service::debug)
-	.def_readonly("name", &Service::name)
-	.def_readonly("taskName", &Service::taskName)
-	.def_readonly("type", &Service::type)
-	.def("codel", &Service::codel)
-	.def("hasCodel", &Service::hasCodel)
-	.def_readonly("output", &Service::output)
-	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
-	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>());
-
-	enum_<Service::Type>("ServiceType")
-	.value("Init", Service::Init)
-	.value("Control", Service::Control)
-	.value("Exec", Service::Exec);
-
-	class_<Codel, Codel::Ptr>("Codel")
-	.def_readonly("name", &Codel::name)
-	.def_readonly("inTypes", &Codel::inTypes)
-	.def_readonly("outTypes", &Codel::outTypes);
-
-	class_<Port, Port::Ptr>("Port")
-	.def_readonly("name", &Port::name)
-	.def_readonly("idlType", &Port::idlType)
-	.def_readonly("type", &Port::type);
-
-	enum_<Port::Type>("PortType")
-	.value("Incoming", Port::Incoming)
-	.value("Outgoing", Port::Outgoing);
-
-	class_<IdlType, IdlType::Ptr>("IdlType")
-	.def("asStructType", &IdlType::asStructType, return_value_policy<reference_existing_object>())
-	.def("asEnumType", &IdlType::asEnumType, return_value_policy<reference_existing_object>())
-	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
-	.def("toCType", &IdlType::toCType)
-	.def("identifier", &IdlType::identifier)
-	.def("kind", &IdlType::kind);
-
-	class_<StructType>("StructType")
-	.def("member", &StructType::member);
-
-	class_<EnumType>("EnumType")
-	.def("enumerators", &EnumType::enumerators, return_value_policy<reference_existing_object>());
-
-	class_<TypedefType>("TypedefType")
-	.def("aliasType", &TypedefType::aliasType);
-
-	enum_<IdlType::Kind>("IdlKind")
-	.value("Null", IdlType::Null)
-	.value("Void", IdlType::Void)
-	.value("Short", IdlType::Short)
-	.value("Long", IdlType::Long)
-	.value("LongLong", IdlType::LongLong)
-	.value("UShort", IdlType::UShort)
-	.value("ULong", IdlType::ULong)
-	.value("ULongLong", IdlType::ULongLong)
-	.value("Float", IdlType::Float)
-	.value("Fixed", IdlType::Fixed)
-	.value("Boolean", IdlType::Boolean)
-	.value("Char", IdlType::Char)
-	.value("WChar", IdlType::WChar)
-	.value("Octet", IdlType::Octet)
-	.value("String", IdlType::String)
-	.value("WString", IdlType::WString)
-	.value("Any", IdlType::Any)
-	.value("Struct", IdlType::Struct)
-	.value("Union", IdlType::Union)
-	.value("Enum", IdlType::Enum)
-	.value("Sequence", IdlType::Sequence)
-	.value("Typedef", IdlType::Typedef);
-
-	// Vectors
-	class_<std::vector<std::string> >("StringVec")
-	.def(vector_indexing_suite<std::vector<std::string> >());
-	class_<IdlType::Vector>("IdlTypeVec")
-	.def(vector_indexing_suite<IdlType::Vector, true>());
-
-	// Maps
-	class_<Task::Map>("TaskMap")
-	.def(map_indexing_suite<Task::Map, true>());
-	class_<Service::Map>("ServiceMap")
-	.def(map_indexing_suite<Service::Map, true>());
-	class_<Codel::Map>("CodelMap")
-	.def(map_indexing_suite<Codel::Map, true>());
-	class_<Port::Map>("PortMap")
-	.def(map_indexing_suite<Port::Map, true>());
+	export_ast();
+	export_idl();
+	export_containers();
 }
 
 /********************** Python interpreter ********/

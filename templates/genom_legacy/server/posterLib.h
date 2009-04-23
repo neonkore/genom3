@@ -1,4 +1,12 @@
+<?
+import string; from string import *
+# create a list of out ports
+outports = []
+for p in comp.portsMap():
+    if p.data().type == PortType.Outgoing:
+	outports.append(p.data())
 
+?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -45,12 +53,12 @@
 */
 typedef struct {
   CNTRL_TASK_DESCRIPTION cntrlTask;
-  EXEC_TASK_DESCRIPTION execTaskTab[$MODULE$_NB_EXEC_TASK];
+  EXEC_TASK_DESCRIPTION execTaskTab[<!upper(comp.name())!>_NB_EXEC_TASK];
   ACTIVITY_DESCRIPTION activityTab[MAX_ACTIVITIES];
-} $MODULE$_CNTRL_STR;
+} <!upper(comp.name())!>_CNTRL_STR;
 
 /* For consistency with other posters */
-typedef $MODULE$_CNTRL_STR $MODULE$_CNTRL_POSTER_STR;
+typedef <!upper(comp.name())!>_CNTRL_STR <!upper(comp.name())!>_CNTRL_POSTER_STR;
  
 /* 
  * Definition des structures de posters
@@ -60,8 +68,36 @@ typedef $MODULE$_CNTRL_STR $MODULE$_CNTRL_POSTER_STR;
 
 
 /* Posters */
-#define $MODULE$_CNTRL_POSTER_NAME         "<!comp.name()!>Cntrl"
-$listPosterNameDeclare$
+#define <!upper(comp.name())!>_CNTRL_POSTER_NAME         "<!comp.name()!>Cntrl"
+<?
+# $listPosterNameDeclare$
+for port in outports:
+    print "#define %s_%s_POSTER_NAME \"%s%s\"\n" % (upper(comp.name()), upper(port.name), comp.name(), port.name);
+?>
 
 /*---------------- PROTOTYPES DES FONCTIONS EXTERNES ------------------*/
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+extern STATUS <!comp.name()!>PosterInit ( void );
+extern POSTER_ID <!comp.name()!>CntrlPosterID ();
+extern STATUS <!comp.name()!>CntrlPosterRead ( <!upper(comp.name())!>_CNTRL_STR *<!comp.name()!>CntrlStrId );
+extern STATUS <!comp.name()!>CntrlPosterInit ( void );
+
+<?
+for port in outports:
+    print "extern STATUS " + comp.name() + port.name + "PosterInit ( void );"
+    print "extern POSTER_ID " + comp.name() + port.name + "PosterID ( void );"
+    write("extern STATUS" + comp.name() + port.name + "PosterRead ( ")
+    print upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR *x );"
+# done for each poster member in genom2, do it for struct members ?
+#    print "extern STATUS " + comp.name() + port.name + port.name + "PosterRead ( " + port.type.toCType(true) + " *" + port.name + " );"
+?>
+
+#ifdef __cplusplus
+ }
+#endif
+
+#endif

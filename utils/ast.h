@@ -170,6 +170,7 @@ class Component
 		int taskIndex(const std::string &name) const;
 		
 		Service::Map& servicesMap();
+		Port::Map& portsMap() { return ports; }
 
 		void addImportedComponent(const std::string &s);
 		std::vector<std::string>& importedComponents() { return m_importedComponents; }

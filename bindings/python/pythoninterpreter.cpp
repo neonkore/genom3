@@ -79,6 +79,7 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.def("taskIndex", &Component::taskIndex)
 	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>())
 	.def("servicesMap", &Component::servicesMap, return_value_policy<reference_existing_object>())
+	.def("portsMap", &Component::portsMap, return_value_policy<reference_existing_object>())
 	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
 	.def("typeFromIdsName", &Component::typeFromIdsName);
 
@@ -111,6 +112,15 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.def_readonly("name", &Codel::name)
 	.def_readonly("inTypes", &Codel::inTypes)
 	.def_readonly("outTypes", &Codel::outTypes);
+
+	class_<Port, Port::Ptr>("Port")
+	.def_readonly("name", &Port::name)
+	.def_readonly("idlType", &Port::idlType)
+	.def_readonly("type", &Port::type);
+
+	enum_<Port::Type>("PortType")
+	.value("Incoming", Port::Incoming)
+	.value("Outgoing", Port::Outgoing);
 
 	class_<IdlType, IdlType::Ptr>("IdlType")
 	.def("toCType", &IdlType::toCType)
@@ -150,6 +160,8 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.def(map_indexing_suite<Service::Map, true>());
 	class_<Codel::Map>("CodelMap")
 	.def(map_indexing_suite<Codel::Map, true>());
+	class_<Port::Map>("PortMap")
+	.def(map_indexing_suite<Port::Map, true>());
 }
 
 /********************** Python interpreter ********/

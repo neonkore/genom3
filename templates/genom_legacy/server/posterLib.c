@@ -1,4 +1,12 @@
+<?
+import string; from string import *
+# create a list of out ports
+outports = []
+for p in comp.portsMap():
+    if p.data().type == PortType.Outgoing:
+	outports.append(p.data())
 
+?>
 /* 
  * Copyright (c) 2003 LAAS/CNRS
  * All rights reserved.
@@ -62,15 +70,101 @@ extern char const * h2GetEvnStateString(int num);
 
 POSTER_ID <!comp.name()!>CntrlPosterID () { return <!comp.name()!>CntrlPosterId; }
 
-STATUS <!comp.name()!>CntrlPosterRead ($MODULE$_CNTRL_STR *<!comp.name()!>CntrlStrId)
+STATUS <!comp.name()!>CntrlPosterRead (<!upper(comp.name())!>_CNTRL_STR *<!comp.name()!>CntrlStrId)
 {  
   if (!<!comp.name()!>CntrlPosterId)
     <!comp.name()!>CntrlPosterInit();
   if (posterRead (<!comp.name()!>CntrlPosterId, 0, (void *) <!comp.name()!>CntrlStrId, 
-	      sizeof($MODULE$_CNTRL_STR)) != sizeof($MODULE$_CNTRL_STR))
+	      sizeof(<!upper(comp.name())!>_CNTRL_STR)) != sizeof(<!upper(comp.name())!>_CNTRL_STR))
     return ERROR; 
   return OK;
 }
 
 /* ---------------- LES POSTERS FONCTIONNELS ------------------------------ */
+
+<?
+for port in outports:
+    print "static POSTER_ID " + port.name + "PosterId=(POSTER_ID)NULL;"
+?>
+
+/* -- posterInit ------------------------------------------------------- */
+
+STATUS <!comp.name()!>PosterInit(void) {
+  int status = OK;
+
+  <!comp.name()!>RecordH2errMsgs();
+
+  if (<!comp.name()!>CntrlPosterInit() == ERROR) {
+    status = ERROR;  
+  }
+<?
+for port in outports:?>
+  if (<!comp.name()!><!port.name!>PosterInit() == ERROR) {
+    status = ERROR;
+  }<?
+#endfor
+?>
+  return(status);
+}
+
+
+/* --  Cntrl ------------------------------------------------- */
+STATUS <!comp.name()!>CntrlPosterInit(void)
+{
+  if (posterFind(<!upper(comp.name())!>_CNTRL_POSTER_NAME, &<!comp.name()!>CntrlPosterId) == ERROR) {
+     h2perror("<!comp.name()!>CntrlPosterInit");
+     return ERROR;
+  }
+  if (posterEndianness(<!comp.name()!>CntrlPosterId, &posterDataEndianness) == ERROR) {
+    h2perror("<!comp.name()!>CntrlPosterInit");
+    return ERROR;
+  }
+  return OK;
+}
+
+
+<?
+for port in outports:
+    ?>
+/* --  <!port.name!> ------------------------------------------------- */
+
+STATUS <!comp.name()!><!port.name!>PosterInit(void)
+{
+  if (posterFind(<!upper(comp.name())!>_<!upper(port.name)!>_POSTER_NAME, &<!port.name!>PosterId) == ERROR) {
+     h2perror("<!comp.name()!><!port.name!>PosterInit");
+     return ERROR;
+  }
+  if (posterEndianness(<!port.name!>PosterId, &posterDataEndianness) == ERROR) {
+    h2perror("<!comp.name()!><!port.name!>PosterInit");
+    return ERROR;
+  }
+  return OK;
+}
+
+/* --  <!port.name!>Read ------------------------------------------------- */
+
+POSTER_ID <!comp.name()!><!port.name!>PosterID() { return <!port.name!>PosterId; }
+STATUS <!comp.name()!><!port.name!>PosterRead(<!upper(comp.name())!>_<!upper(port.name)!>_POSTER_STR *x)
+{
+  if (<!port.name!>PosterId == (POSTER_ID)NULL) {
+     if (<!comp.name()!><!port.name!>PosterInit() == ERROR) {
+        h2perror("<!comp.name()!><!port.name!>PosterInit");
+        return ERROR;
+     }
+  }
+  if (posterRead(<!port.name!>PosterId, 0, (char *)x, sizeof(*x))
+           != sizeof(*x)) {
+    h2perror("<!comp.name()!><!port.name!>PosterRead:");
+    return ERROR;
+  }
+  if (posterDataEndianness != H2_LOCAL_ENDIANNESS)
+     endianswap_struct_DEMO_MOBILESTATE_POSTER_STR(x, 0, NULL);
+  return OK;
+}
+
+/* --  <!port.name!> -> <!port.name!> ---------------------------------------- */
+<?
+#endfor
+#todo read functiosn for poster elements
+?>
 

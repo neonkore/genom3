@@ -10,8 +10,8 @@ main:
   "server/moduleiInit.h" -> "server/$$ModuleInit.h"
   "server/msgLib.c" -> "server/$$MsgLib.c"
 /* $msgLib.c contient msgExec.c et msgCntl.c; idem pour les .h*/
-  "server/posterLib.c" -> "server/$$PosterLib.c"
-  "server/posterLib.h" -> "server/$$PosterLib.h"
+  "server/posterLib.c" -> "server/$$PosterLib.c" DONE
+  "server/posterLib.h" -> "server/$$PosterLib.h" DONE
   "server/posterLibStruct.h" -> "server/$$PosterLibStruct.h"
   "server/posterShowLib.c" -> "server/$$PosterShowLib.c"
   "server/posterShowLib.h" -> "server/$$PosterShowLib.h"
@@ -241,7 +241,7 @@ testCntrl.c testExec.c:
 */
 
 
-/* $execTaskName$ execTask.c
+/* $execTaskName$ execTask.c DONE
 $execTaskName$
 $EXECTASKNAME$
 $cFuncExecFlag$ ->

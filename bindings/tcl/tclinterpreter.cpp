@@ -28,10 +28,11 @@
  */
 
 #include "tclinterpreter.h"
-#include "ast.h"
-#include "cpptcl.h"
 
 #include <iostream>
+
+#include "utils/ast.h"
+#include "cpptcl.h"
 
 using namespace G3nom;
 using namespace Tcl;

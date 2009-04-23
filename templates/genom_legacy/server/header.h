@@ -1,4 +1,4 @@
-
+<?import string; from string import *;?>
 /* --- Generated file, do not edit by hand --------------------------- */
 
 /* 
@@ -62,31 +62,82 @@ extern "C" {
 #endif
 
 /* Inclusions des bibliotheques des serveurs du module */
-$listServerHeader$
-$listPosterHeader$
+<?
+# $listServerHeader$
+for s in comp.importedComponents():
+     print "#include \"server/%sMsgLib.h\"\n" % (i)
+
+# $listPosterHeader$
+for s in comp.importedComponents():
+     print "#include \"server/%sPosterLib.h\"\n" % (i)
+?>
 
 /* Nombre de types requetes definies pour ce serveur */
-#define NB_RQST_TYPE                   ($nbRequest$+1)
+#define NB_RQST_TYPE                   (<!str(len(comp.tasksMap()))!>+1)
 
 /* Declaration des structures de donnees */
-extern $MODULE$_CNTRL_STR *<!comp.name()!>CntrlStrId;
+extern <!upper(comp.name())!>_CNTRL_STR *<!comp.name()!>CntrlStrId;
 extern $internalDataType$ *<!comp.name()!>DataStrId;
 
 #define SDI_C (<!comp.name()!>CntrlStrId)
 #define SDI_F (<!comp.name()!>DataStrId)
 
-
-$listExecTaskClientId$
-$listPosterId$
-$listExecTaskNum$
-
+<?
+# $listExecTaskClientId$
+#for t in comp.tasksMap():
+#	i=0
+#	for ln in t.cs_client_from
+#	  print "#define %s_%s_%s_CLIENT_ID" % (comp.name(), t.name, ln)
+#	  print (%sCntrlStrId->execTaskTab[%s_%s_NUM].clientId[%d])\n" % (comp.name(), comp.name(), t.name, i)
+#	  i = i+1
+?>
+<?
+# $listPosterId$
+#for t in comp.tasksMap():
+#	i=0
+#	for p in comp.outPorts():
+#	  if p.execTask() == t:
+#	    print "#define %s_%s_POSTER_ID " % (comp.name(), p.name)
+#	    print "(%sCntrlStrId->execTaskTab[%s_%s_NUM].posterId[%d])\n" % (comp.name(), comp.name(), t.name, i)
+#	    i = i+1
+?>
+<?
+# $listExecTaskNum$
+i=0
+for t in comp.tasksMap():
+    print "#define %s_%s_NUM (%d)\n" % (upper(comp.name()), upper(t.data().name), i)
+    i = i+1
+?>
 
 /* User functions signatures */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-$listUserFuncProto$
+<?
+# creates the signature of the function corresponding to a codel
+def codel_signature(codel):
+  proto = codel.name + "_codel(";
+  for type in codel.inTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto = proto + idstype.toCType() + " *in_" + type + ", ";
+  for type in codel.outTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto = proto + idstype.toCType() + " *out_" + type + ", ";
+  proto = proto + "int *report)"
+  return proto
+
+# $listUserFuncProto$
+for s in comp.servicesMap():
+    for codel in s.data().codels():
+	if(s.data().type != ServiceType.Exec or s.data().name == "control"):
+	    write("extern STATUS " + codel_signature(codel.data()) + ";\n");
+	else:
+	    write("extern ACTIVITY_EVENT " + codel_signature(codel.data()) + ";\n");
+
+#### todo: print task init function signature
+
+?>
 
 #ifdef __cplusplus
 }

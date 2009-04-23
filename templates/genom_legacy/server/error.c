@@ -1,6 +1,7 @@
+<?import string; from string import *;?>
 #include "<!comp.name()!>Error.h"
 
-static const H2_ERROR const <!comp.name()!>H2errMsgs[] = $MODULE$_H2_ERR_MSGS;
+static const H2_ERROR const <!comp.name()!>H2errMsgs[] = <!upper(comp.name())!>_H2_ERR_MSGS;
 
 int <!comp.name()!>RecordH2errMsgs(void)
 {
@@ -14,7 +15,10 @@ int <!comp.name()!>RecordH2errMsgs(void)
     return 0;
 
   /* others modules errros */
-  $h2recordOtherModules$
+<?
+for s in comp.importedComponents():
+    write("  " + s + "RecordH2errMsgs();\n")
+?>
 
   return 1;
 }

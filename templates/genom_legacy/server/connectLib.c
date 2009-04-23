@@ -1,4 +1,4 @@
-
+<?import string; from string import *;?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -60,9 +60,9 @@ STATUS <!comp.name()!>ClientInit (CLIENT_ID *pClientId)
   <!comp.name()!>RecordH2errMsgs();
 
   /* Appeler la routine d'initialisation d'un client CS */
-  return (csClientInit ($MODULE$_MBOX_NAME, $MODULE$_MAX_RQST_SIZE,
-                        $MODULE$_MAX_INTERMED_REPLY_SIZE, 
-			$MODULE$_MAX_REPLY_SIZE, 
+  return (csClientInit (<!upper(comp.name())!>_MBOX_NAME, $MODULE$_MAX_RQST_SIZE,
+                        <!upper(comp.name())!>_MAX_INTERMED_REPLY_SIZE, 
+			<!upper(comp.name())!>_MAX_REPLY_SIZE, 
 			pClientId));
 }
  

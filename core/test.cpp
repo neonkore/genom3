@@ -55,12 +55,14 @@ int main(int argc, char* argv[])
 	ti.setInterpreter(i);
 
 	Driver d;
-	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/test.gnm"))
+	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
 		cout << "Error parsing gen file " << endl;
 
 	ti.setComponent(&(d.component()));
-	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/test_script",
-	             "/home/ccpasteur/work/git/g3nom/templates/test/test_script");
+	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/cntrlTask.c",
+	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$CntrlTask.c");
+// 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/test/template1",
+// 	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.out");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

@@ -37,9 +37,11 @@
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 // #include "ptr_map_indexing_suite.hpp"
 
-#include "ast.h"
+#include "utils/ast.h"
+#include "utils/idltype.h"
 
 using namespace G3nom;
+using namespace Idl;
 using namespace std;
 using namespace boost::python;
 
@@ -69,14 +71,67 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 
 	class_<Component>("Component")
 	.def("name", &Component::name)
+	.def_readonly("IDSType", &Component::IDSType)
+	.def_readonly("uniqueId", &Component::uniqueId)
 	.def("task", &Component::task, return_value_policy<reference_existing_object>())
 	.def("debug", &Component::debug)
 	.def("tasksList", &Component::tasksList)
-	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>());
+	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>())
+	.def("servicesMap", &Component::servicesMap, return_value_policy<reference_existing_object>())
+	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
+	.def("typeFromIdsName", &Component::typeFromIdsName);
 
 	class_<Task, Task::Ptr>("Task")
 	.def("debug", &Task::debug)
+	.def_readonly("name", &Task::name)
 	.def_readonly("priority", &Task::priority);
+
+	class_<Service, Service::Ptr>("Service")
+	.def("debug", &Service::debug)
+	.def_readonly("name", &Service::name)
+	.def_readonly("type", &Service::type)
+	.def("codel", &Service::codel)
+	.def_readonly("output", &Service::output)
+	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
+	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>());
+
+	enum_<Service::Type>("ServiceType")
+	.value("Init", Service::Init)
+	.value("Control", Service::Control)
+	.value("Exec", Service::Exec);
+
+	class_<Codel, Codel::Ptr>("Codel")
+	.def_readonly("name", &Codel::name)
+	.def_readonly("inTypes", &Codel::inTypes)
+	.def_readonly("outTypes", &Codel::outTypes);
+
+	class_<IdlType, IdlType::Ptr>("IdlType")
+	.def("toCType", &IdlType::toCType)
+	.def("kind", &IdlType::kind);
+
+	enum_<IdlType::Kind>("IdlKind")
+	.value("Null", IdlType::Null)
+	.value("Void", IdlType::Void)
+	.value("Short", IdlType::Short)
+	.value("Long", IdlType::Long)
+	.value("LongLong", IdlType::LongLong)
+	.value("UShort", IdlType::UShort)
+	.value("ULong", IdlType::ULong)
+	.value("ULongLong", IdlType::ULongLong)
+	.value("Float", IdlType::Float)
+	.value("Fixed", IdlType::Fixed)
+	.value("Boolean", IdlType::Boolean)
+	.value("Char", IdlType::Char)
+	.value("WChar", IdlType::WChar)
+	.value("Octet", IdlType::Octet)
+	.value("String", IdlType::String)
+	.value("WString", IdlType::WString)
+	.value("Any", IdlType::Any)
+	.value("Struct", IdlType::Struct)
+	.value("Union", IdlType::Union)
+	.value("Enum", IdlType::Enum)
+	.value("Sequence", IdlType::Sequence)
+	.value("Typedef", IdlType::Typedef);
 
 	// vector of strings
 	class_<std::vector<std::string> >("StringVec")
@@ -84,6 +139,10 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 
 	class_<Task::Map>("TaskMap")
 	.def(map_indexing_suite<Task::Map, true>());
+	class_<Service::Map>("ServiceMap")
+	.def(map_indexing_suite<Service::Map, true>());
+	class_<Codel::Map>("CodelMap")
+	.def(map_indexing_suite<Codel::Map, true>());
 }
 
 /********************** Python interpreter ********/
@@ -165,19 +224,30 @@ void PythonInterpreter::exportVar(const std::string &name, const std::string &va
 	interpret(name + " = " + value);
 }
 
-void PythonInterpreter::writeStdout(const char *text)
+void PythonInterpreter::writeStdout(string text)
 {
 	d->outbuf.append(text);
 }
 
 std::string PythonInterpreter::evalString(const std::string &s)
 {
-	return "sys.stdout.write(" + s + ")";
+	return "sys.stdout.write(" + s + ");";
+}
+
+std::string replaceAllOccurrences(std::string s, const std::string &pattern, const std::string &replaceWith)
+{
+	uint idx = 0;
+	while((idx = s.find(pattern, idx)) != string::npos) {
+		cout << "idx: " << idx << endl;
+		s = s.replace(idx, pattern.length(), replaceWith);
+		idx = idx + 3;
+	}
+	return s;
 }
 
 std::string PythonInterpreter::printString(const std::string &s)
 {
-	return "\nsys.stdout.write('''" + s + "''')\n";
+	return "sys.stdout.write('''" + replaceAllOccurrences(s, "\\", "\\\\") + "'''); ";
 // 	string res = "print \"";
 // 	stringstream ss(s);
 

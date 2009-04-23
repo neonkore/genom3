@@ -158,8 +158,14 @@ void TemplateInterpreter::interpretFile(const std::string &infile, std::string o
 {
 	if(outfile.empty())
 		outfile = infile;
-	cout << "Interpreting file from " << m_source_dir + infile << " to " << m_out_dir << outfile << endl;
-	interpretFileInternal(m_source_dir + infile, m_out_dir + outfile);
+
+	string o = outfile;
+	uint idx = outfile.find("$$");
+	if(idx != string::npos)
+		o = o.replace(idx, 2, m_component->name());
+
+	cout << "Interpreting file from " << m_source_dir + infile << " to " << m_out_dir << o << endl;
+	interpretFileInternal(m_source_dir + infile, m_out_dir + o);
 }
 
 void TemplateInterpreter::interpretServiceFile(const std::string &infile, std::string outfile)
@@ -187,8 +193,13 @@ void TemplateInterpreter::interpretTaskFile(const std::string &infile, std::stri
 	if(!m_component)
 		return;
 
+	string o = outfile;
+	uint idx2 = outfile.find("$component$");
+	if(idx2 != string::npos)
+		 o = o.replace(idx2, 6, m_component->name());
+
 	// find the $$ to be replaced with task name
-	uint idx = outfile.find("$$");
+	uint idx = outfile.find("$task$");
 	if(idx == string::npos)
 		return;
 
@@ -197,8 +208,7 @@ void TemplateInterpreter::interpretTaskFile(const std::string &infile, std::stri
 		if(m_interpreter)
 			m_interpreter->exportVar("currentTask", it->first);
 
-		string o = outfile.replace(idx, 2, it->first);
-		interpretFile(infile, o);
+		interpretFile(infile, o.replace(idx, 11, it->first));
 	}
 }
 

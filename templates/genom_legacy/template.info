@@ -1,12 +1,12 @@
 language: Python
 main:
-  "server/cntrlTask.c" -> "server/$$CntrlTask.c"
-  "server/connectLib.c" -> "server/$$ConnectLib.c"
-  "server/error.c" -> "server/$$Error.c"
+  "server/cntrlTask.c" -> "server/$$CntrlTask.c" DONE
+  "server/connectLib.c" -> "server/$$ConnectLib.c" DONE
+  "server/error.c" -> "server/$$Error.c" DONE
   "server/error.h" -> "server/$$Error.h"
-  "server/header.h" -> "server/$$Header.h"
+  "server/header.h" -> "server/$$Header.h" DONE
   "server/init.h" -> "server/$$Init.h"
-  "server/Makefile.in"
+  "server/Makefile.in" DONE
   "server/moduleiInit.h" -> "server/$$ModuleInit.h"
   "server/msgLib.c" -> "server/$$MsgLib.c"
 /* $msgLib.c contient msgExec.c et msgCntl.c; idem pour les .h*/
@@ -23,12 +23,10 @@ main:
   "server/printXML.c" -> "server/$$PrintXML.c" --> totalement genere par le programme
   "server/scan.h" -> "server/$$Scan.h"
   "server/scan.c" -> "server/$$Scan.c" --> totalement genere par le programme
-  "server/type.h" -> "server/$$Type.h"
+  "server/type.h" -> "server/$$Type.h" DONE
 
-<?for execTask in comp.tasksMap(): 
-  if execTask.type == Task::Exec:?>
-"server/execTask.c -> "server/$$<!execTask.name!>Task.c"
-<??>
+task:
+  "server/execTask.c -> "server/$component$$task$Task.c"
 
 
 /* Found vars: 
@@ -45,7 +43,9 @@ main:
   */
 
 /* Function def:
-  $execTaskNameTabDeclare$ ->
+  $execTaskNameTabDeclare$ 
+--> 
+
   $tabRequestFuncDeclare$
   
 error.h
@@ -56,7 +56,7 @@ error.h
 h2errorLib.h:#define H2_ENCODE_ERR(M_id,err)   (M_id << 16 | (err&0xffff))                                                                                                 
 
   $listCntrlFailures$
-  $listExecFailures$ -> idem avec taches de type exec
+  $listExecFailures$ -> idem avec services de type exec
 ---> 
   n=1
   for s in comp.servicesMap():
@@ -191,9 +191,8 @@ init.c:
 
 Makefile.in
   $listExecTask_c$ ->
-    <?for execTask in comp.tasksMap(): 
-	if execTask.type == Task::Exec:?>
-	print comp.name() + execTask.name() + "task.c
+    <?for execTask in comp.tasksMap(): ?>
+	print comp.name() + execTask.name() + "task.c"
 
   $listIncludesInDotGen$ -> "demoStruct.h" from .gen file
   $genServer$ 
@@ -242,7 +241,7 @@ testCntrl.c testExec.c:
 */
 
 
-/* $execTaskName$ execTask.c : file only for task of type exec
+/* $execTaskName$ execTask.c
 $execTaskName$
 $EXECTASKNAME$
 $cFuncExecFlag$ ->

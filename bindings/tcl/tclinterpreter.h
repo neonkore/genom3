@@ -30,7 +30,7 @@
 #ifndef G3NOM_TCL_INTERPRETER_H
 #define G3NOM_TCL_INTERPRETER_H
 
-#include "interpreter.h"
+#include "utils/interpreter.h"
 #include <string>
 #include <auto_ptr.h>
 

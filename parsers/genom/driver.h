@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "ast.h"
-#include "idltype.h"
+#include "utils/ast.h"
+#include "utils/idltype.h"
 
 namespace G3nom
 {

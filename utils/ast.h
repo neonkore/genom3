@@ -63,7 +63,9 @@ class Codel
 		typedef boost::shared_ptr<Codel> Ptr;
 		typedef std::map<std::string, Ptr> Map;
 
+		Codel() {}
 		Codel(const std::string id)
+		: m_name(id)
 		{}
 
 		void debug();
@@ -103,6 +105,7 @@ class Task
 		std::string name;
 		int priority;
 		int period; // in ms
+		int delay; //in ms
 		int stackSize; // in kbytes
 
 	private:
@@ -124,7 +127,11 @@ class Service
 		void debug();
 
 		void addInput(const std::string &s);
+		std::vector<std::string>& inputs() { return m_inputs; }
+
 		void addCodel(const std::string &name, Codel::Ptr c);
+		Codel::Map& codels() { return m_codels; }
+		Codel::Ptr codel(const std::string &name);
 
 		std::string name;
 		Type type;
@@ -133,8 +140,8 @@ class Service
 		std::string output;
 
 	private:
-		Codel::Map codels;
-		std::vector<std::string> inputs;
+		Codel::Map m_codels;
+		std::vector<std::string> m_inputs;
 		std::vector<std::string> incompatibleServices;
 };
 
@@ -160,11 +167,16 @@ class Component
 		
 		Service::Map& servicesMap();
 
+		void addImportedComponent(const std::string &s);
+		std::vector<std::string>& importedComponents() { return m_importedComponents; }
+
 		Idl::IdlType::Ptr typeFromName(const std::string &name);
+		Idl::IdlType::Ptr typeFromIdsName(const std::string &name);
 
 		std::string pluginLanguage;
 		std::string version;
 		Idl::IdlType::Ptr IDSType;
+		int uniqueId;
 
 	private:
 		std::string m_name;
@@ -173,6 +185,7 @@ class Component
 		Service::Map services;
 		Port::Map ports;
 		Idl::IdlType::Vector types;
+		std::vector<std::string> m_importedComponents;
 };
 
 }

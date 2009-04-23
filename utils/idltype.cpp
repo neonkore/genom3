@@ -147,6 +147,8 @@ BaseType::Ptr BaseType::anyType = IdlType::Ptr(new BaseType(IdlType::Any));
 BaseType::Ptr StringType::unboundedStringType = IdlType::Ptr(new StringType(0));
 BaseType::Ptr WStringType::unboundedWStringType = IdlType::Ptr(new WStringType(0));
 
+/************ Declarator ***************/
+
 void Declarator::addBound(int b)
 {
 	m_bounds.push_back(b);
@@ -157,15 +159,33 @@ bool Declarator::isArray() const
 	return !m_bounds.empty();
 }
 
+/************ StructType ***************/
+
 void StructType::addMember(IdlType::Ptr t, Declarator::VectPtr v)
 {
 	m_members.push_back(make_pair(t, v));
 }
 
+IdlType::Ptr StructType::member(const std::string &name) 
+{
+	vector<TypeDeclarator>::const_iterator it = m_members.begin();
+	for(; it != m_members.end(); ++it) {
+		Declarator::Vect::const_iterator it2 = it->second->begin();
+		for(; it2 != it->second->end(); ++it2) {
+			if((*it2)->identifier() == name)
+				return it->first;
+		}
+	}
+}
+
+/************ EnumType ***************/
+
 void EnumType::addEnumerator(const std::string &e)
 {
 	m_enum.push_back(e);
 }
+
+/************ TypedefType ***************/
 
 bool TypedefType::hasIdentifier(const std::string &name)
 {

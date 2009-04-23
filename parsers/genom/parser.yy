@@ -34,8 +34,8 @@
 #include <vector>
 // #include <boost/variant.hpp>
 
-#include "ast.h"
-#include "idltype.h"
+#include "utils/ast.h"
+#include "utils/idltype.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -43,8 +43,8 @@ using namespace Idl;
 
 /* this code will be placed in parser.hpp before the definition of the parser class*/
 %code requires {
-#include "ast.h"
-#include "idltype.h"
+#include "utils/ast.h"
+#include "utils/idltype.h"
 /*
 typedef boost::variant<
   char, int, double, std::string, Idl::IdlType::Ptr,
@@ -263,12 +263,24 @@ component_field:
     }
 }
 | IDENTIFIER COLON INTEGERLIT
-{}
+{
+    if($1 == "uniqueId") {
+	driver.component().uniqueId = $3;
+    } else {
+      error(yyloc, std::string("Unknown component field: ") + $1);
+      YYERROR;
+    }}
 | IDENTIFIER COLON IDENTIFIER
 {
     if($1 == "ids") {
-	Idl::IdlType::Ptr p(driver.component().typeFromName($3));
+	Idl::IdlType::Ptr p = driver.component().typeFromName($3);
+	if(!p.get()) {
+	    error(yyloc, std::string("Unknown type: ") + $3);
+	    YYERROR;
+	}
 	driver.component().IDSType = p;
+    } else if($1 == "requires") {
+	driver.component().addImportedComponent($3);
     } else {
       error(yyloc, std::string("Unknown component field: ") + $1);
       YYERROR;
@@ -281,12 +293,20 @@ port_decl:
   INPORT IDENTIFIER IDENTIFIER
 {
     Idl::IdlType::Ptr type = driver.component().typeFromName($2);
+    if(!type.get()) {
+	error(yyloc, std::string("Unknown type: ") + $2);
+	YYERROR;
+    }
     Port::Ptr p(new Port($3, type, true));
     driver.component().addPort(p);
 }
 | OUTPORT IDENTIFIER IDENTIFIER
 {
     Idl::IdlType::Ptr type = driver.component().typeFromName($2);
+    if(!type.get()) {
+	error(yyloc, std::string("Unknown type: ") + $2);
+	YYERROR;
+    }
     Port::Ptr p(new Port($3, type, false));
     driver.component().addPort(p);
 };
@@ -322,6 +342,8 @@ task_field:
       t->priority = $3;
     else if($1 == "period")
       t->period = $3;
+    else if($1 == "delay")
+      t->delay = $3;
     else if($1 == "stackSize")
       t->stackSize = $3;
     else {
@@ -406,7 +428,9 @@ codel_prototype:
 };
 
 codel_fields:
-  codel_field
+/*empty prototype */
+{}
+| codel_field
 {}
 | codel_fields COMMA codel_field
 {};
@@ -467,7 +491,12 @@ simple_type_spec:
 | template_type_spec { $$ = $1; }
 | IDENTIFIER
 {
-    $$ = driver.component().typeFromName($1);
+    IdlType::Ptr type = driver.component().typeFromName($1);
+    if(!type.get()) {
+	error(yyloc, std::string("Unknown type: ") + $1);
+	YYERROR;
+    }
+    $$ = type;
 };
 
 base_type_spec:

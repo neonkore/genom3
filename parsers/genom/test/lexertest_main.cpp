@@ -69,8 +69,10 @@ int main(int argc, char* argv[])
 			    "enum essai { value1, value2 };\n"
 			    ;
 		} else if (arg == "testFile") {
-			if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/test.gnm"))
+			if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm")) {
 				cout << "Eror parsing file " << endl;
+				return 1;
+			}
 			d.component().debug();
 			return 0;
 		} else {

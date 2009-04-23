@@ -6,7 +6,7 @@ add_subdirectory(test)
 FIND_PACKAGE(BISON)
 FIND_PACKAGE(FLEX)
 
-include_directories(${PROJECT_SOURCE_DIR}/utils)
+include_directories(${PROJECT_SOURCE_DIR})
 
 BISON_TARGET(GenParser ${PROJECT_SOURCE_DIR}/parsers/genom/parser.yy ${PROJECT_SOURCE_DIR}/parsers/genom/parser.cpp)
 FLEX_TARGET(GenLexer ${PROJECT_SOURCE_DIR}/parsers/genom/lexer.ll ${PROJECT_SOURCE_DIR}/parsers/genom/lexer.cpp)

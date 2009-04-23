@@ -33,7 +33,7 @@
 #include <string>
 #include <auto_ptr.h>
 
-#include "interpreter.h"
+#include "utils/interpreter.h"
 
 namespace G3nom
 {
@@ -56,7 +56,7 @@ class PythonInterpreter : public Interpreter
 
 		static PythonInterpreter *getInstance();
 
-		void writeStdout(const char *text);
+		void writeStdout(std::string text);
 
 	private:
 		static PythonInterpreter* m_instance;

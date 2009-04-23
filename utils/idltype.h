@@ -65,6 +65,7 @@ class IdlType
 		typedef std::map<std::string, IdlType::Ptr> Map;
 		typedef std::vector<IdlType::Ptr> Vector;
 
+		IdlType() : m_kind(Null) {}
 		IdlType(Kind k);
 		virtual ~IdlType() {};
 
@@ -76,11 +77,13 @@ class IdlType
 		/// \return an equivalent IdlType object with aliases stripped.
 // 		IdlType::Ptr unalias();
 
-		virtual void accept(TypeVisitor& visitor) = 0;
+		virtual void accept(TypeVisitor& visitor) {}
 
-		virtual std::vector<std::string> identifiers() {
-			return std::vector<std::string>();
-		}
+// 		virtual std::vector<std::string> identifiers() {
+// 			return std::vector<std::string>();
+// 		}
+
+		virtual std::string toCType(bool declOnly=false) { return "int"; }
 
 	private:
 		Kind m_kind;
@@ -116,8 +119,6 @@ class Declarator
 		IdlType::Ptr    m_type;
 		std::vector<int> m_bounds;
 };
-
-// typedef std::vector<Declarator*> DeclaratorVect;
 
 // class DeclaratorVect : public std::vector<Declarator*> {
 // 	public:
@@ -296,6 +297,7 @@ class StructType : public IdlType
 		const std::vector<TypeDeclarator>& members() const {
 			return m_members;
 		}
+		IdlType::Ptr member(const std::string &name) ;
 
 		bool isRecursive() const {
 			return m_isRecursive;

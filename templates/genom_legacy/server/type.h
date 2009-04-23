@@ -1,4 +1,4 @@
-
+<?import string; from string import *;?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -32,21 +32,31 @@
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
 /* 
- * $module$Type.h:     La SDI_F de $module$
+ * <!comp.name()!>Type.h:     La SDI_F de <!comp.name()!>
  *
  * Utilise par le module et par les clients
- * (inclut dans $module$MsgLib.h et $module$PosterLib.h)
+ * (inclut dans <!comp.name()!>MsgLib.h et <!comp.name()!>PosterLib.h)
  * 
  */
 
-#ifndef $module$_TYPE_H
-#define $module$_TYPE_H
+#ifndef <!comp.name()!>_TYPE_H
+#define <!comp.name()!>_TYPE_H
 
 #include "genom/modules.h"
-#include "$module$Error.h"
+#include "<!comp.name()!>Error.h"
 
 /* Nombre de tache d'execution de ce module */
-#define $MODULE$_NB_EXEC_TASK                   ($nbExecTask$)
+#define <!upper(comp.name())!>_NB_EXEC_TASK                   (<!str(len(comp.tasksMap()))!>)
 
+#endif
+
+#ifndef <!comp.name()!>_TYPE1_H
+#define <!comp.name()!>_TYPE1_H
+
+#include "<!comp.name()!>Struct.h"
+
+<?
+write("typedef " + comp.IDSType.toCType());
+?>
 
 #endif

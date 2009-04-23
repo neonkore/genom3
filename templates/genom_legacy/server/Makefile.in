@@ -1,4 +1,8 @@
-
+<?
+shouldGenerateOpenPRS = "#" # do not generate openrps related code
+shouldGenerateTcl = "#"
+shouldGenerateServer = ""
+?>
 
 
 #  WARNING 
@@ -10,12 +14,11 @@
 #  WARNING 
 
 
-$commentbegin$
 #
 # Copyright (C) 1993-2005 LAAS/CNRS
 # All rights reserved.
 #
-# Redistribution  and  use in source   and binary forms,  with or without
+# # Redistribution  and  use in source   and binary forms,  with or without
 # modification, are permitted provided that  the following conditions are
 # met:
 #
@@ -38,7 +41,6 @@ $commentbegin$
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE  USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-$commentend$
 
 # --- paths -------------------------------------------------------------
 
@@ -63,7 +65,7 @@ CPPFLAGS+= $(GENOM_DEFINES) $(GENOM_INCLUDES) $(GENOM_CFLAGS)
 # Put this BEFORE including genom.mk since genom.mk defines the regen and regen-user targets
 all: \
 	dirs client \
-$genServer$	server
+<!shouldGenerateServer!>	server
 
 # GenoM flags
 include $(top_srcdir)/$(autoconfdir)/genom.mk
@@ -74,7 +76,16 @@ include $(top_srcdir)/$(autoconfdir)/genom.mk
 module_src= \
 	<!comp.name()!>CntrlTask.c	\
 	<!comp.name()!>ModuleInit.c	\
-$listExecTask_c$
+<?
+first = True;
+for t in comp.tasksMap():
+    if not first:
+      print "\\"
+    else:
+      first = False
+
+    write("\t" + comp.name() + t.data().name + "Task.c");
+?>
 
 client_src= \
 	<!comp.name()!>Error.c	\
@@ -84,9 +95,9 @@ client_src= \
 	<!comp.name()!>Scan.c		\
 	<!comp.name()!>PosterLib.c	\
 	<!comp.name()!>MsgLib.c	\
-$genServer$	<!comp.name()!>PosterShowLib.c	\
-$genServer$	<!comp.name()!>PosterXMLLib.c	\
-$genServer$	<!comp.name()!>PosterReadLib.c	\
+<!shouldGenerateServer!>	<!comp.name()!>PosterShowLib.c	\
+<!shouldGenerateServer!>	<!comp.name()!>PosterXMLLib.c	\
+<!shouldGenerateServer!>	<!comp.name()!>PosterReadLib.c	\
 
 client_includes = \
 	server/<!comp.name()!>Type.h \
@@ -97,12 +108,15 @@ client_includes = \
 	server/<!comp.name()!>Error.h \
 	server/<!comp.name()!>Endian.h \
 	server/<!comp.name()!>PosterLib.h \
-$listIncludesInDotGen$ \
-$genServer$	server/<!comp.name()!>PosterXMLLib.h \
-$genServer$	server/<!comp.name()!>PosterWriteLibProto.h \
-$genServer$	server/<!comp.name()!>PosterShowLib.h \
-$genServer$	server/<!comp.name()!>PosterReadLibProto.h \
-$genServer$	server/<!comp.name()!>MsgLib.h \
+<?
+write("\t" + comp.name() + "Struct.h \\")
+# $listIncludesInDotGen$ \
+?>
+<!shouldGenerateServer!>	server/<!comp.name()!>PosterXMLLib.h \
+<!shouldGenerateServer!>	server/<!comp.name()!>PosterWriteLibProto.h \
+<!shouldGenerateServer!>	server/<!comp.name()!>PosterShowLib.h \
+<!shouldGenerateServer!>	server/<!comp.name()!>PosterReadLibProto.h \
+<!shouldGenerateServer!>	server/<!comp.name()!>MsgLib.h \
 
 init_src= \
 	<!comp.name()!>Init.c
@@ -155,8 +169,8 @@ oprsclient_data = \
 
 
 dirs: $(OBJDIR)
-$genTcl$dirs: $(OBJDIR)/tcl
-$genOpenprs$dirs: $(OBJDIR)/openprs
+<!shouldGenerateTcl!>dirs: $(OBJDIR)/tcl
+<!shouldGenerateOpenPRS!>dirs: $(OBJDIR)/openprs
 
 $(OBJDIR):
 	mkdir -p $@
@@ -167,14 +181,14 @@ $(OBJDIR)/tcl:
 $(OBJDIR)/openprs:
 	mkdir -p $@
 
-$genServer$server: $(OBJDIR)/$(MODULE_LIB)
-$genServer$server: $(OBJDIR)/$(INIT_BIN)
-$genServer$server: $(OBJDIR)/$(POSTERWRITE_LIB)
+<!shouldGenerateServer!>server: $(OBJDIR)/$(MODULE_LIB)
+<!shouldGenerateServer!>server: $(OBJDIR)/$(INIT_BIN)
+<!shouldGenerateServer!>server: $(OBJDIR)/$(POSTERWRITE_LIB)
 
 client:: $(OBJDIR)/$(CLIENT_LIB)
-$genServer$client:: $(OBJDIR)/$(TEST_BIN) $(OBJDIR)/$(CONNECT)
-$genServer$$genTcl$client:: $(OBJDIR)/$(TCLCLIENT_LIB)
-$genOpenprs$client:: $(OBJDIR)/$(OPENPRSCLIENT_LIB)
+<!shouldGenerateServer!>client:: $(OBJDIR)/$(TEST_BIN) $(OBJDIR)/$(CONNECT)
+<!shouldGenerateServer!><!shouldGenerateTcl!>client:: $(OBJDIR)/$(TCLCLIENT_LIB)
+<!shouldGenerateOpenPRS!>client:: $(OBJDIR)/$(OPENPRSCLIENT_LIB)
 
 
 # --- libraries ---------------------------------------------------------
@@ -242,13 +256,13 @@ install: all install-bin install-data
 install-bin:
 	$(MKINSTALLDIRS) ${DESTDIR}$(libdir)
 	$(LTINSTALL) $(OBJDIR)/$(CLIENT_LIB) ${DESTDIR}$(libdir)/$(CLIENT_LIB)
-$genTcl$	$(MKINSTALLDIRS) ${DESTDIR}$(libdir)/tclserv
-$genServer$$genTcl$	$(LTINSTALL) $(OBJDIR)/$(TCLCLIENT_LIB) ${DESTDIR}$(libdir)/tclserv/$(TCLCLIENT_LIB)
-$genOpenprs$	$(MKINSTALLDIRS) ${DESTDIR}$(libdir)/openprs
-$genOpenprs$	$(LTINSTALL) $(OBJDIR)/$(OPENPRSCLIENT_LIB) ${DESTDIR}$(libdir)/openprs/$(OPENPRSCLIENT_LIB)
-$genServer$	$(MKINSTALLDIRS) ${DESTDIR}$(bindir)
-$genServer$	$(LTINSTALL) $(OBJDIR)/$(INIT_BIN) ${DESTDIR}$(bindir)/$(INIT_BIN)
-$genServer$	$(LTINSTALL) $(OBJDIR)/$(TEST_BIN) ${DESTDIR}$(bindir)/$(TEST_BIN)
+<!shouldGenerateTcl!>	$(MKINSTALLDIRS) ${DESTDIR}$(libdir)/tclserv
+<!shouldGenerateServer!><!shouldGenerateTcl!>	$(LTINSTALL) $(OBJDIR)/$(TCLCLIENT_LIB) ${DESTDIR}$(libdir)/tclserv/$(TCLCLIENT_LIB)
+<!shouldGenerateOpenPRS!>	$(MKINSTALLDIRS) ${DESTDIR}$(libdir)/openprs
+<!shouldGenerateOpenPRS!>	$(LTINSTALL) $(OBJDIR)/$(OPENPRSCLIENT_LIB) ${DESTDIR}$(libdir)/openprs/$(OPENPRSCLIENT_LIB)
+<!shouldGenerateServer!>	$(MKINSTALLDIRS) ${DESTDIR}$(bindir)
+<!shouldGenerateServer!>	$(LTINSTALL) $(OBJDIR)/$(INIT_BIN) ${DESTDIR}$(bindir)/$(INIT_BIN)
+<!shouldGenerateServer!>	$(LTINSTALL) $(OBJDIR)/$(TEST_BIN) ${DESTDIR}$(bindir)/$(TEST_BIN)
 
 install-data:
 	$(MKINSTALLDIRS) ${DESTDIR}$(includedir)/server
@@ -257,12 +271,12 @@ install-data:
 	done
 	$(MKINSTALLDIRS) ${DESTDIR}$(datadir)/gen
 	$(INSTALL_DATA) $(top_srcdir)/$(GENFILE) ${DESTDIR}$(datadir)/gen
-$genTcl$	$(MKINSTALLDIRS) ${DESTDIR}$(datadir)/tcl
-$genTcl$	$(INSTALL_DATA) $(srcdir)/$(tclclient_tcl) ${DESTDIR}$(datadir)/$(tclclient_tcl)
-$genOpenprs$	$(MKINSTALLDIRS) ${DESTDIR}$(datadir)/openprs
-$genOpenprs$	( cd $(srcdir) && $(INSTALL_DATA) $(oprsclient_data) ${DESTDIR}$(datadir)/openprs )
-$genOpenprs$	$(MKINSTALLDIRS) ${DESTDIR}$(includedir)/server/openprs
-$genOpenprs$	( cd $(srcdir) && $(INSTALL_DATA) $(oprsclient_headers) ${DESTDIR}$(includedir)/server/openprs )
+<!shouldGenerateTcl!>	$(MKINSTALLDIRS) ${DESTDIR}$(datadir)/tcl
+<!shouldGenerateTcl!>	$(INSTALL_DATA) $(srcdir)/$(tclclient_tcl) ${DESTDIR}$(datadir)/$(tclclient_tcl)
+<!shouldGenerateOpenPRS!>	$(MKINSTALLDIRS) ${DESTDIR}$(datadir)/openprs
+<!shouldGenerateOpenPRS!>	( cd $(srcdir) && $(INSTALL_DATA) $(oprsclient_data) ${DESTDIR}$(datadir)/openprs )
+<!shouldGenerateOpenPRS!>	$(MKINSTALLDIRS) ${DESTDIR}$(includedir)/server/openprs
+<!shouldGenerateOpenPRS!>	( cd $(srcdir) && $(INSTALL_DATA) $(oprsclient_headers) ${DESTDIR}$(includedir)/server/openprs )
 
 
 # --- clean -------------------------------------------------------------
@@ -304,29 +318,29 @@ depend $(OBJDIR)/dependencies:: $(OBJDIR);
 depend $(OBJDIR)/dependencies::  $(client_src)
 	$(make_depend) $?
 
-$genServer$depend $(OBJDIR)/dependencies:: $(module_src)
-$genServer$	$(make_depend) $?
+<!shouldGenerateServer!>depend $(OBJDIR)/dependencies:: $(module_src)
+<!shouldGenerateServer!>	$(make_depend) $?
 
-$genServer$depend $(OBJDIR)/dependencies:: $(posterwrite_src)
-$genServer$	$(make_depend) $?
+<!shouldGenerateServer!>depend $(OBJDIR)/dependencies:: $(posterwrite_src)
+<!shouldGenerateServer!>	$(make_depend) $?
 
-$genServer$depend $(OBJDIR)/dependencies::   $(connect_src)
-$genServer$	$(make_depend) $?
+<!shouldGenerateServer!>depend $(OBJDIR)/dependencies::   $(connect_src)
+<!shouldGenerateServer!>	$(make_depend) $?
 
-$genServer$depend $(OBJDIR)/dependencies::  $(test_src)
-$genServer$	$(make_depend) $?
+<!shouldGenerateServer!>depend $(OBJDIR)/dependencies::  $(test_src)
+<!shouldGenerateServer!>	$(make_depend) $?
 
-$genServer$depend $(OBJDIR)/dependencies::  $(init_src)
-$genServer$	$(make_depend) $?
+<!shouldGenerateServer!>depend $(OBJDIR)/dependencies::  $(init_src)
+<!shouldGenerateServer!>	$(make_depend) $?
 
-$genTcl$depend $(OBJDIR)/dependencies:: $(tclclient_src)
-$genTcl$	$(make_depend) $(TCL_CPPFLAGS) $?
+<!shouldGenerateTcl!>depend $(OBJDIR)/dependencies:: $(tclclient_src)
+<!shouldGenerateTcl!>	$(make_depend) $(TCL_CPPFLAGS) $?
 
-$genTcl$depend $(OBJDIR)/dependencies:: $(tclrequires_src)
-$genTcl$	$(make_depend) $(TCL_CPPFLAGS) $?
+<!shouldGenerateTcl!>depend $(OBJDIR)/dependencies:: $(tclrequires_src)
+<!shouldGenerateTcl!>	$(make_depend) $(TCL_CPPFLAGS) $?
 
-$genOpenprs$depend $(OBJDIR)/dependencies:: $(openprsclient_src)
-$genOpenprs$	$(make_depend) $(TRANSGEN_CFLAGS) $?
+<!shouldGenerateOpenPRS!>depend $(OBJDIR)/dependencies:: $(openprsclient_src)
+<!shouldGenerateOpenPRS!>	$(make_depend) $(TRANSGEN_CFLAGS) $?
 
 -include $(OBJDIR)/dependencies
 endif

@@ -165,12 +165,36 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 						return *it4;
 					break;
 				}
+			case IdlType::Enum: {
+					EnumType *e = static_cast<EnumType*>(it4->get());
+					if(e->identifier() == name)
+						return *it4;
+						break;
+				}
 			default:
 				break;
 		}
 	}
 	return IdlType::Ptr();
 }
+
+IdlType::Ptr Component::typeFromIdsName(const std::string &name)
+{
+	switch(IDSType->kind()) {
+		case IdlType::Struct:{
+			StructType *s = static_cast<StructType*>(IDSType.get());
+			return s->member(name);
+		}
+		default:
+			return IdlType::Ptr();
+	}
+}
+
+void Component::addImportedComponent(const std::string &s)
+{
+	m_importedComponents.push_back(s);
+}
+
 
 /******** Port ***************/
 
@@ -188,7 +212,7 @@ void Port::debug()
 
 void Task::debug()
 {
-	cout << "priority: " << priority << ", stackSize: " << stackSize << ", period: " << period << endl;
+	cout << "priority: " << priority << ", stackSize: " << stackSize << ", period: " << period << ", delay: " << delay << endl;
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
 	for (it = codels.begin(); it != codels.end(); ++it) {
@@ -211,7 +235,7 @@ void Service::debug()
 	cout << "Parent task: " << taskName << endl;
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
-	for (it = codels.begin(); it != codels.end(); ++it) {
+	for (it = m_codels.begin(); it != m_codels.end(); ++it) {
 		cout << "\t** " << it->first << " : ";
 		it->second->debug();
 		cout << endl;
@@ -220,12 +244,20 @@ void Service::debug()
 
 void Service::addInput(const std::string &s)
 {
-	inputs.push_back(s);
+	m_inputs.push_back(s);
 }
 
 void Service::addCodel(const std::string &name, Codel::Ptr c)
 {
-	codels.insert(make_pair(name,c));
+	m_codels.insert(make_pair(name,c));
+}
+
+Codel::Ptr Service::codel(const std::string &name)
+{
+	Codel::Map::const_iterator it = m_codels.find(name);
+	if(it == m_codels.end())
+		return Codel::Ptr();
+	return it->second;
 }
 
 /******** Codel ***************/

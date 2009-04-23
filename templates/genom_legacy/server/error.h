@@ -38,7 +38,7 @@
 #include "h2errorLib.h"
 #include "genom/genomError.h"
 
-#define M_<!comp.name()!>    ($numModule$)
+#define M_<!comp.name()!>    (<!comp.uniqueId!>)
 
 /* -- MODULES ERRORS -------------------------------------------------- */
 

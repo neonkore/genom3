@@ -2,7 +2,7 @@
 FIND_PACKAGE(PythonLibs)
 FIND_PACKAGE(Boost COMPONENTS python)
 
-include_directories(${PROJECT_SOURCE_DIR}/utils ${PROJECT_SOURCE_DIR}/parsers/genom ${PYTHON_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/parsers/genom ${PYTHON_INCLUDE_PATH} ${Boost_INCLUDE_DIRS})
 
 # Lib
 

@@ -1,4 +1,11 @@
+<?
+import string; from string import *;
 
+#define some vars used in the rest of the file
+maxMboxReplySize = "" #todo
+currentTask = comp.task(currentTaskName) # currentTaskName is set by genom
+currentTaskNum = comp.taskIndex(currentTask.name)
+?>
 /* --- FILE GENERATED WITH GENOM, DO NOT EDIT BY HAND ------------------ */
 
 /* 
@@ -69,7 +76,7 @@
 #endif
 
 /* Size of the mailbox receiving replies from servers */
-#define $MODULE$_$EXECTASKNAME$_MBOX_REPLY_SIZE $maxMboxReplySize$
+#define <!upper(comp.name())!>_<!upper(currentTask.name)!>_MBOX_REPLY_SIZE <!maxMboxReplySize!>
 
 
 /*--------------------------- EXTERNAL VARIABLES -------------------------*/
@@ -81,10 +88,10 @@ extern SEM_ID sem<!comp.name()!>InitExecTab[];
 /*---------------- PROTOTYPES OF INTERNAL FUNCTIONS ----------------------*/
 
 /* Execution task initialization */
-static STATUS <!comp.name()!>$execTaskName$InitTaskFunc (H2TIMER_ID *execTimerId);
+static STATUS <!comp.name()!><!currentTask.name!>InitTaskFunc (H2TIMER_ID *execTimerId);
 
 /* Suspend the the execution task */
-static void <!comp.name()!>$execTaskName$Suspend (BOOL giveFlag);
+static void <!comp.name()!><!currentTask.name!>Suspend (BOOL giveFlag);
 
 /* Call of user functions */
 static ACTIVITY_EVENT execTaskCallUserFunc (ACTIVITY_STATE state, 
@@ -103,23 +110,24 @@ char const * h2GetEvnStateString(int num);
 /*---------------- User function prototypes -------------------*/
 
 /* Permanent activity functions */
-#if ($cFuncExecFlag$)
-STATUS $cFuncExecName$ (int *bilan);
-#endif
-#if ($cFuncExecFlag2$)
-STATUS $cFuncExecName2$ (int *bilan);
-#endif
+<?
+if currentTask.hasCodel("main"):
+    print "STATUS " + currentTask.codel("main").name + "(int *bilan);"
+if currentTask.hasCodel("main2"):
+    print "STATUS " + currentTask.codel("main2").name + "(int *bilan);"
+?>
 
 /* Initialisation function */
-#if ($cFuncExecInitFlag$)
-int $cFuncExecInitName$ ();
-#endif
+<?
+if currentTask.hasCodel("init"):
+    print "int " + currentTask.codel("init").name + "();"
+?>
 
 /*---------------------- EXPORTED PROCEDURES --------------------------------*/
 
 /*****************************************************************************
  *
- *  <!comp.name()!>$execTaskName$  -  Exec task
+ *  <!comp.name()!><!currentTask.name!>  -  Exec task
  *
  *  Description : Execute fonctions in the module
  *
@@ -127,9 +135,9 @@ int $cFuncExecInitName$ ();
  *  Returns: never
  */
 
-void <!comp.name()!>$execTaskName$ (void)
+void <!comp.name()!><!currentTask.name!> (void)
 {
-  static H2TIMER_ID <!comp.name()!>$execTaskName$TimerId;
+  static H2TIMER_ID <!comp.name()!><!currentTask.name!>TimerId;
   int i, nb, nbActi;
   int prevExecTaskBilan;
   int wakeUpCntrlTask;
@@ -151,32 +159,37 @@ void <!comp.name()!>$execTaskName$ (void)
 
   /* Initialization of task */
   errnoSet(0);
-  EXEC_TASK_STATUS($execTaskNum$) = 
-    <!comp.name()!>$execTaskName$InitTaskFunc (&<!comp.name()!>$execTaskName$TimerId);
-  prevExecTaskBilan = EXEC_TASK_BILAN($execTaskNum$) = errnoGet();
+  EXEC_TASK_STATUS(<!currentTaskNum!>) = 
+    <!comp.name()!><!currentTask.name!>InitTaskFunc (&<!comp.name()!><!currentTask.name!>TimerId);
+  prevExecTaskBilan = EXEC_TASK_BILAN(<!currentTaskNum!>) = errnoGet();
   
   /* Release the initialization semaphore */
-  semGive (sem<!comp.name()!>InitExecTab[$execTaskNum$]);
+  semGive (sem<!comp.name()!>InitExecTab[<!currentTaskNum!>]);
   
   /* suspend ourselves in case of problems */
-  if(EXEC_TASK_STATUS($execTaskNum$) != OK)
-    <!comp.name()!>$execTaskName$Suspend (FALSE);
-  moduleEvent.moduleNum = $numModule$;
-  moduleEvent.taskNum = $execTaskNum$;
+  if(EXEC_TASK_STATUS(<!currentTaskNum!>) != OK)
+    <!comp.name()!><!currentTask.name!>Suspend (FALSE);
+  moduleEvent.moduleNum = <!comp.uniqueId!>;
+  moduleEvent.taskNum = <!currentTaskNum!>;
 
   /* main loop */
   FOREVER {
-#if ($periodFlag$) /* Periodic task */
-    if (h2timerPause (<!comp.name()!>$execTaskName$TimerId) != OK) {
-      logMsg("<!comp.name()!>$execTaskName$: h2timerPause error\n");
-      <!comp.name()!>$execTaskName$Suspend (FALSE);
+<?
+if currentTask.period > 0: ?> 
+    /* Periodic task */
+    if (h2timerPause (<!comp.name()!><!currentTask.name!>TimerId) != OK) {
+      logMsg("<!comp.name()!><!currentTask.name!>: h2timerPause error\n");
+      <!comp.name()!><!currentTask.name!>Suspend (FALSE);
     }
-#else /* wait for external events */
+<?
+else:	?>
+    /* wait for external events */
     if (h2evnSusp(0) != TRUE) {
-      printf ("<!comp.name()!>$execTaskName$: h2evnSusp error\n");
-      <!comp.name()!>$execTaskName$Suspend (FALSE);
+      printf ("<!comp.name()!><!currentTask.name!>: h2evnSusp error\n");
+      <!comp.name()!><!currentTask.name!>Suspend (FALSE);
     }
-#endif
+<?
+?>
 
     /* Get time */
     moduleEvent.eventType = EXEC_START_EVENT;
@@ -189,46 +202,49 @@ void <!comp.name()!>$execTaskName$ (void)
     gettimeofday(&tv, NULL);
     msecBegin = (tv.tv_usec / 1000) + (tv.tv_sec * 1000);
 #endif /* HAS_POSIX_CLOCK */
-    EXEC_TASK_TIME_BEGIN_LOOP($execTaskNum$) = msecBegin;
+    EXEC_TASK_TIME_BEGIN_LOOP(<!currentTaskNum!>) = msecBegin;
 
     if(firstChrono) {firstChrono=FALSE; mseBeginPrev=msecBegin;}
 
     computeMeanFlag = 1;
-#if ($periodFlag$) /* periodic task */
-    if ((EXEC_TASK_ON_PERIOD($execTaskNum$) = msecBegin - mseBeginPrev) 
-	> EXEC_TASK_MAX_PERIOD($execTaskNum$)) {
-      EXEC_TASK_MAX_PERIOD($execTaskNum$) = msecBegin - mseBeginPrev;
+<?
+if currentTask.period > 0: ?> 
+    if ((EXEC_TASK_ON_PERIOD(<!currentTaskNum!>) = msecBegin - mseBeginPrev) 
+	> EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>)) {
+      EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>) = msecBegin - mseBeginPrev;
       computeMeanFlag = 0;
     }
     mseBeginPrev = msecBegin;
 
     /* Previous computation overshot */
-    if (EXEC_TASK_DURATION_LOOP($execTaskNum$) > (1000.0*EXEC_TASK_PERIOD($execTaskNum$))) {
-      periodOverShot = (int) ((EXEC_TASK_DURATION_LOOP($execTaskNum$)
-			       /(1000.0*EXEC_TASK_PERIOD($execTaskNum$))));
+    if (EXEC_TASK_DURATION_LOOP(<!currentTaskNum!>) > (1000.0*EXEC_TASK_PERIOD(<!currentTaskNum!>))) {
+      periodOverShot = (int) ((EXEC_TASK_DURATION_LOOP(<!currentTaskNum!>)
+			       /(1000.0*EXEC_TASK_PERIOD(<!currentTaskNum!>))));
       
       if (GENOM_PRINT_TIME_FLAG) 
-	printf("<!comp.name()!>$execTaskName$ overshot of %d periods (d=%ldms mean=%ldms p=%ldms max=%ldms th=%dms)\n",
+	printf("<!comp.name()!><!currentTask.name!> overshot of %d periods (d=%ldms mean=%ldms p=%ldms max=%ldms th=%dms)\n",
 	       periodOverShot,
-	       EXEC_TASK_DURATION_LOOP($execTaskNum$),
+	       EXEC_TASK_DURATION_LOOP(<!currentTaskNum!>),
 	       meanDuration,
-	       EXEC_TASK_ON_PERIOD($execTaskNum$),
-	       EXEC_TASK_MAX_PERIOD($execTaskNum$),
-	       (int)(1000*EXEC_TASK_PERIOD($execTaskNum$)));
+	       EXEC_TASK_ON_PERIOD(<!currentTaskNum!>),
+	       EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>),
+	       (int)(1000*EXEC_TASK_PERIOD(<!currentTaskNum!>)));
     }
     else
       periodOverShot = 0;
-#endif
+<?
+?>
 
     wakeUpCntrlTask = FALSE;
 
     /* Interruption requested */
     if (STOP_MODULE_FLAG) {
       
-#if ($cFuncExecEndFlag$)
-      /* Execute end codel */
-      $cFuncExecEndName$ ();
-#endif
+<?
+if currentTask.hasCodel("end"):
+      print "       /* Execute end codel */"
+      print currentTask.codel("end").name + "();"
+?>
       
       /* free posters, clients, mailboxes */
       $listPosterDelete$
@@ -236,13 +252,15 @@ void <!comp.name()!>$execTaskName$ (void)
       $listServerClientEnd$
       csMboxEnd();
 #else
-#if (!$periodFlag$) /* non-periodic task */
+<?
+if currentTask.period == 0:?>
       /* free device created to manage h2evn required to aperiodic tasks */
       mboxEnd(0);
-#endif
-#endif
+<?
+?>
+
       /* free semaphore */
-      EXEC_TASK_WAKE_UP_FLAG($execTaskNum$) = FALSE;
+      EXEC_TASK_WAKE_UP_FLAG(<!currentTaskNum!>) = FALSE;
       h2evnSignal(CNTRL_TASK_ID);
 
       return;
@@ -251,8 +269,8 @@ void <!comp.name()!>$execTaskName$ (void)
     /* take IDS access */
       if (commonStructTake (<!comp.name()!>CntrlStrId) != OK ||
 	  commonStructTake (<!comp.name()!>DataStrId) != OK) {
-	logMsg("<!comp.name()!>$execTaskName$: commonStructTake error\n");
-	<!comp.name()!>$execTaskName$Suspend (FALSE);
+	logMsg("<!comp.name()!><!currentTask.name!>: commonStructTake error\n");
+	<!comp.name()!><!currentTask.name!>Suspend (FALSE);
       }
     
     /* Check for a received reply (XXX: see remark down) */
@@ -268,27 +286,30 @@ void <!comp.name()!>$execTaskName$ (void)
        if (!periodOverShot) { */
     
     /* permanent activity 1 */
-#if ($cFuncExecFlag$) 
+<?
+if currentTask.hasCodel("main"): ?>
     moduleEvent.eventType = STATE_START_EVENT;
     moduleEvent.activityNum = -1;
     moduleEvent.activityState = EXEC;
     sendModuleEvent(&moduleEvent);    
 
-    CURRENT_ACTIVITY_NUM($execTaskNum$) = -1;
-    EXEC_TASK_BILAN($execTaskNum$) = OK;
-    if ($cFuncExecName$ (&EXEC_TASK_BILAN($execTaskNum$)) != OK) {
-      logMsg("<!comp.name()!>$execTaskName$: permanent activity error\n");
-      <!comp.name()!>$execTaskName$Suspend (TRUE);
+    CURRENT_ACTIVITY_NUM(<!currentTaskNum!>) = -1;
+    EXEC_TASK_BILAN(<!currentTaskNum!>) = OK;
+    if ($cFuncExecName$ (&EXEC_TASK_BILAN(<!currentTaskNum!>)) != OK) {
+      logMsg("<!comp.name()!><!currentTask.name!>: permanent activity error\n");
+      <!comp.name()!><!currentTask.name!>Suspend (TRUE);
     }
 
     moduleEvent.eventType = STATE_END_EVENT;
     sendModuleEvent(&moduleEvent);   
-#endif
+<?
+
+?>
 
     /* Look for activities */
-    nbActi = EXEC_TASK_NB_ACTI($execTaskNum$);
+    nbActi = EXEC_TASK_NB_ACTI(<!currentTaskNum!>);
     for (i = 0, nb = 0; nb < nbActi && i < MAX_ACTIVITIES; i++) 
-      if (ACTIVITY_TASK_NUM(i) == $execTaskNum$) {
+      if (ACTIVITY_TASK_NUM(i) == <!currentTaskNum!>) {
 	
 	nb++;
 
@@ -315,7 +336,7 @@ void <!comp.name()!>$execTaskName$ (void)
 	  
 	  /* This is for us */
 	case START:
-	  EXEC_TASK_MAX_PERIOD($execTaskNum$) = 0;
+	  EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>) = 0;
 	case END:
 	case FAIL:
 	case INTER:
@@ -331,7 +352,7 @@ void <!comp.name()!>$execTaskName$ (void)
 	  ACTIVITY_STATUS(i) = (ACTIVITY_STATE) ACTIVITY_EVN(i);
 	  
 	  /* Call the processing function */
-	  CURRENT_ACTIVITY_NUM($execTaskNum$) = i;
+	  CURRENT_ACTIVITY_NUM(<!currentTaskNum!>) = i;
 	  ACTIVITY_EVN(i) = execTaskCallUserFunc(ACTIVITY_STATUS(i), i);
 	  
 	  /* Check event validity */
@@ -343,38 +364,41 @@ void <!comp.name()!>$execTaskName$ (void)
 	  break;
 	  
 	default:
-	  logMsg("<!comp.name()!>$execTaskName$, activity %d: incoherent evn %s\n",
+	  logMsg("<!comp.name()!><!currentTask.name!>, activity %d: incoherent evn %s\n",
 		  i, h2GetEvnStateString (ACTIVITY_EVN(i)));
-	  <!comp.name()!>$execTaskName$Suspend (TRUE);
+	  <!comp.name()!><!currentTask.name!>Suspend (TRUE);
 	}           /* switch evn */ 
       }        /* while there are activities */ 
     
     /*****XXXX Temporary test */
     if (nb != nbActi)
-      logMsg("<!comp.name()!>$execTaskName$: invalid number of activities %d (expected %d) !\n", nb, nbActi);
+      logMsg("<!comp.name()!><!currentTask.name!>: invalid number of activities %d (expected %d) !\n", nb, nbActi);
 
 /*XXXXXXXX     }  *//* period overshot test */
 
     /* permanent activity 2 */
-#if ($cFuncExecFlag2$) 
+<?
+if currentTask.hasCodel("main2"): ?>
     moduleEvent.eventType = STATE_START_EVENT;
     moduleEvent.activityNum = -1;
     moduleEvent.activityState = EXEC;
     sendModuleEvent(&moduleEvent);    
 
-    CURRENT_ACTIVITY_NUM($execTaskNum$) = -1;
-    EXEC_TASK_BILAN($execTaskNum$) = OK;
-    if ($cFuncExecName2$ (&EXEC_TASK_BILAN($execTaskNum$)) != OK) {
-      logMsg("<!comp.name()!>$execTaskName$: permanent activity 2 error\n");
-      <!comp.name()!>$execTaskName$Suspend (TRUE);
+    CURRENT_ACTIVITY_NUM(<!currentTaskNum!>) = -1;
+    EXEC_TASK_BILAN(<!currentTaskNum!>) = OK;
+    if ($cFuncExecName2$ (&EXEC_TASK_BILAN(<!currentTaskNum!>)) != OK) {
+      logMsg("<!comp.name()!><!currentTask.name!>: permanent activity 2 error\n");
+      <!comp.name()!><!currentTask.name!>Suspend (TRUE);
     }
 
     moduleEvent.eventType = STATE_END_EVENT;
     sendModuleEvent(&moduleEvent);   
-#endif
+<?
+
+?>
 
     /* no more activity */
-    CURRENT_ACTIVITY_NUM($execTaskNum$) = -2;
+    CURRENT_ACTIVITY_NUM(<!currentTaskNum!>) = -2;
 
     /* update "auto" posters */
     $listPosterUpdateFunc$
@@ -391,36 +415,39 @@ void <!comp.name()!>$execTaskName$ (void)
     msecEnd = (tv.tv_usec / 1000) + (tv.tv_sec * 1000);
 #endif /* HAS_POSIX_CLOCK */
 
-#if (!$periodFlag$)
-    EXEC_TASK_ON_PERIOD($execTaskNum$) = msecEnd - msecBegin;
-    if (EXEC_TASK_ON_PERIOD($execTaskNum$) > EXEC_TASK_MAX_PERIOD($execTaskNum$)) {
-      EXEC_TASK_MAX_PERIOD($execTaskNum$) = EXEC_TASK_ON_PERIOD($execTaskNum$);
+<?
+if currentTask.period == 0:?>
+    EXEC_TASK_ON_PERIOD(<!currentTaskNum!>) = msecEnd - msecBegin;
+    if (EXEC_TASK_ON_PERIOD(<!currentTaskNum!>) > EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>)) {
+      EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>) = EXEC_TASK_ON_PERIOD(<!currentTaskNum!>);
       computeMeanFlag = 0;
     }
-#endif
+<?
 
-    EXEC_TASK_TIME_END_LOOP($execTaskNum$) = msecEnd;
-    EXEC_TASK_DURATION_LOOP($execTaskNum$) = msecEnd-msecBegin;
+?>
+
+    EXEC_TASK_TIME_END_LOOP(<!currentTaskNum!>) = msecEnd;
+    EXEC_TASK_DURATION_LOOP(<!currentTaskNum!>) = msecEnd-msecBegin;
     if (computeMeanFlag) {
       meanDuration = (int)
-	(((double)((nbIter-1)*meanDuration + EXEC_TASK_DURATION_LOOP($execTaskNum$))
+	(((double)((nbIter-1)*meanDuration + EXEC_TASK_DURATION_LOOP(<!currentTaskNum!>))
 	  /((double)nbIter)));
       nbIter++;
     }
 
     /* display about time */
     if (GENOM_PRINT_TIME_FLAG) {
-      printf("<!comp.name()!>$execTaskName$: d %4ld mean %4ld p %4ld max %4ld th %4d\n",
-	     EXEC_TASK_DURATION_LOOP($execTaskNum$),
+      printf("<!comp.name()!><!currentTask.name!>: d %4ld mean %4ld p %4ld max %4ld th %4d\n",
+	     EXEC_TASK_DURATION_LOOP(<!currentTaskNum!>),
 	     meanDuration,
-	     EXEC_TASK_ON_PERIOD($execTaskNum$),
-	     EXEC_TASK_MAX_PERIOD($execTaskNum$),
-	     (int)(EXEC_TASK_PERIOD($execTaskNum$)*1000.0)); 
+	     EXEC_TASK_ON_PERIOD(<!currentTaskNum!>),
+	     EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>),
+	     (int)(EXEC_TASK_PERIOD(<!currentTaskNum!>)*1000.0)); 
     }
 
     /* The result changed: inform the control task */
-    if (prevExecTaskBilan != EXEC_TASK_BILAN($execTaskNum$)) {
-      prevExecTaskBilan =  EXEC_TASK_BILAN($execTaskNum$);
+    if (prevExecTaskBilan != EXEC_TASK_BILAN(<!currentTaskNum!>)) {
+      prevExecTaskBilan =  EXEC_TASK_BILAN(<!currentTaskNum!>);
       wakeUpCntrlTask = TRUE;
     }
 
@@ -437,8 +464,8 @@ void <!comp.name()!>$execTaskName$ (void)
 
     if (commonStructGive (<!comp.name()!>DataStrId) != OK ||
 	commonStructGive (<!comp.name()!>CntrlStrId) != OK) {
-      logMsg("<!comp.name()!>$execTaskName$: commonStructGive error\n");
-      <!comp.name()!>$execTaskName$Suspend (FALSE);
+      logMsg("<!comp.name()!><!currentTask.name!>: commonStructGive error\n");
+      <!comp.name()!><!currentTask.name!>Suspend (FALSE);
     }
   }     /* FOREVER */
 
@@ -452,7 +479,7 @@ void <!comp.name()!>$execTaskName$ (void)
 
 /*****************************************************************************
 *
-*  <!comp.name()!>$execTaskName$InitTaskFunc  -  Routine initialisation
+*  <!comp.name()!><!currentTask.name!>InitTaskFunc  -  Routine initialisation
 *
 *  Description:
 *  Cette fonction alloue et initialise tous les objets utilises par la tache
@@ -461,21 +488,23 @@ void <!comp.name()!>$execTaskName$ (void)
 *  Retourne : OK ou ERROR
 */
 
-static STATUS <!comp.name()!>$execTaskName$InitTaskFunc (H2TIMER_ID *execTimerId)
+static STATUS <!comp.name()!><!currentTask.name!>InitTaskFunc (H2TIMER_ID *execTimerId)
 
 {
-#if ($cFuncExecInitFlag$)
-  int bilan;
-#endif
+<?
+if currentTask.hasCodel("init"):
+    print "int bilan;"
+?>
+
 
     /* Enregistrer l'id de la tache */
-  EXEC_TASK_ID($execTaskNum$) = taskIdSelf ();
+  EXEC_TASK_ID(<!currentTaskNum!>) = taskIdSelf ();
 
 #if ($csServersFlag$) /* Client */
   /* Creation de la boite aux lettres de reception des repliques */
-  if (csMboxInit ("<!comp.name()!>$execTaskName$", 0,  
-                  $MODULE$_$EXECTASKNAME$_MBOX_REPLY_SIZE) != OK) {
-    h2perror("<!comp.name()!>$execTaskName$InitTaskFunc: csMboxInit");
+  if (csMboxInit ("<!comp.name()!><!currentTask.name!>", 0,  
+                  <!upper(comp.name())!>_$EXECTASKNAME$_MBOX_REPLY_SIZE) != OK) {
+    h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: csMboxInit");
     return (ERROR); 
   }
 
@@ -483,7 +512,9 @@ static STATUS <!comp.name()!>$execTaskName$InitTaskFunc (H2TIMER_ID *execTimerId
   $listServerClientInit$
 #endif
 
-#if ($periodFlag$) /* Periodic */
+<?
+if currentTask.period > 0:?>
+/* Periodic */
 
     /*** XXXX
       Passer la periode en milliseconde. Verifier que c'est un
@@ -493,60 +524,65 @@ static STATUS <!comp.name()!>$execTaskName$InitTaskFunc (H2TIMER_ID *execTimerId
       XXX */
   /* Allouer un timer h2 */
   if ((*execTimerId = h2timerAlloc ()) == NULL) {
-    h2perror("<!comp.name()!>$execTaskName$InitTaskFunc: h2timerAlloc");
+    h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: h2timerAlloc");
     return (ERROR);
   }
-  LOGDBG(("<!comp.name()!>$execTaskName$InitTaskFunc: timer allocated\n"));
+  LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: timer allocated\n"));
 
   /* Demarrer le timer d'asservissement */
-  if (h2timerStart (*execTimerId, $period$, $delay$) != OK) {
-    h2perror("<!comp.name()!>$execTaskName$InitTaskFunc: h2timerStart");
+  if (h2timerStart (*execTimerId, <!currentTask.period!>, <!currentTask.delay!>) != OK) {
+    h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: h2timerStart");
     return (ERROR);
   }
-  LOGDBG(("<!comp.name()!>$execTaskName$InitTaskFunc: timer started\n"));
+  LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: timer started\n"));
   
   /* Obtenir la periode d'asservissement */
-  EXEC_TASK_PERIOD($execTaskNum$) = 
-    ((double) $period$ / (double) NTICKS_PER_SEC);
-#else
-  EXEC_TASK_PERIOD($execTaskNum$) = 0;
-#endif /* Periodic */
+  EXEC_TASK_PERIOD(<!currentTaskNum!>) = 
+    ((double) <!currentTask.period!> / (double) NTICKS_PER_SEC);
+<?
+else:?>
+  EXEC_TASK_PERIOD(<!currentTaskNum!>) = 0;
+<?
 
-  EXEC_TASK_MAX_PERIOD($execTaskNum$) = 0;
-  EXEC_TASK_ON_PERIOD($execTaskNum$) = 0;
-  EXEC_TASK_WAKE_UP_FLAG($execTaskNum$) = FALSE;
+?>
+
+  EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>) = 0;
+  EXEC_TASK_ON_PERIOD(<!currentTaskNum!>) = 0;
+  EXEC_TASK_WAKE_UP_FLAG(<!currentTaskNum!>) = FALSE;
 
   /* Creer le poster */
   $listPosterCreate$
-  LOGDBG(("<!comp.name()!>$execTaskName$InitTaskFunc: posters created\n"));
+  LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: posters created\n"));
       
   /* S'initialiser comme client des Posters */
   $listPosterInit$
-  LOGDBG(("<!comp.name()!>$execTaskName$InitTaskFunc: client posters initialized\n"));
+  LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: client posters initialized\n"));
 
   /* Enregister le nom de la tache */
-/*  strcpy (EXEC_TASK_NAME($execTaskNum$), "execTaskName"); */
+/*  strcpy (EXEC_TASK_NAME(<!currentTaskNum!>), "execTaskName"); */
 
-#if ($cFuncExecInitFlag$)
+<?
+if currentTask.hasCodel("init"):?>
     /* Execution de la fonction d'initialisation */
-  if ($cFuncExecInitName$ (&bilan) != OK) {
+  if (<!currentTask.codel("init").name!> (&bilan) != OK) {
     errnoSet(bilan);
-    h2perror("<!comp.name()!>$execTaskName$InitTaskFunc: $cFuncExecInitName$");
+    h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: $cFuncExecInitName$");
     return (ERROR);
   }
-#endif
+<?
+?>
 
   /* Record errors */
 /*   <!comp.name()!>RecordH2errMsgs(); */
 
    /* Donner le sem de fin d'initialisation */
-  LOGDBG(("<!comp.name()!>$execTaskName$InitTaskFunc: ok\n"));
+  LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: ok\n"));
   return (OK);
 }
 
 /*****************************************************************************
 *
-*  <!comp.name()!>$execTaskName$Suspend  -  Suspension de la tache d'asservissement
+*  <!comp.name()!><!currentTask.name!>Suspend  -  Suspension de la tache d'asservissement
 *
 *  Description :
 *  Cette fonction signale qu'une erreur a ete retrouvee a l'interieur de 
@@ -555,18 +591,18 @@ static STATUS <!comp.name()!>$execTaskName$InitTaskFunc (H2TIMER_ID *execTimerId
 *  Retourne: Neant
 */
 
-static void <!comp.name()!>$execTaskName$Suspend (BOOL giveFlag)
+static void <!comp.name()!><!currentTask.name!>Suspend (BOOL giveFlag)
 
 {
   char str[64];
 
   /* Indiquer qu'une erreur a ete detectee */
-  EXEC_TASK_STATUS($execTaskNum$) = ERROR;
-  if (EXEC_TASK_BILAN($execTaskNum$) == OK)
-    EXEC_TASK_BILAN($execTaskNum$) = errnoGet();
+  EXEC_TASK_STATUS(<!currentTaskNum!>) = ERROR;
+  if (EXEC_TASK_BILAN(<!currentTaskNum!>) == OK)
+    EXEC_TASK_BILAN(<!currentTaskNum!>) = errnoGet();
 
-  logMsg("Suspend <!comp.name()!>$execTaskName$: %s\n", 
-	  h2getErrMsg(EXEC_TASK_BILAN($execTaskNum$), str, 64));
+  logMsg("Suspend <!comp.name()!><!currentTask.name!>: %s\n", 
+	  h2getErrMsg(EXEC_TASK_BILAN(<!currentTaskNum!>), str, 64));
 
   /* Eveiller la tache de controle */
   h2evnSignal(CNTRL_TASK_ID);
@@ -603,15 +639,64 @@ static ACTIVITY_EVENT execTaskCallUserFunc (ACTIVITY_STATE state,
   int activityNum;        /* Numero d'activite */
 
   /* Tableau des fonction d'execution (user) */
-  $execFuncTabDeclare$
+<?
+#   $execFuncTabDeclare$
+print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncTab[])() = {"
+for s in comp.servicesMap():
+    if s.data().taskName == currentTask.name and s.data().hasCodel("main"):
+	print s.data().codel("main").name + ","
+    else:
+	print "NULL,"
+print " NULL};"
+?>
+
   /* Tableau des fonctions de demarrage (user)*/
-  $execFuncTabStartDeclare$
+<?
+#  $execFuncTabStartDeclare$
+print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncStartTab[])() = {"
+for s in comp.servicesMap():
+    if s.data().taskName == currentTask.name and s.data().hasCodel("start"):
+	print s.data().codel("start").name + ","
+    else:
+	print "NULL,"
+print " NULL};"
+?>
+
   /* Tableau des fonctions de terminaison (user) */
-  $execFuncTabEndDeclare$
-  /* Tableau des fonctions de terminaison en cas d'interruption (user) */
-  $execFuncTabInterDeclare$ 
-  /* Tableau des fonctions de terminaison en cas d'echec (user) */
-  $execFuncTabFailDeclare$ 
+<?
+# $execFuncTabEndDeclare$
+print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncEndTab[])() = {"
+for s in comp.servicesMap():
+    if s.data().taskName == currentTask.name and s.data().hasCodel("end"):
+	print s.data().codel("end").name + ","
+    else:
+	print "NULL,"
+print " NULL};"
+?>
+
+  /* Tableau des fonctions de terminaison en cas d'interruption (user) */ 
+<?
+# $execFuncTabInterDeclare$
+print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncFailTab[])() = {"
+for s in comp.servicesMap():
+    if s.data().taskName == currentTask.name and s.data().hasCodel("fail"):
+	print s.data().codel("fail").name + ","
+    else:
+	print "NULL,"
+print " NULL};"
+?>
+
+  /* Tableau des fonctions de terminaison en cas d'echec (user) */ 
+<?
+# $execFuncTabFailDeclare$
+print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncInterTab[])() = {"
+for s in comp.servicesMap():
+    if s.data().taskName == currentTask.name and s.data().hasCodel("inter"):
+	print s.data().codel("inter").name + ","
+    else:
+	print "NULL,"
+print " NULL};"
+?>
 
   /* Numero de requete */
   activityNum = ACTIVITY_RQST_TYPE(activityId);
@@ -628,89 +713,89 @@ static ACTIVITY_EVENT execTaskCallUserFunc (ACTIVITY_STATE state,
   switch(state) {
     /* Fonction de demarage */
   case START:
-    if (<!comp.name()!>$execTaskName$ExecFuncStartTab [activityNum] == NULL)
+    if (<!comp.name()!><!currentTask.name!>ExecFuncStartTab [activityNum] == NULL)
       return (EXEC);
     if (inputFlag && outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncStartTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncStartTab [activityNum])
 	     (inputId, outputId, bilan));
     if (inputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncStartTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncStartTab [activityNum])
 	     (inputId, bilan));
     if (outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncStartTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncStartTab [activityNum])
 	     (outputId, bilan));
-    return((*<!comp.name()!>$execTaskName$ExecFuncStartTab [activityNum])
+    return((*<!comp.name()!><!currentTask.name!>ExecFuncStartTab [activityNum])
 	   (bilan));
     
     /* Fonction d'execution */
   case EXEC:
-    if (<!comp.name()!>$execTaskName$ExecFuncTab [activityNum] == NULL)
+    if (<!comp.name()!><!currentTask.name!>ExecFuncTab [activityNum] == NULL)
       return (END);
     if (inputFlag && outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncTab [activityNum])
 	     (inputId, outputId, bilan));
     if (inputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncTab [activityNum])
 	     (inputId, bilan));
     if (outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncTab [activityNum])
 	     (outputId, bilan));
-    return((*<!comp.name()!>$execTaskName$ExecFuncTab [activityNum])
+    return((*<!comp.name()!><!currentTask.name!>ExecFuncTab [activityNum])
 	   (bilan));
     
     /* Fonction de terminaison normale, sur pb ou sur interruption */
   case END:
-    if (<!comp.name()!>$execTaskName$ExecFuncEndTab [activityNum] == NULL)
+    if (<!comp.name()!><!currentTask.name!>ExecFuncEndTab [activityNum] == NULL)
       return(ETHER);
     if (inputFlag && outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncEndTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncEndTab [activityNum])
 	     (inputId, outputId, bilan));
     if (inputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncEndTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncEndTab [activityNum])
 	     (inputId, bilan));
     if (outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncEndTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncEndTab [activityNum])
 	     (outputId, bilan));
-    return((*<!comp.name()!>$execTaskName$ExecFuncEndTab [activityNum])
+    return((*<!comp.name()!><!currentTask.name!>ExecFuncEndTab [activityNum])
 	   (bilan));
 
     /* Fonction a appeler en cas d'echec */
   case FAIL:
-    if (<!comp.name()!>$execTaskName$ExecFuncFailTab [activityNum] == NULL)
+    if (<!comp.name()!><!currentTask.name!>ExecFuncFailTab [activityNum] == NULL)
       return(ZOMBIE);
     if (inputFlag && outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncFailTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncFailTab [activityNum])
 	     (inputId, outputId, bilan));
     if (inputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncFailTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncFailTab [activityNum])
 	     (inputId, bilan));
     if (outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncFailTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncFailTab [activityNum])
 	     (outputId, bilan));
-    return((*<!comp.name()!>$execTaskName$ExecFuncFailTab [activityNum])
+    return((*<!comp.name()!><!currentTask.name!>ExecFuncFailTab [activityNum])
 	   (bilan));
 
     /* Fonction a appeler en cas d'interruption */
   case INTER:
-    if (<!comp.name()!>$execTaskName$ExecFuncInterTab [activityNum] == NULL)
+    if (<!comp.name()!><!currentTask.name!>ExecFuncInterTab [activityNum] == NULL)
       return(ETHER);
     if (inputFlag && outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncInterTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncInterTab [activityNum])
 	     (inputId, outputId, bilan));
     if (inputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncInterTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncInterTab [activityNum])
 	     (inputId, bilan));
     if (outputFlag)
-      return((*<!comp.name()!>$execTaskName$ExecFuncInterTab [activityNum])
+      return((*<!comp.name()!><!currentTask.name!>ExecFuncInterTab [activityNum])
 	     (outputId, bilan));
-    return((*<!comp.name()!>$execTaskName$ExecFuncInterTab [activityNum])
+    return((*<!comp.name()!><!currentTask.name!>ExecFuncInterTab [activityNum])
 	   (bilan));
 
     /* Etats impossibles: ZOMBIE ETHER INIT et autres */
   default:
-    logMsg("<!comp.name()!>$execTaskName$: Activity %d status %s incoherent\n",
+    logMsg("<!comp.name()!><!currentTask.name!>: Activity %d status %s incoherent\n",
 	    activityId, h2GetEvnStateString(state));
-    <!comp.name()!>$execTaskName$Suspend (TRUE);
+    <!comp.name()!><!currentTask.name!>Suspend (TRUE);
     return(ZOMBIE);
   }  /* Switch state */
 }
@@ -756,20 +841,23 @@ static BOOL filterAndSendEvn (ACTIVITY_STATE state,
       transition = TRUE;
     break;
   default:
-    logMsg("<!comp.name()!>$execTaskName$: status %s incoherent\n",
+    logMsg("<!comp.name()!><!currentTask.name!>: status %s incoherent\n",
 	    h2GetEvnStateString(state));
-    <!comp.name()!>$execTaskName$Suspend (TRUE);  
+    <!comp.name()!><!currentTask.name!>Suspend (TRUE);  
   } 
 
   /* Transition autorisee */
   if (transition) {
 
-#if (!$periodFlag$) /* tache non periodique */
+<?
+if currentTask.period == 0:?>
+    /* tache non periodique */
     /* Tache non periodique: Auto reveille sauf evn SLEEP */
     if (evn != SLEEP)
-      h2evnSignal(EXEC_TASK_ID($execTaskNum$));
-/*    semGive (EXEC_TASK_SEM_ID($execTaskNum$));*/
-#endif
+      h2evnSignal(EXEC_TASK_ID(<!currentTaskNum!>));
+/*    semGive (EXEC_TASK_SEM_ID(<!currentTaskNum!>));*/
+<?
+?>
 
     /* Changement d'etat en vu : il faudra prevenir la tache de controle */
     if (state != (ACTIVITY_STATE) evn) 
@@ -779,9 +867,9 @@ static BOOL filterAndSendEvn (ACTIVITY_STATE state,
   /* Transition interdite */
   else {
     /* Ne pas appeler 2 fois la fonction h2GetEvnStateString dans le logMsg */
-    logMsg("<!comp.name()!>$execTaskName$: event %s ", h2GetEvnStateString(evn));
+    logMsg("<!comp.name()!><!currentTask.name!>: event %s ", h2GetEvnStateString(evn));
     logMsg("from state %s not allowed\n", h2GetEvnStateString(state)); 
-    <!comp.name()!>$execTaskName$Suspend (TRUE);
+    <!comp.name()!><!currentTask.name!>Suspend (TRUE);
   }
   return wakeUpCntrlTask;
 }

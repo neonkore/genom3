@@ -101,6 +101,8 @@ class Task
 		void debug();
 
 		void addCodel(const std::string &name, Codel::Ptr c);
+		Codel::Ptr codel(const std::string &name);
+		bool hasCodel(const std::string &name);
 
 		std::string name;
 		int priority;
@@ -109,7 +111,7 @@ class Task
 		int stackSize; // in kbytes
 
 	private:
-		Codel::Map codels;
+		Codel::Map m_codels;
 		//std::string connectedPort;
 };
 
@@ -132,6 +134,7 @@ class Service
 		void addCodel(const std::string &name, Codel::Ptr c);
 		Codel::Map& codels() { return m_codels; }
 		Codel::Ptr codel(const std::string &name);
+		bool hasCodel(const std::string &name);
 
 		std::string name;
 		Type type;
@@ -163,7 +166,8 @@ class Component
 
 		Task::Map& tasksMap();
 		std::vector<std::string> tasksList();
-		Task* task(const std::string &name);
+		Task::Ptr task(const std::string &name);
+		int taskIndex(const std::string &name) const;
 		
 		Service::Map& servicesMap();
 

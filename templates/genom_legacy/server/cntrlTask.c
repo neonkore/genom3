@@ -1064,12 +1064,13 @@ static void
 }
 
 /* Requetes de type controle */
+/* Requetes de type execution */
 
 <?
 serviceNum = 0
 for s in comp.servicesMap():
     service = s.data()
-    controlFuncFlag = (service.codel("control") == 0)
+    controlFuncFlag = (service.hasCodel("control"))
     if len(service.inputs()) == 0:
 	inputFlag = False
 	inputSize = "0"
@@ -1079,7 +1080,6 @@ for s in comp.servicesMap():
 	inputFlag = True
 	inputName = service.inputs()[0]
 	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputName + ")"
-	inputSize = inputSize[:-1] # remove the last '+'
 
 	t = comp.typeFromIdsName(inputName)
 	if(t.kind == IdlKind.String):
@@ -1098,7 +1098,6 @@ for s in comp.servicesMap():
 	outputFlag = True
 	outputName = service.output
 	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + outputName + ")"
-	outputSize = outputSize[:-1] # remove the last '+'
 
 	t = comp.typeFromIdsName(inputName)
 	if(t.kind == IdlKind.String):
@@ -1107,7 +1106,8 @@ for s in comp.servicesMap():
 	    outputNamePtr = "&" + outputName
 	outputRefPtr = "&((*" + comp.name() + "DataStrId)." + outputName + ")" 
 
-    if service.type == ServiceType.Control: ?>
+    if service.type == ServiceType.Control: 
+	?>
 /*****************************************************************************
  *
  *  <!comp.name()!>Cntrl<!service.name!> - Control request
@@ -1115,10 +1115,9 @@ for s in comp.servicesMap():
  */
 
 <?
-    controlFunc = ""
-    if controlFuncFlag:
-	controlFunc = "extern int " + service.codel("control").name + "();"
-    ?>
+	if controlFuncFlag:
+	    print "extern int " + service.codel("control").name + "();"
+	?>
 
 static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 
@@ -1128,10 +1127,10 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   int *compatibilityTab = <!comp.name()!><!service.name!>Compatibility;
   int bilan=OK;
 <? 
-    if inputFlag and controlFuncFlag: 
-	for s in service.inputs():
-	    print comp.typeFromIdsName(s).toCType(True) + " " + s + ";"
-    ?>
+	if inputFlag and controlFuncFlag: 
+	    for s in service.inputs():
+		print "    " + comp.typeFromIdsName(s).toCType(True) + " " + s + ";"
+	?>
 
   /*--------------------------------------------------------------
    * Control init done and exec tasks status 
@@ -1159,28 +1158,28 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
    * Call control func
    */
 <?
-    if controlFuncFlag:
-	?>
+	if controlFuncFlag:
+	    ?>
   {
     BOOL status;
 
 <?
-	if inputFlag: 
-	    ?> 
+	    if inputFlag: 
+		?> 
     /* Get inputs */
     if (csServRqstParamsGet (servId, rqstId, (void *) <!inputNamePtr!>, 
 			     <!inputSize!>, (FUNCPTR) NULL) != OK)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
     
     /* Call control func */
-    status = <!controlFunc!> (<!inputNamePtr!>, &bilan);
+    status = <!service.codel("control").name!> (<!inputNamePtr!>, &bilan);
 <?
-	else:
-	    ?>
+	    else:
+		?>
     status = <!controlFunc!> (&bilan);
 <?
 
-	?>
+	    ?>
     if (status != OK) {
       if (bilan == OK)
 	bilan =  S_<!comp.name()!>_stdGenoM_CONTROL_CODEL_ERROR;
@@ -1192,22 +1191,22 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   }
 <?
 
-    ?>
-
+	?>
+  
  /*-------------------------------------------------------------
   * Record inputs
   */
 <? 
-    if inputFlag:
-	if controlFuncFlag:
-	    print "memcpy ((void *) " + inputRefPtr + ", (void *) " + inputNamePtr + ", " + inputSize + ");"
-	else:?>
+	if inputFlag:
+	    if controlFuncFlag:
+		print "memcpy ((void *) " + inputRefPtr + ", (void *) " + inputNamePtr + ", " + inputSize + ");"
+	    else:?>
   if (csServRqstParamsGet (servId, rqstId, (void *) <!inputRefPtr!>,
 			   <!inputSize!>, (FUNCPTR) NULL) != OK)
     <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
 <?
 
-    ?>
+	?>
 
  /*-------------------------------------------------------------
   * Send final reply
@@ -1223,10 +1222,166 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 }
 
 <?
+    else: 
+	?>
+/*****************************************************************************
+ *
+ *  <!comp.name()!>Cntrl<!service.name!> - Execution request
+ */
+
+<?
+	if controlFuncFlag:
+	    print "extern int " + service.codel("control").name + "();"
+	?>
+
+static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
+
+{
+  $tabCompatibilityDeclare$
+  int activity;
+  int i;
+  int *compatibilityTab = <!comp.name()!><!service.name!>Compatibility;
+<? 
+	if inputFlag and controlFuncFlag: 
+	    for s in service.inputs():
+		print "    " + comp.typeFromIdsName(s).toCType(True) + " " + s + ";"
+	?>
+
+
+  /*--------------------------------------------------------------
+   * Control init done and exec tasks status 
+   */
+<?
+	if service.type == ServiceType.Exec:?>
+  if (!controlExecTaskStatusAndInitRqst(servId, rqstId))
+    return;  
+<?
+# "0" below == reentrantFlag
+	?>
+ 
+  /*--------------------------------------------------------------
+   * Activity allocation
+   */
+  activity = allocActivity(rqstId, <!str(serviceNum)!>, <!str(comp.taskIndex(service.taskName))!>, <!"0"!>, servId);
+  if (activity == -1) return;
+
+<?
+	if controlFuncFlag:
+	    ?>
+  /*--------------------------------------------------------------
+   * Call control func
+   */
+  {
+    STATUS status;
+    int bilan;
+
+<?
+	    if inputFlag:
+		?>
+    /* Get inputs */
+    if (csServRqstParamsGet (servId, rqstId, (void *) <!inputNamePtr!>, 
+			     <!inputSize!>, (FUNCPTR) NULL) != OK)
+      <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
+    status = <!service.codel("control").name!>(<!inputNamePtr!>, &bilan);
+<?
+	    else:?>
+    status = <!service.codel("control").name!>(&bilan);
+<?
+
+	    ?>
+
+    /* Control not OK: stop there */
+    if (status != OK) {
+      freeActivity(activity);
+      if (bilan == OK)
+	bilan = S_<!comp.name()!>_stdGenoM_CONTROL_CODEL_ERROR;
+      if (csServReplySend (servId, rqstId, FINAL_REPLY, bilan, 
+			   (void *) NULL, 0, (FUNCPTR) NULL) != OK)
+	<!comp.name()!>CntrlTaskSuspend (TRUE);
+      return;
+    }
+  }
+<?
+
+	?>
+
+ /*-------------------------------------------------------------
+  * Record inputs
+  *       XXXXXXXX NON C'EST TROP TOT -> INTERROMPRE LES ACTIVITES AVANT !
+  */
+<?
+	if inputFlag: 
+	    ?>
+  /* Get inputs address */
+<?
+	    if False: #reentrant flag 
+		?>
+  ACTIVITY_INPUT_ID(activity) = &(<!comp.name()!>DataStrId-><!service.name!>Input)[activity];
+<?
+	    else: ?>
+  ACTIVITY_INPUT_ID(activity) = <!inputRefPtr!>;
+<?
+
+	    ?>  
+  ACTIVITY_INPUT_SIZE(activity) = <!inputSize!>;
+
+  /* Record inputs */
+<? 
+	    if controlFuncFlag: ?>
+  memcpy ((void *) ACTIVITY_INPUT_ID(activity), (void *) <!inputNamePtr!>, 
+	  ACTIVITY_INPUT_SIZE(activity));
+<?
+	    else: ?>
+  if (csServRqstParamsGet (servId, rqstId, ACTIVITY_INPUT_ID(activity), 
+			   $inputSize$, (FUNCPTR) NULL) != OK)
+    <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
+<?
+
+	?>          
+  
+ /*-------------------------------------------------------------
+  * Get outputs address
+  */
+<?
+	if outputFlag: 
+	    if False: # reentrant flag 
+		?>
+  ACTIVITY_OUTPUT_ID(activity) = 
+    &(<!comp.name()!>DataStrId->$request$Output)[activity];
+<?
+	    else: ?>
+  ACTIVITY_OUTPUT_ID(activity) = <!outputRefPtr!>;
+<?
+	    ?>
+  ACTIVITY_OUTPUT_SIZE(activity) = <!outputSize!>;
+<?
+
+	?>         
+
+  moduleEventCntrl.eventType = STATE_START_EVENT;
+  moduleEventCntrl.activityNum = activity;
+  moduleEventCntrl.activityState = INIT;
+  moduleEventCntrl.rqstType = $requestNum$;
+  moduleEventCntrl.taskNum = $execTaskNum$;
+  sendModuleEvent(&moduleEventCntrl);
+
+  /*-------------------------------------------------------------
+   * Interruption of the incompatible activities
+   */
+  for (i = 0; i < MAX_ACTIVITIES; i++) 
+    if (i != activity && ACTIVITY_STATUS(i) != ETHER 
+	&& ! compatibilityTab[ACTIVITY_RQST_TYPE(i)]) 
+      
+      /* Record remaining incompatible activities */
+      if (! <!comp.name()!>AbortActivity (servId, i)) {
+	ACTIVITY_TAB_INCOMP(activity)[ACTIVITY_NB_INCOMP(activity)] = i;
+	ACTIVITY_NB_INCOMP(activity)++;
+      }  
+}
+
+
+
+<?
     serviceNum += 1
 
 ?>
-
-
-/* Requetes de type execution */
-

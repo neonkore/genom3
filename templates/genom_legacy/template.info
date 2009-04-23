@@ -269,7 +269,7 @@ pour chaque client:
 $clientName$
 */
 
-/* Request specific stuff
+/* Request specific stuff DONE
   requestCntrl.c requestExec.c -> goes in $$CntrlTask.c
   $cControlFunc$
   $tabCompatibilityDeclare$

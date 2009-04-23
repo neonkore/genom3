@@ -59,8 +59,9 @@ int main(int argc, char* argv[])
 		cout << "Error parsing gen file " << endl;
 
 	ti.setComponent(&(d.component()));
-	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/cntrlTask.c",
-	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$CntrlTask.c");
+	i->exportVar("currentTaskName", "Motion");
+	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/execTask.c",
+	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$MotionExecTask.c");
 // 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/test/template1",
 // 	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.out");
 	return 0;

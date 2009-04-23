@@ -117,12 +117,12 @@ void Component::addType(IdlType::Ptr type)
 	types.push_back(type);
 }
 
-Task* Component::task(const std::string &name)
+Task::Ptr Component::task(const std::string &name)
 {
 	Task::Map::iterator it = tasks.find(name);
 	if (it != tasks.end())
-		return it->second.get();
-	return 0;
+		return it->second;
+	return Task::Ptr();
 }
 
 Task::Map& Component::tasksMap()
@@ -144,6 +144,16 @@ std::vector<std::string> Component::tasksList()
 		vec.push_back(it->first);
 
 	return vec;
+}
+
+int Component::taskIndex(const std::string &name) const
+{
+	int i = 0;
+	Task::Map::const_iterator it = tasks.begin();
+	for(; it != tasks.end(); ++it, ++i) {
+		  if(it->first == name)
+			  return i;
+	}
 }
 
 IdlType::Ptr Component::typeFromName(const std::string &name)
@@ -215,7 +225,7 @@ void Task::debug()
 	cout << "priority: " << priority << ", stackSize: " << stackSize << ", period: " << period << ", delay: " << delay << endl;
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
-	for (it = codels.begin(); it != codels.end(); ++it) {
+	for (it = m_codels.begin(); it != m_codels.end(); ++it) {
 		cout << "\t** " << it->first << " : ";
 		it->second->debug();
 		cout << endl;
@@ -224,7 +234,21 @@ void Task::debug()
 
 void Task::addCodel(const std::string& name, G3nom::Codel::Ptr c)
 {
-	codels.insert(make_pair(name,c));
+	m_codels.insert(make_pair(name,c));
+}
+
+Codel::Ptr Task::codel(const std::string &name)
+{
+	Codel::Map::const_iterator it = m_codels.find(name);
+	if(it == m_codels.end())
+		return Codel::Ptr();
+	return it->second;
+}
+
+bool Task::hasCodel(const std::string &name)
+{
+	Codel::Map::const_iterator it = m_codels.find(name);
+	return (it != m_codels.end());
 }
 
 /******** Service ***************/
@@ -258,6 +282,12 @@ Codel::Ptr Service::codel(const std::string &name)
 	if(it == m_codels.end())
 		return Codel::Ptr();
 	return it->second;
+}
+
+bool Service::hasCodel(const std::string &name)
+{
+	Codel::Map::const_iterator it = m_codels.find(name);
+	return (it != m_codels.end());
 }
 
 /******** Codel ***************/

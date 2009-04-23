@@ -181,7 +181,7 @@ void TemplateInterpreter::interpretServiceFile(const std::string &infile, std::s
 	Service::Map::const_iterator it = m_component->servicesMap().begin();
 	for(; it != m_component->servicesMap().end(); ++it) {
 		if(m_interpreter)
-			m_interpreter->exportVar("currentService", it->first);
+			m_interpreter->exportVar("currentServiceName", it->first);
 
 		string o = outfile.replace(idx, 2, it->first);
 		interpretFile(infile, o);
@@ -206,7 +206,7 @@ void TemplateInterpreter::interpretTaskFile(const std::string &infile, std::stri
 	Task::Map::const_iterator it = m_component->tasksMap().begin();
 	for(; it != m_component->tasksMap().end(); ++it) {
 		if(m_interpreter)
-			m_interpreter->exportVar("currentTask", it->first);
+			m_interpreter->exportVar("currentTaskName", it->first);
 
 		interpretFile(infile, o.replace(idx, 11, it->first));
 	}

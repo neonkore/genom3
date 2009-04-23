@@ -73,9 +73,10 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.def("name", &Component::name)
 	.def_readonly("IDSType", &Component::IDSType)
 	.def_readonly("uniqueId", &Component::uniqueId)
-	.def("task", &Component::task, return_value_policy<reference_existing_object>())
+	.def("task", &Component::task)
 	.def("debug", &Component::debug)
 	.def("tasksList", &Component::tasksList)
+	.def("taskIndex", &Component::taskIndex)
 	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>())
 	.def("servicesMap", &Component::servicesMap, return_value_policy<reference_existing_object>())
 	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
@@ -83,14 +84,20 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 
 	class_<Task, Task::Ptr>("Task")
 	.def("debug", &Task::debug)
+	.def("codel", &Task::codel)
+	.def("hasCodel", &Task::hasCodel)
 	.def_readonly("name", &Task::name)
-	.def_readonly("priority", &Task::priority);
+	.def_readonly("priority", &Task::priority)
+	.def_readonly("delay", &Task::delay)
+	.def_readonly("period", &Task::period);
 
 	class_<Service, Service::Ptr>("Service")
 	.def("debug", &Service::debug)
 	.def_readonly("name", &Service::name)
+	.def_readonly("taskName", &Service::taskName)
 	.def_readonly("type", &Service::type)
 	.def("codel", &Service::codel)
+	.def("hasCodel", &Service::hasCodel)
 	.def_readonly("output", &Service::output)
 	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
 	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>());
@@ -221,7 +228,7 @@ std::string PythonInterpreter::eval(const std::string& s)
 
 void PythonInterpreter::exportVar(const std::string &name, const std::string &value)
 {
-	interpret(name + " = " + value);
+	interpret(name + " = \"" + value + "\"");
 }
 
 void PythonInterpreter::writeStdout(string text)
@@ -231,14 +238,13 @@ void PythonInterpreter::writeStdout(string text)
 
 std::string PythonInterpreter::evalString(const std::string &s)
 {
-	return "sys.stdout.write(" + s + ");";
+	return "sys.stdout.write(str(" + s + "));";
 }
 
 std::string replaceAllOccurrences(std::string s, const std::string &pattern, const std::string &replaceWith)
 {
 	uint idx = 0;
 	while((idx = s.find(pattern, idx)) != string::npos) {
-		cout << "idx: " << idx << endl;
 		s = s.replace(idx, pattern.length(), replaceWith);
 		idx = idx + 3;
 	}

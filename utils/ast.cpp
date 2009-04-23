@@ -81,9 +81,9 @@ void Component::debug()
 		cout << endl;
 	}
 
-	cout << endl << "Types: " << types.size() << endl;
+	cout << endl << "Types: " << m_types.size() << endl;
 	IdlType::Vector::const_iterator it4;
-	for (it4 = types.begin(); it4 != types.end(); ++it4) {
+	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
 		cout << "* ";
 		(*it4)->accept(dump);
 		cout << endl;
@@ -114,7 +114,7 @@ void Component::addPort(Port::Ptr port)
 
 void Component::addType(IdlType::Ptr type)
 {
-	types.push_back(type);
+	m_types.push_back(type);
 }
 
 Task::Ptr Component::task(const std::string &name)
@@ -161,7 +161,7 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 	cout << "Searching type " << name << endl;
 
 	IdlType::Vector::const_iterator it4;
-	for (it4 = types.begin(); it4 != types.end(); ++it4) {
+	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
 		switch ((*it4)->kind()) {
 			case IdlType::Struct: {
 					StructType *s = static_cast<StructType*>(it4->get());

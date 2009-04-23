@@ -62,8 +62,8 @@ class IdlType
 			WString, Any, Struct, Union, Enum, Sequence, Typedef
 		};
 		typedef boost::shared_ptr<IdlType> Ptr;
-		typedef std::map<std::string, IdlType::Ptr> Map;
-		typedef std::vector<IdlType::Ptr> Vector;
+		typedef std::map<std::string, Ptr> Map;
+		typedef std::vector<Ptr> Vector;
 
 		IdlType() : m_kind(Null) {}
 		IdlType(Kind k);
@@ -73,6 +73,10 @@ class IdlType
 			return m_kind;
 		}
 		std::string kindAsString() const;
+		// casting functions
+		StructType* asStructType();
+		EnumType* asEnumType();
+		TypedefType* asTypedefType();
 
 		/// \return an equivalent IdlType object with aliases stripped.
 // 		IdlType::Ptr unalias();
@@ -83,6 +87,7 @@ class IdlType
 // 			return std::vector<std::string>();
 // 		}
 
+		virtual std::string identifier() const { return std::string(); }
 		virtual std::string toCType(bool declOnly=false) { return "int"; }
 
 	private:
@@ -254,6 +259,7 @@ class FixedType : public IdlType
 class TypedefType : public IdlType
 {
 	public:
+		TypedefType() : IdlType(Typedef) {}
 		TypedefType(IdlType::Ptr aliasType, Declarator::VectPtr declarators)
 				: IdlType(Typedef), m_aliasType(aliasType), m_declarators(declarators) {}
 		virtual ~TypedefType() {}
@@ -267,6 +273,7 @@ class TypedefType : public IdlType
 			return m_declarators;
 		}
 		bool hasIdentifier(const std::string &name);
+		std::string identifier() const;
 
 		void accept(TypeVisitor& visitor) {
 			visitor.visitTypedefType(this);

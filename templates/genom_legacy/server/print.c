@@ -1,5 +1,15 @@
-/*
- * Copyright (c) 2009 LAAS/CNRS
+<?
+import string; from string import *;
+
+def printType(t,name):
+    if t.kind() == IdlKind.Struct:
+	s = t.asStructType()
+    else: #elif t.kind() == IdlKind.Double:
+	print "print_double(out, &((x+elt)->" + name + "), 0, 0, NULL, in);"
+# todo add all cases
+?>
+/* 
+ * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -27,43 +37,48 @@
  * DAMAGE.
  */
 
-#include <string>
-#include <iostream>
+/*------------------  Fichier généré automatiquement ------------------*/
+/*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#include "parsers/template_info/templateinterpreter.h"
-#include "bindings/tcl/tclinterpreter.h"
-#include "bindings/python/pythoninterpreter.h"
-#include "parsers/genom/driver.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-using namespace std;
-using namespace G3nom;
+#include <portLib.h>
+#include <csLib.h>
+#include <posterLib.h>
+#include "<!comp.name()!>Print.h"
 
-int main(int argc, char* argv[])
+<?
+for t in comp.typesVect():
+    prefix = ""
+    if t.kind() == IdlKind.Struct:
+	prefix = "struct_"
+    elif t.kind() == IdlKind.Enum:
+	prefix = "enum_"
+    elif t.kind() == IdlKind.Typedef:
+	prefix = ""
+    else:
+	continue
+    ?>
+void print_<!prefix!><!t.identifier()!> ( FILE *out,
+     <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
 {
-	Interpreter *i;
+  char *indstr;"
+  indstr=strdup(indentStr(nDim?++indent:indent));
+  indent++;
+  FOR_NB_elt(nDim,dims) {
+    if (nDim != 0)
+      fprintf(out, "%s%s<? if t.kind() == Enum: write("\n");?>", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
 
-	if (argc > 1) {
-		string s(argv[1]);
-		if (s == "python")
-			i = PythonInterpreter::getInstance();
-		else
-			i = TclInterpreter::getInstance();
-	} else
-		i = TclInterpreter::getInstance();
+<?
+    printType(t);
+    ?>
 
-	TemplateInterpreter ti;
-	ti.setInterpreter(i);
-
-	Driver d;
-	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
-		cout << "Error parsing gen file " << endl;
-
-	ti.setComponent(&(d.component()));
-/*	i->exportVar("currentTaskName", "Motion");*/
-	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/print.h",
-	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$Print.h");
-// 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/test/template1",
-// 	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.out");
-	return 0;
+  } END_FOR
+  free(indstr);
 }
-// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;
+<?
+
+?>
+
+

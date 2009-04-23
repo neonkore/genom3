@@ -17,7 +17,7 @@ main:
   "server/posterShowLib.h" -> "server/$$PosterShowLib.h"
   "server/posterXMLLib.c" -> "server/$$PosterXMLLib.c"
   "server/posterXMLLib.h" -> "server/$$PosterXMLLib.h"
-  "server/print.h" -> "server/$$Print.h"
+  "server/print.h" -> "server/$$Print.h" DONE
   "server/print.c" -> "server/$$Print.c" --> totalement genere par le programme
   "server/printXML.h" -> "server/$$PrintXML.h"
   "server/printXML.c" -> "server/$$PrintXML.c" --> totalement genere par le programme

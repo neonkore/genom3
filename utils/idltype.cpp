@@ -97,6 +97,27 @@ string IdlType::kindAsString() const
 	}
 }
 
+StructType* IdlType::asStructType()
+{
+	if(m_kind != Struct)
+		return 0;
+	return static_cast<StructType*>(this);
+}
+
+EnumType* IdlType::asEnumType()
+{
+	if(m_kind != Enum)
+		return 0;
+	return static_cast<EnumType*>(this);
+}
+
+TypedefType* IdlType::asTypedefType()
+{
+	if(m_kind != Typedef)
+		return 0;
+	return static_cast<TypedefType*>(this);
+}
+
 // IdlType* IdlType::unalias()
 // {
 // 	IdlType* t = this;
@@ -195,6 +216,14 @@ bool TypedefType::hasIdentifier(const std::string &name)
 			return true;
 	}
 	return false;
+}
+
+std::string TypedefType::identifier() const
+{
+	Declarator::Vect::const_iterator it = m_declarators->begin();
+	for (; it != m_declarators->end(); ++it) 
+		return (*it)->identifier();
+	return string();
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;  replace-tabs off;

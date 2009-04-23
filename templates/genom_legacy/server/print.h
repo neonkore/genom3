@@ -1,4 +1,6 @@
-
+<?
+import string; from string import *;
+?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -31,14 +33,46 @@
 /*------------------  Fichier généré automatiquement ------------------*/
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#ifndef $MODULE$_PRINT_H
-#define $MODULE$_PRINT_H
+#ifndef <!upper(comp.name())!>_PRINT_H
+#define <!upper(comp.name())!>_PRINT_H
 
 #include "genom/printScan.h"
 
 /* Structures definies par d'autres modules */
-$externPrintLibs$
+<?
+for i in comp.importedComponents():
+    print "#include \"server/" + i + "Print.h"
 
-#include "$module$PosterLib.h"
+?>
+#include "<!comp.name()!>PosterLib.h"
 
 /* Prototypes */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+<?
+for t in comp.typesVect():
+    prefix = ""
+    if t.kind() == IdlKind.Struct:
+	prefix = "struct_"
+    elif t.kind() == IdlKind.Enum:
+	prefix = "enum_"
+    elif t.kind() == IdlKind.Typedef:
+	prefix = ""
+    else:
+	continue
+    ?>
+extern void print_<!prefix!><!t.identifier()!> ( FILE *out,
+     <!t.toCType(True)!> *x,
+     int indent, int nDim, int *dims, FILE *in );
+<?
+
+?>
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* <!upper(comp.name())!>_PRINT_H */
+

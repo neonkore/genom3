@@ -80,6 +80,7 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.def("tasksMap", &Component::tasksMap, return_value_policy<reference_existing_object>())
 	.def("servicesMap", &Component::servicesMap, return_value_policy<reference_existing_object>())
 	.def("portsMap", &Component::portsMap, return_value_policy<reference_existing_object>())
+	.def("typesVect", &Component::typesVect, return_value_policy<reference_existing_object>())
 	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
 	.def("typeFromIdsName", &Component::typeFromIdsName);
 
@@ -123,8 +124,21 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.value("Outgoing", Port::Outgoing);
 
 	class_<IdlType, IdlType::Ptr>("IdlType")
+	.def("asStructType", &IdlType::asStructType, return_value_policy<reference_existing_object>())
+	.def("asEnumType", &IdlType::asEnumType, return_value_policy<reference_existing_object>())
+	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
 	.def("toCType", &IdlType::toCType)
+	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);
+
+	class_<StructType>("StructType")
+	.def("member", &StructType::member);
+
+	class_<EnumType>("EnumType")
+	.def("enumerators", &EnumType::enumerators, return_value_policy<reference_existing_object>());
+
+	class_<TypedefType>("TypedefType")
+	.def("aliasType", &TypedefType::aliasType);
 
 	enum_<IdlType::Kind>("IdlKind")
 	.value("Null", IdlType::Null)
@@ -150,10 +164,13 @@ BOOST_PYTHON_MODULE_INIT(G3nom)
 	.value("Sequence", IdlType::Sequence)
 	.value("Typedef", IdlType::Typedef);
 
-	// vector of strings
+	// Vectors
 	class_<std::vector<std::string> >("StringVec")
 	.def(vector_indexing_suite<std::vector<std::string> >());
+	class_<IdlType::Vector>("IdlTypeVec")
+	.def(vector_indexing_suite<IdlType::Vector, true>());
 
+	// Maps
 	class_<Task::Map>("TaskMap")
 	.def(map_indexing_suite<Task::Map, true>());
 	class_<Service::Map>("ServiceMap")

@@ -171,6 +171,7 @@ class Component
 		
 		Service::Map& servicesMap();
 		Port::Map& portsMap() { return ports; }
+		Idl::IdlType::Vector& typesVect() { return m_types; }
 
 		void addImportedComponent(const std::string &s);
 		std::vector<std::string>& importedComponents() { return m_importedComponents; }
@@ -189,7 +190,7 @@ class Component
 		Task::Map tasks;
 		Service::Map services;
 		Port::Map ports;
-		Idl::IdlType::Vector types;
+		Idl::IdlType::Vector m_types;
 		std::vector<std::string> m_importedComponents;
 };
 

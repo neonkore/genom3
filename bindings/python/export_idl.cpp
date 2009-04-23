@@ -35,23 +35,25 @@ using namespace G3nom;
 using namespace Idl;
 using namespace boost::python;
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(toCTypeOverloads, toCType, 0,1)
+
 void export_idl()
 {
 	class_<IdlType, IdlType::Ptr>("IdlType")
 	.def("asStructType", &IdlType::asStructType, return_value_policy<reference_existing_object>())
 	.def("asEnumType", &IdlType::asEnumType, return_value_policy<reference_existing_object>())
 	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
-	.def("toCType", &IdlType::toCType)
+	.def("toCType", &IdlType::toCType, toCTypeOverloads())
 	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);
 
-	class_<StructType>("StructType")
+	class_<StructType, bases<IdlType> >("StructType")
 	.def("member", &StructType::member);
 
-	class_<EnumType>("EnumType")
+	class_<EnumType, bases<IdlType> >("EnumType")
 	.def("enumerators", &EnumType::enumerators, return_value_policy<reference_existing_object>());
 
-	class_<TypedefType>("TypedefType")
+	class_<TypedefType, bases<IdlType> >("TypedefType")
 	.def("aliasType", &TypedefType::aliasType);
 
 	enum_<IdlType::Kind>("IdlKind")

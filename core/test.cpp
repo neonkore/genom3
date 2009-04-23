@@ -60,8 +60,8 @@ int main(int argc, char* argv[])
 
 	ti.setComponent(&(d.component()));
 /*	i->exportVar("currentTaskName", "Motion");*/
-	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/print.h",
-	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$Print.h");
+	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/posterLibStruct.h",
+	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$PosterLibStruct.h");
 // 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/test/template1",
 // 	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.out");
 	return 0;

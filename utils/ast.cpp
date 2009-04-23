@@ -160,32 +160,37 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 {
 	cout << "Searching type " << name << endl;
 
+	IdlType::Ptr res;
 	IdlType::Vector::const_iterator it4;
 	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
 		switch ((*it4)->kind()) {
 			case IdlType::Struct: {
 					StructType *s = static_cast<StructType*>(it4->get());
 					if (s->identifier() == name)
-						return *it4;
+						res = *it4;
 					break;
 				}
 			case IdlType::Typedef: {
 					TypedefType *t = static_cast<TypedefType*>(it4->get());
 					if (t->hasIdentifier(name))
-						return *it4;
+						res = *it4;
 					break;
 				}
 			case IdlType::Enum: {
 					EnumType *e = static_cast<EnumType*>(it4->get());
 					if(e->identifier() == name)
-						return *it4;
+						res = *it4;
 						break;
 				}
 			default:
 				break;
 		}
 	}
-	return IdlType::Ptr();
+	if(res.get()) {
+		IdlType::Ptr p(new NamedType(name, res));
+		return p;
+	} else
+		return IdlType::Ptr();
 }
 
 IdlType::Ptr Component::typeFromIdsName(const std::string &name)

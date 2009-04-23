@@ -59,7 +59,7 @@ class IdlType
 		enum Kind {
 			Null, Void, Short, Long, LongLong, UShort, ULong, ULongLong,
 			Float, Double, LongDouble, Fixed, Boolean, Char, WChar, Octet, String,
-			WString, Any, Struct, Union, Enum, Sequence, Typedef
+			WString, Any, Struct, Union, Enum, Sequence, Typedef, Array, Named
 		};
 		typedef boost::shared_ptr<IdlType> Ptr;
 		typedef std::map<std::string, Ptr> Map;
@@ -73,13 +73,16 @@ class IdlType
 			return m_kind;
 		}
 		std::string kindAsString() const;
+
 		// casting functions
+		template<class T> T* asType();
 		StructType* asStructType();
 		EnumType* asEnumType();
 		TypedefType* asTypedefType();
 
-		/// \return an equivalent IdlType object with aliases stripped.
-// 		IdlType::Ptr unalias();
+		/** \return an equivalent IdlType object with aliases stripped 
+		* or IdlType::Ptr() if the type is not an alias */
+		IdlType::Ptr unalias();
 
 		virtual void accept(TypeVisitor& visitor) {}
 
@@ -302,7 +305,7 @@ class StructType : public IdlType
 		}
 
 		void addMember(IdlType::Ptr t, Declarator::VectPtr declarators);
-		const std::vector<TypeDeclarator>& members() const {
+		const IdlType::Map& members() const {
 			return m_members;
 		}
 		IdlType::Ptr member(const std::string &name) ;
@@ -322,7 +325,8 @@ class StructType : public IdlType
 
 	private:
 		std::string m_identifier;
-		std::vector<TypeDeclarator> m_members;
+// 		std::vector<TypeDeclarator> m_members;
+		IdlType::Map m_members;
 		bool m_isRecursive;
 };
 
@@ -356,6 +360,52 @@ class EnumType : public IdlType
 	private:
 		std::string m_identifier;
 		std::vector<std::string> m_enum;
+};
+
+class ArrayType : public IdlType {
+	public:
+		ArrayType() : IdlType(Array) {}
+		ArrayType(IdlType::Ptr p, const std::vector<int> &bounds)
+		: IdlType(Array), m_type(p), m_bounds(bounds)
+		{}
+
+		std::vector<int> & bounds() {
+			return m_bounds;
+		}
+		IdlType::Ptr type() const { return m_type; }
+
+		virtual void accept(TypeVisitor& visitor) {
+			visitor.visitArrayType(this);
+		}
+
+		virtual std::string toCType(bool declOnly=false);
+
+	private:
+		IdlType::Ptr m_type;
+		std::vector<int> m_bounds;
+};
+
+class NamedType : public IdlType {
+	public:
+		NamedType() : IdlType(Named) {}
+		NamedType(const std::string &name, IdlType::Ptr type)
+		: IdlType(Named), m_identifier(name), m_type(type)
+		{}
+
+		IdlType::Ptr type() const { return m_type; }
+		virtual std::string identifier() const {
+			return m_identifier;
+		}
+
+		virtual void accept(TypeVisitor& visitor) {
+			visitor.visitNamedType(this);
+		}
+
+		virtual std::string toCType(bool declOnly=false);
+
+	private:
+		std::string m_identifier;
+		IdlType::Ptr m_type;
 };
 
 // class UnionCase {

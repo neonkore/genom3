@@ -90,7 +90,8 @@ string IdlType::kindAsString() const
 			return "wstring";
 		case Sequence:
 			return "sequence";
-			//   case Array:	return "array";
+		case Array:
+			return "array";
 		case Typedef:
 			return "typedef";
 		default:
@@ -136,6 +137,11 @@ string IdlType::toCType(bool declOnly)
 	}
 }
 
+template<class T> T* IdlType::asType()
+{
+	return static_cast<T*>(this);
+}
+
 StructType* IdlType::asStructType()
 {
 	if(m_kind != Struct)
@@ -157,17 +163,30 @@ TypedefType* IdlType::asTypedefType()
 	return static_cast<TypedefType*>(this);
 }
 
-// IdlType* IdlType::unalias()
-// {
-// 	IdlType* t = this;
-// 	while (t && t->kind() == Typedef) {
-// //     if (((Declarator*)((DeclaredType*)t)->decl())->sizes())
-// // 	break;
-// //     t = ((Declarator*)((DeclaredType*)t)->decl())->alias()->aliasType();
-// 		t = static_cast<TypedefType*>(t)->aliasType()->get();
-// 	}
-// 	return IdlType::Ptr(t);
-// }
+IdlType::Ptr IdlType::unalias()
+{
+	switch(m_kind) {
+		case Typedef: {
+			TypedefType *t = asType<TypedefType>();
+			IdlType::Ptr p = t->aliasType()->unalias();
+			if(p.get())
+				return p->unalias();
+			else
+				return t->aliasType();
+			break;
+		} case Named: {
+			NamedType *n = asType<NamedType>();
+			IdlType::Ptr pp = n->type()->unalias();
+			if(pp.get())
+				return pp->unalias();
+			else
+				return n->type();
+			break;
+		}
+		default:
+			return IdlType::Ptr(); // this type is not an alias
+	}
+}
 
 
 // IdlType* IdlType::scopedNameToType(const char* file, int line, const ScopedName* sn)
@@ -223,19 +242,21 @@ bool Declarator::isArray() const
 
 void StructType::addMember(IdlType::Ptr t, Declarator::VectPtr v)
 {
-	m_members.push_back(make_pair(t, v));
+	Declarator::Vect::const_iterator it = v->begin();
+	for(; it != v->end(); ++it) {
+		if((*it)->isArray()) {
+			IdlType::Ptr p(new ArrayType(t, (*it)->bounds()));
+			m_members[(*it)->identifier()] = p;
+		} else
+			m_members[(*it)->identifier()] = t;
+	}
 }
 
 IdlType::Ptr StructType::member(const std::string &name) 
 {
-	vector<TypeDeclarator>::const_iterator it = m_members.begin();
-	for(; it != m_members.end(); ++it) {
-		Declarator::Vect::const_iterator it2 = it->second->begin();
-		for(; it2 != it->second->end(); ++it2) {
-			if((*it2)->identifier() == name)
-				return it->first;
-		}
-	}
+	if(m_members.find(name) == m_members.end())
+		return IdlType::Ptr();
+	return m_members[name];
 }
 
 string intToString(int i)
@@ -252,17 +273,17 @@ string StructType::toCType(bool declOnly)
 		return s;
 
 	s.append("{\n");
-	vector<TypeDeclarator>::const_iterator it = m_members.begin();
+	IdlType::Map::const_iterator it = m_members.begin();
 	for(; it != m_members.end(); ++it) {
-		Declarator::Vect::const_iterator it2 = it->second->begin();
-		for(; it2 != it->second->end(); ++it2) {
-			s.append("   " + it->first->toCType(true) + " " + (*it2)->identifier());
-			//print array if existing
-			std::vector<int>::const_iterator it3 = (*it2)->bounds().begin();
-			for (; it3 != (*it2)->bounds().end(); ++it3)
+		s.append("   " + it->second->toCType(true) + " " + it->first);
+		//print array if existing
+		if(it->second->kind() == IdlType::Array) {
+			ArrayType *a = static_cast<ArrayType*>(it->second.get());
+			std::vector<int>::const_iterator it3 = a->bounds().begin();
+			for (; it3 != a->bounds().end(); ++it3)
 				s.append(string("[") + intToString(*it3) + string("]"));
-			s.append(";\n");
 		}
+		s.append(";\n");
 	}
 	return s.append("}");
 }
@@ -320,6 +341,20 @@ string TypedefType::toCType(bool declOnly)
 	if(declOnly)
 		return id;
 	string s = "typedef " + m_aliasType->toCType(true) + " " + id;
+}
+
+/************ TypedefType ***************/
+
+string ArrayType::toCType(bool declOnly) 
+{
+	return m_type->toCType(declOnly);
+}
+
+/************ NamedType ***************/
+
+string NamedType::toCType(bool declOnly) 
+{
+	return m_type->toCType(true);
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;  replace-tabs off;

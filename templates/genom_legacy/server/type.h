@@ -56,7 +56,9 @@
 #include "<!comp.name()!>Struct.h"
 
 <?
-write("typedef " + comp.IDSType.toCType() + " " + upper(comp.name()) + "_STR;");
+t = comp.IDSType.unalias()
+print t.toCType() + ";"
+print "typedef " + comp.IDSType.toCType() + " " + upper(comp.name()) + "_STR;";
 ?>
 
 #endif

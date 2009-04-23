@@ -49,6 +49,8 @@ class DumpType : public TypeVisitor
 		virtual void visitStructType(StructType*);
 		virtual void visitTypedefType(TypedefType*);
 		virtual void visitEnumType(EnumType*);
+		virtual void visitArrayType(ArrayType *a);
+		virtual void visitNamedType(NamedType*);
 };
 
 }

@@ -44,6 +44,7 @@ void export_idl()
 	.def("asEnumType", &IdlType::asEnumType, return_value_policy<reference_existing_object>())
 	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
 	.def("toCType", &IdlType::toCType, toCTypeOverloads())
+	.def("unalias", &IdlType::unalias)
 	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);
 

@@ -45,6 +45,8 @@ class DeclaredType;
 class StructType;
 class EnumType;
 class TypedefType;
+class ArrayType;
+class NamedType;
 
 class TypeVisitor
 {
@@ -60,6 +62,8 @@ class TypeVisitor
 		virtual void visitStructType(StructType*) {}
 		virtual void visitTypedefType(TypedefType*) {}
 		virtual void visitEnumType(EnumType*) {}
+		virtual void visitArrayType(ArrayType*) {}
+		virtual void visitNamedType(NamedType*) {}
 
 	protected:
 		std::ostream &m_out;

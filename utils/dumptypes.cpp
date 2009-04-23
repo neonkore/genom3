@@ -93,13 +93,11 @@ void printDeclaratorVectString(ostream &m_out, Declarator::VectPtr v)
 void DumpType::visitStructType(StructType *s)
 {
 	m_out << "Struct " << s->identifier() << " {";
-	std::vector<TypeDeclarator>::const_iterator it;
+	IdlType::Map::const_iterator it;
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
-		it->first->accept(*this);
-		m_out << " ";
-		printDeclaratorVectString(m_out, it->second);
-		m_out << ";";
+		it->second->accept(*this);
+		m_out << " " << it->first << ";";
 	}
 	m_out << "\n}";
 }
@@ -127,6 +125,21 @@ void DumpType::visitEnumType(EnumType *e)
 		m_out << *it;
 	}
 	m_out << "} ";
+}
+
+void DumpType::visitArrayType(ArrayType *a)
+{
+	m_out << "array";
+	std::vector<int>::const_iterator it = a->bounds().begin();
+	for (; it != a->bounds().end(); ++it)
+		m_out << "[" << *it << "]";
+	m_out << " of " ;
+	a->type()->accept(*this);
+}
+
+void DumpType::visitNamedType(NamedType *n)
+{
+	m_out << "named:" << n->identifier();
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

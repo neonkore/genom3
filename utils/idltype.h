@@ -88,7 +88,7 @@ class IdlType
 // 		}
 
 		virtual std::string identifier() const { return std::string(); }
-		virtual std::string toCType(bool declOnly=false) { return "int"; }
+		virtual std::string toCType(bool declOnly=false);
 
 	private:
 		Kind m_kind;
@@ -273,11 +273,12 @@ class TypedefType : public IdlType
 			return m_declarators;
 		}
 		bool hasIdentifier(const std::string &name);
-		std::string identifier() const;
+		virtual std::string identifier() const;
 
-		void accept(TypeVisitor& visitor) {
+		virtual void accept(TypeVisitor& visitor) {
 			visitor.visitTypedefType(this);
 		}
+		virtual std::string toCType(bool declOnly=false);
 
 	private:
 		IdlType::Ptr m_aliasType;
@@ -293,7 +294,7 @@ class StructType : public IdlType
 
 		const std::string kindAsString() const;
 
-		std::string identifier() const {
+		virtual std::string identifier() const {
 			return m_identifier;
 		}
 		void setIdentifier(const std::string &id) {
@@ -313,9 +314,11 @@ class StructType : public IdlType
 			m_isRecursive = true;
 		}
 
-		void accept(TypeVisitor& visitor) {
+		virtual void accept(TypeVisitor& visitor) {
 			visitor.visitStructType(this);
 		}
+
+		virtual std::string toCType(bool declOnly=false);
 
 	private:
 		std::string m_identifier;
@@ -347,6 +350,8 @@ class EnumType : public IdlType
 		void accept(TypeVisitor& visitor) {
 			visitor.visitEnumType(this);
 		}
+
+		virtual std::string toCType(bool declOnly=false);
 
 	private:
 		std::string m_identifier;

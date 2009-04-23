@@ -56,7 +56,7 @@
 #include "<!comp.name()!>Struct.h"
 
 <?
-write("typedef " + comp.IDSType.toCType());
+write("typedef " + comp.IDSType.toCType() + " " + upper(comp.name()) + "_STR;");
 ?>
 
 #endif

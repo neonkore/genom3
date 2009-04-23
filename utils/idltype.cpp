@@ -30,6 +30,7 @@
 #include "idltype.h"
 
 #include <iostream>
+#include <sstream>
 
 using namespace G3nom;
 using namespace Idl;
@@ -92,6 +93,44 @@ string IdlType::kindAsString() const
 			//   case Array:	return "array";
 		case Typedef:
 			return "typedef";
+		default:
+			return "unknown";
+	}
+}
+
+string IdlType::toCType(bool declOnly) 
+{ 
+	switch (m_kind) {
+		case Null:
+			return "null";
+		case Void:
+			return "void";
+		case Short:
+			return "short";
+		case Long:
+		case LongLong:
+			return "long";
+		case UShort:
+			return "unsigned short";
+		case ULong:
+		case ULongLong:
+			return "unsigned long";
+		case Float:
+			return "float";
+		case Double:
+		case LongDouble:
+			return "double";
+		case Boolean:
+			return "unsigned char";
+		case Char:
+		case Octet:
+			return "char";
+		case WChar:
+			return "wchar_t";
+		case String:
+			return "char *";
+		case WString:
+			return "char *";
 		default:
 			return "unknown";
 	}
@@ -199,11 +238,60 @@ IdlType::Ptr StructType::member(const std::string &name)
 	}
 }
 
+string intToString(int i)
+{
+	stringstream ss;
+	ss << i;
+	return ss.str();
+}
+
+string StructType::toCType(bool declOnly) 
+{ 
+	string s = "struct " + m_identifier;
+	if(declOnly)
+		return s;
+
+	s.append("{\n");
+	vector<TypeDeclarator>::const_iterator it = m_members.begin();
+	for(; it != m_members.end(); ++it) {
+		Declarator::Vect::const_iterator it2 = it->second->begin();
+		for(; it2 != it->second->end(); ++it2) {
+			s.append("   " + it->first->toCType(true) + " " + (*it2)->identifier());
+			//print array if existing
+			std::vector<int>::const_iterator it3 = (*it2)->bounds().begin();
+			for (; it3 != (*it2)->bounds().end(); ++it3)
+				s.append(string("[") + intToString(*it3) + string("]"));
+			s.append(";\n");
+		}
+	}
+	return s.append("}");
+}
+
 /************ EnumType ***************/
 
 void EnumType::addEnumerator(const std::string &e)
 {
 	m_enum.push_back(e);
+}
+
+string EnumType::toCType(bool declOnly) 
+{
+	string s = "enum " + m_identifier;
+	if(declOnly)
+		return s;
+
+	s.append("{\n");
+	bool first = true;
+	std::vector<std::string>::const_iterator it;
+	for (it = m_enum.begin(); it != m_enum.end(); ++it) {
+		if (!first)
+			s.append(", ");
+		else
+			first = false;
+
+		s.append(*it);
+	}
+	s.append("}\n");
 }
 
 /************ TypedefType ***************/
@@ -224,6 +312,14 @@ std::string TypedefType::identifier() const
 	for (; it != m_declarators->end(); ++it) 
 		return (*it)->identifier();
 	return string();
+}
+
+string TypedefType::toCType(bool declOnly) 
+{
+	string id = m_declarators->at(0)->identifier(); 
+	if(declOnly)
+		return id;
+	string s = "typedef " + m_aliasType->toCType(true) + " " + id;
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;  replace-tabs off;

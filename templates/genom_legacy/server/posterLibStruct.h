@@ -15,7 +15,7 @@ for p in comp.portsMap():
 
 <?
 for p in outports:
-    print p.idlType.toCType();
+    print p.idlType.toCType() + ";";
     print "typedef " + p.idlType.toCType(True) + " " + upper(comp.name()) + "_" + upper(p.name) + "POSTER_STR;"
 ?>
 

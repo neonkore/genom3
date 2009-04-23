@@ -1,5 +1,5 @@
 <?
-import string; from string import *;
+import string; from string import upper;
 abortRequestNum = len(comp.servicesMap()) + 1;
 
 # try to find an init service
@@ -164,7 +164,7 @@ void
      <!comp.name()!>CntrlTaskSuspend(FALSE);
   }
 
-  moduleEventCntrl.moduleNum = <!str(comp.uniqueId)!>;
+  moduleEventCntrl.moduleNum = <!comp.uniqueId!>;
 
   /* Record a signal handler */
   <!comp.name()!>SignalAbort = FALSE;
@@ -448,7 +448,7 @@ static STATUS
 
   /* Installer la requete abort
      (c'est le parser qui attribue le premier numero libre de requete ) */
-  if (csServFuncInstall (*<!comp.name()!>ServId, <!str(abortRequestNum)!>, 
+  if (csServFuncInstall (*<!comp.name()!>ServId, <!abortRequestNum!>, 
 			 (FUNCPTR) <!comp.name()!>RqstAbortActivity) != OK) {
     logMsg("<!comp.name()!>CntrlTask: csServFuncInstall: ");
     h2printErrno(errnoGet());
@@ -469,7 +469,7 @@ static STATUS
   CNTRL_NB_EXEC_TASKS = <!upper(comp.name())!>_NB_EXEC_TASK;
 
   /* La requete d'init */
-  INIT_RQST = <!str(initRqstNb)!>;
+  INIT_RQST = <!initRqstNb!>;
 
   /* Creer le poster de controle */
   if (posterCreate (<!upper(comp.name())!>_CNTRL_POSTER_NAME, sizeof (<!upper(comp.name())!>_CNTRL_STR), 
@@ -1089,7 +1089,7 @@ for s in comp.servicesMap():
 	inputRefPtr = "&((*" + comp.name() + "DataStrId)." + inputName + ")" 
 
     # same for output
-    if service.output:
+    if len(service.output) == 0:
 	outputFlag = False
 	outputSize = "0"
 	outputNamePtr = "NULL"
@@ -1099,7 +1099,7 @@ for s in comp.servicesMap():
 	outputName = service.output
 	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + outputName + ")"
 
-	t = comp.typeFromIdsName(inputName)
+	t = comp.typeFromIdsName(service.output)
 	if(t.kind == IdlKind.String):
 	    outputNamePtr = outputName
 	else:
@@ -1150,7 +1150,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
    */
   moduleEventCntrl.eventType = STATE_START_EVENT;
   moduleEventCntrl.activityState = EXEC;
-  moduleEventCntrl.rqstType = <!str(serviceNum)!>;
+  moduleEventCntrl.rqstType = <!serviceNum!>;
   moduleEventCntrl.taskNum = -1;
   sendModuleEvent(&moduleEventCntrl);
 
@@ -1262,7 +1262,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   /*--------------------------------------------------------------
    * Activity allocation
    */
-  activity = allocActivity(rqstId, <!str(serviceNum)!>, <!str(comp.taskIndex(service.taskName))!>, <!"0"!>, servId);
+  activity = allocActivity(rqstId, <!serviceNum!>, <!comp.taskIndex(service.taskName)!>, <!"0"!>, servId);
   if (activity == -1) return;
 
 <?

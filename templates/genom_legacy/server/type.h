@@ -1,4 +1,4 @@
-<?import string; from string import *;?>
+<?import string; from string import upper;?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.

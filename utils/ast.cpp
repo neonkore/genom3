@@ -195,10 +195,12 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 
 IdlType::Ptr Component::typeFromIdsName(const std::string &name)
 {
-	switch(IDSType->kind()) {
+	IdlType::Ptr ids = IDSType->unalias();
+	switch(ids->kind()) {
 		case IdlType::Struct:{
-			StructType *s = static_cast<StructType*>(IDSType.get());
-			return s->member(name);
+			StructType *s = static_cast<StructType*>(ids.get());
+			if(s)
+				return s->member(name);
 		}
 		default:
 			return IdlType::Ptr();

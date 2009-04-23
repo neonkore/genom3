@@ -1,4 +1,6 @@
-
+<?
+import string; from string import upper;
+?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -31,14 +33,14 @@
 /*------------------  Fichier généré automatiquement ------------------*/
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#ifndef $module$_MSG_LIB_H
-#define $module$_MSG_LIB_H
+#ifndef <!comp.name()!>_MSG_LIB_H
+#define <!comp.name()!>_MSG_LIB_H
 
 #include "portLib.h"
 #include "csLib.h"
 #include "posterLib.h"
  
-#include "$module$Type.h"
+#include "<!comp.name()!>Type.h"
 
 #define TIME_WAIT_REPLY           /*2000*/ 0
  
@@ -58,7 +60,7 @@
 /**
  ** Boite aux lettres reception requetes 
  **/
-#define  $MODULE$_MBOX_NAME                      "$module$"
+#define  $MODULE$_MBOX_NAME                      "<!comp.name()!>"
 
 #define  $MODULE$_MAX_RQST_SIZE              $maxRequestSize$
 
@@ -90,22 +92,113 @@ $listRequests$
 extern "C" {
 #endif
 
-STATUS $module$ClientInit (CLIENT_ID *pClientId);
+STATUS <!comp.name()!>ClientInit (CLIENT_ID *pClientId);
 
-STATUS $module$ClientEnd (CLIENT_ID clientId);
+STATUS <!comp.name()!>ClientEnd (CLIENT_ID clientId);
 
-int $module$AbortRqstSend (CLIENT_ID clientId, 
+int <!comp.name()!>AbortRqstSend (CLIENT_ID clientId, 
 			   int *pRqstId,
 			   int *activity,
 			   int replyTimeOut);
 
-int $module$AbortReplyRcv (CLIENT_ID clientId, 
+int <!comp.name()!>AbortReplyRcv (CLIENT_ID clientId, 
 			   int rqstId, 
 			   int block,  /* NO_BLOCK BLOCK_ON_FINAL_REPLY */
 			   int *bilan);
 
-int $module$AbortRqstAndRcv (CLIENT_ID clientId, 
+int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId, 
 			     int *activity,
 			     int *bilan);
+
+<?
+for s in comp.servicesMap():
+    service = s.data()
+    serviceNum = "%s_%s_RQST" % (upper(comp.name()), upper(service.name))
+
+    if len(service.inputs()) == 0:
+	inputSize = "0"
+	inputName = "NULL"
+	input = ""
+    else:
+	inputShortName = service.inputs()[0]
+	inputName = "in_ " + inputShortName
+	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputShortName + ")"
+
+	t = comp.typeFromIdsName(inputShortName)
+	input = t.toCType(True)
+	if(t.kind != IdlKind.String):
+	    input += " *"
+	else:
+	    output += " "
+	input += inputName + ","
+
+    if len(service.output) == 0:
+	outputSize = "0"
+	outputName = "NULL"
+	output = ""
+    else:
+	outputName = "out_ " + service.output
+	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + service.output + ")"
+
+	t = comp.typeFromIdsName(service.output)
+	output = t.toCType(True)
+	if(t.kind != IdlKind.String):
+	    output += " *"
+	else:
+	    output += " "
+	output += outputName + ","
+
+    if service.type == ServiceType.Control:
+	?>
+extern STATUS <!comp.name()!><!service.name!>RqstSend (CLIENT_ID clientId, 
+					 int *pRqstId,
+					 <!input!>
+					 int replyTimeOut);
+
+int <!comp.name()!><!service.name!>ReplyRcv (CLIENT_ID clientId, 
+			       int rqstId, 
+			       int block,  /* NO_BLOCK BLOCK_ON_FINAL_REPLY */
+			       <!output!>
+			       int *bilan);
+
+int <!comp.name()!><!service.name!>RqstAndRcv (CLIENT_ID clientId, 
+				 <!input!> 
+				 <!output!>
+				 int *bilan);
+<?
+    else:
+	?>
+extern STATUS <!comp.name()!><!service.name!>RqstSend (CLIENT_ID clientId, int *pRqstId,
+					 <!input!>
+					 int replyTimeOut);
+
+extern int <!comp.name()!><!service.name!>ReplyRcv (CLIENT_ID clientId, int rqstId, 
+				      int block,  /* NO_BLOCK BLOCK_ON_FINAL_REPLY 
+						     BLOCK_ON_INTERMED_REPLY */
+				      <!output!>
+				      int *activity, int *bilan);
+
+
+extern int <!comp.name()!><!service.name!>RqstAndAck (CLIENT_ID clientId, int *pRqstId,
+					int replyTimeOut,
+					<!input!>
+					<!output!>
+					int *activity, int *bilan);
+
+extern int <!comp.name()!><!service.name!>RqstAndRcv (CLIENT_ID clientId, 
+					int replyTimeOut,
+					<!input!> 
+					<!output!>
+					int *activity,
+					int *bilan);
+
+<?
+
+?>
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* <!comp.name()!>_MSG_LIB_H */
 
 

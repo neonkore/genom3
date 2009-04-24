@@ -1,5 +1,5 @@
 <?
-import string; from string import *;
+from string import upper;
 
 #define some vars used in the rest of the file
 maxMboxReplySize = "" #todo

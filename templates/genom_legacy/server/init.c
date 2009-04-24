@@ -86,10 +86,8 @@ else:
 	inputVerif = ""
 
 	nbInputParams = "0"
-	inputDeclare = ""
-	inputNamePtrC = ""
 	inputSize = "0"
-	inputShow = ""
+#	inputShow = ""
 	inputNamePtr = "NULL"
 #	requestNum = "0"  is it a bug ?
     else:
@@ -98,7 +96,7 @@ else:
 	inputDeclare = inputType.toCType(True) + " " + inputName + ";"
 	inputSize = "sizeof(*" + inputType.toCType(True) + ")"
 # todo: reuse name from print.c
-	inputShow =  "print_" + inputType.toCType(True) + "(stdout, " + ");"
+#	inputShow =  "print_" + inputType.toCType(True) + "(stdout, " + ");"
 	inputNamePtr = "&" + inputName
 	inputNamePtrC = inputNamePtr + ","
 

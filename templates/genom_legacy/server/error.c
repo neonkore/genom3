@@ -1,4 +1,4 @@
-<?import string; from string import *;?>
+<?from string import upper?>
 #include "<!comp.name()!>Error.h"
 
 static const H2_ERROR const <!comp.name()!>H2errMsgs[] = <!upper(comp.name())!>_H2_ERR_MSGS;

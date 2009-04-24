@@ -42,7 +42,7 @@ class TemplateInfoLexer;
 class TemplateInterpreter
 {
 	public:
-		enum State { Other, InsideMain, InsideTask, InsideService, InsideLanguage };
+		enum State { Other, InsideMain, InsideTask, InsideService, InsideLanguage, InsideRequires };
 
 		TemplateInterpreter();
 
@@ -80,6 +80,9 @@ class TemplateInterpreter
 		void interpretTaskFile(const std::string& infile, std::string outfile);
 		void interpretServiceFile(const std::string& infile, std::string outfile);
 		void interpretFile(const std::string& infile, std::string outfile = std::string());
+
+		/* Pass the file to the interpreter before parsing any other file*/
+		void executeFile(const std::string& infile);
 
 		void setLanguage(const std::string &lang) {
 			m_language = lang;

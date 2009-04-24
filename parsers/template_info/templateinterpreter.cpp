@@ -101,6 +101,17 @@ string readFile(const std::string &inFile)
 	return ss.str();
 }
 
+void TemplateInterpreter::executeFile(const std::string& infile)
+{
+	string s;
+	if(infile.at(0) == '/')
+		s = readFile(infile);
+	else 
+		s = readFile(m_source_dir + infile);
+	m_interpreter->interpret(s);
+}
+
+
 void TemplateInterpreter::interpretFileInternal(const std::string &infile, const std::string &outfile)
 {
 	ofstream out(outfile.c_str());

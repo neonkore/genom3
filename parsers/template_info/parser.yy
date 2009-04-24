@@ -126,6 +126,8 @@ rule:
       driver.setState(TemplateInterpreter::InsideMain);
     else if($1 == "language") 
       driver.setState(TemplateInterpreter::InsideLanguage);
+    else if($1 == "requires") 
+      driver.setState(TemplateInterpreter::InsideRequires);
     else {
       error(yyloc, std::string("Unknown field: ") + $1);
       YYERROR;
@@ -150,7 +152,10 @@ fields:
 field:
  STRINGLIT 
 {
-    driver.interpretFile($1);
+    if(driver.state() == TemplateInterpreter::InsideRequires)
+	driver.executeFile($1);
+    else
+	driver.interpretFile($1);
 }
 | STRINGLIT RARROW STRINGLIT 
 {

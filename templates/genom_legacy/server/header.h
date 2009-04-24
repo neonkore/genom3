@@ -1,4 +1,4 @@
-<?import string; from string import *;?>
+<?from string import upper;?>
 /* --- Generated file, do not edit by hand --------------------------- */
 
 /* 

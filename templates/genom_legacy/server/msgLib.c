@@ -1,5 +1,5 @@
 <?
-import string; from string import upper;
+from string import upper;
 abortRequestNum = len(comp.servicesMap()) + 1;
 ?>
 /* 

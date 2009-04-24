@@ -1,5 +1,5 @@
 <?
-import string; from string import upper;
+from string import upper;
 ?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS

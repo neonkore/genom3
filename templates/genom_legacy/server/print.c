@@ -1,5 +1,5 @@
 <?
-import string; from string import *;
+from string import upper;
 
 def printType(t,name):
     if t.kind() == IdlKind.Struct:

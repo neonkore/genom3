@@ -1,4 +1,123 @@
+<?
+from string import upper
 
+# returns a flat list of the structure of a type
+def flatStructRec(t, name_prefix):
+    if t.kind() == IdlKind.Struct:
+	s = t.asStructType()
+	l = [] 
+	for m in s.members():
+	    l.extend(flatStruct(m.data(), name_prefix+"__"+m.key()))
+	return l
+    else:
+	return (name_prefix, t)
+
+def flatStruct(t, name):
+    if t.kind() == IdlKind.Named:
+	n = t.asNamedType()
+	return flatStruct(n.type(), name)
+    if t.kind() == IdlKind.Struct:
+	s = t.asStructType()
+	l = [] 
+	for m in s.members():
+	    l.extend(flatStruct(m.data(), m.key()))
+	return l
+    else:
+	return [(t, name)]   
+
+def convertFun(t):
+    if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
+        return ""
+    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
+        return "atoi"
+    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+        return "atoi"
+    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+        return "atof"
+    return ""
+
+def formatStringForType(t):
+   if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
+       return "%c";
+   elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
+       return "%d"
+   elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+       return "%u" 
+   elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+       return "%f";
+   else:
+       return ""
+
+# try to find an init service
+initService = 0
+for s in comp.servicesMap():
+    if s.data().type == ServiceType.Init:
+      initService = s.data()
+
+if initService == 0:
+    requestFlag = False
+    nbInputParams = "0"
+    inputDeclare = ""
+    inputNamePtrC = ""
+    inputSize = "0"
+    inputShow = ""
+    inputNamePtr = "NULL"
+    requestNum = "0"
+
+    inputUsage = ""
+    inputA2Type = ""
+    inputFlat = "void"
+    inputFlatDeclare = ""
+    inputFillStruct = ""
+    inputFlatNamePtrC = ""
+    inputVerif = ""
+else:
+    requestFlag = True
+    request = initService.name
+    requestNum = comp.serviceIndex(initService.name)
+
+    if len(initService.inputs()) == 0: # no inputs parameters
+	inputUsage = ""
+	inputA2Type = ""
+	inputFlat = "void"
+	inputFlatDeclare = ""
+	inputFillStruct = ""
+	inputFlatNamePtrC = ""
+	inputVerif = ""
+
+	nbInputParams = "0"
+	inputDeclare = ""
+	inputNamePtrC = ""
+	inputSize = "0"
+	inputShow = ""
+	inputNamePtr = "NULL"
+#	requestNum = "0"  is it a bug ?
+    else:
+	inputName = initService.inputs()[0]
+	inputType = comp.typeFromIdsName(inputName)
+	inputDeclare = inputType.toCType(True) + " " + inputName + ";"
+	inputSize = "sizeof(*" + inputType.toCType(True) + ")"
+# todo: reuse name from print.c
+	inputShow =  "print_" + inputType.toCType(True) + "(stdout, " + ");"
+	inputNamePtr = "&" + inputName
+	inputNamePtrC = inputNamePtr + ","
+
+	nbInputParams = "0"
+	inputUsage = ""
+
+	flatList = flatStruct(inputType, inputName)
+	inputFlatNamePtrC = ""
+	inputFlat = ""
+	first = True
+	for x in flatList:
+	    if not first:
+		inputFlatNamePtrC += ", "
+		inputFlat += ", "
+	    else:
+		first = False
+	    inputFlatNamePtrC += x[1]
+	    inputFlat += x[0].toCType(True) + " " + x[1]
+?>
 /* 
  * Copyright (c) 1993-2004 LAAS/CNRS
  * All rights reserved.
@@ -55,39 +174,54 @@
 #include <errnoLib.h>
 #include <h2initGlob.h>
 
-#define $MODULE$_PROMPT "usage: <!comp.name()!>SendInitRqst ($inputUsage$)\n"
+#define <!upper(comp.name())!>_PROMPT "usage: <!comp.name()!>SendInitRqst (<!inputUsage!>)\n"
 
 /* Inclusions pour acceder au module */
 #include "<!comp.name()!>MsgLib.h"
 
 /*------------------- PROTOTYPE DES FONCTIONS EXPORTEES -------------------*/
 
-STATUS <!comp.name()!>SendInitRqst ( $inputFlat$ );
+STATUS <!comp.name()!>SendInitRqst ( <!inputFlat!> );
 
 /*------------------- PROTOTYPES DES FONCTIONS LOCALES --------------------*/
 
-#if $requestFlag$
+<?
+if requestFlag:?>
 static STATUS <!comp.name()!>InitInitTask (CLIENT_ID *clientId, int size);
 static STATUS <!comp.name()!>InitEnd (CLIENT_ID clientId);
-#endif /* Pas de requete d'init */
+<?
+?>
 
 /*---------------------------   MAIN  ------------------------------------*/
 
 int
 main(int argc, char **argv)
 {
-$inputFlatDeclare$
+<?
+if requestFlag:
+    for x in flatList:
+	print " " + x[0].toCType() + " " + x[1] + ";"
+?>
 
-  if (--argc != $nbInputParams$) {
-    fprintf(stderr, $MODULE$_PROMPT);
+  if (--argc != <!nbInputParams!>) {
+    fprintf(stderr, <!upper(comp.name())!>_PROMPT);
     exit(1);
   }
 
   /* Conversion des parametres */
-$inputA2Type$
-
+<?
+if requestFlag:
+    i = 0
+    for x in flatList:
+	c = convertFun(x[0])
+	if c == "":
+	    print "   " + x[1] + " = "  + "argv[" + str(i) + "];"
+	else:
+	    print "   " + x[1] + " = " + c + "(argv[" + str(i) + "]);"
+	i += 1
+?>
   /* Appel de la fonction d'init */
-  <!comp.name()!>SendInitRqst($inputFlatNamePtrC$);
+  <!comp.name()!>SendInitRqst(<!inputFlatNamePtrC!>);
 
 
   return 0;
@@ -97,16 +231,18 @@ $inputA2Type$
  **   <!comp.name()!>Init - Emission de la requete d'init
  **/
 
-STATUS <!comp.name()!>SendInitRqst ($inputFlat$)
+STATUS <!comp.name()!>SendInitRqst (<!inputFlat!>)
 {
-#if $requestFlag$
+<?
+if requestFlag:
+    ?>
   CLIENT_ID initCId;        /* Id client */
   int bilan=OK;
   int status;
   int rqstId;
   int activity;
-  int size=$inputSize$;
-  $inputDeclare$
+  int size=<!inputSize!>;
+  <!inputDeclare!>
 
   /* Defini la valeur d'un tic (en nombre de tic par seconde) */
   h2initGlob(20);
@@ -116,18 +252,26 @@ STATUS <!comp.name()!>SendInitRqst ($inputFlat$)
     return (ERROR);
 	  
   /* Instanciation de la structure parametre de la requete */
-$inputFillStruct$
+<?
+    for x in flatList:
+	print "   " + inputName + "." + x[1].replace("__", ".") + " = " + x[1] + ";"
+    ?>
   
   /* Affichage de la structure parametre de la requete */
-$inputVerif$
+<?
+    for x in flatList:
+	write("   printf(\"" + inputName + "." + x[1].replace("__", ".") + " = " + formatStringForType(x[0]) + "\\n\", ")
+	print inputName + "." + x[1].replace("__", ".") + ");"
+    ?>
+
   /* Pb: il faut la bibliotheque print.c (possible mais lourd)
      $inputShow$  */
 
   errnoSet(0);
   
   /* Emettre la requete */
-  if ((status = csClientRqstSend (initCId, $requestNum$, 
-				  (void *) $inputNamePtr$,
+  if ((status = csClientRqstSend (initCId, <!requestNum!>, 
+				  (void *) <!inputNamePtr!>,
 				  size, (FUNCPTR) NULL, 
 				  TRUE, 0, 
 				  TIME_WAIT_REPLY, &rqstId)) == ERROR) {
@@ -193,13 +337,15 @@ $inputVerif$
 
   return OK;
 
-#else  /* Pas de requete d'init */
-
+<?
+else:
+    ?>
   printf ("There is no init request\n");
   return OK;
 
-#endif
+<?
 
+?>
 }
 
 
@@ -207,8 +353,9 @@ $inputVerif$
 /*----------------------- ROUTINES LOCALES ---------------------------------*/
 
 
-#if $requestFlag$
-
+<?
+if requestFlag:
+    ?>
 /*****************************************************************************
  *
  *  <!comp.name()!>InitInitTask - Routine d'initialisation de la tache d'essai
@@ -227,14 +374,14 @@ static STATUS <!comp.name()!>InitInitTask (CLIENT_ID *clientId, int size)
   (void) strcpy (mboxName, "t<!comp.name()!>Init");
     
   /* Initialisation des boites aux lettres */
-  if (csMboxInit (mboxName, 0, $MODULE$_CLIENT_MBOX_REPLY_SIZE) != OK) {
+  if (csMboxInit (mboxName, 0, <!upper(comp.name())!>_CLIENT_MBOX_REPLY_SIZE) != OK) {
     h2perror("<!comp.name()!>Init: csMboxInit failed\n");
     return (ERROR);
   }
 
 
   /* S'initialiser comme client */
-  if (csClientInit($MODULE$_MBOX_NAME, 
+  if (csClientInit(<!upper(comp.name())!>_MBOX_NAME, 
 		   size,
 		   sizeof(int),
 		   sizeof(int),
@@ -273,4 +420,6 @@ static STATUS <!comp.name()!>InitEnd (CLIENT_ID initCId)
 }
 
 
-#endif /* Pas de requete d'init */
+<?
+
+?>

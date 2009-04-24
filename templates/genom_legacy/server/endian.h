@@ -1,3 +1,25 @@
+<?
+from string import upper;
+
+def typeProtoPrefix(t):
+    prefix = ""
+    if t.kind() == IdlKind.Struct:
+	prefix = "struct_"
+    elif t.kind() == IdlKind.Enum:
+	prefix = "enum_"
+    elif t.kind() == IdlKind.Typedef:
+	prefix = ""
+    return prefix + t.identifier()
+
+# create a list of out ports
+outports = []
+for p in comp.portsMap():
+    if p.data().type == PortType.Outgoing:
+	outports.append(p.data())
+
+funProto = "extern void endianswap_%s(%s *x, int nDim, int *dims);"
+?>
+
 /*
  * Copyright (c) 2009 LAAS/CNRS
  * All rights reserved.
@@ -27,43 +49,38 @@
  * DAMAGE.
  */
 
-#include <string>
-#include <iostream>
+#ifndef ENDIANSWAP_<!upper(comp.name())!>_H
+#define ENDIANSWAP_<!upper(comp.name())!>_H
 
-#include "parsers/template_info/templateinterpreter.h"
-#include "bindings/tcl/tclinterpreter.h"
-#include "bindings/python/pythoninterpreter.h"
-#include "parsers/genom/driver.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-using namespace std;
-using namespace G3nom;
+#include <portLib.h>
+#include <genom/printScan.h>
+#include <genom/h2endian.h>
+#include "<!comp.name()!>PosterLib.h"
 
-int main(int argc, char* argv[])
-{
-	Interpreter *i;
+<?
+for i in comp.importedComponents():
+    print "#include \"server/" + i + "Endian.h"
+?>
 
-	if (argc > 1) {
-		string s(argv[1]);
-		if (s == "python")
-			i = PythonInterpreter::getInstance();
-		else
-			i = TclInterpreter::getInstance();
-	} else
-		i = TclInterpreter::getInstance();
+/* Protoypes */
 
-	TemplateInterpreter ti;
-	ti.setInterpreter(i);
+<?
+for t in comp.typesVect():
+    print funProto % (typeProtoPrefix(t), t.toCType(True))
+?>
 
-	Driver d;
-	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
-		cout << "Error parsing gen file " << endl;
+/* ======================== ENDIAN DES TYPEDEF ============================= */
 
-	ti.setComponent(&(d.component()));
-/*	i->exportVar("currentTaskName", "Motion");*/
-	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/init.c",
-	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$Init.c");
-// 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/test/template1",
-// 	             "/home/ccpasteur/work/git/g3nom/templates/test/template1.out");
-	return 0;
-}
-// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;
+<?
+typeName = "%s_STR" % (upper(comp.name()))
+print funProto % (typeName, typeName)
+
+for p in outports:
+    typeName = "%s_%s_POSTER_STR" % (upper(comp.name()), upper(p.name))
+    print funProto % (typeName, typeName)
+?>
+
+#endif

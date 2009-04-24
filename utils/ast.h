@@ -170,6 +170,8 @@ class Component
 		int taskIndex(const std::string &name) const;
 		
 		Service::Map& servicesMap();
+		int serviceIndex(const std::string &name) const;
+
 		Port::Map& portsMap() { return ports; }
 		Idl::IdlType::Vector& typesVect() { return m_types; }
 

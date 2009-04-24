@@ -42,6 +42,7 @@ void export_idl()
 	class_<IdlType, IdlType::Ptr>("IdlType")
 	.def("asStructType", &IdlType::asStructType, return_value_policy<reference_existing_object>())
 	.def("asEnumType", &IdlType::asEnumType, return_value_policy<reference_existing_object>())
+	.def("asNamedType", &IdlType::asNamedType, return_value_policy<reference_existing_object>())
 	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
 	.def("toCType", &IdlType::toCType, toCTypeOverloads())
 	.def("unalias", &IdlType::unalias)
@@ -49,13 +50,17 @@ void export_idl()
 	.def("kind", &IdlType::kind);
 
 	class_<StructType, bases<IdlType> >("StructType")
-	.def("member", &StructType::member);
+	.def("member", &StructType::member)
+	.def("members", &StructType::members, return_value_policy<reference_existing_object>());
 
 	class_<EnumType, bases<IdlType> >("EnumType")
 	.def("enumerators", &EnumType::enumerators, return_value_policy<reference_existing_object>());
 
 	class_<TypedefType, bases<IdlType> >("TypedefType")
 	.def("aliasType", &TypedefType::aliasType);
+
+	class_<NamedType, bases<IdlType> >("NamedType")
+	.def("type", &NamedType::type);
 
 	enum_<IdlType::Kind>("IdlKind")
 	.value("Null", IdlType::Null)
@@ -67,6 +72,7 @@ void export_idl()
 	.value("ULong", IdlType::ULong)
 	.value("ULongLong", IdlType::ULongLong)
 	.value("Float", IdlType::Float)
+	.value("Double", IdlType::Double)
 	.value("Fixed", IdlType::Fixed)
 	.value("Boolean", IdlType::Boolean)
 	.value("Char", IdlType::Char)
@@ -79,5 +85,6 @@ void export_idl()
 	.value("Union", IdlType::Union)
 	.value("Enum", IdlType::Enum)
 	.value("Sequence", IdlType::Sequence)
-	.value("Typedef", IdlType::Typedef);
+	.value("Typedef", IdlType::Typedef)
+	.value("Named", IdlType::Named);
 }

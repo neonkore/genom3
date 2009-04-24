@@ -76,6 +76,7 @@ class IdlType
 
 		// casting functions
 		template<class T> T* asType();
+		NamedType* asNamedType();
 		StructType* asStructType();
 		EnumType* asEnumType();
 		TypedefType* asTypedefType();

@@ -1,5 +1,5 @@
 <?
-import string; from string import *
+from string import *
 # create a list of out ports
 outports = []
 for p in comp.portsMap():

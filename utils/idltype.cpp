@@ -163,6 +163,13 @@ TypedefType* IdlType::asTypedefType()
 	return static_cast<TypedefType*>(this);
 }
 
+NamedType* IdlType::asNamedType()
+{
+	if(m_kind != Named)
+		return 0;
+	return static_cast<NamedType*>(this);
+}
+
 IdlType::Ptr IdlType::unalias()
 {
 	switch(m_kind) {

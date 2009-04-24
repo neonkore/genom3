@@ -4,6 +4,8 @@ main:
   "server/connectLib.c" -> "server/$$ConnectLib.c" DONE
   "server/error.c" -> "server/$$Error.c" DONE
   "server/error.h" -> "server/$$Error.h"
+  "server/endian.c" -> "server/$$Endian.c" DONE sauf tableaux
+  "server/endian.h" -> "server/$$Endian.h" DONE
   "server/header.h" -> "server/$$Header.h" DONE
   "server/init.h" -> "server/$$Init.h"
   "server/Makefile.in" DONE

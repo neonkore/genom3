@@ -55,4 +55,6 @@ void export_containers()
 	.def(map_indexing_suite<Codel::Map, true>());
 	class_<Port::Map>("PortMap")
 	.def(map_indexing_suite<Port::Map, true>());
+	class_<IdlType::Map>("IdlTypeMap")
+	.def(map_indexing_suite<IdlType::Map, true>());
 }

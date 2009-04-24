@@ -156,6 +156,16 @@ int Component::taskIndex(const std::string &name) const
 	}
 }
 
+int Component::serviceIndex(const std::string &name) const
+{
+	int i = 0;
+	Service::Map::const_iterator it = services.begin();
+	for(; it != services.end(); ++it, ++i) {
+		  if(it->first == name)
+			  return i;
+	}
+}
+
 IdlType::Ptr Component::typeFromName(const std::string &name)
 {
 	cout << "Searching type " << name << endl;

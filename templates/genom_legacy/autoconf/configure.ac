@@ -1,14 +1,4 @@
 <?
-if shouldGenerateOpenPRS == "":
-  genOpenprs = "yes"
-else:
-  genOpenprs = "no"
-
-if shouldGenerateTcl == "":
-  genTcl = "yes"
-else:
-  genTcl = "no"
-
 if comp.language == "C++":
     lang_cxx = "yes"
 else:
@@ -98,7 +88,7 @@ AC_SUBST(GENOM_CFLAGS)
 AC_SUBST(GENOM_LIBS)
 
 dnl Tcl
-ifelse([<!genTcl!>], [yes], [ROBOT_LIB_TCL(@TCL_CONFIG_PATH@)], [])
+ifelse([<!genTcl!>], [yes], [ROBOT_LIB_TCL(/usr/lib/)], [])
 
 dnl transgen and oprs
 ifelse([<!genOpenprs!>], [yes], [

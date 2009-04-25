@@ -31,8 +31,8 @@ host_cpu=	@host_cpu@
 
 abs_top_srcdir=   @abs_top_srcdir@
 abs_top_builddir= @abs_top_builddir@
-module=		$module$
-codelsdir=	$codelsDir$
+module=		<!comp.name()!>
+codelsdir=	codels
 serverdir=	server
 autoconfdir=	autoconf
 
@@ -40,7 +40,7 @@ prefix=		@prefix@
 exec_prefix=	@exec_prefix@
 bindir=		@bindir@
 libdir=		@libdir@
-includedir=	@includedir@/$pkgname$
+includedir=	@includedir@/<!pkgname!>
 datarootdir=	@datarootdir@
 datadir=	@datadir@/modules
 
@@ -75,33 +75,44 @@ INSTALL_DATA=	$(INSTALL) -m 644
 # --- Libraries ---------------------------------------------------------
 
 # executables or modules
-MODULE_BIN=	$module$$(BINEXT)
-INIT_BIN=	$module$SendInitRqst$(BINEXT)
-TEST_BIN=	$module$Test$(BINEXT)
+MODULE_BIN=	<!comp.name()!>$(BINEXT)
+INIT_BIN=	<!comp.name()!>SendInitRqst$(BINEXT)
+TEST_BIN=	<!comp.name()!>Test$(BINEXT)
 
 # client libraries. These are versioned using the abi_version in the .gen
 ABI_VERSION_INFO=	@ABI_VERSION_INFO@
-CLIENT_LIB=		lib$module$Client$(LIBEXT)
-TCLCLIENT_LIB=		lib$module$TclServ$(LIBEXT)
-OPENPRSCLIENT_LIB=	lib$module$Openprs$(LIBEXT)
+CLIENT_LIB=		lib<!comp.name()!>Client$(LIBEXT)
+TCLCLIENT_LIB=		lib<!comp.name()!>TclServ$(LIBEXT)
+OPENPRSCLIENT_LIB=	lib<!comp.name()!>Openprs$(LIBEXT)
 
 # Use that to link to our client library
 MY_CLIENT_LIB=          $(GENOM_LIBS) $(abs_top_builddir)/server/$(OBJDIR)/$(CLIENT_LIB)
 
 # libtool 'helper' libs -- static archives. Not installed
-MODULE_LIB=		lib$module$Server.la
-USER_LIB=		lib$module$Codels.la
-POSTERWRITE_LIB=	lib$module$PosterWrite.la
+MODULE_LIB=		lib<!comp.name()!>Server.la
+USER_LIB=		lib<!comp.name()!>Codels.la
+POSTERWRITE_LIB=	lib<!comp.name()!>PosterWrite.la
 
 # --- Servers -----------------------------------------------------------
-$genomPackages$
+<? #$genomPackages$
+genomIncludes =""
+genomLibs=""
+for i in comp.importedComponents():
+    name = upper(i)
+    genomIncludes += " $(<!upper(i)!>_CFLAGS)"
+    genomLibs += " $(<!upper(i)!>_LIBS)"
+    ?>
+<!name!>_CFLAGS   = 	@<!name!>_CFLAGS@
+<!name!>_LIBS     = 	@<!name!>_LIBS@
+<?
+?>
 
 # --- Libraries required ------------------------------------------------
 
-SERVERS_CLIENT_LIB=  $serverLibs$
+SERVERS_CLIENT_LIB=  <!genomLibs!>
 SERVERS_ENDIAN_LIB=  $(SERVERS_CLIENT_LIB)
 
-CODEL_LIB=$codelLibs$
+CODEL_LIB=
 
 
 # --- Flags -------------------------------------------------------------
@@ -111,8 +122,8 @@ OSAPI?=		@OSAPI@
 
 ENDIANNESS=	@ENDIANNESS@
 
-GENOM_DEFINES=  $genomDefines$
-GENOM_INCLUDES= $genomIncludes$
+GENOM_DEFINES=  
+GENOM_INCLUDES= <!genomIncludes!>
 # Keep this until all codel have removed their #ifndef UNIX... stuff.
 CPPFLAGS=	@CPPFLAGS@ -DUNIX
 CFLAGS=		@CFLAGS@
@@ -127,14 +138,14 @@ KERNEL_INC=	@KERNEL_INC@
 
 XENO_CONFIG=	@XENO_CONFIG@
 
-$genTcl$TCL_CPPFLAGS=	@TCL_CPPFLAGS@
-$genTcl$TCL_LDFLAGS=	@TCL_LDFLAGS@ @TCL_LIB_FLAG@ @TCL_LIBS@
+<!shouldGenerateTcl!> TCL_CPPFLAGS=	@TCL_CPPFLAGS@
+<!shouldGenerateTcl!> TCL_LDFLAGS=	@TCL_LDFLAGS@ @TCL_LIB_FLAG@ @TCL_LIBS@
 
-$genOpenprs$TRANSGEN_CFLAGS = @TRANSGEN_CFLAGS@
-$genOpenprs$TRANSGEN_LIBS = @TRANSGEN_LIBS@
+<!shouldGenerateOpenPRS!> TRANSGEN_CFLAGS = @TRANSGEN_CFLAGS@
+<!shouldGenerateOpenPRS!> TRANSGEN_LIBS = @TRANSGEN_LIBS@
 
-$genOpenprs$OPENPRS_CFLAGS  = @OPENPRS_CFLAGS@
-$genOpenprs$OPENPRS_LIBS    = @OPENPRS_LIBS@
+<!shouldGenerateOpenPRS!>OPENPRS_CFLAGS  = @OPENPRS_CFLAGS@
+<!shouldGenerateOpenPRS!>OPENPRS_LIBS    = @OPENPRS_LIBS@
 
 GENOM_CFLAGS=	@GENOM_CFLAGS@
 GENOM_LIBS=	@GENOM_LIBS@

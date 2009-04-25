@@ -44,7 +44,7 @@ for t in comp.typesVect():
 void printXML_<!typeProtoPrefix(t)!>( FILE *out, char *name,
      <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
 {
-  char *indstr;"
+  char *indstr;
   indstr=strdup(indentStr(nDim?++indent:indent));
   indent++;
   FOR_NB_elt(nDim,dims) {

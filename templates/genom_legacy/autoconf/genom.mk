@@ -27,9 +27,9 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-GENOM=		$genomBin$
-GENFILE=	$genomFile$
-GENFLAGS=	$genomFlags$
+GENOM=		genom
+GENFILE=	<!comp.name()!>.gen 
+GENFLAGS=	
 
 # --- genom -------------------------------------------------------------
 

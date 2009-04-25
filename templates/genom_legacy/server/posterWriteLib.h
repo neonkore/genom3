@@ -39,7 +39,7 @@
 for p in outports:
 # todo create a write function for each member of poster
     ?>
-extern STATUS <!comp.name()!><!p.name!>PosterWrite ( POSTER_ID pid, <!upper(comp.name())!>_<!upper(p.name())!>_POSTER_STR *x );
+extern STATUS <!comp.name()!><!p.name!>PosterWrite ( POSTER_ID pid, <!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR *x );
 <?
 ?>
 

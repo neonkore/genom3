@@ -159,3 +159,15 @@ periodicFlag = isPeriodic()
 shouldGenerateOpenPRS = "#" # do not generate openrps related code
 shouldGenerateTcl = "#"
 shouldGenerateServer = ""
+pkgname = comp.name()
+
+if shouldGenerateOpenPRS == "":
+  genOpenprs = "yes"
+else:
+  genOpenprs = "no"
+
+if shouldGenerateTcl == "":
+  genTcl = "yes"
+else:
+  genTcl = "no"
+

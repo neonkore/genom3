@@ -65,7 +65,7 @@ for e in errorSet:
 <? # $listStdFailures$
 i = 1
 for s in stdGenomErrors:
-    print "#define S_stdGenoM_" + s + " " + str(encodeError(i))
+    print "#define S_" + comp.name() + "_S_stdGenoM_" + s + " " + str(encodeError(i))
     i += 1
 ?>
 
@@ -77,7 +77,7 @@ out = ""
 for e in errorSet:
     out += "   {\"" + e + "\", " + str(i) +"}, \\\n"
     i += 1
-print out[:-4] + " \\ \n}"
+print out[:-4] + " \\\n}"
 ?>
 
 extern int <!comp.name()!>RecordH2errMsgs(void);

@@ -46,19 +46,21 @@ main:
   "server/posterLibStruct.h" -> "server/$$PosterLibStruct.h" 
   "server/type.h" -> "server/$$Type.h" 
   "server/test.c" -> "server/$$Test.c"
-;
-
-/*  "server/posterShowLib.c" -> "server/$$PosterShowLib.c"
+  "server/posterShowLib.c" -> "server/$$PosterShowLib.c"
   "server/posterShowLib.h" -> "server/$$PosterShowLib.h"
+  "server/posterReadLib.c" -> "server/$$PosterReadLib.c"
+  "server/posterReadLib.h" -> "server/$$PosterReadLib.h"
+  "server/posterWriteLib.c" -> "server/$$PosterWriteLib.c"
+  "server/posterWriteLib.h" -> "server/$$PosterWriteLib.h"
   "server/posterXMLLib.c" -> "server/$$PosterXMLLib.c"
   "server/posterXMLLib.h" -> "server/$$PosterXMLLib.h"
-  "server/print.h" -> "server/$$Print.h" DONE
-  "server/print.c" -> "server/$$Print.c" --> totalement genere par le programme
+  "server/print.h" -> "server/$$Print.h"
+  "server/print.c" -> "server/$$Print.c"
   "server/printXML.h" -> "server/$$PrintXML.h"
-  "server/printXML.c" -> "server/$$PrintXML.c" --> totalement genere par le programme
+  "server/printXML.c" -> "server/$$PrintXML.c"
   "server/scan.h" -> "server/$$Scan.h"
-  "server/scan.c" -> "server/$$Scan.c" --> totalement genere par le programme */
-
+  "server/scan.c" -> "server/$$Scan.c"
+;
 
 task:
   "server/execTask.c" -> "server/$component$$task$.c"

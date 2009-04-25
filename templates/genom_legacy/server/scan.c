@@ -44,7 +44,7 @@ for t in comp.typesVect():
 void scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
        <!t.toCType(True)!> *x, int indent, int nDim, int *dims );
 {
-  char *indstr;"
+  char *indstr;
   indstr=strdup(indentStr(nDim?++indent:indent));
   indent++;
   FOR_NB_elt(nDim,dims) {

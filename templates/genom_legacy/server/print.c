@@ -44,7 +44,7 @@ for t in comp.typesVect():
 void print_<!typeProtoPrefix(t)!>( FILE *out,
      <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
 {
-  char *indstr;"
+  char *indstr;
   indstr=strdup(indentStr(nDim?++indent:indent));
   indent++;
   FOR_NB_elt(nDim,dims) {
@@ -72,6 +72,7 @@ void print_<!typeProtoPrefix(t)!>( FILE *out,
 	default:
 	    fprintf(out, "unknown enum value %d\n", *(x+elt));
     } /* switch */
+<?
     ?>
 
   } END_FOR

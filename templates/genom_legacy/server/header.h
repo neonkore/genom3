@@ -54,8 +54,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "<!comp.name()!>PosterWriteLibProto.h"
-#include "<!comp.name()!>PosterReadLibProto.h"
+#include "<!comp.name()!>PosterWriteLib.h"
+#include "<!comp.name()!>PosterReadLib.h"
 #ifdef __cplusplus
 }
 #endif

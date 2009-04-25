@@ -83,13 +83,13 @@ extern <!internalDataType!> *<!comp.name()!>DataStrId;
 
 <?
 # $listPosterId$
-#for t in comp.tasksMap():
-#	i=0
-#	for p in comp.outPorts():
+for t in comp.tasksMap():
+	i=0
+	for p in outports:
 #	  if p.execTask() == t:
-#	    print "#define %s_%s_POSTER_ID " % (comp.name(), p.name)
-#	    print "(%sCntrlStrId->execTaskTab[%s_%s_NUM].posterId[%d])\n" % (comp.name(), comp.name(), t.name, i)
-#	    i = i+1
+	    write( "#define %s_%s_POSTER_ID " % (upper(comp.name()), upper(p.name)) )
+	    print "(%sCntrlStrId->execTaskTab[%s_%s_NUM].posterId[%d])\n" % (comp.name(), upper(comp.name()), upper(t.data().name), i)
+	    i = i+1
 ?>
 <?
 # $listExecTaskNum$
@@ -105,18 +105,6 @@ extern "C" {
 #endif
 
 <?
-# creates the signature of the function corresponding to a codel
-def codel_signature(codel):
-  proto = codel.name + "_codel(";
-  for type in codel.inTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto = proto + idstype.toCType() + " *in_" + type + ", ";
-  for type in codel.outTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto = proto + idstype.toCType() + " *out_" + type + ", ";
-  proto = proto + "int *report)"
-  return proto
-
 # $listUserFuncProto$
 for s in comp.servicesMap():
     for codel in s.data().codels():

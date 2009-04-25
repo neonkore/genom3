@@ -242,7 +242,14 @@ if currentTask.hasCodel("end"):
 ?>
       
       /* free posters, clients, mailboxes */
-      $listPosterDelete$
+<? #      $listPosterDelete$
+i = -1
+for port in outports:
+    i += 1
+    ?>
+    if (EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>] != (POSTER_ID)NULL)
+	posterDelete(EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>]);
+
 <?
 if currentTask.period == 0:?>
       /* free device created to manage h2evn required to aperiodic tasks */
@@ -279,7 +286,7 @@ if currentTask.hasCodel("main"): ?>
 
     CURRENT_ACTIVITY_NUM(<!currentTaskNum!>) = -1;
     EXEC_TASK_BILAN(<!currentTaskNum!>) = OK;
-    if ($cFuncExecName$ (&EXEC_TASK_BILAN(<!currentTaskNum!>)) != OK) {
+    if (<!currentTask.codel("main").name!> (&EXEC_TASK_BILAN(<!currentTaskNum!>)) != OK) {
       logMsg("<!comp.name()!><!currentTask.name!>: permanent activity error\n");
       <!comp.name()!><!currentTask.name!>Suspend (TRUE);
     }
@@ -370,7 +377,7 @@ if currentTask.hasCodel("main2"): ?>
 
     CURRENT_ACTIVITY_NUM(<!currentTaskNum!>) = -1;
     EXEC_TASK_BILAN(<!currentTaskNum!>) = OK;
-    if ($cFuncExecName2$ (&EXEC_TASK_BILAN(<!currentTaskNum!>)) != OK) {
+    if (<!currentTask.codel("main2").name!> (&EXEC_TASK_BILAN(<!currentTaskNum!>)) != OK) {
       logMsg("<!comp.name()!><!currentTask.name!>: permanent activity 2 error\n");
       <!comp.name()!><!currentTask.name!>Suspend (TRUE);
     }
@@ -385,7 +392,7 @@ if currentTask.hasCodel("main2"): ?>
     CURRENT_ACTIVITY_NUM(<!currentTaskNum!>) = -2;
 
     /* update "auto" posters */
-    $listPosterUpdateFunc$
+//   $listPosterUpdateFunc$
     
     /* Time elapsed since previous read */
     moduleEvent.eventType = EXEC_END_EVENT;
@@ -523,11 +530,42 @@ else:?>
   EXEC_TASK_WAKE_UP_FLAG(<!currentTaskNum!>) = FALSE;
 
   /* Creer le poster */
-  $listPosterCreate$
+<?  # $listPosterCreate$
+i = -1
+for p in outports:
+    i += 1
+    ?>
+  if (posterCreate(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_NAME,
+	sizeof(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR),
+	&(EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>])) != OK) {
+     logMsg("<!comp.name()!><!currentTaskName!>InitTaskFunc: cannot create poster <!p.name!>\n");
+     return(ERROR);
+  }
+  {
+       int size = sizeof(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR);
+       char *tmp = malloc(size);
+       if (tmp == NULL) {
+          fprintf (stderr, "<!comp.name()!><!currentTaskName!>InitTaskFunc : not enough mem to init poster <!p.name!>\n");
+       }
+       else {
+          memset(tmp, 0, size);
+          if (posterWrite(EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>], 0, tmp, size) != size) {
+             fprintf (stderr, "<!comp.name()!><!currentTaskName!>InitTaskFunc : cannot init poster <!p.name!>\n");
+             free(tmp);
+             return(ERROR);
+          }
+          free(tmp);
+       }
+  }
+<?
+?>
+
   LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: posters created\n"));
       
   /* S'initialiser comme client des Posters */
-  $listPosterInit$
+<? # $listPosterInit$ 
+?>
+
   LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: client posters initialized\n"));
 
   /* Enregister le nom de la tache */
@@ -538,7 +576,7 @@ if currentTask.hasCodel("init"):?>
     /* Execution de la fonction d'initialisation */
   if (<!currentTask.codel("init").name!> (&bilan) != OK) {
     errnoSet(bilan);
-    h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: $cFuncExecInitName$");
+    h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: <!currentTask.codel("init").name!>");
     return (ERROR);
   }
 <?

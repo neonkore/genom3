@@ -63,10 +63,10 @@ int main(int argc, char* argv[])
 // 	ti.setSourceDirectory("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/");
 // 	ti.setOutputDirectory("/home/ccpasteur/work/git/g3nom/output/genom_legacy/");
 // 	ti.parseInfoFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/template.info");
-/*	i->exportVar("currentTaskName", "Motion");*/
+	i->exportVar("currentTaskName", "MotionTask");
  	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
- 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/test.c",
- 	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$Test.c");
+ 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/execTask.c",
+ 	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$MotionTask.cpp.");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

@@ -131,6 +131,18 @@ def findServiceWithSameOutput(service, inputName):
 	    l.append(ss)
     return l
 
+# creates the signature of the function corresponding to a codel
+def codel_signature(codel):
+  proto = codel.name + "_codel(";
+  for type in codel.inTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto = proto + idstype.toCType() + " *in_" + type + ", ";
+  for type in codel.outTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto = proto + idstype.toCType() + " *out_" + type + ", ";
+  proto = proto + "int *report)"
+  return proto
+
 # other vars
 nbServices = len(comp.servicesMap())
 abortRequestNum = nbServices + 1;

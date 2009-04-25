@@ -143,6 +143,13 @@ def codel_signature(codel):
   proto = proto + "int *report)"
   return proto
 
+def nbExecService():
+    count = 0
+    for s in comp.servicesMap():
+	if s.data().type != ServiceType.Control:
+	    count += 1
+    return count
+
 # other vars
 nbServices = len(comp.servicesMap())
 abortRequestNum = nbServices + 1;

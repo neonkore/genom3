@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
 // 	ti.parseInfoFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/template.info");
 // 	i->exportVar("currentTaskName", "MotionTask");
  	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
- 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/scan.c",
- 	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$Scan.c");
+ 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/posterXMLLib.c",
+ 	             "/home/ccpasteur/work/git/g3nom/templates/test/server/$$PosterXMLLib.c");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

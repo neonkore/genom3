@@ -31,12 +31,22 @@
 /*------------------  Fichier généré automatiquement ------------------*/
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#ifndef $module$_POSTER_XML_LIB_H
-#define $module$_POSTER_XML_LIB_H
+#ifndef <!comp.name()!>_POSTER_XML_LIB_H
+#define <!comp.name()!>_POSTER_XML_LIB_H
 
 #include "genom/posterXMLLib.h"
 
-#include "$module$PrintXML.h"
-#include "$module$PosterLib.h"
+#include "<!comp.name()!>PrintXML.h"
+#include "<!comp.name()!>PosterLib.h"
 
 /* Prototypes */
+void webdemo(FILE *f, int argc, char **argv, char **argn);
+extern STATUS <!comp.name()!>CntrlPosterXML (FILE *f);
+extern STATUS <!comp.name()!>CntrlPosterActivityXML (FILE *f);
+<?
+for p in outports:
+    ?>
+extern STATUS <!comp.name()!><!p.name!>PosterXML (FILE *f);
+<?
+?>
+#endif /* DEMO_POSTER_XML_LIB_H */

@@ -31,9 +31,20 @@
 /*------------------  Fichier généré automatiquement ------------------*/
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#ifndef $module$_POSTER_SHOW_LIB_H
-#define $module$_POSTER_SHOW_LIB_H
+#ifndef <!comp.name()!>_POSTER_SHOW_LIB_H
+#define <!comp.name()!>_POSTER_SHOW_LIB_H
 
-#include "$module$PosterLib.h"
+#include "<!comp.name()!>PosterLib.h"
 
 /* Prototypes */
+extern STATUS <!comp.name()!>CntrlPosterShow ( void );
+extern STATUS <!comp.name()!>CntrlPosterActivityShow ( void );
+<?
+for p in outports:
+# todo create a show function for each member of poster
+    ?>
+extern STATUS <!comp.name()!><!p.name!>PosterShow ( void );
+<?
+?>
+
+#endif /* <!comp.name()!>_POSTER_SHOW_LIB_H */

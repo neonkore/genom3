@@ -33,7 +33,7 @@
  
 /****************************************************************************/
 /*   LABORATOIRE D'AUTOMATIQUE ET D'ANALYSE DE SYSTEMES - LAAS / CNRS       */
-/*   PROJET HILARE II - INTERACTION PAR POSTER AVEC LE MODULE  $MODULE$     */
+/*   PROJET HILARE II - INTERACTION PAR POSTER AVEC LE MODULE  <!upper(comp.name())!>     */
 /*   FICHIER SOURCE : "<!comp.name()!>PosterLib.c"                                 */
 /****************************************************************************/
 
@@ -51,12 +51,20 @@
 #include "<!comp.name()!>Print.h"
 
 
-  $execTaskNameTabDeclare$
+<?
+# $execTaskNameTabDeclare$
+write("static char *" + comp.name() + "ExecTaskNameTab[] = {\n");
+task_list = ""
+for t in comp.tasksMap():
+    task_list += "\"" + t.data().name + "\",\n"
+print task_list[:-2] # remove the last ',' 
+print "};"
+?>
 
 /*  prototypes de la bibliotheque printState */
 extern char const * h2GetEvnStateString(int num);
 
-static void <!comp.name()!>ActivityShow ($MODULE$_CNTRL_STR *sdic);
+static void <!comp.name()!>ActivityShow (<!upper(comp.name())!>_CNTRL_STR *sdic);
 
 
 /* ---------------- LE POSTER DE CONTROLE ------------------------------ */
@@ -70,11 +78,11 @@ static void <!comp.name()!>ActivityShow ($MODULE$_CNTRL_STR *sdic);
 STATUS <!comp.name()!>CntrlPosterShow ()
 {
   char strmsg[64];
-  $MODULE$_CNTRL_STR *sdic;
+  <!upper(comp.name())!>_CNTRL_STR *sdic;
   int i;
 
   /* Lecture de la SDI de controle */
-  sdic = ($MODULE$_CNTRL_STR *)malloc(sizeof($MODULE$_CNTRL_STR));
+  sdic = (<!upper(comp.name())!>_CNTRL_STR *)malloc(sizeof(<!upper(comp.name())!>_CNTRL_STR));
   if (sdic == NULL) {
     h2perror ("<!comp.name()!>CntrlPosterShow");
     return ERROR;
@@ -95,7 +103,7 @@ STATUS <!comp.name()!>CntrlPosterShow ()
 	  h2getErrMsg(M_CNTRL_TASK_BILAN(sdic), strmsg, 64));
   
   /* Taches d'execution */
-  for (i=0; i<$MODULE$_NB_EXEC_TASK; i++) {
+  for (i=0; i<<!upper(comp.name())!>_NB_EXEC_TASK; i++) {
     printf (" %d:%-15s   %-5s ",  
 	    i, <!comp.name()!>ExecTaskNameTab[i],
 	    M_EXEC_TASK_STATUS(sdic,i) == OK ? "OK": "ERROR");
@@ -122,10 +130,10 @@ STATUS <!comp.name()!>CntrlPosterShow ()
 
 STATUS <!comp.name()!>CntrlPosterActivityShow ()
 {
-  $MODULE$_CNTRL_STR *sdic;
+  <!upper(comp.name())!>_CNTRL_STR *sdic;
 
   /* Lecture de la SDI de controle */
-  sdic = ($MODULE$_CNTRL_STR *)malloc(sizeof($MODULE$_CNTRL_STR));
+  sdic = (<!upper(comp.name())!>_CNTRL_STR *)malloc(sizeof(<!upper(comp.name())!>_CNTRL_STR));
   if (sdic == NULL) {
     h2perror ("<!comp.name()!>CntrlPosterActivityShow");
     return ERROR;
@@ -142,12 +150,29 @@ STATUS <!comp.name()!>CntrlPosterActivityShow ()
 }
 
 /* Fonciton locale d'affichage des activitées */
-static void <!comp.name()!>ActivityShow ($MODULE$_CNTRL_STR *sdic)
+static void <!comp.name()!>ActivityShow (<!upper(comp.name())!>_CNTRL_STR *sdic)
 {
-#define $MODULE$_NB_RQST_EXEC $nbExecRqst$
-#if $MODULE$_NB_RQST_EXEC != 0
+#define <!upper(comp.name())!>_NB_RQST_EXEC <!nbExecService()!>
+#if <!upper(comp.name())!>_NB_RQST_EXEC != 0
 
-  $requestNameTabDeclare$
+<? #  $requestNameTabDeclare$
+write("static char *" + comp.name() + "ExecRqstNameTab[] = {\n");
+service_list = ""
+for s in comp.servicesMap():
+    if s.data().type != ServiceType.Control:
+	service_list += "\"" + s.data().name + "\",\n"
+print service_list[:-2] # remove the last ',' 
+print "};"
+
+print "static int " + comp.name() + "TabRequestNum[] = {"
+i = 0
+l = ""
+for s in comp.servicesMap(): 
+    if s.data().type != ServiceType.Control:
+	l +=  str(i) + ", "
+    i += 1
+print l[:-2] + "};"
+?>
   int i,oneActivity=FALSE;
   ACTIVITY_EVENT evn;
   ACTIVITY_STATE status;
@@ -168,7 +193,7 @@ static void <!comp.name()!>ActivityShow ($MODULE$_CNTRL_STR *sdic)
       /* Identification de la requete */
       rqst=0;
       while(<!comp.name()!>ExecRqstNumTab[rqst] != M_ACTIVITY_RQST_TYPE(sdic,i) 
-	    && rqst<$MODULE$_NB_RQST_EXEC)
+	    && rqst<<!upper(comp.name())!>_NB_RQST_EXEC)
 	rqst++;
 
       if (status != ETHER) 
@@ -179,10 +204,10 @@ static void <!comp.name()!>ActivityShow ($MODULE$_CNTRL_STR *sdic)
 
 	      M_ACTIVITY_ID(sdic,i), 
 
-	      rqst == $MODULE$_NB_RQST_EXEC ? 
+	      rqst == <!upper(comp.name())!>_NB_RQST_EXEC ? 
 	      M_ACTIVITY_RQST_TYPE(sdic,i) : <!comp.name()!>ExecRqstNumTab[rqst],
 
-	      rqst == $MODULE$_NB_RQST_EXEC?
+	      rqst == <!upper(comp.name())!>_NB_RQST_EXEC?
 	      "Unknown" : <!comp.name()!>ExecRqstNameTab[rqst], 
 	      
 	      M_ACTIVITY_TASK_NUM(sdic,i) == -1 ? 
@@ -198,8 +223,33 @@ static void <!comp.name()!>ActivityShow ($MODULE$_CNTRL_STR *sdic)
 
   }	/* for */
   if (!oneActivity) printf ("  No activity\n");
-#endif /* $MODULE$_NB_RQST_EXEC != 0 */
+#endif /* <!upper(comp.name())!>_NB_RQST_EXEC != 0 */
 }
 
 /* ---------------- LES POSTERS FONCTIONNELS ------------------------------ */
 
+<?
+for p in outports:
+    poster_type = upper(comp.name()) + "_" + upper(p.name) + "_POSTER_STR"
+    ?>
+/* --  <!p.name!> ------------------------------------------------- */
+
+STATUS <!comp.name()!><!p.name!>PosterShow(void)
+{
+  <!poster_type!> *x;
+
+  if ((x = (<!poster_type!> *)malloc(sizeof(* x))) == NULL) {
+     h2perror("<!comp.name()!><!p.name!>PosterShow");
+     return ERROR;
+  }
+  if (<!comp.name()!><!p.name!>PosterRead(x) == ERROR) {
+     h2perror("<!comp.name()!><!p.name!>PosterShow");
+     free(x);
+     return ERROR;
+  }
+  print_struct_<!poster_type!>(stdout, x, 0, 0, NULL, stdin);
+  free(x);
+  return OK;
+}
+<?
+?>

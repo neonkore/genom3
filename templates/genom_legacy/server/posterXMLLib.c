@@ -48,12 +48,26 @@
 /*  prototypes de la bibliotheque printState */
 extern char const * h2GetEvnStateString(int num);
 
-  $execTaskNameTabDeclare$
-
+<?
+# $execTaskNameTabDeclare$
+write("static char *" + comp.name() + "ExecTaskNameTab[] = {\n");
+task_list = ""
+for t in comp.tasksMap():
+    task_list += "\"" + t.data().name + "\",\n"
+print task_list[:-2] # remove the last ',' 
+print "};"
+?>
 
 static GENOM_POSTER_XML tabPosterXML[] = {
 {"Cntrl", "", <!comp.name()!>CntrlPosterXML},
-$tabPosterXML$};
+<? #$tabPosterXML$
+l = ""
+nbPosterXML = 1
+for p in outports:
+    l += "{\"%s\", \"\", %s%sPosterXML},\n" % (p.name, comp.name(), p.name)
+    nbPosterXML += 1
+print l[:-2] + "\n};"
+?>
 
 
 /*****************************************
@@ -75,12 +89,12 @@ web<!comp.name()!>(FILE *f, int argc, char **argv, char **argn)
   xmlBalise("errorParam",BEGIN_BALISE,f,1);
 
   /* get parameters */
-  poster = getPosterXML(f, argc, argv, argn, $nbPosterXML$, tabPosterXML);
+  poster = getPosterXML(f, argc, argv, argn, <!nbPosterXML!>, tabPosterXML);
 
   fprintfBuf(f, "</errorParam>\n");
 
   if (poster == -2) {
-    posterListXML(f, $nbPosterXML$, tabPosterXML);
+    posterListXML(f, <!nbPosterXML!>, tabPosterXML);
   }
   else if (poster != -1) {
     tabPosterXML[poster].posterXMLFunc(f);
@@ -93,12 +107,30 @@ web<!comp.name()!>(FILE *f, int argc, char **argv, char **argn)
 /* ---------------- LE POSTER DE CONTROLE ------------------------------ */
 
 static void 
-<!comp.name()!>ActivitiesXML (FILE *f, $MODULE$_CNTRL_STR *sdic)
+<!comp.name()!>ActivitiesXML (FILE *f, <!upper(comp.name())!>_CNTRL_STR *sdic)
 {
-#define $MODULE$_NB_RQST_EXEC $nbExecRqst$
-#if $MODULE$_NB_RQST_EXEC != 0
+#define <!upper(comp.name())!>_NB_RQST_EXEC <!nbExecService()!>
+#if <!upper(comp.name())!>_NB_RQST_EXEC != 0
 
-  $requestNameTabDeclare$
+<? #  $requestNameTabDeclare$
+write("static char *" + comp.name() + "ExecRqstNameTab[] = {\n");
+service_list = ""
+for s in comp.servicesMap():
+    if s.data().type != ServiceType.Control:
+	service_list += "\"" + s.data().name + "\",\n"
+print service_list[:-2] # remove the last ',' 
+print "};"
+
+print "static int " + comp.name() + "TabRequestNum[] = {"
+i = 0
+l = ""
+for s in comp.servicesMap(): 
+    if s.data().type != ServiceType.Control:
+	l +=  str(i) + ", "
+    i += 1
+print l[:-2] + "};"
+?>
+
   int i;
   ACTIVITY_EVENT evn;
   ACTIVITY_STATE status;
@@ -122,11 +154,11 @@ static void
       /* find the name */
       rqst=0;
       while(<!comp.name()!>ExecRqstNumTab[rqst] != M_ACTIVITY_RQST_TYPE(sdic,i) 
-	    && rqst<$MODULE$_NB_RQST_EXEC)
+	    && rqst<<!upper(comp.name())!>_NB_RQST_EXEC)
 	rqst++;
       xmlBalise("name", BEGIN_BALISE, f, 2);
       fprintf(f, "%s", 
-	  rqst == $MODULE$_NB_RQST_EXEC?
+	  rqst == <!upper(comp.name())!>_NB_RQST_EXEC?
 	  "Unknown" : <!comp.name()!>ExecRqstNameTab[rqst]);
       xmlBalise("name", TERMINATE_BALISE, f, 0);
       
@@ -151,7 +183,7 @@ static void
 
   }	/* for */
 
-#endif /* $MODULE$_NB_RQST_EXEC != 0 */
+#endif /* <!upper(comp.name())!>_NB_RQST_EXEC != 0 */
 }
 
 /* ----------------------------------------------------------------------
@@ -162,12 +194,12 @@ static void
 
 STATUS <!comp.name()!>CntrlPosterXML (FILE *f)
 {
-  $MODULE$_CNTRL_STR *sdic;
+  <!upper(comp.name())!>_CNTRL_STR *sdic;
   int i;
   char strerr[64];
 
   /* Read the control IDS */
-  sdic = ($MODULE$_CNTRL_STR *)malloc(sizeof($MODULE$_CNTRL_STR));
+  sdic = (<!upper(comp.name())!>_CNTRL_STR *)malloc(sizeof(<!upper(comp.name())!>_CNTRL_STR));
   if (sdic == NULL) {
     h2perror ("<!comp.name()!>CntrlPosterXML");
     return ERROR;
@@ -199,7 +231,7 @@ STATUS <!comp.name()!>CntrlPosterXML (FILE *f)
   xmlBalise("task", TERMINATE_BALISE, f, 1);
 
   /* execution tasks */
-  for (i=0; i<$MODULE$_NB_EXEC_TASK; i++) {
+  for (i=0; i<<!upper(comp.name())!>_NB_EXEC_TASK; i++) {
     xmlBalise("task", BEGIN_BALISE_NEWLINE, f, 1);
 
     xmlBalise("name", BEGIN_BALISE, f, 2);
@@ -236,10 +268,10 @@ STATUS <!comp.name()!>CntrlPosterXML (FILE *f)
  **/
 STATUS <!comp.name()!>CntrlPosterActivityXML (FILE *f)
 {
-  $MODULE$_CNTRL_STR *sdic;
+  <!upper(comp.name())!>_CNTRL_STR *sdic;
 
   /* Lecture de la SDI de controle */
-  sdic = ($MODULE$_CNTRL_STR *)malloc(sizeof($MODULE$_CNTRL_STR));
+  sdic = (<!upper(comp.name())!>_CNTRL_STR *)malloc(sizeof(<!upper(comp.name())!>_CNTRL_STR));
   if (sdic == NULL) {
     h2perror ("<!comp.name()!>CntrlPosterActivityXML");
     return ERROR;
@@ -255,3 +287,40 @@ STATUS <!comp.name()!>CntrlPosterActivityXML (FILE *f)
 
 /* ---------------- LES POSTERS FONCTIONNELS ------------------------------ */
 
+<?
+for p in outports:
+    poster_type = upper(comp.name()) + "_" + upper(p.name) + "_POSTER_STR"
+    ?>
+/* --  <!p.name!> ------------------------------------------------- */
+
+STATUS <!comp.name()!>MobileStatePosterXML(FILE *f)
+{
+  BOOL err=FALSE;
+  H2TIME posterDate;
+  <!poster_type!> x;
+
+  xmlBalise("<!p.name!>",BEGIN_BALISE_NEWLINE,f,1);
+  xmlBalise("error",BEGIN_BALISE,f,2);
+
+  if (<!comp.name()!><!p.name!>PosterRead(&x) == ERROR) {
+    h2perror("<!comp.name()!><!p.name!>PosterXML");
+    err=TRUE;
+    fprintfBuf(f, "poster read failed");
+  }
+  fprintfBuf(f, "</error>\n");
+  if (!err) {
+    printXML_struct_<!poster_type!>(f, "data", &x, 2, 0, NULL, NULL);
+    posterIoctl(<!comp.name()!><!p.name!>PosterID(), FIO_GETDATE, &posterDate);
+    xmlBalise("date",BEGIN_BALISE,f,2);
+    fprintf(f, "%04d/%02d/%02d %02d:%02d:%02d.%03d",
+             posterDate.year + 1900, posterDate.month,
+             posterDate.date + 1, posterDate.hour,
+             posterDate.minute, posterDate.sec,
+             posterDate.msec);
+    fprintf(f, "</date>\n");
+  }
+  xmlBalise("<!p.name!>",TERMINATE_BALISE,f,1);
+  return OK;
+}
+<?
+?>

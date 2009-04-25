@@ -139,9 +139,6 @@ void <!comp.name()!><!currentTask.name!> (void)
   int i, nb, nbActi;
   int prevExecTaskBilan;
   int wakeUpCntrlTask;
-#if ($csServersFlag$) /* client task */
-  int extEvn;
-#endif
   int periodOverShot=0;
 
   MODULE_EVENT_STR moduleEvent;
@@ -246,10 +243,6 @@ if currentTask.hasCodel("end"):
       
       /* free posters, clients, mailboxes */
       $listPosterDelete$
-#if ($csServersFlag$) /* client task */
-      $listServerClientEnd$
-      csMboxEnd();
-#else
 <?
 if currentTask.period == 0:?>
       /* free device created to manage h2evn required to aperiodic tasks */
@@ -270,13 +263,6 @@ if currentTask.period == 0:?>
 	logMsg("<!comp.name()!><!currentTask.name!>: commonStructTake error\n");
 	<!comp.name()!><!currentTask.name!>Suspend (FALSE);
       }
-    
-    /* Check for a received reply (XXX: see remark down) */
-#if ($csServersFlag$) /* client task */
-    extEvn = FALSE;
-    if (csMboxStatus(REPLY_MBOX) & REPLY_MBOX)
-      extEvn = TRUE;
-#endif
 
 
     /* If last period overshot, does not execute activities this time */
@@ -497,18 +483,6 @@ if currentTask.hasCodel("init"):
 
     /* Enregistrer l'id de la tache */
   EXEC_TASK_ID(<!currentTaskNum!>) = taskIdSelf ();
-
-#if ($csServersFlag$) /* Client */
-  /* Creation de la boite aux lettres de reception des repliques */
-  if (csMboxInit ("<!comp.name()!><!currentTask.name!>", 0,  
-                  <!upper(comp.name())!>_$EXECTASKNAME$_MBOX_REPLY_SIZE) != OK) {
-    h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: csMboxInit");
-    return (ERROR); 
-  }
-
-  /* S'initialiser comme client */
-  $listServerClientInit$
-#endif
 
 <?
 if currentTask.period > 0:?>

@@ -1,4 +1,3 @@
-<?from string import upper;?>
 /* --- Generated file, do not edit by hand --------------------------- */
 
 /* 
@@ -82,15 +81,6 @@ extern <!internalDataType!> *<!comp.name()!>DataStrId;
 #define SDI_C (<!comp.name()!>CntrlStrId)
 #define SDI_F (<!comp.name()!>DataStrId)
 
-<?
-# $listExecTaskClientId$
-#for t in comp.tasksMap():
-#	i=0
-#	for ln in t.cs_client_from
-#	  print "#define %s_%s_%s_CLIENT_ID" % (comp.name(), t.name, ln)
-#	  print (%sCntrlStrId->execTaskTab[%s_%s_NUM].clientId[%d])\n" % (comp.name(), comp.name(), t.name, i)
-#	  i = i+1
-?>
 <?
 # $listPosterId$
 #for t in comp.tasksMap():

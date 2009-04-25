@@ -155,3 +155,7 @@ nbServices = len(comp.servicesMap())
 abortRequestNum = nbServices + 1;
 internalDataType = comp.IDSType.toCType(True)
 periodicFlag = isPeriodic()
+
+shouldGenerateOpenPRS = "#" # do not generate openrps related code
+shouldGenerateTcl = "#"
+shouldGenerateServer = ""

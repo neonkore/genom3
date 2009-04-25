@@ -2,6 +2,32 @@ language: Python;
 requires: "server/server_utils.py";
 
 main:
+/*build related files*/
+  "Makefile.in"
+  "autogen"
+  "acinclude.user.m4"
+  "configure.ac.user"
+  "local.mk.in"
+/* autoconf/ dir */
+  "autoconf/codels.mk"
+  "autoconf/config.mk.in"
+  "autoconf/config.rtai.mk"  
+  "autoconf/configure.ac.in"    
+  "autoconf/genom.mk"    
+  "autoconf/ltcf-c.sh"  
+  "autoconf/ltmain.sh"      
+  "autoconf/module-oprs.pc.in"  
+  "autoconf/robots.m4"
+  "autoconf/config.guess"  
+  "autoconf/config.posix.mk"  
+  "autoconf/config.sub"      
+  "autoconf/config.xenomai.mk"  
+  "autoconf/install-sh"  
+  "autoconf/ltconfig"   
+  "autoconf/mkinstalldirs"  
+  "autoconf/module.pc.in"
+/* server/ dir */
+  "struct.h" -> "$$Struct.h"
   "server/cntrlTask.c" -> "server/$$CntrlTask.c"
   "server/connectLib.c" -> "server/$$ConnectLib.c"
   "server/error.c" -> "server/$$Error.c"

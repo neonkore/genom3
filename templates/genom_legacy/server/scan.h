@@ -31,15 +31,37 @@
 /*------------------  Fichier généré automatiquement ------------------*/
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#ifndef $MODULE$_SCAN_H
-#define $MODULE$_SCAN_H
+#ifndef <!upper(comp.name())!>_SCAN_H
+#define <!upper(comp.name())!>_SCAN_H
 
 #include "genom/printScan.h"
 
 /* Structures definies par d'autres modules */
-$externScanLibs$
+<?
+for i in comp.importedComponents():
+    print "#include \"server/" + i + "Scan.h"
+
+?>
 
 /* Structures du module */
-#include "$module$PosterLib.h"
+#include "<!comp.name()!>PosterLib.h"
 
 /* Prototypes */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+<?
+for t in comp.typesVect():
+    ?>
+extern int scan_<!typeProtoPrefix(t)!> ( FILE *in, FILE *out,
+       <!t.toCType(True)!> *x, int indent, int nDim, int *dims );
+<?
+
+?>
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* <!upper(comp.name())!>_SCAN_H */

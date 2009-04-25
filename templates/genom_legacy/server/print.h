@@ -1,6 +1,3 @@
-<?
-import string; from string import *;
-?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -53,17 +50,8 @@ extern "C" {
 
 <?
 for t in comp.typesVect():
-    prefix = ""
-    if t.kind() == IdlKind.Struct:
-	prefix = "struct_"
-    elif t.kind() == IdlKind.Enum:
-	prefix = "enum_"
-    elif t.kind() == IdlKind.Typedef:
-	prefix = ""
-    else:
-	continue
     ?>
-extern void print_<!prefix!><!t.identifier()!> ( FILE *out,
+extern void print_<!typeProtoPrefix(t)!> ( FILE *out,
      <!t.toCType(True)!> *x,
      int indent, int nDim, int *dims, FILE *in );
 <?

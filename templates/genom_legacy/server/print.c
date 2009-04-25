@@ -1,10 +1,6 @@
 <?
-def printType(t,name):
-    if t.kind() == IdlKind.Struct:
-	s = t.asStructType()
-    else: #elif t.kind() == IdlKind.Double:
-	print "print_double(out, &((x+elt)->" + name + "), 0, 0, NULL, in);"
-# todo add all cases
+def printType(t):
+
 ?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
@@ -48,17 +44,8 @@ def printType(t,name):
 
 <?
 for t in comp.typesVect():
-    prefix = ""
-    if t.kind() == IdlKind.Struct:
-	prefix = "struct_"
-    elif t.kind() == IdlKind.Enum:
-	prefix = "enum_"
-    elif t.kind() == IdlKind.Typedef:
-	prefix = ""
-    else:
-	continue
     ?>
-void print_<!prefix!><!t.identifier()!> ( FILE *out,
+void print_<!typeProtoPrefix(t)!>( FILE *out,
      <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
 {
   char *indstr;"
@@ -66,10 +53,29 @@ void print_<!prefix!><!t.identifier()!> ( FILE *out,
   indent++;
   FOR_NB_elt(nDim,dims) {
     if (nDim != 0)
-      fprintf(out, "%s%s<? if t.kind() == Enum: write("\n");?>", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
+      fprintf(out, "%s%s", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
 
 <?
-    printType(t);
+    if t.kind() == IdlKind.Struct:
+	s = t.asStructType()
+	for m in s.members(): 
+	    ?>
+    fprintf(out, "%s<!m.key()!>:\n", indstr);
+    print_<!typeProtoPrefix(m.data())!>(out, &((x+elt)-><!m.key()!>), indent, 0, NULL, in);
+<? 
+    elif t.kind() == IdlKind.Enum:
+	e = t.asEnumType()
+	?>
+    /* Affiche l'ancienne valeur */ 
+    switch (*(x+elt)) { <?
+	for x in e.enumerators():
+	    ?>
+	case <!x!>:
+	    fprintf(out, "<!x!> =%d\n", <!x!>); break;<?
+	?>
+	default:
+	    fprintf(out, "unknown enum value %d\n", *(x+elt));
+    } /* switch */
     ?>
 
   } END_FOR

@@ -84,7 +84,7 @@ for t in comp.tasksMap():
     else:
       first = False
 
-    write("\t" + comp.name() + t.data().name + "Task.c");
+    write("\t" + comp.name() + t.data().name + ".c");
 ?>
 
 client_src= \

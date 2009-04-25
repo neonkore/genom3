@@ -27,7 +27,7 @@ main:
   "autoconf/install-sh"  
   "autoconf/ltconfig"   
   "autoconf/mkinstalldirs"  
-  "autoconf/module.pc.in"
+  "autoconf/module.pc.in" -> "autoconf/$$.pc.in"
 /* server/ dir */
   "struct.h" -> "$$Struct.h"
   "server/cntrlTask.c" -> "server/$$CntrlTask.c"

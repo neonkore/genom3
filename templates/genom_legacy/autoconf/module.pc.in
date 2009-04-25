@@ -1,14 +1,18 @@
+<?
+pkgname = comp.name()
+?>
+
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@/$pkgname$
-genomfile=$genomFile$
-genomflags=$genomFlags$
-cppflags=$cppOptions$
+genomfile=<!comp.name!>.gnm
+genomflags=
+cppflags=
 
-Name: $pkgname$
-Description: $module$ Genom module
+Name: <!pkgname!>
+Description: <!comp.name()!> Genom module
 Version: @PACKAGE_VERSION@
-Requires: genom >= $genomVersion$ $require$
+Requires: genom >= 2.2
 Libs: -L${libdir} -l$module$Client
 Cflags: -I${includedir}

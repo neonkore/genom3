@@ -1,3 +1,4 @@
+
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -30,55 +31,16 @@
 /*------------------  Fichier généré automatiquement ------------------*/
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef <!comp.name()!>_POSTER_WRITE_LIB_H
+#define <!comp.name()!>_POSTER_WRITE_LIB_H
 
-#include <portLib.h>
-#include <csLib.h>
-#include <posterLib.h>
-#include "<!comp.name()!>Print.h"
-
+/* Prototypes */
 <?
-for t in comp.typesVect():
+for p in outports:
+# todo create a write function for each member of poster
     ?>
-void print_<!typeProtoPrefix(t)!>( FILE *out,
-     <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
-{
-  char *indstr;"
-  indstr=strdup(indentStr(nDim?++indent:indent));
-  indent++;
-  FOR_NB_elt(nDim,dims) {
-    if (nDim != 0)
-      fprintf(out, "%s%s", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
-
+extern STATUS <!comp.name()!><!p.name!>PosterWrite ( POSTER_ID pid, <!upper(comp.name())!>_<!upper(p.name())!>_POSTER_STR *x );
 <?
-    if t.kind() == IdlKind.Struct:
-	s = t.asStructType()
-	for m in s.members(): 
-	    ?>
-    fprintf(out, "%s<!m.key()!>:\n", indstr);
-    print_<!typeProtoPrefix(m.data())!>(out, &((x+elt)-><!m.key()!>), indent, 0, NULL, in);
-<? 
-    elif t.kind() == IdlKind.Enum:
-	e = t.asEnumType()
-	?>
-    /* Affiche l'ancienne valeur */ 
-    switch (*(x+elt)) { <?
-	for x in e.enumerators():
-	    ?>
-	case <!x!>:
-	    fprintf(out, "<!x!> =%d\n", <!x!>); break;<?
-	?>
-	default:
-	    fprintf(out, "unknown enum value %d\n", *(x+elt));
-    } /* switch */
-    ?>
-
-  } END_FOR
-  free(indstr);
-}
-<?
-
 ?>
 
-
+#endif /* <!comp.name()!>_POSTER_WRITE_LIB_H */

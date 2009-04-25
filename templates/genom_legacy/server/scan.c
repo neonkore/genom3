@@ -41,8 +41,8 @@
 <?
 for t in comp.typesVect():
     ?>
-void print_<!typeProtoPrefix(t)!>( FILE *out,
-     <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
+void scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
+       <!t.toCType(True)!> *x, int indent, int nDim, int *dims );
 {
   char *indstr;"
   indstr=strdup(indentStr(nDim?++indent:indent));
@@ -54,17 +54,24 @@ void print_<!typeProtoPrefix(t)!>( FILE *out,
 <?
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
-	for m in s.members(): 
+	for m in s.members():
 	    ?>
     fprintf(out, "%s<!m.key()!>:\n", indstr);
-    print_<!typeProtoPrefix(m.data())!>(out, &((x+elt)-><!m.key()!>), indent, 0, NULL, in);
-<? 
+    if(scan_<!typeProtoPrefix(m.data())!>(in, out, &((x+elt)-><!m.key()!>), indent, 0, NULL) == ABORT) {
+       free (indstr);
+       return ABORT;
+    }
+<?
     elif t.kind() == IdlKind.Enum:
 	e = t.asEnumType()
+	eqStr = ""
 	?>
     /* Affiche l'ancienne valeur */ 
     switch (*(x+elt)) { <?
 	for x in e.enumerators():
+	    if eqStr != "":
+		eqStr += " && "
+	    eqStr += x + " != *(x+elt)"
 	    ?>
 	case <!x!>:
 	    fprintf(out, "<!x!> =%d\n", <!x!>); break;<?
@@ -72,13 +79,31 @@ void print_<!typeProtoPrefix(t)!>( FILE *out,
 	default:
 	    fprintf(out, "unknown enum value %d\n", *(x+elt));
     } /* switch */
+
+    /* Scan l'enum */
+    { int trouve;
+      do {
+        trouve = 1;
+        if (scan_type(in, out, "%d", x+elt) == ABORT) {
+          free (indstr);
+          return ABORT; }
+        if (<!eqStr!>) {
+          fprintf(out, "Unknown value, select between:");
+<?
+	for x in e.enumerators():
+	  print "          fprintf(out,\"\\n   " + x + "=%d   \", " + x + ");"
+	?>
+	  trouve = 0;
+        }
+      } while (! trouve);
+<?
     ?>
 
   } END_FOR
   free(indstr);
+  return OK;
 }
 <?
-
 ?>
 
 

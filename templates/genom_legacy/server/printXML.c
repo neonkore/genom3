@@ -36,28 +36,26 @@
 #include <portLib.h>
 #include <csLib.h>
 #include <posterLib.h>
-#include "<!comp.name()!>Print.h"
+#include "<!comp.name()!>PrintXML.h"
 
 <?
 for t in comp.typesVect():
     ?>
-void print_<!typeProtoPrefix(t)!>( FILE *out,
+void printXML_<!typeProtoPrefix(t)!>( FILE *out, char *name,
      <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
 {
   char *indstr;"
   indstr=strdup(indentStr(nDim?++indent:indent));
   indent++;
   FOR_NB_elt(nDim,dims) {
-    if (nDim != 0)
-      fprintf(out, "%s%s", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
+    fprintfBuf(out, "%s<%s%s>\n", indstr, name, getIndexesStr2(nDim, dims, elt));
 
 <?
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	for m in s.members(): 
 	    ?>
-    fprintf(out, "%s<!m.key()!>:\n", indstr);
-    print_<!typeProtoPrefix(m.data())!>(out, &((x+elt)-><!m.key()!>), indent, 0, NULL, in);
+    printXML_<!typeProtoPrefix(m.data())!>(out, "<!m.key()!>" ,&((x+elt)-><!m.key()!>), indent, 0, NULL, in);
 <? 
     elif t.kind() == IdlKind.Enum:
 	e = t.asEnumType()
@@ -67,18 +65,18 @@ void print_<!typeProtoPrefix(t)!>( FILE *out,
 	for x in e.enumerators():
 	    ?>
 	case <!x!>:
-	    fprintf(out, "<!x!> =%d\n", <!x!>); break;<?
+	    fprintfBuf(out, "<!x!>"); break;<?
 	?>
 	default:
 	    fprintf(out, "unknown enum value %d\n", *(x+elt));
     } /* switch */
+<?
     ?>
 
+    fprintfBuf(out, "%s</%s%s>\n", indstr, name, getIndexesStr2(nDim, dims, elt));
   } END_FOR
   free(indstr);
 }
 <?
 
 ?>
-
-

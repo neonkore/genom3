@@ -39,7 +39,6 @@
 <?
 for i in comp.importedComponents():
     print "#include \"server/" + i + "Print.h"
-
 ?>
 #include "<!comp.name()!>PosterLib.h"
 
@@ -55,7 +54,6 @@ extern void print_<!typeProtoPrefix(t)!> ( FILE *out,
      <!t.toCType(True)!> *x,
      int indent, int nDim, int *dims, FILE *in );
 <?
-
 ?>
 
 #ifdef __cplusplus

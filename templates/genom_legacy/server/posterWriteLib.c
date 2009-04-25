@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 1993-2003 LAAS/CNRS
+ * Copyright (c) 1993-2005 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -27,58 +27,36 @@
  * DAMAGE.
  */
 
-/*------------------  Fichier généré automatiquement ------------------*/
-/*------------------  Ne pas éditer manuellement !!! ------------------*/
+/*--------------  file automaticaly generated with GenoM -------------*/
+/*-----------------------  DO NOT EDIT BY HAND -----------------------*/
+ 
+/****************************************************************************/
+/*   LABORATOIRE D'AUTOMATIQUE ET D'ANALYSE DE SYSTEMES - LAAS / CNRS       */
+/*   PROJET HILARE II - INTERACTION PAR POSTER AVEC LE MODULE  <!upper(comp.name())!>     */
+/*   FICHIER SOURCE : "<!comp.name()!>PosterWriteLib.c"                                 */
+/****************************************************************************/
+
+/* DESCRIPTION :
+   Bibliotheque de fonctions qui permettent l'écriture
+   du contenu des posters du module
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <portLib.h>
-#include <csLib.h>
 #include <posterLib.h>
 #include "<!comp.name()!>Print.h"
 
 <?
-for t in comp.typesVect():
+for p in outports:
     ?>
-void print_<!typeProtoPrefix(t)!>( FILE *out,
-     <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
+/* --  <!p.name!>  ------------------------------------------------- */
+
+STATUS <!comp.name()!><!p.name!>PosterWrite(POSTER_ID pid, <!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR *x)
 {
-  char *indstr;"
-  indstr=strdup(indentStr(nDim?++indent:indent));
-  indent++;
-  FOR_NB_elt(nDim,dims) {
-    if (nDim != 0)
-      fprintf(out, "%s%s", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
-
-<?
-    if t.kind() == IdlKind.Struct:
-	s = t.asStructType()
-	for m in s.members(): 
-	    ?>
-    fprintf(out, "%s<!m.key()!>:\n", indstr);
-    print_<!typeProtoPrefix(m.data())!>(out, &((x+elt)-><!m.key()!>), indent, 0, NULL, in);
-<? 
-    elif t.kind() == IdlKind.Enum:
-	e = t.asEnumType()
-	?>
-    /* Affiche l'ancienne valeur */ 
-    switch (*(x+elt)) { <?
-	for x in e.enumerators():
-	    ?>
-	case <!x!>:
-	    fprintf(out, "<!x!> =%d\n", <!x!>); break;<?
-	?>
-	default:
-	    fprintf(out, "unknown enum value %d\n", *(x+elt));
-    } /* switch */
-    ?>
-
-  } END_FOR
-  free(indstr);
+  return (posterWrite(pid, 0, (char *)x, sizeof(*x))
+            == sizeof(*x) ? OK : ERROR);
 }
 <?
-
 ?>
-
-

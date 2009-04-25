@@ -32,15 +32,35 @@
 /*------------------  Fichier généré automatiquement ------------------*/
 /*------------------  Ne pas éditer manuellement !!! ------------------*/
 
-#ifndef $MODULE$_PRINTXML_H
-#define $MODULE$_PRINTXML_H
+#ifndef <!upper(comp.name())!>_PRINTXML_H
+#define <!upper(comp.name())!>_PRINTXML_H
 
 #include "genom/printScan.h"
 #include "genom/printXMLProto.h"
 
 /* Structures definies par d'autres modules */
-$externPrintXMLLibs$
+<?
+for i in comp.importedComponents():
+    print "#include \"server/" + i + "PrintXML.h"
+?>
 
-#include "$module$PosterLib.h"
+#include "<!comp.name()!>PosterLib.h"
 
 /* Prototypes */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+<?
+for t in comp.typesVect():
+    ?>
+extern void printXML_<!typeProtoPrefix(t)!> ( FILE *out, char *name,
+     <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in );
+<?
+?>
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* <!upper(comp.name())!>_PRINTXML_H */

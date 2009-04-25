@@ -1,4 +1,14 @@
+<?
+stdGenomErrors = ["ACTIVITY_INTERRUPTED", \
+  "TOO_MANY_ACTIVITIES", "ACTIVITY_FAILED", \
+  "WAIT_ABORT_ZOMBIE_ACTIVITY", "UNKNOWN_ACTIVITY", \
+  "FORBIDDEN_ACTIVITY_TRANSITION", "SYSTEM_ERROR", \
+  "ACTIVITY_ALREADY_ENDED", "WAIT_INIT_RQST"," EXEC_TASK_SUSPENDED", \
+  "CONTROL_CODEL_ERROR", "BAD_BLOCK_TYPE", \
+  "BAD_POSTER_TYPE"]
 
+errorSet = createErrorList()
+?>
 /* 
  * Copyright (c) 1993-2005 LAAS/CNRS
  * All rights reserved.
@@ -43,15 +53,32 @@
 /* -- MODULES ERRORS -------------------------------------------------- */
 
 /* demo errors */
-$listCntrlFailures$$listExecFailures$
+
+<? # $listCntrlFailures$$listExecFailures$
+i = 1
+for e in errorSet:
+    print "#define S_" + comp.name() + "_" + e + " H2_ENCODE_ERR(M_" + comp.name() + ", " + str(i) + ")"
+    i += 1
+?>
 
 /* std errors */
-$listStdFailures$
-
+<? # $listStdFailures$
+i = 1
+for s in stdGenomErrors:
+    print "#define S_stdGenoM_" + s + " " + str(encodeError(i))
+    i += 1
+?>
 
 /* static H2_ERROR[] */
-#define $MODULE$_H2_ERR_MSGS {\$listTabFailures$
-}
+#define <!upper(comp.name())!>_H2_ERR_MSGS {\
+<? # $listTabFailures$
+i = 1
+out = ""
+for e in errorSet:
+    out += "   {\"" + e + "\", " + str(i) +"}, \\\n"
+    i += 1
+print out[:-4] + " \\ \n}"
+?>
 
 extern int <!comp.name()!>RecordH2errMsgs(void);
 

@@ -168,8 +168,7 @@ int Component::serviceIndex(const std::string &name) const
 
 IdlType::Ptr Component::typeFromName(const std::string &name)
 {
-	cout << "Searching type " << name << endl;
-
+// 	cout << "Searching type " << name << endl;
 	IdlType::Ptr res;
 	IdlType::Vector::const_iterator it4;
 	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
@@ -240,6 +239,12 @@ void Port::debug()
 void Task::debug()
 {
 	cout << "priority: " << priority << ", stackSize: " << stackSize << ", period: " << period << ", delay: " << delay << endl;
+	cout << "Error messages: ";
+	vector<string>::const_iterator it2 = m_errorMessages.begin();
+	for(; it2 != m_errorMessages.end(); ++it2)
+		cout << *it2 << " ";
+	cout << endl;
+
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
 	for (it = m_codels.begin(); it != m_codels.end(); ++it) {
@@ -268,12 +273,24 @@ bool Task::hasCodel(const std::string &name)
 	return (it != m_codels.end());
 }
 
+void Task::addErrorMessage(const std::string &s)
+{
+	m_errorMessages.push_back(s);
+}
+
 /******** Service ***************/
 
 void Service::debug()
 {
 	cout << "doc: " << doc << endl;
 	cout << "Parent task: " << taskName << endl;
+
+	cout << "Error messages: ";
+	vector<string>::const_iterator it2 = m_errorMessages.begin();
+	for(; it2 != m_errorMessages.end(); ++it2)
+		cout << *it2 << " ";
+	cout << endl;
+
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
 	for (it = m_codels.begin(); it != m_codels.end(); ++it) {
@@ -305,6 +322,11 @@ bool Service::hasCodel(const std::string &name)
 {
 	Codel::Map::const_iterator it = m_codels.find(name);
 	return (it != m_codels.end());
+}
+
+void Service::addErrorMessage(const std::string &s)
+{
+	m_errorMessages.push_back(s);
 }
 
 /******** Codel ***************/

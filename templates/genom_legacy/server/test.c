@@ -74,12 +74,55 @@ void <!comp.name()!>Test (int testNumber);
 
 static void <!comp.name()!>TestInitTask (TEST_STR* testStr);
 
-$requestFuncTabDeclare$
-  $requestNameTabDeclare$
+<?
+for s in comp.servicesMap():
+    print "static BOOL %sTest%s(TEST_STR *id, int rq, int ac, BOOL ch);" % (comp.name(), s.data().name)
+?>
 
-  $posterNameTabDeclare$
-  $posterShowFuncTabDeclare$
+static  TEST_RQST_DESC_STR <!comp.name()!>TestRqstFuncTab[] = {
+<? # $requestFuncTabDeclare$
+out = ""
+for s in comp.servicesMap():
+    service = s.data()
+    if len(service.inputs()) > 0:
+	inputSize = sizeOfIdsMember(service.inputs()[0])
+    else:
+	inputSize = "0"
+    outputSize = sizeOfIdsMember(service.output)
+    out += "  {%s_%s_RQST, %sTest%s, %s, %s},\n" % (upper(comp.name()), upper(service.name), comp.name(), service.name, inputSize, outputSize)
+print out[:-1] + "};" 
+?>
 
+static char *<!comp.name()!>TestRequestNameTab[] = {
+<? # $requestNameTabDeclare$
+out = ""
+for s in comp.servicesMap():
+    service = s.data()
+    out += "   \"" + service.name
+    if service.type == ServiceType.Exec:
+	# if reentrant print "(nE)"
+	out += "(E)"
+    elif service.type == ServiceType.Init:
+	out += "(I)"
+    out+= "\",\n"
+print out[:-2] + "\n};" 
+?>
+
+static char *<!comp.name()!>TestPosterNameTab[] = {
+<? # $posterNameTabDeclare$
+out = ""
+for port in outports:
+    out += "\"%s\"\n" % port.name
+print out[:-2] + "\n};" 
+?>
+
+static STATUS (*<!comp.name()!>TestPosterShowFuncTab[])() = {
+<? #  $posterShowFuncTabDeclare$
+for port in outports:
+    print "   " + comp.name() + port.name + "PosterShow,"
+?>   <!comp.name()!>CntrlPosterShow,
+   <!comp.name()!>CntrlPosterActivityShow
+};
 
 /*--------------------------------------------------------------------------*/
 
@@ -109,12 +152,12 @@ void
   
   /* Allocation de la structure */
   if ((testStr = testInit(testNumber, "<!comp.name()!>",
-			  $MODULE$_CLIENT_MBOX_REPLY_SIZE,
-			  $MODULE$_ABORT_RQST,
-			  $nbRequest$,
+			  <!upper(comp.name())!>_CLIENT_MBOX_REPLY_SIZE,
+			  <!upper(comp.name())!>_ABORT_RQST,
+			  <!nbServices!>,
 			  <!comp.name()!>TestRequestNameTab,
 			  <!comp.name()!>TestRqstFuncTab,
-			  $nbPosterData$, 
+			  <!len(outports)!>, 
 			  <!comp.name()!>TestPosterNameTab,
 			  <!comp.name()!>TestPosterShowFuncTab)) == NULL)
     return;
@@ -138,9 +181,9 @@ static void <!comp.name()!>TestInitTask (TEST_STR *testStr)
 {
   /* S'initialiser comme client */
   printf ("client init ...");
-  if (csClientInit ($MODULE$_MBOX_NAME, $MODULE$_MAX_RQST_SIZE,
-		    $MODULE$_MAX_INTERMED_REPLY_SIZE, 
-		    $MODULE$_MAX_REPLY_SIZE, &TEST_CID(testStr)) != OK) {
+  if (csClientInit (<!upper(comp.name())!>_MBOX_NAME, <!upper(comp.name())!>_MAX_RQST_SIZE,
+		    <!upper(comp.name())!>_MAX_INTERMED_REPLY_SIZE, 
+		    <!upper(comp.name())!>_MAX_REPLY_SIZE, &TEST_CID(testStr)) != OK) {
       (void) h2perror("Client init failed");
       testEnd(testStr);
   }

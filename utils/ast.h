@@ -104,6 +104,9 @@ class Task
 		Codel::Ptr codel(const std::string &name);
 		bool hasCodel(const std::string &name);
 
+		std::vector<std::string>& errorMessages() { return m_errorMessages; }
+		void addErrorMessage(const std::string &s);
+
 		std::string name;
 		int priority;
 		int period; // in ms
@@ -112,6 +115,7 @@ class Task
 
 	private:
 		Codel::Map m_codels;
+		std::vector<std::string> m_errorMessages;
 		//std::string connectedPort;
 };
 
@@ -131,6 +135,9 @@ class Service
 		void addInput(const std::string &s);
 		std::vector<std::string>& inputs() { return m_inputs; }
 
+		std::vector<std::string>& errorMessages() { return m_errorMessages; }
+		void addErrorMessage(const std::string &s);
+
 		void addCodel(const std::string &name, Codel::Ptr c);
 		Codel::Map& codels() { return m_codels; }
 		Codel::Ptr codel(const std::string &name);
@@ -146,6 +153,7 @@ class Service
 		Codel::Map m_codels;
 		std::vector<std::string> m_inputs;
 		std::vector<std::string> incompatibleServices;
+		std::vector<std::string> m_errorMessages;
 };
 
 class Component

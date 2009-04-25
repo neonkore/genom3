@@ -73,15 +73,40 @@
 
 /* Initialization semaphores */
 SEM_ID sem<!comp.name()!>CntrlTaskInit;
-SEM_ID sem<!comp.name()!>InitExecTab[$MODULE$_NB_EXEC_TASK];
+SEM_ID sem<!comp.name()!>InitExecTab[<!upper(comp.name())!>_NB_EXEC_TASK];
 
 /* Les taches */
 void <!comp.name()!>CntrlTask ();
-$execTaskTabDescribe$
+<? # $execTaskTabDescribe$
+for t in comp.tasksMap():
+    print "extern void %s%sTask(%s_CNTRL_STR *, %s *);" % (comp.name(), t.data().name, upper(comp.name()), comp.IDSType.toCType(True))
+?>
+typedef struct {
+	char *name;
+	int priority;
+	int size;
+	void (*func)();
+} <!upper(comp.name())!>_EXEC_TASK_STR;
+
+<!upper(comp.name())!>_EXEC_TASK_STR <!comp.name()!>ExecTaskTab[] = {
+<?
+out = ""
+for t in comp.tasksMap():
+    task = t.data()
+    out += "{\"" + comp.name() + task.name + "Task\", "
+    out += "%d, " % task.priority
+    if task.stackSize > 0:
+	out += str(task.stackSize)
+    else:
+	out += "5000"
+	sys.stderr.write("No stack size specified for task '%s'" % task.name)
+    out += ", " + comp.name() + task.name + "Task },\n"
+print out[:-2] + "\n};"
+?>
 
 /* Internal data structures */
-$internalDataType$ *<!comp.name()!>DataStrId = NULL;
-$MODULE$_CNTRL_STR *<!comp.name()!>CntrlStrId = NULL;
+<!internalDataType!> *<!comp.name()!>DataStrId = NULL;
+<!upper(comp.name())!>_CNTRL_STR *<!comp.name()!>CntrlStrId = NULL;
 
 #ifdef PID_FILE
 /* name of the file containing module's PID */
@@ -116,7 +141,7 @@ STATUS
    */
 
   /* SDI_f */
-  if (commonStructCreate (sizeof ($internalDataType$), 
+  if (commonStructCreate (sizeof (<!internalDataType!>), 
 			  (void *) &<!comp.name()!>DataStrId) 
       != OK)  {
     h2perror ("<!comp.name()!>TaskInit: cannot create the Functional Data Base");
@@ -124,7 +149,7 @@ STATUS
   }
   
   /* SDI_c */
-  if (commonStructCreate (sizeof ($MODULE$_CNTRL_STR), 
+  if (commonStructCreate (sizeof (<!upper(comp.name())!>_CNTRL_STR), 
 			  (void *) &<!comp.name()!>CntrlStrId) 
       != OK)  {
     h2perror ("<!comp.name()!>TaskInit: cannot create the Control Data Base");
@@ -175,7 +200,7 @@ STATUS
   }
   
   if (taskSpawn("<!comp.name()!>CntrlTask", 10 /* priorite */, VX_FP_TASK,
-		$MODULE$_MAX_RQST_SIZE + CNTRL_TASK_MIN_STACK_SIZE /*size*/, 
+		<!upper(comp.name())!>_MAX_RQST_SIZE + CNTRL_TASK_MIN_STACK_SIZE /*size*/, 
 		(FUNCPTR)<!comp.name()!>CntrlTask) == ERROR) {
      h2perror("<!comp.name()!>TaskInit: cannot spawn <!comp.name()!>CntrlTask");
      goto error;
@@ -197,7 +222,7 @@ STATUS
   /* 
    * Spawn execution tasks
    */
-  for (i=0; i<$MODULE$_NB_EXEC_TASK; i++) {
+  for (i=0; i<<!upper(comp.name())!>_NB_EXEC_TASK; i++) {
     logMsg("<!comp.name()!>: spawning task %s.\n", <!comp.name()!>ExecTaskTab[i].name);
 
     sem<!comp.name()!>InitExecTab[i] = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
@@ -243,7 +268,7 @@ STATUS
 
   error:
   /* Destroy initialization semaphores */
-  for (i=0; i<$MODULE$_NB_EXEC_TASK; i++) if (sem<!comp.name()!>InitExecTab[i]) {
+  for (i=0; i<<!upper(comp.name())!>_NB_EXEC_TASK; i++) if (sem<!comp.name()!>InitExecTab[i]) {
      semDelete(sem<!comp.name()!>InitExecTab[i]);
      sem<!comp.name()!>InitExecTab[i] = NULL;
   }

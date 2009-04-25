@@ -350,6 +350,23 @@ task_field:
       error(yyloc, std::string("Unknown task field: ") + $1);
       YYERROR;
     }
+} 
+| IDENTIFIER COLON task_errors_list
+{
+    if($1 != "errors") {
+      error(yyloc, std::string("Wrong arguments for field: ") + $1);
+      YYERROR;
+    }
+};
+
+task_errors_list:
+  IDENTIFIER 
+{
+    driver.currentTask()->addErrorMessage($1);
+}
+| task_errors_list IDENTIFIER
+{
+    driver.currentTask()->addErrorMessage($2);
 };
 
 /*** Service Declaration ***/
@@ -396,10 +413,20 @@ service_field:
 	s->addInput($3);
     } else if($1 == "output") {
 	s->output = $3;
+    } else if($1 == "errors") {
+	driver.currentService()->addErrorMessage($3);
     } else {
       error(yyloc, std::string("Unknown service field: ") + $1);
       YYERROR;
     }
+}
+| IDENTIFIER COLON IDENTIFIER service_errors_list
+{
+    if($1 != "errors") {
+      error(yyloc, std::string("Wrong arguments for field: ") + $1);
+      YYERROR;
+    }
+    driver.currentService()->addErrorMessage($3);
 }
 | IDENTIFIER COLON STRINGLIT 
 {
@@ -413,6 +440,16 @@ service_field:
 }
 | IDENTIFIER COLON INTEGERLIT 
 {};
+
+service_errors_list:
+  IDENTIFIER 
+{
+    driver.currentService()->addErrorMessage($1);
+}
+| service_errors_list IDENTIFIER
+{
+    driver.currentService()->addErrorMessage($2);
+};
 
 /*** Codel Declaration ***/
 

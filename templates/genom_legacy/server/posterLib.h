@@ -1,12 +1,3 @@
-<?
-from string import upper
-# create a list of out ports
-outports = []
-for p in comp.portsMap():
-    if p.data().type == PortType.Outgoing:
-	outports.append(p.data())
-
-?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.

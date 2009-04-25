@@ -1,22 +1,27 @@
-language: Python
+language: Python;
+requires: "server/server_utils.py";
+
 main:
-  "server/cntrlTask.c" -> "server/$$CntrlTask.c" DONE
-  "server/connectLib.c" -> "server/$$ConnectLib.c" DONE
-  "server/error.c" -> "server/$$Error.c" DONE
+  "server/cntrlTask.c" -> "server/$$CntrlTask.c"
+  "server/connectLib.c" -> "server/$$ConnectLib.c"
+  "server/error.c" -> "server/$$Error.c"
   "server/error.h" -> "server/$$Error.h"
-  "server/endian.c" -> "server/$$Endian.c" DONE sauf tableaux
-  "server/endian.h" -> "server/$$Endian.h" DONE
-  "server/header.h" -> "server/$$Header.h" DONE
+  "server/endian.c" -> "server/$$Endian.c"
+  "server/endian.h" -> "server/$$Endian.h"
+  "server/header.h" -> "server/$$Header.h"
   "server/init.h" -> "server/$$Init.h"
-  "server/Makefile.in" DONE
+  "server/Makefile.in"
   "server/moduleiInit.h" -> "server/$$ModuleInit.h"
-  "server/msgLib.c" -> "server/$$MsgLib.c" DONE
-  "server/msgLib.h" -> "server/$$MsgLib.h" DONE
-/* $msgLib.c contient msgExec.c et msgCntl.c; idem pour les .h*/ DONE
-  "server/posterLib.c" -> "server/$$PosterLib.c" DONE
-  "server/posterLib.h" -> "server/$$PosterLib.h" DONE
-  "server/posterLibStruct.h" -> "server/$$PosterLibStruct.h" DONE
-  "server/posterShowLib.c" -> "server/$$PosterShowLib.c"
+  "server/msgLib.c" -> "server/$$MsgLib.c"
+  "server/msgLib.h" -> "server/$$MsgLib.h"
+  "server/posterLib.c" -> "server/$$PosterLib.c" 
+  "server/posterLib.h" -> "server/$$PosterLib.h"
+  "server/posterLibStruct.h" -> "server/$$PosterLibStruct.h" 
+  "server/type.h" -> "server/$$Type.h" 
+  "server/test.c" -> "server/$$Test.c"
+;
+
+/*  "server/posterShowLib.c" -> "server/$$PosterShowLib.c"
   "server/posterShowLib.h" -> "server/$$PosterShowLib.h"
   "server/posterXMLLib.c" -> "server/$$PosterXMLLib.c"
   "server/posterXMLLib.h" -> "server/$$PosterXMLLib.h"
@@ -25,266 +30,9 @@ main:
   "server/printXML.h" -> "server/$$PrintXML.h"
   "server/printXML.c" -> "server/$$PrintXML.c" --> totalement genere par le programme
   "server/scan.h" -> "server/$$Scan.h"
-  "server/scan.c" -> "server/$$Scan.c" --> totalement genere par le programme
-  "server/type.h" -> "server/$$Type.h" DONE
+  "server/scan.c" -> "server/$$Scan.c" --> totalement genere par le programme */
+
 
 task:
-  "server/execTask.c -> "server/$component$$task$Task.c"
- /* "server/execTaskHeader.h" -> "server/$component$$task$Task.h"  not used ?*/
-
-
-/* Found vars: 
-  $module$ -> <!comp.name()!>
-  $MODULE$ -> <!comp.name().to_upper()!>
-  $numModule$ -> <!comp.number()!>
-  $abortRequestNum$ ->
-  $initRqst$
-  $nbRequest$ -> <!comp.IDSType().declaration()!>
-  $internalDataType$ ->
-
-  $commentbegin$
-  $commentend$
-  */
-
-/* Function def:
-  $execTaskNameTabDeclare$ 
---> 
-
-  $tabRequestFuncDeclare$
-  
-error.h
-  $h2recordOtherModules$
------> for i in comp.imports():
-	print i + "RecordH2errMsgs();\n"
-
-h2errorLib.h:#define H2_ENCODE_ERR(M_id,err)   (M_id << 16 | (err&0xffff))                                                                                                 
-
-  $listCntrlFailures$
-  $listExecFailures$ -> idem avec services de type exec
----> 
-  n=1
-  for s in comp.servicesMap():
-    if s.data().type() != Service::Init:
-      for s in s.failErrors():
-	print "#define S_" + comp.name() _+ "_" + s + " H2_ENCODE_ERR(M_" + comp.name() + " , " + str(n) + ")\n"
-	n++
-
-	       "#define S_%s_%-20s H2_ENCODE_ERR(M_%-10s, %d)\n",
-
-  
-
-  $listStdFailures$
------> for s in stdErrors:
-	  err = h2EncodeErr(s);
-	  genSrc = H2_SOURCE_STD_ERR(genomH2errMsgs[i].num)
-	  genErr = H2_NUMBER_STD_ERR(genomH2errMsgs[i].num)
-	  print "#define S_%s_stdGenoM_%-26s %d   /* %d<<16 | 0x8000 | %d<<8 | %d */\n" % (comp.name(), s, err, comp.number(), genSrc, genErr)
-
-"#define S_%s_stdGenoM_%-26s %d   /* %d<<16 | 0x8000 | %d<<8 | %d */\n",
-
-#define GENOM_H2_ERR_MSGS \
-{ \
-  {"ACTIVITY_INTERRUPTED",          S_stdGenoM_ACTIVITY_INTERRUPTED}, \
-  {"TOO_MANY_ACTIVITIES",           S_stdGenoM_TOO_MANY_ACTIVITIES}, \
-  {"ACTIVITY_FAILED",               S_stdGenoM_ACTIVITY_FAILED}, \
-  {"WAIT_ABORT_ZOMBIE_ACTIVITY",    S_stdGenoM_WAIT_ABORT_ZOMBIE_ACTIVITY}, \
-  {"UNKNOWN_ACTIVITY",              S_stdGenoM_UNKNOWN_ACTIVITY}, \
-  {"FORBIDDEN_ACTIVITY_TRANSITION", S_stdGenoM_FORBIDDEN_ACTIVITY_TRANSITION}, \
-  {"SYSTEM_ERROR",                  S_stdGenoM_SYSTEM_ERROR}, \
-  {"ACTIVITY_ALREADY_ENDED",        S_stdGenoM_ACTIVITY_ALREADY_ENDED}, \
-  {"WAIT_INIT_RQST",                S_stdGenoM_WAIT_INIT_RQST}, \
-  {"CONTROL_CODEL_ERROR",           S_stdGenoM_CONTROL_CODEL_ERROR},\
-  {"EXEC_TASK_SUSPENDED",           S_stdGenoM_EXEC_TASK_SUSPENDED},	\
-  {"BAD_BLOCK_TYPE",                S_stdGenoM_BAD_BLOCK_TYPE},	\
-  {"BAD_POSTER_TYPE",               S_stdGenoM_BAD_POSTER_TYPE} \
-}
-
-  $listTabFailures$
-----> 
-  n=1
-  for s in comp.servicesMap():
-    if s.data().type() != Service::Init:
-      for s in s.failErrors():
-	print "{ \"" + s + "\" , " + str(n) + "}\n"
-	n++
-
-header.h
-  $listExecTaskNum$
--------> 
-  i=0
-  for t in comp.tasksMap():
-      print "#define %s_%s_NUM (%d)\n" % (comp.name(), t.name, i)
-      i++
-
-  $listServerHeader$ :: cs_client_from
------>
-  for i in comp.imports():
-      print "#include \"server/%sMsgLib.h\"\n" % (i)
-
-  $listPosterHeader$ :: idem pour poster_client_from
-----> 
-
-  $listExecTaskClientId$
------> for t in comp.tasksMap():
-	i=0
-	for ln in t.cs_client_from
-	  print "#define %s_%s_%s_CLIENT_ID" % (comp.name(), t.name, ln)
-	  print (%sCntrlStrId->execTaskTab[%s_%s_NUM].clientId[%d])\n" % (comp.name(), comp.name(), t.name, i)
-	  i++
-
-
-  $listPosterId$
------>for t in comp.tasksMap():
-	i=0
-	for p in comp.outPorts():
-	  if p.execTask() == t:
-	    print "#define %s_%s_POSTER_ID " % (comp.name(), p.name)
-	    print "(%sCntrlStrId->execTaskTab[%s_%s_NUM].posterId[%d])\n" % (comp.name(), comp.name(), t.name, i)
-	    i++
-
-
-
-  $listUserFuncProto$
-  -----> 
-  for s in tasks.servcesMap():
-    for c in s.codels():
-      print "extern STATUS %s(" % (c.name)
-
-extern STATUS demoSetSpeedCntrl(DEMO_SPEED *(speedRef), int *bilan); etc
-extern ACTIVITY_EVENT demoMonitorExec(double *(in_monitor), double *(out_position), int *bilan);
-
-
-init.c:
-  Service s = comp.initService()
-  if s == 0 || s.inTypes().empty() :
-      requestFlag = "(0)";
-      nbInputParams = "0";
-      inputDeclare = "";
-      inputNamePtrC= "";
-      inputSize = "0";
-      inputShow = "";
-      inputNamePtr = "NULL";
-      requestNum = "0";
-
-      inputUsage ="";
-      inputA2Type = "";
-      inputFlat = "void";
-      inputFlatDeclare = "";
-      inputFillStruct = "";
-      inputFlatNamePtrC = "";
-      inputVerif = "";
-    else
-      requestFlag = "(1)";
-      request = s.name
-      requestNum = s.num;
-      // add input type
-      
-
-  $inputUsage$
-  $inputFlat$
-  $requestFlag$
-  $inputFlatDeclare$
-  $nbInputParams$
-  $inputA2Type$
-  $inputFlatNamePtrC$
-  $inputSize$
-  $inputFillStruct$
-  $inputVerif$
-  $requestNum$
-  $inputNamePtr$
-
-Makefile.in
-  $listExecTask_c$ ->
-    <?for execTask in comp.tasksMap(): ?>
-	print comp.name() + execTask.name() + "task.c"
-
-  $listIncludesInDotGen$ -> "demoStruct.h" from .gen file
-  $genServer$ 
-  $genTcl$
-  $genOpenprs$ -> lines to comment whether these options are activated or not
-
-moduleInit.c:
-  $execTaskTabDescribe$ -> extern void demoMotionTask(DEMO_CNTRL_STR *, struct DEMO_STR *);
-  
-posterLib;h:
-  $listPosterNameDeclare$
-
-posterLibStruct.h
-  $posterStruct$
-
-posterShowLib.c:
-  $execTaskNameTabDeclare$
-  $nbExecRqst$
-  $requestNameTabDeclare$
-
-posterShowLib.h posterXMLLib.h: template rempli par prog
-
-print.h:
-  $externPrintLibs$ -> #include "server/demoPrint.h"
-
-printXML.h:
-  $externPrintXMLLibs$ -> idem
-
-scan.h:
-  $externScanLibs$ -> idem
-
-test.c
-  $requestFuncTabDeclare$
-  $requestNameTabDeclare$
-
-  $posterNameTabDeclare$
-  $posterShowFuncTabDeclare$
-  $nbPosterData$
-
-  testCntrl.c et testExec.c vont dans $$Test.c
-testCntrl.c testExec.c:
-  $inputDeclarations$
-  $outputDeclarations$
-  $inputScan$
-  $outputPrint$
-*/
-
-
-/* $execTaskName$ execTask.c DONE
-$execTaskName$
-$EXECTASKNAME$
-$cFuncExecFlag$ ->
-$cFuncExecFlag2$ -> 
-$cFuncExecName$
-$cFuncExecName2$
-$cFuncExecInitFlag$
-$cFuncExecInitName$
-$csServersFlag$
-$execTaskNum$
-$periodFlag$
- /* Tableau des fonction d'execution (user) 
-  $execFuncTabDeclare$
-  /* Tableau des fonctions de demarrage (user)
-  $execFuncTabStartDeclare$
-  /* Tableau des fonctions de terminaison (user) 
-  $execFuncTabEndDeclare$
-  /* Tableau des fonctions de terminaison en cas d'interruption (user) 
-  $execFuncTabInterDeclare$ 
-  /* Tableau des fonctions de terminaison en cas d'echec (user) 
-  $execFuncTabFailDeclare$ 
-$maxMboxReplySize$
-
-pour chaque client:
-$clientName$
-*/
-
-/* Request specific stuff DONE
-  requestCntrl.c requestExec.c -> goes in $$CntrlTask.c
-  $cControlFunc$
-  $tabCompatibilityDeclare$
-  $inputFlag$
-  $controlFuncFlag$
-  $inputDeclare$
-  $inputNamePtr$
-  $inputSize$
-  $inputRefPtr$
-  $outputRefPtr$
-  
-  $requestNum$, $execTaskNum$, $reentrantFlag$
-
-*/
+  "server/execTask.c" -> "server/$component$$task$Task.c"
+;

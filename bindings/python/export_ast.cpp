@@ -57,9 +57,11 @@ void export_ast()
 	.def("codel", &Task::codel)
 	.def("hasCodel", &Task::hasCodel)
 	.def_readonly("name", &Task::name)
+	.def_readonly("stackSize", &Task::stackSize)
 	.def_readonly("priority", &Task::priority)
 	.def_readonly("delay", &Task::delay)
-	.def_readonly("period", &Task::period);
+	.def_readonly("period", &Task::period)
+	.def("errorMessages", &Task::errorMessages, return_value_policy<reference_existing_object>());
 
 	class_<Service, Service::Ptr>("Service")
 	.def("debug", &Service::debug)
@@ -70,7 +72,8 @@ void export_ast()
 	.def("hasCodel", &Service::hasCodel)
 	.def_readonly("output", &Service::output)
 	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
-	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>());
+	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>())
+	.def("errorMessages", &Service::errorMessages, return_value_policy<reference_existing_object>());
 
 	enum_<Service::Type>("ServiceType")
 	.value("Init", Service::Init)

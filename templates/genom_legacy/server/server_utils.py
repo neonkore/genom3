@@ -69,17 +69,22 @@ def typeProtoPrefix(t):
         prefix = "double"
     return prefix + t.identifier()
 
+def sizeOfIdsMember(name):
+    type =  comp.typeFromIdsName(name)
+    if type == None:
+	return "0"
+    return "sizeof(" + type.toCType(True) + ")"
 
 # try to find an init service
-def findInitService:
+def findInitService():
   i=-1
   for s in comp.servicesMap():
     i += 1
     if s.data().type == ServiceType.Init:
       return s.data(), i
+  return 0,-1
 
-initService, initServiceNb = findInitService
-
+initService,initServiceNb = findInitService()
 
 # create a list of out ports, because we don't use inports
 outports = []
@@ -87,6 +92,21 @@ for p in comp.portsMap():
     if p.data().type == PortType.Outgoing:
 	outports.append(p.data())
 
-# other vars
-abortRequestNum = len(comp.servicesMap()) + 1;
+# error related functions
+def createErrorList():
+  l = []
+  for s in comp.servicesMap():
+    for e in s.data().errorMessages():
+	l.append(e)
+  for t in comp.tasksMap():
+    for e in t.data().errorMessages():
+	l.append(e)
+  return set(l)
 
+def encodeError(i):
+    return comp.uniqueId << 16 | 0x8000 | 100 << 8 | i
+
+# other vars
+nbServices = len(comp.servicesMap())
+abortRequestNum = nbServices + 1;
+internalDataType = comp.IDSType.toCType(True)

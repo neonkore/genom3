@@ -106,7 +106,33 @@ def createErrorList():
 def encodeError(i):
     return comp.uniqueId << 16 | 0x8000 | 100 << 8 | i
 
+def isPeriodic():
+    for t in comp.tasksMap():
+	if t.data().period > 0:
+	    return True
+    return False
+
+def serviceDescString(s):
+    if s.type == ServiceType.Exec:
+	# if reentrant return "(nE)"
+	return "(E)"
+    elif s.type == ServiceType.Init:
+	return "(I)"
+    return ""
+
+def findServiceWithSameOutput(service, inputName):
+    l = []
+    # find another service with an output corresponding to the service's input
+    for it in comp.servicesMap():
+	ss = it.data()
+	if ss.name == service.name:
+	    break; 
+	if ss.output == inputName:
+	    l.append(ss)
+    return l
+
 # other vars
 nbServices = len(comp.servicesMap())
 abortRequestNum = nbServices + 1;
 internalDataType = comp.IDSType.toCType(True)
+periodicFlag = isPeriodic()

@@ -9,9 +9,9 @@ main:
   "server/endian.c" -> "server/$$Endian.c"
   "server/endian.h" -> "server/$$Endian.h"
   "server/header.h" -> "server/$$Header.h"
-  "server/init.h" -> "server/$$Init.h"
+  "server/init.c" -> "server/$$Init.c"
   "server/Makefile.in"
-  "server/moduleiInit.h" -> "server/$$ModuleInit.h"
+  "server/moduleInit.c" -> "server/$$ModuleInit.c"
   "server/msgLib.c" -> "server/$$MsgLib.c"
   "server/msgLib.h" -> "server/$$MsgLib.h"
   "server/posterLib.c" -> "server/$$PosterLib.c" 
@@ -34,5 +34,5 @@ main:
 
 
 task:
-  "server/execTask.c" -> "server/$component$$task$Task.c"
+  "server/execTask.c" -> "server/$component$$task$.c"
 ;

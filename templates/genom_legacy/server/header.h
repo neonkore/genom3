@@ -73,11 +73,11 @@ for s in comp.importedComponents():
 ?>
 
 /* Nombre de types requetes definies pour ce serveur */
-#define NB_RQST_TYPE                   (<!str(len(comp.tasksMap()))!>+1)
+#define NB_RQST_TYPE                   (<!nbServices!>+1)
 
 /* Declaration des structures de donnees */
 extern <!upper(comp.name())!>_CNTRL_STR *<!comp.name()!>CntrlStrId;
-extern $internalDataType$ *<!comp.name()!>DataStrId;
+extern <!internalDataType!> *<!comp.name()!>DataStrId;
 
 #define SDI_C (<!comp.name()!>CntrlStrId)
 #define SDI_F (<!comp.name()!>DataStrId)
@@ -131,12 +131,13 @@ def codel_signature(codel):
 for s in comp.servicesMap():
     for codel in s.data().codels():
 	if(s.data().type != ServiceType.Exec or s.data().name == "control"):
-	    write("extern STATUS " + codel_signature(codel.data()) + ";\n");
+	    print "extern STATUS " + codel_signature(codel.data()) + ";";
 	else:
-	    write("extern ACTIVITY_EVENT " + codel_signature(codel.data()) + ";\n");
+	    print "extern ACTIVITY_EVENT " + codel_signature(codel.data()) + ";";
 
 #### todo: print task init function signature
-
+if initServiceNb != -1:
+    print "extern STATUS " + codel_signature(initService.codel("main")) + ";"
 ?>
 
 #ifdef __cplusplus

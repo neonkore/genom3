@@ -40,7 +40,7 @@ else:
 	inputName = initService.inputs()[0]
 	inputType = comp.typeFromIdsName(inputName)
 	inputDeclare = inputType.toCType(True) + " " + inputName + ";"
-	inputSize = "sizeof(*" + inputType.toCType(True) + ")"
+	inputSize = "sizeof(" + inputType.toCType(True) + ")"
 # todo: reuse name from print.c
 #	inputShow =  "print_" + inputType.toCType(True) + "(stdout, " + ");"
 	inputNamePtr = "&" + inputName
@@ -118,7 +118,7 @@ else:
 #include <errnoLib.h>
 #include <h2initGlob.h>
 
-#define <!upper(comp.name())!>_PROMPT "usage: <!comp.name()!>SendInitRqst (<!inputUsage!>)\n"
+#define <!upper(comp.name())!>_PROMPT "usage: <!comp.name()!>SendInitRqst (<!inputFlat!>)\n"
 
 /* Inclusions pour acceder au module */
 #include "<!comp.name()!>MsgLib.h"

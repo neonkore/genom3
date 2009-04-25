@@ -86,5 +86,6 @@ void export_idl()
 	.value("Enum", IdlType::Enum)
 	.value("Sequence", IdlType::Sequence)
 	.value("Typedef", IdlType::Typedef)
-	.value("Named", IdlType::Named);
+	.value("Named", IdlType::Named)
+	.value("Array", IdlType::Array);
 }

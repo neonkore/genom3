@@ -1,6 +1,3 @@
-<?
-from string import upper;
-?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
  * All rights reserved.
@@ -60,31 +57,37 @@ from string import upper;
 /**
  ** Boite aux lettres reception requetes 
  **/
-#define  $MODULE$_MBOX_NAME                      "<!comp.name()!>"
+#define  <!upper(comp.name())!>_MBOX_NAME                      "<!comp.name()!>"
 
-#define  $MODULE$_MAX_RQST_SIZE              $maxRequestSize$
+#define  <!upper(comp.name())!>_MAX_RQST_SIZE              sizeof(int)
 
-#define  $MODULE$_MBOX_RQST_SIZE       \
- (BUF_SIZE($MODULE$_MAX_RQST_SIZE) * SERV_NMAX_RQST_ID)
+#define  <!upper(comp.name())!>_MBOX_RQST_SIZE       \
+ (BUF_SIZE(<!upper(comp.name())!>_MAX_RQST_SIZE) * SERV_NMAX_RQST_ID)
 
 /** 
  ** Taille max repliques (serveur)
  **/
-#define  $MODULE$_MAX_INTERMED_REPLY_SIZE   (sizeof(int))
+#define  <!upper(comp.name())!>_MAX_INTERMED_REPLY_SIZE   (sizeof(int))
 
-#define  $MODULE$_MAX_REPLY_SIZE             $maxReplySize$
+#define  <!upper(comp.name())!>_MAX_REPLY_SIZE             sizeof(double)
 
 /** 
  ** Taille bal clients pour reception repliques 
  **/
-#define  $MODULE$_CLIENT_MBOX_REPLY_SIZE   \
-((BUF_SIZE($MODULE$_MAX_REPLY_SIZE) \
-   + BUF_SIZE($MODULE$_MAX_INTERMED_REPLY_SIZE)) \
+#define  <!upper(comp.name())!>_CLIENT_MBOX_REPLY_SIZE   \
+((BUF_SIZE(<!upper(comp.name())!>_MAX_REPLY_SIZE) \
+   + BUF_SIZE(<!upper(comp.name())!>_MAX_INTERMED_REPLY_SIZE)) \
  * CLIENT_NMAX_RQST_ID)
 
 /*-------------------------- Liste des requetes  -------------------------*/
 
-$listRequests$
+<? #$listRequests$
+i = 0
+for s in comp.servicesMap():
+    print "#define %s_%s_RQST %d" % (upper(comp.name()), upper(s.data().name), i)
+    i += 1
+print "#define %s_ABORT_RQST %d" % (upper(comp.name()), i)
+?>
 
 /*---------------- PROTOTYPES DES FONCTIONS EXTERNES ------------------*/
 

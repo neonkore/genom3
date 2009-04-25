@@ -98,12 +98,7 @@ static char *<!comp.name()!>TestRequestNameTab[] = {
 out = ""
 for s in comp.servicesMap():
     service = s.data()
-    out += "   \"" + service.name
-    if service.type == ServiceType.Exec:
-	# if reentrant print "(nE)"
-	out += "(E)"
-    elif service.type == ServiceType.Init:
-	out += "(I)"
+    out += "   \"" + service.name + serviceDescString(service)
     out+= "\",\n"
 print out[:-2] + "\n};" 
 ?>
@@ -196,3 +191,109 @@ static void <!comp.name()!>TestInitTask (TEST_STR *testStr)
   printf ("ok.");
 }
  
+<?
+for s in comp.servicesMap():
+    service = s.data()
+    inputFlag = len(service.inputs()) > 0
+    if inputFlag:
+	inputName = service.inputs()[0]
+	t = comp.typeFromIdsName(inputName)
+	if t != None:
+	    inputNewline = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	inputType = t.toCType(True)
+	inputTypeProto = typeProtoPrefix(t)
+
+    outputFlag = len(service.output) > 0
+    if outputFlag:
+	outputName = service.output
+	t = comp.typeFromIdsName(outputName)
+	if t != None:
+	    outputNewline = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	outputType = t.toCType(True)
+	outputTypeProto = typeProtoPrefix(t)
+    ?>
+/**
+ **  Emission et reception de la requete <!comp.name()!>Test<!service.name!>
+ **/
+
+static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum, 
+				    int acti, BOOL silent)
+
+{
+<? # $inputDeclarations$ 
+    if inputFlag:
+	print  "int *inputDims = NULL;"
+ # $outputDeclarations$
+    if outputFlag:
+	print  "int *outputDims = NULL;"
+
+    if service.type == ServiceType.Exec:
+	?>
+  /* Saisie données */
+  if (!TEST_ACTIVITY_ON(testId, acti)) {
+<?
+ # $inputScan$
+    if inputFlag:
+	outputServices = findServiceWithSameOutput(service,inputName)
+	#similarPosters = findPosterWithSameOutput()
+	#todo meme chose avec les posters
+
+	funcnames = ""
+	for ss in outputServices:
+	    if funcnames != "":
+		funcnames += ", "
+	    funcnames += "\"request " + ss.name + " " + serviceDescString(ss) + "\""
+	    if len(ss.inputs()) > 0:
+		funcnames += " - needs input "
+
+	if funcnames != "":
+	    ?>
+  const char *menu[] = {"<!inputName!>", <!funcnames!>};
+  if(testPrintGetInputMenu(testId, <!len(outputServices) + 1!>, menu, rqstNum)) {
+      switch(TEST_RQST_GET_CMD(testId,rqstNum)) {
+<?
+	    i = 0
+	    for ss in outputServices:
+		?>
+	case <!i!>:
+	  if (!testSendAndGetInput(testId, <!upper(comp.name())!>_<!upper(ss.name)!>_RQST, acti, TEST_RQST_INPUT(testId,rqstNum)))
+	    return FALSE;
+<?
+		i+= 1
+	    ?>
+	default:
+	  break;
+      }
+  }
+<?
+	?>
+  printf ("-- Enter <!inputType!> <!inputName!>:");
+  scan_<!inputTypeProto!>(stdin, stdout, (<!inputType!> *)TEST_RQST_INPUT(testId,rqstNum), <!inputNewline!>, 0, inputDims);
+<?
+    if service.type == ServiceType.Exec:
+	?>
+  }
+
+  /* Emission d'une requete + replique intermediaire 
+     ET/OU reception replique finale (selon TEST_ACTIVITY_RQST_ID) */
+  if (!testSendAndOrRcvExecRqst(testId, rqstNum, acti, silent))
+     return FALSE;
+<?
+    else:
+	?>
+  if (!testSendAndRcvCntrlRqst(testId, rqstNum, acti, silent))
+     return FALSE;
+
+<? #  $outputPrint$
+    if outputFlag:
+	?>
+  if (!silent) {
+    printf ("<!outputName!> = ");
+    print_<!outputTypeProto!>(stdout, (<!outputType!> *)TEST_RQST_OUTPUT(testId,rqstNum), <!outputNewline!>, 0, outputDims, stdin);
+  }
+<?
+    ?>
+  return TRUE;
+}
+<?
+?>

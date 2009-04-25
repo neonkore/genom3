@@ -406,11 +406,16 @@ main(int argc, char *argv[])
     }
 
     /* Initialise environnement comLib */
-#if $periodic$
+<?
+if periodicFlag:
+    ?>
     errFlag = h2initGlob(100);
-#else
+<?
+else:
+    ?>
     errFlag = h2initGlob(0);
-#endif
+<?
+?>
     if (errFlag == ERROR) {
 	/* informe la tache en avant plan */
 	write(waitPipe[1], "<!comp.name()!>: h2initGlob error\n", 17); 

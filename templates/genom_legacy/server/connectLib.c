@@ -59,7 +59,7 @@ STATUS <!comp.name()!>ClientInit (CLIENT_ID *pClientId)
   <!comp.name()!>RecordH2errMsgs();
 
   /* Appeler la routine d'initialisation d'un client CS */
-  return (csClientInit (<!upper(comp.name())!>_MBOX_NAME, $MODULE$_MAX_RQST_SIZE,
+  return (csClientInit (<!upper(comp.name())!>_MBOX_NAME, <!upper(comp.name())!>_MAX_RQST_SIZE,
                         <!upper(comp.name())!>_MAX_INTERMED_REPLY_SIZE, 
 			<!upper(comp.name())!>_MAX_REPLY_SIZE, 
 			pClientId));

@@ -110,7 +110,7 @@ int <!comp.name()!>AbortRqstSend (CLIENT_ID clientId,
   errnoSet(0);
 
   /* Emettre la requete */
-  if (csClientRqstSend (clientId, <!abortRequestNum!>, (void *) activity,
+  if (csClientRqstSend (clientId, <!upper(comp.name())!>_ABORT_RQST, (void *) activity,
 			sizeof(int), (FUNCPTR) NULL, FALSE, 0, replyTimeOut, 
 			pRqstId) == ERROR)
     return(ERROR);
@@ -177,7 +177,7 @@ int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId,
   *bilan = OK;
   
   /* Emettre la requete */
-  if (csClientRqstSend (clientId, <!abortRequestNum!>, (void *) activity,
+  if (csClientRqstSend (clientId, <!upper(comp.name())!>_ABORT_RQST, (void *) activity,
 			sizeof(int), (FUNCPTR) NULL, FALSE, 0, 
 			TIME_WAIT_REPLY, 
 			&rqstId) == ERROR) {

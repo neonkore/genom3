@@ -1,7 +1,3 @@
-<?
-from string import upper;
-abortRequestNum = len(comp.servicesMap()) + 1;
-?>
 /* 
  * Copyright (c) 1993-2005 LAAS/CNRS
  * All rights reserved.

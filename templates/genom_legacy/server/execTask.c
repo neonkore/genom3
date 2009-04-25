@@ -1,6 +1,4 @@
 <?
-from string import upper;
-
 #define some vars used in the rest of the file
 maxMboxReplySize = "" #todo
 currentTask = comp.task(currentTaskName) # currentTaskName is set by genom

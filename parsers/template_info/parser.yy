@@ -154,12 +154,20 @@ field:
 {
     if(driver.state() == TemplateInterpreter::InsideRequires)
 	driver.executeFile($1);
-    else
+    else if(driver.state() == TemplateInterpreter::InsideMain)
 	driver.interpretFile($1);
+    else {
+	error(yyloc, "A destination file is required in this section.");
+	YYERROR;
+    }
 }
 | STRINGLIT RARROW STRINGLIT 
 {
     switch(driver.state()) {
+      case TemplateInterpreter::InsideMain: {
+	driver.interpretFile($1, $3);
+	break;
+      }
       case TemplateInterpreter::InsideTask: {
 	driver.interpretTaskFile($1, $3);
 	break;

@@ -28,17 +28,17 @@
  * DAMAGE.
  */
 
-#ifndef $MODULE$_$execTaskName$_HEADER
-#define $MODULE$_$execTaskName$_HEADER
+#ifndef <!upper(comp.name())!>_<!currentTaskName!>_HEADER
+#define <!upper(comp.name())!>_<!currentTaskName!>_HEADER
 
 
-int $module$$exectaskname$Id;
-POSTER_ID $module$$exectaskname$PosterId;
-double $module$$exectaskname$Period;
-double $module$$exectaskname$Delay;
+int <!comp.name()!><!currentTaskName!>d;
+POSTER_ID <!comp.name()!><!currentTaskName!>PosterId;
+double <!comp.name()!><!currentTaskName!>Period;
+double <!comp.name()!><!currentTaskName!>Delay;
 
 
 /* Pour chaque client */
-CLIENT_ID $module$$execTaskName$$clientName$Id;
+CLIENT_ID <!comp.name()!><!currentTaskName!>$clientName$Id;
 
 #endif

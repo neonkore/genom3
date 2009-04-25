@@ -1,45 +1,4 @@
 <?
-from string import upper;
-
-def typeProtoPrefix(t):
-    prefix = ""
-    if t.kind() == IdlKind.Named:
-	n = t.asNamedType()
-	return typeProtoPrefix(n.type())
-    if t.kind() == IdlKind.Struct:
-	prefix = "struct_"
-    elif t.kind() == IdlKind.Enum:
-	prefix = "enum_"
-    elif t.kind() == IdlKind.Typedef:
-	return ""
-    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
-        prefix = "char"
-    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
-        prefix = "int"
-    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
-        prefix = "uint"
-    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
-        prefix = "double"
-    return prefix + t.identifier()
-
-def formatStringForType(t):
-   if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
-       return "%c";
-   elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
-       return "%d"
-   elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
-       return "%u" 
-   elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
-       return "%f";
-   else:
-       return ""
-
-# create a list of out ports
-outports = []
-for p in comp.portsMap():
-    if p.data().type == PortType.Outgoing:
-	outports.append(p.data())
-
 funHeader = "void endianswap_%s(%s *x, int nDim, int *dims)\n{\n"
 "  FOR_EACH_elt(nDim,dims) {";
 ?>

@@ -1,22 +1,4 @@
 <?
-from string import upper;
-
-def typeProtoPrefix(t):
-    prefix = ""
-    if t.kind() == IdlKind.Struct:
-	prefix = "struct_"
-    elif t.kind() == IdlKind.Enum:
-	prefix = "enum_"
-    elif t.kind() == IdlKind.Typedef:
-	prefix = ""
-    return prefix + t.identifier()
-
-# create a list of out ports
-outports = []
-for p in comp.portsMap():
-    if p.data().type == PortType.Outgoing:
-	outports.append(p.data())
-
 funProto = "extern void endianswap_%s(%s *x, int nDim, int *dims);"
 ?>
 

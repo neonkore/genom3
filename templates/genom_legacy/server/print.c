@@ -1,6 +1,4 @@
 <?
-from string import upper;
-
 def printType(t,name):
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()

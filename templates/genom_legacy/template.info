@@ -14,7 +14,7 @@ main:
   "autoconf/codels.mk"
   "autoconf/config.mk.in"
   "autoconf/config.rtai.mk"  
-  "autoconf/configure.ac.in"    
+  "autoconf/configure.ac"    
   "autoconf/genom.mk"    
   "autoconf/ltcf-c.sh"  
   "autoconf/ltmain.sh"      

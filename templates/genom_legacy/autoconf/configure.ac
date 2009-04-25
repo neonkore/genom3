@@ -1,19 +1,36 @@
+<?
+if shouldGenerateOpenPRS == "":
+  genOpenprs = "yes"
+else:
+  genOpenprs = "no"
+
+if shouldGenerateTcl == "":
+  genTcl = "yes"
+else:
+  genTcl = "no"
+
+if comp.language == "C++":
+    lang_cxx = "yes"
+else:
+    lang_cxx = "no"
+?>
 dnl
 dnl configure.ac --
 dnl	process this file with autoconf to produce a configure script.
 dnl
 
-AC_INIT($module$-genom, $version$, $email$)
+AC_INIT(<!comp.name()!>-genom, <!comp.version!>, <!"email"!>)
 AC_CONFIG_AUX_DIR(autoconf)
 
-ABI_VERSION_INFO=$iface_version$
+ABI_VERSION_INFO=
 AC_SUBST(ABI_VERSION_INFO)
 
 AC_CANONICAL_HOST
 
 dnl --- checks for programs ---------------------------------------------
 dnl
-LANG_CXX=$lang_cxx$
+
+LANG_CXX=<!lang_cxx!>
 AC_SUBST(LANG_CXX)
 
 AC_PROG_CC
@@ -81,12 +98,12 @@ AC_SUBST(GENOM_CFLAGS)
 AC_SUBST(GENOM_LIBS)
 
 dnl Tcl
-ifelse([$genTcl$], [yes], [ROBOT_LIB_TCL(@TCL_CONFIG_PATH@)], [])
+ifelse([<!genTcl!>], [yes], [ROBOT_LIB_TCL(@TCL_CONFIG_PATH@)], [])
 
 dnl transgen and oprs
-ifelse([$genOpenprs$], [yes], [
+ifelse([<!genOpenprs!>], [yes], [
 	PKG_CHECK_MODULES(TRANSGEN, transgen)
-        AC_CONFIG_FILES([$module$-oprs.pc:autoconf/$module$-oprs.pc.in])
+        AC_CONFIG_FILES([<!comp.name()!>-oprs.pc:autoconf/<!comp.name()!>-oprs.pc.in])
 	], [])
 
 dnl --- Check for extra software ----------------------------------------
@@ -109,7 +126,14 @@ AC_ARG_WITH(libraries,
    ], [EXTRA_LIBS=])
 AC_SUBST(EXTRA_LIBS)
 
-$genomPackages$
+<? #$genomPackages$
+for i in comp.importedComponents():
+    ?>
+PKG_CHECK_MODULES(<!upper(i)!>, <!i!>)
+AC_SUBST(<!upper(i)!>_CFLAGS)
+AC_SUBST(<!upper(i)!>_LIBS)
+<?
+?>
 
 dnl ============ Include the user part
 m4_include([../configure.ac.user])
@@ -123,7 +147,7 @@ AC_CONFIG_FILES(
 	[Makefile]
 	[codels/Makefile]
 	[server/Makefile]
-	[$pkgname$.pc:autoconf/$pkgname$.pc.in]
+	[<!comp.name()!>.pc:autoconf/<!comp.name()!>.pc.in]
 	[local.mk]
 )
 

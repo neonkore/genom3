@@ -154,6 +154,7 @@ int Component::taskIndex(const std::string &name) const
 		  if(it->first == name)
 			  return i;
 	}
+	return -1;
 }
 
 int Component::serviceIndex(const std::string &name) const
@@ -164,6 +165,7 @@ int Component::serviceIndex(const std::string &name) const
 		  if(it->first == name)
 			  return i;
 	}
+	return -1;
 }
 
 IdlType::Ptr Component::typeFromName(const std::string &name)

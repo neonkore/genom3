@@ -81,7 +81,7 @@ extern STATUS <!comp.name()!>CntrlPosterInit ( void );
 for port in outports:
     print "extern STATUS " + comp.name() + port.name + "PosterInit ( void );"
     print "extern POSTER_ID " + comp.name() + port.name + "PosterID ( void );"
-    write("extern STATUS" + comp.name() + port.name + "PosterRead ( ")
+    write("extern STATUS " + comp.name() + port.name + "PosterRead ( ")
     print upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR *x );"
 # done for each poster member in genom2, do it for struct members ?
 #    print "extern STATUS " + comp.name() + port.name + port.name + "PosterRead ( " + port.type.toCType(true) + " *" + port.name + " );"

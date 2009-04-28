@@ -48,7 +48,7 @@ class Port
 
 		Port() {}
 		Port(std::string name, Idl::IdlType::Ptr idlType, bool incoming)
-				: name(name), idlType(idlType), type(incoming ? Incoming : Outgoing) {}
+				: name(name), type(incoming ? Incoming : Outgoing), idlType(idlType) {}
 
 		void debug();
 

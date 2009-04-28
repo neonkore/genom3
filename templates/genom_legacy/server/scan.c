@@ -41,8 +41,8 @@
 <?
 for t in comp.typesVect():
     ?>
-void scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
-       <!t.toCType(True)!> *x, int indent, int nDim, int *dims );
+int scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
+       <!t.toCType(True)!> *x, int indent, int nDim, int *dims )
 {
   char *indstr;
   indstr=strdup(indentStr(nDim?++indent:indent));
@@ -96,6 +96,7 @@ void scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
 	  trouve = 0;
         }
       } while (! trouve);
+    }
 <?
     ?>
 

@@ -193,6 +193,7 @@ IdlType::Ptr IdlType::unalias()
 		default:
 			return IdlType::Ptr(); // this type is not an alias
 	}
+	return IdlType::Ptr();
 }
 
 
@@ -304,9 +305,9 @@ void EnumType::addEnumerator(const std::string &e)
 
 string EnumType::toCType(bool declOnly) 
 {
-	string s = "enum " + m_identifier;
 	if(declOnly)
-		return s;
+	  return m_identifier;
+	string s = "enum " + m_identifier;
 
 	s.append("{\n");
 	bool first = true;
@@ -320,6 +321,7 @@ string EnumType::toCType(bool declOnly)
 		s.append(*it);
 	}
 	s.append("}\n");
+	return s;
 }
 
 /************ TypedefType ***************/
@@ -348,6 +350,7 @@ string TypedefType::toCType(bool declOnly)
 	if(declOnly)
 		return id;
 	string s = "typedef " + m_aliasType->toCType(true) + " " + id;
+	return s;
 }
 
 /************ TypedefType ***************/

@@ -107,7 +107,7 @@ static char *<!comp.name()!>TestPosterNameTab[] = {
 <? # $posterNameTabDeclare$
 out = ""
 for port in outports:
-    out += "\"%s\"\n" % port.name
+    out += "   \"%s\",\n" % port.name
 print out[:-2] + "\n};" 
 ?>
 

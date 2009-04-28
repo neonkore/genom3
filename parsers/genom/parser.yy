@@ -146,8 +146,9 @@ struct variant_type {
 /* %type <portVal>		port_decl */
 /* %type <taskVal>		task_decl */
 /* %type <serviceVal>	service_decl */
-%type <codelVal>		codel_prototype;
-
+%type <stringVal>		identifier_list
+%type <stringVal>		identifiers
+%type <codelVal>		codel_prototype
 %type <typeVal>			type_decl
 %type <typeVal>  		type_spec
 %type <typeVal> 		simple_type_spec
@@ -392,41 +393,52 @@ service_field:
 {
     driver.currentService()->addCodel($2, $4);
 }
-| IDENTIFIER COLON IDENTIFIER
+| IDENTIFIER COLON IDENTIFIER identifier_list
 {
     Service::Ptr s = driver.currentService();
 
-    if($1 == "type") {
-	if($3 == "init")
-	  s->type = Service::Init;
-	else if($3 == "control")
-	  s->type = Service::Control;
-        else if($3 == "exec")
-	  s->type = Service::Exec;
-	else {
-	  error(yyloc, std::string("Unknown service type: ") + $3);
+    if($4 == "") {
+	if($1 == "type") {
+	    if($3 == "init")
+	      s->type = Service::Init;
+	    else if($3 == "control")
+	      s->type = Service::Control;
+	    else if($3 == "exec")
+	      s->type = Service::Exec;
+	    else {
+	      error(yyloc, std::string("Unknown service type: ") + $3);
+	      YYERROR;
+	    }
+	} else if($1 == "taskName") {
+	    s->taskName = $3;
+	} else if($1 == "input") {
+	    s->addInput($3);
+	} else if($1 == "output") {
+	    s->output = $3;
+	} else if($1 == "errors") {
+	    driver.currentService()->addErrorMessage($3);
+	} else if($1 == "interrupts") {
+	    driver.currentService()->addIncompatibleService($3);
+	} else {
+	  error(yyloc, std::string("Unknown service field: ") + $1);
 	  YYERROR;
 	}
-    } else if($1 == "taskName") {
-	s->taskName = $3;
-    } else if($1 == "input") {
-	s->addInput($3);
-    } else if($1 == "output") {
-	s->output = $3;
-    } else if($1 == "errors") {
-	driver.currentService()->addErrorMessage($3);
     } else {
-      error(yyloc, std::string("Unknown service field: ") + $1);
-      YYERROR;
+	std::vector<std::string> ids;
+	driver.split($4, ids);
+	std::vector<std::string>::const_iterator it = ids.begin();
+
+	if($1 == "errors") {
+	    for(; it != ids.end(); ++it)
+		driver.currentService()->addErrorMessage(*it);
+	} else if ($1 == "interrupts") {
+	    for(; it != ids.end(); ++it)
+		driver.currentService()->addIncompatibleService(*it);
+	} else {
+	  error(yyloc, std::string("Unknown service field (or wrong number of arguments): ") + $1);
+	  YYERROR;
+	}
     }
-}
-| IDENTIFIER COLON IDENTIFIER service_errors_list
-{
-    if($1 != "errors") {
-      error(yyloc, std::string("Wrong arguments for field: ") + $1);
-      YYERROR;
-    }
-    driver.currentService()->addErrorMessage($3);
 }
 | IDENTIFIER COLON STRINGLIT 
 {
@@ -441,14 +453,24 @@ service_field:
 | IDENTIFIER COLON INTEGERLIT 
 {};
 
-service_errors_list:
-  IDENTIFIER 
+identifier_list:
+/*empty*/
 {
-    driver.currentService()->addErrorMessage($1);
+    $$ = "";
 }
-| service_errors_list IDENTIFIER
+| identifiers
 {
-    driver.currentService()->addErrorMessage($2);
+    $$ = $1;
+}
+
+identifiers:
+ IDENTIFIER 
+{
+   $$ = $1;
+}
+| identifiers IDENTIFIER
+{
+    $$ = $1 + $2;
 };
 
 /*** Codel Declaration ***/
@@ -876,5 +898,4 @@ void G3nom::Parser::error(const Parser::location_type& l,
 {
     driver.error(l, m);
 }
-
 

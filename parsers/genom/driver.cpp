@@ -10,6 +10,7 @@
 
 using namespace G3nom;
 using namespace Idl;
+using namespace std;
 
 Driver::Driver()
 		: m_verboseLexing(false),
@@ -75,4 +76,15 @@ Task::Ptr Driver::currentTask()
 // 		m_currentTask = new Task();
 	return m_currentTask;
 }
+
+void Driver::split(const std::string &s, vector<string> &v)
+{
+	uint idx = 0, previdx = 0;
+	do {
+		idx = s.find(" ", previdx);
+		v.push_back(s.substr(previdx, idx - previdx));
+		previdx = idx;
+	} while(idx != string::npos);
+}
+
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

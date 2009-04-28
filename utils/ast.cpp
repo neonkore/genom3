@@ -293,6 +293,16 @@ void Service::debug()
 		cout << *it2 << " ";
 	cout << endl;
 
+	cout << "Incompatible services: " ;
+	if(m_incompatibleServices.empty())
+		cout << "none" << endl;
+	else {
+		vector<string>::const_iterator it2 = m_incompatibleServices.begin();
+		for(; it2 != m_incompatibleServices.end(); ++it2)
+			cout << *it2 << " ";
+		cout << endl;
+	}
+
 	cout << "Codels:" << endl;
 	Codel::Map::const_iterator it;
 	for (it = m_codels.begin(); it != m_codels.end(); ++it) {
@@ -329,6 +339,11 @@ bool Service::hasCodel(const std::string &name)
 void Service::addErrorMessage(const std::string &s)
 {
 	m_errorMessages.push_back(s);
+}
+
+void Service::addIncompatibleService(const std::string &name)
+{
+	m_incompatibleServices.push_back(name);
 }
 
 /******** Codel ***************/

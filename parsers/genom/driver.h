@@ -103,6 +103,8 @@ class Driver
 			m_currentType = t;
 		}
 
+		void split(const std::string &s, std::vector<std::string> &v);
+
 	private:
 		/** Pointer to the current lexer instance, this is used to connect the
 		 * parser to the scanner. It is used in the yylex macro. */

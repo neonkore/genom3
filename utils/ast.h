@@ -143,6 +143,8 @@ class Service
 		Codel::Ptr codel(const std::string &name);
 		bool hasCodel(const std::string &name);
 
+		void addIncompatibleService(const std::string &name);
+
 		std::string name;
 		Type type;
 		std::string doc;
@@ -152,7 +154,7 @@ class Service
 	private:
 		Codel::Map m_codels;
 		std::vector<std::string> m_inputs;
-		std::vector<std::string> incompatibleServices;
+		std::vector<std::string> m_incompatibleServices;
 		std::vector<std::string> m_errorMessages;
 };
 

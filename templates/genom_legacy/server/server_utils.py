@@ -152,7 +152,7 @@ def nbExecService():
 
 # other vars
 nbServices = len(comp.servicesMap())
-abortRequestNum = nbServices + 1;
+abortRequestNum = nbServices;
 internalDataType = comp.IDSType.toCType(True)
 periodicFlag = isPeriodic()
 

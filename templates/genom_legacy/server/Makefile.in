@@ -107,9 +107,9 @@ write("\t" + comp.name() + "Struct.h \\")
 # $listIncludesInDotGen$ \
 ?>
 <!shouldGenerateServer!>	server/<!comp.name()!>PosterXMLLib.h \
-<!shouldGenerateServer!>	server/<!comp.name()!>PosterWriteLibProto.h \
+<!shouldGenerateServer!>	server/<!comp.name()!>PosterWriteLib.h \
 <!shouldGenerateServer!>	server/<!comp.name()!>PosterShowLib.h \
-<!shouldGenerateServer!>	server/<!comp.name()!>PosterReadLibProto.h \
+<!shouldGenerateServer!>	server/<!comp.name()!>PosterReadLib.h \
 <!shouldGenerateServer!>	server/<!comp.name()!>MsgLib.h \
 
 init_src= \

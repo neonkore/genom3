@@ -79,7 +79,7 @@ SEM_ID sem<!comp.name()!>InitExecTab[<!upper(comp.name())!>_NB_EXEC_TASK];
 void <!comp.name()!>CntrlTask ();
 <? # $execTaskTabDescribe$
 for t in comp.tasksMap():
-    print "extern void %s%sTask(%s_CNTRL_STR *, %s *);" % (comp.name(), t.data().name, upper(comp.name()), comp.IDSType.toCType(True))
+    print "extern void %s%s(%s_CNTRL_STR *, %s *);" % (comp.name(), t.data().name, upper(comp.name()), comp.IDSType.toCType(True))
 ?>
 typedef struct {
 	char *name;
@@ -93,14 +93,14 @@ typedef struct {
 out = ""
 for t in comp.tasksMap():
     task = t.data()
-    out += "{\"" + comp.name() + task.name + "Task\", "
+    out += "{\"" + comp.name() + task.name + "\", "
     out += "%d, " % task.priority
     if task.stackSize > 0:
 	out += str(task.stackSize)
     else:
 	out += "5000"
 	sys.stderr.write("No stack size specified for task '%s'" % task.name)
-    out += ", " + comp.name() + task.name + "Task },\n"
+    out += ", " + comp.name() + task.name + " },\n"
 print out[:-2] + "\n};"
 ?>
 

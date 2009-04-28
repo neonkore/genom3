@@ -28,7 +28,7 @@
 #
 
 GENOM=		genom
-GENFILE=	<!comp.name()!>.gen 
+GENFILE=	<!comp.name()!>.gnm 
 GENFLAGS=	
 
 # --- genom -------------------------------------------------------------

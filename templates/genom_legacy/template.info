@@ -9,7 +9,7 @@ main:
   "configure.ac.user"
   "local.mk.in"
   "server/Makefile.in"
-  "codels/Makefile.in"
+/*  "codels/Makefile.in" */
 /* autoconf/ dir */
   "autoconf/codels.mk"
   "autoconf/config.mk.in"

@@ -144,6 +144,7 @@ class Service
 		bool hasCodel(const std::string &name);
 
 		void addIncompatibleService(const std::string &name);
+		std::vector<std::string> & incompatibleServices() { return m_incompatibleServices; }
 
 		std::string name;
 		Type type;

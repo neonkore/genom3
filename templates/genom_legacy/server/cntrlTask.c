@@ -1094,6 +1094,27 @@ for s in comp.servicesMap():
 	    outputNamePtr = "&" + outputName
 	outputRefPtr = "&((*" + comp.name() + "DataStrId)." + outputName + ")" 
 
+ #  $tabCompatibilityDeclare$
+    tabCompatibilityDeclare = "static int " + comp.name() + service.name + "Compatibility[] = {"
+    l = service.incompatibleServices()
+    out = ""
+    defaultValue = ""
+    if len(l) == 0 or l[0] == "none":
+	defaultValue = "1";
+    elif l[0] == "all":
+	defaultValue = "0";
+    for ss in comp.servicesMap():
+	if out != "":
+	    out += ", "
+	if defaultValue != "":
+	    out += defaultValue
+	else:
+	    if ss.data().name in l:
+		out += "0"
+	    else:
+		out += "1"
+    tabCompatibilityDeclare += out + "};"
+
     if service.type == ServiceType.Control: 
 	?>
 /*****************************************************************************
@@ -1111,7 +1132,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 
 {
   int i;
-  $tabCompatibilityDeclare$
+  <!tabCompatibilityDeclare!>
   int *compatibilityTab = <!comp.name()!><!service.name!>Compatibility;
   int bilan=OK;
 <? 
@@ -1225,7 +1246,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 
 {
-  $tabCompatibilityDeclare$
+  <!tabCompatibilityDeclare!>
   int activity;
   int i;
   int *compatibilityTab = <!comp.name()!><!service.name!>Compatibility;
@@ -1321,7 +1342,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <?
 	    else: ?>
   if (csServRqstParamsGet (servId, rqstId, ACTIVITY_INPUT_ID(activity), 
-			   $inputSize$, (FUNCPTR) NULL) != OK)
+			   <!inputSize!>, (FUNCPTR) NULL) != OK)
     <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
 <?
 
@@ -1335,7 +1356,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 	    if False: # reentrant flag 
 		?>
   ACTIVITY_OUTPUT_ID(activity) = 
-    &(<!comp.name()!>DataStrId->$request$Output)[activity];
+    &(<!comp.name()!>DataStrId-><!service.name!>Output)[activity];
 <?
 	    else: ?>
   ACTIVITY_OUTPUT_ID(activity) = <!outputRefPtr!>;
@@ -1349,8 +1370,8 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   moduleEventCntrl.eventType = STATE_START_EVENT;
   moduleEventCntrl.activityNum = activity;
   moduleEventCntrl.activityState = INIT;
-  moduleEventCntrl.rqstType = $requestNum$;
-  moduleEventCntrl.taskNum = $execTaskNum$;
+  moduleEventCntrl.rqstType = <!serviceNum!>;
+  moduleEventCntrl.taskNum = <!comp.taskIndex(service.taskName)!> /*execTaskNum*/;
   sendModuleEvent(&moduleEventCntrl);
 
   /*-------------------------------------------------------------

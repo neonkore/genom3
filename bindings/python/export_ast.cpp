@@ -75,7 +75,8 @@ void export_ast()
 	.def_readonly("output", &Service::output)
 	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
 	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>())
-	.def("errorMessages", &Service::errorMessages, return_value_policy<reference_existing_object>());
+	.def("errorMessages", &Service::errorMessages, return_value_policy<reference_existing_object>())
+	.def("incompatibleServices", &Service::incompatibleServices, return_value_policy<reference_existing_object>());
 
 	enum_<Service::Type>("ServiceType")
 	.value("Init", Service::Init)

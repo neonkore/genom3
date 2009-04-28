@@ -217,11 +217,11 @@ for s in comp.servicesMap():
 	input = ""
     else:
 	inputShortName = service.inputs()[0]
-	inputName = "in_ " + inputShortName
-	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputShortName + ")"
+	inputName = "in_" + inputShortName
 
 	t = comp.typeFromIdsName(inputShortName)
 	input = t.toCType(True)
+	inputSize = "sizeof(" + input + ")"
 	if(t.kind != IdlKind.String):
 	    input += " *"
 	else:
@@ -233,11 +233,11 @@ for s in comp.servicesMap():
 	outputName = "NULL"
 	output = ""
     else:
-	outputName = "out_ " + service.output
-	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + service.output + ")"
+	outputName = "out_" + service.output
 
 	t = comp.typeFromIdsName(service.output)
 	output = t.toCType(True)
+	outputSize = "sizeof(" + output + ")"
 	if(t.kind != IdlKind.String):
 	    output += " *"
 	else:

@@ -121,7 +121,7 @@ for s in comp.servicesMap():
 print service_list[:-2] # remove the last ',' 
 print "};"
 
-print "static int " + comp.name() + "TabRequestNum[] = {"
+print "static int " + comp.name() + "ExecRqstNumTab[] = {"
 i = 0
 l = ""
 for s in comp.servicesMap(): 

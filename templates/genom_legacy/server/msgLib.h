@@ -124,7 +124,7 @@ for s in comp.servicesMap():
 	input = ""
     else:
 	inputShortName = service.inputs()[0]
-	inputName = "in_ " + inputShortName
+	inputName = "in_" + inputShortName
 	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputShortName + ")"
 
 	t = comp.typeFromIdsName(inputShortName)
@@ -140,7 +140,7 @@ for s in comp.servicesMap():
 	outputName = "NULL"
 	output = ""
     else:
-	outputName = "out_ " + service.output
+	outputName = "out_" + service.output
 	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + service.output + ")"
 
 	t = comp.typeFromIdsName(service.output)

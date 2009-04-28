@@ -199,7 +199,11 @@ for s in comp.servicesMap():
 	inputName = service.inputs()[0]
 	t = comp.typeFromIdsName(inputName)
 	if t != None:
-	    inputNewline = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	    if b:
+		inputNewline = "1"
+	    else:
+		inputNewline = "0"
 	inputType = t.toCType(True)
 	inputTypeProto = typeProtoPrefix(t)
 
@@ -208,7 +212,11 @@ for s in comp.servicesMap():
 	outputName = service.output
 	t = comp.typeFromIdsName(outputName)
 	if t != None:
-	    outputNewline = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	    if b:
+		outputNewline = "1"
+	    else:
+		outputNewline = "0"
 	outputType = t.toCType(True)
 	outputTypeProto = typeProtoPrefix(t)
     ?>

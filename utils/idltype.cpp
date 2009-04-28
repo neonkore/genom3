@@ -305,9 +305,9 @@ void EnumType::addEnumerator(const std::string &e)
 
 string EnumType::toCType(bool declOnly) 
 {
-	if(declOnly)
-	  return m_identifier;
 	string s = "enum " + m_identifier;
+	if(declOnly)
+	  return s;
 
 	s.append("{\n");
 	bool first = true;

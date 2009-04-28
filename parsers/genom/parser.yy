@@ -429,9 +429,11 @@ service_field:
 	std::vector<std::string>::const_iterator it = ids.begin();
 
 	if($1 == "errors") {
+	    driver.currentService()->addErrorMessage($3);
 	    for(; it != ids.end(); ++it)
 		driver.currentService()->addErrorMessage(*it);
 	} else if ($1 == "interrupts") {
+	    driver.currentService()->addIncompatibleService($3);
 	    for(; it != ids.end(); ++it)
 		driver.currentService()->addIncompatibleService(*it);
 	} else {

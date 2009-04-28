@@ -149,7 +149,7 @@ STATUS <!comp.name()!><!port.name!>PosterRead(<!upper(comp.name())!>_<!upper(por
     return ERROR;
   }
   if (posterDataEndianness != H2_LOCAL_ENDIANNESS)
-     endianswap_struct_DEMO_MOBILESTATE_POSTER_STR(x, 0, NULL);
+     endianswap_<!typeProtoPrefix(port.idlType)!>(x, 0, NULL);
   return OK;
 }
 

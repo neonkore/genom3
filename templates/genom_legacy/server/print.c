@@ -82,4 +82,7 @@ void print_<!typeProtoPrefix(t)!>( FILE *out,
 
 ?>
 
+/* ======================== PRINT DES TYPEDEF ============================= */
+
+
 

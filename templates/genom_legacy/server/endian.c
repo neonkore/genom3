@@ -62,7 +62,7 @@ typeName = "%s_STR" % (upper(comp.name()))
 void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
-     endianswap_struct_<!upper(comp.name())!>_STR(&(*(x+elt)), 0, NULL);
+     endianswap_<!typeProtoPrefix(comp.IDSType)!>(&(*(x+elt)), 0, NULL);
   } END_FOR
 }
 
@@ -73,7 +73,7 @@ for p in outports:
 void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
-     endianswap_struct_<!typeName!>(&(*(x+elt)), 0, NULL);
+     endianswap_<!typeProtoPrefix(p.idlType)!>(&(*(x+elt)), 0, NULL);
   } END_FOR
 }
 

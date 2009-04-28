@@ -309,7 +309,7 @@ STATUS <!comp.name()!>MobileStatePosterXML(FILE *f)
   }
   fprintfBuf(f, "</error>\n");
   if (!err) {
-    printXML_struct_<!poster_type!>(f, "data", &x, 2, 0, NULL, NULL);
+    printXML_<!typeProtoPrefix(p.idlType)!>(f, "data", &x, 2, 0, NULL, NULL);
     posterIoctl(<!comp.name()!><!p.name!>PosterID(), FIO_GETDATE, &posterDate);
     xmlBalise("date",BEGIN_BALISE,f,2);
     fprintf(f, "%04d/%02d/%02d %02d:%02d:%02d.%03d",

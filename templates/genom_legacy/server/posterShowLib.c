@@ -247,7 +247,7 @@ STATUS <!comp.name()!><!p.name!>PosterShow(void)
      free(x);
      return ERROR;
   }
-  print_struct_<!poster_type!>(stdout, x, 0, 0, NULL, stdin);
+  print_<!typeProtoPrefix(p.idlType)!>(stdout, x, 0, 0, NULL, stdin);
   free(x);
   return OK;
 }

@@ -59,7 +59,7 @@
  **/
 #define  <!upper(comp.name())!>_MBOX_NAME                      "<!comp.name()!>"
 
-#define  <!upper(comp.name())!>_MAX_RQST_SIZE              sizeof(int)
+#define  <!upper(comp.name())!>_MAX_RQST_SIZE              16
 
 #define  <!upper(comp.name())!>_MBOX_RQST_SIZE       \
  (BUF_SIZE(<!upper(comp.name())!>_MAX_RQST_SIZE) * SERV_NMAX_RQST_ID)
@@ -69,7 +69,7 @@
  **/
 #define  <!upper(comp.name())!>_MAX_INTERMED_REPLY_SIZE   (sizeof(int))
 
-#define  <!upper(comp.name())!>_MAX_REPLY_SIZE             sizeof(double)
+#define  <!upper(comp.name())!>_MAX_REPLY_SIZE             8
 
 /** 
  ** Taille bal clients pour reception repliques 

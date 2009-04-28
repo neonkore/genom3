@@ -108,7 +108,7 @@ extern "C" {
 # $listUserFuncProto$
 for s in comp.servicesMap():
     for codel in s.data().codels():
-	if(s.data().type != ServiceType.Exec or s.data().name == "control"):
+	if(s.data().type != ServiceType.Exec or codel.key() == "control"):
 	    print "extern STATUS " + codel_signature(codel.data()) + ";";
 	else:
 	    print "extern ACTIVITY_EVENT " + codel_signature(codel.data()) + ";";

@@ -90,7 +90,7 @@ for s in comp.servicesMap():
 	inputSize = "0"
     outputSize = sizeOfIdsMember(service.output)
     out += "  {%s_%s_RQST, %sTest%s, %s, %s},\n" % (upper(comp.name()), upper(service.name), comp.name(), service.name, inputSize, outputSize)
-print out[:-1] + "};" 
+print out[:-2] + "};" 
 ?>
 
 static char *<!comp.name()!>TestRequestNameTab[] = {
@@ -199,7 +199,7 @@ for s in comp.servicesMap():
 	inputName = service.inputs()[0]
 	t = comp.typeFromIdsName(inputName)
 	if t != None:
-	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array or t.kind() == IdlKind.Named
 	    if b:
 		inputNewline = "1"
 	    else:
@@ -212,7 +212,7 @@ for s in comp.servicesMap():
 	outputName = service.output
 	t = comp.typeFromIdsName(outputName)
 	if t != None:
-	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array
+	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array or t.kind() == IdlKind.Named
 	    if b:
 		outputNewline = "1"
 	    else:
@@ -235,7 +235,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
     if outputFlag:
 	print  "int *outputDims = NULL;"
 
-    if service.type == ServiceType.Exec:
+    if service.type != ServiceType.Control:
 	?>
   /* Saisie données */
   if (!TEST_ACTIVITY_ON(testId, acti)) {
@@ -250,9 +250,10 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 	for ss in outputServices:
 	    if funcnames != "":
 		funcnames += ", "
-	    funcnames += "\"request " + ss.name + " " + serviceDescString(ss) + "\""
+	    funcnames += "\"request " + ss.name + " " + serviceDescString(ss) 
 	    if len(ss.inputs()) > 0:
 		funcnames += " - needs input "
+	    funcnames += "\""
 
 	if funcnames != "":
 	    ?>
@@ -278,7 +279,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
   printf ("-- Enter <!inputType!> <!inputName!>:");
   scan_<!inputTypeProto!>(stdin, stdout, (<!inputType!> *)TEST_RQST_INPUT(testId,rqstNum), <!inputNewline!>, 0, inputDims);
 <?
-    if service.type == ServiceType.Exec:
+    if service.type != ServiceType.Control:
 	?>
   }
 

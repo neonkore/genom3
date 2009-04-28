@@ -36,6 +36,8 @@ else:
 #	inputShow = ""
 	inputNamePtr = "NULL"
 #	requestNum = "0"  is it a bug ?
+	flatList = []
+	inputDeclare = ""
     else:
 	inputName = initService.inputs()[0]
 	inputType = comp.typeFromIdsName(inputName)

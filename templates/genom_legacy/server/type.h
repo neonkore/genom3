@@ -41,7 +41,7 @@
 #ifndef <!comp.name()!>_TYPE_H
 #define <!comp.name()!>_TYPE_H
 
-#include "genom/modules.h"
+#include "<!comp.name()!>Modules.h"
 #include "<!comp.name()!>Error.h"
 
 /* Nombre de tache d'execution de ce module */

@@ -30,6 +30,7 @@ main:
   "autoconf/module.pc.in" -> "autoconf/$$.pc.in"
 /* server/ dir */
   "struct.h" -> "$$Struct.h"
+  "server/modules.h" -> "server/$$Modules.h"
   "server/cntrlTask.c" -> "server/$$CntrlTask.c"
   "server/connectLib.c" -> "server/$$ConnectLib.c"
   "server/error.c" -> "server/$$Error.c"

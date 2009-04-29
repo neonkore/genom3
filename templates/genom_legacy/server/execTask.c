@@ -58,11 +58,10 @@ currentTaskNum = comp.taskIndex(currentTask.name)
 #include <h2evnLib.h>
 #include <h2timerLib.h>
 
-#include <genom/modules.h>
+
+#include "<!comp.name()!>Modules.h"
 #include <genom/moduleEvents.h>
-
 #include "<!comp.name()!>Header.h"
-
 
 /* Print debugging information */
 #define GENOM_DEBUG_EXECTASK
@@ -242,14 +241,6 @@ if currentTask.hasCodel("end"):
 ?>
       
       /* free posters, clients, mailboxes */
-<? #      $listPosterDelete$
-i = -1
-for port in outports:
-    i += 1
-    ?>
-    if (EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>] != (POSTER_ID)NULL)
-	posterDelete(EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>]);
-
 <?
 if currentTask.period == 0:?>
       /* free device created to manage h2evn required to aperiodic tasks */
@@ -528,39 +519,6 @@ else:?>
   EXEC_TASK_MAX_PERIOD(<!currentTaskNum!>) = 0;
   EXEC_TASK_ON_PERIOD(<!currentTaskNum!>) = 0;
   EXEC_TASK_WAKE_UP_FLAG(<!currentTaskNum!>) = FALSE;
-
-  /* Creer le poster */
-<?  # $listPosterCreate$
-i = -1
-for p in outports:
-    i += 1
-    ?>
-  if (posterCreate(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_NAME,
-	sizeof(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR),
-	&(EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>])) != OK) {
-     logMsg("<!comp.name()!><!currentTaskName!>InitTaskFunc: cannot create poster <!p.name!>\n");
-     return(ERROR);
-  }
-  {
-       int size = sizeof(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR);
-       char *tmp = malloc(size);
-       if (tmp == NULL) {
-          fprintf (stderr, "<!comp.name()!><!currentTaskName!>InitTaskFunc : not enough mem to init poster <!p.name!>\n");
-       }
-       else {
-          memset(tmp, 0, size);
-          if (posterWrite(EXEC_TASK_POSTER_ID(<!currentTaskNum!>)[<!i!>], 0, tmp, size) != size) {
-             fprintf (stderr, "<!comp.name()!><!currentTaskName!>InitTaskFunc : cannot init poster <!p.name!>\n");
-             free(tmp);
-             return(ERROR);
-          }
-          free(tmp);
-       }
-  }
-<?
-?>
-
-  LOGDBG(("<!comp.name()!><!currentTask.name!>InitTaskFunc: posters created\n"));
       
   /* S'initialiser comme client des Posters */
 <? # $listPosterInit$ 

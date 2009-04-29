@@ -88,7 +88,7 @@ for t in comp.tasksMap():
 	for p in outports:
 #	  if p.execTask() == t:
 	    write( "#define %s_%s_POSTER_ID " % (upper(comp.name()), upper(p.name)) )
-	    print "(%sCntrlStrId->execTaskTab[%s_%s_NUM].posterId[%d])\n" % (comp.name(), upper(comp.name()), upper(t.data().name), i)
+	    print "%sCntrlStrId->cntrlTask.posterId[%d])\n" % (comp.name(), i)
 	    i = i+1
 ?>
 <?
@@ -176,6 +176,7 @@ if initServiceNb != -1:
 #define INIT_RQST              M_INIT_RQST(SDI_C)
 #define CNTRL_NB_EXEC_TASKS    M_CNTRL_NB_EXEC_TASKS(SDI_C)
 #define CNTRL_SDI_F            M_CNTRL_SDI_F(SDI_C)
+#define CNTRL_TASK_POSTER_ID  M_CNTRL_TASK_POSTER_ID(SDI_C)
 
 #define GENOM_VERBOSE_LEVEL    M_GENOM_VERBOSE_LEVEL(SDI_C)
 #define GENOM_PRINT_TIME_FLAG  M_GENOM_PRINT_TIME_FLAG(SDI_C)

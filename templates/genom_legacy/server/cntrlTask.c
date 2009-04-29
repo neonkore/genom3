@@ -467,7 +467,41 @@ static STATUS
     return (ERROR);
   }
   LOGDBG(("<!comp.name()!>CntrlInitTask: created control poster\n"));
- 
+
+  /* Creer les autres posters */
+  /* Creer le poster */
+<?  # $listPosterCreate$
+i = -1
+for p in outports:
+    i += 1
+    ?>
+  if (posterCreate(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_NAME,
+	sizeof(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR),
+	&(CNTRL_TASK_POSTER_ID[<!i!>])) != OK) {
+     logMsg("<!comp.name()!>CntrlInitTask: cannot create poster <!p.name!>\n");
+     return(ERROR);
+  }
+  {
+       int size = sizeof(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR);
+       char *tmp = malloc(size);
+       if (tmp == NULL) {
+          fprintf (stderr, "<!comp.name()!>CntrlInitTask : not enough mem to init poster <!p.name!>\n");
+       }
+       else {
+          memset(tmp, 0, size);
+          if (posterWrite(CNTRL_TASK_POSTER_ID[<!i!>], 0, tmp, size) != size) {
+             fprintf (stderr, "<!comp.name()!>CntrlInitTask : cannot init poster <!p.name!>\n");
+             free(tmp);
+             return(ERROR);
+          }
+          free(tmp);
+       }
+  }
+<?
+?>
+
+  LOGDBG(("<!comp.name()!>CntrlInitTask: posters created\n"));
+
   /* Obtenir son propre identificateur de tache */
   CNTRL_TASK_ID = taskIdSelf ();
   NB_ACTIVITIES = 0;
@@ -956,6 +990,16 @@ static void <!comp.name()!>RqstAbortActivity (SERV_ID servId, int rqstId)
 	  commonStructDelete ((void *) <!comp.name()!>DataStrId);
 	  commonStructDelete ((void *) <!comp.name()!>CntrlStrId);
 	  posterDelete(<!comp.name()!>CntrlPosterId);
+	  /* Detruit les autres posters */
+<? #      $listPosterDelete$
+i = -1
+for port in outports:
+    i += 1
+    ?>
+	  posterDelete(CNTRL_TASK_POSTER_ID[<!i!>]);
+<?
+?>
+
 	  logMsg("<!comp.name()!>CntrlTask ended\n");
 	  /* Remove PID file */
 	  unlink(pidFilePath);

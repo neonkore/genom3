@@ -143,6 +143,12 @@ def codel_signature(codel):
   proto = proto + "int *report)"
   return proto
 
+def codelSignatureFull(codel, service):
+    if service.type == ServiceType.Control or codel.key() == "control":
+	return "STATUS " + codel_signature(codel.data()) + ";";
+    else:
+	return "ACTIVITY_EVENT " + codel_signature(codel.data()) + ";";
+
 def nbExecService():
     count = 0
     for s in comp.servicesMap():

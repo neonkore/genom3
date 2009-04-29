@@ -61,8 +61,11 @@ main:
   "server/printXML.c" -> "server/$$PrintXML.c"
   "server/scan.h" -> "server/$$Scan.h"
   "server/scan.c" -> "server/$$Scan.c"
+/* codels/ dir */
+  "codels/cntrlTaskCodels.c" -> "codels/$$CntrlTaskCodels.c"
 ;
 
 task:
   "server/execTask.c" -> "server/$component$$task$.c"
+  "codels/execTaskCodels.c" -> "codels/$component$$task$Codels.c"
 ;

@@ -94,6 +94,7 @@ client_src= \
 <!shouldGenerateServer!>	<!comp.name()!>PosterReadLib.c	\
 
 client_includes = \
+	server/<!comp.name()!>Modules.h \
 	server/<!comp.name()!>Type.h \
 	server/<!comp.name()!>Scan.h \
 	server/<!comp.name()!>PrintXML.h \

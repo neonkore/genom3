@@ -4,7 +4,7 @@
 <?
 for t in comp.typesVect():
     if t.identifier() != comp.IDSType.identifier():
-	print t.toCType() + ";"
+	print "typedef " + t.toCType() + "  " + t.identifier() + ";\n"
 ?>
 
 #endif /* <!upper(comp.name())!>_STRUCT_H */

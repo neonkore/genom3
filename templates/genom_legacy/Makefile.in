@@ -115,7 +115,7 @@ regen: standalone-regen
 	${MAKE} depend
 
 # --- pkgconfig ---------------------------------------------------------
-ALL_PKGCONFIG := $pkgname$.pc $(addsuffix .pc,@EXTRA_PKGCONFIG@)
+ALL_PKGCONFIG := <!pkgname!>.pc $(addsuffix .pc,@EXTRA_PKGCONFIG@)
 <!shouldGenerateOpenPRS!>ALL_PKGCONFIG += $pkgname$-oprs.pc
 install:: $(ALL_PKGCONFIG)
 	$(MKINSTALLDIRS) ${DESTDIR}$(libdir)/pkgconfig

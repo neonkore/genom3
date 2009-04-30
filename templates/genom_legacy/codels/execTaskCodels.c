@@ -1,5 +1,11 @@
 <?
 currentTask = comp.task(currentTaskName) # currentTaskName is set by genom
+def codelNameToValue(n):
+  if n == "MAIN":
+     return "EXEC"
+  elif n == "MAIN2":
+     return "EXEC2"
+  return n
 ?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
@@ -33,18 +39,52 @@ currentTask = comp.task(currentTaskName) # currentTaskName is set by genom
 #include <portLib.h>
 
 #include "server/<!comp.name()!>Header.h"
+#include "userCodels.h"
+
+extern STATUS returnCodeToStatus(int res);
+
+ACTIVITY_EVENT returnCodeToActivityEvent(int res)
+{
+  switch(res) {
+<?
+errorSet = createErrorList()
+for e in errorSet:
+    print "    case ERROR_" + e + ": return ERROR;"
+for s in comp.servicesMap():
+    service = s.data()
+    if service.taskName != currentTaskName or service.type == ServiceType.Control:
+	continue
+
+    # print targets for this service
+    for c in service.codels():
+	if c.key() == "control":
+	    continue
+	print "    case " + upper(service.name) + "_" + upper(c.key()) + ":  return " + codelNameToValue(upper(c.key())) + ";"
+    # add the 'Ether' target
+    print "    case " + upper(service.name) + "_ETHER: return ETHER;"
+?>
+    default:
+	return ETHER;
+  }
+}
+
+extern int returnCodeToReport(int res);
 
 <?
 for s in comp.servicesMap():
     service = s.data()
     if service.taskName != currentTaskName or service.type == ServiceType.Control:
 	continue
-    for codel in service.codels():
-	if codel.key() == "control":
+    for c in service.codels():
+	if c.key() == "control":
 	    continue
+	codel = c.data()
 	?>
+
+extern int <!real_codel_signature(codel)!>;
+
 /*------------------------------------------------------------------------
- * <!codel.data().name!>  -  control codel of EXEC request <!service.name!>
+ * <!codel.name!>_codel  -  control codel of EXEC request <!service.name!>
  *
  * Description:    
  * Report: OK
@@ -56,14 +96,45 @@ for s in comp.servicesMap():
  * Returns:    OK or ERROR
  */
 
-<!codelSignatureFull(codel, s.data())!>
-{
+<!codelSignatureFull(c, s.data())!>
+{<?
+	for port in codel.outPorts:
+	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+	    posterAddr = "outport_" + port
+	    ?>
+  /* find a pointer to <!port!> poster*/
+  <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = posterAddr(<!posterId!>);
+  if (<!posterAddr!> == NULL) {
+    *report = errnoGet();
+    return ETHER;
+  }<?
+	?>
 
+  /* Lock access to posters*/<?
+	for port in codel.outPorts:
+	    ?>
+  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
+	?>
+
+  /*call real codel */
+  int res = <!real_codel_call(codel)!>;
+  if(res < 0) {
+      *report = returnCodeToReport(res);
+      return ETHER;
+  }
+
+  /* release lock on posters */<?
+	for port in codel.outPorts:
+	    ?>
+  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
+<?
+	?>
+  return returnCodeToActivityEvent(res);
 }
 
 <?
 if currentTask.hasCodel("init"):
-    ?>
+	?>
 /*------------------------------------------------------------------------
  *
  * <!currentTask.codel("init").name!>  --  Initialization codel (fIDS, ...)
@@ -74,8 +145,40 @@ if currentTask.hasCodel("init"):
  */
 
 STATUS <!codel_signature(currentTask.codel("init"))!>
-{
+{<?
+	codel = currentTask.codel("init")
+	for port in codel.outPorts:
+	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+	    posterAddr = "outport_" + port
+	    ?>
+  /* find a pointer to <!port!> poster*/
+  static <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = NULL;
+  <!posterAddr!> = posterAddr(<!posterId!>);
+  if (<!posterAddr!> == NULL) {
+    *report = errnoGet();
+    return ETHER;
+  }<?
+	?>
+  /* Lock access to posters*/<?
+	for port in codel.outPorts:
+	    ?>
+  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
+	?>
 
+  /*call real codel */
+  int res = <!real_codel_call(codel)!>;
+  if(res < 0) {
+      *report = returnCodeToReport(res);
+      return ETHER;
+  }
+
+  /* release lock on posters */<?
+	for port in codel.outPorts:
+	    ?>
+  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
+<?
+	?>
+  return returnCodeToStatus(res);
 }
 <?
 ?>

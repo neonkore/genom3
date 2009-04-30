@@ -28,37 +28,8 @@
  * DAMAGE.
  */
 
-#include <portLib.h>
-
-#include "server/<!comp.name()!>Header.h"
+#include "<!comp.name()!>Struct.h"
 #include "userCodels.h"
-
-STATUS returnCodeToStatus(int res)
-{
-  switch(res) {
-<?
-errorSet = createErrorList()
-for e in errorSet:
-    print "    case ERROR_" + e + ": return ERROR;"
-?>
-    case USER_OK:  return OK;
-    default:
-	return ERROR;
-  }
-}
-
-int returnCodeToReport(int res)
-{
-  switch(res) {
-<?
-errorSet = createErrorList()
-for e in errorSet:
-    print "    case ERROR_" + e + ": return S_"+ comp.name() + "_" + e + ";"
-?>
-    default:
-      return S_stdGenoM_CONTROL_CODEL_ERROR;
-  }
-}
 
 <?
 for s in comp.servicesMap():
@@ -75,46 +46,14 @@ for s in comp.servicesMap():
  * Report: OK
 <?
 	for m in service.errorMessages():
-	    print " *   S_" + comp.name() + "_" + m
+	    print " * ERROR_" + m
 	?> *         
  *
  * Returns:    OK or ERROR
  */
+int <!real_codel_signature(codel)!>
+{
 
-<!codelSignatureFull(c, s.data())!>
-{<?
-	for port in codel.outPorts:
-	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
-	    posterAddr = "outport_" + port
-	    ?>
-  /* find a pointer to <!port!> poster*/
-  static <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = NULL;
-  <!posterAddr!> = posterAddr(<!posterId!>);
-  if (<!posterAddr!> == NULL) {
-    *report = errnoGet();
-    return ERROR;
-  }<?
-	?>
-  /* Lock access to posters*/<?
-	for port in codel.outPorts:
-	    ?>
-  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
-	?>
-
-  /*call real codel */
-  int res = <!real_codel_call(codel)!>;
-  if(res < 0) {
-      *report = returnCodeToReport(res);
-      return ERROR;
-  }
-
-  /* release lock on posters */<?
-	for port in codel.outPorts:
-	    ?>
-  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
-<?
-	?>
-  return returnCodeToStatus(res);
 }
 <?
 ?>

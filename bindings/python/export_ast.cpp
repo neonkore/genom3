@@ -49,6 +49,7 @@ void export_ast()
 	.def("taskIndex", &Component::taskIndex)
 	.def("servicesMap", &Component::servicesMap, return_value_policy<reference_existing_object>())
 	.def("serviceIndex", &Component::serviceIndex)
+	.def("port", &Component::port)
 	.def("portsMap", &Component::portsMap, return_value_policy<reference_existing_object>())
 	.def("typesVect", &Component::typesVect, return_value_policy<reference_existing_object>())
 	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
@@ -86,7 +87,8 @@ void export_ast()
 	class_<Codel, Codel::Ptr>("Codel")
 	.def_readonly("name", &Codel::name)
 	.def_readonly("inTypes", &Codel::inTypes)
-	.def_readonly("outTypes", &Codel::outTypes);
+	.def_readonly("outTypes", &Codel::outTypes)
+	.def_readonly("outPorts", &Codel::outPorts);
 
 	class_<Port, Port::Ptr>("Port")
 	.def_readonly("name", &Port::name)

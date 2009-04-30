@@ -183,6 +183,7 @@ class Component
 		Service::Map& servicesMap();
 		int serviceIndex(const std::string &name) const;
 
+		Port::Ptr port(const std::string &name);
 		Port::Map& portsMap() { return ports; }
 		Idl::IdlType::Vector& typesVect() { return m_types; }
 

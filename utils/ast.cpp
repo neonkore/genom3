@@ -168,6 +168,14 @@ int Component::serviceIndex(const std::string &name) const
 	return -1;
 }
 
+Port::Ptr Component::port(const std::string &name)
+{
+	Port::Map::const_iterator it = ports.find(name);
+	if (it != ports.end())
+		return it->second;
+	return Port::Ptr();
+}
+
 IdlType::Ptr Component::typeFromName(const std::string &name)
 {
 // 	cout << "Searching type " << name << endl;

@@ -133,7 +133,7 @@ def findServiceWithSameOutput(service, inputName):
 
 # creates the signature of the function corresponding to a codel
 def codel_signature(codel):
-  proto = codel.name + "(";
+  proto = codel.name + "_codel(";
   for type in codel.inTypes:
     idstype = comp.typeFromIdsName(type);
     proto = proto + idstype.toCType() + " *in_" + type + ", ";
@@ -145,9 +145,37 @@ def codel_signature(codel):
 
 def codelSignatureFull(codel, service):
     if service.type == ServiceType.Control or codel.key() == "control":
-	return "STATUS " + codel_signature(codel.data()) + ";";
+	return "STATUS " + codel_signature(codel.data())
     else:
-	return "ACTIVITY_EVENT " + codel_signature(codel.data()) + ";";
+	return "ACTIVITY_EVENT " + codel_signature(codel.data())
+
+def real_codel_signature(codel):
+  proto = ""
+  for type in codel.inTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto += idstype.toCType() + " *in_" + type + ", ";
+  for type in codel.outTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto += idstype.toCType() + " *out_" + type + ", ";
+  for port in codel.outPorts:
+    p = comp.port(port)
+    if p != None:
+	proto += p.idlType.toCType() + " *outport_" + port + ", "; 
+    else:
+	proto += port + ", "
+  proto = codel.name + "(" + proto[:-2] + ")"
+  return proto
+
+def real_codel_call(codel):
+  proto = ""
+  for type in codel.inTypes:
+    proto += "in_" + type + ", ";
+  for type in codel.outTypes:
+    proto += "out_" + type + ", ";
+  for port in codel.outPorts:
+    proto += "outport_" + port + ", "; 
+  proto = codel.name + "(" + proto[:-2] + ")"
+  return proto
 
 def nbExecService():
     count = 0

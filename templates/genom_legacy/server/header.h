@@ -88,7 +88,7 @@ for t in comp.tasksMap():
 	for p in outports:
 #	  if p.execTask() == t:
 	    write( "#define %s_%s_POSTER_ID " % (upper(comp.name()), upper(p.name)) )
-	    print "%sCntrlStrId->cntrlTask.posterId[%d])\n" % (comp.name(), i)
+	    print "%sCntrlStrId->cntrlTask.posterId[%d]\n" % (comp.name(), i)
 	    i = i+1
 ?>
 <?
@@ -108,7 +108,7 @@ extern "C" {
 # $listUserFuncProto$
 for s in comp.servicesMap():
     for codel in s.data().codels():
-	print "extern " + codelSignatureFull(codel, s.data())
+	print "extern " + codelSignatureFull(codel, s.data()) + ";"
 
 #### todo: print task init function signature
 if initServiceNb != -1:

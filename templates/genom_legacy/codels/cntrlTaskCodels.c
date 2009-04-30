@@ -103,10 +103,8 @@ for s in comp.servicesMap():
 
   /*call real codel */
   int res = <!real_codel_call(codel)!>;
-  if(res < 0) {
+  if(res < 0)
       *report = returnCodeToReport(res);
-      return ERROR;
-  }
 
   /* release lock on posters */<?
 	for port in codel.outPorts:

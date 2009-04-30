@@ -118,10 +118,8 @@ extern int <!real_codel_signature(codel)!>;
 
   /*call real codel */
   int res = <!real_codel_call(codel)!>;
-  if(res < 0) {
+  if(res < 0)
       *report = returnCodeToReport(res);
-      return ETHER;
-  }
 
   /* release lock on posters */<?
 	for port in codel.outPorts:
@@ -135,6 +133,8 @@ extern int <!real_codel_signature(codel)!>;
 <?
 if currentTask.hasCodel("init"):
 	?>
+extern int <!real_codel_signature(currentTask.codel("init"))!>;
+
 /*------------------------------------------------------------------------
  *
  * <!currentTask.codel("init").name!>  --  Initialization codel (fIDS, ...)
@@ -167,10 +167,8 @@ STATUS <!codel_signature(currentTask.codel("init"))!>
 
   /*call real codel */
   int res = <!real_codel_call(codel)!>;
-  if(res < 0) {
+  if(res < 0)
       *report = returnCodeToReport(res);
-      return ETHER;
-  }
 
   /* release lock on posters */<?
 	for port in codel.outPorts:

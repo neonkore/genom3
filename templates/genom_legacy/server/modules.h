@@ -11,8 +11,8 @@
  **/
 
 /* Indiquer le chargement du fichier */
-#ifndef <!upper(comp.name())!>_GENOM_MODULE
-#define <!upper(comp.name())!>_GENOM_MODULE
+#ifndef H_GENOM_MODULE
+#define H_GENOM_MODULE
 
 #ifndef NEW_MODULES
 #define NEW_MODULES

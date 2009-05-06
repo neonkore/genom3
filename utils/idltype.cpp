@@ -295,6 +295,12 @@ string StructType::toCType(bool declOnly)
 	s.append("{\n");
 	IdlType::Map::const_iterator it = m_members.begin();
 	for(; it != m_members.end(); ++it) {
+		if(it->second->kind() == IdlType::String) {
+			StringType *st = it->second->asStringType();
+			if(st)
+				s.append("   char " + it->first + "[" + intToString(st->bound()) + "];\n");
+			continue;
+		}
 		s.append("   " + it->second->toCType(true) + " " + it->first);
 		//print array if existing
 		if(it->second->kind() == IdlType::Array) {

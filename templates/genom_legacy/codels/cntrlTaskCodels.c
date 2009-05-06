@@ -153,7 +153,7 @@ for port in inports:
  *
  * Returns:    OK or ERROR
  */
-STATUS <!codel_signature(service.codel("main"))!>
+STATUS <!codel_signature(service.codel("control"))!>
 {
     POSTER_ID posterId;
     if (posterFind(in__connect_str, &posterId) == ERROR) {

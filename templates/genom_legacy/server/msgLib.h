@@ -58,8 +58,8 @@
  ** Boite aux lettres reception requetes 
  **/
 #define  <!upper(comp.name())!>_MBOX_NAME                      "<!comp.name()!>"
-
-#define  <!upper(comp.name())!>_MAX_RQST_SIZE              16
+<?# todo: compute this size from all the request?>
+#define  <!upper(comp.name())!>_MAX_RQST_SIZE              256
 
 #define  <!upper(comp.name())!>_MBOX_RQST_SIZE       \
  (BUF_SIZE(<!upper(comp.name())!>_MAX_RQST_SIZE) * SERV_NMAX_RQST_ID)
@@ -128,11 +128,7 @@ for s in servicesMap:
 	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputShortName + ")"
 
 	t = typeFromIdsName(inputShortName)
-	input = t.toCType(True)
-	if(t.kind != IdlKind.String):
-	    input += " *"
-	else:
-	    output += " "
+	input = pointerTo(t)
 	input += inputName + ","
 
     if len(service.output) == 0:
@@ -144,11 +140,7 @@ for s in servicesMap:
 	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + service.output + ")"
 
 	t = typeFromIdsName(service.output)
-	output = t.toCType(True)
-	if(t.kind != IdlKind.String):
-	    output += " *"
-	else:
-	    output += " "
+	output = pointerTo(t)
 	output += outputName + ","
 
     if service.type == ServiceType.Control:

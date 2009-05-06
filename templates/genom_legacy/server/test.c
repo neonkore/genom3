@@ -231,7 +231,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 <? # $inputDeclarations$ 
     if inputFlag:
 	if inputType.kind() == IdlKind.String:
-	  print "int *inputDims[1] = {" + str(inputType.asStringType().bound()) + "};"
+	  print "int inputDims[1] = {" + str(inputType.asStringType().bound()) + "};"
 	  inputNbDimensions = 1
 	else:
 	  print  "int *inputDims = NULL;"

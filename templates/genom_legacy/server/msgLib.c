@@ -220,12 +220,8 @@ for s in servicesMap:
 	inputName = "in_" + inputShortName
 
 	t = typeFromIdsName(inputShortName)
-	input = t.toCType(True)
+	input = pointerTo(t)
 	inputSize = "sizeof(" + input + ")"
-	if(t.kind != IdlKind.String):
-	    input += " *"
-	else:
-	    output += " "
 	input += inputName + ","
 
     if len(service.output) == 0:
@@ -236,12 +232,8 @@ for s in servicesMap:
 	outputName = "out_" + service.output
 
 	t = typeFromIdsName(service.output)
-	output = t.toCType(True)
+	output = pointerTo(t)
 	outputSize = "sizeof(" + output + ")"
-	if(t.kind != IdlKind.String):
-	    output += " *"
-	else:
-	    output += " "
 	output += outputName + ","
 
     if service.type == ServiceType.Control:

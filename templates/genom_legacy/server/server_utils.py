@@ -84,11 +84,18 @@ def typeProtoPrefix(t):
 	prefix = "string"
     return prefix + t.identifier()
 
+def sizeOfType(t):
+    if t.kind() == IdlKind.String:
+	s = t.asStringType()
+	return str(s.bound())
+    else:
+	return "sizeof(" + t.toCType(True) + ")"
+
 def sizeOfIdsMember(name):
-    type =  typeFromIdsName(name)
+    type = typeFromIdsName(name)
     if type == None:
 	return "0"
-    return "sizeof(" + type.toCType(True) + ")"
+    return sizeOfType(type)
 
 # try to find an init service
 def findInitService():
@@ -227,7 +234,7 @@ for port in inports:
   s.addInput(connectIDSMember)
   c = Codel(name + "Exec")
   c.addInType(connectIDSMember)
-  s.addCodel("main", c)
+  s.addCodel("control", c)
   servicesMap[name] = s
 
 # add a member in the ids for connect services 

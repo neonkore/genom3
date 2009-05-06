@@ -1114,7 +1114,7 @@ for s in servicesMap:
 	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputName + ")"
 
 	t = typeFromIdsName(inputName)
-	if(t.kind == IdlKind.String):
+	if(t.kind() == IdlKind.String):
 	    inputNamePtr = inputName
 	else:
 	    inputNamePtr = "&" + inputName
@@ -1132,7 +1132,7 @@ for s in servicesMap:
 	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + outputName + ")"
 
 	t = typeFromIdsName(service.output)
-	if(t.kind == IdlKind.String):
+	if(t.kind() == IdlKind.String):
 	    outputNamePtr = outputName
 	else:
 	    outputNamePtr = "&" + outputName
@@ -1182,7 +1182,12 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <? 
 	if inputFlag and controlFuncFlag: 
 	    for s in service.inputs():
-		print "    " + typeFromIdsName(s).toCType(True) + " " + s + ";"
+		t = typeFromIdsName(s)
+		if t.kind() == IdlKind.String:
+		    st = t.asStringType()
+		    print "char " + s + "[" + str(st.bound()) +"];"
+		else:
+		    print "    " + t.toCType(True) + " " + s + ";"
 	?>
 
   /*--------------------------------------------------------------
@@ -1225,7 +1230,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
     
     /* Call control func */
-    status = <!service.codel("control").name!> (<!inputNamePtr!>, &bilan);
+    status = <!service.codel("control").name!>_codel(<!inputNamePtr!>, &bilan);
 <?
 	    else:
 		?>
@@ -1252,7 +1257,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <? 
 	if inputFlag:
 	    if controlFuncFlag:
-		print "memcpy ((void *) " + inputRefPtr + ", (void *) " + inputNamePtr + ", " + inputSize + ");"
+		print "  memcpy ((void *) " + inputRefPtr + ", (void *) " + inputNamePtr + ", " + inputSize + ");"
 	    else:?>
   if (csServRqstParamsGet (servId, rqstId, (void *) <!inputRefPtr!>,
 			   <!inputSize!>, (FUNCPTR) NULL) != OK)

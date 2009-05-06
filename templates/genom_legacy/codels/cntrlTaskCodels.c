@@ -61,11 +61,14 @@ for e in errorSet:
 }
 
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     for c in service.codels():
 	codel = c.data()
 	if service.type != ServiceType.Control and c.key() != "control" :
+	    continue
+	# check for a special 'connect inport' service
+	if len(service.inputs()) == 1 and service.inputs()[0] == connectIDSMember:
 	    continue
 	?>
 /*------------------------------------------------------------------------
@@ -93,12 +96,28 @@ for s in comp.servicesMap():
   if (<!posterAddr!> == NULL) {
     *report = errnoGet();
     return ERROR;
+  }
+<?
+	for port in codel.inPorts:
+	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+	    posterAddr = "inport_" + port
+	    ?>
+  /* find a pointer to inport <!port!> */
+  static <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = NULL;
+  <!posterAddr!> = posterAddr(<!posterId!>);
+  if (<!posterAddr!> == NULL) {
+    *report = errnoGet();
+    return ERROR;
   }<?
 	?>
   /* Lock access to posters*/<?
 	for port in codel.outPorts:
 	    ?>
   posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
+
+	for port in codel.inPorts:
+	    ?>
+  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_READ);<?
 	?>
 
   /*call real codel */
@@ -111,9 +130,40 @@ for s in comp.servicesMap():
 	    ?>
   posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
 <?
+	for port in codel.inPorts:
+	    ?>
+  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
+<?
 	?>
   return returnCodeToStatus(res);
 }
 <?
-?>
 
+# 'connect inport' services' codels
+idx = len(outports)
+for port in inports:
+  name = "connect" + port.name
+  service = comp.service(name)
+  ?>
+/*------------------------------------------------------------------------
+ * <!name!>_codel  -  control codel of CONTROL request <!name!>
+ *
+ * Description:    
+ * Report: OK     
+ *
+ * Returns:    OK or ERROR
+ */
+STATUS <!codel_signature(service.codel("main"))!>
+{
+    POSTER_ID posterId;
+    if (posterFind(in__connect_str, &posterId) == ERROR) {
+	*report = errnoGet();
+	return ERROR;
+    }
+
+    CNTRL_TASK_POSTER_ID[<!idx!>] = posterId;
+    return OK;
+}
+<?
+  idx += 1
+?>

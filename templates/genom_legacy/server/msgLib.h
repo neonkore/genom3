@@ -83,7 +83,7 @@
 
 <? #$listRequests$
 i = 0
-for s in comp.servicesMap():
+for s in servicesMap:
     print "#define %s_%s_RQST %d" % (upper(comp.name()), upper(s.data().name), i)
     i += 1
 print "#define %s_ABORT_RQST %d" % (upper(comp.name()), i)
@@ -114,7 +114,7 @@ int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId,
 			     int *bilan);
 
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     serviceNum = "%s_%s_RQST" % (upper(comp.name()), upper(service.name))
 
@@ -127,7 +127,7 @@ for s in comp.servicesMap():
 	inputName = "in_" + inputShortName
 	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputShortName + ")"
 
-	t = comp.typeFromIdsName(inputShortName)
+	t = typeFromIdsName(inputShortName)
 	input = t.toCType(True)
 	if(t.kind != IdlKind.String):
 	    input += " *"
@@ -143,7 +143,7 @@ for s in comp.servicesMap():
 	outputName = "out_" + service.output
 	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + service.output + ")"
 
-	t = comp.typeFromIdsName(service.output)
+	t = typeFromIdsName(service.output)
 	output = t.toCType(True)
 	if(t.kind != IdlKind.String):
 	    output += " *"

@@ -367,13 +367,13 @@ static void <!comp.name()!>CntrlPosterWrite ()
 # $tabRequestFuncDeclare$
 
 # print functions declarations
-for s in comp.servicesMap():
+for s in servicesMap:
     print "static void " + comp.name() + "Cntrl" + s.data().name + "(SERV_ID servId, int rqstId);"
 
 # print $$TabRequestFunc array
 print "\nstatic void (*" + comp.name() + "TabRequestFunc[])() = {"
 l = ""
-for s in comp.servicesMap():
+for s in servicesMap:
     l += comp.name() + "Cntrl" + s.data().name + ",\n"
 print l[:-2] + "\n};"
 
@@ -381,7 +381,7 @@ print l[:-2] + "\n};"
 print "static int " + comp.name() + "TabRequestNum[] = {"
 i = 0
 l = ""
-for s in comp.servicesMap(): 
+for s in servicesMap: 
     l +=  str(i) + ", "
     i += 1
 print l[:-2] + "};"
@@ -1100,7 +1100,7 @@ static void
 
 <?
 serviceNum = 0
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     controlFuncFlag = (service.hasCodel("control"))
     if len(service.inputs()) == 0:
@@ -1113,7 +1113,7 @@ for s in comp.servicesMap():
 	inputName = service.inputs()[0]
 	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputName + ")"
 
-	t = comp.typeFromIdsName(inputName)
+	t = typeFromIdsName(inputName)
 	if(t.kind == IdlKind.String):
 	    inputNamePtr = inputName
 	else:
@@ -1131,7 +1131,7 @@ for s in comp.servicesMap():
 	outputName = service.output
 	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + outputName + ")"
 
-	t = comp.typeFromIdsName(service.output)
+	t = typeFromIdsName(service.output)
 	if(t.kind == IdlKind.String):
 	    outputNamePtr = outputName
 	else:
@@ -1147,7 +1147,7 @@ for s in comp.servicesMap():
 	defaultValue = "1";
     elif l[0] == "all":
 	defaultValue = "0";
-    for ss in comp.servicesMap():
+    for ss in servicesMap:
 	if out != "":
 	    out += ", "
 	if defaultValue != "":
@@ -1182,7 +1182,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <? 
 	if inputFlag and controlFuncFlag: 
 	    for s in service.inputs():
-		print "    " + comp.typeFromIdsName(s).toCType(True) + " " + s + ";"
+		print "    " + typeFromIdsName(s).toCType(True) + " " + s + ";"
 	?>
 
   /*--------------------------------------------------------------
@@ -1297,7 +1297,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <? 
 	if inputFlag and controlFuncFlag: 
 	    for s in service.inputs():
-		print "    " + comp.typeFromIdsName(s).toCType(True) + " " + s + ";"
+		print "    " + typeFromIdsName(s).toCType(True) + " " + s + ";"
 	?>
 
 

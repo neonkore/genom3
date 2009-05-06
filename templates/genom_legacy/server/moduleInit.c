@@ -79,7 +79,7 @@ SEM_ID sem<!comp.name()!>InitExecTab[<!upper(comp.name())!>_NB_EXEC_TASK];
 void <!comp.name()!>CntrlTask ();
 <? # $execTaskTabDescribe$
 for t in comp.tasksMap():
-    print "extern void %s%s(%s_CNTRL_STR *, %s *);" % (comp.name(), t.data().name, upper(comp.name()), comp.IDSType.toCType(True))
+    print "extern void %s%s(%s_CNTRL_STR *, %s *);" % (comp.name(), t.data().name, upper(comp.name()), internalDataType)
 ?>
 typedef struct {
 	char *name;

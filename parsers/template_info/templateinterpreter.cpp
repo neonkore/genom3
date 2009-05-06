@@ -161,7 +161,8 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
 		idx = pos + 2;
 	}
  
-// 	cout << s << endl;
+	if(m_verboseParsing)
+		cout << s << endl;
  	out << m_interpreter->interpret(s);
 }
 

@@ -42,7 +42,7 @@ for e in errorSet:
     i += 1
 
 codelCount = 1000
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     if service.type == ServiceType.Control:
 	continue

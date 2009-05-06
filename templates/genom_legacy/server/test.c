@@ -75,14 +75,14 @@ void <!comp.name()!>Test (int testNumber);
 static void <!comp.name()!>TestInitTask (TEST_STR* testStr);
 
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     print "static BOOL %sTest%s(TEST_STR *id, int rq, int ac, BOOL ch);" % (comp.name(), s.data().name)
 ?>
 
 static  TEST_RQST_DESC_STR <!comp.name()!>TestRqstFuncTab[] = {
 <? # $requestFuncTabDeclare$
 out = ""
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     if len(service.inputs()) > 0:
 	inputSize = sizeOfIdsMember(service.inputs()[0])
@@ -96,7 +96,7 @@ print out[:-2] + "};"
 static char *<!comp.name()!>TestRequestNameTab[] = {
 <? # $requestNameTabDeclare$
 out = ""
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     out += "   \"" + service.name + serviceDescString(service)
     out+= "\",\n"
@@ -192,12 +192,12 @@ static void <!comp.name()!>TestInitTask (TEST_STR *testStr)
 }
  
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     inputFlag = len(service.inputs()) > 0
     if inputFlag:
 	inputName = service.inputs()[0]
-	t = comp.typeFromIdsName(inputName)
+	t = typeFromIdsName(inputName)
 	if t != None:
 	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array or t.kind() == IdlKind.Named
 	    if b:
@@ -210,7 +210,7 @@ for s in comp.servicesMap():
     outputFlag = len(service.output) > 0
     if outputFlag:
 	outputName = service.output
-	t = comp.typeFromIdsName(outputName)
+	t = typeFromIdsName(outputName)
 	if t != None:
 	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array or t.kind() == IdlKind.Named
 	    if b:

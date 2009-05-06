@@ -306,6 +306,7 @@ class StructType : public IdlType
 		}
 
 		void addMember(IdlType::Ptr t, Declarator::VectPtr declarators);
+		void addMember(IdlType::Ptr t, const std::string &name);
 		const IdlType::Map& members() const {
 			return m_members;
 		}

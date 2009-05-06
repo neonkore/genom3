@@ -260,6 +260,11 @@ void StructType::addMember(IdlType::Ptr t, Declarator::VectPtr v)
 	}
 }
 
+void StructType::addMember(IdlType::Ptr t, const std::string &name)
+{
+	m_members[name] = t;
+}
+
 IdlType::Ptr StructType::member(const std::string &name) 
 {
 	if(m_members.find(name) == m_members.end())

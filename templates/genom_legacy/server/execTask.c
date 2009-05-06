@@ -610,7 +610,7 @@ static ACTIVITY_EVENT execTaskCallUserFunc (ACTIVITY_STATE state,
 <?
 #   $execFuncTabDeclare$
 print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncTab[])() = {"
-for s in comp.servicesMap():
+for s in servicesMap:
     if s.data().taskName == currentTask.name and s.data().hasCodel("main"):
 	print s.data().codel("main").name + "_codel,"
     else:
@@ -622,7 +622,7 @@ print " NULL};"
 <?
 #  $execFuncTabStartDeclare$
 print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncStartTab[])() = {"
-for s in comp.servicesMap():
+for s in servicesMap:
     if s.data().taskName == currentTask.name and s.data().hasCodel("start"):
 	print s.data().codel("start").name + "_codel,"
     else:
@@ -634,7 +634,7 @@ print " NULL};"
 <?
 # $execFuncTabEndDeclare$
 print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncEndTab[])() = {"
-for s in comp.servicesMap():
+for s in servicesMap:
     if s.data().taskName == currentTask.name and s.data().hasCodel("end"):
 	print s.data().codel("end").name + "_codel,"
     else:
@@ -646,7 +646,7 @@ print " NULL};"
 <?
 # $execFuncTabInterDeclare$
 print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncFailTab[])() = {"
-for s in comp.servicesMap():
+for s in servicesMap:
     if s.data().taskName == currentTask.name and s.data().hasCodel("fail"):
 	print s.data().codel("fail").name + "_codel,"
     else:
@@ -658,7 +658,7 @@ print " NULL};"
 <?
 # $execFuncTabFailDeclare$
 print "static ACTIVITY_EVENT (*" + comp.name() + currentTask.name + "ExecFuncInterTab[])() = {"
-for s in comp.servicesMap():
+for s in servicesMap:
     if s.data().taskName == currentTask.name and s.data().hasCodel("inter"):
 	print s.data().codel("inter").name + "_codel,"
     else:

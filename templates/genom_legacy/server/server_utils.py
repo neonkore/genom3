@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
 from string import upper
 
+servicesMap = comp.servicesMap()
+connectIDSMember = "_connect_str"
+
+# we have to intercept this call because the connect service use 
+# a field that is not really in the ids
+def typeFromIdsName(name):
+  if name == connectIDSMember:
+    return StringType.unboundedStringType
+  else:
+    return comp.typeFromIdsName(name)
+
 # returns a flat list of the structure of a type
 def flatStructRec(t, name_prefix):
     if t.kind() == IdlKind.Struct:
@@ -44,7 +55,9 @@ def formatStringForType(t):
    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
        return "%u" 
    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
-       return "%f";
+       return "%f"
+   elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
+       return "%s"
    else:
        return ""
 
@@ -67,10 +80,12 @@ def typeProtoPrefix(t):
         prefix = "uint"
     elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
         prefix = "double"
+    elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
+	prefix = "string"
     return prefix + t.identifier()
 
 def sizeOfIdsMember(name):
-    type =  comp.typeFromIdsName(name)
+    type =  typeFromIdsName(name)
     if type == None:
 	return "0"
     return "sizeof(" + type.toCType(True) + ")"
@@ -78,7 +93,7 @@ def sizeOfIdsMember(name):
 # try to find an init service
 def findInitService():
   i=-1
-  for s in comp.servicesMap():
+  for s in servicesMap:
     i += 1
     if s.data().type == ServiceType.Init:
       return s.data(), i
@@ -88,14 +103,17 @@ initService,initServiceNb = findInitService()
 
 # create a list of out ports, because we don't use inports
 outports = []
+inports = []
 for p in comp.portsMap():
     if p.data().type == PortType.Outgoing:
 	outports.append(p.data())
+    else:
+	inports.append(p.data())
 
 # error related functions
 def createErrorList():
   l = []
-  for s in comp.servicesMap():
+  for s in servicesMap:
     for e in s.data().errorMessages():
 	l.append(e)
   for t in comp.tasksMap():
@@ -123,7 +141,7 @@ def serviceDescString(s):
 def findServiceWithSameOutput(service, inputName):
     l = []
     # find another service with an output corresponding to the service's input
-    for it in comp.servicesMap():
+    for it in servicesMap:
 	ss = it.data()
 	if ss.name == service.name:
 	    break; 
@@ -132,14 +150,21 @@ def findServiceWithSameOutput(service, inputName):
     return l
 
 # creates the signature of the function corresponding to a codel
+def pointerTo(t):
+  s = t.toCType(True)
+  if t.kind() == IdlKind.String:
+    return s
+  else:
+    return s+"*"
+
 def codel_signature(codel):
   proto = codel.name + "_codel(";
   for type in codel.inTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto = proto + idstype.toCType() + " *in_" + type + ", ";
+    idstype = typeFromIdsName(type);
+    proto = proto + pointerTo(idstype) + " in_" + type + ", ";
   for type in codel.outTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto = proto + idstype.toCType() + " *out_" + type + ", ";
+    idstype = typeFromIdsName(type);
+    proto = proto + pointerTo(idstype) + " out_" + type + ", ";
   proto = proto + "int *report)"
   return proto
 
@@ -152,15 +177,21 @@ def codelSignatureFull(codel, service):
 def real_codel_signature(codel):
   proto = ""
   for type in codel.inTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto += idstype.toCType() + " *in_" + type + ", ";
+    idstype = typeFromIdsName(type);
+    proto += pointerTo(idstype) + " in_" + type + ", ";
   for type in codel.outTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto += idstype.toCType() + " *out_" + type + ", ";
+    idstype = typeFromIdsName(type);
+    proto += pointerTo(idstype) + " out_" + type + ", ";
   for port in codel.outPorts:
     p = comp.port(port)
     if p != None:
-	proto += p.idlType.toCType() + " *outport_" + port + ", "; 
+	proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
+    else:
+	proto += port + ", "
+  for port in codel.inPorts:
+    p = comp.port(port)
+    if p != None:
+	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
     else:
 	proto += port + ", "
   proto = codel.name + "(" + proto[:-2] + ")"
@@ -174,20 +205,48 @@ def real_codel_call(codel):
     proto += "out_" + type + ", ";
   for port in codel.outPorts:
     proto += "outport_" + port + ", "; 
+  for port in codel.inPorts:
+    proto += "inport_" + port + ", "; 
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
 def nbExecService():
     count = 0
-    for s in comp.servicesMap():
+    for s in servicesMap:
 	if s.data().type != ServiceType.Control:
 	    count += 1
     return count
 
+# create connect services for each inport
+
+
+for port in inports:
+  name = "connect" + port.name
+  s = Service(name)
+  s.type = ServiceType.Control
+  s.addInput(connectIDSMember)
+  c = Codel(name + "Exec")
+  c.addInType(connectIDSMember)
+  s.addCodel("main", c)
+  servicesMap[name] = s
+
+# add a member in the ids for connect services 
+IDSType = comp.IDSType
+if len(inports) > 0:
+  t = comp.IDSType.unalias()
+  s = t.asStructType()
+  if s != None:
+    # copy ids type and add a member
+    IDSType = StructType()
+    IDSType.setIdentifier(comp.IDSType.identifier())
+    IDSType.addMember(StringType.unboundedStringType, connectIDSMember)
+    for m in s.members():
+	IDSType.addMember(m.data(), m.key())
+
 # other vars
-nbServices = len(comp.servicesMap())
+nbServices = len(servicesMap)
 abortRequestNum = nbServices;
-internalDataType = comp.IDSType.toCType(True)
+internalDataType = IDSType.toCType(True)
 periodicFlag = isPeriodic()
 
 shouldGenerateOpenPRS = "#" # do not generate openrps related code

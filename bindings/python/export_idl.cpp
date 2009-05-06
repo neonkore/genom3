@@ -49,8 +49,16 @@ void export_idl()
 	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);
 
+	void (StructType::*AddMemberStr)(IdlType::Ptr,const std::string &) = &StructType::addMember;
+
+	object stringTypeClass = class_<StringType, bases<IdlType> >("StringType", init<int>());
+	stringTypeClass.attr("unboundedStringType") = &StringType::unboundedStringType;
+// 	.add_static_property("unboundedStringType", &StringType::unboundedStringType);
+
 	class_<StructType, bases<IdlType> >("StructType")
 	.def("member", &StructType::member)
+	.def("addMember", AddMemberStr)
+	.def("setIdentifier", &StructType::setIdentifier)
 	.def("members", &StructType::members, return_value_policy<reference_existing_object>());
 
 	class_<EnumType, bases<IdlType> >("EnumType")

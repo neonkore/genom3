@@ -40,7 +40,7 @@ else:
 	inputDeclare = ""
     else:
 	inputName = initService.inputs()[0]
-	inputType = comp.typeFromIdsName(inputName)
+	inputType = typeFromIdsName(inputName)
 	inputDeclare = inputType.toCType(True) + " " + inputName + ";"
 	inputSize = "sizeof(" + inputType.toCType(True) + ")"
 # todo: reuse name from print.c

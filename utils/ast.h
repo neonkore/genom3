@@ -64,7 +64,7 @@ class Codel
 		typedef std::map<std::string, Ptr> Map;
 
 		Codel() {}
-		Codel(const std::string id)
+		Codel(const std::string &id)
 		: m_name(id)
 		{}
 
@@ -181,6 +181,7 @@ class Component
 		int taskIndex(const std::string &name) const;
 		
 		Service::Map& servicesMap();
+		Service::Ptr service(const std::string &name);
 		int serviceIndex(const std::string &name) const;
 
 		Port::Ptr port(const std::string &name);

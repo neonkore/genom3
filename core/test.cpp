@@ -59,14 +59,15 @@ int main(int argc, char* argv[])
 	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
 		cout << "Error parsing gen file " << endl;
 
+// 	ti.setDebug(true);
 	ti.setComponent(&(d.component()));
 	ti.setSourceDirectory("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/");
 	ti.setOutputDirectory("/home/ccpasteur/work/git/g3nom/output/genom_legacy/");
 	ti.parseInfoFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/template.info");
 // 	i->exportVar("currentTaskName", "MotionTask");
 //  	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
-//  	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/codels/cntrlTaskCodels.c",
-//  	             "/home/ccpasteur/work/git/g3nom/templates/test/codels/$$CntrlTaskCodels.c");
+//  	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/codels/execTaskCodels.c",
+//  	             "/home/ccpasteur/work/git/g3nom/templates/test/codels/$$MotionTaskCodels.c");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

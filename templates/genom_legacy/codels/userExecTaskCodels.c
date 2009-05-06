@@ -34,7 +34,7 @@ currentTask = comp.task(currentTaskName) # currentTaskName is set by genom
 #include "userCodels.h"
 
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     if service.taskName != currentTaskName or service.type == ServiceType.Control:
 	continue

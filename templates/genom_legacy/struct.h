@@ -3,7 +3,7 @@
 
 <?
 for t in comp.typesVect():
-    if t.identifier() != comp.IDSType.identifier():
+    if t.identifier() != IDSType.identifier():
 	print "typedef " + t.toCType() + "  " + t.identifier() + ";\n"
 ?>
 

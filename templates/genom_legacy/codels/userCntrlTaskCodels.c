@@ -32,7 +32,7 @@
 #include "userCodels.h"
 
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     for c in service.codels():
 	codel = c.data()

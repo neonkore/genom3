@@ -158,7 +158,7 @@ static void <!comp.name()!>ActivityShow (<!upper(comp.name())!>_CNTRL_STR *sdic)
 <? #  $requestNameTabDeclare$
 write("static char *" + comp.name() + "ExecRqstNameTab[] = {\n");
 service_list = ""
-for s in comp.servicesMap():
+for s in servicesMap:
     if s.data().type != ServiceType.Control:
 	service_list += "\"" + s.data().name + "\",\n"
 print service_list[:-2] # remove the last ',' 
@@ -167,7 +167,7 @@ print "};"
 print "static int " + comp.name() + "ExecRqstNumTab[] = {"
 i = 0
 l = ""
-for s in comp.servicesMap(): 
+for s in servicesMap: 
     if s.data().type != ServiceType.Control:
 	l +=  str(i) + ", "
     i += 1

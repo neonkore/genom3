@@ -50,7 +50,7 @@ ACTIVITY_EVENT returnCodeToActivityEvent(int res)
 errorSet = createErrorList()
 for e in errorSet:
     print "    case ERROR_" + e + ": return ERROR;"
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     if service.taskName != currentTaskName or service.type == ServiceType.Control:
 	continue
@@ -71,7 +71,7 @@ for s in comp.servicesMap():
 extern int returnCodeToReport(int res);
 
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     if service.taskName != currentTaskName or service.type == ServiceType.Control:
 	continue
@@ -108,12 +108,26 @@ extern int <!real_codel_signature(codel)!>;
     *report = errnoGet();
     return ETHER;
   }<?
+	for port in codel.inPorts:
+	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+	    posterAddr = "inport_" + port
+	    ?>
+  /* find a pointer to <!port!> poster*/
+  <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = posterAddr(<!posterId!>);
+  if (<!posterAddr!> == NULL) {
+    *report = errnoGet();
+    return ETHER;
+  }<?
 	?>
 
   /* Lock access to posters*/<?
 	for port in codel.outPorts:
 	    ?>
   posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
+
+	for port in codel.inPorts:
+	    ?>
+  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_READ);<?
 	?>
 
   /*call real codel */
@@ -126,8 +140,12 @@ extern int <!real_codel_signature(codel)!>;
 	    ?>
   posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
 <?
+	for port in codel.inPorts:
+	    ?>
+  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
+<?
 	?>
-  return returnCodeToActivityEvent(res);
+  returnCodeToActivityEvent(res);
 }
 
 <?

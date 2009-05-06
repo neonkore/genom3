@@ -157,6 +157,14 @@ int Component::taskIndex(const std::string &name) const
 	return -1;
 }
 
+Service::Ptr Component::service(const std::string &name)
+{
+	Service::Map::iterator it = services.find(name);
+	if (it != services.end())
+		return it->second;
+	return Service::Ptr();
+}
+
 int Component::serviceIndex(const std::string &name) const
 {
 	int i = 0;

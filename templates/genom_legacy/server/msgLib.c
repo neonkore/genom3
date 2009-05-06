@@ -207,7 +207,7 @@ int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId,
 /* liste des requetes/repliques d'execution */
 
 <?
-for s in comp.servicesMap():
+for s in servicesMap:
     service = s.data()
     serviceNum = "%s_%s_RQST" % (upper(comp.name()), upper(service.name))
 
@@ -219,7 +219,7 @@ for s in comp.servicesMap():
 	inputShortName = service.inputs()[0]
 	inputName = "in_" + inputShortName
 
-	t = comp.typeFromIdsName(inputShortName)
+	t = typeFromIdsName(inputShortName)
 	input = t.toCType(True)
 	inputSize = "sizeof(" + input + ")"
 	if(t.kind != IdlKind.String):
@@ -235,7 +235,7 @@ for s in comp.servicesMap():
     else:
 	outputName = "out_" + service.output
 
-	t = comp.typeFromIdsName(service.output)
+	t = typeFromIdsName(service.output)
 	output = t.toCType(True)
 	outputSize = "sizeof(" + output + ")"
 	if(t.kind != IdlKind.String):

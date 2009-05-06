@@ -80,6 +80,7 @@ class IdlType
 		StructType* asStructType();
 		EnumType* asEnumType();
 		TypedefType* asTypedefType();
+		StringType* asStringType();
 
 		/** \return an equivalent IdlType object with aliases stripped 
 		* or IdlType::Ptr() if the type is not an alias */

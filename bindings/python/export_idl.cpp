@@ -44,6 +44,7 @@ void export_idl()
 	.def("asEnumType", &IdlType::asEnumType, return_value_policy<reference_existing_object>())
 	.def("asNamedType", &IdlType::asNamedType, return_value_policy<reference_existing_object>())
 	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
+	.def("asStringType", &IdlType::asStringType, return_value_policy<reference_existing_object>())
 	.def("toCType", &IdlType::toCType, toCTypeOverloads())
 	.def("unalias", &IdlType::unalias)
 	.def("identifier", &IdlType::identifier)
@@ -51,7 +52,8 @@ void export_idl()
 
 	void (StructType::*AddMemberStr)(IdlType::Ptr,const std::string &) = &StructType::addMember;
 
-	object stringTypeClass = class_<StringType, bases<IdlType> >("StringType", init<int>());
+	object stringTypeClass = class_<StringType, bases<IdlType> >("StringType", init<int>())
+	.def("bound", &StringType::bound);
 	stringTypeClass.attr("unboundedStringType") = &StringType::unboundedStringType;
 // 	.add_static_property("unboundedStringType", &StringType::unboundedStringType);
 

@@ -170,6 +170,13 @@ NamedType* IdlType::asNamedType()
 	return static_cast<NamedType*>(this);
 }
 
+StringType* IdlType::asStringType()
+{
+	if(m_kind != String)
+		return 0;
+	return static_cast<StringType*>(this);
+}
+
 IdlType::Ptr IdlType::unalias()
 {
 	switch(m_kind) {

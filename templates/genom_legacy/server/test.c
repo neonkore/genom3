@@ -197,15 +197,15 @@ for s in servicesMap:
     inputFlag = len(service.inputs()) > 0
     if inputFlag:
 	inputName = service.inputs()[0]
-	t = typeFromIdsName(inputName)
+	inputType = typeFromIdsName(inputName)
 	if t != None:
-	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array or t.kind() == IdlKind.Named
+	    b = inputType.kind() == IdlKind.Struct or inputType.kind() == IdlKind.Typedef or inputType.kind() == IdlKind.Array or inputType.kind() == IdlKind.Named
 	    if b:
 		inputNewline = "1"
 	    else:
 		inputNewline = "0"
-	inputType = t.toCType(True)
-	inputTypeProto = typeProtoPrefix(t)
+	inputTypePtr = pointerTo(inputType)
+	inputTypeProto = typeProtoPrefix(inputType)
 
     outputFlag = len(service.output) > 0
     if outputFlag:
@@ -230,7 +230,12 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 {
 <? # $inputDeclarations$ 
     if inputFlag:
-	print  "int *inputDims = NULL;"
+	if inputType.kind() == IdlKind.String:
+	  print "int *inputDims[1] = {" + str(inputType.asStringType().bound()) + "};"
+	  inputNbDimensions = 1
+	else:
+	  print  "int *inputDims = NULL;"
+	  inputNbDimensions = 0
  # $outputDeclarations$
     if outputFlag:
 	print  "int *outputDims = NULL;"
@@ -276,8 +281,8 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
   }
 <?
 	?>
-  printf ("-- Enter <!inputType!> <!inputName!>:");
-  scan_<!inputTypeProto!>(stdin, stdout, (<!inputType!> *)TEST_RQST_INPUT(testId,rqstNum), <!inputNewline!>, 0, inputDims);
+  printf ("-- Enter <!inputTypePtr!> <!inputName!>:");
+  scan_<!inputTypeProto!>(stdin, stdout, (<!inputTypePtr!>)TEST_RQST_INPUT(testId,rqstNum), <!inputNewline!>, <!inputNbDimensions!>, inputDims);
 <?
     if service.type != ServiceType.Control:
 	?>

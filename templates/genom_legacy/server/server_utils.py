@@ -8,7 +8,7 @@ connectIDSMember = "_connect_str"
 # a field that is not really in the ids
 def typeFromIdsName(name):
   if name == connectIDSMember:
-    return StringType.unboundedStringType
+    return StringType(256)
   else:
     return comp.typeFromIdsName(name)
 
@@ -239,7 +239,7 @@ if len(inports) > 0:
     # copy ids type and add a member
     IDSType = StructType()
     IDSType.setIdentifier(comp.IDSType.identifier())
-    IDSType.addMember(StringType.unboundedStringType, connectIDSMember)
+    IDSType.addMember(StringType(256), connectIDSMember)
     for m in s.members():
 	IDSType.addMember(m.data(), m.key())
 

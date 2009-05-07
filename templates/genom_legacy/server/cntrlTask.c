@@ -1187,7 +1187,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 		    st = t.asStringType()
 		    print "char " + s + "[" + str(st.bound()) +"];"
 		else:
-		    print "    " + t.toCType(True) + " " + s + ";"
+		    print "    " + MapTypeToC(t,True) + " " + s + ";"
 	?>
 
   /*--------------------------------------------------------------
@@ -1302,7 +1302,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <? 
 	if inputFlag and controlFuncFlag: 
 	    for s in service.inputs():
-		print "    " + typeFromIdsName(s).toCType(True) + " " + s + ";"
+		print "    " + MapTypeToC(typeFromIdsName(s)) + " " + s + ";"
 	?>
 
 

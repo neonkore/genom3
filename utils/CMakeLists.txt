@@ -4,6 +4,9 @@ set(genutils_SRCS
   interpreter.cpp
   idltype.cpp
   dumptypes.cpp
+  idlvisitor.cpp
+  cvisitor.cpp
+#  cppvisitor.cpp
 )
 
 add_library(genutils ${genutils_SRCS})

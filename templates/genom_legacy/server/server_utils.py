@@ -89,7 +89,7 @@ def sizeOfType(t):
 	s = t.asStringType()
 	return str(s.bound())
     else:
-	return "sizeof(" + t.toCType(True) + ")"
+	return "sizeof(" + MapTypeToC(t,True) + ")"
 
 def sizeOfIdsMember(name):
     type = typeFromIdsName(name)
@@ -158,7 +158,7 @@ def findServiceWithSameOutput(service, inputName):
 
 # creates the signature of the function corresponding to a codel
 def pointerTo(t):
-  s = t.toCType(True)
+  s = MapTypeToC(t,True)
   if t.kind() == IdlKind.String:
     return s
   else:
@@ -274,7 +274,7 @@ if len(inports) > 0:
 # other vars
 nbServices = len(servicesMap)
 abortRequestNum = nbServices;
-internalDataType = IDSType.toCType(True)
+internalDataType = MapTypeToC(IDSType,True)
 periodicFlag = isPeriodic()
 
 shouldGenerateOpenPRS = "#" # do not generate openrps related code

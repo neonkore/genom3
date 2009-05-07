@@ -42,7 +42,7 @@
 for t in comp.typesVect():
     ?>
 void print_<!typeProtoPrefix(t)!>( FILE *out,
-     <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in )
+     <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims, FILE *in )
 {
   char *indstr;
   indstr=strdup(indentStr(nDim?++indent:indent));

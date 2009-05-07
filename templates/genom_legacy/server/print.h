@@ -51,7 +51,7 @@ extern "C" {
 for t in comp.typesVect():
     ?>
 extern void print_<!typeProtoPrefix(t)!> ( FILE *out,
-     <!t.toCType(True)!> *x,
+     <!MapTypeToC(t,True)!> *x,
      int indent, int nDim, int *dims, FILE *in );
 <?
 ?>

@@ -38,8 +38,10 @@ namespace Idl {
 class DumpType : public TypeVisitor
 {
 	public:
-		DumpType(std::ostream &out) : TypeVisitor(out) {}
+		DumpType(std::ostream &out) : m_out(out) {}
 		virtual ~DumpType() {}
+
+		static std::string dumpType(IdlType *t);
 
 		virtual void visitBaseType(BaseType*);
 		virtual void visitStringType(StringType*);
@@ -49,8 +51,11 @@ class DumpType : public TypeVisitor
 		virtual void visitStructType(StructType*);
 		virtual void visitTypedefType(TypedefType*);
 		virtual void visitEnumType(EnumType*);
-		virtual void visitArrayType(ArrayType *a);
+		virtual void visitArrayType(ArrayType *);
 		virtual void visitNamedType(NamedType*);
+
+	protected:
+		std::ostream &m_out;
 };
 
 }

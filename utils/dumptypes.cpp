@@ -27,11 +27,23 @@
  * DAMAGE.
  */
 #include "dumptypes.h"
+
+#include <sstream>
+
 #include "idltype.h"
 
 using namespace G3nom;
 using namespace Idl;
 using namespace std;
+
+std::string DumpType::dumpType(IdlType *t)
+{
+	std::string s;
+	ostringstream oss(s);
+	DumpType visitor(oss);
+	t->accept(visitor);
+	return oss.str();
+}
 
 void DumpType::visitBaseType(BaseType *base)
 {

@@ -37,7 +37,7 @@ funHeader = "void endianswap_%s(%s *x, int nDim, int *dims)\n{\n"
 <?
 for t in comp.typesVect():
     ?>
-void endianswap_<!typeProtoPrefix(t)!>(<!t.toCType(True)!> *x, int nDim, int *dims)
+void endianswap_<!typeProtoPrefix(t)!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
 <?

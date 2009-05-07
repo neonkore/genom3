@@ -217,7 +217,7 @@ for s in servicesMap:
 		outputNewline = "1"
 	    else:
 		outputNewline = "0"
-	outputType = t.toCType(True)
+	outputType = MapTypeToC(t,True)
 	outputTypeProto = typeProtoPrefix(t)
     ?>
 /**

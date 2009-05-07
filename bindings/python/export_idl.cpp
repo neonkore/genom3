@@ -30,22 +30,29 @@
 #include <boost/python.hpp>
 
 #include "utils/idltype.h"
+#include "utils/cvisitor.h"
 
 using namespace G3nom;
 using namespace Idl;
 using namespace boost::python;
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(toCTypeOverloads, toCType, 0,1)
+std::string MapTypeToC(IdlType::Ptr t, bool declOnly=false)
+{
+	return CVisitor::MapTypeToC(t.get(), declOnly);
+} 
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1,2)
 
 void export_idl()
 {
+	def("MapTypeToC", &MapTypeToC, MapTypeToCOverloads());
+
 	class_<IdlType, IdlType::Ptr>("IdlType")
 	.def("asStructType", &IdlType::asStructType, return_value_policy<reference_existing_object>())
 	.def("asEnumType", &IdlType::asEnumType, return_value_policy<reference_existing_object>())
 	.def("asNamedType", &IdlType::asNamedType, return_value_policy<reference_existing_object>())
 	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
 	.def("asStringType", &IdlType::asStringType, return_value_policy<reference_existing_object>())
-	.def("toCType", &IdlType::toCType, toCTypeOverloads())
 	.def("unalias", &IdlType::unalias)
 	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);

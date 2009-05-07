@@ -51,7 +51,7 @@ for i in comp.importedComponents():
 
 <?
 for t in comp.typesVect():
-    print funProto % (typeProtoPrefix(t), t.toCType(True))
+    print funProto % (typeProtoPrefix(t), MapTypeToC(t,True))
 ?>
 
 /* ======================== ENDIAN DES TYPEDEF ============================= */

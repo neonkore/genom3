@@ -7,8 +7,8 @@
 <?
 for p in comp.portsMap():
     port = p.data()
-    print port.idlType.toCType() + ";";
-    print "typedef " + port.idlType.toCType(True) + " " + upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR;"
+    print MapTypeToC(port.idlType) + ";";
+    print "typedef " + MapTypeToC(port.idlType, True) + " " + upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR;"
 ?>
 
 /*-------------------- Fin de chargement du fichier -----------------------*/

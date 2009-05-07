@@ -55,7 +55,7 @@ extern "C" {
 for t in comp.typesVect():
     ?>
 extern int scan_<!typeProtoPrefix(t)!> ( FILE *in, FILE *out,
-       <!t.toCType(True)!> *x, int indent, int nDim, int *dims );
+       <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims );
 <?
 
 ?>

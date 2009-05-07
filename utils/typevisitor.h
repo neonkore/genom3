@@ -47,11 +47,12 @@ class EnumType;
 class TypedefType;
 class ArrayType;
 class NamedType;
+class IdlType;
 
 class TypeVisitor
 {
 	public:
-		TypeVisitor(std::ostream &out) : m_out(out) {}
+		TypeVisitor() {}
 		virtual ~TypeVisitor() {}
 
 		virtual void visitBaseType(BaseType*) {}
@@ -64,9 +65,6 @@ class TypeVisitor
 		virtual void visitEnumType(EnumType*) {}
 		virtual void visitArrayType(ArrayType*) {}
 		virtual void visitNamedType(NamedType*) {}
-
-	protected:
-		std::ostream &m_out;
 };
 
 }

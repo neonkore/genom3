@@ -75,7 +75,9 @@ class IdlType
 		std::string kindAsString() const;
 
 		// casting functions
-		template<class T> T* asType();
+		template<class T> T* asType() {
+			return static_cast<T*>(this);
+		}
 		NamedType* asNamedType();
 		StructType* asStructType();
 		EnumType* asEnumType();
@@ -93,7 +95,6 @@ class IdlType
 // 		}
 
 		virtual std::string identifier() const { return std::string(); }
-		virtual std::string toCType(bool declOnly=false);
 
 	private:
 		Kind m_kind;
@@ -283,7 +284,6 @@ class TypedefType : public IdlType
 		virtual void accept(TypeVisitor& visitor) {
 			visitor.visitTypedefType(this);
 		}
-		virtual std::string toCType(bool declOnly=false);
 
 	private:
 		IdlType::Ptr m_aliasType;
@@ -324,8 +324,6 @@ class StructType : public IdlType
 			visitor.visitStructType(this);
 		}
 
-		virtual std::string toCType(bool declOnly=false);
-
 	private:
 		std::string m_identifier;
 // 		std::vector<TypeDeclarator> m_members;
@@ -358,8 +356,6 @@ class EnumType : public IdlType
 			visitor.visitEnumType(this);
 		}
 
-		virtual std::string toCType(bool declOnly=false);
-
 	private:
 		std::string m_identifier;
 		std::vector<std::string> m_enum;
@@ -381,8 +377,6 @@ class ArrayType : public IdlType {
 			visitor.visitArrayType(this);
 		}
 
-		virtual std::string toCType(bool declOnly=false);
-
 	private:
 		IdlType::Ptr m_type;
 		std::vector<int> m_bounds;
@@ -403,8 +397,6 @@ class NamedType : public IdlType {
 		virtual void accept(TypeVisitor& visitor) {
 			visitor.visitNamedType(this);
 		}
-
-		virtual std::string toCType(bool declOnly=false);
 
 	private:
 		std::string m_identifier;

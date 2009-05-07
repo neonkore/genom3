@@ -84,7 +84,7 @@ for port in outports:
     write("extern STATUS " + comp.name() + port.name + "PosterRead ( ")
     print upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR *x );"
 # done for each poster member in genom2, do it for struct members ?
-#    print "extern STATUS " + comp.name() + port.name + port.name + "PosterRead ( " + port.type.toCType(true) + " *" + port.name + " );"
+#    print "extern STATUS " + comp.name() + port.name + port.name + "PosterRead ( " + MapTypeToC(port.type,True) + " *" + port.name + " );"
 ?>
 
 #ifdef __cplusplus

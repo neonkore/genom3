@@ -55,7 +55,7 @@ extern "C" {
 for t in comp.typesVect():
     ?>
 extern void printXML_<!typeProtoPrefix(t)!> ( FILE *out, char *name,
-     <!t.toCType(True)!> *x, int indent, int nDim, int *dims, FILE *in );
+     <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims, FILE *in );
 <?
 ?>
 

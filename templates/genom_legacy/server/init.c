@@ -41,10 +41,10 @@ else:
     else:
 	inputName = initService.inputs()[0]
 	inputType = typeFromIdsName(inputName)
-	inputDeclare = inputType.toCType(True) + " " + inputName + ";"
-	inputSize = "sizeof(" + inputType.toCType(True) + ")"
+	inputDeclare = MapTypeToC(inputType,True) + " " + inputName + ";"
+	inputSize = "sizeof(" + MapTypeToC(inputType,True) + ")"
 # todo: reuse name from print.c
-#	inputShow =  "print_" + inputType.toCType(True) + "(stdout, " + ");"
+#	inputShow =  "print_" + MapTypeToC(inputType,True) + "(stdout, " + ");"
 	inputNamePtr = "&" + inputName
 	inputNamePtrC = inputNamePtr + ","
 
@@ -62,7 +62,7 @@ else:
 	    else:
 		first = False
 	    inputFlatNamePtrC += x[1]
-	    inputFlat += x[0].toCType(True) + " " + x[1]
+	    inputFlat += MapTypeToC(x[0],True) + " " + x[1]
 ?>
 /* 
  * Copyright (c) 1993-2004 LAAS/CNRS
@@ -146,7 +146,7 @@ main(int argc, char **argv)
 <?
 if requestFlag:
     for x in flatList:
-	print " " + x[0].toCType() + " " + x[1] + ";"
+	print " " + MapTypeToC(x[0]) + " " + x[1] + ";"
 ?>
 
   if (--argc != <!nbInputParams!>) {

@@ -55,10 +55,10 @@ int main(int argc, char* argv[])
 	d.component().setName("BlaBla");
 	i->start(&(d.component()));
 	i->eval("3");
-// 	cout << i->eval("comp.name()");
+	cout << i->eval("comp.dname()");
 // 	cout << i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
 // 	i->interpret("");
-	cout << i->printString("Essai no 1") << endl;
-	cout << i->printString("Jjsqhqshdkqhdsshdq\niqsdqsdqshkldh\nqsdqshdqkl") << endl;
+// 	cout << i->printString("Essai no 1") << endl;
+// 	cout << i->printString("Jjsqhqshdkqhdsshdq\niqsdqsdqshkldh\nqsdqshdqkl") << endl;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

@@ -13,7 +13,12 @@
 #include "<!comp.name()!>ControlImpl.h"
 
 // stub headers
-#include "IControlTaskStub.h"
+#include "IControlTaskSkel.h"
+<?
+for t in comp.tasksMap():
+    task = t.data()
+    print "I" + capCompName + task.name + "Skel.h"
+?>
 
 using namespace RTC;
 

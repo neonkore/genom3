@@ -36,7 +36,7 @@ using namespace G3nom;
 using namespace Idl;
 using namespace std;
 
-std::string DumpType::dumpType(IdlType *t)
+std::string DumpType::dumpType(IdlType::Ptr t)
 {
 	std::string s;
 	ostringstream oss(s);

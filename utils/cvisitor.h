@@ -26,8 +26,8 @@
  * USE   OF THIS SOFTWARE, EVEN   IF ADVISED OF   THE POSSIBILITY OF SUCH
  * DAMAGE.
  */
-#ifndef G3NOM_DUMPTYPES_H
-#define G3NOM_DUMPTYPES_H
+#ifndef G3NOM_CVISITOR_H
+#define G3NOM_CVISITOR_H
 
 #include "typevisitor.h"
 #include "idltype.h"
@@ -36,13 +36,13 @@ namespace G3nom
 {
 namespace Idl {
 
-class DumpType : public TypeVisitor
+class CVisitor : public TypeVisitor
 {
 	public:
-		DumpType(std::ostream &out) : m_out(out) {}
-		virtual ~DumpType() {}
+		CVisitor(std::ostream &out, bool declOnly) : m_out(out), m_declOnly(declOnly) {}
+		virtual ~CVisitor() {}
 
-		static std::string dumpType(IdlType::Ptr t);
+		static std::string mapTypeToC(IdlType::Ptr t, bool declOnly=false);
 
 		virtual void visitBaseType(BaseType*);
 		virtual void visitStringType(StringType*);
@@ -57,6 +57,7 @@ class DumpType : public TypeVisitor
 
 	protected:
 		std::ostream &m_out;
+		bool m_declOnly;
 };
 
 }

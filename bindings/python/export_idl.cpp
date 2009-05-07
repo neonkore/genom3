@@ -31,6 +31,7 @@
 
 #include "utils/idltype.h"
 #include "utils/cvisitor.h"
+#include "utils/idlvisitor.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -38,7 +39,12 @@ using namespace boost::python;
 
 std::string MapTypeToC(IdlType::Ptr t, bool declOnly=false)
 {
-	return CVisitor::MapTypeToC(t.get(), declOnly);
+	return CVisitor::mapTypeToC(t, declOnly);
+} 
+
+std::string MapTypeToIdl(IdlType::Ptr t)
+{
+	return IdlVisitor::mapTypeToIdl(t);
 } 
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1,2)

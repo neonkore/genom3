@@ -48,13 +48,11 @@ Component::~Component()
 
 void Component::debug()
 {
-	DumpType dump(cout);
-
 	cout << "Component: " << m_name << " v. " << version << endl;
 	cout << "\tLanguage (plugin) : " << pluginLanguage << endl;
 	cout << "\tIDS Struct: " << endl;
 	if (IDSType)
-		IDSType->accept(dump);
+		DumpType::dumpType(IDSType);
 	cout << endl;
 
 	cout << endl << "Services: " << services.size() << endl;
@@ -85,7 +83,7 @@ void Component::debug()
 	IdlType::Vector::const_iterator it4;
 	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
 		cout << "* ";
-		(*it4)->accept(dump);
+		DumpType::dumpType(*it4);
 		cout << endl;
 	}
 }

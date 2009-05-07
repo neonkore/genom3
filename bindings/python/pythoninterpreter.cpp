@@ -136,12 +136,15 @@ std::string PythonInterpreter::interpret(const std::string& s)
 	try {
 		d->outbuf.erase();
 		exec(str(s), d->pydict, d->pydict);
-		return d->outbuf.substr(0, d->outbuf.length() - 1);
+// 		return d->outbuf.substr(0, d->outbuf.length() - 1);
+		return d->outbuf;
 	} catch (error_already_set const &) {
 		cerr << "Error in python interpreter: ";
 		PyErr_Print();
 		cerr << endl;
+		exit(1);
 	}
+	return "";
 }
 
 std::string PythonInterpreter::eval(const std::string& s)

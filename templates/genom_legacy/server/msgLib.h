@@ -58,7 +58,9 @@
  ** Boite aux lettres reception requetes 
  **/
 #define  <!upper(comp.name())!>_MBOX_NAME                      "<!comp.name()!>"
-<?# todo: compute this size from all the request?>
+<?
+# todo: compute this size from all the request
+?>
 #define  <!upper(comp.name())!>_MAX_RQST_SIZE              256
 
 #define  <!upper(comp.name())!>_MBOX_RQST_SIZE       \

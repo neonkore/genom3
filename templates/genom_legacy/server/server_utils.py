@@ -164,25 +164,41 @@ def pointerTo(t):
   else:
     return s+"*"
 
-def codel_signature(codel):
+def codel_signature(codel, service=None):
   proto = codel.name + "_codel(";
+  if service != None:
+    for s in service.inputs():
+	idstype = typeFromIdsName(s);
+	proto += pointerTo(idstype) + " in_" + s + ", ";
+    if len(service.output) > 0:
+	idstype = typeFromIdsName(service.output);
+	proto += pointerTo(idstype) + " out_" + service.output + ", ";  
+
   for type in codel.inTypes:
     idstype = typeFromIdsName(type);
-    proto = proto + pointerTo(idstype) + " in_" + type + ", ";
+    proto += pointerTo(idstype) + " in_" + type + ", ";
   for type in codel.outTypes:
     idstype = typeFromIdsName(type);
-    proto = proto + pointerTo(idstype) + " out_" + type + ", ";
-  proto = proto + "int *report)"
+    proto += pointerTo(idstype) + " out_" + type + ", ";
+  proto +=  "int *report)"
   return proto
 
 def codelSignatureFull(codel, service):
     if service.type == ServiceType.Control or codel.key() == "control":
-	return "STATUS " + codel_signature(codel.data())
+	return "STATUS " + codel_signature(codel.data(), service)
     else:
-	return "ACTIVITY_EVENT " + codel_signature(codel.data())
+	return "ACTIVITY_EVENT " + codel_signature(codel.data(), service)
 
-def real_codel_signature(codel):
+def real_codel_signature(codel, service=None):
   proto = ""
+  if service != None:
+    for s in service.inputs():
+	idstype = typeFromIdsName(s);
+	proto += pointerTo(idstype) + " in_" + s + ", ";
+    if len(service.output) > 0:
+	idstype = typeFromIdsName(service.output);
+	proto += pointerTo(idstype) + " out_" + service.output + ", "; 
+
   for type in codel.inTypes:
     idstype = typeFromIdsName(type);
     proto += pointerTo(idstype) + " in_" + type + ", ";
@@ -204,8 +220,14 @@ def real_codel_signature(codel):
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
-def real_codel_call(codel):
+def real_codel_call(codel, service=None):
   proto = ""
+  if service != None:
+    for s in service.inputs():
+	proto += " in_" + s + ", ";
+    if len(service.output) > 0:
+	proto += " out_" + service.output + ", "; 
+
   for type in codel.inTypes:
     proto += "in_" + type + ", ";
   for type in codel.outTypes:
@@ -233,7 +255,6 @@ for port in inports:
   s.type = ServiceType.Control
   s.addInput(connectIDSMember)
   c = Codel(name + "Exec")
-  c.addInType(connectIDSMember)
   s.addCodel("control", c)
   servicesMap[name] = s
 

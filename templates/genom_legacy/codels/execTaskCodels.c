@@ -81,7 +81,7 @@ for s in servicesMap:
 	codel = c.data()
 	?>
 
-extern int <!real_codel_signature(codel)!>;
+extern int <!real_codel_signature(codel, s.data())!>;
 
 /*------------------------------------------------------------------------
  * <!codel.name!>_codel  -  control codel of EXEC request <!service.name!>
@@ -131,7 +131,7 @@ extern int <!real_codel_signature(codel)!>;
 	?>
 
   /*call real codel */
-  int res = <!real_codel_call(codel)!>;
+  int res = <!real_codel_call(codel, s.data())!>;
   if(res < 0)
       *report = returnCodeToReport(res);
 

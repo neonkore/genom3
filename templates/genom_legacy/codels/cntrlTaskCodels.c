@@ -121,7 +121,7 @@ for s in servicesMap:
 	?>
 
   /*call real codel */
-  int res = <!real_codel_call(codel)!>;
+  int res = <!real_codel_call(codel, s.data())!>;
   if(res < 0)
       *report = returnCodeToReport(res);
 
@@ -153,7 +153,7 @@ for port in inports:
  *
  * Returns:    OK or ERROR
  */
-STATUS <!codel_signature(service.codel("control"))!>
+STATUS <!codel_signature(service.codel("control"), service)!>
 {
     POSTER_ID posterId;
     if (posterFind(in__connect_str, &posterId) == ERROR) {

@@ -52,6 +52,8 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1,2)
 void export_idl()
 {
 	def("MapTypeToC", &MapTypeToC, MapTypeToCOverloads());
+	def("MapTypeToCpp", &MapTypeToC, MapTypeToCOverloads());
+	def("MapTypeToIdl", &MapTypeToIdl);
 
 	class_<IdlType, IdlType::Ptr>("IdlType")
 	.def("asStructType", &IdlType::asStructType, return_value_policy<reference_existing_object>())
@@ -63,8 +65,10 @@ void export_idl()
 	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);
 
-	void (StructType::*AddMemberStr)(IdlType::Ptr,const std::string &) = &StructType::addMember;
+	object baseTypeClass = class_<BaseType, bases<IdlType> >("BaseType", init<IdlType::Kind>());
+	baseTypeClass.attr("voidType") = &BaseType::voidType;
 
+	void (StructType::*AddMemberStr)(IdlType::Ptr,const std::string &) = &StructType::addMember;
 	object stringTypeClass = class_<StringType, bases<IdlType> >("StringType", init<int>())
 	.def("bound", &StringType::bound);
 	stringTypeClass.attr("unboundedStringType") = &StringType::unboundedStringType;

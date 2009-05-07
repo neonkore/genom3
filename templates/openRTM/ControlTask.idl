@@ -1,0 +1,15 @@
+<?
+# print all types except ids in idl format
+for t in comp.typesVect():
+    if t.identifier() != IDSType.identifier():
+	print MapTypeToIdl(t) + ";"
+?>
+
+interface I<!capCompName!>Control
+{
+<?
+for s in servicesMap:
+    service = s.data()
+    if service.type == ServiceType.Control:
+	print service_idl_signature(service)
+?>};

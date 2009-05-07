@@ -78,7 +78,7 @@ void IdlVisitor::visitSequenceType(SequenceType *seq)
 
 void IdlVisitor::visitFixedType(FixedType *fixed)
 {
-	m_out << "Fixed<" << fixed->digits() << "," << fixed->scale() << "> ";
+	m_out << "fixed<" << fixed->digits() << "," << fixed->scale() << "> ";
 }
 
 void IdlVisitor::printDeclaratorVectString(ostream &m_out, Declarator::VectPtr v)
@@ -104,7 +104,7 @@ void IdlVisitor::printDeclaratorVectString(ostream &m_out, Declarator::VectPtr v
 
 void IdlVisitor::visitStructType(StructType *s)
 {
-	m_out << "Struct " << s->identifier() << " {";
+	m_out << "struct " << s->identifier() << " {";
 	IdlType::Map::const_iterator it;
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
@@ -116,7 +116,7 @@ void IdlVisitor::visitStructType(StructType *s)
 
 void IdlVisitor::visitTypedefType(TypedefType *t)
 {
-	m_out << "Typedef ";
+	m_out << "typedef ";
 	t->aliasType()->accept(*this);
 	m_out << " ";
 	printDeclaratorVectString(m_out, t->declarators());
@@ -124,7 +124,7 @@ void IdlVisitor::visitTypedefType(TypedefType *t)
 
 void IdlVisitor::visitEnumType(EnumType *e)
 {
-	m_out << "Enum " << e->identifier() << " { ";
+	m_out << "enum " << e->identifier() << " { ";
 
 	bool first = true;
 	std::vector<std::string>::const_iterator it;
@@ -141,7 +141,7 @@ void IdlVisitor::visitEnumType(EnumType *e)
 
 void IdlVisitor::visitArrayType(ArrayType *a)
 {
-
+	/// todo
 }
 
 void IdlVisitor::visitNamedType(NamedType *n)

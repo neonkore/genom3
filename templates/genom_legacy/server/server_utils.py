@@ -247,8 +247,6 @@ def nbExecService():
     return count
 
 # create connect services for each inport
-
-
 for port in inports:
   name = "connect" + port.name
   s = Service(name)

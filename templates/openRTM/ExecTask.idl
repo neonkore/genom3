@@ -11,6 +11,6 @@ interface I<!capCompName!><!currentTaskName!>
 <?
 for s in servicesMap:
     service = s.data()
-    if service.type != ServiceType.Control:
+    if service.type != ServiceType.Control and service.taskName == currentTaskName:
 	print service_idl_signature(service)
 ?>};

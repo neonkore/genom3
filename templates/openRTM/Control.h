@@ -103,11 +103,11 @@ for t in comp.tasksMap():
   RTC::CorbaPort m_<!task.name!>ProviderServicePort;<?
 ?>
   // Service declaration
-  RTC::CorbaProvider<I<!capCompName!>Control> m_controlService;
+  <!capCompName!>ControlImpl m_controlService;
 <?
 for t in comp.tasksMap():
     task = t.data()
-    print "  RTC::CorbaProvider<I" + capCompName + task.name + "> m_" + task.name + "ProviderService;"
+    #print "  RTC::CorbaProvider<I" + capCompName + task.name + "> m_" + task.name + "ProviderService;"
 ?>
 
   // Consumer declaration

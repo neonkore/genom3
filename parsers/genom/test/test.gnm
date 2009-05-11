@@ -1,0 +1,38 @@
+
+typedef sequence<string<2>,98> stringList;
+
+struct testids {
+  long a;
+  long b;
+  string s;
+  sequence<long,10> j;
+  stringList l;
+};
+
+component demo {
+  language: "c";
+  version: "0.1";
+  ids: testids;
+/*  requires: importedModule; */
+  uniqueId: 9000;
+};
+
+task main {
+  priority: 100;
+  period: 5;
+  stackSize:  100;
+
+  codel start: tstart(in a);
+};
+
+/* Test comment*/
+
+service Setup {
+  type:	init;
+  taskName:	main;
+  doc:	"Setup service";
+  input: a; /*ignore this too*/
+  output: a;
+
+  codel main: main_lib(in a, out b);
+};

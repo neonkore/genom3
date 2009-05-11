@@ -52,8 +52,8 @@ for port in outports:
 <?
 for t in comp.tasksMap():
     task = t.data()
-    print "  m_" + task.name + "ProviderServicePort.registerProvider(\"" + task.name + "ProviderService\","
-    print "    \"I" + capCompName + task.name + "\", m_" + task.name + "ProviderService);"
+    print "  m_" + task.name + "ProviderServicePort.registerProvider(\"controlService\","
+    print "    \"I" + capCompName + task.name + "\", m_controlService);"
 ?>
   // Set service consumers to Ports
 <?

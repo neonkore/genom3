@@ -4,6 +4,7 @@
 
 #include "I<!comp.name()!>ControlSkel.h"
 
+class <!capCompName!>ControlData;
  
 /*
  * Example class implementing IDL interface MyService
@@ -43,6 +44,9 @@ for t in comp.tasksMap():
       if service.type != ServiceType.Control and service.taskName == task.name:
 	print "   " + service_cpp_signature(service) + ";"
 ?>
+
+  private:
+    <!capCompName!>ControlData *m_data;
 };
 
 #endif // <!upperCompName!>_CONTROL_IMPL_H

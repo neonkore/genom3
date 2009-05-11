@@ -1,10 +1,16 @@
 
 #include "<!comp.name()!>ControlImpl.h"
 
-/*
- * Example implementational code for IDL interface MyService
- */
-<!capCompName!>ControlImpl::<!capCompName!>ControlImpl()
+// forward declaration of user codels
+<?
+for s in servicesMap:
+  service = s.data()
+  if service.type == ServiceType.Control and service.hasCodel("control"):
+    print "int " + real_codel_signature(service.codel("control"), service) + ";"
+?>
+
+<!capCompName!>ControlImpl::<!capCompName!>ControlImpl(<!capCompName!>ControlData *data)
+: m_data(0)
 {}
 
 
@@ -16,7 +22,7 @@ for s in servicesMap:
   service = s.data()
   if service.type == ServiceType.Control:
     ?>
-<!service_cpp_signature(service)!>
+<!service_cpp_signature(service, capCompName + "ControlImpl")!>
 {
 <?
     if service.hasCodel("control"):

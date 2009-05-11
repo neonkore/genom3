@@ -11,22 +11,57 @@
 
 // Service implementation headers
 #include "<!comp.name()!>ControlImpl.h"
-
 // stub headers
 #include "IControlTaskSkel.h"
+
+#include "<!comp.name()!>Struct.h"
+
 <?
 for t in comp.tasksMap():
     task = t.data()
-    print "I" + capCompName + task.name + "Skel.h"
+    print "#include \"I" + capCompName + task.name + "Skel.h\""
 ?>
 
 using namespace RTC;
+
+// definition of th ids
+struct <!capCompName!>ControlData {
+  // members of the ids
+<?
+t = comp.IDSType.unalias()
+if t.kind() == IdlKind.Struct:
+  s = t.asStructType()
+  for m in s.members():
+     print "  " + MapTypeToCpp(m.data()) + " " + m.key() + ";"
+?>
+  // DataInPort declaration
+<?
+for port in inports:
+    typeName = MapTypeToCpp(port.idlType)
+    ?>
+  <!typeName!> m_<!port.name!>_data;
+  Outport<<!typeName!>> m_<!port.name!>;
+<?
+?>
+
+  // DataOutPort declaration
+<?
+for port in outports:
+    typeName = MapTypeToCpp(port.idlType)
+    ?>
+  <!typeName!> m_<!port.name!>_data;
+  Outport<<!typeName!>> m_<!port.name!>;
+<?
+?>
+};
 
 class <!capCompName!>Control  : public RTC::DataFlowComponentBase
 {
  public:
   <!capCompName!>Control(RTC::Manager* manager);
   ~<!capCompName!>Control();
+
+  <!capCompName!>ControlData* data() { return &m_data; }
 <?
 if initServiceNb != -1: ?>
   // The initialize action (on CREATED->ALIVE transition)
@@ -69,30 +104,6 @@ if initServiceNb != -1: ?>
 
 
  protected:
-  // Configuration variable declaration
-  // <rtc-template block="config_declare">
-  
-  // </rtc-template>
-
-  // DataInPort declaration
-<?
-for port in inports:
-    typeName = MapTypeToCpp(port.idlType)
-    ?>
-  <!typeName!> m_<!port.name!>;
-  Outport<<!typeName!>> m_<!port.name!>;
-<?
-?>
-
-  // DataOutPort declaration
-<?
-for port in outports:
-    typeName = MapTypeToCpp(port.idlType)
-    ?>
-  <!typeName!> m_<!port.name!>;
-  Outport<<!typeName!>> m_<!port.name!>;
-<?
-?>
   // CORBA Port declaration
   RTC::CorbaPort m_controlServicePort;
 <?
@@ -104,11 +115,6 @@ for t in comp.tasksMap():
 ?>
   // Service declaration
   <!capCompName!>ControlImpl m_controlService;
-<?
-for t in comp.tasksMap():
-    task = t.data()
-    #print "  RTC::CorbaProvider<I" + capCompName + task.name + "> m_" + task.name + "ProviderService;"
-?>
 
   // Consumer declaration
 <?
@@ -117,7 +123,7 @@ for t in comp.tasksMap():
     print "  RTC::CorbaConsumer<I" + capCompName + task.name + "> m_" + task.name + "ConsumerService;"
 ?>
  private:
-
+    <!capCompName!>ControlData m_data;
 };
 
 

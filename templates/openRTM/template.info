@@ -9,6 +9,10 @@ main:
   "ControlImpl.h" -> "$$ControlImpl.h"
   "ControlImpl.cpp" -> "$$ControlImpl.cpp"
   "ControlTask.idl"
+  "ExecServices.h"
+  "ExecServices.cpp"
+  "struct.h" -> "$$Struct.h" 
+  "CMakeLists.txt"
 ;
 
 task:

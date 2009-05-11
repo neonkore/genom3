@@ -22,6 +22,9 @@ class <!capCompName!><!currentTaskName!> : public RTC::DataFlowComponentBase
  public:
   <!capCompName!><!currentTaskName!>(RTC::Manager* manager);
   ~<!capCompName!><!currentTaskName!>();
+
+  void setData(<!capCompName!>ControlData *data);
+
 <?
 if currentTask.hasCodel("init"): ?>
   // The initialize action (on CREATED->ALIVE transition)
@@ -64,14 +67,28 @@ if currentTask.hasCodel("init"): ?>
 
 
  protected:
+  // Services' output ports
+<?
+for s in comp.servicesMap():
+  service = s.data()
+  if service.type != ServiceType.Exec or service.taskName != currentTaskName:
+    continue
+  if len(service.output) == 0:
+    continue
+  typeName = MapTypeToCpp(comp.typeFromIdsName(service.output))
+  ?>
+/*  <!typeName!> m_<!service.name!>_data;*/
+  Outport<std::pair<<!typeName!>, int> > m_<!service.name!>_outport;
+<?
+?>
   // CORBA Port declaration
   RTC::CorbaPort m_servicePort;
 
   // Service declaration
-  RTC::CorbaProvider<I<!capCompName!><!currentTaskName!>> m_service;
-
+  <!capCompName!><!currentTaskName!>Impl m_service;
+  
  private:
-
+  <!capCompName!>ControlData *m_data;
 };
 
 

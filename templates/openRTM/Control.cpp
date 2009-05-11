@@ -26,17 +26,15 @@ static const char* <!comp.name()!>Control_spec[] =
 for t in comp.tasksMap():
     task = t.data()
     print "    m_" + task.name + "ConsumerServicePort(\"" + capCompName + task.name + "Consumer\")," 
-    print "    m_" + task.name + "ProviderServicePort(\"" + capCompName + task.name + "\")," 
-?>    m_controlServicePort("<!capCompName!>Control")
+?>    m_controlServicePort("<!capCompName!>Control"),
+    m_service(&m_data)
 {
-  // Registration: InPort/OutPort/Service
-  // <rtc-template block="registration">
   // Set InPort buffers
 <?
 for port in inports:
     typeName = MapTypeToCpp(port.idlType)
     ?>
-  registerInPort("<!port.name!>", m_<!port.name!>);
+  registerInPort("<!port.name!>", m_data.m_<!port.name!>);
 <?
 ?>
   // Set OutPort buffers
@@ -44,7 +42,7 @@ for port in inports:
 for port in outports:
     typeName = MapTypeToCpp(port.idlType)
     ?>
-  registerOutPort("<!port.name!>", m_<!port.name!>);
+  registerOutPort("<!port.name!>", m_data.m_<!port.name!>);
 <?
 ?>
   // Set service provider to Ports
@@ -68,19 +66,30 @@ for t in comp.tasksMap():
 for t in comp.tasksMap():
     task = t.data()
     ?>
-  registerPort(m_<!task.name!>ConsumerServicePort);
-  registerPort(m_<!task.name!>ProviderServicePort);<?
+  registerPort(m_<!task.name!>ConsumerServicePort);<?
+?>
+
+
+  // create tasks and connect them
+<?
+for t in comp.tasksMap():
+  task = t.data()
+  ?>  
+  RtcBase *base = manager->createComponent("<!capCompName!><!task.name!>");
+  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = dynamic_cast<<!capCompName!><!task.name!>*>(base);
+  m_<!capCompName!><!task.name!>->setData(&m_data);
+<?
 ?>
 }
 
-<!comp.name()!>Control::~<!comp.name()!>Control()
+<!capCompName!>Control::~<!capCompName!>Control()
 {
 }
 
 <?
 if initServiceNb != -1:
   ?>
-RTC::ReturnCode_t <!comp.name()!>Control::onInitialize()
+RTC::ReturnCode_t <!capCompName!>Control::onInitialize()
 {
   int res = <!codel_call(initService.codel("exec", initService))!>;
   if(res == ERROR)
@@ -90,25 +99,25 @@ RTC::ReturnCode_t <!comp.name()!>Control::onInitialize()
 ?>
 
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onFinalize()
+RTC::ReturnCode_t <!capCompName!>Control::onFinalize()
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onStartup(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onStartup(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onShutdown(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onShutdown(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onActivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onActivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
@@ -120,25 +129,25 @@ RTC::ReturnCode_t <!comp.name()!>Control::onDeactivated(RTC::UniqueId ec_id)
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onExecute(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onAborting(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onAborting(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onError(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onError(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onReset(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onReset(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
@@ -150,7 +159,7 @@ RTC::ReturnCode_t <!comp.name()!>Control::onStateUpdate(RTC::UniqueId ec_id)
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>Control::onRateChanged(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!capCompName!>Control::onRateChanged(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }

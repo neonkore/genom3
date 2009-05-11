@@ -20,22 +20,62 @@ def service_idl_signature(service):
 	args += "in " + MapTypeToIdl(t) + " " + i + ", "
     return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ");"
 
+def service_cpp_args(service, className=""):
+    # create the args list
+    args = ""
+    for i in service.inputs():
+	t = comp.typeFromIdsName(i)
+	args += MapTypeToCpp(t) + " in_" + i + ", "
+    if className != "":
+	return className + "::" + service.name + "(" + args[:-2] + ")"
+    else:
+	return service.name + "(" + args[:-2] + ")"
+
 def service_cpp_signature(service, className=""):
     # find the service output type
     if len(service.output) > 0:
 	outputType = comp.typeFromIdsName(service.output)
     else:
 	outputType = BaseType.voidType
+    return MapTypeToCpp(outputType) + " " + service_cpp_args(service, className)
 
-    # then create the args list
-    args = ""
-    for i in service.inputs():
-	t = comp.typeFromIdsName(i)
-	args += MapTypeToCpp(t) + " in_" + i + ", "
-    if className != "":
-	return MapTypeToCpp(outputType) + " " + className + "::" + service.name + "(" + args[:-2] + ")"
+def pointerTo(t):
+  s = MapTypeToC(t,True)
+  if t.kind() == IdlKind.String:
+    return s
+  else:
+    return s+"*"
+
+def real_codel_signature(codel, service=None):
+  proto = ""
+  if service != None:
+    for s in service.inputs():
+	idstype = comp.typeFromIdsName(s);
+	proto += pointerTo(idstype) + " in_" + s + ", ";
+    if len(service.output) > 0:
+	idstype = comp.typeFromIdsName(service.output);
+	proto += pointerTo(idstype) + " out_" + service.output + ", "; 
+
+  for type in codel.inTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto += pointerTo(idstype) + " in_" + type + ", ";
+  for type in codel.outTypes:
+    idstype = comp.typeFromIdsName(type);
+    proto += pointerTo(idstype) + " out_" + type + ", ";
+  for port in codel.outPorts:
+    p = comp.port(port)
+    if p != None:
+	proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
     else:
-	return MapTypeToCpp(outputType) + " " + service.name + "(" + args[:-2] + ")"
+	proto += port + ", "
+  for port in codel.inPorts:
+    p = comp.port(port)
+    if p != None:
+	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
+    else:
+	proto += port + ", "
+  proto = codel.name + "(" + proto[:-2] + ")"
+  return proto
 
 # try to find an init service
 def findInitService():
@@ -76,6 +116,25 @@ def codel_call(codel, service=None):
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
+def real_codel_call(codel, data_prefix="", service=None):
+  proto = ""
+  if service != None:
+    for s in service.inputs():
+	proto += " &in_" + s + ", ";
+    if len(service.output) > 0:
+	proto += " &out_" + service.output + ", "; 
+
+  for type in codel.inTypes:
+    proto += "& " + data_prefix + "in_" + type + ", ";
+  for type in codel.outTypes:
+    proto += "& " + data_prefix + "out_" + type + ", ";
+  for port in codel.outPorts:
+    proto += data_prefix + "outport_" + port + "_data, "; 
+  for port in codel.inPorts:
+    proto += data_prefix + "inport_" + port + ", "; 
+  proto = codel.name + "(" + proto[:-2] + ")"
+  return proto
+
 def service_call(service):
     # create the args list
     args = ""
@@ -83,3 +142,22 @@ def service_call(service):
 	args += "in_" + i + ", "
     return service.name + "(" + args[:-2] + ")"
 
+def serviceOutportsSet(service):
+  portList = []
+  for c in service.codels():
+    for port in c.data().outPorts:
+      portList.append(port)
+  return set(portList)
+
+def serviceInportsSet(service):
+  portList = []
+  for c in service.codels():
+    for port in c.data().inPorts:
+      portList.append(port)
+  return set(portList)
+
+def startStateForService(service):
+  if service.hasCodel("start"):
+    return upper(service.name) + "_START"
+  else:
+    return upper(service.name) + "_MAIN"

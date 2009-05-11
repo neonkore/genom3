@@ -1,0 +1,16 @@
+language: Python;
+requires: "utils.py";
+
+main:
+  "Makefile"
+  "ControlComp.cpp" -> "$$ControlComp.cpp"
+  "Control.h" -> "$$Control.h"
+  "Control.cpp" -> "$$Control.cpp"
+  "ControlImpl.h" -> "$$ControlImpl.h"
+  "ControlImpl.cpp" -> "$$ControlImpl.cpp"
+  "ControlTask.idl"
+;
+
+task:
+  "ExecTask.idl" -> "$component$$task$.idl" 
+;

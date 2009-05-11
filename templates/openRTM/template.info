@@ -13,6 +13,7 @@ main:
   "ExecServices.cpp"
   "struct.h" -> "$$Struct.h" 
   "CMakeLists.txt"
+  "FindOpenRTM.cmake"
 ;
 
 task:

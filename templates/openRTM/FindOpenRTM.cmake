@@ -8,10 +8,11 @@ EXECUTE_PROCESS(COMMAND ${RTM_CONFIG} --cflags OUTPUT_VARIABLE RTM_CXXFLAGS OUTP
 EXECUTE_PROCESS(COMMAND ${RTM_CONFIG} --libs OUTPUT_VARIABLE RTM_LIBRARIES OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${RTM_CXXFLAGS})
+include_directories(${RTM_PREFIX}/include)
 
-SET(IDLFLAGS ${IDLFLAGS} -I${RTM_PREFIX}/include)
+SET(IDLFLAGS ${IDLFLAGS} -I${RTM_PREFIX}/include/rtm/idl)
 SEPARATE_ARGUMENTS(IDLFLAGS)
-SET(WRAPPER_FLAGS "--include-dir="" --skel-suffix=Skel --stub-suffix=Stub")
+SET(WRAPPER_FLAGS "--include-dir=\"\" --skel-suffix=Skel --stub-suffix=Stub")
 
 MACRO(IDL_TARGET Name Input)
   SET(IDL_TARGET_usage "FLEX_TARGET(<Name> <Input>")
@@ -19,22 +20,20 @@ MACRO(IDL_TARGET Name Input)
   GET_FILENAME_COMPONENT(InputPath ${Input} PATH)
 
   SET(IDL_OUTPUTS ${InputPath}/${InputBaseName}SK.cc)
-
   ADD_CUSTOM_COMMAND(OUTPUT ${IDL_OUTPUTS}
     COMMAND ${IDLC} ${IDLFLAGS} ${Input}
     DEPENDS ${Input}
-    COMMENT "[IDL][${Name}] Creating stubs"
+    COMMENT "[IDL] Creating stubs from ${Input}"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-  SET(WRAPPER_OUTPUTS ${InputPath}/${InputBaseName}Skel.cpp ${InputPath}/${InputBaseName}Skel.h 
-	${InputPath}/${InputBaseName}Stub.h ${InputPath}/${InputBaseName}Stub.cpp)
-
+  SET(WRAPPER_OUTPUTS ${InputPath}/${InputBaseName}Skel.cpp)
   ADD_CUSTOM_COMMAND(OUTPUT ${WRAPPER_OUTPUTS}
     COMMAND ${RTM_WRAPPER} ${WRAPPER_FLAGS} --idl-file=${Input}
     DEPENDS ${Input}
-    COMMENT "[OpenRTM Wrapper][${Name}] Creating skels"
+    COMMENT "[OpenRTM Wrapper] Creating skels from ${Input}"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-  SET(IDL_${Name}_OUTPUTS ${IDL_OUTPUTS} ${WRAPPPER_OUTPUTS})
+
+  SET(IDL_${Name}_OUTPUTS ${IDL_OUTPUTS} ${WRAPPER_OUTPUTS})
   SET(IDL_${Name}_INPUT ${Input})
 ENDMACRO(IDL_TARGET)

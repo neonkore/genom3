@@ -1,17 +1,20 @@
-
+<?
+currentTask = comp.task(currentTaskName)
+?>
 #include <rtm/Manager.h>
 #include <iostream>
 #include <string>
-#include "<!comp.name()!>Control.h"
+#include "<!comp.name()!><!currentTaskName!>.h"
 
 
-void <!capCompName!>ControlInit(RTC::Manager* manager)
+void <!capCompName!><!currentTaskName!>Init(RTC::Manager* manager)
 {
   <!comp.name()!>Init(manager);
   RTC::RtcBase* comp;
 
   // Create a component
-  comp = manager->createComponent("<!capCompName!>Control");
+  comp = manager->createComponent("<!capCompName!><!currentTaskName!>");
+
 
   // Example
   // The following procedure is examples how handle RT-Components.
@@ -66,7 +69,7 @@ int main (int argc, char** argv)
 
   // Set module initialization proceduer
   // This procedure will be invoked in activateManager() function.
-  manager->setModuleInitProc(<!capCompName!>ControlInit);
+  manager->setModuleInitProc(<!capCompName!><!currentTaskName!>ModuleInit);
 
   // Activate manager and register to naming service
   manager->activateManager();

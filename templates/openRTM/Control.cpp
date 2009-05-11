@@ -73,83 +73,84 @@ for t in comp.tasksMap():
 ?>
 }
 
-<!comp.name()!>::~<!comp.name()!>()
+<!comp.name()!>Control::~<!comp.name()!>Control()
 {
 }
 
+<?
+if initServiceNb != -1:
+  ?>
+RTC::ReturnCode_t <!comp.name()!>Control::onInitialize()
+{
+  int res = <!codel_call(initService.codel("exec", initService))!>;
+  if(res == ERROR)
+      return RTC::RTC_ERROR;
+  return RTC::RTC_OK;
+}<?
+?>
 
-RTC::ReturnCode_t <!comp.name()!>::onInitialize()
-{
-  // <rtc-template block="bind_config">
-  // Bind variables and configuration variable
-
-  // </rtc-template>
-  return RTC::RTC_OK;
-}
-
-
 /*
-RTC::ReturnCode_t <!comp.name()!>::onFinalize()
+RTC::ReturnCode_t <!comp.name()!>Control::onFinalize()
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onStartup(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onStartup(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onShutdown(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onShutdown(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onActivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onActivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onDeactivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onDeactivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onExecute(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onAborting(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onAborting(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onError(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onError(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onReset(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onReset(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onStateUpdate(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onStateUpdate(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t <!comp.name()!>::onRateChanged(RTC::UniqueId ec_id)
+RTC::ReturnCode_t <!comp.name()!>Control::onRateChanged(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
@@ -159,12 +160,12 @@ RTC::ReturnCode_t <!comp.name()!>::onRateChanged(RTC::UniqueId ec_id)
 extern "C"
 {
  
-  void <!comp.name()!>Init(RTC::Manager* manager)
+  void <!capCompName!>ControlInit(RTC::Manager* manager)
   {
-    RTC::Properties profile(myserviceconsumer_spec);
+    RTC::Properties profile(<!comp.name()!>Control_spec);
     manager->registerFactory(profile,
-                             RTC::Create<<!comp.name()!>>,
-                             RTC::Delete<<!comp.name()!>>);
+                             RTC::Create<<!capCompName!>Control>,
+                             RTC::Delete<<!capCompName!>Control>);
   }
   
 };

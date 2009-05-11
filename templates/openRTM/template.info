@@ -12,5 +12,10 @@ main:
 ;
 
 task:
-  "ExecTask.idl" -> "$component$$task$.idl" 
+  "ExecTask.idl" -> "I$component$$task$.idl" 
+  "ExecTask.h" -> "$component$$task$.h" 
+  "ExecTask.cpp" -> "$component$$task$.cpp"
+  "ExecTaskComp.cpp" -> "$component$$task$Comp.cpp"  
+  "ExecTaskImpl.h" -> "$component$$task$Impl.h" 
+  "ExecTaskImpl.cpp" -> "$component$$task$Impl.cpp" 
 ;

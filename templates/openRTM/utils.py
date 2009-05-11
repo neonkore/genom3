@@ -20,7 +20,7 @@ def service_idl_signature(service):
 	args += "in " + MapTypeToIdl(t) + " " + i + ", "
     return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ");"
 
-def service_cpp_signature(service):
+def service_cpp_signature(service, className=""):
     # find the service output type
     if len(service.output) > 0:
 	outputType = comp.typeFromIdsName(service.output)
@@ -32,7 +32,10 @@ def service_cpp_signature(service):
     for i in service.inputs():
 	t = comp.typeFromIdsName(i)
 	args += MapTypeToCpp(t) + " in_" + i + ", "
-    return MapTypeToCpp(outputType) + " " + service.name + "(" + args[:-2] + ")"
+    if className != "":
+	return MapTypeToCpp(outputType) + " " + className + "::" + service.name + "(" + args[:-2] + ")"
+    else:
+	return MapTypeToCpp(outputType) + " " + service.name + "(" + args[:-2] + ")"
 
 # try to find an init service
 def findInitService():

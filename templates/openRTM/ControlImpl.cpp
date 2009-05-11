@@ -1,5 +1,5 @@
 
-#include "<!capCompName!>ControlImpl.h"
+#include "<!comp.name()!>ControlImpl.h"
 
 /*
  * Example implementational code for IDL interface MyService
@@ -28,7 +28,7 @@ for s in servicesMap:
     for s in service.inputs():
 	print "  m_" + s + " = in_" + s + ";" 
     if len (service.output) > 0:
-	print "return m_" + service.output + ";"
+	print "  return m_" + service.output + ";"
     ?>
 }
 <?
@@ -46,7 +46,7 @@ for t in comp.tasksMap():
 	  else:
 	    returnStr = ""
 	  ?>
-<!service_cpp_signature(service)!>
+<!service_cpp_signature(service, capCompName + "ControlImpl")!>
 {
     <!returnStr!>m_<!task.name!>ConsumerService-><!service_call(service)!>;
 }

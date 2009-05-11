@@ -1,9 +1,9 @@
 
-#include "I<!comp.name()!>ControlSkel.h"
-
-
 #ifndef <!upperCompName!>_CONTROL_IMPL_H
 #define <!upperCompName!>_CONTROL_IMPL_H
+
+#include "I<!comp.name()!>ControlSkel.h"
+
  
 /*
  * Example class implementing IDL interface MyService

@@ -1,6 +1,11 @@
 
 #include "<!comp.name()!>Control.h"
 
+<?
+for t in comp.tasksMap():
+  print "#include \"" + comp.name() + t.data().name + ".h\""
+?>
+
 // Module specification
 static const char* <!comp.name()!>Control_spec[] =
   {
@@ -19,9 +24,22 @@ static const char* <!comp.name()!>Control_spec[] =
     ""
   };
 
+<?
+portInit = ""
+for port in inports:
+  portInit += port.name + "(\"" + port.name + "\", " + port.name + "_data),\n" 
+for port in outports:
+  portInit += port.name + "(\"" + port.name + "\", " + port.name + "_data),\n" 
+for name,type in output_ports_map.iteritems():
+  portInit += name + "_outport(\"" + name + "_outport\", " + name + "_data),\n" 
+?>
+<!capCompName!>ControlData::<!capCompName!>ControlData()
+: <!portInit[:-2]!>
+{}
+
 <!capCompName!>Control::<!capCompName!>Control(RTC::Manager* manager)
     // <rtc-template block="initializer">
-  : RTC::DataFlowComponentBase(manager)
+  : RTC::DataFlowComponentBase(manager),
     m_controlServicePort("<!capCompName!>Control"),
     m_service(&m_data)
 {
@@ -30,7 +48,7 @@ static const char* <!comp.name()!>Control_spec[] =
 for port in inports:
     typeName = MapTypeToCpp(port.idlType)
     ?>
-  registerInPort("<!port.name!>", m_data.m_<!port.name!>);
+  registerInPort("<!port.name!>", m_data.<!port.name!>);
 <?
 ?>
   // Set OutPort buffers
@@ -38,11 +56,15 @@ for port in inports:
 for port in outports:
     typeName = MapTypeToCpp(port.idlType)
     ?>
-  registerOutPort("<!port.name!>", m_data.m_<!port.name!>);
+  registerOutPort("<!port.name!>", m_data.<!port.name!>);
+<?
+for name,typeName in output_ports_map.iteritems():
+  ?>
+  registerOutPort("<!name!>_outport", m_data.<!name!>_outport);
 <?
 ?>
   // Set service provider to Ports
-  m_controlServicePort.registerProvider("controlService", "I<!capCompName!>Control", m_controlService);
+  m_controlServicePort.registerProvider("controlService", "I<!capCompName!>", m_service);
 
   // Set CORBA Service Ports
   registerPort(m_controlServicePort);
@@ -59,17 +81,20 @@ RTC::ReturnCode_t <!capCompName!>Control::onInitialize()
 for t in comp.tasksMap():
   task = t.data()
   ?>  
-  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = new <!capCompName!><!task.name!>(&m_data); 
+  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = new <!capCompName!><!task.name!>(m_pManager); 
+  m_<!capCompName!><!task.name!>->setData(&m_data);
+  RTObject_var rtobj = m_<!capCompName!><!task.name!>->getObjRef();
 <?
   if task.period > 0: ?>
-  PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new PeriodicExecutionContext(m_<!capCompName!><!task.name!>, 1.0 / (<!task.period!> * 1000));
+  PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new PeriodicExecutionContext();
+  m_<!capCompName!><!task.name!>_exc->set_rate(1.0 / (<!task.period!> * 1000));
 <? 
   else: ?>
-  ExtTriggerExecutionContext *m_<!capCompName!><!task.name!>_exc = new ExtTriggerExecutionContext(m_<!capCompName!><!task.name!>);
+  ExtTriggerExecutionContext *m_<!capCompName!><!task.name!>_exc = new ExtTriggerExecutionContext(rtobj);
 <?
   ?>
-  m_<!capCompName!><!task.name!>_exc->add(m_<!capCompName!><!task.name!>);
-  m_<!capCompName!><!task.name!>_exc->activate_component(m_<!capCompName!><!task.name!>);
+  m_<!capCompName!><!task.name!>_exc->add(rtobj);
+  m_<!capCompName!><!task.name!>_exc->activate_component(rtobj);
   m_<!capCompName!><!task.name!>_exc->start();
 
 <?

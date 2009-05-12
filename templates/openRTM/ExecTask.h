@@ -10,6 +10,8 @@ currentTask = comp.task(currentTaskName)
 
 using namespace RTC;
 
+class <!capCompName!>ControlData;
+
 class <!capCompName!><!currentTaskName!> : public RTC::DataFlowComponentBase
 {
  public:
@@ -41,7 +43,7 @@ if currentTask.hasCodel("init"): ?>
   // virtual RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id);
 
   // The execution action that is invoked periodically
-  // virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
+  virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
   // The aborting action when main logic error occurred.
   // virtual RTC::ReturnCode_t onAborting(RTC::UniqueId ec_id);

@@ -5,9 +5,9 @@
 #include "<!comp.name()!>Control.h"
 
 
-void <!capCompName!>ControlInit(RTC::Manager* manager)
+void <!capCompName!>CompInit(RTC::Manager* manager)
 {
-  <!comp.name()!>Init(manager);
+  <!capCompName!>ControlInit(manager);
   RTC::RtcBase* comp;
 
   // Create a component
@@ -66,7 +66,7 @@ int main (int argc, char** argv)
 
   // Set module initialization proceduer
   // This procedure will be invoked in activateManager() function.
-  manager->setModuleInitProc(<!capCompName!>ControlInit);
+  manager->setModuleInitProc(<!capCompName!>CompInit);
 
   // Activate manager and register to naming service
   manager->activateManager();

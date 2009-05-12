@@ -43,9 +43,9 @@ std::string MapTypeToC(IdlType::Ptr t, bool declOnly=false)
 	return CVisitor::mapTypeToC(t, declOnly);
 }
 
-std::string MapTypeToCpp(IdlType::Ptr t, bool declOnly=false)
+std::string MapTypeToCpp(IdlType::Ptr t, bool declOnly=false, bool isOutType = false)
 {
-	return CorbaCppVisitor::mapTypeToCpp(t, declOnly);
+	return CorbaCppVisitor::mapTypeToCpp(t, declOnly, isOutType);
 }  
 
 std::string MapTypeToIdl(IdlType::Ptr t)
@@ -54,7 +54,7 @@ std::string MapTypeToIdl(IdlType::Ptr t)
 } 
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1,2)
-BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1,2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1,3)
 
 void export_idl()
 {

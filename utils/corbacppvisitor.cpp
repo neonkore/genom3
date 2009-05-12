@@ -36,11 +36,11 @@ using namespace G3nom;
 using namespace Idl;
 using namespace std;
 
-std::string CorbaCppVisitor::mapTypeToCpp(IdlType::Ptr t, bool declOnly)
+std::string CorbaCppVisitor::mapTypeToCpp(IdlType::Ptr t, bool declOnly, bool isOutType)
 {
 	std::string s;
 	ostringstream oss(s);
-	CorbaCppVisitor visitor(oss, declOnly);
+	CorbaCppVisitor visitor(oss, declOnly, isOutType);
 	t->accept(visitor);
 	return oss.str();
 }
@@ -105,10 +105,12 @@ void CorbaCppVisitor::visitFixedType(FixedType *fixed)
 
 void CorbaCppVisitor::visitStructType(StructType *s)
 {
-	m_out << "struct " + s->identifier();
-	if(m_declOnly)
+	if(m_declOnly) {
+		m_out << s->identifier();
 		return;
+	}
 
+	m_out << "struct " + s->identifier();
 	m_out << "{" << endl;
 	IdlType::Map::const_iterator it = s->members().begin();
 	for(; it != s->members().end(); ++it) {
@@ -148,10 +150,15 @@ void CorbaCppVisitor::visitTypedefType(TypedefType *t)
 
 void CorbaCppVisitor::visitEnumType(EnumType *e)
 {
-	m_out << "enum " << e->identifier();
-	if(m_declOnly)
-	  return;
+	if(m_declOnly) {
+		if(m_isOutType)
+			m_out << "CORBA::Long";
+		else
+			m_out << e->identifier();
+		return;
+	}
 
+	m_out << "enum " << e->identifier();
 	m_out << "{" << endl;
 	bool first = true;
 	std::vector<std::string>::const_iterator it;

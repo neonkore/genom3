@@ -20,7 +20,7 @@ class <!capCompName!>ControlImpl
 
  public:
    // standard constructor
-   <!capCompName!>ControlImpl();
+   <!capCompName!>ControlImpl(<!capCompName!>ControlData *data);
    virtual ~<!capCompName!>ControlImpl();
 
    // I<!capCompName!>Control interface
@@ -29,18 +29,14 @@ for s in servicesMap:
   service = s.data()
   if service.type == ServiceType.Control:
     print "   " + service_cpp_signature(service) + ";"
-?>   
 
-<?
 for t in comp.tasksMap():
     task = t.data()
-    print "   //  I" + capCompName + task.name + " interface"
     for s in comp.servicesMap():
       service = s.data()
       if service.type != ServiceType.Control and service.taskName == task.name:
-	print "   " + service_cpp_signature(service) + ";"
+	  print "   " + service_cpp_signature(service) + ";"
 ?>
-
   private:
     <!capCompName!>ControlData *m_data;
 };

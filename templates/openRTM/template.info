@@ -10,7 +10,6 @@ main:
   "ControlTask.idl"
   "ExecServices.h"
   "ExecServices.cpp"
-  "struct.h" -> "$$Struct.h" 
   "CMakeLists.txt"
   "FindOpenRTM.cmake"
 ;

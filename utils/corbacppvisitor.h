@@ -39,10 +39,11 @@ namespace Idl {
 class CorbaCppVisitor : public TypeVisitor
 {
 	public:
-		CorbaCppVisitor(std::ostream &out, bool declOnly) : m_out(out), m_declOnly(declOnly) {}
+		CorbaCppVisitor(std::ostream &out, bool declOnly, bool isOutType) 
+		: m_out(out), m_declOnly(declOnly), m_isOutType(isOutType) {}
 		virtual ~CorbaCppVisitor() {}
 
-		static std::string mapTypeToCpp(IdlType::Ptr t, bool declOnly=false);
+		static std::string mapTypeToCpp(IdlType::Ptr t, bool declOnly=false, bool out=false);
 
 		virtual void visitBaseType(BaseType*);
 		virtual void visitStringType(StringType*);
@@ -58,6 +59,7 @@ class CorbaCppVisitor : public TypeVisitor
 	protected:
 		std::ostream &m_out;
 		bool m_declOnly;
+		bool m_isOutType;
 };
 
 }

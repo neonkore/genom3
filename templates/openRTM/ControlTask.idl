@@ -3,8 +3,15 @@
 for t in comp.typesVect():
     if t.identifier() != IDSType.identifier():
 	print MapTypeToIdl(t) + ";"
-?>
 
+for name,typeName in output_ports_map.iteritems():
+  ?>
+struct <!name!>OutStruct {
+    long id;
+    <!typeName!> data;
+};
+<?
+?>
 interface I<!capCompName!>
 {
 <?

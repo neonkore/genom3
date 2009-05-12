@@ -34,10 +34,13 @@ def service_cpp_args(service, className=""):
 def service_cpp_signature(service, className=""):
     # find the service output type
     if len(service.output) > 0:
-	outputType = comp.typeFromIdsName(service.output)
+	if service.type != ServiceType.Control:
+	  outputType = BaseType.longType
+	else:
+	  outputType = comp.typeFromIdsName(service.output)
     else:
 	outputType = BaseType.voidType
-    return MapTypeToCpp(outputType) + " " + service_cpp_args(service, className)
+    return MapTypeToCpp(outputType, True, True) + " " + service_cpp_args(service, className)
 
 def pointerTo(t):
   s = MapTypeToC(t,True)
@@ -110,9 +113,9 @@ def codel_call(codel, service=None):
   for type in codel.outTypes:
     proto += "& out_" + type + ", ";
   for port in codel.outPorts:
-    proto += "outport_" + port + ", "; 
+    proto += port + ", "; 
   for port in codel.inPorts:
-    proto += "inport_" + port + ", "; 
+    proto += port + ", "; 
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
@@ -125,13 +128,13 @@ def real_codel_call(codel, data_prefix="", service=None):
 	proto += " &out_" + service.output + ", "; 
 
   for type in codel.inTypes:
-    proto += "& " + data_prefix + "in_" + type + ", ";
+    proto += "& " + data_prefix + type + ", ";
   for type in codel.outTypes:
-    proto += "& " + data_prefix + "out_" + type + ", ";
+    proto += "& " + data_prefix + type + ", ";
   for port in codel.outPorts:
-    proto += data_prefix + "outport_" + port + "_data, "; 
+    proto += "&" + data_prefix + port + "_data, "; 
   for port in codel.inPorts:
-    proto += data_prefix + "inport_" + port + ", "; 
+    proto += "&" + data_prefix + port + ", "; 
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
@@ -161,3 +164,16 @@ def startStateForService(service):
     return upper(service.name) + "_START"
   else:
     return upper(service.name) + "_MAIN"
+
+def outputPortsMap():
+  m = {}
+  for s in servicesMap:
+    service = s.data()
+    if service.type != ServiceType.Exec or len(service.output) == 0:
+      continue
+    typeName = MapTypeToIdl(comp.typeFromIdsName(service.output))
+    m[service.name] = typeName
+  return m
+
+output_ports_map = outputPortsMap()
+

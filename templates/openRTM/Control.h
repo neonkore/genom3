@@ -2,6 +2,7 @@
 #ifndef <!upperCompName!>_CONTROL_H
 #define <!upperCompName!>_CONTROL_H
 
+#include <list>
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
@@ -14,12 +15,18 @@
 // stub headers
 #include "ControlTaskSkel.h"
 
-#include "<!comp.name()!>Struct.h"
+<?
+for s in comp.servicesMap():
+  if s.data().type == ServiceType.Exec:
+    print "class " + s.data().name + "Service;"
+?>
 
 using namespace RTC;
 
 // definition of th ids
 struct <!capCompName!>ControlData {
+  <!capCompName!>ControlData();
+  
   // members of the ids
 <?
 t = comp.IDSType.unalias()
@@ -33,8 +40,8 @@ if t.kind() == IdlKind.Struct:
 for port in inports:
     typeName = MapTypeToCpp(port.idlType)
     ?>
-  <!typeName!> m_<!port.name!>_data;
-  Outport<<!typeName!>> m_<!port.name!>;
+  <!typeName!> <!port.name!>_data;
+  InPort<<!typeName!>> <!port.name!>;
 <?
 ?>
 
@@ -43,25 +50,27 @@ for port in inports:
 for port in outports:
     typeName = MapTypeToCpp(port.idlType)
     ?>
-  <!typeName!> m_<!port.name!>_data;
-  Outport<<!typeName!>> m_<!port.name!>;
+  <!typeName!> <!port.name!>_data;
+  OutPort<<!typeName!>> <!port.name!>;
 <?
 ?>
   // Services' output ports
 <?
-for s in comp.servicesMap():
-  service = s.data()
-  if service.type != ServiceType.Exec:
-    continue
-  if len(service.output) == 0:
-    continue
-  typeName = MapTypeToCpp(comp.typeFromIdsName(service.output))
+for name,typeName in output_ports_map.iteritems():
   ?>
-/*  <!typeName!> m_<!service.name!>_data;*/
-  Outport<std::pair<<!typeName!>, int> > m_<!service.name!>_outport;
+  <!name!>OutStruct <!name!>_data;
+  OutPort<<!name!>OutStruct> <!name!>_outport;
 <?
 ?>
-  
+  // Activities list
+<?
+for s in comp.servicesMap():
+  service = s.data()
+  if service.type != ServiceType.Control:
+    ?>
+   std::list<<!service.name!>Service*> <!service.name!>Services;
+<?
+?>
 };
 
 class <!capCompName!>Control  : public RTC::DataFlowComponentBase
@@ -71,12 +80,9 @@ class <!capCompName!>Control  : public RTC::DataFlowComponentBase
   ~<!capCompName!>Control();
 
   <!capCompName!>ControlData* data() { return &m_data; }
-<?
-if initServiceNb != -1: ?>
+
   // The initialize action (on CREATED->ALIVE transition)
   virtual RTC::ReturnCode_t onInitialize();
-<?
-?>
 
   // The finalize action (on ALIVE->END transition)
   // virtual RTC::ReturnCode_t onFinalize();
@@ -115,22 +121,10 @@ if initServiceNb != -1: ?>
  protected:
   // CORBA Port declaration
   RTC::CorbaPort m_controlServicePort;
-<?
-for t in comp.tasksMap():
-    task = t.data()
-    ?>
-  RTC::CorbaPort m_<!task.name!>ConsumerServicePort;
-  RTC::CorbaPort m_<!task.name!>ProviderServicePort;<?
-?>
-  // Service declaration
-  <!capCompName!>ControlImpl m_controlService;
 
-  // Consumer declaration
-<?
-for t in comp.tasksMap():
-    task = t.data()
-    print "  RTC::CorbaConsumer<I" + capCompName + task.name + "> m_" + task.name + "ConsumerService;"
-?>
+  // Service declaration
+  <!capCompName!>ControlImpl m_service;
+
  private:
     <!capCompName!>ControlData m_data;
 };

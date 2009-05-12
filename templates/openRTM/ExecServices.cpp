@@ -1,6 +1,7 @@
 #include "ExecServices.h"
 
 #include "userCodels.h"
+#include "<!comp.name()!>Control.h"
 
 // forward declaration of user codels
 <?
@@ -18,25 +19,24 @@ for s in comp.servicesMap():
   if service.type == ServiceType.Control:
     continue
 
-  inputStr = ""
-  first = True
+  if len(service.output) > 0:
+    inputStr = ", CORBA::Long id"
+  else:
+    inputStr = ""
   for s in service.inputs():
-    if first:
-      first = False
-    else:
-      inputStr += ", "
+    inputStr += ", "
     t = comp.typeFromIdsName(s)
     inputStr += MapTypeToCpp(t) + " " + s
 
   ?>
 // <!service.name!>Service
 
-<!service.name!>Service::<!service.name!>Service(<!capCompName!>ControlData *data, <!inputStr!>)
+<!service.name!>Service::<!service.name!>Service(<!capCompName!>ControlData *data <!inputStr!>)
 : m_data(data)
 {
 <?
   for s in service.inputs():
-    print "  m_" + s + " = " + s + ";"
+    print "  in_" + s + " = " + s + ";"
   ?>
   m_status = <!startStateForService(service)!>;
 }
@@ -47,6 +47,8 @@ bool <!service.name!>Service::step()
   switch(m_status) {
 <?
   for c in service.codels():
+    if c.key() == "control":
+      continue
     ?>
     case <!upper(service.name)!>_<!upper(c.key())!>:
       m_status = <!c.key()!>();
@@ -73,7 +75,7 @@ int <!service.name!>Service::<!c.key()!>()
   // update ports
 <?
     for p in codel.outPorts:
-      print "  outport_" + p + "->write();"  
+      print "  m_data->" + p + ".write();"  
     ?>
   return res;
 }

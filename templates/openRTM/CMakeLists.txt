@@ -10,12 +10,19 @@ SET(<!upperCompName!>_SRC
       <!comp.name()!>Control.cpp 
       <!comp.name()!>ControlImpl.cpp  
       ExecServices.cpp
+      <!comp.name()!>UserCntrlTaskCodels.cpp<?
+for t in comp.tasksMap():
+  ?>
+      <!comp.name()!>User<!t.data().name!>Codels.cpp
+      <!comp.name()!><!t.data().name!>.cpp
+<?
+?>
 )
 
 ADD_LIBRARY(<!capCompName!>Control SHARED ${<!upperCompName!>_SRC})
-TARGET_LINK_LIBRARIES( ${RTM_LIBRARIES})
+TARGET_LINK_LIBRARIES(${RTM_LIBRARIES})
 
 SET(<!capCompName!>Comp_SRC <!comp.name()!>ControlComp.cpp)
 
 ADD_EXECUTABLE(<!comp.name()!>Comp ${<!capCompName!>Comp_SRC})
-TARGET_LINK_LIBRARIES(<!comp.name()!>Comp <!capCompName!>Control)
+TARGET_LINK_LIBRARIES(<!comp.name()!>Comp <!capCompName!>Control ${RTM_LIBRARIES})

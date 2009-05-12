@@ -2,6 +2,8 @@
 #ifndef <!upperCompName!>_EXECSERVICES_H
 #define <!upperCompName!>_EXECSERVICES_H
 
+#include "ControlTaskSkel.h"
+
 class <!capCompName!>ControlData;
 
 <?
@@ -18,26 +20,31 @@ for s in comp.servicesMap():
     else:
       statusStr += ", "
     statusStr += upper(service.name) + "_" + upper(c.key())
-  
-    inputStr = ""
-    first = True
+      
+    if len(service.output) > 0:
+      inputStr = ", CORBA::Long id"
+    else:
+      inputStr = ""
     for s in service.inputs():
-      if first:
-	first = False
-      else:
-	inputStr += ", "
+      inputStr += ", "
       t = comp.typeFromIdsName(s)
       inputStr += MapTypeToCpp(t) + " " + s
+
+    if len(service.output) > 0:
+      t = comp.typeFromIdsName(service.output)
+      outputType = MapTypeToCpp(t)
   ?>
 class <!service.name!>Service {
   public:
 //     enum Status { <!statusStr!>}
 
-    <!service.name!>Service(<!capCompName!>ControlData *data, <!inputStr!>);
+    <!service.name!>Service(<!capCompName!>ControlData *data <!inputStr!>);
 
+    int id() const { return m_id; }
     bool step();
-    demoState result() { return out_state; }
-
+<?
+  if len(service.output) > 0:?>
+    <!outputType!> result() { return out_<!service.output!>; }
 <?
   for c in service.codels():
     if c.key() == "control":
@@ -47,17 +54,15 @@ class <!service.name!>Service {
 
   private:
     int m_id;
-    Status m_status;
+    int m_status;
 <?
   for s in service.inputs():
     t = comp.typeFromIdsName(s)
     print "    " + MapTypeToCpp(t) + " in_" + s + ";"    
   if len(service.output) > 0:
-    t = comp.typeFromIdsName(service.output)
-    print "    " + MapTypeToCpp(t) + " out_" + service.output + ";"
+    print "    " + outputType + " out_" + service.output + ";"
   ?>
-
-    <!capCompName!>ControlData *m_data, 
+    <!capCompName!>ControlData *m_data;
 }; 
 
 <?

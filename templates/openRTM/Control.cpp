@@ -46,45 +46,43 @@ for port in outports:
 
   // Set CORBA Service Ports
   registerPort(m_controlServicePort);
-
-  // create tasks and connect them
-<?
-for t in comp.tasksMap():
-  task = t.data()
-
-  ?>  
-  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = new <!capCompName!><!task.name!>(&m_data);
-<?
-  if(task.period > 0):
-    ?>
-  PeriodicExecutionContext *exc = new PeriodicExecutionContext(m_<!capCompName!><!task.name!>, 1.0 / (<!task.period!> * 1000));
-<?
-  else:
-    ?>
-  ExtTriggerExecutionContext *exc = new ExtTriggerExecutionContext(m_<!capCompName!><!task.name!>);
-<?
-  ?>
-  exc->add(m_<!capCompName!><!task.name!>);
-  exc->activate_component(m_<!capCompName!><!task.name!>);
-<?
-?>
 }
 
 <!capCompName!>Control::~<!capCompName!>Control()
 {
 }
 
+RTC::ReturnCode_t <!capCompName!>Control::onInitialize()
+{
+    // create tasks and connect them
+<?
+for t in comp.tasksMap():
+  task = t.data()
+  ?>  
+  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = new <!capCompName!><!task.name!>(&m_data); 
+<?
+  if task.period > 0: ?>
+  PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new PeriodicExecutionContext(m_<!capCompName!><!task.name!>, 1.0 / (<!task.period!> * 1000));
+<? 
+  else: ?>
+  ExtTriggerExecutionContext *m_<!capCompName!><!task.name!>_exc = new ExtTriggerExecutionContext(m_<!capCompName!><!task.name!>);
+<?
+  ?>
+  m_<!capCompName!><!task.name!>_exc->add(m_<!capCompName!><!task.name!>);
+  m_<!capCompName!><!task.name!>_exc->activate_component(m_<!capCompName!><!task.name!>);
+  m_<!capCompName!><!task.name!>_exc->start();
+
 <?
 if initServiceNb != -1:
   ?>
-RTC::ReturnCode_t <!capCompName!>Control::onInitialize()
-{
+  // call user init function
   int res = <!codel_call(initService.codel("exec", initService))!>;
   if(res == ERROR)
       return RTC::RTC_ERROR;
-  return RTC::RTC_OK;
-}<?
+<?
 ?>
+  return RTC::RTC_OK;
+}
 
 /*
 RTC::ReturnCode_t <!capCompName!>Control::onFinalize()

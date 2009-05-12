@@ -2,7 +2,7 @@
 #ifndef <!upperCompName!>_CONTROL_IMPL_H
 #define <!upperCompName!>_CONTROL_IMPL_H
 
-#include "I<!comp.name()!>ControlSkel.h"
+#include "ControlTaskSkel.h"
 
 class <!capCompName!>ControlData;
  
@@ -10,11 +10,7 @@ class <!capCompName!>ControlData;
  * Example class implementing IDL interface MyService
  */
 class <!capCompName!>ControlImpl
- : public virtual POA_I<!capCompName!>Control,
-<?
-for t in comp.tasksMap():
-    print "public virtual POA_I" + capCompName + t.data().name + ","
-?>
+ : public virtual POA_I<!capCompName!>,
    public virtual PortableServer::RefCountServantBase
 {
  private:

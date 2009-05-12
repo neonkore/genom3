@@ -12,15 +12,9 @@
 // Service implementation headers
 #include "<!comp.name()!>ControlImpl.h"
 // stub headers
-#include "IControlTaskSkel.h"
+#include "ControlTaskSkel.h"
 
 #include "<!comp.name()!>Struct.h"
-
-<?
-for t in comp.tasksMap():
-    task = t.data()
-    print "#include \"I" + capCompName + task.name + "Skel.h\""
-?>
 
 using namespace RTC;
 

@@ -32,6 +32,7 @@
 #include "utils/idltype.h"
 #include "utils/cvisitor.h"
 #include "utils/idlvisitor.h"
+#include "utils/corbacppvisitor.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -40,7 +41,12 @@ using namespace boost::python;
 std::string MapTypeToC(IdlType::Ptr t, bool declOnly=false)
 {
 	return CVisitor::mapTypeToC(t, declOnly);
-} 
+}
+
+std::string MapTypeToCpp(IdlType::Ptr t, bool declOnly=false)
+{
+	return CorbaCppVisitor::mapTypeToCpp(t, declOnly);
+}  
 
 std::string MapTypeToIdl(IdlType::Ptr t)
 {
@@ -48,11 +54,12 @@ std::string MapTypeToIdl(IdlType::Ptr t)
 } 
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1,2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1,2)
 
 void export_idl()
 {
 	def("MapTypeToC", &MapTypeToC, MapTypeToCOverloads());
-	def("MapTypeToCpp", &MapTypeToC, MapTypeToCOverloads());
+	def("MapTypeToCpp", &MapTypeToCpp, MapTypeToCppOverloads());
 	def("MapTypeToIdl", &MapTypeToIdl);
 
 	class_<IdlType, IdlType::Ptr>("IdlType")

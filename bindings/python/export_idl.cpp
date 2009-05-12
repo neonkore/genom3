@@ -67,6 +67,7 @@ void export_idl()
 
 	object baseTypeClass = class_<BaseType, bases<IdlType> >("BaseType", init<IdlType::Kind>());
 	baseTypeClass.attr("voidType") = &BaseType::voidType;
+	baseTypeClass.attr("longType") = &BaseType::longType;
 
 	void (StructType::*AddMemberStr)(IdlType::Ptr,const std::string &) = &StructType::addMember;
 	object stringTypeClass = class_<StringType, bases<IdlType> >("StringType", init<int>())

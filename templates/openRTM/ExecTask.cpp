@@ -13,34 +13,10 @@ if currentTask.hasCodel("init"):
     print "int " + real_codel_signature(currentTask.codel("init")) + ";"
 ?>
 
-// Module specification
-static const char* <!comp.name()!><!currentTaskName!>_spec[] =
-  {
-    "implementation_id", "<!comp.name()!><!currentTaskName!>",
-    "type_name",         "<!comp.name()!><!currentTaskName!>",
-    "description",       "currentTask.description()",
-    "version",           "<!comp.version!>",
-    "vendor",            "AIST",
-    "category",          "Generic",
-    "activity_type",     "<!activityType!>",
-    "kind",              "<!comp.name()!>",
-    "max_instance",      "10",
-    "language",          "C++",
-    "lang_type",         "compile",
-    // Configuration variables
-    ""
-  };
-
 <!capCompName!><!currentTaskName!>::<!capCompName!><!currentTaskName!>(RTC::Manager* manager)
-  : RTC::DataFlowComponentBase(manager)
-    m_servicePort("<!capCompName!><!currentTaskName!>"),
+  : RTC::DataFlowComponentBase(manager),
     m_data(0)
 {
-  // Set service provider to Ports
-  m_servicePort.registerProvider("<!currentTaskName!>Service", "I<!capCompName!><!currentTaskName!> ", m_service);
-
-  // Set CORBA Service Ports
-  registerPort(m_servicePort);
 }
 
 <!capCompName!><!currentTaskName!>::~<!capCompName!><!currentTaskName!>()
@@ -80,11 +56,11 @@ for s in comp.servicesMap():
   if len(service.output) > 0:
     ?>
       // get the output result
-      m_service.m_<!service.name!>_outport->write(make_pair(it->result(), m_id))
+      m_data->m_<!service.name!>_outport->write(make_pair(it->result(), m_id))
 <?
   ?>
       delete *it;
-      m_service.m_<!service.name!>Services.remove(*it);
+      m_data->m_<!service.name!>Services.remove(*it);
     }
   }
 <?
@@ -153,20 +129,3 @@ RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onRateChanged(RTC::UniqueI
   return RTC::RTC_OK;
 }
 */
-
-
-extern "C"
-{
- 
-  void <!capCompName!><!currentTaskName!>Init(RTC::Manager* manager)
-  {
-    RTC::Properties profile(<!comp.name()!><!currentTaskName!>_spec);
-    manager->registerFactory(profile,
-                             RTC::Create<<!capCompName!><!currentTaskName!>>,
-                             RTC::Delete<<!capCompName!><!currentTaskName!>>);
-  }
-  
-};
-
-
-

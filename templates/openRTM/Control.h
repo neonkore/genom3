@@ -53,6 +53,21 @@ for port in outports:
   Outport<<!typeName!>> m_<!port.name!>;
 <?
 ?>
+  // Services' output ports
+<?
+for s in comp.servicesMap():
+  service = s.data()
+  if service.type != ServiceType.Exec:
+    continue
+  if len(service.output) == 0:
+    continue
+  typeName = MapTypeToCpp(comp.typeFromIdsName(service.output))
+  ?>
+/*  <!typeName!> m_<!service.name!>_data;*/
+  Outport<std::pair<<!typeName!>, int> > m_<!service.name!>_outport;
+<?
+?>
+  
 };
 
 class <!capCompName!>Control  : public RTC::DataFlowComponentBase

@@ -22,11 +22,7 @@ static const char* <!comp.name()!>Control_spec[] =
 <!capCompName!>Control::<!capCompName!>Control(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager)
-<?#  m_MyServicePort("MyService")
-for t in comp.tasksMap():
-    task = t.data()
-    print "    m_" + task.name + "ConsumerServicePort(\"" + capCompName + task.name + "Consumer\")," 
-?>    m_controlServicePort("<!capCompName!>Control"),
+    m_controlServicePort("<!capCompName!>Control"),
     m_service(&m_data)
 {
   // Set InPort buffers
@@ -47,37 +43,29 @@ for port in outports:
 ?>
   // Set service provider to Ports
   m_controlServicePort.registerProvider("controlService", "I<!capCompName!>Control", m_controlService);
-<?
-for t in comp.tasksMap():
-    task = t.data()
-    print "  m_" + task.name + "ProviderServicePort.registerProvider(\"controlService\","
-    print "    \"I" + capCompName + task.name + "\", m_controlService);"
-?>
-  // Set service consumers to Ports
-<?
-for t in comp.tasksMap():
-    task = t.data()
-    print "  m_" + task.name + "ConsumerServicePort.registerConsumer(\"" + task.name + "ConsumerService\","
-    print "    \"I" + capCompName + task.name + "\", m_" + task.name + "ConsumerService);"
-?>
 
   // Set CORBA Service Ports
-  registerPort(m_controlServicePort);<?
-for t in comp.tasksMap():
-    task = t.data()
-    ?>
-  registerPort(m_<!task.name!>ConsumerServicePort);<?
-?>
-
+  registerPort(m_controlServicePort);
 
   // create tasks and connect them
 <?
 for t in comp.tasksMap():
   task = t.data()
+
   ?>  
-  RtcBase *base = manager->createComponent("<!capCompName!><!task.name!>");
-  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = dynamic_cast<<!capCompName!><!task.name!>*>(base);
-  m_<!capCompName!><!task.name!>->setData(&m_data);
+  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = new <!capCompName!><!task.name!>(&m_data);
+<?
+  if(task.period > 0):
+    ?>
+  PeriodicExecutionContext *exc = new PeriodicExecutionContext(m_<!capCompName!><!task.name!>, 1.0 / (<!task.period!> * 1000));
+<?
+  else:
+    ?>
+  ExtTriggerExecutionContext *exc = new ExtTriggerExecutionContext(m_<!capCompName!><!task.name!>);
+<?
+  ?>
+  exc->add(m_<!capCompName!><!task.name!>);
+  exc->activate_component(m_<!capCompName!><!task.name!>);
 <?
 ?>
 }

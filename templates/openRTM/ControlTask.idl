@@ -5,11 +5,9 @@ for t in comp.typesVect():
 	print MapTypeToIdl(t) + ";"
 ?>
 
-interface I<!capCompName!>Control
+interface I<!capCompName!>
 {
 <?
 for s in servicesMap:
-    service = s.data()
-    if service.type == ServiceType.Control:
-	print service_idl_signature(service)
+  print "   " + service_idl_signature(s.data())
 ?>};

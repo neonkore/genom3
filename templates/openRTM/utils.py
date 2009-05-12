@@ -9,7 +9,7 @@ upperCompName = upper(comp.name())
 def service_idl_signature(service):
     # find the service output type
     if len(service.output) > 0:
-	outputType = comp.typeFromIdsName(service.output)
+	outputType = BaseType.longType
     else:
 	outputType = BaseType.voidType
 

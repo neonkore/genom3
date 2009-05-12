@@ -7,13 +7,6 @@ currentTask = comp.task(currentTaskName)
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
-#include <rtm/CorbaPort.h>
-
-// Service implementation headers
-#include "<!comp.name()!><!task.name!>Impl.h"
-
-// stub headers
-#include "I<!capCompName!><!task.name!>Skel.h"
 
 using namespace RTC;
 
@@ -65,28 +58,6 @@ if currentTask.hasCodel("init"): ?>
   // The action that is invoked when execution context's rate is changed
   // virtual RTC::ReturnCode_t onRateChanged(RTC::UniqueId ec_id);
 
-
- protected:
-  // Services' output ports
-<?
-for s in comp.servicesMap():
-  service = s.data()
-  if service.type != ServiceType.Exec or service.taskName != currentTaskName:
-    continue
-  if len(service.output) == 0:
-    continue
-  typeName = MapTypeToCpp(comp.typeFromIdsName(service.output))
-  ?>
-/*  <!typeName!> m_<!service.name!>_data;*/
-  Outport<std::pair<<!typeName!>, int> > m_<!service.name!>_outport;
-<?
-?>
-  // CORBA Port declaration
-  RTC::CorbaPort m_servicePort;
-
-  // Service declaration
-  <!capCompName!><!currentTaskName!>Impl m_service;
-  
  private:
   <!capCompName!>ControlData *m_data;
 };

@@ -9,8 +9,8 @@ for t in comp.tasksMap():
 // Module specification
 static const char* <!comp.name()!>Control_spec[] =
   {
-    "implementation_id", "<!comp.name()!>Control",
-    "type_name",         "<!comp.name()!>Control",
+    "implementation_id", "<!capCompName!>Control",
+    "type_name",         "<!capCompName!>Control",
     "description",       "comp.desccription()",
     "version",           "<!comp.version!>",
     "vendor",            "AIST",
@@ -64,7 +64,7 @@ for name,typeName in output_ports_map.iteritems():
 <?
 ?>
   // Set service provider to Ports
-  m_controlServicePort.registerProvider("controlService", "I<!capCompName!>", m_service);
+  m_controlServicePort.registerProvider("<!capCompName!>Service", "I<!capCompName!>", m_service);
 
   // Set CORBA Service Ports
   registerPort(m_controlServicePort);
@@ -86,11 +86,11 @@ for t in comp.tasksMap():
   RTObject_var rtobj = m_<!capCompName!><!task.name!>->getObjRef();
 <?
   if task.period > 0: ?>
-  PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new PeriodicExecutionContext();
+  PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new PeriodicExecutionContext(::DataFlowComponent::_narrow(rtobj));
   m_<!capCompName!><!task.name!>_exc->set_rate(1.0 / (<!task.period!> * 1000));
 <? 
   else: ?>
-  ExtTriggerExecutionContext *m_<!capCompName!><!task.name!>_exc = new ExtTriggerExecutionContext(rtobj);
+  ExtTriggerExecutionContext *m_<!capCompName!><!task.name!>_exc = new ExtTriggerExecutionContext(::DataFlowComponent::_narrow(rtobj));
 <?
   ?>
   m_<!capCompName!><!task.name!>_exc->add(rtobj);

@@ -65,7 +65,7 @@ for s in comp.servicesMap():
 <?
   ?>
       delete *it;
-      m_data-><!service.name!>Services.remove(*it);
+      it = m_data-><!service.name!>Services.erase(it);
     }
   }
 <?

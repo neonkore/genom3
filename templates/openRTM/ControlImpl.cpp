@@ -14,7 +14,7 @@ for s in servicesMap:
 ?>
 
 <!capCompName!>ControlImpl::<!capCompName!>ControlImpl(<!capCompName!>ControlData *data)
-: m_data(0)
+: m_data(data)
 {}
 
 

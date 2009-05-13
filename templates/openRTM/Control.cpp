@@ -37,6 +37,27 @@ for name,type in output_ports_map.iteritems():
 : <!portInit[:-2]!>
 {}
 
+void <!capCompName!>ControlData::killAllServices()
+{
+<?
+for s in servicesMap:
+  service = s.data()
+  if service.type == ServiceType.Exec:
+    print "  kill" + service.name + "Services();"
+?>}
+
+<?
+for s in servicesMap:
+  service = s.data()
+  if service.type == ServiceType.Exec:
+    ?>
+void <!capCompName!>ControlData::kill<!service.name!>Services()
+{
+  <!service.name!>Services.clear();
+}
+<?
+?>
+
 <!capCompName!>Control::<!capCompName!>Control(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
@@ -87,7 +108,7 @@ for t in comp.tasksMap():
 <?
   if task.period > 0: ?>
   PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new PeriodicExecutionContext(::DataFlowComponent::_narrow(rtobj));
-  m_<!capCompName!><!task.name!>_exc->set_rate(1.0 / (<!task.period!> * 1000));
+  m_<!capCompName!><!task.name!>_exc->set_rate(1000 / <!task.period!>);
 <? 
   else: ?>
   ExtTriggerExecutionContext *m_<!capCompName!><!task.name!>_exc = new ExtTriggerExecutionContext(::DataFlowComponent::_narrow(rtobj));

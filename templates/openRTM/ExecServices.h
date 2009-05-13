@@ -2,6 +2,8 @@
 #ifndef <!upperCompName!>_EXECSERVICES_H
 #define <!upperCompName!>_EXECSERVICES_H
 
+#include <list>
+#include <boost/shared_ptr.hpp>
 #include "ControlTaskSkel.h"
 
 class <!capCompName!>ControlData;
@@ -37,6 +39,8 @@ for s in comp.servicesMap():
 class <!service.name!>Service {
   public:
 //     enum Status { <!statusStr!>}
+    typedef boost::shared_ptr<<!service.name!>Service> Ptr;
+    typedef std::list<Ptr> List;
 
     <!service.name!>Service(<!capCompName!>ControlData *data <!inputStr!>);
 

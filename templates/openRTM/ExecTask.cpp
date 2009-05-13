@@ -51,7 +51,7 @@ for s in comp.servicesMap():
   if service.type != ServiceType.Exec or service.taskName != currentTaskName:
     continue
   ?>
-  for(std::list<<!service.name!>Service*>::iterator it = m_data-><!service.name!>Services.begin();
+  for(<!service.name!>Service::List::iterator it = m_data-><!service.name!>Services.begin();
 	it != m_data-><!service.name!>Services.end();) {
     if(!(*it)->step()) { // delete the service
 <?
@@ -64,7 +64,6 @@ for s in comp.servicesMap():
       m_data-><!service.name!>_outport.write(s);
 <?
   ?>
-      delete *it;
       it = m_data-><!service.name!>Services.erase(it);
     } else
       ++it;

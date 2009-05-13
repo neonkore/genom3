@@ -2,7 +2,6 @@
 #ifndef <!upperCompName!>_CONTROL_H
 #define <!upperCompName!>_CONTROL_H
 
-#include <list>
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
@@ -15,17 +14,20 @@
 // stub headers
 #include "ControlTaskSkel.h"
 
-<?
-for s in comp.servicesMap():
-  if s.data().type == ServiceType.Exec:
-    print "class " + s.data().name + "Service;"
-?>
+#include "ExecServices.h"
 
 using namespace RTC;
 
 // definition of th ids
 struct <!capCompName!>ControlData {
   <!capCompName!>ControlData();
+
+  void killAllServices();
+<?
+for s in servicesMap:
+  if s.data().type == ServiceType.Exec:
+    print "  void kill" + s.data().name + "Services();"
+?>
   
   // members of the ids
 <?
@@ -68,7 +70,7 @@ for s in comp.servicesMap():
   service = s.data()
   if service.type != ServiceType.Control:
     ?>
-   std::list<<!service.name!>Service*> <!service.name!>Services;
+   <!service.name!>Service::List <!service.name!>Services;
 <?
 ?>
 };

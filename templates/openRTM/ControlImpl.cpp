@@ -34,7 +34,16 @@ for s in servicesMap:
   int res = <!real_codel_call(service.codel("control"), "", service)!>;
   if(res < 0) //error
       return;
+
+  // kill existing incompatible services
 <?
+    if len(service.incompatibleServices()) > 0 and service.incompatibleServices()[0] != "none":
+      if service.incompatibleServices()[0] == "all":
+	print "  m_data->killAllServices();"
+      else:
+	for incomp in service.incompatibleServices():
+	  print "  m_data->kill" + incomp + "Services();" 
+
     for s in service.inputs():
 	print "  m_data->" + s + " = in_" + s + ";" 
     if len (service.output) > 0:
@@ -72,8 +81,18 @@ for s in comp.servicesMap():
       <!returnStr!>
 <?
     ?>
+  // kill existing incompatible services
+<?
+    if len(service.incompatibleServices()) > 0 and service.incompatibleServices()[0] != "none":
+      if service.incompatibleServices()[0] == "all":
+	print "  m_data->killAllServices();"
+      else:
+	for incomp in service.incompatibleServices():
+	  print "  m_data->kill" + incomp + "Services();" 
+    ?>
+
   // create the activity
-  <!service.name!>Service *s = new <!service.name!>Service(m_data <!args!>);
+  <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data <!args!>));
   m_data-><!service.name!>Services.push_back(s);
 <?
     if len(service.output) > 0: ?>

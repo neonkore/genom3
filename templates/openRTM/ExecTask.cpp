@@ -52,7 +52,7 @@ for s in comp.servicesMap():
     continue
   ?>
   for(std::list<<!service.name!>Service*>::iterator it = m_data-><!service.name!>Services.begin();
-	it != m_data-><!service.name!>Services.end(); ++it) {
+	it != m_data-><!service.name!>Services.end();) {
     if(!(*it)->step()) { // delete the service
 <?
   if len(service.output) > 0:
@@ -66,7 +66,8 @@ for s in comp.servicesMap():
   ?>
       delete *it;
       it = m_data-><!service.name!>Services.erase(it);
-    }
+    } else
+      ++it;
   }
 <?
 ?>

@@ -50,6 +50,7 @@ class TemplateInterpreter
 
 		bool parseInfoFile(const std::string &filename);
 
+		void setPrintGeneratedFile(bool b) { m_printGeneratedFile = b; }
 		void setDebug(bool verbose);
 		/** Error handling with associated line number. This can be modified to
 		 * output the error e.g. to a dialog box. */
@@ -108,6 +109,7 @@ class TemplateInterpreter
 		bool m_verboseLexing;
 		/// enable debug output in the bison parser
 		bool m_verboseParsing;
+		bool m_printGeneratedFile;
 		State m_state;
 };
 

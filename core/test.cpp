@@ -54,12 +54,13 @@ int main(int argc, char* argv[])
 
 	TemplateInterpreter ti;
 	ti.setInterpreter(i);
+	ti.setPrintGeneratedFile(true);
+		ti.setDebug(true);
 
 	Driver d;
 	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
 		cout << "Error parsing gen file " << endl;
 
-// 	ti.setDebug(true);
 	ti.setComponent(&(d.component()));
 // 	i->exportVar("currentTaskName", "MotionTask");
  	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");

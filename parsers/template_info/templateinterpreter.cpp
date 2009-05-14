@@ -116,8 +116,6 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
 {
 	ofstream out(outfile.c_str());
 	string s;
-// 	auto_ptr<char> tmpFile(new char[L_tmpnam]);
-// 	tmpnam(tmpFile.get());
 
 	if (!out.is_open()) {
 		cerr << "Error opening file for writing: " << outfile << endl;
@@ -161,7 +159,7 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
 		idx = pos + 2;
 	}
  
-	if(m_verboseParsing)
+	if(m_printGeneratedFile)
 		cout << s << endl;
  	out << m_interpreter->interpret(s);
 }

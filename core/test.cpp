@@ -43,19 +43,24 @@ int main(int argc, char* argv[])
 {
 	Interpreter *i;
 
-	if (argc > 1) {
-		string s(argv[1]);
-		if (s == "python")
-			i = PythonInterpreter::getInstance();
-		else
-			i = TclInterpreter::getInstance();
-	} else
+	if (argc < 4) {
+		cout << "Not enough arguments " << endl;
+		exit(0);
+	}
+
+	string s(argv[1]);
+	if (s == "python")
+		i = PythonInterpreter::getInstance();
+	else
 		i = TclInterpreter::getInstance();
+
+	string infile(argv[2]);
+	string outfile(argv[3]);
 
 	TemplateInterpreter ti;
 	ti.setInterpreter(i);
 	ti.setPrintGeneratedFile(true);
-		ti.setDebug(true);
+	ti.setDebug(true);
 
 	Driver d;
 	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
@@ -64,8 +69,7 @@ int main(int argc, char* argv[])
 	ti.setComponent(&(d.component()));
 // 	i->exportVar("currentTaskName", "MotionTask");
  	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
- 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/tcl/tclClient.tcl",
- 	             "/home/ccpasteur/work/git/g3nom/templates/test/server/tcl/$$Client.tcl");
+ 	ti.interpretFile(infile, outfile);
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

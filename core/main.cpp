@@ -29,7 +29,6 @@
 
 #include <string>
 #include <iostream>
-// #include <libgen.h>
 
 #include "parsers/template_info/templateinterpreter.h"
 #include "bindings/tcl/tclinterpreter.h"
@@ -41,30 +40,72 @@ using namespace G3nom;
 
 int main(int argc, char* argv[])
 {
-	Interpreter *i;
+	Interpreter *i = 0;
 
-	if (argc > 1) {
-		string s(argv[1]);
-		if (s == "python")
-			i = PythonInterpreter::getInstance();
-		else
-			i = TclInterpreter::getInstance();
-	} else
-		i = TclInterpreter::getInstance();
+	string usage_str(
+		"Usage:\n"
+		"genom [-d] [-i interpreter_name] [-t template] --onefile out_dir file\n"
+		"genom [-d] [-i interpreter_name] [-t template] out_dir file\n"
+		"with\n"
+		"-h Display this help message\n"
+		"-d Display debug information\n");
+
+	string templatesDir("/home/ccpasteur/work/git/g3nom/templates/");
+	string templ("genom_legacy");
+
+	bool oneFileMode = false;
+	bool debug = false;
+
+	int idx = 1;
+	while ((idx < argc) && (argv[idx][0]=='-')) {
+		string sw = argv[idx];
+		if(sw == "-i") {
+			string name = argv[++idx];
+			if(name == "tcl")
+				i  = TclInterpreter::getInstance();
+			else if(name == "python")
+				i = PythonInterpreter::getInstance();
+			else {
+				cout << "Unknown interpreter: " << name << endl;
+				exit(1);
+			}
+		} if(sw == "-t") {
+			templ = argv[++idx];
+		}
+		else if(sw == "--onefile") {
+			oneFileMode = true;
+		} else if (sw == "-d") {
+			debug = true;
+		}else if(sw == "-u" || sw == "--help" || sw == "-h") {
+			cout << usage_str << endl;
+			exit(0);
+		}
+		idx++;
+	}
+
+	cout << "n rags: " << argc << " idx: " << idx << endl;
+	if(idx + 1 >= argc) { // not enough args
+		cout << "Not enough arguments" << endl;
+		cout << usage_str << endl;
+		exit(1);
+	}
 
 	TemplateInterpreter ti;
+	if(!i)
+		i = PythonInterpreter::getInstance();
 	ti.setInterpreter(i);
+	string sourceDir = templatesDir + templ + "/";
+	string outputDir = argv[idx++];
 
 	Driver d;
-	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
-		cout << "Error parsing gen file " << endl;
-
-// 	ti.setDebug(true);
+	if (!d.parseFile(argv[idx]))
+		cout << "Error parsing .gnm file: " << argv[idx] << endl;
 	ti.setComponent(&(d.component()));
-// 	i->exportVar("currentTaskName", "MotionTask");
- 	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
- 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/tcl/tclClient.tcl",
- 	             "/home/ccpasteur/work/git/g3nom/templates/test/server/tcl/$$Client.tcl");
+
+	ti.setSourceDirectory(sourceDir);
+	ti.setOutputDirectory(outputDir);
+	
+	ti.parseInfoFile(sourceDir + "template.info");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

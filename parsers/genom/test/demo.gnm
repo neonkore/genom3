@@ -27,7 +27,7 @@ component demo {
 /* Control request: modify the default speed */
 service SetSpeed {
    type:                 control;               /* request's type */
-   input:                speedRef;       /* input: speed chosen */
+   input:                speedRef = DEMO_SLOW;       /* input: speed chosen */
    codel control: demoSetSpeedCntrl();     /* codel for validity checks */ 
    errors:             INVALID_SPEED;         /*  possible error messages */
 };
@@ -46,7 +46,7 @@ service Stop {
 /* Execution request: translate of a given distance */
 service Goto {
    type:                  exec;              /* request's type */
-   input:                 distRef; /* input: distance */
+   input:                 distRef = {3, 10.3, {1, DEMO_SLOW}}; /* input: distance */
    codel control:         demoGotoCntrl();     /* codel for validity checks */
    errors:          TOO_FAR_AWAY;     /*  possible error messages */
    codel start:           demoGotoStart();     /* initialization codel */

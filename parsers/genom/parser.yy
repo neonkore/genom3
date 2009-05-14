@@ -59,6 +59,7 @@ struct variant_type {
     G3nom::Idl::IdlType::Ptr		typeVal;
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
     G3nom::Idl::Declarator::Ptr		declaratorVal;
+    G3nom::Idl::Literal		literalVal;
 };
 #define YYSTYPE variant_type
 
@@ -124,10 +125,11 @@ struct variant_type {
 %token			SERVICE		"service"
 %token			CODEL		"codel"
 
-%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN
+%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL
 
 %token IN OUT INPORT OUTPORT
 // type tokens
+%token TRUE FALSE
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 %token TYPEDEF UNSIGNED OBJECT
@@ -137,15 +139,17 @@ struct variant_type {
 %token DOUBLELIT	"double"
 %token STRINGLIT	"string literal"
 %token IDENTIFIER	"identifier"*/
-%token <charVal>	SPECIAL_CHAR	"char"
+/* %token <charVal>	SPECIAL_CHAR	"char" */
+%token <charVal>	CHARLIT		"char"
 %token <integerVal> 	INTEGERLIT	"integer"
 %token <doubleVal> 	DOUBLELIT	"double"
 %token <stringVal> 	STRINGLIT	"string literal"
 %token <stringVal> 	IDENTIFIER	"identifier"
 
-/* %type <portVal>		port_decl */
-/* %type <taskVal>		task_decl */
-/* %type <serviceVal>	service_decl */
+%type <literalVal>		literal;
+%type <literalVal>		literals;
+%type <literalVal>		boolean_literal;
+
 %type <stringVal>		identifier_list
 %type <stringVal>		identifiers
 %type <codelVal>		codel_prototype
@@ -393,6 +397,16 @@ service_field:
 {
     driver.currentService()->addCodel($2, $4);
 }
+| IDENTIFIER COLON IDENTIFIER EQUAL literal
+{
+    Service::Ptr s = driver.currentService();
+    if($1 == "input") {
+	s->addInput($3, $5);
+    } else {
+	  error(yyloc, std::string("Unknown service field (or wrong number of arguments): ") + $1);
+	  YYERROR;
+    }
+}
 | IDENTIFIER COLON IDENTIFIER identifier_list
 {
     Service::Ptr s = driver.currentService();
@@ -514,7 +528,64 @@ codel_field:
     driver.currentCodel()->addOutPort($2);
 };
 
-/*** Type Declaration ***/
+/*** IDL Literal Declaration ***/
+
+literal:
+  INTEGERLIT
+{
+    $$ = Literal($1);
+}
+| DOUBLELIT
+{
+    $$ = Literal($1);
+}
+| STRINGLIT
+{
+    $$ = Literal("\"" + $1 + "\"");
+}
+| CHARLIT
+{
+    $$ = Literal($1);
+}
+| boolean_literal
+{
+    $$ = $1;
+}
+| IDENTIFIER 
+{
+    /*enum value*/
+    $$ = Literal($1);
+}
+| LBRACE literals RBRACE
+{
+    $$ = $2;
+}
+;
+
+boolean_literal:
+  TRUE
+{
+    $$ = Literal(true);
+}
+| FALSE
+{
+    $$ = Literal(false);
+};
+
+literals:
+  literal
+{
+    Literal l;
+    l.addMember($1);
+    $$ = l;
+}
+| literals COMMA literal
+{
+    $1.addMember($3);
+    $$ = $1;
+}
+
+/*** IDL Type Declaration ***/
 
 type_decl:
 TYPEDEF type_spec declarators

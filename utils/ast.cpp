@@ -29,6 +29,7 @@
 #include "ast.h"
 
 #include <iostream>
+#include <sstream>
 
 #include "dumptypes.h"
 
@@ -52,7 +53,7 @@ void Component::debug()
 	cout << "\tLanguage (plugin) : " << pluginLanguage << endl;
 	cout << "\tIDS Struct: " << endl;
 	if (IDSType)
-		DumpType::dumpType(IDSType);
+		cout << DumpType::dumpType(IDSType);
 	cout << endl;
 
 	cout << endl << "Services: " << services.size() << endl;
@@ -83,7 +84,7 @@ void Component::debug()
 	IdlType::Vector::const_iterator it4;
 	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
 		cout << "* ";
-		DumpType::dumpType(*it4);
+		cout << DumpType::dumpType(*it4);
 		cout << endl;
 	}
 }
@@ -301,9 +302,17 @@ void Service::debug()
 	cout << "doc: " << doc << endl;
 	cout << "Parent task: " << taskName << endl;
 
+	cout << "Inputs: ";
+	for(vector<string>::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
+		cout << *it;
+		if(m_inputDefaultArgs.find(*it) != m_inputDefaultArgs.end())
+			cout << " = " << inputDefaultArg(*it).print() << ", ";
+	}
+
+	cout << endl << "Output: " << output << endl;
+
 	cout << "Error messages: ";
-	vector<string>::const_iterator it2 = m_errorMessages.begin();
-	for(; it2 != m_errorMessages.end(); ++it2)
+	for(vector<string>::const_iterator it2 = m_errorMessages.begin(); it2 != m_errorMessages.end(); ++it2)
 		cout << *it2 << " ";
 	cout << endl;
 
@@ -326,9 +335,19 @@ void Service::debug()
 	}
 }
 
-void Service::addInput(const std::string &s)
+void Service::addInput(const std::string &s, const Idl::Literal &defaultValue)
 {
 	m_inputs.push_back(s);
+	if(!defaultValue.isEmpty())
+		m_inputDefaultArgs[s] = defaultValue;
+}
+
+Idl::Literal Service::inputDefaultArg(const std::string &n)
+{
+	Literal::Map::iterator it = m_inputDefaultArgs.find(n);
+	if(it != m_inputDefaultArgs.end())
+		return it->second;
+	return Literal();
 }
 
 void Service::addCodel(const std::string &name, Codel::Ptr c)
@@ -402,5 +421,33 @@ void Codel::addOutPort(const std::string &t)
 	outPorts.push_back(t);
 }
 
+/******** Literal ***************/
+
+std::string Literal::print() const
+{
+	string s;
+	stringstream ss;
+	if(m_kind == Struct) {
+		ss << "{";
+		bool first = true;
+		for(Literal::Vector::const_iterator it = m_members.begin(); it != m_members.end(); ++it) {
+			if(first)
+				first = false;
+			else
+				ss << ", ";
+			ss << it->print();
+		}
+		ss << "}";
+	} else
+		ss << m_value;
+	return ss.str();
+}
+
+void Literal::addMember(const Literal &l)
+{
+	m_kind = Struct;
+	m_isEmpty = false;
+	m_members.push_back(l);
+}
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

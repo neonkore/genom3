@@ -49,6 +49,7 @@ fracconst				([0-9]*\.[0-9]+)|([0-9]+\.)
 exppart					[eE][-+]?[0-9]+
 floatsuffix				[fFlL]
 stringtext				([^\"])|(\\.)
+chartext				([^\'])|(\\.)
 
 %s IN_COMMENT
 
@@ -104,7 +105,7 @@ stringtext				([^\"])|(\\.)
 ")"			{ return token::RPAREN; }
 "<"			{ return token::LESS_THAN; }
 ">"			{ return token::GREATER_THAN; }
-
+"="			{ return token::EQUAL; }
 
  /* type related keywords */
 "unsigned"		{ return token::UNSIGNED; }
@@ -132,6 +133,8 @@ stringtext				([^\"])|(\\.)
 "struct"		{ return token::STRUCT; }
 "sequence"		{ return token::SEQUENCE; }
 "typedef"		{ return token::TYPEDEF; }
+"TRUE"			{ return token::TRUE; }
+"FALSE"			{ return token::FALSE; }
 
  /*other keywords  */
 "component"		{ return token::COMPONENT; }
@@ -171,6 +174,12 @@ stringtext				([^\"])|(\\.)
    char *end;
    yylval->doubleVal = strtod(yytext, &end);
    return token::DOUBLELIT;
+}
+
+ /* char literals */
+"'"{chartext}*"'" {
+   yylval->charVal = yytext[1];
+   return token::CHARLIT;
 }
 
  /* string literals */

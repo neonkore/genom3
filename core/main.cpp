@@ -29,6 +29,7 @@
 
 #include <string>
 #include <iostream>
+#include "libgen.h"
 
 #include "parsers/template_info/templateinterpreter.h"
 #include "bindings/tcl/tclinterpreter.h"
@@ -56,6 +57,8 @@ int main(int argc, char* argv[])
 	bool oneFileMode = false;
 	bool debug = false;
 
+	string outputDir;
+
 	int idx = 1;
 	while ((idx < argc) && (argv[idx][0]=='-')) {
 		string sw = argv[idx];
@@ -69,14 +72,16 @@ int main(int argc, char* argv[])
 				cout << "Unknown interpreter: " << name << endl;
 				exit(1);
 			}
-		} if(sw == "-t") {
+		} else if(sw == "-o") {
+			outputDir = argv[++idx];
+		} else if(sw == "-t") {
 			templ = argv[++idx];
 		}
 		else if(sw == "--onefile") {
 			oneFileMode = true;
 		} else if (sw == "-d") {
 			debug = true;
-		}else if(sw == "-u" || sw == "--help" || sw == "-h") {
+		} else if(sw == "-u" || sw == "--help" || sw == "-h") {
 			cout << usage_str << endl;
 			exit(0);
 		}
@@ -84,7 +89,7 @@ int main(int argc, char* argv[])
 	}
 
 	cout << "n rags: " << argc << " idx: " << idx << endl;
-	if(idx + 1 >= argc) { // not enough args
+	if(idx >= argc) { // not enough args
 		cout << "Not enough arguments" << endl;
 		cout << usage_str << endl;
 		exit(1);
@@ -94,13 +99,16 @@ int main(int argc, char* argv[])
 	if(!i)
 		i = PythonInterpreter::getInstance();
 	ti.setInterpreter(i);
+	ti.setPrintGeneratedFile(false);
 	string sourceDir = templatesDir + templ + "/";
-	string outputDir = argv[idx++];
 
 	Driver d;
 	if (!d.parseFile(argv[idx]))
 		cout << "Error parsing .gnm file: " << argv[idx] << endl;
 	ti.setComponent(&(d.component()));
+
+	if(outputDir.empty())
+		outputDir = dirname(argv[idx]);
 
 	ti.setSourceDirectory(sourceDir);
 	ti.setOutputDirectory(outputDir);

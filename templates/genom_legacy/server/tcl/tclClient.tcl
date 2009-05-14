@@ -30,14 +30,18 @@ def inputFormat(type, name):
   return str
 
 def outputFormat(type, name):
-  str = ""
+  if type.kind() == IdlKind.String:
+    str = "{1} " # dimension
+  else:
+    str = "{} "
+
   if type.kind() == IdlKind.Struct:
-    str += "{ "
+    str += "{ " + name + " "
     for m in type.asStructType().members():
-      str += outputFormat(m.data(), m.key()) + " { } "
+      str += outputFormat(m.data(), m.key()) + " "
     str += "}"
   else:
-    str = name
+    str += name
   return str
 ?>
 
@@ -82,6 +86,8 @@ if { [lsearch [interp hidden] <!comp.name()!>Install] >= 0 } {
 serviceList = ""
 for s in servicesMap:
   serviceList += "\"" + s.data().name + "\" "
+for port in outports:
+  serviceList += "\"" + port.name + "PosterRead\" " 
 ?>
 proc ::<!comp.name()!>Install { name } {
     foreach rqst { <!serviceList!> } {
@@ -173,7 +179,7 @@ proc ::<!comp.name()!><!port.name!>PosterRead { name args } {
 
 
 proc ::<!comp.name()!><!port.name!>PosterFormatOutput { list } {
-    set format { status {} <!outputFormat(port.idlType.unalias(), "")!>}
+    set format { {} status <!outputFormat(port.idlType.unalias(), port.name)!>}
 
     set out ""
     interp invokehidden {} rqstFormatOuput $format out list ""

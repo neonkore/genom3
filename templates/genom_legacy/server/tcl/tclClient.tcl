@@ -1,3 +1,45 @@
+<?
+def inputFormat(type, name):
+  str = "    lappend format [list "
+  defValue = ""
+  if type.kind() == IdlKind.Short or type.kind() == IdlKind.Char:
+      str += "short"
+      defValue = "0"
+  elif type.kind() == IdlKind.Long:
+      str += "int"
+      defValue = "0"
+  elif type.kind() == IdlKind.LongLong:
+      str += "wide"
+      defValue = "0"
+  elif type.kind() == IdlKind.String: 
+      str += "string"
+      defValue = "\"\""
+  elif type.kind() == IdlKind.Float: 
+      str += "float"
+      defValue = "0.0"
+  elif type.kind() == IdlKind.Double: 
+      str += "double"
+      defValue = "0.0"
+  elif type.kind() == IdlKind.Enum: 
+      defValue = "\"\""
+      str += "{"
+      for en in type.asEnumType().enumerators():
+	str += "\"" + en + "\" "
+      str += "}"
+  str += " \"" + name + "\" " + defValue + " ]"
+  return str
+
+def outputFormat(type, name):
+  str = ""
+  if type.kind() == IdlKind.Struct:
+    str += "{ "
+    for m in type.asStructType().members():
+      str += outputFormat(m.data(), m.key()) + " { } "
+    str += "}"
+  else:
+    str = name
+  return str
+?>
 
 #
 # Copyright (c) 1999-2003 LAAS/CNRS
@@ -32,15 +74,114 @@
 # Manual editing not recommended. Changes will be overridden.
 #
 
-if { [lsearch [interp hidden] $module$Install] >= 0 } {
-    interp expose {} $module$Install
+if { [lsearch [interp hidden] <!comp.name()!>Install] >= 0 } {
+    interp expose {} <!comp.name()!>Install
 }
 
-proc ::$module$Install { name } {
-    foreach rqst { $rqstList$ } {
-	interp alias {} ${name}::$rqst {} interp invoke {} $module$$rqst $name
+<?
+serviceList = ""
+for s in servicesMap:
+  serviceList += "\"" + s.data().name + "\" "
+?>
+proc ::<!comp.name()!>Install { name } {
+    foreach rqst { <!serviceList!> } {
+	interp alias {} ${name}::$rqst {} interp invoke {} <!comp.name()!>$rqst $name
     }
 }
 
-interp hide {} $module$Install
+interp hide {} <!comp.name()!>Install
 
+<?
+for s in servicesMap:
+  service = s.data()
+  flatList = []
+  if len(service.inputs()) == 0:
+      inputFlag = False
+  else:
+      inputFlag = True
+      inputName = service.inputs()[0]
+      inputType = typeFromIdsName(inputName)
+      flatList = flatStruct(inputType, inputName, ".") 
+
+  # same for output
+  if len(service.output) == 0:
+      outputFlag = False
+      outputFormatStr = ""
+  else:
+      outputFlag = True
+      outputName = service.output
+
+      outputType = typeFromIdsName(service.output)
+      outFlatList = flatStruct(outputType, outputName, ".")
+      outputFormatStr = outputFormat(outputType, outputName)
+  ?>
+# <!service.name!> ----------------------------------------------------------
+
+if { [lsearch [interp hidden] <!comp.name()!><!service.name!>] >= 0 } {
+    interp expose {} <!comp.name()!><!service.name!>
+}
+if { [lsearch [interp hidden] <!comp.name()!><!service.name!>FormatOutput] >= 0 } {
+    interp expose {} <!comp.name()!><!service.name!>FormatOutput
+}
+
+proc ::<!comp.name()!><!service.name!> { name args } {
+    set format {}
+<?
+  if inputFlag:
+    for x in flatList:
+      print inputFormat(x[0], x[1])
+  ?>
+    return [ ::cs::rqstSend "${name}" "<!service.name!>" \
+	"<!service.doc!>" \
+	"service.usage" \
+	<!len(flatList)!> \
+	$format \
+	$args ]
+}
+
+
+proc ::<!comp.name()!><!service.name!>FormatOutput { list } {
+    set format { {} status <!outputFormatStr!>}
+
+    set out ""
+    interp invokehidden {} rqstFormatOuput $format out list ""
+    return [join $out "\n"]
+}
+
+interp hide {} <!comp.name()!><!service.name!>
+interp hide {} <!comp.name()!><!service.name!>FormatOutput
+
+<?
+
+for port in outports:
+  ?>
+# <!port.name!> ----------------------------------------------------------
+
+if { [lsearch [interp hidden] <!comp.name()!><!port.name!>PosterRead] >= 0 } {
+    interp expose {} <!comp.name()!><!port.name!>PosterRead
+}
+if { [lsearch [interp hidden] <!comp.name()!><!port.name!>PosterFormatOutput] >= 0 } {
+    interp expose {} <!comp.name()!><!port.name!>PosterFormatOutput
+}
+
+proc ::<!comp.name()!><!port.name!>PosterRead { name args } {
+
+    return [ ::cs::posterRead "${name}" "<!port.name!>" \
+	"port.doc" \
+	$args ]
+}
+
+
+proc ::<!comp.name()!><!port.name!>PosterFormatOutput { list } {
+    set format { status {} <!outputFormat(port.idlType.unalias(), "")!>}
+
+    set out ""
+    interp invokehidden {} rqstFormatOuput $format out list ""
+    return [join $out "\n"]
+}
+
+interp hide {} <!comp.name()!><!port.name!>PosterRead
+interp hide {} <!comp.name()!><!port.name!>PosterFormatOutput
+
+<?
+?>

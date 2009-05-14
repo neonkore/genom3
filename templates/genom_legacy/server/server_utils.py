@@ -13,25 +13,16 @@ def typeFromIdsName(name):
     return comp.typeFromIdsName(name)
 
 # returns a flat list of the structure of a type
-def flatStructRec(t, name_prefix):
-    if t.kind() == IdlKind.Struct:
-	s = t.asStructType()
-	l = [] 
-	for m in s.members():
-	    l.extend(flatStruct(m.data(), name_prefix+"__"+m.key()))
-	return l
-    else:
-	return (name_prefix, t)
 
-def flatStruct(t, name):
+def flatStruct(t, name, separator = "_"):
     if t.kind() == IdlKind.Named:
 	n = t.asNamedType()
-	return flatStruct(n.type(), name)
-    if t.kind() == IdlKind.Struct:
+	return flatStruct(n.type(), name, separator)
+    elif t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	l = [] 
 	for m in s.members():
-	    l.extend(flatStruct(m.data(), m.key()))
+	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator))
 	return l
     else:
 	return [(t, name)]   
@@ -245,6 +236,12 @@ def nbExecService():
 	if s.data().type != ServiceType.Control:
 	    count += 1
     return count
+
+def maxServiceNameLength():
+    maxLen = 0
+    for s in servicesMap:
+	maxLen = max(maxLen, len(s.data().name))
+    return maxLen
 
 # create connect services for each inport
 for port in inports:

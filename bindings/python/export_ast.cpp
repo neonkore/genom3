@@ -32,7 +32,10 @@
 #include "utils/ast.h"
 
 using namespace G3nom;
+using namespace Idl;
 using namespace boost::python;
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ServiceAddInputOverloads, Service::addInput, 1,2)
 
 void export_ast()
 {
@@ -70,12 +73,13 @@ void export_ast()
 	class_<Service, Service::Ptr>("Service", init<const std::string &>())
 	.def("debug", &Service::debug)
 	.def_readonly("name", &Service::name)
+	.def_readonly("doc", &Service::doc)
 	.def_readwrite("taskName", &Service::taskName)
 	.def_readwrite("type", &Service::type)
 	.def("codel", &Service::codel)
 	.def("hasCodel", &Service::hasCodel)
 	.def("addCodel", &Service::addCodel)
-	.def("addInput", &Service::addInput)
+	.def("addInput", &Service::addInput, ServiceAddInputOverloads())
 	.def_readwrite("output", &Service::output)
 	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
 	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>())
@@ -106,4 +110,8 @@ void export_ast()
 	enum_<Port::Type>("PortType")
 	.value("Incoming", Port::Incoming)
 	.value("Outgoing", Port::Outgoing);
+
+	class_<Literal>("Literal")
+	.def("print", &Literal::print)
+	.def("isEmpty", &Literal::isEmpty);
 }

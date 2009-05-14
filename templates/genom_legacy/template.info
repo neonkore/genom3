@@ -62,6 +62,9 @@ main:
   "server/printXML.c" -> "server/$$PrintXML.c"
   "server/scan.h" -> "server/$$Scan.h"
   "server/scan.c" -> "server/$$Scan.c"
+/* server/tcl/ stuff*/
+  "server/tcl/tcl.c" -> "server/tcl/$$Tcl.c"
+  "server/tcl/tclClient.tcl" -> "server/tcl/$$Client.tcl"
 /* codels/ dir */
   "codels/cntrlTaskCodels.c" -> "codels/$$CntrlTaskCodels.c"
 /*  "codels/userCntrlTaskCodels.c" -> "codels/$$UserCntrlTaskCodels.c" */

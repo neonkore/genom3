@@ -273,7 +273,7 @@ internalDataType = MapTypeToC(IDSType,True)
 periodicFlag = isPeriodic()
 
 shouldGenerateOpenPRS = "#" # do not generate openrps related code
-shouldGenerateTcl = "#"
+shouldGenerateTcl = ""
 shouldGenerateServer = ""
 pkgname = comp.name()
 

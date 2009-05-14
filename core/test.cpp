@@ -61,13 +61,13 @@ int main(int argc, char* argv[])
 
 // 	ti.setDebug(true);
 	ti.setComponent(&(d.component()));
-// 	ti.setSourceDirectory("/home/ccpasteur/work/git/g3nom/templates/openRTM/");
-// 	ti.setOutputDirectory("/home/ccpasteur/work/git/g3nom/output/openRTM2/");
-// 	ti.parseInfoFile("/home/ccpasteur/work/git/g3nom/templates/openRTM/template.info");
+	ti.setSourceDirectory("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/");
+	ti.setOutputDirectory("/home/ccpasteur/work/git/g3nom/output/genom_legacy/");
+	ti.parseInfoFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/template.info");
 // 	i->exportVar("currentTaskName", "MotionTask");
- 	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
- 	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/tcl/tclClient.tcl",
- 	             "/home/ccpasteur/work/git/g3nom/templates/test/server/tcl/$$Client.tcl");
+//  	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
+//  	ti.interpretFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/tcl/tclClient.tcl",
+//  	             "/home/ccpasteur/work/git/g3nom/templates/test/server/tcl/$$Client.tcl");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

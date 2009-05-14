@@ -72,7 +72,7 @@ def processOutput(type, name, allocFlag = False):
 	enumList += ", \"" + en + "\", " + str(i)
 	i += 1
       ?>
-		Tcl_NewEnumObj(interp, (int)%s, <!enumList!>, NULL));
+		Tcl_NewEnumObj(interp, (int)<!name!> <!enumList!>, NULL));
 <?
   if allocFlag: ?>
     if (ret != TCL_OK) {free(_posterData); return TCL_ERROR;}
@@ -324,6 +324,224 @@ static int
 }
 
 
+/*
+ * ----------------------------------------------------------------------
+ * Requests
+ */
+<?
+serviceNum = 0
+for s in servicesMap:
+  service = s.data()
+  flatList = []
+  if len(service.inputs()) == 0:
+      inputFlag = False
+      inputSize = "0"
+      inputNamePtr = " NULL"
+  else:
+      inputFlag = True
+      inputName = service.inputs()[0]
+
+      inputType = typeFromIdsName(inputName)
+      if(inputType.kind() == IdlKind.String):
+	  inputNamePtr = inputName 
+      else:
+	  inputNamePtr = "&" + inputName 
+      inputSize = "sizeof(" + MapTypeToC(inputType, True) + ")"
+
+      flatList = flatStruct(inputType, inputName, ".") 
+
+  # same for output
+  if len(service.output) == 0:
+      outputFlag = False
+      outputSize = "0"
+      outputNamePtr = "NULL"
+  else:
+      outputFlag = True
+      outputName = service.output
+
+      outputType = typeFromIdsName(service.output)
+      if(outputType.kind() == IdlKind.String):
+	  outputNamePtr = outputName
+      else:
+	  outputNamePtr = "&" + outputName
+      outputSize = "sizeof(" + MapTypeToC(outputType, True) + ")"
+      outFlatList = flatStruct(outputType, outputName, ".")
+  ?>
+/*
+ * ----------------------------------------------------------------------
+ * <!service.name!> Request
+ */
+
+static int <!comp.name()!><!service.name!>RqstSendCb(ClientData, Tcl_Interp *, int, Tcl_Obj *const []); 
+static int <!comp.name()!><!service.name!>ReplyRcvCb(ClientData, Tcl_Interp *, int, Tcl_Obj * const []);
+
+static int
+<!comp.name()!><!service.name!>RqstSendCb(ClientData data, Tcl_Interp *interp,
+				int objc, Tcl_Obj *const objv[])
+{
+   struct ModuleInfo *tclModuleInfo = (struct ModuleInfo *)data;
+   int rqstId, bilan;
+   char buf[10];
+<?
+  if inputFlag:
+    print "   static " + MapTypeToC(inputType) + " " + inputName + ";" 
+# #if ($argNumber$ > 0)
+  if len(flatList) > 0:
+    ?>
+   int ret;
+   int curObjc = 0;
+<? # endif
+  ?>
+   char strerr[64];
+
+   TEST_BAD_USAGE(objc != <!len(flatList)!>+1);
+		 
+<? #$parseInput$
+  if inputFlag:
+    for x in flatList:
+      parseInput(x[0], x[1])
+  ?>
+
+   if (tclServRqstSend(interp, Tcl_GetStringFromObj(objv[0], NULL),
+		       tclModuleInfo->cid, <!serviceNum!>,
+		       <!inputNamePtr!>, <!inputSize!>,
+		       &rqstId, &bilan) == ERROR) {
+
+     Tcl_SetResult(interp, h2getErrMsg(bilan, strerr, 64), TCL_VOLATILE);
+      return TCL_ERROR;
+   }
+    
+   sprintf(buf, " %d", rqstId);
+   Tcl_SetResult(interp, "SENT", TCL_STATIC);
+   Tcl_AppendResult(interp, buf, NULL);
+   return TCL_OK;
+}
+
+static int
+<!comp.name()!><!service.name!>ReplyRcvCb(ClientData data, Tcl_Interp *interp,
+				int objc, Tcl_Obj * const objv[])
+{
+   struct ModuleInfo *tclModuleInfo = (struct ModuleInfo *)data;
+   int ret;
+   int rqstId, bilan, activity;
+<?
+  if outputFlag:
+    print "   static " + MapTypeToC(outputType) + " " + outputName + ";" 
+  ?>
+   Tcl_Obj *my_own_private_unique_result;
+   char strerr[64];
+
+   TEST_BAD_USAGE(
+      objc != 2 ||
+      Tcl_GetIntFromObj(interp, objv[1], &rqstId) != TCL_OK
+   );
+
+   switch (
+      /* c'est laid */
+      tclServReplyRcv(interp,
+		      tclModuleInfo->cid, rqstId, NO_BLOCK,
+		      &activity, <!outputNamePtr!>, <!outputSize!>,
+		      &bilan)
+      ) {
+      case WAITING_INTERMED_REPLY:
+	 Tcl_SetResult(interp, "SENT", TCL_STATIC);
+	 return TCL_OK;
+
+      case WAITING_FINAL_REPLY: {
+	 char tmp[50];
+	 sprintf(tmp, "ACK %d", activity);
+	 Tcl_SetResult(interp, tmp, TCL_VOLATILE);
+	 return TCL_OK;
+      }
+
+      case FINAL_REPLY_OK:
+	 break;
+
+      default:
+	 Tcl_SetResult(interp, h2getErrMsg(bilan, strerr, 64), TCL_VOLATILE);
+	 return TCL_ERROR;
+   }
+
+   my_own_private_unique_result = Tcl_NewListObj(0, NULL);
+   if (my_own_private_unique_result == NULL) return TCL_ERROR;
+
+   ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result,
+				  Tcl_NewStringObj("TERM", -1));
+   if (ret != TCL_OK) return TCL_ERROR;
+
+   if (bilan == OK)
+      ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result,
+				     Tcl_NewStringObj("OK", -1));
+   else
+      ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result,
+				     Tcl_NewStringObj(
+					h2getErrMsg(bilan, strerr, 64), -1));
+   if (ret != TCL_OK) return TCL_ERROR;
+<?
+  if outputFlag:
+    for x in outFlatList:
+      processOutput(x[0], x[1])
+  ?>
+   Tcl_SetObjResult(interp, my_own_private_unique_result);
+   return TCL_OK;
+}
+<?
+?>
+
+<?
+for port in outports:
+  ?>
+/*
+ * ----------------------------------------------------------------------
+ * <!port.name!> Poster
+ */
+
+static int <!comp.name()!><!port.name!>PosterTclRead(ClientData, Tcl_Interp *, int, Tcl_Obj *const []); 
+
+static int
+<!comp.name()!><!port.name!>PosterTclRead(ClientData data, Tcl_Interp *interp,
+			 int objc, Tcl_Obj *const objv[])
+{
+   int ret;
+   static <!MapTypeToC(port.idlType, True)!> *_posterData;	/* data */
+   Tcl_Obj *my_own_private_unique_result;
+   char strerr[64];
+
+   TEST_BAD_USAGE(objc != 1);
+		 
+  if ((_posterData = malloc(sizeof(<!MapTypeToC(port.idlType, True)!>))) == NULL) {
+      Tcl_SetResult(interp, h2getErrMsg(errnoGet(), strerr, 64), TCL_VOLATILE);
+      return TCL_ERROR;
+  }
+
+   if (<!comp.name()!><!port.name!>PosterRead(_posterData) != OK) {
+      Tcl_SetResult(interp, h2getErrMsg(errnoGet(), strerr, 64), TCL_VOLATILE);
+      free(_posterData);
+      return TCL_ERROR;
+   }
+
+   my_own_private_unique_result = Tcl_NewListObj(0, NULL);
+   if (my_own_private_unique_result == NULL) {
+     free(_posterData);
+     return TCL_ERROR;
+   }
+
+<?
+  portFlatList = flatStruct(port.idlType, "(*_posterData)", ".") 
+  for x in portFlatList:
+    processOutput(x[0], x[1], True)
+  ?>
+
+   Tcl_SetObjResult(interp, my_own_private_unique_result);
+   free(_posterData);
+   return TCL_OK;
+}
+
+<?
+?>
+
+
+
 int
 <!comp.name()!>_Init(Tcl_Interp *interp)
 {
@@ -407,220 +625,5 @@ for p in outports:
 }
 
 
-/*
- * ----------------------------------------------------------------------
- * Requests
- */
-<?
-serviceNum = 0
-for s in servicesMap:
-  service = s.data()
-  flatList = []
-  if len(service.inputs()) == 0:
-      inputFlag = False
-      inputSize = "0"
-      inputNamePtr = "NULL"
-  else:
-      inputFlag = True
-      inputName = service.inputs()[0]
 
-      inputType = typeFromIdsName(inputName)
-      if(inputType.kind() == IdlKind.String):
-	  inputNamePtr = inputName + ", "
-      else:
-	  inputNamePtr = ", &" + inputName + ", " 
-      inputSize = "sizeof((*" + MapTypeToC(inputType, True) + ")"
 
-      flatList = flatStruct(inputType, inputName, ".") 
-
-  # same for output
-  if len(service.output) == 0:
-      outputFlag = False
-      outputSize = "0"
-      outputNamePtr = "NULL"
-      outputRefPtr = "NULL"
-  else:
-      outputFlag = True
-      outputName = service.output
-      outputSize = "sizeof((*" + comp.name() + "DataStrId)." + outputName + ")"
-
-      outputType = typeFromIdsName(service.output)
-      if(outputType.kind() == IdlKind.String):
-	  outputNamePtr = outputName
-      else:
-	  outputNamePtr = "&" + outputName
-      outputRefPtr = "&((*" + comp.name() + "DataStrId)." + outputName + ")" 
-      outFlatList = flatStruct(outputType, outputName, ".")
-  ?>
-/*
- * ----------------------------------------------------------------------
- * <!service.name!> Request
- */
-
-static int <!comp.name()!><!service.name!>RqstSendCb(ClientData, Tcl_Interp *, int, Tcl_Obj *const []); 
-static int <!comp.name()!><!service.name!>ReplyRcvCb(ClientData, Tcl_Interp *, int, Tcl_Obj * const []);
-
-static int
-<!comp.name()!><!service.name!>RqstSendCb(ClientData data, Tcl_Interp *interp,
-				int objc, Tcl_Obj *const objv[])
-{
-   struct ModuleInfo *tclModuleInfo = (struct ModuleInfo *)data;
-   int rqstId, bilan;
-   char buf[10];
-<?
-  if inputFlag:
-    print "   static " + MapTypeToC(inputType) + " " + inputName + ";" 
-# #if ($argNumber$ > 0)
-  if len(flatList) > 0:
-    ?>
-   int ret;
-   int curObjc = 0;
-<? # endif
-  ?>
-   char strerr[64];
-
-   TEST_BAD_USAGE(objc != <!len(flatList)!>+1);
-		 
-<? #$parseInput$
-  if inputFlag:
-    for x in flatList:
-      parseInput(x[0], x[1])
-  ?>
-
-   if (tclServRqstSend(interp, Tcl_GetStringFromObj(objv[0], NULL),
-		       tclModuleInfo->cid, <!serviceNum!>,
-		       <!inputNamePtr!> <!inputSize!>,
-		       &rqstId, &bilan) == ERROR) {
-
-     Tcl_SetResult(interp, h2getErrMsg(bilan, strerr, 64), TCL_VOLATILE);
-      return TCL_ERROR;
-   }
-    
-   sprintf(buf, " %d", rqstId);
-   Tcl_SetResult(interp, "SENT", TCL_STATIC);
-   Tcl_AppendResult(interp, buf, NULL);
-   return TCL_OK;
-}
-
-static int
-<!comp.name()!><!service.name!>ReplyRcvCb(ClientData data, Tcl_Interp *interp,
-				int objc, Tcl_Obj * const objv[])
-{
-   struct ModuleInfo *tclModuleInfo = (struct ModuleInfo *)data;
-   int ret;
-   int rqstId, bilan, activity;
-<?
-  if inputFlag:
-    print "   static " + MapTypeToC(outputType) + " " + outputName + ";" 
-  ?>
-   Tcl_Obj *my_own_private_unique_result;
-   char strerr[64];
-
-   TEST_BAD_USAGE(
-      objc != 2 ||
-      Tcl_GetIntFromObj(interp, objv[1], &rqstId) != TCL_OK
-   );
-
-   switch (
-      /* c'est laid */
-      tclServReplyRcv(interp,
-		      tclModuleInfo->cid, rqstId, NO_BLOCK,
-		      &activity, $&outputVar,$ $outputSize$,
-		      &bilan)
-      ) {
-      case WAITING_INTERMED_REPLY:
-	 Tcl_SetResult(interp, "SENT", TCL_STATIC);
-	 return TCL_OK;
-
-      case WAITING_FINAL_REPLY: {
-	 char tmp[50];
-	 sprintf(tmp, "ACK %d", activity);
-	 Tcl_SetResult(interp, tmp, TCL_VOLATILE);
-	 return TCL_OK;
-      }
-
-      case FINAL_REPLY_OK:
-	 break;
-
-      default:
-	 Tcl_SetResult(interp, h2getErrMsg(bilan, strerr, 64), TCL_VOLATILE);
-	 return TCL_ERROR;
-   }
-
-   my_own_private_unique_result = Tcl_NewListObj(0, NULL);
-   if (my_own_private_unique_result == NULL) return TCL_ERROR;
-
-   ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result,
-				  Tcl_NewStringObj("TERM", -1));
-   if (ret != TCL_OK) return TCL_ERROR;
-
-   if (bilan == OK)
-      ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result,
-				     Tcl_NewStringObj("OK", -1));
-   else
-      ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result,
-				     Tcl_NewStringObj(
-					h2getErrMsg(bilan, strerr, 64), -1));
-   if (ret != TCL_OK) return TCL_ERROR;
-<?
-  if outputFlag:
-    for x in outFlatList:
-      processOutput(x[0], x[1])
-?>
-   Tcl_SetObjResult(interp, my_own_private_unique_result);
-   return TCL_OK;
-}
-<?
-?>
-
-<?
-for port in outports:
-  ?>
-/*
- * ----------------------------------------------------------------------
- * $posterName$ Poster
- */
-
-static int <!comp.name()!><!port.name!>PosterTclRead(ClientData, Tcl_Interp *, int, Tcl_Obj *const []); 
-
-static int
-<!comp.name()!><!port.name!>PosterTclRead(ClientData data, Tcl_Interp *interp,
-			 int objc, Tcl_Obj *const objv[])
-{
-   int ret;
-   static <!MapTypeToC(port.idlType, True)!> *_posterData;	/* data */
-   Tcl_Obj *my_own_private_unique_result;
-   char strerr[64];
-
-   TEST_BAD_USAGE(objc != 1);
-		 
-  if ((_posterData = malloc(sizeof(<!MapTypeToC(port.idlType, True)!>))) == NULL) {
-      Tcl_SetResult(interp, h2getErrMsg(errnoGet(), strerr, 64), TCL_VOLATILE);
-      return TCL_ERROR;
-  }
-
-   if (<!comp.name()!><!port.name!>PosterRead(_posterData) != OK) {
-      Tcl_SetResult(interp, h2getErrMsg(errnoGet(), strerr, 64), TCL_VOLATILE);
-      free(_posterData);
-      return TCL_ERROR;
-   }
-
-   my_own_private_unique_result = Tcl_NewListObj(0, NULL);
-   if (my_own_private_unique_result == NULL) {
-     free(_posterData);
-     return TCL_ERROR;
-   }
-
-<?
-  portFlatList = flatStruct(port.idlType, "(*_posterData)", ".") 
-  for x in portFlatList:
-    processOutput(x[0], x[1], True)
-?>
-
-   Tcl_SetObjResult(interp, my_own_private_unique_result);
-   free(_posterData);
-   return TCL_OK;
-}
-
-<?
-?>

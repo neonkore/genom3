@@ -191,7 +191,9 @@ class Component
 
 		Port::Ptr port(const std::string &name);
 		Port::Map& portsMap() { return ports; }
+
 		Idl::IdlType::Vector& typesVect() { return m_types; }
+		Idl::ConstValue::Map& valuesMap() { return m_constValues; }
 
 		void addImportedComponent(const std::string &s);
 		std::vector<std::string>& importedComponents() { return m_importedComponents; }

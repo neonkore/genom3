@@ -33,6 +33,7 @@
 
 #include "utils/ast.h"
 #include "utils/idltype.h"
+#include "utils/idlvalues.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -57,4 +58,6 @@ void export_containers()
 	.def(map_indexing_suite<Port::Map, true>());
 	class_<IdlType::Map>("IdlTypeMap")
 	.def(map_indexing_suite<IdlType::Map, true>());
+	class_<ConstValue::Map>("ConstValueMap")
+	.def(map_indexing_suite<ConstValue::Map, true>());
 }

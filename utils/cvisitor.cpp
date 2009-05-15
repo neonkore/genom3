@@ -46,6 +46,15 @@ std::string CVisitor::mapTypeToC(IdlType::Ptr t, bool declOnly)
 	return oss.str();
 }
 
+std::string CVisitor::mapValueToC(ConstValue *v)
+{
+	std::string s;
+	ostringstream oss(s);
+	CVisitor visitor(oss, true);
+	v->accept(visitor);
+	return oss.str();
+}
+
 void CVisitor::visitBaseType(BaseType *base)
 {
 	switch (base->kind()) {
@@ -149,12 +158,12 @@ void CVisitor::visitEnumType(EnumType *e)
 	if(m_declOnly)
 	  return;
 
-	m_out << "{" << endl;
+	m_out << "{" << endl << "\t";
 	bool first = true;
 	std::vector<std::string>::const_iterator it;
 	for (it = e->enumerators().begin(); it != e->enumerators().end(); ++it) {
 		if (!first)
-			m_out << ", ";
+			m_out << ", \n\t";
 		else
 			first = false;
 
@@ -178,7 +187,7 @@ void CVisitor::visitNamedType(NamedType *n)
 
 void CVisitor::visitConstValue(ConstValue *v) 
 {
-	m_out << "#define " << v->identifier() << " " << v->value().print() << endl;
+	m_out << "#define " << v->identifier() << " (" << v->value().print() << ")" << endl;
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

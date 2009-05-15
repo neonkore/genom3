@@ -44,6 +44,7 @@ class CorbaCppVisitor : public TypeVisitor
 		virtual ~CorbaCppVisitor() {}
 
 		static std::string mapTypeToCpp(IdlType::Ptr t, bool declOnly=false, bool out=false);
+		static std::string mapValueToCpp(ConstValue *v);
 
 		virtual void visitBaseType(BaseType*);
 		virtual void visitStringType(StringType*);

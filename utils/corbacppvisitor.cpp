@@ -46,6 +46,15 @@ std::string CorbaCppVisitor::mapTypeToCpp(IdlType::Ptr t, bool declOnly, bool is
 	return oss.str();
 }
 
+std::string CorbaCppVisitor::mapValueToCpp(ConstValue *v)
+{
+	std::string s;
+	ostringstream oss(s);
+	CorbaCppVisitor visitor(oss, true, false);
+	v->accept(visitor);
+	return oss.str();
+}
+
 void CorbaCppVisitor::visitBaseType(BaseType *base)
 {
 	switch (base->kind()) {

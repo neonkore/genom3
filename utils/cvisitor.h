@@ -43,6 +43,7 @@ class CVisitor : public TypeVisitor
 		virtual ~CVisitor() {}
 
 		static std::string mapTypeToC(IdlType::Ptr t, bool declOnly=false);
+		static std::string mapValueToC(ConstValue *v);
 
 		virtual void visitBaseType(BaseType*);
 		virtual void visitStringType(StringType*);

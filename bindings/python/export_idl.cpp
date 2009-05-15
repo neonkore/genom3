@@ -30,6 +30,7 @@
 #include <boost/python.hpp>
 
 #include "utils/idltype.h"
+#include "utils/idlvalues.h"
 #include "utils/cvisitor.h"
 #include "utils/idlvisitor.h"
 #include "utils/corbacppvisitor.h"
@@ -51,6 +52,16 @@ std::string MapTypeToCpp(IdlType::Ptr t, bool declOnly=false, bool isOutType = f
 std::string MapTypeToIdl(IdlType::Ptr t)
 {
 	return IdlVisitor::mapTypeToIdl(t);
+}
+
+std::string MapValueToC(ConstValue *v)
+{
+	return CVisitor::mapValueToC(v);
+} 
+
+std::string MapValueToCpp(ConstValue *v)
+{
+	return CorbaCppVisitor::mapValueToCpp(v);
 } 
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1,2)
@@ -59,8 +70,17 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1,3)
 void export_idl()
 {
 	def("MapTypeToC", &MapTypeToC, MapTypeToCOverloads());
+	def("MapValueToC", &MapValueToC);
 	def("MapTypeToCpp", &MapTypeToCpp, MapTypeToCppOverloads());
+	def("MapValueToCpp", &MapValueToCpp);
 	def("MapTypeToIdl", &MapTypeToIdl);
+
+	class_<Literal>("Literal")
+	.def("print", &Literal::print)
+	.def("isEmpty", &Literal::isEmpty);
+
+	class_<ConstValue>("ConstValue")
+	.def("identifier", &ConstValue::identifier);
 
 	class_<IdlType, IdlType::Ptr>("IdlType")
 	.def("asStructType", &IdlType::asStructType, return_value_policy<reference_existing_object>())

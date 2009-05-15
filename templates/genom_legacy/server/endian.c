@@ -69,7 +69,7 @@ void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 <?
 for p in outports:
     typeName = "%s_%s_POSTER_STR" % (upper(comp.name()), upper(p.name))
-?>
+    ?>
 void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {

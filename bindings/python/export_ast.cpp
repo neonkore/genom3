@@ -56,6 +56,7 @@ void export_ast()
 	.def("port", &Component::port)
 	.def("portsMap", &Component::portsMap, return_value_policy<reference_existing_object>())
 	.def("typesVect", &Component::typesVect, return_value_policy<reference_existing_object>())
+	.def("valuesMap", &Component::valuesMap, return_value_policy<reference_existing_object>())
 	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
 	.def("typeFromIdsName", &Component::typeFromIdsName);
 
@@ -110,8 +111,4 @@ void export_ast()
 	enum_<Port::Type>("PortType")
 	.value("Incoming", Port::Incoming)
 	.value("Outgoing", Port::Outgoing);
-
-	class_<Literal>("Literal")
-	.def("print", &Literal::print)
-	.def("isEmpty", &Literal::isEmpty);
 }

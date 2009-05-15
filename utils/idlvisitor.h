@@ -55,6 +55,8 @@ class IdlVisitor : public TypeVisitor
 		virtual void visitArrayType(ArrayType *);
 		virtual void visitNamedType(NamedType*);
 
+		virtual void visitConstValue(ConstValue *v);
+
 	protected:
 		void printDeclaratorVectString(std::ostream &m_out, Declarator::VectPtr v);
 

@@ -42,26 +42,33 @@ std::string Literal::print() const
 {
 	string s;
 	stringstream ss;
-	if(m_kind == Struct) {
-		ss << "{";
-		bool first = true;
-		for(Literal::Vector::const_iterator it = m_members.begin(); it != m_members.end(); ++it) {
-			if(first)
-				first = false;
-			else
-				ss << ", ";
-			ss << it->print();
-		}
-		ss << "}";
-	} else
-		ss << m_value;
+	switch(m_kind) {
+		case Struct: {
+			ss << "{";
+			bool first = true;
+			for(Literal::Vector::const_iterator it = m_members.begin(); it != m_members.end(); ++it) {
+				if(first)
+					first = false;
+				else
+					ss << ", ";
+				ss << it->print();
+			}
+			ss << "}";
+			break;
+		} case Plus: {
+			ss << m_members.front().print();
+			ss << " + " << m_members.back().print();
+			break;
+		} default:
+			ss << m_value;
+	}
 	return ss.str();
 }
 
 void Literal::addMember(const Literal &l)
 {
-	m_kind = Struct;
 	m_isEmpty = false;
 	m_members.push_back(l);
 }
 
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

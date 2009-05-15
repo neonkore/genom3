@@ -125,7 +125,7 @@ struct variant_type {
 %token			SERVICE		"service"
 %token			CODEL		"codel"
 
-%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL
+%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL PLUS
 
 %token IN OUT INPORT OUTPORT
 // type tokens
@@ -197,6 +197,7 @@ struct variant_type {
 %type <case_label_val> 		case_label
 %type <union_case_val> 		element_spec*/
 
+%left PLUS
 
 /* %destructor { delete $$; } STRINGLIT */
 /*%destructor { delete $$; } port_decl service_decl task_decl*/
@@ -583,6 +584,17 @@ literal:
 {
     $$ = $2;
 }
+| LPAREN literal RPAREN
+{
+    $$ = $2;
+}
+| literal PLUS literal
+{
+    Literal l(Literal::Plus);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
 ;
 
 boolean_literal:
@@ -598,7 +610,7 @@ boolean_literal:
 literals:
   literal
 {
-    Literal l;
+    Literal l(Literal::Struct);
     l.addMember($1);
     $$ = l;
 }

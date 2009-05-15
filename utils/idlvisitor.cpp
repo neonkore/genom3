@@ -31,6 +31,7 @@
 #include <sstream>
 
 #include "idltype.h"
+#include "idlvalues.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -147,6 +148,11 @@ void IdlVisitor::visitArrayType(ArrayType *a)
 void IdlVisitor::visitNamedType(NamedType *n)
 {
 	m_out << n->identifier();
+}
+
+void IdlVisitor::visitConstValue(ConstValue *v) 
+{
+	m_out << "const " << IdlVisitor::mapTypeToIdl(v->type()) << v->identifier() << " = " << v->value().print() << ";" << endl;
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

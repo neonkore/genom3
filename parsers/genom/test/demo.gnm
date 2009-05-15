@@ -1,6 +1,6 @@
 
 const double DEMO_THRESHOLD = 0.2;
-const long MAX_VAL = 10;
+const long MAX_VAL = 10 + 3;
 
 struct demoState {
     double position;

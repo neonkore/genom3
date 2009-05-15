@@ -46,11 +46,11 @@ namespace Idl {
 
 class Literal {
 	public:
-		enum Kind { None, Bool, Char, Int, Double, String, Struct};
+		enum Kind { None, Bool, Char, Int, Double, String, Struct, Plus};
 		typedef std::map<std::string, Literal> Map;
 		typedef std::vector<Literal> Vector;
 
-		Literal() : m_kind(None) , m_isEmpty(true) {}
+		Literal(Kind k = None) : m_kind(k) , m_isEmpty(true) {}
 		Literal(char c) : m_kind(Char), m_value(c), m_isEmpty(false)  {}
 		Literal(int i) : m_kind(Int), m_value(i), m_isEmpty(false)  {}
 		Literal(std::string s) : m_kind(String), m_value(s), m_isEmpty(false)  {}

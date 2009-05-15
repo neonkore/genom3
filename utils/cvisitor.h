@@ -55,6 +55,8 @@ class CVisitor : public TypeVisitor
 		virtual void visitArrayType(ArrayType *);
 		virtual void visitNamedType(NamedType*);
 
+		virtual void visitConstValue(ConstValue *v);
+
 	protected:
 		std::ostream &m_out;
 		bool m_declOnly;

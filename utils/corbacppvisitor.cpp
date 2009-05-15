@@ -31,6 +31,7 @@
 #include <sstream>
 
 #include "idltype.h"
+#include "idlvalues.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -184,6 +185,11 @@ void CorbaCppVisitor::visitNamedType(NamedType *n)
 	m_declOnly = true;
 	n->type()->accept(*this);
 	m_declOnly = savedDeclOnly;
+}
+
+void CorbaCppVisitor::visitConstValue(ConstValue *v) 
+{
+	m_out << "const " << CorbaCppVisitor::mapTypeToCpp(v->type(), true) << v->identifier() << " = " << v->value().print() << ";" << endl;
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

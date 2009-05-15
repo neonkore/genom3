@@ -106,6 +106,7 @@ chartext				([^\'])|(\\.)
 "<"			{ return token::LESS_THAN; }
 ">"			{ return token::GREATER_THAN; }
 "="			{ return token::EQUAL; }
+"+"			{ return token::PLUS; }
 
  /* type related keywords */
 "unsigned"		{ return token::UNSIGNED; }

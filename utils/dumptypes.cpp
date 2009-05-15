@@ -45,6 +45,15 @@ std::string DumpType::dumpType(IdlType::Ptr t)
 	return oss.str();
 }
 
+std::string DumpType::dumpConstValue(ConstValue &v)
+{
+	std::string s;
+	ostringstream oss(s);
+	DumpType visitor(oss);
+	v.accept(visitor);
+	return oss.str();
+}
+
 void DumpType::visitBaseType(BaseType *base)
 {
 	m_out << base->kindAsString();
@@ -152,6 +161,12 @@ void DumpType::visitArrayType(ArrayType *a)
 void DumpType::visitNamedType(NamedType *n)
 {
 	m_out << "named:" << n->identifier();
+}
+
+void DumpType::visitConstValue(ConstValue *v) 
+{
+	m_out << "const " << v->type()->identifier();
+	m_out << " " << v->identifier() << " = " << v->value().print();
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

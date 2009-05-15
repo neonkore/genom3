@@ -3,6 +3,7 @@ set(genutils_SRCS
   ast.cpp
   interpreter.cpp
   idltype.cpp
+  idlvalues.cpp
   dumptypes.cpp
   idlvisitor.cpp
   cvisitor.cpp

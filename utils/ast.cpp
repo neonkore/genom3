@@ -29,7 +29,6 @@
 #include "ast.h"
 
 #include <iostream>
-#include <sstream>
 
 #include "dumptypes.h"
 
@@ -57,34 +56,42 @@ void Component::debug()
 	cout << endl;
 
 	cout << endl << "Services: " << services.size() << endl;
-	Service::Map::const_iterator it;
-	for (it = services.begin(); it != services.end(); ++it) {
+	for (Service::Map::const_iterator it = services.begin();
+			it != services.end(); ++it) {
 		cout << "\t" << it->first << " : " << endl;
 		it->second->debug();
 		cout << endl;
 	}
 
 	cout << endl << "Tasks: " << tasks.size() << endl;
-	Task::Map::const_iterator it2;
-	for (it2 = tasks.begin(); it2 != tasks.end(); ++it2) {
-		cout << "\t-- " << it2->first << " : " << endl;
-		it2->second->debug();
+	for (Task::Map::const_iterator it = tasks.begin(); 
+			it != tasks.end(); ++it) {
+		cout << "\t-- " << it->first << " : " << endl;
+		it->second->debug();
 		cout << endl;
 	}
 
 	cout << endl << "Ports: " << ports.size() << endl;
-	Port::Map::const_iterator it3;
-	for (it3 = ports.begin(); it3 != ports.end(); ++it3) {
-		cout << "\t* " << it3->first << " : ";
-		it3->second->debug();
+	for (Port::Map::const_iterator it = ports.begin();
+			it != ports.end(); ++it) {
+		cout << "\t* " << it->first << " : ";
+		it->second->debug();
 		cout << endl;
 	}
 
 	cout << endl << "Types: " << m_types.size() << endl;
-	IdlType::Vector::const_iterator it4;
-	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
+	for (IdlType::Vector::const_iterator it = m_types.begin();
+			it != m_types.end(); ++it) {
 		cout << "* ";
-		cout << DumpType::dumpType(*it4);
+		cout << DumpType::dumpType(*it);
+		cout << endl;
+	}
+
+	cout << endl << "Const Values: " << m_types.size() << endl;
+	for (ConstValue::Map::iterator it = m_constValues.begin();
+			it != m_constValues.end(); ++it) {
+		cout << "* ";
+		cout << DumpType::dumpConstValue(it->second);
 		cout << endl;
 	}
 }
@@ -114,6 +121,11 @@ void Component::addPort(Port::Ptr port)
 void Component::addType(IdlType::Ptr type)
 {
 	m_types.push_back(type);
+}
+
+void Component::addConstValue(const Idl::ConstValue &val)
+{
+	m_constValues[val.identifier()] = val;
 }
 
 Task::Ptr Component::task(const std::string &name)
@@ -419,35 +431,6 @@ void Codel::addInPort(const std::string &t)
 void Codel::addOutPort(const std::string &t)
 {
 	outPorts.push_back(t);
-}
-
-/******** Literal ***************/
-
-std::string Literal::print() const
-{
-	string s;
-	stringstream ss;
-	if(m_kind == Struct) {
-		ss << "{";
-		bool first = true;
-		for(Literal::Vector::const_iterator it = m_members.begin(); it != m_members.end(); ++it) {
-			if(first)
-				first = false;
-			else
-				ss << ", ";
-			ss << it->print();
-		}
-		ss << "}";
-	} else
-		ss << m_value;
-	return ss.str();
-}
-
-void Literal::addMember(const Literal &l)
-{
-	m_kind = Struct;
-	m_isEmpty = false;
-	m_members.push_back(l);
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

@@ -27,52 +27,41 @@
  * DAMAGE.
  */
 
-#ifndef G3NOM_TYPEVISITOR_H
-#define G3NOM_TYPEVISITOR_H
+#include "idlvalues.h"
 
-#include <ostream>
+#include <string>
+#include <sstream>
 
-namespace G3nom
+using namespace G3nom;
+using namespace Idl;
+using namespace std;
+
+/******** Literal ***************/
+
+std::string Literal::print() const
 {
-namespace Idl {
-
-class BaseType;
-class StringType;
-class WStringType;
-class SequenceType;
-class FixedType;
-class DeclaredType;
-class StructType;
-class EnumType;
-class TypedefType;
-class ArrayType;
-class NamedType;
-class IdlType;
-class ConstValue;
-
-class TypeVisitor
-{
-	public:
-		TypeVisitor() {}
-		virtual ~TypeVisitor() {}
-
-		virtual void visitBaseType(BaseType*) {}
-		virtual void visitStringType(StringType*) {}
-		virtual void visitWStringType(WStringType*) {}
-		virtual void visitSequenceType(SequenceType*) {}
-		virtual void visitFixedType(FixedType*) {}
-		virtual void visitStructType(StructType*) {}
-		virtual void visitTypedefType(TypedefType*) {}
-		virtual void visitEnumType(EnumType*) {}
-		virtual void visitArrayType(ArrayType*) {}
-		virtual void visitNamedType(NamedType*) {}
-
-		virtual void visitConstValue(ConstValue *v) {}
-};
-
-}
+	string s;
+	stringstream ss;
+	if(m_kind == Struct) {
+		ss << "{";
+		bool first = true;
+		for(Literal::Vector::const_iterator it = m_members.begin(); it != m_members.end(); ++it) {
+			if(first)
+				first = false;
+			else
+				ss << ", ";
+			ss << it->print();
+		}
+		ss << "}";
+	} else
+		ss << m_value;
+	return ss.str();
 }
 
-#endif
+void Literal::addMember(const Literal &l)
+{
+	m_kind = Struct;
+	m_isEmpty = false;
+	m_members.push_back(l);
+}
 
-// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

@@ -38,16 +38,6 @@
 
 #include "typevisitor.h"
 
-// Note on Type object memory management
-//
-// All type objects which can be are statically allocated; all others
-// are allocated on the heap. When Decl objects receive a pointer to a
-// type object, they should call its shouldDelete() function to see if
-// they are responsible for deleting the object. This only returns
-// true for those heap-allocated objects which do not have an
-// associated Decl object. Type objects created by Decl constructors
-// must be deleted by the Decls' destructors.
-
 namespace G3nom
 {
 

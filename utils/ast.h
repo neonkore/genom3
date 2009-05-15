@@ -33,9 +33,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/variant.hpp>
 
 #include "idltype.h"
+#include "idlvalues.h"
 
 namespace G3nom
 {
@@ -120,42 +120,6 @@ class Task
 		//std::string connectedPort;
 };
 
-namespace Idl {
-
-class Literal {
-	public:
-		enum Kind { None, Bool, Char, Int, Double, String, Struct};
-		typedef std::map<std::string, Literal> Map;
-		typedef std::vector<Literal> Vector;
-
-		Literal() : m_kind(None) , m_isEmpty(true) {}
-		Literal(char c) : m_kind(Char), m_value(c), m_isEmpty(false)  {}
-		Literal(int i) : m_kind(Int), m_value(i), m_isEmpty(false)  {}
-		Literal(std::string s) : m_kind(String), m_value(s), m_isEmpty(false)  {}
-		Literal(double d) : m_kind(Double), m_value(d), m_isEmpty(false)  {}
-		Literal(bool b) : m_kind(Bool), m_value(b), m_isEmpty(false)  {}
-
-		void addMember(const Literal &l);
-		Literal::Vector& members() { return m_members; }
-
-		bool isEmpty() const { return m_isEmpty; }
-		std::string print() const;
-
-		int asBool() const { return boost::get<bool>(m_value); }
-		char asChar() const { return (char) boost::get<int>(m_value); }
-		int asInt() const { return boost::get<int>(m_value); }
-		double asDouble() const  { return boost::get<double>(m_value); }
-		std::string asString() const  { return boost::get<std::string>(m_value); }
-
-	private:
-		Kind m_kind;
-		boost::variant<bool, int, double, std::string> m_value;
-		bool m_isEmpty;
-		Literal::Vector m_members;
-};
-
-}
-
 class Service
 {
 	public:
@@ -212,6 +176,8 @@ class Component
 		void addTask(Task::Ptr task);
 		void addService(Service::Ptr task);
 		void addPort(Port::Ptr port);
+
+		void addConstValue(const Idl::ConstValue &val);
 		void addType(Idl::IdlType::Ptr type);
 
 		Task::Map& tasksMap();
@@ -245,6 +211,7 @@ class Component
 		Service::Map services;
 		Port::Map ports;
 		Idl::IdlType::Vector m_types;
+		Idl::ConstValue::Map m_constValues;
 		std::vector<std::string> m_importedComponents;
 };
 

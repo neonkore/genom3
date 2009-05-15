@@ -31,6 +31,7 @@
 
 #include "typevisitor.h"
 #include "idltype.h"
+#include "idlvalues.h"
 
 namespace G3nom
 {
@@ -43,6 +44,7 @@ class DumpType : public TypeVisitor
 		virtual ~DumpType() {}
 
 		static std::string dumpType(IdlType::Ptr t);
+		static std::string dumpConstValue(ConstValue &v);
 
 		virtual void visitBaseType(BaseType*);
 		virtual void visitStringType(StringType*);
@@ -54,6 +56,8 @@ class DumpType : public TypeVisitor
 		virtual void visitEnumType(EnumType*);
 		virtual void visitArrayType(ArrayType *);
 		virtual void visitNamedType(NamedType*);
+
+		virtual void visitConstValue(ConstValue *v);
 
 	protected:
 		std::ostream &m_out;

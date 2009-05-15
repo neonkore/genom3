@@ -131,7 +131,7 @@ struct variant_type {
 // type tokens
 %token TRUE FALSE
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
-%token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
+%token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE CONST
 %token TYPEDEF UNSIGNED OBJECT
 
 /*token SPECIAL_CHAR	"char"
@@ -185,6 +185,7 @@ struct variant_type {
 %type <typeVal> 		sequence_type
 %type <typeVal> 		string_type
 %type <typeVal> 		wide_string_type
+%type <typeVal> 		const_type
 
 /*%type <union_val> 		union_type
 %type <union_val> 		union_header
@@ -239,6 +240,8 @@ declaration:
 {
     driver.component().addType($1);
 }
+| const_decl
+{}
 ;
 
 /*** Component information ***/
@@ -527,6 +530,26 @@ codel_field:
 {
     driver.currentCodel()->addOutPort($2);
 };
+
+/*** Const value declaration ***/
+
+const_decl:
+  CONST const_type IDENTIFIER EQUAL literal
+{
+    ConstValue c($3, $2, $5);
+    driver.component().addConstValue(c);
+};
+
+const_type:
+ integer_type
+| char_type
+| wide_char_type
+| boolean_type
+| floating_pt_type
+| string_type
+| wide_string_type
+| fixed_pt_type
+| octet_type;
 
 /*** IDL Literal Declaration ***/
 

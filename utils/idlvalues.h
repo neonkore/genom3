@@ -81,7 +81,9 @@ class ConstValue {
 		typedef std::map<std::string, ConstValue> Map;
 
 		ConstValue() {}
-		ConstValue(const std::string &name, IdlType::Ptr type, Literal value);
+		ConstValue(const std::string &name, IdlType::Ptr type, Literal value)
+		: m_identifier(name), m_type(type), m_value(value)
+		{}
 
 		std::string identifier() const { return m_identifier; }
 		const Literal& value() const { return m_value; }

@@ -124,6 +124,7 @@ chartext				([^\'])|(\\.)
 "any"			{ return token::ANY; }
 "void"			{ return token::VOID; }
 
+"const"			{ return token::CONST; }
 "native"		{ return token::NATIVE; }
 "enum"			{ return token::ENUM; }
 "union"			{ return token::UNION; }

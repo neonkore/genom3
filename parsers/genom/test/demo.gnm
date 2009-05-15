@@ -1,4 +1,7 @@
 
+const double DEMO_THRESHOLD = 0.2;
+const long MAX_VAL = 10;
+
 struct demoState {
     double position;
     double speed;

@@ -130,12 +130,9 @@ void CVisitor::visitStructType(StructType *s)
 		m_out << " " << it->first;
 
 		//print array if existing
-		if(it->second->kind() == IdlType::Array) {
-			ArrayType *a = it->second->asType<ArrayType>();
-			std::vector<int>::const_iterator it3 = a->bounds().begin();
-			for (; it3 != a->bounds().end(); ++it3)
-				m_out << "[" << *it3 << "]";
-		}
+		if(it->second->kind() == IdlType::Array)
+			m_out << it->second->asType<ArrayType>()->printBounds();
+
 		m_out << ";" << endl;
 	}
 	m_out << "}";

@@ -55,7 +55,21 @@ int scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	for m in s.members():
-	    ?>
+	    if m.data().kind() == IdlKind.Array:
+		a = m.data().asArrayType()
+		dims = ""
+		for n in a.bounds():
+		  dims += str(n) + ", "
+		?>
+    fprintf(out, "%s<!m.key()!><!a.printBounds()!>:\n", indstr);
+    { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
+      if (scan_<!typeProtoPrefix(a.type())!>(in, out, (<!MapTypeToC(a.type(), True)!> *)(x+elt)-><!m.key()!>, 
+                     indent, 1, dims) == ABORT) {
+      free (indstr);
+      return ABORT; } }
+<?
+	    else:
+		?>
     fprintf(out, "%s<!m.key()!>:\n", indstr);
     if(scan_<!typeProtoPrefix(m.data())!>(in, out, &((x+elt)-><!m.key()!>), indent, 0, NULL) == ABORT) {
        free (indstr);

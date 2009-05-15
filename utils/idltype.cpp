@@ -134,6 +134,13 @@ StringType* IdlType::asStringType()
 	return static_cast<StringType*>(this);
 }
 
+ArrayType* IdlType::asArrayType()
+{
+	if(m_kind != Array)
+		return 0;
+	return static_cast<ArrayType*>(this);
+}
+
 IdlType::Ptr IdlType::unalias()
 {
 	switch(m_kind) {
@@ -268,6 +275,17 @@ std::string TypedefType::identifier() const
 	for (; it != m_declarators->end(); ++it) 
 		return (*it)->identifier();
 	return string();
+}
+
+/************ ArrayType ***************/
+
+std::string ArrayType::printBounds() const
+{
+	string s;
+	stringstream ss(s);
+	for(vector<int>::const_iterator it = m_bounds.begin(); it != m_bounds.end(); ++it)
+		ss << "[" << *it << "]";
+	return ss.str();
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;  replace-tabs off;

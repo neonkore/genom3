@@ -150,11 +150,7 @@ void DumpType::visitEnumType(EnumType *e)
 
 void DumpType::visitArrayType(ArrayType *a)
 {
-	m_out << "array";
-	std::vector<int>::const_iterator it = a->bounds().begin();
-	for (; it != a->bounds().end(); ++it)
-		m_out << "[" << *it << "]";
-	m_out << " of " ;
+	m_out << "array" << a->printBounds() << " of " ;
 	a->type()->accept(*this);
 }
 

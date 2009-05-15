@@ -73,6 +73,7 @@ class IdlType
 		EnumType* asEnumType();
 		TypedefType* asTypedefType();
 		StringType* asStringType();
+		ArrayType* asArrayType();
 
 		/** \return an equivalent IdlType object with aliases stripped 
 		* or IdlType::Ptr() if the type is not an alias */
@@ -361,6 +362,8 @@ class ArrayType : public IdlType {
 		std::vector<int> & bounds() {
 			return m_bounds;
 		}
+		std::string printBounds() const;
+
 		IdlType::Ptr type() const { return m_type; }
 
 		virtual void accept(TypeVisitor& visitor) {

@@ -55,7 +55,18 @@ void print_<!typeProtoPrefix(t)!>( FILE *out,
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	for m in s.members(): 
-	    ?>
+	    if m.data().kind() == IdlKind.Array:
+		a = m.data().asArrayType()
+		dims = ""
+		for n in a.bounds():
+		  dims += str(n) + ", "
+		?>
+    fprintf(out, "%s<!m.key()!><!a.printBounds()!>:\n", indstr);
+    { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
+      print_<!typeProtoPrefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+<?
+	    else:
+		?>
     fprintf(out, "%s<!m.key()!>:\n", indstr);
     print_<!typeProtoPrefix(m.data())!>(out, &((x+elt)-><!m.key()!>), indent, 0, NULL, in);
 <? 

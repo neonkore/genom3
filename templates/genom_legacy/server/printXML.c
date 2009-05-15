@@ -53,8 +53,18 @@ void printXML_<!typeProtoPrefix(t)!>( FILE *out, char *name,
 <?
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
-	for m in s.members(): 
-	    ?>
+	for m in s.members():
+	    if m.data().kind() == IdlKind.Array:
+		a = m.data().asArrayType()
+		dims = ""
+		for n in a.bounds():
+		  dims += str(n) + ", "
+		?>
+    { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
+      printXML_<!typeProtoPrefix(a.type())!>(out, "<!m.key()!>", (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+<?
+	    else:
+		?> 
     printXML_<!typeProtoPrefix(m.data())!>(out, "<!m.key()!>" ,&((x+elt)-><!m.key()!>), indent, 0, NULL, in);
 <? 
     elif t.kind() == IdlKind.Enum:

@@ -42,6 +42,8 @@ using namespace boost::python;
 void export_containers()
 {
 	// Vectors
+	class_<std::vector<int> >("IntVec")
+	.def(vector_indexing_suite<std::vector<int> >());
 	class_<std::vector<std::string> >("StringVec")
 	.def(vector_indexing_suite<std::vector<std::string> >());
 	class_<IdlType::Vector>("IdlTypeVec")

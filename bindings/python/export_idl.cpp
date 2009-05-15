@@ -88,6 +88,7 @@ void export_idl()
 	.def("asNamedType", &IdlType::asNamedType, return_value_policy<reference_existing_object>())
 	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
 	.def("asStringType", &IdlType::asStringType, return_value_policy<reference_existing_object>())
+	.def("asArrayType", &IdlType::asArrayType, return_value_policy<reference_existing_object>())
 	.def("unalias", &IdlType::unalias)
 	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);
@@ -116,6 +117,11 @@ void export_idl()
 
 	class_<NamedType, bases<IdlType> >("NamedType")
 	.def("type", &NamedType::type);
+
+	class_<ArrayType, bases<IdlType> >("ArrayType")
+	.def("type", &ArrayType::type)
+	.def("bounds", &ArrayType::bounds, return_value_policy<reference_existing_object>())
+	.def("printBounds", &ArrayType::printBounds);
 
 	enum_<IdlType::Kind>("IdlKind")
 	.value("Null", IdlType::Null)

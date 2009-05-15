@@ -65,6 +65,13 @@ void print_<!typeProtoPrefix(t)!>( FILE *out,
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
       print_<!typeProtoPrefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
 <?
+	    elif m.data().kind() == IdlKind.Sequence:
+		seq = m.data().asSequenceType()
+		?>
+    fprintf(out, "%s<!m.key()!>[<!seq.bound()!>]:\n", indstr);
+    { int dims[1] = {<!seq.bound()!>};
+      print_<!typeProtoPrefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+<?
 	    else:
 		?>
     fprintf(out, "%s<!m.key()!>:\n", indstr);

@@ -89,6 +89,7 @@ void export_idl()
 	.def("asTypedefType", &IdlType::asTypedefType, return_value_policy<reference_existing_object>())
 	.def("asStringType", &IdlType::asStringType, return_value_policy<reference_existing_object>())
 	.def("asArrayType", &IdlType::asArrayType, return_value_policy<reference_existing_object>())
+	.def("asSequenceType", &IdlType::asType<SequenceType>, return_value_policy<reference_existing_object>())
 	.def("unalias", &IdlType::unalias)
 	.def("identifier", &IdlType::identifier)
 	.def("kind", &IdlType::kind);
@@ -122,6 +123,10 @@ void export_idl()
 	.def("type", &ArrayType::type)
 	.def("bounds", &ArrayType::bounds, return_value_policy<reference_existing_object>())
 	.def("printBounds", &ArrayType::printBounds);
+
+	class_<SequenceType, bases<IdlType> >("SequenceType", init<IdlType::Ptr, int>())
+	.def("seqType", &SequenceType::seqType)
+	.def("bound", &SequenceType::bound);
 
 	enum_<IdlType::Kind>("IdlKind")
 	.value("Null", IdlType::Null)

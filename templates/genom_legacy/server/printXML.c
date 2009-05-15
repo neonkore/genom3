@@ -63,6 +63,12 @@ void printXML_<!typeProtoPrefix(t)!>( FILE *out, char *name,
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
       printXML_<!typeProtoPrefix(a.type())!>(out, "<!m.key()!>", (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
 <?
+	    elif m.data().kind() == IdlKind.Sequence:
+		seq = m.data().asSequenceType()
+		?>
+    { int dims[1] = {<!seq.bound()!>};
+      printXML_<!typeProtoPrefix(seq.seqType())!>(out, "<!m.key()!>", (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+<?
 	    else:
 		?> 
     printXML_<!typeProtoPrefix(m.data())!>(out, "<!m.key()!>" ,&((x+elt)-><!m.key()!>), indent, 0, NULL, in);

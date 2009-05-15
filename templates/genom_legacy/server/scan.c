@@ -68,6 +68,16 @@ int scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
       free (indstr);
       return ABORT; } }
 <?
+	    elif m.data().kind() == IdlKind.Sequence:
+		seq = m.data().asSequenceType()
+		?>
+    fprintf(out, "%s<!m.key()!>[<!seq.bound()!>]:\n", indstr);
+    { int dims[1] = {<!seq.bound()!>};
+      if (scan_<!typeProtoPrefix(seq.seqType())!>(in, out, (<!MapTypeToC(seq.seqType(), True)!> *)(x+elt)-><!m.key()!>, 
+                     indent, 1, dims) == ABORT) {
+      free (indstr);
+      return ABORT; } }
+<?
 	    else:
 		?>
     fprintf(out, "%s<!m.key()!>:\n", indstr);

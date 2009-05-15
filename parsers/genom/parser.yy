@@ -490,7 +490,7 @@ identifiers:
 }
 | identifiers IDENTIFIER
 {
-    $$ = $1 + $2;
+    $$ = $1 + " " + $2;
 };
 
 /*** Codel Declaration ***/

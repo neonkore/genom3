@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 	ti.setDebug(true);
 
 	Driver d;
-	if (!d.parseFile("/home/ccpasteur/work/git/g3nom/parsers/genom/test/demo.gnm"))
+	if (!d.parseFile("/home/ccpasteur/work/viam-genom-1.3/viam.gnm"))
 		cout << "Error parsing gen file " << endl;
 
 	ti.setComponent(&(d.component()));

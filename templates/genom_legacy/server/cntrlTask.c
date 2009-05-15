@@ -1234,7 +1234,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <?
 	    else:
 		?>
-    status = <!controlFunc!> (&bilan);
+    status = <!service.codel("control").name!>_codel(&bilan);
 <?
 
 	    ?>

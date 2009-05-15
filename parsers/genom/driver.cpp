@@ -82,9 +82,13 @@ void Driver::split(const std::string &s, vector<string> &v)
 	uint idx = 0, previdx = 0;
 	do {
 		idx = s.find(" ", previdx);
-		v.push_back(s.substr(previdx, idx - previdx));
+		string r = s.substr(previdx, idx - previdx);
+		if(r.empty())
+			idx++; // ignore white space
+		else
+			v.push_back(r);
 		previdx = idx;
-	} while(idx != string::npos);
+	} while(idx != string::npos && idx < s.length());
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

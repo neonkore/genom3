@@ -103,12 +103,14 @@ int main(int argc, char* argv[])
 	string sourceDir = templatesDir + templ + "/";
 
 	Driver d;
-	if (!d.parseFile(argv[idx]))
+	if (!d.parseFile(argv[idx])) {
 		cout << "Error parsing .gnm file: " << argv[idx] << endl;
+		exit(1);
+	}
 	ti.setComponent(&(d.component()));
 
 	if(outputDir.empty())
-		outputDir = dirname(argv[idx]);
+		outputDir = dirname(argv[idx]) + string("/");
 
 	ti.setSourceDirectory(sourceDir);
 	ti.setOutputDirectory(outputDir);

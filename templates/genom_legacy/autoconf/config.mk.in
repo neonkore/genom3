@@ -99,8 +99,8 @@ genomIncludes =""
 genomLibs=""
 for i in comp.importedComponents():
     name = upper(i)
-    genomIncludes += " $(<!upper(i)!>_CFLAGS)"
-    genomLibs += " $(<!upper(i)!>_LIBS)"
+    genomIncludes += " $(" + upper(i) + "_CFLAGS)"
+    genomLibs += " $(" + upper(i) + "_LIBS)"
     ?>
 <!name!>_CFLAGS   = 	@<!name!>_CFLAGS@
 <!name!>_LIBS     = 	@<!name!>_LIBS@

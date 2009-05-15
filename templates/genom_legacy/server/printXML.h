@@ -41,7 +41,7 @@
 /* Structures definies par d'autres modules */
 <?
 for i in comp.importedComponents():
-    print "#include \"server/" + i + "PrintXML.h"
+    print "#include \"server/" + i + "PrintXML.h\""
 ?>
 
 #include "<!comp.name()!>PosterLib.h"

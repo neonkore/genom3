@@ -68,7 +68,7 @@ def typeProtoPrefix(t):
     elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
         prefix = "int"
     elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
-        prefix = "uint"
+        prefix = "int"
     elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
         prefix = "double"
     elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:

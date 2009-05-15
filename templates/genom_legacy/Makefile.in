@@ -67,7 +67,7 @@ clean:
 .PHONY: distclean
 distclean:
 	-$(MAKE) $@-$(OSAPI)
-	rm -f Makefile libtool config.log config.status $pkgname$.pc $pkgname$-oprs.pc local.mk config.mk
+	rm -f Makefile libtool config.log config.status <!pkgname!>.pc <!pkgname!>-oprs.pc local.mk config.mk
 
 .PHONY:	dist
 dist:
@@ -116,7 +116,7 @@ regen: standalone-regen
 
 # --- pkgconfig ---------------------------------------------------------
 ALL_PKGCONFIG := <!pkgname!>.pc $(addsuffix .pc,@EXTRA_PKGCONFIG@)
-<!shouldGenerateOpenPRS!>ALL_PKGCONFIG += $pkgname$-oprs.pc
+<!shouldGenerateOpenPRS!>ALL_PKGCONFIG += <!pkgname!>-oprs.pc
 install:: $(ALL_PKGCONFIG)
 	$(MKINSTALLDIRS) ${DESTDIR}$(libdir)/pkgconfig
 	$(INSTALL) $(ALL_PKGCONFIG) ${DESTDIR}$(libdir)/pkgconfig

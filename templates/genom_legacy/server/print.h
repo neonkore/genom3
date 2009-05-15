@@ -38,7 +38,7 @@
 /* Structures definies par d'autres modules */
 <?
 for i in comp.importedComponents():
-    print "#include \"server/" + i + "Print.h"
+    print "#include \"server/" + i + "Print.h\""
 ?>
 #include "<!comp.name()!>PosterLib.h"
 

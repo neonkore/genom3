@@ -44,7 +44,7 @@ funProto = "extern void endianswap_%s(%s *x, int nDim, int *dims);"
 
 <?
 for i in comp.importedComponents():
-    print "#include \"server/" + i + "Endian.h"
+    print "#include \"server/" + i + "Endian.h\""
 ?>
 
 /* Protoypes */

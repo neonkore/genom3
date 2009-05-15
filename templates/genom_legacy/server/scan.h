@@ -39,7 +39,7 @@
 /* Structures definies par d'autres modules */
 <?
 for i in comp.importedComponents():
-    print "#include \"server/" + i + "Scan.h"
+    print "#include \"server/" + i + "Scan.h\""
 
 ?>
 

@@ -101,7 +101,8 @@ void CVisitor::visitWStringType(WStringType *ws)
 
 void CVisitor::visitSequenceType(SequenceType *seq)
 {
-	/// todo
+	seq->seqType()->accept(*this);
+	m_out << "*";
 }
 
 void CVisitor::visitFixedType(FixedType *fixed)
@@ -174,7 +175,7 @@ void CVisitor::visitEnumType(EnumType *e)
 
 void CVisitor::visitArrayType(ArrayType *a)
 {
-	/// todo
+	a->type()->accept(*this);
 }
 
 void CVisitor::visitNamedType(NamedType *n)

@@ -111,6 +111,8 @@ extern "C" {
 <?
 # $listUserFuncProto$
 for s in servicesMap:
+    if s.data().type == ServiceType.Init:
+	continue
     for codel in s.data().codels():
 	print "extern " + codelSignatureFull(codel, s.data()) + ";"
 

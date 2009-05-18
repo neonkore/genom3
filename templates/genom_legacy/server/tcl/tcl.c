@@ -50,12 +50,30 @@ def parseInput(inputType, name):
 
 
 def processOutput(type, name, allocFlag = False):
+  if type.kind() == IdlKind.Array: 
+    a = type.asArrayType()
+    ?>
+   {
+      int loop1[<!len(a.bounds())!>];
+      for(loop1[0]=0; loop1[0] < <!a.bounds()[0]!>; loop1[0]++) {
+<?
+    flatListArray = flatStruct(a.type(), name + "[loop1[0]]", ".")
+    for x in flatListArray:
+      processOutput(x[0], x[1], allocFlag)
+    ?>
+      }
+   }
+<?
+    return
   ?>
     ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result, <?
   if type.kind() == IdlKind.Short or type.kind() == IdlKind.Long or type.kind() == IdlKind.Char: ?>
 		Tcl_NewIntObj(<!name!>));
 <?
-  elif type.kind() == IdlKind.LongLong: ?>
+  elif type.kind() == IdlKind.UShort or type.kind() == IdlKind.ULong or type.kind() == IdlKind.Char: ?>
+		Tcl_NewIntObj(<!name!>));
+<?
+  elif type.kind() == IdlKind.LongLong or type.kind() == IdlKind.ULongLong: ?>
 		Tcl_NewWideIntObj(<!name!>));
 <?
   elif type.kind() == IdlKind.String: ?>

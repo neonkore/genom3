@@ -71,6 +71,7 @@ for s in servicesMap:
 extern int returnCodeToReport(int res);
 
 <?
+alreadyDefinedCodels = []
 for s in servicesMap:
     service = s.data()
     if service.taskName != currentTaskName or service.type == ServiceType.Control:
@@ -79,6 +80,9 @@ for s in servicesMap:
 	if c.key() == "control":
 	    continue
 	codel = c.data()
+	if codel.name in alreadyDefinedCodels: # some codels can be used twice (eg in stop and inter)
+	    continue # do not define twice the same function
+	alreadyDefinedCodels.append(codel.name)
 	?>
 
 extern int <!real_codel_signature(codel, s.data())!>;

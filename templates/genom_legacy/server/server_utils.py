@@ -28,7 +28,7 @@ def flatStruct(t, name, separator = "_"):
 	return [(t, name)]   
 
 def convertFun(t):
-    if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
+    if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
         return ""
     elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
         return "atoi"
@@ -39,7 +39,7 @@ def convertFun(t):
     return ""
 
 def formatStringForType(t):
-   if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
+   if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
        return "%c";
    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
        return "%d"
@@ -63,7 +63,7 @@ def typeProtoPrefix(t):
 	prefix = "enum_"
     elif t.kind() == IdlKind.Typedef:
 	return ""
-    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
+    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
         prefix = "char"
     elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
         prefix = "int"

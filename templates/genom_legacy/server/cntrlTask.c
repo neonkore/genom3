@@ -1159,6 +1159,15 @@ for s in servicesMap:
 		out += "1"
     tabCompatibilityDeclare += out + "};"
 
+    if controlFuncFlag:
+	controlFuncParams = ""
+        for type in service.codel("control").inTypes:
+	  controlFuncParams += ", & SDI_F->" + type;
+	for type in service.codel("control").outTypes:
+	  controlFuncParams += ", & SDI_F->" + type;
+    else:
+      controlFuncParams = ""
+
     if service.type == ServiceType.Control: 
 	?>
 /*****************************************************************************
@@ -1168,8 +1177,8 @@ for s in servicesMap:
  */
 
 <?
-	if controlFuncFlag:
-	    print "extern int " + service.codel("control").name + "();"
+# 	if controlFuncFlag:
+# 	    print "extern int " + service.codel("control").name + "();"
 	?>
 
 static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
@@ -1230,7 +1239,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
     
     /* Call control func */
-    status = <!service.codel("control").name!>_codel(<!inputNamePtr!>, &bilan);
+    status = <!service.codel("control").name!>_codel(<!inputNamePtr!> <!controlFuncParams!>, &bilan);
 <?
 	    else:
 		?>
@@ -1288,8 +1297,8 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
  */
 
 <?
-	if controlFuncFlag:
-	    print "extern int " + service.codel("control").name + "();"
+# 	if controlFuncFlag:
+# 	    print "extern int " + service.codel("control").name + "();"
 	?>
 
 static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
@@ -1340,7 +1349,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
     if (csServRqstParamsGet (servId, rqstId, (void *) <!inputNamePtr!>, 
 			     <!inputSize!>, (FUNCPTR) NULL) != OK)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
-    status = <!service.codel("control").name!>(<!inputNamePtr!>, &bilan);
+    status = <!service.codel("control").name!>(<!inputNamePtr!> <!controlFuncParams!>, &bilan);
 <?
 	    else:?>
     status = <!service.codel("control").name!>(&bilan);

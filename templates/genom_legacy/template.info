@@ -30,7 +30,7 @@ main:
   "autoconf/mkinstalldirs"  
   "autoconf/module.pc.in" -> "autoconf/$$.pc.in"
 /* server/ dir */
-  "struct.h" -> "$$Struct.h"
+/*  "struct.h" -> "$$Struct.h"*/
   "server/modules.h" -> "server/$$Modules.h"
   "server/cntrlTask.c" -> "server/$$CntrlTask.c"
   "server/connectLib.c" -> "server/$$ConnectLib.c"

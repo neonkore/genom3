@@ -175,7 +175,7 @@ def codel_signature(codel, service=None):
   return proto
 
 def codelSignatureFull(codel, service):
-    if service.type == ServiceType.Control or codel.key() == "control":
+    if service.type != ServiceType.Exec or codel.key() == "control":
 	return "STATUS " + codel_signature(codel.data(), service)
     else:
 	return "ACTIVITY_EVENT " + codel_signature(codel.data(), service)

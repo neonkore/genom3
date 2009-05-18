@@ -49,7 +49,7 @@ ACTIVITY_EVENT returnCodeToActivityEvent(int res)
 <?
 errorSet = createErrorList()
 for e in errorSet:
-    print "    case ERROR_" + e + ": return ERROR;"
+    print "    case ERROR_" + e + ": return ETHER;"
 for s in servicesMap:
     service = s.data()
     if service.taskName != currentTaskName or service.type == ServiceType.Control:

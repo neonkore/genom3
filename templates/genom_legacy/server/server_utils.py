@@ -243,6 +243,48 @@ def maxServiceNameLength():
 	maxLen = max(maxLen, len(s.data().name))
     return maxLen
 
+def typeSize(t):
+    if t.kind() == IdlKind.Named:
+	return typeSize(t.asNamedType().type())
+    if t.kind() == IdlKind.Struct:
+	s = t.asStructType()
+	res = 0
+	for m in s.members():
+	    res += typeSize(m.data())
+	return res
+    elif t.kind() == IdlKind.Typedef:
+	return typeSize(t.asTypedefType().type())
+    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
+        return 4
+    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.Enum:
+	return 8
+    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+        return 8
+    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+        return 16
+    elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
+	s = t.asStringType()
+	if s is None:
+	  return 0
+	else:
+	  return s.bound()
+    return 0
+
+def maxArgsSize():
+    res = 8
+    s = IDSType.unalias().asStructType()
+    for m in s.members():
+      res = max(res, typeSize(m.data()))
+    return res
+
+def maxOutputSize():
+    res = 8
+    for s in servicesMap:
+      if s.data().output != "":
+	t = typeFromIdsName(s.data().output)
+	res = max(res, typeSize(m.data()))
+    return res
+
 # create connect services for each inport
 for port in inports:
   name = "connect" + port.name

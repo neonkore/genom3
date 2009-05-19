@@ -125,7 +125,7 @@ struct variant_type {
 %token			SERVICE		"service"
 %token			CODEL		"codel"
 
-%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL PLUS
+%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL 
 
 %token IN OUT INPORT OUTPORT
 // type tokens
@@ -149,6 +149,7 @@ struct variant_type {
 %type <literalVal>		literal;
 %type <literalVal>		literals;
 %type <literalVal>		boolean_literal;
+%type <literalVal>		composed_literal;
 
 %type <stringVal>		identifier_list
 %type <stringVal>		identifiers
@@ -197,7 +198,12 @@ struct variant_type {
 %type <case_label_val> 		case_label
 %type <union_case_val> 		element_spec*/
 
-%left PLUS
+%left PLUS MINUS
+%left TIMES SLASH
+%nonassoc MOD
+%left  AND OR XOR 
+%nonassoc LSHIFT RSHIFT
+%left NEG POS TILDE
 
 /* %destructor { delete $$; } STRINGLIT */
 /*%destructor { delete $$; } port_decl service_decl task_decl*/
@@ -616,14 +622,8 @@ literal:
 {
     $$ = $2;
 }
-| literal PLUS literal
-{
-    Literal l(Literal::Plus);
-    l.addMember($1);
-    l.addMember($3);
-    $$ = l;
-}
-;
+| composed_literal
+{};
 
 boolean_literal:
   TRUE
@@ -633,6 +633,96 @@ boolean_literal:
 | FALSE
 {
     $$ = Literal(false);
+};
+
+composed_literal:
+  /* unary operators */
+  MINUS literal %prec NEG 
+{
+    Literal l(Literal::Neg);
+    l.addMember($2);
+    $$ = l;
+}
+| PLUS literal %prec POS 
+{
+    $$ = $2;
+}
+| TILDE literal %prec TILDE
+{
+    Literal l(Literal::LNeg);
+    l.addMember($2);
+    $$ = l;
+} 
+  /* binary operators */
+|  literal PLUS literal
+{
+    Literal l(Literal::Plus);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal MINUS literal
+{
+    Literal l(Literal::Minus);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal TIMES literal
+{
+    Literal l(Literal::Times);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal SLASH literal
+{
+    Literal l(Literal::Divide);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal MOD literal
+{
+    Literal l(Literal::Mod);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal AND literal
+{
+    Literal l(Literal::And);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal OR literal
+{
+    Literal l(Literal::Or);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal XOR literal
+{
+    Literal l(Literal::Xor);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal LSHIFT literal
+{
+    Literal l(Literal::LShift);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
+}
+| literal RSHIFT literal
+{
+    Literal l(Literal::RShift);
+    l.addMember($1);
+    l.addMember($3);
+    $$ = l;
 };
 
 literals:

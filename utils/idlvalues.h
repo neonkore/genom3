@@ -46,7 +46,8 @@ namespace Idl {
 
 class Literal {
 	public:
-		enum Kind { None, Bool, Char, Int, Double, String, Struct, Plus};
+		enum Kind { None, Bool, Char, Int, Double, String, Struct, Plus, Minus, Times,
+		  Divide, Mod, And, Or, Xor, LShift, RShift, Neg, LNeg};
 		typedef std::map<std::string, Literal> Map;
 		typedef std::vector<Literal> Vector;
 

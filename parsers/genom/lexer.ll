@@ -107,6 +107,16 @@ chartext				([^\'])|(\\.)
 ">"			{ return token::GREATER_THAN; }
 "="			{ return token::EQUAL; }
 "+"			{ return token::PLUS; }
+"-"			{ return token::MINUS; }
+"*"			{ return token::TIMES; }
+"/"			{ return token::SLASH; }
+"%"			{ return token::MOD; }
+"&"			{ return token::AND; }
+"|"			{ return token::OR; }
+"^"			{ return token::XOR; }
+"<<"			{ return token::LSHIFT; }
+">>"			{ return token::RSHIFT; }
+"~"			{ return token::TILDE; }
 
  /* type related keywords */
 "unsigned"		{ return token::UNSIGNED; }

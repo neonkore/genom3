@@ -63,7 +63,7 @@ service Goto {
 /* Execution request: monitor a particular mobile's position */
 service Monitor {
    type:                  exec;                 /* request's type */
-   input:                 monitor;    /* inputs: position */
+   input:                 monitor = 1 << 8;    /* inputs: position */
    output:                state/*.position*/; /* outputs: actual pos. */
    codel main:            demoMonitorExec();      /* main codel */
    errors:          TOO_FAR_AWAY;        /*  possible error messages */

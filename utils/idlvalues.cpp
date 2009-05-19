@@ -59,7 +59,44 @@ std::string Literal::print() const
 			ss << m_members.front().print();
 			ss << " + " << m_members.back().print();
 			break;
-		} default:
+		} case Minus: {
+			ss << m_members.front().print();
+			ss << " - " << m_members.back().print();
+			break;
+		} case Times: {
+			ss << m_members.front().print();
+			ss << " * " << m_members.back().print();
+			break;
+		} case Divide: {
+			ss << m_members.front().print();
+			ss << " / " << m_members.back().print();
+			break;
+		} case Mod: {
+			ss << m_members.front().print();
+			ss << " % " << m_members.back().print();
+			break;
+		} case And: {
+			ss << m_members.front().print();
+			ss << " & " << m_members.back().print();
+			break;
+		} case Or: {
+			ss << m_members.front().print();
+			ss << " | " << m_members.back().print();
+			break;
+		} case Xor: {
+			ss << m_members.front().print();
+			ss << " ^ " << m_members.back().print();
+			break;
+		} case LShift: {
+			ss << m_members.front().print();
+			ss << " << " << m_members.back().print();
+			break;
+		} case RShift: {
+			ss << m_members.front().print();
+			ss << " >> " << m_members.back().print();
+			break;
+		}
+		default:
 			ss << m_value;
 	}
 	return ss.str();

@@ -194,31 +194,7 @@ static void <!comp.name()!>TestInitTask (TEST_STR *testStr)
 <?
 for s in servicesMap:
     service = s.data()
-    inputFlag = len(service.inputs()) > 0
-    if inputFlag:
-	inputName = service.inputs()[0]
-	inputType = typeFromIdsName(inputName)
-	if t != None:
-	    b = inputType.kind() == IdlKind.Struct or inputType.kind() == IdlKind.Typedef or inputType.kind() == IdlKind.Array or inputType.kind() == IdlKind.Named
-	    if b:
-		inputNewline = "1"
-	    else:
-		inputNewline = "0"
-	inputTypePtr = pointerTo(inputType)
-	inputTypeProto = typeProtoPrefix(inputType)
-
-    outputFlag = len(service.output) > 0
-    if outputFlag:
-	outputName = service.output
-	t = typeFromIdsName(outputName)
-	if t != None:
-	    b = t.kind() == IdlKind.Struct or t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Array or t.kind() == IdlKind.Named
-	    if b:
-		outputNewline = "1"
-	    else:
-		outputNewline = "0"
-	outputType = MapTypeToC(t,True)
-	outputTypeProto = typeProtoPrefix(t)
+    serviceInfo = services_info_dict[service.name]
     ?>
 /**
  **  Emission et reception de la requete <!comp.name()!>Test<!service.name!>
@@ -229,15 +205,15 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 
 {
 <? # $inputDeclarations$ 
-    if inputFlag:
-	if inputType.kind() == IdlKind.String:
-	  print "int inputDims[1] = {" + str(inputType.asStringType().bound()) + "};"
+    if serviceInfo.inputFlag:
+	if serviceInfo.inputType.kind() == IdlKind.String:
+	  print "int inputDims[1] = {" + str(serviceInfo.inputType.asStringType().bound()) + "};"
 	  inputNbDimensions = 1
 	else:
 	  print  "int *inputDims = NULL;"
 	  inputNbDimensions = 0
  # $outputDeclarations$
-    if outputFlag:
+    if serviceInfo.outputFlag:
 	print  "int *outputDims = NULL;"
 
     if service.type != ServiceType.Control:
@@ -246,8 +222,8 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
   if (!TEST_ACTIVITY_ON(testId, acti)) {
 <?
  # $inputScan$
-    if inputFlag:
-	outputServices = findServiceWithSameOutput(service,inputName)
+    if serviceInfo.inputFlag:
+	outputServices = findServiceWithSameOutput(service,serviceInfo.inputName)
 	#similarPosters = findPosterWithSameOutput()
 	#todo meme chose avec les posters
 
@@ -281,8 +257,8 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
   }
 <?
 	?>
-  printf ("-- Enter <!inputTypePtr!> <!inputName!>:");
-  scan_<!inputTypeProto!>(stdin, stdout, (<!inputTypePtr!>)TEST_RQST_INPUT(testId,rqstNum), <!inputNewline!>, <!inputNbDimensions!>, inputDims);
+  printf ("-- Enter <!serviceInfo.inputTypePtr!> <!serviceInfo.inputName!>:");
+  scan_<!serviceInfo.inputTypeProto!>(stdin, stdout, (<!serviceInfo.inputTypePtr!>)TEST_RQST_INPUT(testId,rqstNum), <!serviceInfo.inputNewline!>, <!inputNbDimensions!>, inputDims);
 <?
     if service.type != ServiceType.Control:
 	?>
@@ -299,11 +275,11 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
      return FALSE;
 
 <? #  $outputPrint$
-    if outputFlag:
+    if serviceInfo.outputFlag:
 	?>
   if (!silent) {
-    printf ("<!outputName!> = ");
-    print_<!outputTypeProto!>(stdout, (<!outputType!> *)TEST_RQST_OUTPUT(testId,rqstNum), <!outputNewline!>, 0, outputDims, stdin);
+    printf ("<!serviceInfo.outputName!> = ");
+    print_<!serviceInfo.outputTypeProto!>(stdout, (<!serviceInfo.outputTypeC!> *)TEST_RQST_OUTPUT(testId,rqstNum), <!serviceInfo.outputNewline!>, 0, outputDims, stdin);
   }
 <?
     ?>

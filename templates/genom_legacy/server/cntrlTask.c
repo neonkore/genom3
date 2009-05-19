@@ -1102,41 +1102,7 @@ static void
 serviceNum = 0
 for s in servicesMap:
     service = s.data()
-    controlFuncFlag = (service.hasCodel("control"))
-    if len(service.inputs()) == 0:
-	inputFlag = False
-	inputSize = "0"
-	inputNamePtr = "NULL"
-	inputRefPtr = "NULL"
-    else:
-	inputFlag = True
-	inputName = service.inputs()[0]
-	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputName + ")"
-
-	t = typeFromIdsName(inputName)
-	if(t.kind() == IdlKind.String):
-	    inputNamePtr = inputName
-	else:
-	    inputNamePtr = "&" + inputName
-	inputRefPtr = "&((*" + comp.name() + "DataStrId)." + inputName + ")" 
-
-    # same for output
-    if len(service.output) == 0:
-	outputFlag = False
-	outputSize = "0"
-	outputNamePtr = "NULL"
-	outputRefPtr = "NULL"
-    else:
-	outputFlag = True
-	outputName = service.output
-	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + outputName + ")"
-
-	t = typeFromIdsName(service.output)
-	if(t.kind() == IdlKind.String):
-	    outputNamePtr = outputName
-	else:
-	    outputNamePtr = "&" + outputName
-	outputRefPtr = "&((*" + comp.name() + "DataStrId)." + outputName + ")" 
+    serviceInfo = services_info_dict[service.name]
 
  #  $tabCompatibilityDeclare$
     tabCompatibilityDeclare = "static int " + comp.name() + service.name + "Compatibility[] = {"
@@ -1159,15 +1125,6 @@ for s in servicesMap:
 		out += "1"
     tabCompatibilityDeclare += out + "};"
 
-    if controlFuncFlag:
-	controlFuncParams = ""
-        for type in service.codel("control").inTypes:
-	  controlFuncParams += ", & SDI_F->" + type;
-	for type in service.codel("control").outTypes:
-	  controlFuncParams += ", & SDI_F->" + type;
-    else:
-      controlFuncParams = ""
-
     if service.type == ServiceType.Control: 
 	?>
 /*****************************************************************************
@@ -1177,7 +1134,7 @@ for s in servicesMap:
  */
 
 <?
-# 	if controlFuncFlag:
+# 	if self.controlFuncFlag:
 # 	    print "extern int " + service.codel("control").name + "();"
 	?>
 
@@ -1189,14 +1146,12 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   int *compatibilityTab = <!comp.name()!><!service.name!>Compatibility;
   int bilan=OK;
 <? 
-	if inputFlag and controlFuncFlag: 
-	    for s in service.inputs():
-		t = typeFromIdsName(s)
-		if t.kind() == IdlKind.String:
-		    st = t.asStringType()
-		    print "char " + s + "[" + str(st.bound()) +"];"
-		else:
-		    print "    " + MapTypeToC(t,True) + " " + s + ";"
+	if serviceInfo.inputFlag and serviceInfo.controlFuncFlag: 
+	  if serviceInfo.inputType.kind() == IdlKind.String:
+	      st = serviceInfo.inputType.asStringType()
+	      print "char " + serviceInfo.inputName + "[" + str(st.bound()) +"];"
+	  else:
+	      print "    " + MapTypeToC(serviceInfo.inputType,True) + " " + serviceInfo.inputName + ";"
 	?>
 
   /*--------------------------------------------------------------
@@ -1225,21 +1180,21 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
    * Call control func
    */
 <?
-	if controlFuncFlag:
+	if serviceInfo.controlFuncFlag:
 	    ?>
   {
     BOOL status;
 
 <?
-	    if inputFlag: 
+	    if serviceInfo.inputFlag: 
 		?> 
     /* Get inputs */
-    if (csServRqstParamsGet (servId, rqstId, (void *) <!inputNamePtr!>, 
-			     <!inputSize!>, (FUNCPTR) NULL) != OK)
+    if (csServRqstParamsGet (servId, rqstId, (void *) <!serviceInfo.inputNamePtr!>, 
+			     <!serviceInfo.inputSize!>, (FUNCPTR) NULL) != OK)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
     
     /* Call control func */
-    status = <!service.codel("control").name!>_codel(<!inputNamePtr!> <!controlFuncParams!>, &bilan);
+    status = <!service.codel("control").name!>_codel(<!serviceInfo.inputNamePtr!> <!serviceInfo.controlFuncParams!>, &bilan);
 <?
 	    else:
 		?>
@@ -1264,12 +1219,12 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   * Record inputs
   */
 <? 
-	if inputFlag:
-	    if controlFuncFlag:
-		print "  memcpy ((void *) " + inputRefPtr + ", (void *) " + inputNamePtr + ", " + inputSize + ");"
+	if serviceInfo.inputFlag:
+	    if serviceInfo.controlFuncFlag:
+		print "  memcpy ((void *) " + serviceInfo.inputRefPtr + ", (void *) " + serviceInfo.inputNamePtr + ", " + serviceInfo.inputSize + ");"
 	    else:?>
-  if (csServRqstParamsGet (servId, rqstId, (void *) <!inputRefPtr!>,
-			   <!inputSize!>, (FUNCPTR) NULL) != OK)
+  if (csServRqstParamsGet (servId, rqstId, (void *) <!serviceInfo.inputRefPtr!>,
+			   <!serviceInfo.inputSize!>, (FUNCPTR) NULL) != OK)
     <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
 <?
 
@@ -1279,7 +1234,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   * Send final reply
   */
   if (csServReplySend (servId, rqstId, FINAL_REPLY, bilan, 
-		       (void *) <!outputRefPtr!>, <!outputSize!>,
+		       (void *) <!serviceInfo.outputRefPtr!>, <!serviceInfo.outputSize!>,
 		       (FUNCPTR) NULL) != OK)
     <!comp.name()!>CntrlTaskSuspend (TRUE);
 
@@ -1297,7 +1252,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
  */
 
 <?
-# 	if controlFuncFlag:
+# 	if self.controlFuncFlag:
 # 	    print "extern int " + service.codel("control").name + "();"
 	?>
 
@@ -1309,9 +1264,12 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   int i;
   int *compatibilityTab = <!comp.name()!><!service.name!>Compatibility;
 <? 
-	if inputFlag and controlFuncFlag: 
-	    for s in service.inputs():
-		print "    " + MapTypeToC(typeFromIdsName(s)) + " " + s + ";"
+	if serviceInfo.inputFlag and serviceInfo.controlFuncFlag: 
+	  if serviceInfo.inputType.kind() == IdlKind.String:
+	      st = serviceInfo.inputType.asStringType()
+	      print "char " + s + "[" + str(st.bound()) +"];"
+	  else:
+	      print "    " + MapTypeToC(serviceInfo.inputType,True) + " " + s + ";"
 	?>
 
 
@@ -1333,7 +1291,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   if (activity == -1) return;
 
 <?
-	if controlFuncFlag:
+	if serviceInfo.controlFuncFlag:
 	    ?>
   /*--------------------------------------------------------------
    * Call control func
@@ -1343,13 +1301,13 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
     int bilan;
 
 <?
-	    if inputFlag:
+	    if serviceInfo.inputFlag:
 		?>
     /* Get inputs */
-    if (csServRqstParamsGet (servId, rqstId, (void *) <!inputNamePtr!>, 
-			     <!inputSize!>, (FUNCPTR) NULL) != OK)
+    if (csServRqstParamsGet (servId, rqstId, (void *) <!serviceInfo.inputNamePtr!>, 
+			     <!serviceInfo.inputSize!>, (FUNCPTR) NULL) != OK)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
-    status = <!service.codel("control").name!>(<!inputNamePtr!> <!controlFuncParams!>, &bilan);
+    status = <!service.codel("control").name!>(<!serviceInfo.inputNamePtr!> <!serviceInfo.controlFuncParams!>, &bilan);
 <?
 	    else:?>
     status = <!service.codel("control").name!>(&bilan);
@@ -1377,7 +1335,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   *       XXXXXXXX NON C'EST TROP TOT -> INTERROMPRE LES ACTIVITES AVANT !
   */
 <?
-	if inputFlag: 
+	if serviceInfo.inputFlag: 
 	    ?>
   /* Get inputs address */
 <?
@@ -1386,21 +1344,21 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   ACTIVITY_INPUT_ID(activity) = &(<!comp.name()!>DataStrId-><!service.name!>Input)[activity];
 <?
 	    else: ?>
-  ACTIVITY_INPUT_ID(activity) = <!inputRefPtr!>;
+  ACTIVITY_INPUT_ID(activity) = <!serviceInfo.inputRefPtr!>;
 <?
 
 	    ?>  
-  ACTIVITY_INPUT_SIZE(activity) = <!inputSize!>;
+  ACTIVITY_INPUT_SIZE(activity) = <!serviceInfo.inputSize!>;
 
   /* Record inputs */
 <? 
-	    if controlFuncFlag: ?>
-  memcpy ((void *) ACTIVITY_INPUT_ID(activity), (void *) <!inputNamePtr!>, 
+	    if serviceInfo.controlFuncFlag: ?>
+  memcpy ((void *) ACTIVITY_INPUT_ID(activity), (void *) <!serviceInfo.inputNamePtr!>, 
 	  ACTIVITY_INPUT_SIZE(activity));
 <?
 	    else: ?>
   if (csServRqstParamsGet (servId, rqstId, ACTIVITY_INPUT_ID(activity), 
-			   <!inputSize!>, (FUNCPTR) NULL) != OK)
+			   <!serviceInfo.inputSize!>, (FUNCPTR) NULL) != OK)
     <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
 <?
 
@@ -1410,17 +1368,17 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   * Get outputs address
   */
 <?
-	if outputFlag: 
+	if serviceInfo.outputFlag: 
 	    if False: # reentrant flag 
 		?>
   ACTIVITY_OUTPUT_ID(activity) = 
     &(<!comp.name()!>DataStrId-><!service.name!>Output)[activity];
 <?
 	    else: ?>
-  ACTIVITY_OUTPUT_ID(activity) = <!outputRefPtr!>;
+  ACTIVITY_OUTPUT_ID(activity) = <!serviceInfo.outputRefPtr!>;
 <?
 	    ?>
-  ACTIVITY_OUTPUT_SIZE(activity) = <!outputSize!>;
+  ACTIVITY_OUTPUT_SIZE(activity) = <!serviceInfo.outputSize!>;
 <?
 
 	?>         

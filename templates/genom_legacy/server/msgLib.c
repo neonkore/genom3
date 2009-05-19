@@ -209,32 +209,22 @@ int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId,
 <?
 for s in servicesMap:
     service = s.data()
+    serviceInfo = services_info_dict[service.name]
     serviceNum = "%s_%s_RQST" % (upper(comp.name()), upper(service.name))
 
-    if len(service.inputs()) == 0:
-	inputSize = "0"
+    if serviceInfo.inputFlag:
+	inputName = "in_" + serviceInfo.inputName
+	input = serviceInfo.inputTypePtr + inputName + ","
+    else:
 	inputName = "NULL"
 	input = ""
+
+    if serviceInfo.outputFlag:
+	outputName = "out_" + serviceInfo.outputName
+	output = serviceInfo.outputTypePtr + " " + outputName + ","
     else:
-	inputShortName = service.inputs()[0]
-	inputName = "in_" + inputShortName
-
-	t = typeFromIdsName(inputShortName)
-	input = pointerTo(t)
-	inputSize = "sizeof(" + input + ")"
-	input += inputName + ","
-
-    if len(service.output) == 0:
-	outputSize = "0"
 	outputName = "NULL"
 	output = ""
-    else:
-	outputName = "out_" + service.output
-
-	t = typeFromIdsName(service.output)
-	output = pointerTo(t)
-	outputSize = "sizeof(" + output + ")"
-	output += outputName + ","
 
     if service.type == ServiceType.Control:
 	?>
@@ -254,7 +244,7 @@ STATUS <!comp.name()!><!service.name!>RqstSend (CLIENT_ID clientId,
 
   /* Emettre la requete */
   if (csClientRqstSend (clientId, <!serviceNum!>, (void *) <!inputName!>,
-			<!inputSize!>, (FUNCPTR) NULL, FALSE, 0, replyTimeOut, 
+			<!serviceInfo.inputSize!>, (FUNCPTR) NULL, FALSE, 0, replyTimeOut, 
 			pRqstId) == ERROR)
     return ERROR;
   return OK;
@@ -283,7 +273,7 @@ int <!comp.name()!><!service.name!>ReplyRcv (CLIENT_ID clientId,
   
   if ((status = csClientReplyRcv (clientId, rqstId, block, (void *) NULL, 0,  
 				  (FUNCPTR) NULL, (void *) <!outputName!>,
-				  <!outputSize!>, (FUNCPTR) NULL)) == ERROR) {
+				  <!serviceInfo.outputSize!>, (FUNCPTR) NULL)) == ERROR) {
     *bilan = errnoGet();
     if (H2_MODULE_ERR_FLAG(*bilan)) return(FINAL_REPLY_OK);
   }
@@ -310,7 +300,7 @@ int <!comp.name()!><!service.name!>RqstAndRcv (CLIENT_ID clientId,
   
   /* Emettre la requete */
   if (csClientRqstSend (clientId, <!serviceNum!>, (void *) <!inputName!>,
-			<!inputSize!>, (FUNCPTR) NULL, FALSE, 0, 
+			<!serviceInfo.inputSize!>, (FUNCPTR) NULL, FALSE, 0, 
 			TIME_WAIT_REPLY, &rqstId) == ERROR) {
     *bilan = errnoGet();
     return(ERROR);
@@ -319,7 +309,7 @@ int <!comp.name()!><!service.name!>RqstAndRcv (CLIENT_ID clientId,
   /* Reception de la replique */
   if ((status = csClientReplyRcv (clientId, rqstId, BLOCK_ON_FINAL_REPLY, 
 				  (void *) NULL, 0, (FUNCPTR) NULL, 
-				  (void *) <!outputName!>, <!outputSize!>, 
+				  (void *) <!outputName!>, <!serviceInfo.outputSize!>, 
 				  (FUNCPTR) NULL)) == ERROR) {
     *bilan = errnoGet();
     if (H2_MODULE_ERR_FLAG(*bilan)) return(FINAL_REPLY_OK);
@@ -347,7 +337,7 @@ STATUS <!comp.name()!><!service.name!>RqstSend (CLIENT_ID clientId, int *pRqstId
 
   /* Emettre la requete */
   if (csClientRqstSend (clientId, <!serviceNum!>, (void *) <!inputName!>,
-			<!inputSize!>, (FUNCPTR) NULL, TRUE, TIME_WAIT_REPLY, 
+			<!serviceInfo.inputSize!>, (FUNCPTR) NULL, TRUE, TIME_WAIT_REPLY, 
 			replyTimeOut, pRqstId) == ERROR)
     return ERROR;
   return OK;
@@ -379,7 +369,7 @@ int <!comp.name()!><!service.name!>ReplyRcv (CLIENT_ID clientId, int rqstId,
   if ((status = csClientReplyRcv (clientId, rqstId, block, 
 				  (void *) activity, sizeof(int), 
 				  (FUNCPTR) NULL, (void *) <!outputName!>,
-				  <!outputSize!>, (FUNCPTR) NULL)) == ERROR) {
+				  <!serviceInfo.outputSize!>, (FUNCPTR) NULL)) == ERROR) {
     *bilan = errnoGet();
     if (H2_MODULE_ERR_FLAG(*bilan)) return(FINAL_REPLY_OK);
   }
@@ -408,7 +398,7 @@ int <!comp.name()!><!service.name!>RqstAndAck (CLIENT_ID clientId, int *pRqstId,
   
   /* Emettre la requete */
   if (csClientRqstSend (clientId, <!serviceNum!>, (void *) <!inputName!>,
-			<!inputSize!>, (FUNCPTR) NULL, TRUE, 
+			<!serviceInfo.inputSize!>, (FUNCPTR) NULL, TRUE, 
 			TIME_WAIT_REPLY, replyTimeOut, 
 			pRqstId) == ERROR) {
     *bilan = errnoGet();
@@ -418,7 +408,7 @@ int <!comp.name()!><!service.name!>RqstAndAck (CLIENT_ID clientId, int *pRqstId,
   /* Reception de la replique intermediaire */
   if ((status = csClientReplyRcv (clientId, *pRqstId, BLOCK_ON_INTERMED_REPLY, 
                              (void *) activity, sizeof(int), (FUNCPTR) NULL, 
-                             (void *) <!outputName!>, <!outputSize!>, 
+                             (void *) <!outputName!>, <!serviceInfo.outputSize!>, 
                              (FUNCPTR) NULL)) == ERROR) {
     *bilan = errnoGet();
     if (H2_MODULE_ERR_FLAG(*bilan)) return(FINAL_REPLY_OK);
@@ -451,7 +441,7 @@ int <!comp.name()!><!service.name!>RqstAndRcv (CLIENT_ID clientId,
   
   /* Emettre la requete */
   if (csClientRqstSend (clientId, <!serviceNum!>, (void *) <!inputName!>,
-			<!inputSize!>, (FUNCPTR) NULL, TRUE, 
+			<!serviceInfo.inputSize!>, (FUNCPTR) NULL, TRUE, 
 			TIME_WAIT_REPLY, replyTimeOut, 
 			&rqstId) == ERROR) {
     *bilan = errnoGet();
@@ -461,7 +451,7 @@ int <!comp.name()!><!service.name!>RqstAndRcv (CLIENT_ID clientId,
   /* Reception de la replique intermediaire */
   status = csClientReplyRcv (clientId, rqstId, BLOCK_ON_INTERMED_REPLY, 
 			     (void *) activity, sizeof(int), (FUNCPTR) NULL, 
-			     (void *) <!outputName!>, <!outputSize!>, 
+			     (void *) <!outputName!>, <!serviceInfo.outputSize!>, 
 			     (FUNCPTR) NULL);
   switch(status) {
 
@@ -473,7 +463,7 @@ int <!comp.name()!><!service.name!>RqstAndRcv (CLIENT_ID clientId,
   case WAITING_FINAL_REPLY:
     if ((status = csClientReplyRcv (clientId, rqstId, BLOCK_ON_FINAL_REPLY, 
 			       (void *) NULL, 0, (FUNCPTR) NULL, 
-			       (void *) <!outputName!>, <!outputSize!>, 
+			       (void *) <!outputName!>, <!serviceInfo.outputSize!>, 
 			       (FUNCPTR) NULL)) == ERROR) {
       *bilan = errnoGet();
       if (H2_MODULE_ERR_FLAG(*bilan)) return(FINAL_REPLY_OK);

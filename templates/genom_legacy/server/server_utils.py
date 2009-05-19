@@ -285,6 +285,79 @@ def maxOutputSize():
 	res = max(res, typeSize(m.data()))
     return res
 
+class ServiceInfo:
+  def __init__(self, service):
+    # inputs
+    if len(service.inputs()) == 0:
+      self.inputFlag = False
+      self.inputSize = "0"
+      self.inputNamePtr = "NULL"
+      self.inputRefPtr = "NULL"
+    else:
+      if len(service.inputs()) > 1: # need to create the type
+	return
+      self.inputFlag = True
+      self.inputName = service.inputs()[0]
+      self.inputType = typeFromIdsName(self.inputName)
+      self.inputTypePtr = pointerTo(self.inputType)
+      self.inputTypeProto = typeProtoPrefix(self.inputType)
+
+      self.inputSize = "sizeof(" + MapTypeToC(self.inputType) + ")"
+      if(self.inputType.kind() == IdlKind.String):
+	  self.inputNamePtr = self.inputName
+      else:
+	  self.inputNamePtr = "&" + self.inputName
+      self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
+ 
+      if self.inputType.kind() == IdlKind.Struct or self.inputType.kind() == IdlKind.Typedef \
+      or self.inputType.kind() == IdlKind.Array or self.inputType.kind() == IdlKind.Named:
+	  self.inputNewline = "1"
+      else:
+	  self.inputNewline = "0"
+
+    # outputs
+    if len(service.output) == 0:
+      self.outputFlag = False
+      self.outputSize = "0"
+      self.outputNamePtr = "NULL"
+      self.outputRefPtr = "NULL"
+    else:
+      self.outputFlag = True
+      self.outputName = service.output
+      self.outputType = typeFromIdsName(self.outputName)
+      self.outputTypeC = MapTypeToC(self.outputType,True)
+      self.outputTypeProto = typeProtoPrefix(self.outputType)
+      self.outputTypePtr = pointerTo(self.outputType)
+
+      self.outputSize = "sizeof(" + MapTypeToC(self.outputType) + ")"
+
+      if(self.outputType.kind() == IdlKind.String):
+	  self.outputNamePtr = self.outputName
+      else:
+	  self.outputNamePtr = "&" + self.outputName
+      self.outputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.outputName + ")" 
+
+      if self.outputType.kind() == IdlKind.Struct or self.outputType.kind() == IdlKind.Typedef \
+      or self.outputType.kind() == IdlKind.Array or self.outputType.kind() == IdlKind.Named:
+	self.outputNewline = "1"
+      else:
+	self.outputNewline = "0"
+
+    # other attributes
+    self.controlFuncFlag = service.hasCodel("control")
+    if self.controlFuncFlag:
+      self.controlFuncParams = ""
+      for type in service.codel("control").inTypes:
+	self.controlFuncParams += ", & SDI_F->" + type;
+      for type in service.codel("control").outTypes:
+	self.controlFuncParams += ", & SDI_F->" + type;
+    else:
+      self.controlFuncParams = ""
+
+services_info_dict = dict()
+for s in servicesMap:
+    services_info_dict[s.key()] = ServiceInfo(s.data())    
+
 # create connect services for each inport
 for port in inports:
   name = "connect" + port.name

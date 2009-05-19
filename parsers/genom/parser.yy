@@ -430,8 +430,22 @@ service_field:
 	} else if($1 == "taskName") {
 	    s->taskName = $3;
 	} else if($1 == "input") {
+	    // check if the name given is in the ids
+	    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);
+	    if(!t.get()) {
+	      error(yyloc, std::string("Input is not in the IDS: ") + $3);
+	      YYERROR;
+	    }
+
 	    s->addInput($3);
 	} else if($1 == "output") {
+	    // check if the name given is in the ids
+	    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);
+	    if(!t.get()) {
+	      error(yyloc, std::string("Output is not in the IDS: ") + $3);
+	      YYERROR;
+	    }
+
 	    s->output = $3;
 	} else if($1 == "errors") {
 	    driver.currentService()->addErrorMessage($3);
@@ -517,10 +531,24 @@ codel_fields:
 codel_field:
   IN IDENTIFIER
 {
+    // check if the name given is in the ids
+    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($2);
+    if(!t.get()) {
+      error(yyloc, std::string("Input is not in the IDS: ") + $2);
+      YYERROR;
+    }
+
     driver.currentCodel()->addInType($2);
 }
 | OUT IDENTIFIER
 {
+    // check if the name given is in the ids
+    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($2);
+    if(!t.get()) {
+      error(yyloc, std::string("Output is not in the IDS: ") + $2);
+      YYERROR;
+    }
+
     driver.currentCodel()->addOutType($2);
 }
 | INPORT IDENTIFIER

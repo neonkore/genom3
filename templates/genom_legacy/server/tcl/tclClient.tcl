@@ -84,8 +84,8 @@ if { [lsearch [interp hidden] <!comp.name()!>Install] >= 0 } {
 
 <?
 serviceList = ""
-for s in servicesMap:
-  serviceList += "\"" + s.data().name + "\" "
+for name, service in servicesDict.iteritems():
+  serviceList += "\"" + name + "\" "
 for port in outports:
   serviceList += "\"" + port.name + "PosterRead\" " 
 ?>
@@ -98,8 +98,7 @@ proc ::<!comp.name()!>Install { name } {
 interp hide {} <!comp.name()!>Install
 
 <?
-for s in servicesMap:
-  service = s.data()
+for name, service in servicesDict.iteritems():
   flatList = []
   if len(service.inputs()) == 0:
       inputFlag = False

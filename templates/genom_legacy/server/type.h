@@ -61,12 +61,4 @@ if t != None:
 print "typedef " + MapTypeToC(IDSType) + " " + upper(comp.name()) + "_STR;";
 ?>
 
-<?
-#for s in servicesMap:
-#  service = s.data()
-#  serviceInfo = services_info_dict[service.name]
-#  if len(service.inputs()) > 1:
-#    print MapTypeToC(serviceInfo.inputType) + ";"
-?>
-
 #endif

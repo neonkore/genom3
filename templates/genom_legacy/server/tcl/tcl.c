@@ -348,8 +348,7 @@ static int
  */
 <?
 serviceNum = 0
-for s in servicesMap:
-  service = s.data()
+for name, service in servicesDict.iteritems():
   flatList = []
   if len(service.inputs()) == 0:
       inputFlag = False
@@ -600,8 +599,7 @@ static int
       strcpy(name+offset, "AbortRcv");
       Tcl_CreateObjCommand(interp, name, <!comp.name()!>AbortReplyRcvCb, m, NULL);
 <? # $createCommands$
-for s in servicesMap:
-  service = s.data()
+for name, service in servicesDict.iteritems():
   ?>
       strcpy(name+offset, "<!service.name!>Send");
       Tcl_CreateObjCommand(interp, name, <!comp.name()!><!service.name!>RqstSendCb, m, NULL);
@@ -623,8 +621,7 @@ for port in outports:
       strcpy(name+offset, "AbortRcv");
       Tcl_DeleteCommand(interp, name);
 <? # $deleteCommands$
-for s in servicesMap:
-  service = s.data()
+for name, service in servicesDict.iteritems():
   ?>
       strcpy(name+offset, "<!service.name!>Send");
       Tcl_DeleteCommand(interp, name);

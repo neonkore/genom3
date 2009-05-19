@@ -61,8 +61,7 @@ for e in errorSet:
 }
 
 <?
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     for c in service.codels():
 	codel = c.data()
 	if service.type != ServiceType.Control and c.key() != "control" :
@@ -84,7 +83,7 @@ for s in servicesMap:
  * Returns:    OK or ERROR
  */
 
-<!codelSignatureFull(c, s.data())!>
+<!codelSignatureFull(c, service)!>
 {<?
 	for port in codel.outPorts:
 	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
@@ -121,7 +120,7 @@ for s in servicesMap:
 	?>
 
   /*call real codel */
-  int res = <!real_codel_call(codel, s.data())!>;
+  int res = <!real_codel_call(codel, service)!>;
   if(res < 0)
       *report = returnCodeToReport(res);
 
@@ -143,7 +142,7 @@ for s in servicesMap:
 idx = len(outports)
 for port in inports:
   name = "connect" + port.name
-  service = comp.service(name)
+  service = servicesDict[name]
   ?>
 /*------------------------------------------------------------------------
  * <!name!>_codel  -  control codel of CONTROL request <!name!>

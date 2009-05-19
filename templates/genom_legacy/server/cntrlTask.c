@@ -367,21 +367,21 @@ static void <!comp.name()!>CntrlPosterWrite ()
 # $tabRequestFuncDeclare$
 
 # print functions declarations
-for s in servicesMap:
-    print "static void " + comp.name() + "Cntrl" + s.data().name + "(SERV_ID servId, int rqstId);"
+for name, service in servicesDict.iteritems():
+    print "static void " + comp.name() + "Cntrl" + name + "(SERV_ID servId, int rqstId);"
 
 # print $$TabRequestFunc array
 print "\nstatic void (*" + comp.name() + "TabRequestFunc[])() = {"
 l = ""
-for s in servicesMap:
-    l += comp.name() + "Cntrl" + s.data().name + ",\n"
+for name, service in servicesDict.iteritems():
+    l += comp.name() + "Cntrl" + name + ",\n"
 print l[:-2] + "\n};"
 
 # print $$TabRequestNum array (just ints from 0 to the number of services minus one)
 print "static int " + comp.name() + "TabRequestNum[] = {"
 i = 0
 l = ""
-for s in servicesMap: 
+for name, service in servicesDict.iteritems(): 
     l +=  str(i) + ", "
     i += 1
 print l[:-2] + "};"
@@ -1100,12 +1100,11 @@ static void
 
 <?
 serviceNum = 0
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     serviceInfo = services_info_dict[service.name]
 
  #  $tabCompatibilityDeclare$
-    tabCompatibilityDeclare = "static int " + comp.name() + service.name + "Compatibility[] = {"
+    tabCompatibilityDeclare = "static int " + comp.name() + name + "Compatibility[] = {"
     l = service.incompatibleServices()
     out = ""
     defaultValue = ""
@@ -1113,13 +1112,13 @@ for s in servicesMap:
 	defaultValue = "1";
     elif l[0] == "all":
 	defaultValue = "0";
-    for ss in servicesMap:
+    for nn, ss in servicesDict.iteritems():
 	if out != "":
 	    out += ", "
 	if defaultValue != "":
 	    out += defaultValue
 	else:
-	    if ss.data().name in l:
+	    if nn in l:
 		out += "0"
 	    else:
 		out += "1"

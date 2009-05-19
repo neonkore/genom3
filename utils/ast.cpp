@@ -241,6 +241,7 @@ IdlType::Ptr Component::typeFromIdsName(const std::string &name)
 				return s->member(name);
 		}
 		default:
+			cerr << "Error: there is no " << name << " member in the ids" << endl;
 			return IdlType::Ptr();
 	}
 }

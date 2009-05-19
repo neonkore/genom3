@@ -28,6 +28,7 @@
  */
 #include "cvisitor.h"
 
+#include <iostream>
 #include <sstream>
 
 #include "idltype.h"
@@ -39,6 +40,11 @@ using namespace std;
 
 std::string CVisitor::mapTypeToC(IdlType::Ptr t, bool declOnly)
 {
+	if(t.get() == 0) {
+		cerr << "Trying to map a null type" << endl;
+		return "gggggggggggggggggggggggggggggggggggg";
+	}
+
 	std::string s;
 	ostringstream oss(s);
 	CVisitor visitor(oss, declOnly);

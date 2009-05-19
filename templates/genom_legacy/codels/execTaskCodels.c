@@ -50,8 +50,7 @@ ACTIVITY_EVENT returnCodeToActivityEvent(int res)
 errorSet = createErrorList()
 for e in errorSet:
     print "    case ERROR_" + e + ": return ETHER;"
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     if service.taskName != currentTaskName or service.type == ServiceType.Control:
 	continue
 
@@ -72,8 +71,7 @@ extern int returnCodeToReport(int res);
 
 <?
 alreadyDefinedCodels = []
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     if service.taskName != currentTaskName or service.type == ServiceType.Control:
 	continue
     for c in service.codels():
@@ -85,7 +83,7 @@ for s in servicesMap:
 	alreadyDefinedCodels.append(codel.name)
 	?>
 
-extern int <!real_codel_signature(codel, s.data())!>;
+extern int <!real_codel_signature(codel, service)!>;
 
 /*------------------------------------------------------------------------
  * <!codel.name!>_codel  -  control codel of EXEC request <!service.name!>
@@ -100,7 +98,7 @@ extern int <!real_codel_signature(codel, s.data())!>;
  * Returns:    OK or ERROR
  */
 
-<!codelSignatureFull(c, s.data())!>
+<!codelSignatureFull(c, service)!>
 {<?
 	for port in codel.outPorts:
 	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
@@ -135,7 +133,7 @@ extern int <!real_codel_signature(codel, s.data())!>;
 	?>
 
   /*call real codel */
-  int res = <!real_codel_call(codel, s.data())!>;
+  int res = <!real_codel_call(codel, service)!>;
   if(res < 0)
       *report = returnCodeToReport(res);
 

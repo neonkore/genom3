@@ -75,30 +75,28 @@ void <!comp.name()!>Test (int testNumber);
 static void <!comp.name()!>TestInitTask (TEST_STR* testStr);
 
 <?
-for s in servicesMap:
-    print "static BOOL %sTest%s(TEST_STR *id, int rq, int ac, BOOL ch);" % (comp.name(), s.data().name)
+for name, service in servicesDict.iteritems():
+    print "static BOOL %sTest%s(TEST_STR *id, int rq, int ac, BOOL ch);" % (comp.name(), name)
 ?>
 
 static  TEST_RQST_DESC_STR <!comp.name()!>TestRqstFuncTab[] = {
 <? # $requestFuncTabDeclare$
 out = ""
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     if len(service.inputs()) > 0:
 	inputSize = sizeOfIdsMember(service.inputs()[0])
     else:
 	inputSize = "0"
     outputSize = sizeOfIdsMember(service.output)
-    out += "  {%s_%s_RQST, %sTest%s, %s, %s},\n" % (upper(comp.name()), upper(service.name), comp.name(), service.name, inputSize, outputSize)
+    out += "  {%s_%s_RQST, %sTest%s, %s, %s},\n" % (upper(comp.name()), upper(name), comp.name(), name, inputSize, outputSize)
 print out[:-2] + "};" 
 ?>
 
 static char *<!comp.name()!>TestRequestNameTab[] = {
 <? # $requestNameTabDeclare$
 out = ""
-for s in servicesMap:
-    service = s.data()
-    out += "   \"" + service.name + serviceDescString(service)
+for name, service in servicesDict.iteritems():
+    out += "   \"" + name + serviceDescString(service)
     out+= "\",\n"
 print out[:-2] + "\n};" 
 ?>
@@ -192,9 +190,8 @@ static void <!comp.name()!>TestInitTask (TEST_STR *testStr)
 }
  
 <?
-for s in servicesMap:
-    service = s.data()
-    serviceInfo = services_info_dict[service.name]
+for name, service in servicesDict.iteritems():
+    serviceInfo = services_info_dict[name]
     ?>
 /**
  **  Emission et reception de la requete <!comp.name()!>Test<!service.name!>

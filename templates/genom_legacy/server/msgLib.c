@@ -207,8 +207,7 @@ int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId,
 /* liste des requetes/repliques d'execution */
 
 <?
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     serviceInfo = services_info_dict[service.name]
     serviceNum = "%s_%s_RQST" % (upper(comp.name()), upper(service.name))
 

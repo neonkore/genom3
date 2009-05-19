@@ -115,17 +115,17 @@ static void
 <? #  $requestNameTabDeclare$
 write("static char *" + comp.name() + "ExecRqstNameTab[] = {\n");
 service_list = ""
-for s in servicesMap:
-    if s.data().type != ServiceType.Control:
-	service_list += "\"" + s.data().name + "\",\n"
+for name, service in servicesDict.iteritems():
+    if service.type != ServiceType.Control:
+	service_list += "\"" + name + "\",\n"
 print service_list[:-2] # remove the last ',' 
 print "};"
 
 print "static int " + comp.name() + "ExecRqstNumTab[] = {"
 i = 0
 l = ""
-for s in servicesMap: 
-    if s.data().type != ServiceType.Control:
+for name, service in servicesDict.iteritems(): 
+    if service.type != ServiceType.Control:
 	l +=  str(i) + ", "
     i += 1
 print l[:-2] + "};"

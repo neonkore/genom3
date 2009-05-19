@@ -32,8 +32,7 @@
 #include "userCodels.h"
 
 <?
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     for c in service.codels():
 	codel = c.data()
 	if service.type != ServiceType.Control and c.key() != "control" :

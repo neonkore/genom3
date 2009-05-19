@@ -110,11 +110,11 @@ extern "C" {
 
 <?
 # $listUserFuncProto$
-for s in servicesMap:
-#    if s.data().type == ServiceType.Init:
+for name, service in servicesDict.iteritems():
+#    if service.type == ServiceType.Init:
 #	continue
-    for codel in s.data().codels():
-	print "extern " + codelSignatureFull(codel, s.data()) + ";"
+    for codel in service.codels():
+	print "extern " + codelSignatureFull(codel, service) + ";"
 
 #### todo: print task init function signature
 #if initServiceNb != -1:

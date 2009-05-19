@@ -71,7 +71,7 @@
  **/
 #define  <!upper(comp.name())!>_MAX_INTERMED_REPLY_SIZE   (sizeof(int))
 
-#define  <!upper(comp.name())!>_MAX_REPLY_SIZE             <!maxArgsSize()!>
+#define  <!upper(comp.name())!>_MAX_REPLY_SIZE             <!maxOutputSize()!>
 
 /** 
  ** Taille bal clients pour reception repliques 
@@ -85,8 +85,8 @@
 
 <? #$listRequests$
 i = 0
-for s in servicesMap:
-    print "#define %s_%s_RQST %d" % (upper(comp.name()), upper(s.data().name), i)
+for name, service in servicesDict.iteritems():
+    print "#define %s_%s_RQST %d" % (upper(comp.name()), upper(name), i)
     i += 1
 print "#define %s_ABORT_RQST %d" % (upper(comp.name()), i)
 ?>
@@ -116,8 +116,7 @@ int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId,
 			     int *bilan);
 
 <?
-for s in servicesMap:
-    service = s.data()
+for name, service in servicesDict.iteritems():
     serviceInfo = services_info_dict[service.name]
     serviceNum = "%s_%s_RQST" % (upper(comp.name()), upper(service.name))
 

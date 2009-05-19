@@ -2,10 +2,10 @@
 from string import upper
 
 # copy some elements to not modify the ast
-servicesMap = comp.servicesMap()
-#servicesMap = dict()
-#for s in comp.servicesMap():
-#  servicesMap[s.key()] = s.data()
+#servicesMap = comp.servicesMap()
+servicesDict = dict()
+for s in comp.servicesMap():
+  servicesDict[s.key()] = s.data()
 
 typesVect = []
 for t in comp.typesVect():
@@ -100,10 +100,10 @@ def sizeOfIdsMember(name):
 # try to find an init service
 def findInitService():
   i=-1
-  for s in servicesMap:
+  for name, service in servicesDict.iteritems():
     i += 1
-    if s.data().type == ServiceType.Init:
-      return s.data(), i
+    if service.type == ServiceType.Init:
+      return service, i
   return 0,-1
 
 initService,initServiceNb = findInitService()
@@ -120,8 +120,8 @@ for p in comp.portsMap():
 # error related functions
 def createErrorList():
   l = []
-  for s in servicesMap:
-    for e in s.data().errorMessages():
+  for name, service in servicesDict.iteritems():
+    for e in service.errorMessages():
 	l.append(e)
   for t in comp.tasksMap():
     for e in t.data().errorMessages():
@@ -148,9 +148,8 @@ def serviceDescString(s):
 def findServiceWithSameOutput(service, inputName):
     l = []
     # find another service with an output corresponding to the service's input
-    for it in servicesMap:
-	ss = it.data()
-	if ss.name == service.name:
+    for name, ss in servicesDict.iteritems():
+	if name == service.name:
 	    break; 
 	if ss.output == inputName:
 	    l.append(ss)
@@ -241,15 +240,15 @@ def real_codel_call(codel, service=None):
 
 def nbExecService():
     count = 0
-    for s in servicesMap:
-	if s.data().type != ServiceType.Control:
+    for name, service in servicesDict.iteritems():
+	if service.type != ServiceType.Control:
 	    count += 1
     return count
 
 def maxServiceNameLength():
     maxLen = 0
-    for s in servicesMap:
-	maxLen = max(maxLen, len(s.data().name))
+    for name, service in servicesDict.iteritems():
+	maxLen = max(maxLen, len(name))
     return maxLen
 
 def typeSize(t):
@@ -279,23 +278,6 @@ def typeSize(t):
 	  return s.bound()
     return 0
 
-def maxArgsSize():
-    res = 8
-    s = IDSType.asStructType()
-    if s is None:
-      s = IDSType.unalias().asStructType()
-    for m in s.members():
-      res = max(res, typeSize(m.data()))
-    return res
-
-def maxOutputSize():
-    res = 8
-    for s in servicesMap:
-      if s.data().output != "":
-	t = typeFromIdsName(s.data().output)
-	res = max(res, typeSize(m.data()))
-    return res
-
 # create connect services for each inport
 for port in inports:
   name = "connect" + port.name
@@ -304,7 +286,7 @@ for port in inports:
   s.addInput(connectIDSMember)
   c = Codel(name + "Exec")
   s.addCodel("control", c)
-  servicesMap[name] = s
+  servicesDict[name] = s
 
 # copy ids type
 IDSType = StructType()
@@ -400,11 +382,29 @@ class ServiceInfo:
 
 # create serviceInfo objects
 services_info_dict = dict()
-for s in servicesMap:
-    services_info_dict[s.key()] = ServiceInfo(s.data())    
+for name, service in servicesDict.iteritems():
+    services_info_dict[name] = ServiceInfo(service)    
+
+# compute the max request and result size
+def maxArgsSize():
+    res = 8
+    s = IDSType.asStructType()
+    if s is None:
+      s = IDSType.unalias().asStructType()
+    for m in s.members():
+      res = max(res, typeSize(m.data()))
+    return res
+
+def maxOutputSize():
+    res = 8
+    for name, service in servicesDict.iteritems():
+      serviceInfo = services_info_dict[name]
+      if serviceInfo.outputFlag:
+	res = max(res, typeSize(serviceInfo.outputType))
+    return res
 
 # other vars
-nbServices = len(servicesMap)
+nbServices = len(servicesDict)
 abortRequestNum = nbServices;
 internalDataType = MapTypeToC(IDSType,True)
 periodicFlag = isPeriodic()

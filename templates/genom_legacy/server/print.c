@@ -39,7 +39,7 @@
 #include "<!comp.name()!>Print.h"
 
 <?
-for t in comp.typesVect():
+for t in typesVect:
     ?>
 void print_<!typeProtoPrefix(t)!>( FILE *out,
      <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims, FILE *in )

@@ -118,32 +118,20 @@ int <!comp.name()!>AbortRqstAndRcv (CLIENT_ID clientId,
 <?
 for s in servicesMap:
     service = s.data()
+    serviceInfo = services_info_dict[service.name]
     serviceNum = "%s_%s_RQST" % (upper(comp.name()), upper(service.name))
 
-    if len(service.inputs()) == 0:
-	inputSize = "0"
-	inputName = "NULL"
+    if serviceInfo.inputFlag:
+	inputName = "in_" + serviceInfo.inputName
+	input = serviceInfo.inputTypePtr + inputName + ","
+    else:
 	input = ""
+
+    if serviceInfo.outputFlag:
+	outputName = "out_" + serviceInfo.outputName
+	output = serviceInfo.outputTypePtr + " " + outputName + ","
     else:
-	inputShortName = service.inputs()[0]
-	inputName = "in_" + inputShortName
-	inputSize = "sizeof((*" + comp.name() + "DataStrId)." + inputShortName + ")"
-
-	t = typeFromIdsName(inputShortName)
-	input = pointerTo(t)
-	input += inputName + ","
-
-    if len(service.output) == 0:
-	outputSize = "0"
-	outputName = "NULL"
 	output = ""
-    else:
-	outputName = "out_" + service.output
-	outputSize = "sizeof((*" + comp.name() + "DataStrId)." + service.output + ")"
-
-	t = typeFromIdsName(service.output)
-	output = pointerTo(t)
-	output += outputName + ","
 
     if service.type == ServiceType.Control:
 	?>

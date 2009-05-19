@@ -48,7 +48,7 @@ extern "C" {
 #endif
 
 <?
-for t in comp.typesVect():
+for t in typesVect:
     ?>
 extern void print_<!typeProtoPrefix(t)!> ( FILE *out,
      <!MapTypeToC(t,True)!> *x,

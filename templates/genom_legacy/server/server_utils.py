@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 from string import upper
 
+# copy some elements to not modify the ast
 servicesMap = comp.servicesMap()
+#servicesMap = dict()
+#for s in comp.servicesMap():
+#  servicesMap[s.key()] = s.data()
+
+typesVect = []
+for t in comp.typesVect():
+  typesVect.append(t)
+
 connectIDSMember = "_connect_str"
 
 # we have to intercept this call because the connect service use 
@@ -272,7 +281,9 @@ def typeSize(t):
 
 def maxArgsSize():
     res = 8
-    s = IDSType.unalias().asStructType()
+    s = IDSType.asStructType()
+    if s is None:
+      s = IDSType.unalias().asStructType()
     for m in s.members():
       res = max(res, typeSize(m.data()))
     return res
@@ -285,6 +296,27 @@ def maxOutputSize():
 	res = max(res, typeSize(m.data()))
     return res
 
+# create connect services for each inport
+for port in inports:
+  name = "connect" + port.name
+  s = Service(name)
+  s.type = ServiceType.Control
+  s.addInput(connectIDSMember)
+  c = Codel(name + "Exec")
+  s.addCodel("control", c)
+  servicesMap[name] = s
+
+# copy ids type
+IDSType = StructType()
+IDSType.setIdentifier(comp.IDSType.identifier())
+s = comp.IDSType.unalias().asStructType()
+for m in s.members():
+    IDSType.addMember(m.data(), m.key())
+
+# add a member in the ids for connect services 
+if len(inports) > 0:
+  IDSType.addMember(StringType(256), connectIDSMember)
+
 class ServiceInfo:
   def __init__(self, service):
     # inputs
@@ -294,11 +326,23 @@ class ServiceInfo:
       self.inputNamePtr = "NULL"
       self.inputRefPtr = "NULL"
     else:
-      if len(service.inputs()) > 1: # need to create the type
-	return
       self.inputFlag = True
-      self.inputName = service.inputs()[0]
-      self.inputType = typeFromIdsName(self.inputName)
+
+      if len(service.inputs()) > 1: # need to create the type
+	self.inputType = StructType()
+	self.inputType.setIdentifier(service.name + "_input_struct")
+	for i in service.inputs():
+	  t = typeFromIdsName(i)
+	  self.inputType.addMember(t, i)
+	self.inputName = service.name + "_input"
+	# add a type and the corresponding element in the ids
+	typesVect.append(self.inputType)
+	IDSType.addMember(self.inputType, service.name + "_input")
+
+      else:
+	self.inputName = service.inputs()[0]
+	self.inputType = typeFromIdsName(self.inputName)
+
       self.inputTypePtr = pointerTo(self.inputType)
       self.inputTypeProto = typeProtoPrefix(self.inputType)
 
@@ -354,32 +398,10 @@ class ServiceInfo:
     else:
       self.controlFuncParams = ""
 
+# create serviceInfo objects
 services_info_dict = dict()
 for s in servicesMap:
     services_info_dict[s.key()] = ServiceInfo(s.data())    
-
-# create connect services for each inport
-for port in inports:
-  name = "connect" + port.name
-  s = Service(name)
-  s.type = ServiceType.Control
-  s.addInput(connectIDSMember)
-  c = Codel(name + "Exec")
-  s.addCodel("control", c)
-  servicesMap[name] = s
-
-# add a member in the ids for connect services 
-IDSType = comp.IDSType
-if len(inports) > 0:
-  t = comp.IDSType.unalias()
-  s = t.asStructType()
-  if s != None:
-    # copy ids type and add a member
-    IDSType = StructType()
-    IDSType.setIdentifier(comp.IDSType.identifier())
-    IDSType.addMember(StringType(256), connectIDSMember)
-    for m in s.members():
-	IDSType.addMember(m.data(), m.key())
 
 # other vars
 nbServices = len(servicesMap)

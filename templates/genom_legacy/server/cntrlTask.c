@@ -1267,9 +1267,9 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 	if serviceInfo.inputFlag and serviceInfo.controlFuncFlag: 
 	  if serviceInfo.inputType.kind() == IdlKind.String:
 	      st = serviceInfo.inputType.asStringType()
-	      print "char " + s + "[" + str(st.bound()) +"];"
+	      print "char " + serviceInfo.inputName + "[" + str(st.bound()) +"];"
 	  else:
-	      print "    " + MapTypeToC(serviceInfo.inputType,True) + " " + s + ";"
+	      print "    " + MapTypeToC(serviceInfo.inputType,True) + " " + serviceInfo.inputName + ";"
 	?>
 
 

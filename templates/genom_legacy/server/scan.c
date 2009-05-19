@@ -39,7 +39,7 @@
 #include "<!comp.name()!>Print.h"
 
 <?
-for t in comp.typesVect():
+for t in typesVect:
     ?>
 int scan_<!typeProtoPrefix(t)!>( FILE *in, FILE *out,
        <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims )

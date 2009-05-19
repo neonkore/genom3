@@ -52,7 +52,7 @@ extern "C" {
 #endif
 
 <?
-for t in comp.typesVect():
+for t in typesVect:
     ?>
 extern int scan_<!typeProtoPrefix(t)!> ( FILE *in, FILE *out,
        <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims );

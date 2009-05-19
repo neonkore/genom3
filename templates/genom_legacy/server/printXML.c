@@ -39,7 +39,7 @@
 #include "<!comp.name()!>PrintXML.h"
 
 <?
-for t in comp.typesVect():
+for t in typesVect:
     ?>
 void printXML_<!typeProtoPrefix(t)!>( FILE *out, char *name,
      <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims, FILE *in )

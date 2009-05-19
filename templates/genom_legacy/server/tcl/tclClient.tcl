@@ -99,26 +99,11 @@ interp hide {} <!comp.name()!>Install
 
 <?
 for name, service in servicesDict.iteritems():
-  flatList = []
-  if len(service.inputs()) == 0:
-      inputFlag = False
+  serviceInfo = services_info_dict[name]
+  if serviceInfo.outputFlag:
+    outputFormatStr = outputFormat(serviceInfo.outputType, serviceInfo.outputName)
   else:
-      inputFlag = True
-      inputName = service.inputs()[0]
-      inputType = typeFromIdsName(inputName)
-      flatList = flatStruct(inputType, inputName, ".") 
-
-  # same for output
-  if len(service.output) == 0:
-      outputFlag = False
-      outputFormatStr = ""
-  else:
-      outputFlag = True
-      outputName = service.output
-
-      outputType = typeFromIdsName(service.output)
-      outFlatList = flatStruct(outputType, outputName, ".")
-      outputFormatStr = outputFormat(outputType, outputName)
+    outputFormatStr = ""
   ?>
 # <!service.name!> ----------------------------------------------------------
 
@@ -132,14 +117,14 @@ if { [lsearch [interp hidden] <!comp.name()!><!service.name!>FormatOutput] >= 0 
 proc ::<!comp.name()!><!service.name!> { name args } {
     set format {}
 <?
-  if inputFlag:
-    for x in flatList:
+  if serviceInfo.inputFlag:
+    for x in serviceInfo.inputFlatList:
       print inputFormat(x[0], x[1])
   ?>
     return [ ::cs::rqstSend "${name}" "<!service.name!>" \
 	"<!service.doc!>" \
 	"service.usage" \
-	<!len(flatList)!> \
+	<!len(serviceInfo.inputFlatList)!> \
 	$format \
 	$args ]
 }

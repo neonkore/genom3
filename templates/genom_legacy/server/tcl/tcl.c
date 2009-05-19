@@ -349,40 +349,7 @@ static int
 <?
 serviceNum = 0
 for name, service in servicesDict.iteritems():
-  flatList = []
-  if len(service.inputs()) == 0:
-      inputFlag = False
-      inputSize = "0"
-      inputNamePtr = " NULL"
-  else:
-      inputFlag = True
-      inputName = service.inputs()[0]
-
-      inputType = typeFromIdsName(inputName)
-      if(inputType.kind() == IdlKind.String):
-	  inputNamePtr = inputName 
-      else:
-	  inputNamePtr = "&" + inputName 
-      inputSize = "sizeof(" + MapTypeToC(inputType, True) + ")"
-
-      flatList = flatStruct(inputType, inputName, ".") 
-
-  # same for output
-  if len(service.output) == 0:
-      outputFlag = False
-      outputSize = "0"
-      outputNamePtr = "NULL"
-  else:
-      outputFlag = True
-      outputName = service.output
-
-      outputType = typeFromIdsName(service.output)
-      if(outputType.kind() == IdlKind.String):
-	  outputNamePtr = outputName
-      else:
-	  outputNamePtr = "&" + outputName
-      outputSize = "sizeof(" + MapTypeToC(outputType, True) + ")"
-      outFlatList = flatStruct(outputType, outputName, ".")
+  serviceInfo = services_info_dict[name]
   ?>
 /*
  * ----------------------------------------------------------------------
@@ -400,10 +367,10 @@ static int
    int rqstId, bilan;
    char buf[10];
 <?
-  if inputFlag:
-    print "   static " + MapTypeToC(inputType) + " " + inputName + ";" 
+  if serviceInfo.inputFlag:
+    print "   static " + serviceInfo.inputVarDecl + ";"
 # #if ($argNumber$ > 0)
-  if len(flatList) > 0:
+  if len(serviceInfo.inputFlatList) > 0:
     ?>
    int ret;
    int curObjc = 0;
@@ -411,17 +378,17 @@ static int
   ?>
    char strerr[64];
 
-   TEST_BAD_USAGE(objc != <!len(flatList)!>+1);
+   TEST_BAD_USAGE(objc != <!len(serviceInfo.inputFlatList)!>+1);
 		 
 <? #$parseInput$
-  if inputFlag:
-    for x in flatList:
+  if serviceInfo.inputFlag:
+    for x in serviceInfo.inputFlatList:
       parseInput(x[0], x[1])
   ?>
 
    if (tclServRqstSend(interp, Tcl_GetStringFromObj(objv[0], NULL),
 		       tclModuleInfo->cid, <!serviceNum!>,
-		       <!inputNamePtr!>, <!inputSize!>,
+		       <!serviceInfo.inputNamePtr!>, <!serviceInfo.inputSize!>,
 		       &rqstId, &bilan) == ERROR) {
 
      Tcl_SetResult(interp, h2getErrMsg(bilan, strerr, 64), TCL_VOLATILE);
@@ -442,8 +409,8 @@ static int
    int ret;
    int rqstId, bilan, activity;
 <?
-  if outputFlag:
-    print "   static " + MapTypeToC(outputType) + " " + outputName + ";" 
+  if serviceInfo.outputFlag:
+    print "   static " + serviceInfo.outputVarDecl + ";"
   ?>
    Tcl_Obj *my_own_private_unique_result;
    char strerr[64];
@@ -457,7 +424,7 @@ static int
       /* c'est laid */
       tclServReplyRcv(interp,
 		      tclModuleInfo->cid, rqstId, NO_BLOCK,
-		      &activity, <!outputNamePtr!>, <!outputSize!>,
+		      &activity, <!serviceInfo.outputNamePtr!>, <!serviceInfo.outputSize!>,
 		      &bilan)
       ) {
       case WAITING_INTERMED_REPLY:
@@ -495,8 +462,8 @@ static int
 					h2getErrMsg(bilan, strerr, 64), -1));
    if (ret != TCL_OK) return TCL_ERROR;
 <?
-  if outputFlag:
-    for x in outFlatList:
+  if serviceInfo.outputFlag:
+    for x in serviceInfo.outputFlatList:
       processOutput(x[0], x[1])
   ?>
    Tcl_SetObjResult(interp, my_own_private_unique_result);

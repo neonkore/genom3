@@ -1146,11 +1146,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   int bilan=OK;
 <? 
 	if serviceInfo.inputFlag and serviceInfo.controlFuncFlag: 
-	  if serviceInfo.inputType.kind() == IdlKind.String:
-	      st = serviceInfo.inputType.asStringType()
-	      print "char " + serviceInfo.inputName + "[" + str(st.bound()) +"];"
-	  else:
-	      print "    " + MapTypeToC(serviceInfo.inputType,True) + " " + serviceInfo.inputName + ";"
+	  print "  " + serviceInfo.inputVarDecl + ";"
 	?>
 
   /*--------------------------------------------------------------
@@ -1264,11 +1260,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   int *compatibilityTab = <!comp.name()!><!service.name!>Compatibility;
 <? 
 	if serviceInfo.inputFlag and serviceInfo.controlFuncFlag: 
-	  if serviceInfo.inputType.kind() == IdlKind.String:
-	      st = serviceInfo.inputType.asStringType()
-	      print "char " + serviceInfo.inputName + "[" + str(st.bound()) +"];"
-	  else:
-	      print "    " + MapTypeToC(serviceInfo.inputType,True) + " " + serviceInfo.inputName + ";"
+	  print "  " + serviceInfo.inputVarDecl + ";"
 	?>
 
 

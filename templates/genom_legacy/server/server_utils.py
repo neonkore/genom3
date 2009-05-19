@@ -307,6 +307,7 @@ class ServiceInfo:
       self.inputSize = "0"
       self.inputNamePtr = "NULL"
       self.inputRefPtr = "NULL"
+      self.inputFlatList = []
     else:
       self.inputFlag = True
 
@@ -341,12 +342,20 @@ class ServiceInfo:
       else:
 	  self.inputNewline = "0"
 
+      self.inputFlatList = flatStruct(self.inputType, self.inputName, ".") 
+      if self.inputType.kind() == IdlKind.String:
+	  st = self.inputType.asStringType()
+	  self.inputVarDecl = "char " + self.inputName + "[" + str(st.bound()) + "]"
+      else:
+	  self.inputVarDecl = MapTypeToC(self.inputType,True) + " " + self.inputName
+
     # outputs
     if len(service.output) == 0:
       self.outputFlag = False
       self.outputSize = "0"
       self.outputNamePtr = "NULL"
       self.outputRefPtr = "NULL"
+      self.outputFlatList = []
     else:
       self.outputFlag = True
       self.outputName = service.output
@@ -368,6 +377,13 @@ class ServiceInfo:
 	self.outputNewline = "1"
       else:
 	self.outputNewline = "0"
+
+      self.outputFlatList = flatStruct(self.outputType, self.outputName, ".")
+      if self.outputType.kind() == IdlKind.String:
+	  st = self.outputType.asStringType()
+	  self.outputVarDecl = "char " + self.outputName + "[" + str(st.bound()) + "]"
+      else:
+	  self.outputVarDecl = MapTypeToC(self.outputType,True) + " " + self.outputName
 
     # other attributes
     self.controlFuncFlag = service.hasCodel("control")

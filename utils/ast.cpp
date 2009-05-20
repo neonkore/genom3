@@ -310,16 +310,24 @@ void Task::addErrorMessage(const std::string &s)
 
 /******** Service ***************/
 
+bool Service::Input::operator==(const Service::Input &rhs)
+{
+	return kind == rhs.kind && identifier == rhs.identifier && defaultValue == rhs.defaultValue && type.get() == rhs.type.get();
+}
+
 void Service::debug()
 {
 	cout << "doc: " << doc << endl;
 	cout << "Parent task: " << taskName << endl;
 
 	cout << "Inputs: ";
-	for(vector<string>::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
-		cout << *it;
-		if(m_inputDefaultArgs.find(*it) != m_inputDefaultArgs.end())
-			cout << " = " << inputDefaultArg(*it).print() << ", ";
+	for(Input::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
+		if(it->kind == Input::IDSMember)
+			cout << "IDS:" << it->identifier;
+		else
+			cout << DumpType::dumpType(it->type) << " " << it->identifier;
+		if(!it->defaultValue.isEmpty())
+			cout << " = " << it->defaultValue.print() << ", ";
 	}
 
 	cout << endl << "Output: " << output << endl;
@@ -348,18 +356,32 @@ void Service::debug()
 	}
 }
 
-void Service::addInput(const std::string &s, const Idl::Literal &defaultValue)
+void Service::addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue)
 {
-	m_inputs.push_back(s);
-	if(!defaultValue.isEmpty())
-		m_inputDefaultArgs[s] = defaultValue;
+	Input i;
+	if(!t.get())
+		i.kind = Input::IDSMember;
+	else {
+		i.kind = Input::Type;
+		i.type = t;
+	}
+
+	i.identifier = s;
+	i.defaultValue = defaultValue;
+	m_inputs.push_back(i);
+}
+
+void Service::addInput(const Service::Input &i)
+{
+	m_inputs.push_back(i);
 }
 
 Idl::Literal Service::inputDefaultArg(const std::string &n)
 {
-	Literal::Map::iterator it = m_inputDefaultArgs.find(n);
-	if(it != m_inputDefaultArgs.end())
-		return it->second;
+	for(Input::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
+		if(it->identifier == n)
+			return it->defaultValue;
+	}
 	return Literal();
 }
 

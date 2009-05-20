@@ -108,4 +108,12 @@ void Literal::addMember(const Literal &l)
 	m_members.push_back(l);
 }
 
+bool Literal::operator==(const Literal &rhs)
+{
+	if(m_kind != rhs.m_kind)
+		return false;
+
+	return print() == rhs.print();
+}
+
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

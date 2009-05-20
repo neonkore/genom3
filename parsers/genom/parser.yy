@@ -60,6 +60,7 @@ struct variant_type {
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
     G3nom::Idl::Declarator::Ptr		declaratorVal;
     G3nom::Idl::Literal		literalVal;
+    G3nom::Service::Input	serviceInputVal;
 };
 #define YYSTYPE variant_type
 
@@ -132,7 +133,7 @@ struct variant_type {
 %token TRUE FALSE
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE CONST
-%token TYPEDEF UNSIGNED OBJECT
+%token TYPEDEF UNSIGNED OBJECT IDS INPUT
 
 /*token SPECIAL_CHAR	"char"
 %token INTEGERLIT	"integer"
@@ -150,6 +151,8 @@ struct variant_type {
 %type <literalVal>		literals;
 %type <literalVal>		boolean_literal;
 %type <literalVal>		composed_literal;
+
+%type <serviceInputVal>		input_type;
 
 %type <stringVal>		identifier_list
 %type <stringVal>		identifiers
@@ -407,15 +410,8 @@ service_field:
 {
     driver.currentService()->addCodel($2, $4);
 }
-| IDENTIFIER COLON IDENTIFIER EQUAL literal
+| INPUT COLON inputs
 {
-    Service::Ptr s = driver.currentService();
-    if($1 == "input") {
-	s->addInput($3, $5);
-    } else {
-	  error(yyloc, std::string("Unknown service field (or wrong number of arguments): ") + $1);
-	  YYERROR;
-    }
 }
 | IDENTIFIER COLON IDENTIFIER identifier_list
 {
@@ -435,15 +431,6 @@ service_field:
 	    }
 	} else if($1 == "taskName") {
 	    s->taskName = $3;
-	} else if($1 == "input") {
-	    // check if the name given is in the ids
-	    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);
-	    if(!t.get()) {
-	      error(yyloc, std::string("Input is not in the IDS: ") + $3);
-	      YYERROR;
-	    }
-
-	    s->addInput($3);
 	} else if($1 == "output") {
 	    // check if the name given is in the ids
 	    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);
@@ -511,6 +498,47 @@ identifiers:
 | identifiers IDENTIFIER
 {
     $$ = $1 + " " + $2;
+};
+
+inputs:
+  input
+{}
+| inputs COMMA input
+{};
+
+input:
+  input_type EQUAL literal
+{
+    $1.defaultValue = $3;
+    driver.currentService()->addInput($1);
+}
+| input_type 
+{
+    driver.currentService()->addInput($1);
+};
+
+input_type:
+  IDS COLON IDENTIFIER
+{
+    // check if the name given is in the ids
+    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);
+    if(!t.get()) {
+      error(yyloc, std::string("Input is not in the IDS: ") + $3);
+      YYERROR;
+    }
+
+    Service::Input i;
+    i.kind = Service::Input::IDSMember;
+    i.identifier = $3;
+    $$ = i;
+}
+| type_spec IDENTIFIER
+{
+    Service::Input i;
+    i.kind = Service::Input::Type;
+    i.identifier = $2;
+    i.type = $1;
+    $$ = i;
 };
 
 /*** Codel Declaration ***/

@@ -35,7 +35,7 @@ using namespace G3nom;
 using namespace Idl;
 using namespace boost::python;
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ServiceAddInputOverloads, Service::addInput, 1,2)
+// BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ServiceAddInputOverloads, Service::addInput, 1,3)
 
 void export_ast()
 {
@@ -80,7 +80,7 @@ void export_ast()
 	.def("codel", &Service::codel)
 	.def("hasCodel", &Service::hasCodel)
 	.def("addCodel", &Service::addCodel)
-	.def("addInput", &Service::addInput, ServiceAddInputOverloads())
+// 	.def("addInput", &Service::addInput, ServiceAddInputOverloads())
 	.def_readwrite("output", &Service::output)
 	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
 	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>())
@@ -91,6 +91,16 @@ void export_ast()
 	.value("Init", Service::Init)
 	.value("Control", Service::Control)
 	.value("Exec", Service::Exec);
+
+	class_<Service::Input>("ServiceInput")
+	.def_readwrite("kind", &Service::Input::kind)
+	.def_readwrite("identifier", &Service::Input::identifier)
+	.def_readwrite("type", &Service::Input::type)
+	.def_readwrite("defaultValue", &Service::Input::defaultValue);
+
+	enum_<Service::Input::Kind>("ServiceInputKind")
+	.value("IDSMember", Service::Input::IDSMember)
+	.value("Type", Service::Input::Type);
 
 	class_<Codel, Codel::Ptr>("Codel", init<const std::string &>())
 	.def_readonly("name", &Codel::name)

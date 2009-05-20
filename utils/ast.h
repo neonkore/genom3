@@ -127,14 +127,27 @@ class Service
 		typedef std::map<std::string, Ptr> Map;
 		enum Type { Control, Exec, Init };
 
+		struct Input {
+			typedef std::vector<Input> Vect;
+			enum Kind { IDSMember, Type};
+
+			bool operator==(const Input &rhs); // necessary for boost.python
+
+			Kind kind;
+			std::string identifier;
+			Idl::IdlType::Ptr type;
+			Idl::Literal defaultValue;
+		};
+
 		Service() {}
 		Service(const std::string &id) 
 		: name(id) {}
 
 		void debug();
 
-		void addInput(const std::string &s, const Idl::Literal &defaultValue = Idl::Literal());
-		std::vector<std::string>& inputs() { return m_inputs; }
+		void addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue = Idl::Literal());
+		void addInput(const Service::Input &i);
+		Input::Vect& inputs() { return m_inputs; }
 		Idl::Literal inputDefaultArg(const std::string &n); 
 
 		std::vector<std::string>& errorMessages() { return m_errorMessages; }
@@ -156,8 +169,7 @@ class Service
 
 	private:
 		Codel::Map m_codels;
-		std::vector<std::string> m_inputs;
-		Idl::Literal::Map m_inputDefaultArgs;
+		Input::Vect m_inputs;
 		std::vector<std::string> m_incompatibleServices;
 		std::vector<std::string> m_errorMessages;
 };

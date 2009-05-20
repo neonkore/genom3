@@ -58,6 +58,8 @@ class Literal {
 		Literal(double d) : m_kind(Double), m_value(d), m_isEmpty(false)  {}
 		Literal(bool b) : m_kind(Bool), m_value(b), m_isEmpty(false)  {}
 
+		bool operator==(const G3nom::Idl::Literal& rhs);  // necessary for boost.python
+
 		void addMember(const Literal &l);
 		Literal::Vector& members() { return m_members; }
 

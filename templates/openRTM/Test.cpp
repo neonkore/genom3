@@ -1,5 +1,18 @@
-
+<?
+def parseInput(type, name):
+  if type.kind() == IdlKind.Enum:?>
+      int tmp;
+      cin >> tmp;
+      <!name!> = (<!MapTypeToCpp(type, True)!>) tmp;
+<?
+  else:
+    print "cin >> " + name + ";"
+?>
 #include "<!comp.name()!>Test.h"
+
+#include <iostream>
+
+using namespace std;
 
 // Module specification
 static const char* <!comp.name()!>Test_spec[] =
@@ -98,7 +111,68 @@ RTC::ReturnCode_t <!comp.name()!>Control::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t <!capCompName!>Test::onExecute(RTC::UniqueId ec_id)
 {
-  return RTC::RTC_OK;
+  int action;  
+  // print usage
+  cout << "Available actions:" << endl;
+<?
+idx = 0
+for s in servicesMap:
+  service = s.data()
+  idx += 1
+  print "  cout << \"  (" + str(idx) + ") " + service.name + "\" << endl;"
+?>
+
+  std::cin >> action;
+  switch(action) {
+<?
+idx = 0
+for s in servicesMap:
+  service = s.data()
+  idx += 1
+  inputFlatList = inputList(service)
+  serviceArgs = ""
+  for i in service.inputs():
+    serviceArgs += i + ", "
+  serviceArgs = serviceArgs[:-2]
+  ?>
+    case <!idx!>: {
+<?
+  for i in service.inputs():
+    print "      " + MapTypeToCpp(comp.typeFromIdsName(i), True) + " " + i + ";";
+  if len(service.output) > 0 and service.type == ServiceType.Control:
+    print "      " + MapTypeToCpp(comp.typeFromIdsName(service.output), True, True) + " " + service.output + ";";
+
+  for x in inputFlatList:
+    t = MapTypeToCpp(x[0], True)
+    ?>
+      cout << "Enter <!t!> <!x[1]!>:  ";
+<?
+    parseInput(x[0], x[1]);
+
+  if service.type == ServiceType.Control:
+    if len(service.output) > 0:
+      outputType = MapTypeToCpp(comp.typeFromIdsName(service.output), True)
+      ?>
+      <!service.output!> = m_service-><!service.name!>(<!serviceArgs!>);
+      cout << endl << "Result: " << <!service.output!> << endl;
+<?
+    else:?>
+      m_service-><!service.name!>(<!serviceArgs!>);
+<?
+  else:
+    if len(service.output) > 0:?>
+      cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
+<?
+    else:?>
+      m_service-><!service.name!>(<!serviceArgs!>);
+      cout << endl << "Started activity " << endl;
+<?
+  ?>
+      break;
+    }
+<?
+?>      
+  }
 }
 
 /*

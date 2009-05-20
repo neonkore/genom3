@@ -6,6 +6,26 @@ servicesMap = comp.servicesMap()
 capCompName = comp.name().capitalize()
 upperCompName = upper(comp.name())
 
+# returns a flat list of the structure of a type
+def flatStruct(t, name, separator = "_"):
+    if t.kind() == IdlKind.Named:
+	n = t.asNamedType()
+	return flatStruct(n.type(), name, separator)
+    elif t.kind() == IdlKind.Struct:
+	s = t.asStructType()
+	l = [] 
+	for m in s.members():
+	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator))
+	return l
+    else:
+	return [(t, name)]  
+
+def inputList(service):
+  res = []
+  for i in service.inputs():
+    res.extend(flatStruct(comp.typeFromIdsName(i), i, '.'))
+  return res
+
 def service_idl_signature(service):
     # find the service output type
     if len(service.output) > 0:

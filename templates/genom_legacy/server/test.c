@@ -83,12 +83,8 @@ static  TEST_RQST_DESC_STR <!comp.name()!>TestRqstFuncTab[] = {
 <? # $requestFuncTabDeclare$
 out = ""
 for name, service in servicesDict.iteritems():
-    if len(service.inputs()) > 0:
-	inputSize = sizeOfIdsMember(service.inputs()[0])
-    else:
-	inputSize = "0"
-    outputSize = sizeOfIdsMember(service.output)
-    out += "  {%s_%s_RQST, %sTest%s, %s, %s},\n" % (upper(comp.name()), upper(name), comp.name(), name, inputSize, outputSize)
+    serviceInfo = services_info_dict[name]
+    out += "  {%s_%s_RQST, %sTest%s, %s, %s},\n" % (upper(comp.name()), upper(name), comp.name(), name, serviceInfo.inputSize, serviceInfo.outputSize)
 print out[:-2] + "};" 
 ?>
 

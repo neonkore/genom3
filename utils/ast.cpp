@@ -356,20 +356,20 @@ void Service::debug()
 	}
 }
 
-void Service::addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue)
-{
-	Input i;
-	if(!t.get())
-		i.kind = Input::IDSMember;
-	else {
-		i.kind = Input::Type;
-		i.type = t;
-	}
-
-	i.identifier = s;
-	i.defaultValue = defaultValue;
-	m_inputs.push_back(i);
-}
+// void Service::addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue)
+// {
+// 	Input i;
+// 	if(!t.get())
+// 		i.kind = Input::IDSMember;
+// 	else {
+// 		i.kind = Input::Type;
+// 		i.type = t;
+// 	}
+// 
+// 	i.identifier = s;
+// 	i.defaultValue = defaultValue;
+// 	m_inputs.push_back(i);
+// }
 
 void Service::addInput(const Service::Input &i)
 {

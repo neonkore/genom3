@@ -36,6 +36,7 @@ using namespace Idl;
 using namespace boost::python;
 
 // BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ServiceAddInputOverloads, Service::addInput, 1,3)
+// bool    (X::*fx1)(int)              = &X::f;
 
 void export_ast()
 {
@@ -80,7 +81,7 @@ void export_ast()
 	.def("codel", &Service::codel)
 	.def("hasCodel", &Service::hasCodel)
 	.def("addCodel", &Service::addCodel)
-// 	.def("addInput", &Service::addInput, ServiceAddInputOverloads())
+	.def("addInput", &Service::addInput/*, ServiceAddInputOverloads()*/)
 	.def_readwrite("output", &Service::output)
 	.def("codels", &Service::codels, return_value_policy<reference_existing_object>())
 	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>())

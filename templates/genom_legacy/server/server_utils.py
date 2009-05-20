@@ -21,8 +21,35 @@ def typeFromIdsName(name):
   else:
     return comp.typeFromIdsName(name)
 
-# returns a flat list of the structure of a type
+def inputType(i):
+  if i.kind == ServiceInputKind.IDSMember:
+    return typeFromIdsName(i.identifier)
+  else:
+    return i.type
 
+def pointerTo(t):
+  s = MapTypeToC(t,True)
+  if t.kind() == IdlKind.String:
+    return s
+  else:
+    return s+"*"
+
+#ids_members = dict()
+
+def idsMemberForInput(i, service):
+  if i.kind == ServiceInputKind.IDSMember:
+    return i.identifier
+  else:
+    #if i.type in ids_members:
+      #return ids_members[i.type]
+    #else: # create a new ids member for this type
+      #name = MapTypeToC(i.type).replace(' ', '_')
+      name = service.name + "_" + i.identifier
+      IDSType.addMember(i.type, name)
+      #ids_members[i.type] = name
+      return name
+
+# returns a flat list of the structure of a type
 def flatStruct(t, name, separator = "_"):
     if t.kind() == IdlKind.Named:
 	n = t.asNamedType()
@@ -35,6 +62,172 @@ def flatStruct(t, name, separator = "_"):
 	return l
     else:
 	return [(t, name)]   
+
+def typeProtoPrefix(t):
+    prefix = ""
+    if t.kind() == IdlKind.Named:
+	n = t.asNamedType()
+	return typeProtoPrefix(n.type())
+    if t.kind() == IdlKind.Struct:
+	prefix = "struct_"
+    elif t.kind() == IdlKind.Enum:
+	prefix = "enum_"
+    elif t.kind() == IdlKind.Typedef:
+	return ""
+    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
+        prefix = "char"
+    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
+        prefix = "int"
+    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+        prefix = "int"
+    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+        prefix = "double"
+    elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
+	prefix = "string"
+    return prefix + t.identifier()
+
+# copy ids type
+IDSType = StructType()
+IDSType.setIdentifier(comp.IDSType.identifier())
+s = comp.IDSType.unalias().asStructType()
+for m in s.members():
+    IDSType.addMember(m.data(), m.key())
+
+# create a list of out ports, because we don't use inports
+outports = []
+inports = []
+for p in comp.portsMap():
+    if p.data().type == PortType.Outgoing:
+	outports.append(p.data())
+    else:
+	inports.append(p.data())
+# add a member in the ids for connect services 
+if len(inports) > 0:
+  IDSType.addMember(StringType(256), connectIDSMember)
+
+# create connect services for each inport
+for port in inports:
+  name = "connect" + port.name
+  s = Service(name)
+  s.type = ServiceType.Control
+
+  i = ServiceInput()
+  i.identifier = connectIDSMember
+  i.kind = ServiceInputKind.IDSMember
+  s.addInput(i)
+  c = Codel(name + "Exec")
+  s.addCodel("control", c)
+  servicesDict[name] = s
+
+class ServiceInfo:
+  def __init__(self, service):
+    # inputs
+    if len(service.inputs()) == 0:
+      self.inputFlag = False
+      self.inputSize = "0"
+      self.inputNamePtr = "NULL"
+      self.inputRefPtr = "NULL"
+      self.inputFlatList = []
+    else:
+      self.inputFlag = True
+
+      if len(service.inputs()) > 1: # need to create the type
+	self.inputType = StructType()
+	self.inputType.setIdentifier(service.name + "_input_struct")
+	for i in service.inputs():
+	  t = inputType(i)
+	  self.inputType.addMember(t, i.identifier)
+	self.inputName = service.name + "_input"
+	# add a type and the corresponding element in the ids
+	typesVect.append(self.inputType)
+	IDSType.addMember(self.inputType, service.name + "_input")
+
+      else:
+	self.inputName = idsMemberForInput(service.inputs()[0], service)
+	self.inputType = inputType(service.inputs()[0])
+
+      self.inputTypePtr = pointerTo(self.inputType)
+      self.inputTypeProto = typeProtoPrefix(self.inputType)
+
+      self.inputSize = "sizeof(" + MapTypeToC(self.inputType, True) + ")"
+      if(self.inputType.kind() == IdlKind.String):
+	  self.inputNamePtr = self.inputName
+      else:
+	  self.inputNamePtr = "&" + self.inputName
+      self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
+ 
+      if self.inputType.kind() == IdlKind.Struct or self.inputType.kind() == IdlKind.Typedef \
+      or self.inputType.kind() == IdlKind.Array or self.inputType.kind() == IdlKind.Named:
+	  self.inputNewline = "1"
+      else:
+	  self.inputNewline = "0"
+
+      self.inputFlatList = flatStruct(self.inputType, self.inputName, ".") 
+      if self.inputType.kind() == IdlKind.String:
+	  st = self.inputType.asStringType()
+	  self.inputVarDecl = "char " + self.inputName + "[" + str(st.bound()) + "]"
+      else:
+	  self.inputVarDecl = MapTypeToC(self.inputType,True) + " " + self.inputName
+
+      self.signatureProto = ""
+      for i in service.inputs():
+	  idstype = inputType(i);
+	  self.signatureProto += pointerTo(idstype) + " in_" + i.identifier + ", ";
+      if len(service.output) > 0:
+	  idstype = typeFromIdsName(service.output);
+	  self.signatureProto += pointerTo(idstype) + " out_" + service.output + ", ";  
+
+    # outputs
+    if len(service.output) == 0:
+      self.outputFlag = False
+      self.outputSize = "0"
+      self.outputNamePtr = "NULL"
+      self.outputRefPtr = "NULL"
+      self.outputFlatList = []
+    else:
+      self.outputFlag = True
+      self.outputName = service.output
+      self.outputType = typeFromIdsName(self.outputName)
+      self.outputTypeC = MapTypeToC(self.outputType,True)
+      self.outputTypeProto = typeProtoPrefix(self.outputType)
+      self.outputTypePtr = pointerTo(self.outputType)
+
+      self.outputSize = "sizeof(" + MapTypeToC(self.outputType, True) + ")"
+
+      if(self.outputType.kind() == IdlKind.String):
+	  self.outputNamePtr = self.outputName
+      else:
+	  self.outputNamePtr = "&" + self.outputName
+      self.outputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.outputName + ")" 
+
+      if self.outputType.kind() == IdlKind.Struct or self.outputType.kind() == IdlKind.Typedef \
+      or self.outputType.kind() == IdlKind.Array or self.outputType.kind() == IdlKind.Named:
+	self.outputNewline = "1"
+      else:
+	self.outputNewline = "0"
+
+      self.outputFlatList = flatStruct(self.outputType, self.outputName, ".")
+      if self.outputType.kind() == IdlKind.String:
+	  st = self.outputType.asStringType()
+	  self.outputVarDecl = "char " + self.outputName + "[" + str(st.bound()) + "]"
+      else:
+	  self.outputVarDecl = MapTypeToC(self.outputType,True) + " " + self.outputName
+
+    # other attributes
+    self.controlFuncFlag = service.hasCodel("control")
+    if self.controlFuncFlag:
+      self.controlFuncParams = ""
+      for type in service.codel("control").inTypes:
+	self.controlFuncParams += ", & SDI_F->" + type;
+      for type in service.codel("control").outTypes:
+	self.controlFuncParams += ", & SDI_F->" + type;
+    else:
+      self.controlFuncParams = ""
+
+# create serviceInfo objects
+services_info_dict = dict()
+for name, service in servicesDict.iteritems():
+    services_info_dict[name] = ServiceInfo(service)    
 
 def convertFun(t):
     if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
@@ -61,29 +254,6 @@ def formatStringForType(t):
    else:
        return ""
 
-def typeProtoPrefix(t):
-    prefix = ""
-    if t.kind() == IdlKind.Named:
-	n = t.asNamedType()
-	return typeProtoPrefix(n.type())
-    if t.kind() == IdlKind.Struct:
-	prefix = "struct_"
-    elif t.kind() == IdlKind.Enum:
-	prefix = "enum_"
-    elif t.kind() == IdlKind.Typedef:
-	return ""
-    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
-        prefix = "char"
-    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
-        prefix = "int"
-    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
-        prefix = "int"
-    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
-        prefix = "double"
-    elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
-	prefix = "string"
-    return prefix + t.identifier()
-
 def sizeOfType(t):
     if t.kind() == IdlKind.String:
 	s = t.asStringType()
@@ -107,15 +277,6 @@ def findInitService():
   return 0,-1
 
 initService,initServiceNb = findInitService()
-
-# create a list of out ports, because we don't use inports
-outports = []
-inports = []
-for p in comp.portsMap():
-    if p.data().type == PortType.Outgoing:
-	outports.append(p.data())
-    else:
-	inports.append(p.data())
 
 # error related functions
 def createErrorList():
@@ -156,22 +317,11 @@ def findServiceWithSameOutput(service, inputName):
     return l
 
 # creates the signature of the function corresponding to a codel
-def pointerTo(t):
-  s = MapTypeToC(t,True)
-  if t.kind() == IdlKind.String:
-    return s
-  else:
-    return s+"*"
-
 def codel_signature(codel, service=None):
   proto = codel.name + "_codel(";
   if service != None:
-    for s in service.inputs():
-	idstype = typeFromIdsName(s);
-	proto += pointerTo(idstype) + " in_" + s + ", ";
-    if len(service.output) > 0:
-	idstype = typeFromIdsName(service.output);
-	proto += pointerTo(idstype) + " out_" + service.output + ", ";  
+    serviceInfo = services_info_dict[service.name]
+    proto += serviceInfo.signatureProto
 
   for type in codel.inTypes:
     idstype = typeFromIdsName(type);
@@ -191,12 +341,8 @@ def codelSignatureFull(codel, service):
 def real_codel_signature(codel, service=None):
   proto = ""
   if service != None:
-    for s in service.inputs():
-	idstype = typeFromIdsName(s);
-	proto += pointerTo(idstype) + " in_" + s + ", ";
-    if len(service.output) > 0:
-	idstype = typeFromIdsName(service.output);
-	proto += pointerTo(idstype) + " out_" + service.output + ", "; 
+    serviceInfo = services_info_dict[service.name]
+    proto += serviceInfo.signatureProto
 
   for type in codel.inTypes:
     idstype = typeFromIdsName(type);
@@ -222,8 +368,8 @@ def real_codel_signature(codel, service=None):
 def real_codel_call(codel, service=None):
   proto = ""
   if service != None:
-    for s in service.inputs():
-	proto += " in_" + s + ", ";
+    for i in service.inputs():
+	proto += " in_" + i.identifier + ", ";
     if len(service.output) > 0:
 	proto += " out_" + service.output + ", "; 
 
@@ -277,129 +423,6 @@ def typeSize(t):
 	else:
 	  return s.bound()
     return 0
-
-# create connect services for each inport
-for port in inports:
-  name = "connect" + port.name
-  s = Service(name)
-  s.type = ServiceType.Control
-  s.addInput(connectIDSMember)
-  c = Codel(name + "Exec")
-  s.addCodel("control", c)
-  servicesDict[name] = s
-
-# copy ids type
-IDSType = StructType()
-IDSType.setIdentifier(comp.IDSType.identifier())
-s = comp.IDSType.unalias().asStructType()
-for m in s.members():
-    IDSType.addMember(m.data(), m.key())
-
-# add a member in the ids for connect services 
-if len(inports) > 0:
-  IDSType.addMember(StringType(256), connectIDSMember)
-
-class ServiceInfo:
-  def __init__(self, service):
-    # inputs
-    if len(service.inputs()) == 0:
-      self.inputFlag = False
-      self.inputSize = "0"
-      self.inputNamePtr = "NULL"
-      self.inputRefPtr = "NULL"
-      self.inputFlatList = []
-    else:
-      self.inputFlag = True
-
-      if len(service.inputs()) > 1: # need to create the type
-	self.inputType = StructType()
-	self.inputType.setIdentifier(service.name + "_input_struct")
-	for i in service.inputs():
-	  t = typeFromIdsName(i)
-	  self.inputType.addMember(t, i)
-	self.inputName = service.name + "_input"
-	# add a type and the corresponding element in the ids
-	typesVect.append(self.inputType)
-	IDSType.addMember(self.inputType, service.name + "_input")
-
-      else:
-	self.inputName = service.inputs()[0]
-	self.inputType = typeFromIdsName(self.inputName)
-
-      self.inputTypePtr = pointerTo(self.inputType)
-      self.inputTypeProto = typeProtoPrefix(self.inputType)
-
-      self.inputSize = "sizeof(" + MapTypeToC(self.inputType) + ")"
-      if(self.inputType.kind() == IdlKind.String):
-	  self.inputNamePtr = self.inputName
-      else:
-	  self.inputNamePtr = "&" + self.inputName
-      self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
- 
-      if self.inputType.kind() == IdlKind.Struct or self.inputType.kind() == IdlKind.Typedef \
-      or self.inputType.kind() == IdlKind.Array or self.inputType.kind() == IdlKind.Named:
-	  self.inputNewline = "1"
-      else:
-	  self.inputNewline = "0"
-
-      self.inputFlatList = flatStruct(self.inputType, self.inputName, ".") 
-      if self.inputType.kind() == IdlKind.String:
-	  st = self.inputType.asStringType()
-	  self.inputVarDecl = "char " + self.inputName + "[" + str(st.bound()) + "]"
-      else:
-	  self.inputVarDecl = MapTypeToC(self.inputType,True) + " " + self.inputName
-
-    # outputs
-    if len(service.output) == 0:
-      self.outputFlag = False
-      self.outputSize = "0"
-      self.outputNamePtr = "NULL"
-      self.outputRefPtr = "NULL"
-      self.outputFlatList = []
-    else:
-      self.outputFlag = True
-      self.outputName = service.output
-      self.outputType = typeFromIdsName(self.outputName)
-      self.outputTypeC = MapTypeToC(self.outputType,True)
-      self.outputTypeProto = typeProtoPrefix(self.outputType)
-      self.outputTypePtr = pointerTo(self.outputType)
-
-      self.outputSize = "sizeof(" + MapTypeToC(self.outputType) + ")"
-
-      if(self.outputType.kind() == IdlKind.String):
-	  self.outputNamePtr = self.outputName
-      else:
-	  self.outputNamePtr = "&" + self.outputName
-      self.outputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.outputName + ")" 
-
-      if self.outputType.kind() == IdlKind.Struct or self.outputType.kind() == IdlKind.Typedef \
-      or self.outputType.kind() == IdlKind.Array or self.outputType.kind() == IdlKind.Named:
-	self.outputNewline = "1"
-      else:
-	self.outputNewline = "0"
-
-      self.outputFlatList = flatStruct(self.outputType, self.outputName, ".")
-      if self.outputType.kind() == IdlKind.String:
-	  st = self.outputType.asStringType()
-	  self.outputVarDecl = "char " + self.outputName + "[" + str(st.bound()) + "]"
-      else:
-	  self.outputVarDecl = MapTypeToC(self.outputType,True) + " " + self.outputName
-
-    # other attributes
-    self.controlFuncFlag = service.hasCodel("control")
-    if self.controlFuncFlag:
-      self.controlFuncParams = ""
-      for type in service.codel("control").inTypes:
-	self.controlFuncParams += ", & SDI_F->" + type;
-      for type in service.codel("control").outTypes:
-	self.controlFuncParams += ", & SDI_F->" + type;
-    else:
-      self.controlFuncParams = ""
-
-# create serviceInfo objects
-services_info_dict = dict()
-for name, service in servicesDict.iteritems():
-    services_info_dict[name] = ServiceInfo(service)    
 
 # compute the max request and result size
 def maxArgsSize():

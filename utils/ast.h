@@ -145,7 +145,7 @@ class Service
 
 		void debug();
 
-		void addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue = Idl::Literal());
+// 		void addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue = Idl::Literal());
 		void addInput(const Service::Input &i);
 		Input::Vect& inputs() { return m_inputs; }
 		Idl::Literal inputDefaultArg(const std::string &n); 

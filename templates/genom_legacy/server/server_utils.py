@@ -43,6 +43,7 @@ def idsMemberForInput(i, service):
     return i.identifier
   else:
     # control service can share their input
+    # (when they just have one input)
     if service.type == ServiceType.Control:
       name = idsNameForType(i.type)
       if name not in ids_members: # create a new ids member for this type

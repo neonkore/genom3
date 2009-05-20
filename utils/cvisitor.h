@@ -61,6 +61,7 @@ class CVisitor : public TypeVisitor
 	protected:
 		std::ostream &m_out;
 		bool m_declOnly;
+		std::string m_indent;
 };
 
 }

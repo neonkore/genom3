@@ -34,19 +34,24 @@ def pointerTo(t):
   else:
     return s+"*"
 
-#ids_members = dict()
+def idsNameForType(t):
+  return "_" + MapTypeToC(i.type).replace(' ', '_')
 
+ids_members = []
 def idsMemberForInput(i, service):
   if i.kind == ServiceInputKind.IDSMember:
     return i.identifier
   else:
-    #if i.type in ids_members:
-      #return ids_members[i.type]
-    #else: # create a new ids member for this type
-      #name = MapTypeToC(i.type).replace(' ', '_')
+    # control service can share their input
+    if service.type == ServiceType.Control:
+      name = idsNameForType(t)
+      if name not in ids_members: # create a new ids member for this type
+	IDSType.addMember(i.type, name)
+	ids_members.append(name)
+      return name
+    else:
       name = service.name + "_" + i.identifier
       IDSType.addMember(i.type, name)
-      #ids_members[i.type] = name
       return name
 
 # returns a flat list of the structure of a type
@@ -128,6 +133,7 @@ class ServiceInfo:
       self.inputNamePtr = "NULL"
       self.inputRefPtr = "NULL"
       self.inputFlatList = []
+      self.signatureProto = ""
     else:
       self.inputFlag = True
 

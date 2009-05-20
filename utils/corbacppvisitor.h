@@ -63,6 +63,7 @@ class CorbaCppVisitor : public TypeVisitor
 		std::ostream &m_out;
 		bool m_declOnly;
 		bool m_isOutType;
+		std::string m_indent;
 };
 
 }

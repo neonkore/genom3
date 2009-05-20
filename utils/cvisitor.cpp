@@ -34,6 +34,8 @@
 #include "idltype.h"
 #include "idlvalues.h"
 
+#define INDENT_QUANTUM "    "
+
 using namespace G3nom;
 using namespace Idl;
 using namespace std;
@@ -123,25 +125,29 @@ void CVisitor::visitStructType(StructType *s)
 		return;
 
 	m_out << "{" << endl;
+	string oldIndent = m_indent;
+	m_indent += INDENT_QUANTUM;
+
 	IdlType::Map::const_iterator it = s->members().begin();
 	for(; it != s->members().end(); ++it) {
+		m_out << m_indent;
 		if(it->second->kind() == IdlType::String) {
 			StringType *st = it->second->asStringType();
 			if(st)
-				m_out << "   char " << it->first << "[" << st->bound() <<  "];" << endl;
+				m_out << "char " << it->first << "[" << st->bound() <<  "];" << endl;
 			continue;
-		}
-		m_out  << "   ";
+		} 
+
 		it->second->accept(*this); // no need to set declOnly because of NamedType
 		m_out << " " << it->first;
-
 		//print array if existing
 		if(it->second->kind() == IdlType::Array)
 			m_out << it->second->asType<ArrayType>()->printBounds();
 
 		m_out << ";" << endl;
 	}
-	m_out << "}";
+	m_indent = oldIndent;
+	m_out << m_indent << "}";
 }
 
 void CVisitor::visitTypedefType(TypedefType *t)
@@ -162,18 +168,18 @@ void CVisitor::visitEnumType(EnumType *e)
 	if(m_declOnly)
 	  return;
 
-	m_out << "{" << endl << "\t";
+	m_out << "{" << endl << m_indent;
 	bool first = true;
 	std::vector<std::string>::const_iterator it;
 	for (it = e->enumerators().begin(); it != e->enumerators().end(); ++it) {
 		if (!first)
-			m_out << ", \n\t";
+			m_out << ", \n" << m_indent << INDENT_QUANTUM;
 		else
 			first = false;
 
 		m_out << *it;
 	}
-	m_out << "}" << endl;
+	m_out << m_indent << "}" << endl;
 }
 
 void CVisitor::visitArrayType(ArrayType *a)

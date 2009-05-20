@@ -6,6 +6,12 @@ servicesMap = comp.servicesMap()
 capCompName = comp.name().capitalize()
 upperCompName = upper(comp.name())
 
+def inputType(i):
+  if i.kind == ServiceInputKind.IDSMember:
+    return comp.typeFromIdsName(i.identifier)
+  else:
+    return i.type
+
 def service_idl_signature(service):
     # find the service output type
     if len(service.output) > 0:
@@ -16,16 +22,16 @@ def service_idl_signature(service):
     # then create the args list
     args = ""
     for i in service.inputs():
-	t = comp.typeFromIdsName(i)
-	args += "in " + MapTypeToIdl(t) + " " + i + ", "
+	t = inputType(i)
+	args += "in " + MapTypeToIdl(t) + " " + i.identifier + ", "
     return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ");"
 
 def service_cpp_args(service, className=""):
     # create the args list
     args = ""
     for i in service.inputs():
-	t = comp.typeFromIdsName(i)
-	args += MapTypeToCpp(t) + " in_" + i + ", "
+	t = inputType(i)
+	args += MapTypeToCpp(t) + " in_" + i.identifier + ", "
     if className != "":
 	return className + "::" + service.name + "(" + args[:-2] + ")"
     else:
@@ -53,8 +59,8 @@ def real_codel_signature(codel, service=None):
   proto = ""
   if service != None:
     for s in service.inputs():
-	idstype = comp.typeFromIdsName(s);
-	proto += pointerTo(idstype) + " in_" + s + ", ";
+	idstype = inputType(s);
+	proto += pointerTo(idstype) + " in_" + s.identifier + ", ";
     if len(service.output) > 0:
 	idstype = comp.typeFromIdsName(service.output);
 	proto += pointerTo(idstype) + " out_" + service.output + ", "; 
@@ -104,7 +110,7 @@ def codel_call(codel, service=None):
   proto = ""
   if service != None:
     for s in service.inputs():
-	proto += " in_" + s + ", ";
+	proto += " in_" + s.identifier + ", ";
     if len(service.output) > 0:
 	proto += " out_" + service.output + ", "; 
 
@@ -122,8 +128,8 @@ def codel_call(codel, service=None):
 def real_codel_call(codel, data_prefix="", service=None):
   proto = ""
   if service != None:
-    for s in service.inputs():
-	proto += " &in_" + s + ", ";
+    for i in service.inputs():
+	proto += " &in_" + i.identifier + ", ";
     if len(service.output) > 0:
 	proto += " &out_" + service.output + ", "; 
 
@@ -142,7 +148,7 @@ def service_call(service):
     # create the args list
     args = ""
     for i in service.inputs():
-	args += "in_" + i + ", "
+	args += "in_" + i.identifier + ", "
     return service.name + "(" + args[:-2] + ")"
 
 def serviceOutportsSet(service):

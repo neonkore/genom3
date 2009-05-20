@@ -44,8 +44,8 @@ for s in servicesMap:
 	for incomp in service.incompatibleServices():
 	  print "  m_data->kill" + incomp + "Services();" 
 
-    for s in service.inputs():
-	print "  m_data->" + s + " = in_" + s + ";" 
+    for i in service.inputs():
+	print "  m_data->" + i.identifier + " = in_" + i.identifier + ";" 
     if len (service.output) > 0:
 	print "  return m_data->" + service.output + ";"
     ?>
@@ -65,8 +65,8 @@ for s in comp.servicesMap():
       args = ", m_serviceCount++ "
     else:
       args = ""
-    for s in service.inputs():
-      args += ", in_" + s
+    for i in service.inputs():
+      args += ", in_" + i.identifier
     ?>
 <!service_cpp_signature(service, prefix)!>
 {

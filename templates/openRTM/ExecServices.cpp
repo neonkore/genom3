@@ -23,10 +23,10 @@ for s in comp.servicesMap():
     inputStr = ", CORBA::Long id"
   else:
     inputStr = ""
-  for s in service.inputs():
+  for i in service.inputs():
     inputStr += ", "
-    t = comp.typeFromIdsName(s)
-    inputStr += MapTypeToCpp(t) + " " + s
+    t = inputType(i)
+    inputStr += MapTypeToCpp(t) + " " + i.identifier
 
   ?>
 // <!service.name!>Service
@@ -35,8 +35,8 @@ for s in comp.servicesMap():
 : m_data(data)
 {
 <?
-  for s in service.inputs():
-    print "  in_" + s + " = " + s + ";"
+  for i in service.inputs():
+    print "  in_" + i.identifier + " = " + i.identifier + ";"
   ?>
   m_status = <!startStateForService(service)!>;
 }

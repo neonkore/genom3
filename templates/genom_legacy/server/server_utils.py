@@ -35,7 +35,7 @@ def pointerTo(t):
     return s+"*"
 
 def idsNameForType(t):
-  return "_" + MapTypeToC(i.type).replace(' ', '_')
+  return "_" + MapTypeToC(t, True).replace(' ', '_')
 
 ids_members = []
 def idsMemberForInput(i, service):
@@ -44,7 +44,7 @@ def idsMemberForInput(i, service):
   else:
     # control service can share their input
     if service.type == ServiceType.Control:
-      name = idsNameForType(t)
+      name = idsNameForType(i.type)
       if name not in ids_members: # create a new ids member for this type
 	IDSType.addMember(i.type, name)
 	ids_members.append(name)

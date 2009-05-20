@@ -44,7 +44,7 @@ std::string CVisitor::mapTypeToC(IdlType::Ptr t, bool declOnly)
 {
 	if(t.get() == 0) {
 		cerr << "Trying to map a null type" << endl;
-		return "gggggggggggggggggggggggggggggggggggg";
+		return "<NULL TYPE>";
 	}
 
 	std::string s;

@@ -193,7 +193,7 @@ class ServiceInfo:
       self.outputFlatList = []
     else:
       self.outputFlag = True
-      self.outputName = idsMemberForInput(service.output)
+      self.outputName = idsMemberForInput(service.output, service)
       self.outputType = typeFromIdsName(self.outputName)
       self.outputTypeC = MapTypeToC(self.outputType,True)
       self.outputTypeProto = typeProtoPrefix(self.outputType)
@@ -376,9 +376,9 @@ def real_codel_call(codel, service=None):
   proto = ""
   if service is not None:
     for i in service.inputs():
-	proto += " in_" + idsMemberForInput(i, service) + ", ";
+	proto += " in_" + i.identifier + ", ";
     if service.output.identifier:
-	proto += " out_" + idsMemberForInput(service.output, service) + ", "; 
+	proto += " out_" + service.output.identifier + ", "; 
 
   for type in codel.inTypes:
     proto += "in_" + type + ", ";

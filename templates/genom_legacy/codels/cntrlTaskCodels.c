@@ -67,7 +67,7 @@ for name, service in servicesDict.iteritems():
 	if service.type != ServiceType.Control and c.key() != "control" :
 	    continue
 	# check for a special 'connect inport' service
-	if len(service.inputs()) == 1 and service.inputs()[0] == connectIDSMember:
+	if len(service.inputs()) == 1 and service.inputs()[0].identifier == connectIDSMember:
 	    continue
 	?>
 /*------------------------------------------------------------------------

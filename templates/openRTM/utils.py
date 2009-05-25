@@ -195,7 +195,7 @@ def outputPortsMap():
   m = {}
   for s in servicesMap:
     service = s.data()
-    if service.type != ServiceType.Exec or len(service.output) == 0:
+    if service.type != ServiceType.Exec or not service.output:
       continue
     typeName = MapTypeToIdl(comp.typeFromIdsName(service.output))
     m[service.name] = typeName

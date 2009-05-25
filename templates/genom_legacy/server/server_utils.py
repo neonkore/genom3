@@ -180,12 +180,12 @@ class ServiceInfo:
       for i in service.inputs():
 	  idstype = inputType(i);
 	  self.signatureProto += pointerTo(idstype) + " in_" + i.identifier + ", ";
-      if service.output:
-	  idstype = typeFromIdsName(service.output);
-	  self.signatureProto += pointerTo(idstype) + " out_" + service.output + ", ";  
+      if service.output.identifier:
+	  idstype = inputType(service.output);
+	  self.signatureProto += pointerTo(idstype) + " out_" + service.output.identifier + ", ";  
 
     # outputs
-    if not service.output:
+    if not service.output.identifier:
       self.outputFlag = False
       self.outputSize = "0"
       self.outputNamePtr = "NULL"
@@ -193,7 +193,7 @@ class ServiceInfo:
       self.outputFlatList = []
     else:
       self.outputFlag = True
-      self.outputName = service.output
+      self.outputName = service.output.identifier
       self.outputType = typeFromIdsName(self.outputName)
       self.outputTypeC = MapTypeToC(self.outputType,True)
       self.outputTypeProto = typeProtoPrefix(self.outputType)
@@ -376,9 +376,9 @@ def real_codel_call(codel, service=None):
   proto = ""
   if service is not None:
     for i in service.inputs():
-	proto += " in_" + i.identifier + ", ";
-    if service.output:
-	proto += " out_" + service.output + ", "; 
+	proto += " in_" + idsMemberForInput(i) + ", ";
+    if service.output.identifier:
+	proto += " out_" + idsMemberForInput(service.output) + ", "; 
 
   for type in codel.inTypes:
     proto += "in_" + type + ", ";

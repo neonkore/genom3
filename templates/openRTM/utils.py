@@ -34,8 +34,11 @@ def inputList(service):
 
 def service_idl_signature(service):
     # find the service output type
-    if service.output:
-	outputType = BaseType.longType
+    if service.output.identifier:
+	if service.type != ServiceType.Control:
+	  outputType = BaseType.longType
+	else:
+	  outputType = comp.typeFromIdsName(service.output)
     else:
 	outputType = BaseType.voidType
 
@@ -59,11 +62,11 @@ def service_cpp_args(service, className=""):
 
 def service_cpp_signature(service, className=""):
     # find the service output type
-    if service.output:
+    if service.output.identifier:
 	if service.type != ServiceType.Control:
 	  outputType = BaseType.longType
 	else:
-	  outputType = comp.typeFromIdsName(service.output)
+	  outputType = inputType(service.output)
     else:
 	outputType = BaseType.voidType
     return MapTypeToCpp(outputType, True, True) + " " + service_cpp_args(service, className)
@@ -81,9 +84,9 @@ def real_codel_signature(codel, service=None):
     for s in service.inputs():
 	idstype = inputType(s);
 	proto += pointerTo(idstype) + " in_" + s.identifier + ", ";
-    if service.output:
-	idstype = comp.typeFromIdsName(service.output);
-	proto += pointerTo(idstype) + " out_" + service.output + ", "; 
+    if service.output.identifier:
+	idstype = inputType(service.output);
+	proto += pointerTo(idstype) + " out_" + service.output.identifier + ", "; 
 
   for type in codel.inTypes:
     idstype = comp.typeFromIdsName(type);
@@ -131,8 +134,8 @@ def codel_call(codel, service=None):
   if service is not None:
     for s in service.inputs():
 	proto += " in_" + s.identifier + ", ";
-    if service.output:
-	proto += " out_" + service.output + ", "; 
+    if service.output.identifier:
+	proto += " out_" + service.output.identifier + ", "; 
 
   for type in codel.inTypes:
     proto += "& in_" + type + ", ";
@@ -150,8 +153,8 @@ def real_codel_call(codel, data_prefix="", service=None):
   if service is not None:
     for i in service.inputs():
 	proto += " &in_" + i.identifier + ", ";
-    if service.output:
-	proto += " &out_" + service.output + ", "; 
+    if service.output.identifier:
+	proto += " &out_" + service.output.identifier + ", "; 
 
   for type in codel.inTypes:
     proto += "& " + data_prefix + type + ", ";
@@ -197,7 +200,7 @@ def outputPortsMap():
     service = s.data()
     if service.type != ServiceType.Exec or not service.output:
       continue
-    typeName = MapTypeToIdl(comp.typeFromIdsName(service.output))
+    typeName = MapTypeToIdl(inputType(service.output))
     m[service.name] = typeName
   return m
 

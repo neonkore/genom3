@@ -132,13 +132,13 @@ for s in servicesMap:
   inputFlatList = inputList(service)
   serviceArgs = ""
   for i in service.inputs():
-    serviceArgs += i + ", "
+    serviceArgs += i.identifier + ", "
   serviceArgs = serviceArgs[:-2]
   ?>
     case <!idx!>: {
 <?
   for i in service.inputs():
-    print "      " + MapTypeToCpp(comp.typeFromIdsName(i), True) + " " + i + ";";
+    print "      " + MapTypeToCpp(inputType(i), True) + " " + i.identifier + ";";
   if len(service.output) > 0 and service.type == ServiceType.Control:
     print "      " + MapTypeToCpp(comp.typeFromIdsName(service.output), True, True) + " " + service.output + ";";
 

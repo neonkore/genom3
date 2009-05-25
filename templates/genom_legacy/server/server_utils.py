@@ -34,6 +34,12 @@ def pointerTo(t):
   else:
     return s+"*"
 
+def addressOf(t, s):
+  if t.kind() == IdlKind.String:
+    return s
+  else:
+    return "&" + s
+
 def idsNameForType(t):
   return "_" + MapTypeToC(t, True).replace(' ', '_')
 
@@ -127,6 +133,7 @@ for port in inports:
 
 class ServiceInfo:
   def __init__(self, service):
+    self.controlFuncParams = ""
     # inputs
     if not service.inputs():
       self.inputFlag = False
@@ -135,6 +142,8 @@ class ServiceInfo:
       self.inputRefPtr = "NULL"
       self.inputFlatList = []
       self.signatureProto = ""
+      self.userSignatureProto = ""
+
     else:
       self.inputFlag = True
 
@@ -157,10 +166,13 @@ class ServiceInfo:
       self.inputTypeProto = typeProtoPrefix(self.inputType)
 
       self.inputSize = "sizeof(" + MapTypeToC(self.inputType, True) + ")"
-      if(self.inputType.kind() == IdlKind.String):
-	  self.inputNamePtr = self.inputName
-      else:
-	  self.inputNamePtr = "&" + self.inputName
+      self.inputNamePtr = addressOf(self.inputType, self.inputName)
+      #if len(service.inputs()) > 1:
+	  #for i in service.inputs():
+	    #self.controlFuncParams += addressOf(inputType(i), self.inputName + "." + i.identifier) + ", "
+	  #self.controlFuncParams = self.controlFuncParams[:-2] # remove the trailing ','
+      #else:
+      self.controlFuncParams += self.inputNamePtr
       self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
  
       if self.inputType.kind() == IdlKind.Struct or self.inputType.kind() == IdlKind.Typedef \
@@ -177,12 +189,16 @@ class ServiceInfo:
 	  self.inputVarDecl = MapTypeToC(self.inputType,True) + " " + self.inputName
 
       self.signatureProto = ""
+      self.userSignatureProto = ""
       for i in service.inputs():
 	  idstype = inputType(i);
-	  self.signatureProto += pointerTo(idstype) + " in_" + i.identifier + ", ";
+	  self.userSignatureProto += pointerTo(idstype) + " in_" + i.identifier + ", "
+      if self.inputFlag:
+	  self.signatureProto += pointerTo(self.inputType) + " in_" + self.inputName + ", "
       if service.output.identifier:
 	  idstype = inputType(service.output);
-	  self.signatureProto += pointerTo(idstype) + " out_" + service.output.identifier + ", ";  
+	  self.signatureProto += pointerTo(idstype) + " out_" + service.output.identifier + ", "  
+	  self.userSignatureProto += pointerTo(idstype) + " out_" + service.output.identifier + ", "  
 
     # outputs
     if not service.output.identifier:
@@ -194,7 +210,7 @@ class ServiceInfo:
     else:
       self.outputFlag = True
       self.outputName = idsMemberForInput(service.output, service)
-      self.outputType = typeFromIdsName(self.outputName)
+      self.outputType = inputType(service.output)
       self.outputTypeC = MapTypeToC(self.outputType,True)
       self.outputTypeProto = typeProtoPrefix(self.outputType)
       self.outputTypePtr = pointerTo(self.outputType)
@@ -223,13 +239,10 @@ class ServiceInfo:
     # other attributes
     self.controlFuncFlag = service.hasCodel("control")
     if self.controlFuncFlag:
-      self.controlFuncParams = ""
       for type in service.codel("control").inTypes:
 	self.controlFuncParams += ", & SDI_F->" + type;
       for type in service.codel("control").outTypes:
 	self.controlFuncParams += ", & SDI_F->" + type;
-    else:
-      self.controlFuncParams = ""
 
 # create serviceInfo objects
 services_info_dict = dict()
@@ -349,7 +362,7 @@ def real_codel_signature(codel, service=None):
   proto = ""
   if service is not None:
     serviceInfo = services_info_dict[service.name]
-    proto += serviceInfo.signatureProto
+    proto += serviceInfo.userSignatureProto
 
   for type in codel.inTypes:
     idstype = typeFromIdsName(type);
@@ -375,8 +388,12 @@ def real_codel_signature(codel, service=None):
 def real_codel_call(codel, service=None):
   proto = ""
   if service is not None:
+    inputPrefix = ""
+    if len(service.inputs()) > 1:
+	serviceInfo = services_info_dict[service.name]
+	inputPrefix = serviceInfo.inputName + "->"
     for i in service.inputs():
-	proto += " in_" + i.identifier + ", ";
+	proto += addressOf(inputType(i), inputPrefix + "in_" + i.identifier) + ", ";
     if service.output.identifier:
 	proto += " out_" + service.output.identifier + ", "; 
 

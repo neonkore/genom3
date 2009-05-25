@@ -133,7 +133,6 @@ for port in inports:
 
 class ServiceInfo:
   def __init__(self, service):
-    self.controlFuncParams = ""
     # inputs
     if not service.inputs():
       self.inputFlag = False
@@ -167,12 +166,6 @@ class ServiceInfo:
 
       self.inputSize = "sizeof(" + MapTypeToC(self.inputType, True) + ")"
       self.inputNamePtr = addressOf(self.inputType, self.inputName)
-      #if len(service.inputs()) > 1:
-	  #for i in service.inputs():
-	    #self.controlFuncParams += addressOf(inputType(i), self.inputName + "." + i.identifier) + ", "
-	  #self.controlFuncParams = self.controlFuncParams[:-2] # remove the trailing ','
-      #else:
-      self.controlFuncParams += self.inputNamePtr
       self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
  
       if self.inputType.kind() == IdlKind.Struct or self.inputType.kind() == IdlKind.Typedef \
@@ -238,6 +231,7 @@ class ServiceInfo:
 
     # other attributes
     self.controlFuncFlag = service.hasCodel("control")
+    self.controlFuncParams = ""
     if self.controlFuncFlag:
       for type in service.codel("control").inTypes:
 	self.controlFuncParams += ", & SDI_F->" + type;

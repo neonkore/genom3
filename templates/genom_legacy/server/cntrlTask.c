@@ -1189,7 +1189,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
     
     /* Call control func */
-    status = <!service.codel("control").name!>_codel(<!inputNamePtr!>, <!serviceInfo.controlFuncParams!>, &bilan);
+    status = <!service.codel("control").name!>_codel(<!serviceInfo.inputNamePtr!>, <!serviceInfo.controlFuncParams!>, &bilan);
 <?
 	    else:
 		?>
@@ -1298,7 +1298,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
     if (csServRqstParamsGet (servId, rqstId, (void *) <!serviceInfo.inputNamePtr!>, 
 			     <!serviceInfo.inputSize!>, (FUNCPTR) NULL) != OK)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
-    status = <!service.codel("control").name!>(<!inputNamePtr!>, <!serviceInfo.controlFuncParams!>, &bilan);
+    status = <!service.codel("control").name!>(<!serviceInfo.inputNamePtr!>, <!serviceInfo.controlFuncParams!>, &bilan);
 <?
 	    else:?>
     status = <!service.codel("control").name!>(&bilan);

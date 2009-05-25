@@ -23,7 +23,7 @@ for s in comp.servicesMap():
       statusStr += ", "
     statusStr += upper(service.name) + "_" + upper(c.key())
       
-    if len(service.output) > 0:
+    if service.output:
       inputStr = ", CORBA::Long id"
     else:
       inputStr = ""
@@ -32,7 +32,7 @@ for s in comp.servicesMap():
       t = inputType(i)
       inputStr += MapTypeToCpp(t) + " " + i.identifier
 
-    if len(service.output) > 0:
+    if service.output:
       t = comp.typeFromIdsName(service.output)
       outputType = MapTypeToCpp(t)
   ?>
@@ -47,7 +47,7 @@ class <!service.name!>Service {
     int id() const { return m_id; }
     bool step();
 <?
-  if len(service.output) > 0:?>
+  if service.output:?>
     <!outputType!> result() { return out_<!service.output!>; }
 <?
   for c in service.codels():
@@ -63,7 +63,7 @@ class <!service.name!>Service {
   for i in service.inputs():
     t = inputType(i)
     print "    " + MapTypeToCpp(t) + " in_" + i.identifier + ";"    
-  if len(service.output) > 0:
+  if service.output:
     print "    " + outputType + " out_" + service.output + ";"
   ?>
     <!capCompName!>ControlData *m_data;

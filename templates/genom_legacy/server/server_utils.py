@@ -108,7 +108,7 @@ for p in comp.portsMap():
     else:
 	inports.append(p.data())
 # add a member in the ids for connect services 
-if len(inports) > 0:
+if inports:
   IDSType.addMember(StringType(256), connectIDSMember)
 
 # create connect services for each inport
@@ -128,7 +128,7 @@ for port in inports:
 class ServiceInfo:
   def __init__(self, service):
     # inputs
-    if len(service.inputs()) == 0:
+    if not service.inputs():
       self.inputFlag = False
       self.inputSize = "0"
       self.inputNamePtr = "NULL"
@@ -180,12 +180,12 @@ class ServiceInfo:
       for i in service.inputs():
 	  idstype = inputType(i);
 	  self.signatureProto += pointerTo(idstype) + " in_" + i.identifier + ", ";
-      if len(service.output) > 0:
+      if service.output:
 	  idstype = typeFromIdsName(service.output);
 	  self.signatureProto += pointerTo(idstype) + " out_" + service.output + ", ";  
 
     # outputs
-    if len(service.output) == 0:
+    if not service.output:
       self.outputFlag = False
       self.outputSize = "0"
       self.outputNamePtr = "NULL"
@@ -270,7 +270,7 @@ def sizeOfType(t):
 
 def sizeOfIdsMember(name):
     type = typeFromIdsName(name)
-    if type == None:
+    if type is None:
 	return "0"
     return sizeOfType(type)
 
@@ -326,7 +326,7 @@ def findServiceWithSameOutput(service, inputName):
 # creates the signature of the function corresponding to a codel
 def codel_signature(codel, service=None):
   proto = codel.name + "_codel(";
-  if service != None:
+  if service is not None:
     serviceInfo = services_info_dict[service.name]
     proto += serviceInfo.signatureProto
 
@@ -347,7 +347,7 @@ def codelSignatureFull(codel, service):
 
 def real_codel_signature(codel, service=None):
   proto = ""
-  if service != None:
+  if service is not None:
     serviceInfo = services_info_dict[service.name]
     proto += serviceInfo.signatureProto
 
@@ -359,13 +359,13 @@ def real_codel_signature(codel, service=None):
     proto += pointerTo(idstype) + " out_" + type + ", ";
   for port in codel.outPorts:
     p = comp.port(port)
-    if p != None:
+    if p is not None:
 	proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
     else:
 	proto += port + ", "
   for port in codel.inPorts:
     p = comp.port(port)
-    if p != None:
+    if p is not None:
 	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
     else:
 	proto += port + ", "
@@ -374,10 +374,10 @@ def real_codel_signature(codel, service=None):
 
 def real_codel_call(codel, service=None):
   proto = ""
-  if service != None:
+  if service is not None:
     for i in service.inputs():
 	proto += " in_" + i.identifier + ", ";
-    if len(service.output) > 0:
+    if service.output:
 	proto += " out_" + service.output + ", "; 
 
   for type in codel.inTypes:

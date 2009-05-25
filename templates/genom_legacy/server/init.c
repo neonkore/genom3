@@ -22,7 +22,7 @@ else:
     request = initService.name
     requestNum = comp.serviceIndex(initService.name)
 
-    if len(initService.inputs()) == 0: # no inputs parameters
+    if not initService.inputs(): # no inputs parameters
 	inputUsage = ""
 	inputA2Type = ""
 	inputFlat = "void"

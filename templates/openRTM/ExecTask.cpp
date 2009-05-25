@@ -55,7 +55,7 @@ for s in comp.servicesMap():
 	it != m_data-><!service.name!>Services.end();) {
     if(!(*it)->step()) { // delete the service
 <?
-  if len(service.output) > 0:
+  if service.output:
     ?>
       // get the output result
       <!service.name!>OutStruct s;

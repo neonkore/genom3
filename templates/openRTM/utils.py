@@ -34,7 +34,7 @@ def inputList(service):
 
 def service_idl_signature(service):
     # find the service output type
-    if len(service.output) > 0:
+    if service.output:
 	outputType = BaseType.longType
     else:
 	outputType = BaseType.voidType
@@ -59,7 +59,7 @@ def service_cpp_args(service, className=""):
 
 def service_cpp_signature(service, className=""):
     # find the service output type
-    if len(service.output) > 0:
+    if service.output:
 	if service.type != ServiceType.Control:
 	  outputType = BaseType.longType
 	else:
@@ -77,11 +77,11 @@ def pointerTo(t):
 
 def real_codel_signature(codel, service=None):
   proto = ""
-  if service != None:
+  if service is not None:
     for s in service.inputs():
 	idstype = inputType(s);
 	proto += pointerTo(idstype) + " in_" + s.identifier + ", ";
-    if len(service.output) > 0:
+    if service.output:
 	idstype = comp.typeFromIdsName(service.output);
 	proto += pointerTo(idstype) + " out_" + service.output + ", "; 
 
@@ -93,13 +93,13 @@ def real_codel_signature(codel, service=None):
     proto += pointerTo(idstype) + " out_" + type + ", ";
   for port in codel.outPorts:
     p = comp.port(port)
-    if p != None:
+    if p is not None:
 	proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
     else:
 	proto += port + ", "
   for port in codel.inPorts:
     p = comp.port(port)
-    if p != None:
+    if p is not None:
 	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
     else:
 	proto += port + ", "
@@ -128,10 +128,10 @@ for p in comp.portsMap():
 
 def codel_call(codel, service=None):
   proto = ""
-  if service != None:
+  if service is not None:
     for s in service.inputs():
 	proto += " in_" + s.identifier + ", ";
-    if len(service.output) > 0:
+    if service.output:
 	proto += " out_" + service.output + ", "; 
 
   for type in codel.inTypes:
@@ -147,10 +147,10 @@ def codel_call(codel, service=None):
 
 def real_codel_call(codel, data_prefix="", service=None):
   proto = ""
-  if service != None:
+  if service is not None:
     for i in service.inputs():
 	proto += " &in_" + i.identifier + ", ";
-    if len(service.output) > 0:
+    if service.output:
 	proto += " &out_" + service.output + ", "; 
 
   for type in codel.inTypes:

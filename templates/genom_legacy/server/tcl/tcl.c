@@ -370,7 +370,7 @@ static int
   if serviceInfo.inputFlag:
     print "   static " + serviceInfo.inputVarDecl + ";"
 # #if ($argNumber$ > 0)
-  if len(serviceInfo.inputFlatList) > 0:
+  if serviceInfo.inputFlatList:
     ?>
    int ret;
    int curObjc = 0;

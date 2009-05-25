@@ -56,7 +56,7 @@
 
 <?
 t = IDSType.unalias()
-if t != None:
+if t is not None:
     print MapTypeToC(t) + ";"
 print "typedef " + MapTypeToC(IDSType) + " " + upper(comp.name()) + "_STR;";
 ?>

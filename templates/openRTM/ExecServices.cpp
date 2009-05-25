@@ -19,7 +19,7 @@ for s in comp.servicesMap():
   if service.type == ServiceType.Control:
     continue
 
-  if len(service.output) > 0:
+  if service.output:
     inputStr = ", CORBA::Long id"
   else:
     inputStr = ""

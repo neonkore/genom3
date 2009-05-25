@@ -225,7 +225,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 	    if funcnames != "":
 		funcnames += ", "
 	    funcnames += "\"request " + ss.name + " " + serviceDescString(ss) 
-	    if len(ss.inputs()) > 0:
+	    if ss.inputs():
 		funcnames += " - needs input "
 	    funcnames += "\""
 

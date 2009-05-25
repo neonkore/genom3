@@ -1108,7 +1108,7 @@ for name, service in servicesDict.iteritems():
     l = service.incompatibleServices()
     out = ""
     defaultValue = ""
-    if len(l) == 0 or l[0] == "none":
+    if not l or l[0] == "none":
 	defaultValue = "1";
     elif l[0] == "all":
 	defaultValue = "0";

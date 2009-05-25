@@ -139,7 +139,7 @@ for s in servicesMap:
 <?
   for i in service.inputs():
     print "      " + MapTypeToCpp(inputType(i), True) + " " + i.identifier + ";";
-  if len(service.output) > 0 and service.type == ServiceType.Control:
+  if service.output and service.type == ServiceType.Control:
     print "      " + MapTypeToCpp(comp.typeFromIdsName(service.output), True, True) + " " + service.output + ";";
 
   for x in inputFlatList:
@@ -150,7 +150,7 @@ for s in servicesMap:
     parseInput(x[0], x[1]);
 
   if service.type == ServiceType.Control:
-    if len(service.output) > 0:
+    if service.output:
       outputType = MapTypeToCpp(comp.typeFromIdsName(service.output), True)
       ?>
       <!service.output!> = m_service-><!service.name!>(<!serviceArgs!>);
@@ -160,7 +160,7 @@ for s in servicesMap:
       m_service-><!service.name!>(<!serviceArgs!>);
 <?
   else:
-    if len(service.output) > 0:?>
+    if service.output:?>
       cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
 <?
     else:?>

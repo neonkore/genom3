@@ -37,7 +37,7 @@ for s in servicesMap:
 
   // kill existing incompatible services
 <?
-    if len(service.incompatibleServices()) > 0 and service.incompatibleServices()[0] != "none":
+    if service.incompatibleServices() and service.incompatibleServices()[0] != "none":
       if service.incompatibleServices()[0] == "all":
 	print "  m_data->killAllServices();"
       else:
@@ -46,7 +46,7 @@ for s in servicesMap:
 
     for i in service.inputs():
 	print "  m_data->" + i.identifier + " = in_" + i.identifier + ";" 
-    if len (service.output) > 0:
+    if service.output:
 	print "  return m_data->" + service.output + ";"
     ?>
 }
@@ -56,12 +56,12 @@ prefix = capCompName + "ControlImpl"
 for s in comp.servicesMap():
   service = s.data()
   if service.type != ServiceType.Control:
-    if len(service.output) > 0:
+    if service.output:
       returnStr = "  return m_data->" + service.output + ";"
     else:
       returnStr = "  return;"
 
-    if len(service.output) > 0:
+    if service.output:
       args = ", m_serviceCount++ "
     else:
       args = ""
@@ -71,7 +71,7 @@ for s in comp.servicesMap():
 <!service_cpp_signature(service, prefix)!>
 {
 <?
-    if len(service.output) > 0: ?>
+    if service.output: ?>
   static long m_serviceCount = 0;
 <?
     if service.hasCodel("control"):
@@ -83,7 +83,7 @@ for s in comp.servicesMap():
     ?>
   // kill existing incompatible services
 <?
-    if len(service.incompatibleServices()) > 0 and service.incompatibleServices()[0] != "none":
+    if service.incompatibleServices() and service.incompatibleServices()[0] != "none":
       if service.incompatibleServices()[0] == "all":
 	print "  m_data->killAllServices();"
       else:
@@ -95,7 +95,7 @@ for s in comp.servicesMap():
   <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data <!args!>));
   m_data-><!service.name!>Services.push_back(s);
 <?
-    if len(service.output) > 0: ?>
+    if service.output: ?>
   return m_serviceCount;<?
     ?>
 }

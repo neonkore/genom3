@@ -159,6 +159,7 @@ chartext				([^\'])|(\\.)
 "out"			{ return token::OUT; }
 "IDS"			{ return token::IDS; }
 "input"			{ return token::INPUT; }
+"output"		{ return token::OUTPUT; }
 
  /* ints */
 "0"[xX][0-9a-fA-F]+{intsuffix}? { 

@@ -35,7 +35,7 @@ service SetSpeed {
 /* Control request: return the default speed */
 service GetSpeed {
    type:                 control;               /* request's type */
-   output:               speedRef;       /* output: the speed */
+   output:               IDS:speedRef;       /* output: the speed */
 };
 /* Control request: interrupt the mobile */
 service Stop {
@@ -62,7 +62,7 @@ service Goto {
 service Monitor {
    type:                  exec;                 /* request's type */
    input:                 double monitor = 1 << 8;    /* inputs: position */
-   output:                state/*.position*/; /* outputs: actual pos. */
+   output:                IDS:state/*.position*/; /* outputs: actual pos. */
    codel main:            demoMonitorExec();      /* main codel */
    errors:          TOO_FAR_AWAY;        /*  possible error messages */
    interrupts: none;                 /* no incompatible requests */

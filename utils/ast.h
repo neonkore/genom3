@@ -130,6 +130,8 @@ class Service
 		struct Input {
 			typedef std::vector<Input> Vect;
 			enum Kind { IDSMember, Type};
+			
+			Input() : kind(IDSMember) {}
 
 			bool operator==(const Input &rhs); // necessary for boost.python
 
@@ -165,7 +167,7 @@ class Service
 		Type type;
 		std::string doc;
 		std::string taskName;
-		std::string output;
+		Input output;
 
 	private:
 		Codel::Map m_codels;

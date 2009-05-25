@@ -133,7 +133,7 @@ struct variant_type {
 %token TRUE FALSE
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE CONST
-%token TYPEDEF UNSIGNED OBJECT IDS INPUT
+%token TYPEDEF UNSIGNED OBJECT IDS INPUT OUTPUT
 
 /*token SPECIAL_CHAR	"char"
 %token INTEGERLIT	"integer"
@@ -413,6 +413,10 @@ service_field:
 | INPUT COLON inputs
 {
 }
+| OUTPUT COLON input_type
+{
+    driver.currentService()->output = $3;
+}
 | IDENTIFIER COLON IDENTIFIER identifier_list
 {
     Service::Ptr s = driver.currentService();
@@ -431,15 +435,6 @@ service_field:
 	    }
 	} else if($1 == "taskName") {
 	    s->taskName = $3;
-	} else if($1 == "output") {
-	    // check if the name given is in the ids
-	    Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);
-	    if(!t.get()) {
-	      error(yyloc, std::string("Output is not in the IDS: ") + $3);
-	      YYERROR;
-	    }
-
-	    s->output = $3;
 	} else if($1 == "errors") {
 	    driver.currentService()->addErrorMessage($3);
 	} else if($1 == "interrupts") {

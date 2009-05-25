@@ -330,7 +330,13 @@ void Service::debug()
 			cout << " = " << it->defaultValue.print() << ", ";
 	}
 
-	cout << endl << "Output: " << output << endl;
+	cout << endl << "Output: ";
+	if(output.identifier.empty())
+		cout << "None" << endl;
+	else if(output.kind == Input::IDSMember)
+		cout << "IDS:" << output.identifier << endl;
+	else
+		cout << DumpType::dumpType(output.type) << " " << output.identifier << endl;
 
 	cout << "Error messages: ";
 	for(vector<string>::const_iterator it2 = m_errorMessages.begin(); it2 != m_errorMessages.end(); ++it2)

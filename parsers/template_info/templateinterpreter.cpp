@@ -87,6 +87,14 @@ void TemplateInterpreter::setDebug(bool verbose)
 	m_verboseParsing = true;
 }
 
+string readStream(std::istream &in)
+{
+	string str;
+	stringstream ss(str);
+	ss << in.rdbuf();
+	return ss.str();
+}
+
 string readFile(const std::string &inFile)
 {
 	ifstream in(inFile.c_str());
@@ -95,10 +103,7 @@ string readFile(const std::string &inFile)
 		return string();
 	}
 
-	string str;
-	stringstream ss(str);
-	ss << in.rdbuf();
-	return ss.str();
+	return readStream(in);
 }
 
 void TemplateInterpreter::executeFile(const std::string& infile)

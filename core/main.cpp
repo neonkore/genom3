@@ -35,6 +35,7 @@
 #include "bindings/tcl/tclinterpreter.h"
 #include "bindings/python/pythoninterpreter.h"
 #include "parsers/genom/driver.h"
+#include "pstream.h"
 
 using namespace std;
 using namespace G3nom;
@@ -103,7 +104,8 @@ int main(int argc, char* argv[])
 	string sourceDir = templatesDir + templ + "/";
 
 	Driver d;
-	if (!d.parseFile(argv[idx])) {
+	redi::ipstream in(string("cpp -P ") + argv[idx]);
+	if (!d.parseStream(in)) {
 		cout << "Error parsing .gnm file: " << argv[idx] << endl;
 		exit(1);
 	}

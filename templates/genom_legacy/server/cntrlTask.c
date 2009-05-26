@@ -474,6 +474,15 @@ static STATUS
 i = -1
 for p in outports:
     i += 1
+    if isDynamicPort(p):
+      ?>
+  // dynamic poster, only initialize the struct
+  SDI_F-><!p.name!>_outport_struct.size = 0;
+  SDI_F-><!p.name!>_outport_struct.length = 0;
+  SDI_F-><!p.name!>_outport_struct.data = NULL;
+  CNTRL_TASK_POSTER_ID[<!i!>] = NULL;
+<?
+      continue
     ?>
   if (posterCreate(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_NAME,
 	sizeof(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_STR),

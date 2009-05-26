@@ -30,6 +30,8 @@ def inputFormat(type, name):
   return str
 
 def outputFormat(type, name):
+  if type is None:
+    return ""
   if type.kind() == IdlKind.String:
     str = "{1} " # dimension
   else:

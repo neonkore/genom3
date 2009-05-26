@@ -97,6 +97,7 @@ void export_idl()
 	object baseTypeClass = class_<BaseType, bases<IdlType> >("BaseType", init<IdlType::Kind>());
 	baseTypeClass.attr("voidType") = &BaseType::voidType;
 	baseTypeClass.attr("longType") = &BaseType::longType;
+	baseTypeClass.attr("charType") = &BaseType::charType;
 
 	void (StructType::*AddMemberStr)(IdlType::Ptr,const std::string &) = &StructType::addMember;
 	object stringTypeClass = class_<StringType, bases<IdlType> >("StringType", init<int>())
@@ -119,7 +120,7 @@ void export_idl()
 	class_<NamedType, bases<IdlType> >("NamedType")
 	.def("type", &NamedType::type);
 
-	class_<ArrayType, bases<IdlType> >("ArrayType")
+	class_<ArrayType, bases<IdlType> >("ArrayType", init<IdlType::Ptr, int>())
 	.def("type", &ArrayType::type)
 	.def("bounds", &ArrayType::bounds, return_value_policy<reference_existing_object>())
 	.def("printBounds", &ArrayType::printBounds);

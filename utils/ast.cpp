@@ -195,6 +195,17 @@ Port::Ptr Component::port(const std::string &name)
 	return Port::Ptr();
 }
 
+int Component::portIndex(const std::string &name) const
+{
+	int i = 0;
+	Port::Map::const_iterator it = ports.begin();
+	for(; it != ports.end(); ++it, ++i) {
+		  if(it->first == name)
+			  return i;
+	}
+	return -1;
+}
+
 IdlType::Ptr Component::typeFromName(const std::string &name)
 {
 // 	cout << "Searching type " << name << endl;

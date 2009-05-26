@@ -205,6 +205,7 @@ class Component
 
 		Port::Ptr port(const std::string &name);
 		Port::Map& portsMap() { return ports; }
+		int portIndex(const std::string &name) const;
 
 		Idl::IdlType::Vector& typesVect() { return m_types; }
 		Idl::ConstValue::Map& valuesMap() { return m_constValues; }

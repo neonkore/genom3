@@ -98,6 +98,25 @@ def typeProtoPrefix(t):
 	prefix = "string"
     return prefix + t.identifier()
 
+def isDynamicPort(port):
+  if port.idlType.kind == IdlKind.Sequence:
+    return True
+  else:
+    t = port.idlType.unalias()
+    if t is not None:
+      return t.kind() == IdlKind.Sequence
+    return False
+
+def dynamicPortType(port):
+   if port.idlType.kind == IdlKind.Sequence:
+     return port.idlType.asSequenceType().seqType()
+   else:
+     t = port.idlType.unalias()
+     if t is not None and t.kind() == IdlKind.Sequence:
+       return t.asSequenceType().seqType()
+     else:
+	return BaseType.charType
+
 # copy ids type
 IDSType = StructType()
 IDSType.setIdentifier(comp.IDSType.identifier())
@@ -130,6 +149,21 @@ for port in inports:
   c = Codel(name + "Exec")
   s.addCodel("control", c)
   servicesDict[name] = s
+
+# create ids member for dynamic posters
+for port in outports:
+  if isDynamicPort(port):
+    t = dynamicPortType(port)
+    s = StructType()
+    s.setIdentifier(port.name + "_outport_struct")
+    s.addMember(BaseType.longType, "size")
+    s.addMember(BaseType.longType, "length")
+    s.addMember(ArrayType(t, 0), "data")
+
+    sys.stderr.write("Added " + s.identifier() + "\n")
+    IDSType.addMember(s, port.name + "_outport")
+  else:
+    sys.stderr.write("Not dynamic " + port.name + "\n")
 
 class ServiceInfo:
   def __init__(self, service):

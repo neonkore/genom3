@@ -148,7 +148,7 @@ IdlType::Ptr IdlType::unalias()
 			TypedefType *t = asType<TypedefType>();
 			IdlType::Ptr p = t->aliasType()->unalias();
 			if(p.get())
-				return p->unalias();
+				return p;
 			else
 				return t->aliasType();
 			break;
@@ -156,7 +156,7 @@ IdlType::Ptr IdlType::unalias()
 			NamedType *n = asType<NamedType>();
 			IdlType::Ptr pp = n->type()->unalias();
 			if(pp.get())
-				return pp->unalias();
+				return pp;
 			else
 				return n->type();
 			break;
@@ -286,6 +286,12 @@ std::string ArrayType::printBounds() const
 	for(vector<int>::const_iterator it = m_bounds.begin(); it != m_bounds.end(); ++it)
 		ss << "[" << *it << "]";
 	return ss.str();
+}
+
+ArrayType::ArrayType(IdlType::Ptr p, int bound)
+: IdlType(Array), m_type(p)
+{
+	m_bounds.push_back(bound);
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;  replace-tabs off;

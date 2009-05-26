@@ -355,6 +355,7 @@ class EnumType : public IdlType
 class ArrayType : public IdlType {
 	public:
 		ArrayType() : IdlType(Array) {}
+		ArrayType(IdlType::Ptr p, int bound);
 		ArrayType(IdlType::Ptr p, const std::vector<int> &bounds)
 		: IdlType(Array), m_type(p), m_bounds(bounds)
 		{}

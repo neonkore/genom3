@@ -81,8 +81,21 @@ int scan_<!prefix!>( FILE *in, FILE *out,
       free (indstr);
       return ABORT; } }
 <?
-	    else:
+	    elif m.data().kind() == IdlKind.String:
+		s = m.data().asStringType()
+		length = s.bound()
+		if length == 0:
+		    length = 1024
 		?>
+    fprintf(out, "%s<!m.key()!>[<!length!>]:\n", indstr);
+    { int dims[1] = {<!length!>};
+      if (scan_string(in, out, (char *)(x+elt)-><!m.key()!>, 
+                     indent, 1, dims) == ABORT) {
+      free (indstr);
+      return ABORT; } }
+<?
+	    else:
+	      ?>
     fprintf(out, "%s<!m.key()!>:\n", indstr);
     if(scan_<!typeProtoPrefix(m.data())!>(in, out, &((x+elt)-><!m.key()!>), indent, 0, NULL) == ABORT) {
        free (indstr);

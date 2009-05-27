@@ -467,6 +467,15 @@ def typeSize(t):
 	return res
     elif t.kind() == IdlKind.Typedef:
 	return typeSize(t.asTypedefType().type())
+    elif t.kind() == IdlKind.Array:
+	a = t.asArrayType()
+	res = 1
+	for x in a.bounds():
+	  res *= x
+	return res * typeSize(a.type())
+    elif t.kind() == IdlKind.Sequence:
+	s = t.asSequenceType()
+	return s.bound() * typeSize(s.seqType())
     elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
         return 4
     elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.Enum:
@@ -478,7 +487,7 @@ def typeSize(t):
     elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
 	s = t.asStringType()
 	if s is None:
-	  return 0
+	  return 1024
 	else:
 	  return s.bound()
     return 0
@@ -486,11 +495,10 @@ def typeSize(t):
 # compute the max request and result size
 def maxArgsSize():
     res = 8
-    s = IDSType.asStructType()
-    if s is None:
-      s = IDSType.unalias().asStructType()
-    for m in s.members():
-      res = max(res, typeSize(m.data()))
+    for name, service in servicesDict.iteritems():
+      serviceInfo = services_info_dict[name]
+      if serviceInfo.inputFlag:
+	res = max(res, typeSize(serviceInfo.inputType))
     return res
 
 def maxOutputSize():

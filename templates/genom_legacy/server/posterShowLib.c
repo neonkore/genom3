@@ -231,6 +231,10 @@ print l[:-2] + "};"
 <?
 for p in outports:
     poster_type = upper(comp.name()) + "_" + upper(p.name) + "_POSTER_STR"
+    if isDynamicPort(port):
+      t = dynamicPortType(port)
+    else:
+      t = port.idlType
     ?>
 /* --  <!p.name!> ------------------------------------------------- */
 
@@ -247,7 +251,7 @@ STATUS <!comp.name()!><!p.name!>PosterShow(void)
      free(x);
      return ERROR;
   }
-  print_<!typeProtoPrefix(p.idlType)!>(stdout, x, 0, 0, NULL, stdin);
+  print_<!typeProtoPrefix(t)!>(stdout, x, 0, 0, NULL, stdin);
   free(x);
   return OK;
 }

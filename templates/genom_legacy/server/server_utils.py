@@ -401,7 +401,10 @@ def real_codel_signature(codel, service=None):
   for port in codel.outPorts:
     p = comp.port(port)
     if p is not None:
-	proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
+	if isDynamicPort(p):
+	  proto += pointerTo(IDSType.member(port + "_outport")) + " outport_" + port + ", "; 
+	else:
+	  proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
     else:
 	proto += port + ", "
   for port in codel.inPorts:

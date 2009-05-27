@@ -53,8 +53,11 @@ extern "C" {
 
 <?
 for t in typesVect:
+    prefix = typeProtoPrefix(t)
+    if not prefix:
+      continue
     ?>
-extern void printXML_<!typeProtoPrefix(t)!> ( FILE *out, char *name,
+extern void printXML_<!prefix!> ( FILE *out, char *name,
      <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims, FILE *in );
 <?
 ?>

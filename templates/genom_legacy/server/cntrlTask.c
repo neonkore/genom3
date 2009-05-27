@@ -477,9 +477,9 @@ for p in outports:
     if isDynamicPort(p):
       ?>
   // dynamic poster, only initialize the struct
-  SDI_F-><!p.name!>_outport_struct.size = 0;
-  SDI_F-><!p.name!>_outport_struct.length = 0;
-  SDI_F-><!p.name!>_outport_struct.data = NULL;
+  SDI_F-><!p.name!>_outport.size = 0;
+  SDI_F-><!p.name!>_outport.length = 0;
+//   SDI_F-><!p.name!>_outport.data = NULL;
   CNTRL_TASK_POSTER_ID[<!i!>] = NULL;
 <?
       continue
@@ -1198,7 +1198,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
     
     /* Call control func */
-    status = <!service.codel("control").name!>_codel(<!serviceInfo.inputNamePtr!>, <!serviceInfo.controlFuncParams!>, &bilan);
+    status = <!service.codel("control").name!>_codel(<!serviceInfo.inputNamePtr!> <!serviceInfo.controlFuncParams!>, &bilan);
 <?
 	    else:
 		?>
@@ -1307,7 +1307,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
     if (csServRqstParamsGet (servId, rqstId, (void *) <!serviceInfo.inputNamePtr!>, 
 			     <!serviceInfo.inputSize!>, (FUNCPTR) NULL) != OK)
       <!comp.name()!>ReplyAndSuspend (servId, rqstId, TRUE);
-    status = <!service.codel("control").name!>(<!serviceInfo.inputNamePtr!>, <!serviceInfo.controlFuncParams!>, &bilan);
+    status = <!service.codel("control").name!>(<!serviceInfo.inputNamePtr!> <!serviceInfo.controlFuncParams!>, &bilan);
 <?
 	    else:?>
     status = <!service.codel("control").name!>(&bilan);

@@ -65,7 +65,24 @@ def processOutput(type, name, allocFlag = False):
    }
 <?
     return
+
+  if type.kind() == IdlKind.Sequence: 
+    a = type.asSequenceType()
+    ?>
+   {
+      int loop1[1];
+      for(loop1[0]=0; loop1[0] < <!a.bound()!>; loop1[0]++) {
+<?
+    flatListArray = flatStruct(a.seqType(), name + "[loop1[0]]", ".")
+    for x in flatListArray:
+      processOutput(x[0], x[1], allocFlag)
+    ?>
+      }
+   }
+<?
+    return
   ?>
+
     ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result, <?
   if type.kind() == IdlKind.Short or type.kind() == IdlKind.Long or type.kind() == IdlKind.Char: ?>
 		Tcl_NewIntObj(<!name!>));
@@ -474,6 +491,10 @@ static int
 
 <?
 for port in outports:
+  if isDynamicPort(port):
+      t = dynamicPortType(port)
+  else:
+      t = port.idlType
   ?>
 /*
  * ----------------------------------------------------------------------
@@ -487,13 +508,13 @@ static int
 			 int objc, Tcl_Obj *const objv[])
 {
    int ret;
-   static <!MapTypeToC(port.idlType, True)!> *_posterData;	/* data */
+   static <!MapTypeToC(t, True)!> *_posterData;	/* data */
    Tcl_Obj *my_own_private_unique_result;
    char strerr[64];
 
    TEST_BAD_USAGE(objc != 1);
 		 
-  if ((_posterData = malloc(sizeof(<!MapTypeToC(port.idlType, True)!>))) == NULL) {
+  if ((_posterData = malloc(sizeof(<!MapTypeToC(t, True)!>))) == NULL) {
       Tcl_SetResult(interp, h2getErrMsg(errnoGet(), strerr, 64), TCL_VOLATILE);
       return TCL_ERROR;
   }
@@ -511,7 +532,7 @@ static int
    }
 
 <?
-  portFlatList = flatStruct(port.idlType, "(*_posterData)", ".") 
+  portFlatList = flatStruct(t, "(*_posterData)", ".") 
   for x in portFlatList:
     processOutput(x[0], x[1], True)
   ?>

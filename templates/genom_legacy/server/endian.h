@@ -50,8 +50,10 @@ for i in comp.importedComponents():
 /* Protoypes */
 
 <?
-for t in comp.typesVect():
-    print funProto % (typeProtoPrefix(t), MapTypeToC(t,True))
+for t in typesVect:
+    prefix = typeProtoPrefix(t)
+    if prefix:
+      print funProto % (prefix, MapTypeToC(t,True))
 ?>
 
 /* ======================== ENDIAN DES TYPEDEF ============================= */

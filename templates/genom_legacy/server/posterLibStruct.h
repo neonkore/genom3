@@ -7,8 +7,13 @@
 <?
 for p in comp.portsMap():
     port = p.data()
-    print MapTypeToC(port.idlType) + ";";
-    print "typedef " + MapTypeToC(port.idlType, True) + " " + upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR;"
+    if isDynamicPort(port):
+      t = dynamicPortType(port)
+      print MapTypeToC(t) + ";";
+      print "typedef " + MapTypeToC(t, True) + " " + upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR;"      
+    else:
+      print MapTypeToC(port.idlType) + ";";
+      print "typedef " + MapTypeToC(port.idlType, True) + " " + upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR;"
 ?>
 
 /*-------------------- Fin de chargement du fichier -----------------------*/

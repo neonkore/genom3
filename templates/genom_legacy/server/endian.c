@@ -36,8 +36,11 @@ funHeader = "void endianswap_%s(%s *x, int nDim, int *dims)\n{\n"
 
 <?
 for t in comp.typesVect():
+    prefix = typeProtoPrefix(t)
+    if not prefix:
+      continue
     ?>
-void endianswap_<!typeProtoPrefix(t)!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
+void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
 <?
@@ -85,11 +88,15 @@ void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 <?
 for p in outports:
     typeName = "%s_%s_POSTER_STR" % (upper(comp.name()), upper(p.name))
+    if isDynamicPort(port):
+      t = dynamicPortType(port)
+    else:
+      t = port.idlType
     ?>
 void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
-     endianswap_<!typeProtoPrefix(p.idlType)!>(&(*(x+elt)), 0, NULL);
+     endianswap_<!typeProtoPrefix(t)!>(&(*(x+elt)), 0, NULL);
   } END_FOR
 }
 

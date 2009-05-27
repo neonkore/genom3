@@ -40,8 +40,11 @@
 
 <?
 for t in typesVect:
+    prefix = typeProtoPrefix(t)
+    if not prefix:
+      continue
     ?>
-void print_<!typeProtoPrefix(t)!>( FILE *out,
+void print_<!prefix!>( FILE *out,
      <!MapTypeToC(t,True)!> *x, int indent, int nDim, int *dims, FILE *in )
 {
   char *indstr;

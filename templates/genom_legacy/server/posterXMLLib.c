@@ -290,10 +290,14 @@ STATUS <!comp.name()!>CntrlPosterActivityXML (FILE *f)
 <?
 for p in outports:
     poster_type = upper(comp.name()) + "_" + upper(p.name) + "_POSTER_STR"
+    if isDynamicPort(port):
+      t = dynamicPortType(port)
+    else:
+      t = port.idlType
     ?>
 /* --  <!p.name!> ------------------------------------------------- */
 
-STATUS <!comp.name()!>MobileStatePosterXML(FILE *f)
+STATUS <!comp.name()!><!p.name!>PosterXML(FILE *f)
 {
   BOOL err=FALSE;
   H2TIME posterDate;
@@ -309,7 +313,7 @@ STATUS <!comp.name()!>MobileStatePosterXML(FILE *f)
   }
   fprintfBuf(f, "</error>\n");
   if (!err) {
-    printXML_<!typeProtoPrefix(p.idlType)!>(f, "data", &x, 2, 0, NULL, NULL);
+    printXML_<!typeProtoPrefix(t)!>(f, "data", &x, 2, 0, NULL, NULL);
     posterIoctl(<!comp.name()!><!p.name!>PosterID(), FIO_GETDATE, &posterDate);
     xmlBalise("date",BEGIN_BALISE,f,2);
     fprintf(f, "%04d/%02d/%02d %02d:%02d:%02d.%03d",

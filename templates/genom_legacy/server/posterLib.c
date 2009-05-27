@@ -116,6 +116,10 @@ STATUS <!comp.name()!>CntrlPosterInit(void)
 
 <?
 for port in outports:
+    if isDynamicPort(port):
+      t = dynamicPortType(port)
+    else:
+      t = port.idlType
     ?>
 /* --  <!port.name!> ------------------------------------------------- */
 
@@ -149,7 +153,7 @@ STATUS <!comp.name()!><!port.name!>PosterRead(<!upper(comp.name())!>_<!upper(por
     return ERROR;
   }
   if (posterDataEndianness != H2_LOCAL_ENDIANNESS)
-     endianswap_<!typeProtoPrefix(port.idlType)!>(x, 0, NULL);
+     endianswap_<!typeProtoPrefix(t)!>(x, 0, NULL);
   return OK;
 }
 

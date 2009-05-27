@@ -117,7 +117,7 @@ void export_idl()
 	class_<TypedefType, bases<IdlType> >("TypedefType")
 	.def("aliasType", &TypedefType::aliasType);
 
-	class_<NamedType, bases<IdlType> >("NamedType")
+	class_<NamedType, bases<IdlType> >("NamedType", init<const std::string &, IdlType::Ptr>())
 	.def("type", &NamedType::type);
 
 	class_<ArrayType, bases<IdlType> >("ArrayType", init<IdlType::Ptr, int>())

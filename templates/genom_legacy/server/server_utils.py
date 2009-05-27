@@ -158,10 +158,10 @@ for port in outports:
     s.setIdentifier(port.name + "_outport_struct")
     s.addMember(BaseType.longType, "size")
     s.addMember(BaseType.longType, "length")
-    s.addMember(ArrayType(t, 0), "data")
+    s.addMember(SequenceType(t, 0), "data")
 
-    sys.stderr.write("Added " + s.identifier() + "\n")
-    IDSType.addMember(s, port.name + "_outport")
+    n = NamedType(port.name + "_outport_struct", s)
+    IDSType.addMember(n, port.name + "_outport")
   else:
     sys.stderr.write("Not dynamic " + port.name + "\n")
 
@@ -181,14 +181,15 @@ class ServiceInfo:
       self.inputFlag = True
 
       if len(service.inputs()) > 1: # need to create the type
-	self.inputType = StructType()
-	self.inputType.setIdentifier(service.name + "_input_struct")
+	s = StructType()
+	s.setIdentifier(service.name + "_input_struct")
 	for i in service.inputs():
 	  t = inputType(i)
-	  self.inputType.addMember(t, i.identifier)
+	  s.addMember(t, i.identifier)
 	self.inputName = service.name + "_input"
+	self.inputType = NamedType(service.name + "_input_struct", s)
 	# add a type and the corresponding element in the ids
-	typesVect.append(self.inputType)
+	typesVect.append(s)
 	IDSType.addMember(self.inputType, service.name + "_input")
 
       else:
@@ -424,9 +425,12 @@ def real_codel_call(codel, service=None):
 	serviceInfo = services_info_dict[service.name]
 	inputPrefix = serviceInfo.inputName + "->"
     for i in service.inputs():
-	proto += addressOf(inputType(i), inputPrefix + "in_" + i.identifier) + ", ";
+	if inputPrefix:
+	    proto += addressOf(inputType(i), "in_" + inputPrefix + i.identifier) + ", "
+	else:
+	    proto += "in_" + i.identifier + ", "
     if service.output.identifier:
-	proto += " out_" + service.output.identifier + ", "; 
+	proto += " out_" + service.output.identifier + ", "
 
   for type in codel.inTypes:
     proto += "in_" + type + ", ";

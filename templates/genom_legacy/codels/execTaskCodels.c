@@ -36,10 +36,12 @@ def codelNameToValue(n):
  * DAMAGE.
  */
 
+#include <stdlib.h>
 #include <portLib.h>
 
 #include "server/<!comp.name()!>Header.h"
 #include "userCodels.h"
+#include "../<!comp.name()!>UserStruct.h"
 
 extern STATUS returnCodeToStatus(int res);
 
@@ -112,7 +114,7 @@ extern int <!real_codel_signature(codel, service)!>;
 
   if(SDI_F-><!p.name!>_outport.data == NULL)
     <!p.name!>_is_empty = 1;
-  <!p.name!>_outport_struct* <!posterAddr!> = SDI_F-><!p.name!>_outport;
+  struct <!p.name!>_outport_struct* <!posterAddr!> = &SDI_F-><!p.name!>_outport;
 <?
 	    else: ?>
   /* find a pointer to <!port!> poster*/
@@ -169,13 +171,13 @@ extern int <!real_codel_signature(codel, service)!>;
 	// create the real poster
 	if(posterCreate(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_NAME,
 		SDI_F-><!p.name!>_outport.size,
-		&(posterId))) != OK) {
-	    *report = S_<!comp.name()!>_CODEL_ERROR;
+		&(<!posterId!>)) != OK) {
+	    *report = S_<!comp.name()!>_stdGenoM_CONTROL_CODEL_ERROR;
 	    return ETHER;
 	}
 
 	// copy the data
-	posterTake(<!posterId!>);
+	posterTake(<!posterId!>, POSTER_WRITE);
 	<!posterType!> *<!p.name!>_addr = posterAddr(<!posterId!>);
 	memcpy(<!p.name!>_addr, SDI_F-><!p.name!>_outport.data, SDI_F-><!p.name!>_outport.size);
 	posterGive(<!posterId!>);

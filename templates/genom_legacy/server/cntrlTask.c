@@ -479,7 +479,7 @@ for p in outports:
   // dynamic poster, only initialize the struct
   SDI_F-><!p.name!>_outport.size = 0;
   SDI_F-><!p.name!>_outport.length = 0;
-//   SDI_F-><!p.name!>_outport.data = NULL;
+  SDI_F-><!p.name!>_outport.data = NULL;
   CNTRL_TASK_POSTER_ID[<!i!>] = NULL;
 <?
       continue

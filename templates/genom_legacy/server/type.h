@@ -53,8 +53,14 @@
 #define <!comp.name()!>_TYPE1_H
 
 #include "<!comp.name()!>Struct.h"
+#include "<!comp.name()!>UserStruct.h"
 
 <?
+# print the types created for inputs
+for name, service in servicesDict.iteritems():
+  if len(service.inputs()) > 1:
+    print MapTypeToC(IDSType.member(name + "_input").unalias()) + ";\n"
+
 t = IDSType.unalias()
 if t is not None:
     print MapTypeToC(t) + ";"

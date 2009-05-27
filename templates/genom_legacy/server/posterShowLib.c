@@ -229,25 +229,26 @@ print l[:-2] + "};"
 /* ---------------- LES POSTERS FONCTIONNELS ------------------------------ */
 
 <?
-for p in outports:
-    poster_type = upper(comp.name()) + "_" + upper(p.name) + "_POSTER_STR"
+for port in outports:
+    poster_type = upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR"
     if isDynamicPort(port):
+      sys.stderr.write("Dynamic poster " + port.name + "\n")
       t = dynamicPortType(port)
     else:
       t = port.idlType
     ?>
-/* --  <!p.name!> ------------------------------------------------- */
+/* --  <!port.name!> ------------------------------------------------- */
 
-STATUS <!comp.name()!><!p.name!>PosterShow(void)
+STATUS <!comp.name()!><!port.name!>PosterShow(void)
 {
   <!poster_type!> *x;
 
   if ((x = (<!poster_type!> *)malloc(sizeof(* x))) == NULL) {
-     h2perror("<!comp.name()!><!p.name!>PosterShow");
+     h2perror("<!comp.name()!><!port.name!>PosterShow");
      return ERROR;
   }
-  if (<!comp.name()!><!p.name!>PosterRead(x) == ERROR) {
-     h2perror("<!comp.name()!><!p.name!>PosterShow");
+  if (<!comp.name()!><!port.name!>PosterRead(x) == ERROR) {
+     h2perror("<!comp.name()!><!port.name!>PosterShow");
      free(x);
      return ERROR;
   }

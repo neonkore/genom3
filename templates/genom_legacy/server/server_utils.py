@@ -428,7 +428,7 @@ def real_codel_call(codel, service=None):
 	if inputPrefix:
 	    proto += addressOf(inputType(i), "in_" + inputPrefix + i.identifier) + ", "
 	else:
-	    proto += "in_" + i.identifier + ", "
+	    proto += "in_" + idsMemberForInput(i, service) + ", "
     if service.output.identifier:
 	proto += " out_" + service.output.identifier + ", "
 

@@ -24,7 +24,7 @@ if currentTask.hasCodel("init"):
   ?>
 bool <!comp.name()!><!currentTaskName!>::threadInit()
 {
-  int res = <!codel_call(currentTask.codel("init"))!>;
+  int res = <!real_codel_call(currentTask.codel("init"))!>;
   return (res >= 0); // error
 }
 <?

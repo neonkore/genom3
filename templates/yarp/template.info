@@ -7,6 +7,8 @@ main:
   /*"controlservice.hpp" */
   "Module.hpp" -> "$$Module.hpp"
   "Module.cpp" -> "$$Module.cpp"
+  "ExecServices.cpp" -> "ExecServices.cpp"
+  "ExecServices.hpp" -> "ExecServices.hpp"
 ;
 
 task:

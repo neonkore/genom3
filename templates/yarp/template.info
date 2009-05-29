@@ -9,6 +9,8 @@ main:
   "Module.cpp" -> "$$Module.cpp"
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
+  "CMakeLists.txt"
+  "Struct.hpp" -> "$$Struct.hpp"
 ;
 
 task:

@@ -11,7 +11,11 @@ for s in servicesMap:
 ?>
 
 <!comp.name()!>Module::<!comp.name()!>Module()
-: m_data(0)
+: m_data(0) <?
+for t in tasksMap: ?>
+, m_<!t.data().name!>Task(0)
+<?
+?>
 {
     setName("<!comp.name()!>");
 } 
@@ -34,7 +38,18 @@ for p in inports: ?>
     attach(m_request_port);
 
     // create exec task and start them
-
+<?
+for t in tasksMap:
+  task = t.data()
+  if task.period:
+    periodStr = ", " + str(task.period)
+  else:
+    periodStr = ""
+  ?>
+    m_<!task.name!>Task = new <!comp.name()!><!task.name!>(m_data<!periodStr!>);
+    m_<!task.name!>Task->start();
+<?
+?>
     return true;
 }
 
@@ -43,6 +58,11 @@ bool <!comp.name()!>Module::interruptModule()
 <?
 for p in portsMap: ?>
     <!p.key()!>.interrupt();
+<?
+for t in tasksMap: 
+  task = t.data()
+  ?>
+    m_<!task.name!>Task->suspend();
 <?
 ?>
     return true;

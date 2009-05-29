@@ -15,24 +15,29 @@ else:
 <?
 if currentTask.hasCodel("init"):
     print "int " + real_codel_signature(currentTask.codel("init")) + ";"
+if currentTask.hasCodel("end"):
+    print "int " + real_codel_signature(currentTask.codel("end")) + ";"
 ?>
 
-class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>
+class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>, public yarp::os::PortReader
 {
     public:
       <!comp.name()!><!currentTaskName!>();
       ~<!comp.name()!><!currentTaskName!>();
 
     virtual void run();
-<?
-if currentTask.hasCodel("init"): ?>
+
     virtual bool threadInit();
+<?
+if currentTask.hasCodel("end"): ?>
+    virtual bool threadRelease();
 <?
 ?>
     private:
       <!comp.name()!>ControlData *m_data;
       // Request port
       yarp::os::BufferedPort<yarp::os::Bottle> m_request_port;
+      yarp::os::BufferedPort<yarp::os::Bottle> m_reply_port;
 };
 
 #endif

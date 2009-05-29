@@ -22,10 +22,7 @@ for s in comp.servicesMap():
       statusStr += ", "
     statusStr += upper(service.name) + "_" + upper(c.key())
       
-    if service.output.identifier:
-      inputStr = ", int id"
-    else:
-      inputStr = ""
+    inputStr = "";
     for i in service.inputs():
       inputStr += ", "
       t = inputType(i)
@@ -41,9 +38,12 @@ class <!service.name!>Service {
     typedef boost::shared_ptr<<!service.name!>Service> Ptr;
     typedef std::list<Ptr> List;
 
-    <!service.name!>Service(<!capCompName!>ControlData *data <!inputStr!>);
+    <!service.name!>Service(<!capCompName!>ControlData *data,
+	int id, std::string clientName <!inputStr!>);
 
     int id() const { return m_id; }
+    std::string clientName() const { return m_clientName; }
+
     bool step();
 <?
   if service.output.identifier:?>
@@ -58,6 +58,7 @@ class <!service.name!>Service {
   private:
     int m_id;
     int m_status;
+    std::string m_clientName;
 <?
   for i in service.inputs():
     t = inputType(i)

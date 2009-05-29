@@ -19,10 +19,7 @@ for s in comp.servicesMap():
   if service.type == ServiceType.Control:
     continue
 
-  if service.output.identifier:
-    inputStr = ", CORBA::Long id"
-  else:
-    inputStr = ""
+  inputStr = ""
   for i in service.inputs():
     inputStr += ", "
     t = inputType(i)
@@ -31,8 +28,9 @@ for s in comp.servicesMap():
   ?>
 // <!service.name!>Service
 
-<!service.name!>Service::<!service.name!>Service(<!capCompName!>ControlData *data <!inputStr!>)
-: m_data(data)
+<!service.name!>Service::<!service.name!>Service(<!capCompName!>ControlData *data, 
+    int id, std::string clientName <!inputStr!>)
+: m_data(data), m_id(id), m_clientName(clientName)
 {
 <?
   for i in service.inputs():

@@ -3,6 +3,7 @@ from string import upper
 
 IDSType = comp.IDSType
 servicesMap = comp.servicesMap()
+tasksMap = comp.tasksMap()
 typesVect = comp.typesVect()
 portsMap = comp.portsMap()
 capCompName = comp.name().capitalize()

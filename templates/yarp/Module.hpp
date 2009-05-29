@@ -58,6 +58,15 @@ class <!comp.name()!>Module : public yarp::os::Module
       <!comp.name()!>ControlData *m_data;
       // Request port
       yarp::os::BufferedPort<yarp::os::Bottle> m_request_port;
+      yarp::os::BufferedPort<yarp::os::Bottle> m_reply_port;
+
+<?
+for t in tasksMap: 
+  task = t.data()
+  ?>
+      <!comp.name()!><!task.name!> * m_<!task.name!>Task;
+<?
+?>
 };
 
 #endif

@@ -22,7 +22,7 @@ for s in comp.servicesMap():
       statusStr += ", "
     statusStr += upper(service.name) + "_" + upper(c.key())
       
-    if service.output:
+    if service.output.identifier:
       inputStr = ", int id"
     else:
       inputStr = ""

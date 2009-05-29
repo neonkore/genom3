@@ -13,17 +13,15 @@
 
 #include <list>
 
-
-
 namespace GenomYarp {
 
 
   /**
    *Typedef used when there is no input/output in the service. 
    */
-  typedef struct cmpntVoid{
+  typedef struct VoidIO{
     int n;
-  }cmpntVoid;
+  } VoidIO;
 
 };
 

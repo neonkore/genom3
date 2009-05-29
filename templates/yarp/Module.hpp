@@ -41,8 +41,6 @@ for port in outports:
   OutPort<<!typeName!>> <!port.name!>_outport;
 <?
 ?>
-  // Request port
-  yarp::os::BufferedPort<yarp::os::Bottle> request_port;
 };
 
 class <!comp.name()!>Module : public yarp::os::Module
@@ -58,6 +56,8 @@ class <!comp.name()!>Module : public yarp::os::Module
 
     private:
       <!comp.name()!>ControlData *m_data;
+      // Request port
+      yarp::os::BufferedPort<yarp::os::Bottle> m_request_port;
 };
 
 #endif

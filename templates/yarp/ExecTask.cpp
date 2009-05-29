@@ -19,16 +19,20 @@ else:?>
 {
 } 
 
+
+bool <!comp.name()!><!currentTaskName!>::threadInit()
+{
+    m_request_port.open("/<!comp.name()!>/Services/<!currentTaskName!>");
+
 <?
 if currentTask.hasCodel("init"):
   ?>
-bool <!comp.name()!><!currentTaskName!>::threadInit()
-{
+  // call user init func
   int res = <!real_codel_call(currentTask.codel("init"))!>;
   return (res >= 0); // error
-}
 <?
 ?>
+}
 
 void <!comp.name()!><!currentTaskName!>::run()
 {

@@ -8,6 +8,10 @@ portsMap = comp.portsMap()
 capCompName = comp.name().capitalize()
 upperCompName = upper(comp.name())
 
+typesVect = []
+for t in comp.typesVect():
+  typesVect.append(t)
+
 def inputType(i):
   if i.kind == ServiceInputKind.IDSMember:
     return comp.typeFromIdsName(i.identifier)
@@ -44,8 +48,46 @@ def pointerTo(t):
   else:
     return s+"*"
 
-def codel_call(codel, service=None):
-  return codel.name + "dFFFFFFFFFFFFFFFFFFFFFFF()"
+class ServiceInfo:
+  def __init__(self, service):
+    # inputs
+    if not service.inputs():
+      self.inputFlag = False
+      self.signatureProto = ""
+      self.userSignatureProto = ""
+    else:
+      self.inputFlag = True
+
+      if len(service.inputs()) > 1: # need to create the type
+	s = StructType()
+	s.setIdentifier(service.name + "_input_struct")
+	for i in service.inputs():
+	  t = inputType(i)
+	  s.addMember(t, i.identifier)
+	self.inputName = service.name + "_input"
+	self.inputType = NamedType(service.name + "_input_struct", s)
+	# add a type and the corresponding element in the ids
+	typesVect.append(s)
+	IDSType.addMember(self.inputType, service.name + "_input")
+
+      else:
+	self.inputName = service.inputs()[0].identifier
+	self.inputType = inputType(service.inputs()[0])
+      self.inputTypeCpp = MapTypeToC(self.inputType)
+
+    if not service.output.identifier:
+      self.outputFlag = False
+    else:
+      self.outputFlag = True
+      self.outputName = service.output.identifier
+      self.outputType = inputType(service.output)
+      self.outputTypeCpp = MapTypeToC(self.outputType)
+
+# create serviceInfo objects
+services_info_dict = dict()
+for s in servicesMap:
+    service = s.data()
+    services_info_dict[service.name] = ServiceInfo(service)    
 
 def real_codel_call(codel, data_prefix="", service=None):
   proto = ""

@@ -31,6 +31,8 @@ if currentTask.hasCodel("init"): ?>
 ?>
     private:
       <!comp.name()!>ControlData *m_data;
+      // Request port
+      yarp::os::BufferedPort<yarp::os::Bottle> m_request_port;
 };
 
 #endif

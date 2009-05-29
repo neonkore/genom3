@@ -1,0 +1,15 @@
+language: Python;
+requires: "utils.py";
+
+main:
+  "YarpCodec.hpp" -> "$$YarpCodec.hpp"
+  "YarpCodec.cpp" -> "$$YarpCodec.cpp"
+  /*"controlservice.hpp" */
+  "Module.hpp" -> "$$Module.hpp"
+  "Module.cpp" -> "$$Module.cpp"
+;
+
+task:
+  "ExecTask.hpp" -> "$component$$task$.hpp"
+  "ExecTask.cpp" -> "$component$$task$.cpp"
+;

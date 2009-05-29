@@ -168,7 +168,7 @@ void CVisitor::visitEnumType(EnumType *e)
 	if(m_declOnly)
 	  return;
 
-	m_out << "{" << endl << m_indent;
+	m_out << "{" << endl << m_indent << INDENT_QUANTUM;
 	bool first = true;
 	std::vector<std::string>::const_iterator it;
 	for (it = e->enumerators().begin(); it != e->enumerators().end(); ++it) {
@@ -179,7 +179,7 @@ void CVisitor::visitEnumType(EnumType *e)
 
 		m_out << *it;
 	}
-	m_out << m_indent << "}" << endl;
+	m_out << endl << m_indent << "}" << endl;
 }
 
 void CVisitor::visitArrayType(ArrayType *a)

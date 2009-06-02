@@ -40,7 +40,7 @@ else:?>
 bool <!comp.name()!><!currentTaskName!>::threadInit()
 {
     m_request_port.open("/<!comp.name()!>/Services/<!currentTaskName!>");
-
+    m_reply_port.open("/<!comp.name()!>/Services/Replies/<!currentTaskName!>");
 <?
 if currentTask.hasCodel("init"):
   ?>

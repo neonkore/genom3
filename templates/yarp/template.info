@@ -7,6 +7,7 @@ main:
   "Module.hpp" -> "$$Module.hpp"
   "Module.cpp" -> "$$Module.cpp"
   "Comp.cpp" -> "$$Comp.cpp"
+  "Test.cpp" -> "$$Test.cpp"
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
   "CMakeLists.txt"

@@ -28,12 +28,10 @@ SET(<!capCompName!>Comp_SRC <!comp.name()!>Comp.cpp)
 ADD_EXECUTABLE(<!comp.name()!>Comp ${<!capCompName!>Comp_SRC})
 TARGET_LINK_LIBRARIES(<!comp.name()!>Comp <!capCompName!>Module ${YARP_OS_LIBRARY})
 
-# # Test component
-# SET(<!capCompName!>TestComp_SRC 
-#     ${IDL_<!capCompName!>ControlIdl_OUTPUTS}
-#     <!comp.name()!>TestComp.cpp
-#     <!comp.name()!>Test.cpp
-# )
-# 
-# ADD_EXECUTABLE(<!comp.name()!>TestComp ${<!capCompName!>TestComp_SRC})
-# TARGET_LINK_LIBRARIES(<!comp.name()!>TestComp ${RTM_LIBRARIES})
+# Test component
+SET(<!capCompName!>Test_SRC 
+    <!comp.name()!>Test.cpp
+)
+
+ADD_EXECUTABLE(<!comp.name()!>Test ${<!capCompName!>Test_SRC})
+TARGET_LINK_LIBRARIES(<!comp.name()!>Test ${YARP_OS_LIBRARY})

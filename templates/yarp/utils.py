@@ -33,6 +33,12 @@ def flatStruct(t, name, separator = "_"):
     else:
 	return [(t, name)]  
 
+def inputList(service):
+  res = []
+  for i in service.inputs():
+    res.extend(flatStruct(inputType(i), i.identifier, '.'))
+  return res
+
 outports = []
 inports = []
 for p in portsMap:
@@ -56,6 +62,7 @@ class ServiceInfo:
       self.inputFlag = False
       self.signatureProto = ""
       self.userSignatureProto = ""
+      self.requestType = "VoidIO"
     else:
       self.inputFlag = True
 
@@ -75,14 +82,17 @@ class ServiceInfo:
 	self.inputName = service.inputs()[0].identifier
 	self.inputType = inputType(service.inputs()[0])
       self.inputTypeCpp = MapTypeToC(self.inputType)
+      self.requestType = self.inputTypeCpp
 
     if not service.output.identifier:
       self.outputFlag = False
+      self.replyType = "VoidIO"
     else:
       self.outputFlag = True
       self.outputName = service.output.identifier
       self.outputType = inputType(service.output)
       self.outputTypeCpp = MapTypeToC(self.outputType)
+      self.replyType = self.outputTypeCpp
 
 # create serviceInfo objects
 services_info_dict = dict()

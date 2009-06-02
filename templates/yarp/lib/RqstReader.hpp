@@ -15,9 +15,9 @@
 namespace GenomYarp {
   class RqstReader;
   
-  static  int RQST_CLIENT_NAME_POS  = 0;
-  static  int RQST_RQST_ID_POS      = 1;
-  static  int RQST_INPUT_POS        = 2;
+  static  int RQST_CLIENT_NAME_POS  = 1;
+  static  int RQST_RQST_ID_POS      = 2;
+  static  int RQST_INPUT_POS        = 3;
 }
 
 
@@ -34,16 +34,18 @@ public:
   
   static int readRqstId(const yarp::os::Bottle& b)
   {
-    int rqstId;
-    rqstId = b.get(RQST_RQST_ID_POS).asInt();
-    return rqstId;
+    return b.get(RQST_RQST_ID_POS).asInt();
   }
 
   template<typename T> 
   static T readRqstInput(const yarp::os::Bottle& b) 
   {
     T input;
-    YarpCodec<T>::decode(b.get(RQST_INPUT_POS).asList(),input,0);
+    yarp::os::Bottle *c = b.get(RQST_INPUT_POS).asList();
+    if(c)
+      YarpCodec<T>::decode(c,input,0);
+    else
+      throw YarpCodecExceptionBlob();
     return input;
   }
 };

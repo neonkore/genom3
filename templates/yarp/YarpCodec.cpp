@@ -1,7 +1,7 @@
 <?
 def encodeSimpleType(type, name):
   ?>
-    it = YarpCodec<<!type!>>::encode(b,(<!name!>));
+    it = YarpCodec<<!type!>>::encode(b,<!name!>);
     if (it == -1) 
       return -1;
 <?
@@ -14,8 +14,16 @@ def encodeType(t, name):
   elif t.kind() == IdlKind.String:
     encodeSimpleType("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: ?>
-    b->add(new yarp::os::Value((void *)(<!name!>), 1));
+    b->add(new yarp::os::Value((void *)<!name!>, 1));
     ++it;
+<?
+  elif t.kind() == IdlKind.Enum: ?>
+  {
+    int tmp = (int) <!name!>;
+    it = YarpCodec<int>::encode(b,tmp);
+    if (it == -1) 
+      return -1;
+  }
 <?
 
 def decodeSimpleType(type, name):
@@ -42,6 +50,32 @@ def decodeType(t, name):
     <!name!> = *(b->get(it).asBlob());
     it++;
 <?
+  elif t.kind() == IdlKind.Enum: 
+    e = t.asEnumType()
+    ?>
+  {
+    int tmp;
+    try{
+      it = YarpCodec<int>::decode(b,tmp,it);
+      switch(tmp) {
+<?
+    for x in e.enumerators():?>
+	case <!x!>: <!name!> = <!x!>; break;
+<?
+    ?>
+	default:
+	  throw YarpCodecException();
+      }
+    }
+    catch(YarpCodecException& e){
+      e.add("<!name!>","<!type!>");
+      throw(e);
+    }
+    if (it == -1) 
+      return -1;
+  }
+
+<?
 
 def printSimpleType(type, name):
   ?>
@@ -59,6 +93,19 @@ def printType(t, name):
     printSimpleType("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: ?>
       std::cout << "<!name!>" << " Binary-Non-Printable" << std::endl;
+<?
+  elif t.kind() == IdlKind.Enum: 
+    e = t.asEnumType()
+    ?>
+      std::cout << "<!name!> =";
+      switch(<!name!>) {
+<?
+    for x in e.enumerators():?>
+	case <!x!>: std::cout << "<!x!>"; break;
+<?
+    ?>
+      }
+      std::cout << std::endl;
 <?
 ?>
 

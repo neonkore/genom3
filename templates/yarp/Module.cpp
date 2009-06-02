@@ -1,7 +1,7 @@
 #include "<!comp.name()!>Module.hpp"
 
 #include "lib/RepliesWriter.hpp"
-#include "<!comp.name()!>Error.hpp"
+#include "userCodels.h"
 
 using namespace GenomYarp;
 
@@ -22,6 +22,21 @@ for s in servicesMap:
   if service.hasCodel("control"):
     print "int " + real_codel_signature(service.codel("control"), service) + ";"
 ?>
+
+// helper function for codel calls
+std::string errorString(int err)
+{
+  switch(err) {
+<?
+for e in errorList: ?>
+    case ERROR_<!e!>: return "<!e!>";
+<?
+?>
+    default: return "";
+  }
+  return "";
+}
+
 
 <!comp.name()!>Module::<!comp.name()!>Module()
 : m_data(0) <?

@@ -4,8 +4,22 @@ currentTask = comp.task(currentTaskName)
 
 #include "<!comp.name()!><!currentTaskName!>.hpp"
 
-#include "<!comp.name()!>Module.h"
-#include "ExecServices.h"
+#include "<!comp.name()!>Module.hpp"
+#include "ExecServices.hpp"
+#include "lib/RepliesWriter.hpp"
+
+using namespace GenomYarp;
+using namespace yarp::os;
+
+// forward declaration of user codels
+<?
+for s in servicesMap:
+  service = s.data()
+  if service.type == ServiceType.Control or service.taskName != currentTaskName:
+    continue
+  if service.hasCodel("control"):
+    print "int " + real_codel_signature(service.codel("control"), service) + ";"
+?>
 
 <!comp.name()!><!currentTaskName!>::<!comp.name()!><!currentTaskName!>(<!comp.name()!>ControlData *data)
 <?
@@ -17,7 +31,7 @@ else:?>
 <?
 ?>
 {
-    setOptions(<!currentTask.stackSize!>);
+//     setOptions(<!currentTask.stackSize!>);
 } 
 
 bool <!comp.name()!><!currentTaskName!>::threadInit()
@@ -62,12 +76,12 @@ for s in comp.servicesMap():
   if serviceInfo.outputFlag: ?>
       // send the result
       <!serviceInfo.outputTypeCpp!> res = (*it)->result();
-      ReplyWriter<<!serviceInfo.outputTypeCpp!>>::write(reply, 
+      ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_reply_port, 
 	  (*it)->clientName(), (*it)->id(), "<!service.name!>", "OK", &res);    
 <?
   else:?>
       // send the final reply
-      ReplyWriter<VoidIO>::write(reply, 
+      ReplyWriter<VoidIO>::send(m_reply_port, 
 	  (*it)->clientName(), (*it)->id(), "<!service.name!>", "OK", 0);
 <?
   ?>
@@ -82,9 +96,9 @@ for s in comp.servicesMap():
 bool <!comp.name()!><!currentTaskName!>::read(yarp::os::ConnectionReader &connection)
 /*bool <!comp.name()!><!currentTaskName!>::respond(const Bottle &command, Bottle &reply)   */
 {
-    Bottle cmd, reply;
+    Bottle command, reply;
     // read the request
-    if (!cmd.read(connection)) 
+    if (!command.read(connection)) 
 	return false;
 
     string client_name  = RqstReader::readClientName(command);
@@ -105,7 +119,7 @@ for s in servicesMap:
   ?>
     <!elseStr!> if(request_name == "<!service.name!>") {
 	if(!run<!service.name!>(client_name, rqst_id, command, reply))
-	    return false:
+	    return false;
     }
 <?
 ?>
@@ -119,7 +133,7 @@ for s in servicesMap:
     ConnectionWriter *writer = connection.getWriter();
     if(!writer)
       return false;
-    reply.write(writer);
+    reply.write(*writer);
     return true;
 }
 
@@ -130,11 +144,11 @@ for s in servicesMap:
   if service.type == ServiceType.Control or service.taskName != currentTaskName:
     continue
   serviceInfo = services_info_dict[service.name]
-  args = ", rqst_id"
+  args = ""
   for i in service.inputs():
     args += ", in_" + i.identifier
   ?>
-bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command, Bottle &reply)
+bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command, Bottle &reply)
 {
 <?
   if serviceInfo.inputFlag: ?>
@@ -143,9 +157,9 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
   if service.hasCodel("control"):
 	?>
   // call real control codel
-  int res = <!real_codel_call(service.codel("control"), service)!>;
+  int res = <!real_codel_call(service.codel("control"), "m_data->",service)!>;
   if(res < 0) { // error
-    string r = request_name + ": " + errorString(res);
+    string r = "<!service.name!>: " + errorString(res);
     cout << r << endl;
     ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", r, 0);    
     return true;
@@ -172,7 +186,7 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
   ?>
 
   // create the activity
-  <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data <!args!>));
+  <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data, rqst_id, clientName <!args!>));
   m_data-><!service.name!>Services.push_back(s);
 
   // send first reply

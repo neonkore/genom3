@@ -4,7 +4,6 @@ requires: "utils.py";
 main:
   "YarpCodec.hpp" -> "$$YarpCodec.hpp"
   "YarpCodec.cpp" -> "$$YarpCodec.cpp"
-  "Error.hpp" -> "$$Error.hpp"
   "Module.hpp" -> "$$Module.hpp"
   "Module.cpp" -> "$$Module.cpp"
   "ExecServices.cpp" -> "ExecServices.cpp"

@@ -6,6 +6,7 @@
 #include "<!comp.name()!>Struct.hpp"
 #include "lib/OutPort.hpp"
 #include "lib/DataServer.hpp"
+#include "ExecServices.hpp"
 
 //forward declaration of Tasks
 <?
@@ -13,6 +14,9 @@ for t in tasksMap:
   task = t.data()
   print "class " + comp.name() + task.name + ";"
 ?>
+
+// helper function
+std::string errorString(int err);
 
 // definition of the ids
 struct <!comp.name()!>ControlData {
@@ -47,6 +51,15 @@ for port in outports:
     typeName = MapTypeToCpp(port.idlType)
     ?>
   GenomYarp::OutPort<<!typeName!>> <!port.name!>_outport;
+<?
+?>
+  // Activities list
+<?
+for s in comp.servicesMap():
+  service = s.data()
+  if service.type != ServiceType.Control:
+    ?>
+   <!service.name!>Service::List <!service.name!>Services;
 <?
 ?>
 };

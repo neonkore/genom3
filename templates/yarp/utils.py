@@ -147,3 +147,17 @@ def startStateForService(service):
     return upper(service.name) + "_START"
   else:
     return upper(service.name) + "_MAIN"
+
+# error related functions
+def createErrorList():
+  l = []
+  for s in servicesMap:
+    service = s.data()
+    for e in service.errorMessages():
+	l.append(e)
+  for t in comp.tasksMap():
+    for e in t.data().errorMessages():
+	l.append(e)
+  return set(l)
+errorList = createErrorList();
+

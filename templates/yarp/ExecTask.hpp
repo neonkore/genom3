@@ -9,6 +9,7 @@ else:
 #ifndef <!upperCompName!>_<!upper(currentTaskName)!>_HPP
 #define <!upperCompName!>_<!upper(currentTaskName)!>_HPP
 
+#include <string>
 #include <yarp/os/all.h>
 
 class <!comp.name()!>ControlData;

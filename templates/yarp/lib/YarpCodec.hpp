@@ -90,8 +90,8 @@ namespace GenomYarp {
 
   public:
     
-    static int  encode (yarp::os::Bottle* b, const T_STRUCT& v);
-    static int  decode (const yarp::os::Bottle* b, T_STRUCT& v,int it); 
+    static int  encode (yarp::os::Bottle *b, const T_STRUCT& v);
+    static int  decode (const yarp::os::Bottle *b, T_STRUCT& v,int it); 
     static int  print  (const T_STRUCT& v);
 
   };
@@ -104,7 +104,7 @@ namespace GenomYarp {
       b->addInt(v);
       return 0;
     }
-    static int decode (const yarp::os::Bottle* b,int& v,int it){
+    static int decode (const yarp::os::Bottle *b,int& v,int it){
       if (!b->get(it).isInt())
 	throw YarpCodecExceptionInt();
       
@@ -119,17 +119,17 @@ namespace GenomYarp {
     
   };
   
-  template <> class YarpCodec<cmpntVoid>{
+  template <> class YarpCodec<VoidIO>{
     
   public:
-    static int encode  (yarp::os::Bottle* b,const cmpntVoid& v){
+    static int encode  (yarp::os::Bottle* b,const VoidIO& v){
       return 0;
     }
-    static int decode (const yarp::os::Bottle* b,cmpntVoid& v,int it){
+    static int decode (const yarp::os::Bottle *b,VoidIO& v,int it){
       return it;
     }
     static int print  (const int &v){
-      std::cout << "cmpntVoid" ;
+      std::cout << "VoidIO" ;
       return 0;
     }
     
@@ -142,7 +142,7 @@ namespace GenomYarp {
       b->addDouble(v);
       return 0;
     }
-    static int decode (const yarp::os::Bottle* b,double& v,int it){
+    static int decode (const yarp::os::Bottle *b,double& v,int it){
       if (!b->get(it).isDouble())
 	throw YarpCodecExceptionDouble();
 
@@ -168,7 +168,7 @@ namespace GenomYarp {
       return 0;
     } 
     
-    static    int decode(const yarp::os::Bottle* b,std::string& v, int it){
+    static    int decode(const yarp::os::Bottle *b,std::string& v, int it){
       if (!b->get(it).isString())
 	throw YarpCodecExceptionString();
       

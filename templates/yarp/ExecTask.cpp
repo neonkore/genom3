@@ -78,27 +78,48 @@ for s in comp.servicesMap():
 <?
 ?>
 }
-
-bool <!comp.name()!><!currentTaskName!>::respond(const Bottle &command, Bottle &reply)   
+    
+bool <!comp.name()!><!currentTaskName!>::read(yarp::os::ConnectionReader &connection)
+/*bool <!comp.name()!><!currentTaskName!>::respond(const Bottle &command, Bottle &reply)   */
 {
+    Bottle cmd, reply;
+    // read the request
+    if (!cmd.read(connection)) 
+	return false;
+
     string client_name  = RqstReader::readClientName(command);
     int rqst_id = RqstReader::readRqstId(command);
     string request_name  = RqstReader::readClientName(command);
 
 <?
+first = True
 for s in servicesMap:
   service = s.data()
   if service.type == ServiceType.Control or service.taskName != currentTaskName:
     continue
+  if first:
+    first = False
+    elseStr = ""
+  else:
+    elseStr = "else"
   ?>
-    if(request_name == "<!service.name!>") 
-	return run<!service.name!>(client_name, rqst_id, command, reply);
+    <!elseStr!> if(request_name == "<!service.name!>") {
+	if(!run<!service.name!>(client_name, rqst_id, command, reply))
+	    return false:
+    }
 <?
 ?>
-    // wrong request name
-    string r = "No such service: "  + request_name;
-    cout << r << endl;
-    ReplyWriter<VoidIO>::write(reply, client_name, rqst_id, request_name, r, 0);
+    else {     // wrong request name
+	string r = "No such service: "  + request_name;
+	cout << r << endl;
+	ReplyWriter<VoidIO>::send(m_reply_port, client_name, rqst_id, request_name, r, 0);
+    }
+
+    // send the reply
+    ConnectionWriter *writer = connection.getWriter();
+    if(!writer)
+      return false;
+    reply.write(writer);
     return true;
 }
 
@@ -127,6 +148,7 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
     string r = request_name + ": " + errorString(res);
     cout << r << endl;
     ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", r, 0);    
+    return true;
   }
 <?
   ?>

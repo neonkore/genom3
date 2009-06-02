@@ -1,7 +1,7 @@
-#include "ExecServices.h"
+#include "ExecServices.hpp"
 
 #include "userCodels.h"
-#include "<!comp.name()!>Module.h"
+#include "<!comp.name()!>Module.hpp"
 
 // forward declaration of user codels
 <?
@@ -23,12 +23,12 @@ for s in comp.servicesMap():
   for i in service.inputs():
     inputStr += ", "
     t = inputType(i)
-    inputStr += MapTypeToCpp(t) + " " + i.identifier
+    inputStr += MapTypeToC(t) + " " + i.identifier
 
   ?>
 // <!service.name!>Service
 
-<!service.name!>Service::<!service.name!>Service(<!capCompName!>ControlData *data, 
+<!service.name!>Service::<!service.name!>Service(<!comp.name()!>ControlData *data, 
     int id, std::string clientName <!inputStr!>)
 : m_data(data), m_id(id), m_clientName(clientName)
 {
@@ -73,7 +73,7 @@ int <!service.name!>Service::<!c.key()!>()
   // update ports
 <?
     for p in codel.outPorts:
-      print "  m_data->" + p + ".write();"  
+      print "  m_data->" + p + "_outport.exportData();"  
     ?>
   return res;
 }

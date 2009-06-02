@@ -73,6 +73,7 @@ void CVisitor::visitBaseType(BaseType *base)
 		case IdlType::Short:
 			m_out << "short"; break;
 		case IdlType::Long:
+			m_out << "int"; break;
 		case IdlType::LongLong:
 			m_out << "long"; break;
 		case IdlType::UShort:

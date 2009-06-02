@@ -13,18 +13,16 @@
 namespace GenomYarp {
 
 template<class T_DATA>
-class OutPort :public cmpnt::GenericExporter {
+class OutPort {
 
 public:  
   OutPort() {}
+  ~OutPort() {}
   
-  open(const std::string &portName)
+  void open(const std::string &portName)
   {
     out_port.open(portName.c_str());
   }
-
-  virtual ~OutPort() {}
-  
 
   /**
    *Set the data Pt. Watch Out the type of the Data must T_DATA
@@ -45,7 +43,7 @@ public:
   {
     yarp::os::Bottle& b = out_port.prepare();
     b.clear();
-    cmpnt::YarpCodec<T_DATA>::encode(&b,
+    YarpCodec<T_DATA>::encode(&b,
 				     *data);
     out_port.writeStrict();
     return 0;
@@ -54,12 +52,19 @@ public:
   int exportData(T_DATA *data)
   {
     setData(data);
-    eportData();
+    exportData();
   }
+
+  void interrupt()
+  {
+      out_port.interrupt();
+  }
+
+    T_DATA* data;
 
   private:
     std::string portName;
-    T_DATA* data;
+    yarp::os::BufferedPort<yarp::os::Bottle> out_port;
 };
 
 }

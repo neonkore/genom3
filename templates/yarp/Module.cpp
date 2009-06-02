@@ -1,4 +1,17 @@
-#include "module.hpp"
+#include "<!comp.name()!>Module.hpp"
+
+#include "lib/RepliesWriter.hpp"
+#include "<!comp.name()!>Error.hpp"
+
+using namespace GenomYarp;
+
+<?
+for t in tasksMap:
+  task = t.data()
+  print "#include \"" + comp.name() + task.name + ".hpp\""
+?> 
+
+using namespace yarp::os;
 
 // forward declaration of user codels
 <?
@@ -20,7 +33,7 @@ for t in tasksMap: ?>
     setName("<!comp.name()!>");
 } 
 
-bool <!comp.name()!>Module::open(Searchable& config)
+bool <!comp.name()!>Module::open(yarp::os::Searchable& config)
 {
     // initialize data
     m_data = new <!comp.name()!>ControlData();
@@ -41,12 +54,8 @@ for p in inports: ?>
 <?
 for t in tasksMap:
   task = t.data()
-  if task.period:
-    periodStr = ", " + str(task.period)
-  else:
-    periodStr = ""
   ?>
-    m_<!task.name!>Task = new <!comp.name()!><!task.name!>(m_data<!periodStr!>);
+    m_<!task.name!>Task = new <!comp.name()!><!task.name!>(m_data);
     m_<!task.name!>Task->start();
 <?
 ?>
@@ -56,8 +65,11 @@ for t in tasksMap:
 bool <!comp.name()!>Module::interruptModule()
 {
 <?
-for p in portsMap: ?>
-    <!p.key()!>.interrupt();
+for p in outports: ?>
+    m_data-><!port.name!>_outport.interrupt();
+<?
+for p in inports: ?>
+    m_data-><!port.name!>_inport.interrupt();
 <?
 for t in tasksMap: 
   task = t.data()
@@ -107,14 +119,14 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
 {
 <?
   if serviceInfo.inputFlag: ?>
-  <!serviceInfo.inputTypeCpp!> input = RqstReader::readRqstInput<<!serviceInfo.inputTypeCpp!>>(command);
+  <!serviceInfo.inputTypeCpp!> in_<!serviceInfo.inputName!> = RqstReader::readRqstInput<<!serviceInfo.inputTypeCpp!>>(command);
 <?
   if service.hasCodel("control"):
 	?>
   // call real control codel
-  int res = <!real_codel_call(service.codel("control"), service)!>;
+  int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
   if(res < 0) { // error
-    string r = request_name + ": " + errorString(res);
+    string r = "<!service.name!> : " + errorString(res);
     cout << r << endl;
     ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", r, 0);    
   }
@@ -136,12 +148,12 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
 	print "  m_data->" + i.identifier + " = input." + i.identifier + ";" 
   elif serviceInfo.inputFlag:
     if service.inputs()[0].kind == ServiceInputKind.IDSMember:
-      print "  m_data->" + serviceInfo.inputName + " = input;" 
+      print "  m_data->" + serviceInfo.inputName + " = in_" + serviceInfo.inputName + ";" 
   ?>
 
 <?
   if serviceInfo.outputFlag: ?>
-  ReplyWriter<<!serviceInfo.outputTypeCpp!>>::write(reply, clientName, rqst_id, "<!service.name!>", "OK", m_data-><!serviceInfo.outputName!>);    
+  ReplyWriter<<!serviceInfo.outputTypeCpp!>>::write(reply, clientName, rqst_id, "<!service.name!>", "OK", &m_data-><!serviceInfo.outputName!>);    
 <?
   else: ?>
   ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", "OK", 0);    

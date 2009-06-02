@@ -11,6 +11,8 @@ else:
 
 #include <yarp/os/all.h>
 
+class <!comp.name()!>ControlData;
+
 // forward declaration of user codels
 <?
 if currentTask.hasCodel("init"):
@@ -22,7 +24,7 @@ if currentTask.hasCodel("end"):
 class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>, public yarp::os::PortReader
 {
     public:
-      <!comp.name()!><!currentTaskName!>();
+      <!comp.name()!><!currentTaskName!>(<!comp.name()!>ControlData *data);
       ~<!comp.name()!><!currentTaskName!>();
 
     virtual void run();
@@ -33,6 +35,20 @@ if currentTask.hasCodel("end"): ?>
     virtual bool threadRelease();
 <?
 ?>
+    virtual bool read(yarp::os::ConnectionReader &);
+
+    protected:
+<?
+for s in servicesMap:
+  service = s.data()
+  if service.type == ServiceType.Control or service.taskName != currentTaskName:
+    continue
+  ?>
+      bool run<!service.name!>(const std::string &clientName, int rqst_id,
+	    const yarp::os::Bottle &command, yarp::os::Bottle &reply);
+<?
+?>
+
     private:
       <!comp.name()!>ControlData *m_data;
       // Request port

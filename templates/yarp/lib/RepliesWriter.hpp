@@ -30,14 +30,14 @@ public:
     bottle.addString(report.c_str());
     
     yarp::os::Bottle& b_output = bottle.addList();
-    cmpnt::YarpCodec<T_OUTPUT>::encode(&b_output,*output);
+    YarpCodec<T_OUTPUT>::encode(&b_output,*output);
   }
 
   static int send(yarp::os::BufferedPort<yarp::os::Bottle> &port, const std::string &clientName,
 	     int rqst_id, const std::string &requestName, const std::string &report, T_OUTPUT *output)
   {
     yarp::os::Bottle& bottle = port.prepare();
-    write(bottle, clientName, rqst_id, requestName, report, output);ss
+    write(bottle, clientName, rqst_id, requestName, report, output);
         
     port.writeStrict();      
     return 0;

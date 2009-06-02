@@ -25,25 +25,25 @@ class GenomYarp::RqstReader{
   
 public:
 
-  static std::string readClientName(yarp::os::Bottle* b)
+  static std::string readClientName(const yarp::os::Bottle& b)
   {
     std::string clientName;
-    YarpCodec<std::string>::decode(b,clientName,RQST_CLIENT_NAME_POS);
+    YarpCodec<std::string>::decode(&b,clientName,RQST_CLIENT_NAME_POS);
     return clientName;
   }
   
-  static int readRqstId(yarp::os::Bottle* b)
+  static int readRqstId(const yarp::os::Bottle& b)
   {
     int rqstId;
-    rqstId = b->get(RQST_RQST_ID_POS).asInt();
+    rqstId = b.get(RQST_RQST_ID_POS).asInt();
     return rqstId;
   }
 
   template<typename T> 
-  static T readRqstInput(yarp::os::Bottle *b) 
+  static T readRqstInput(const yarp::os::Bottle& b) 
   {
     T input;
-    YarpCodec<T>::decode(b->get(RQST_INPUT_POS).asList(),input,0);
+    YarpCodec<T>::decode(b.get(RQST_INPUT_POS).asList(),input,0);
     return input;
   }
 };

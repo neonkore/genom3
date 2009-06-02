@@ -1,10 +1,10 @@
 #ifndef URUS_YARPCODEC_HPP
 #define URUS_YARPCODEC_HPP
 
-#include "struct.hpp"
-#include "gurus/cmpntYarpCodec.hpp"
+#include "<!comp.name()!>Struct.hpp"
+#include "lib/YarpCodec.hpp"
 
-namespace cmpnt{
+namespace GenomYarp {
 <?
 for t in typesVect:
   typeName = t.identifier()

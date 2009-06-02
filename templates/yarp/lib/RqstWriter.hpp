@@ -17,7 +17,7 @@ template<class T_INPUT>
 class RqstWriter{
   
   public:
-    static void write(yarp::os::Bottle &bottle, const std::string &clientName, int rqstId, const T_INPUT &input)
+    static void write(yarp::os::Bottle &b, const std::string &clientName, int rqstId, const T_INPUT &input)
     {
 	b.clear();
 	
@@ -31,12 +31,14 @@ class RqstWriter{
     static void send(yarp::os::BufferedPort<yarp::os::Bottle> &p, const std::string &clientName, int rqstId, const T_INPUT &input)
     {
 	yarp::os::Bottle& b = p.prepare();    
-	write(bottle, clientName, rqstId, input);
+	write(b, clientName, rqstId, input);
 
 	p.writeStrict();  
 	std::cout << "( RQST ) " << b.toString() << std::endl; 
     }
    
 };
+
+}
 
 #endif

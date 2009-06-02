@@ -103,7 +103,7 @@ def real_codel_call(codel, data_prefix="", service=None):
   for type in codel.outTypes:
     proto += "& " + data_prefix + type + ", ";
   for port in codel.outPorts:
-    proto += "&" + data_prefix + port + "_data, "; 
+    proto +=  data_prefix + port + "_outport.data, "; 
   for port in codel.inPorts:
     proto += "&" + data_prefix + port + ", "; 
   proto = codel.name + "(" + proto[:-2] + ")"

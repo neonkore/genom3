@@ -3,7 +3,10 @@
 #define <!upperCompName!>_EXECSERVICES_H
 
 #include <list>
+#include <string>
 #include <boost/shared_ptr.hpp>
+
+#include "<!comp.name()!>Struct.hpp"
 
 class <!comp.name()!>ControlData;
 
@@ -26,11 +29,11 @@ for s in comp.servicesMap():
     for i in service.inputs():
       inputStr += ", "
       t = inputType(i)
-      inputStr += MapTypeToCpp(t) + " " + i.identifier
+      inputStr += MapTypeToC(t) + " " + i.identifier
 
     if service.output.identifier:
       t = inputType(service.output)
-      outputType = MapTypeToCpp(t)
+      outputType = MapTypeToC(t)
   ?>
 class <!service.name!>Service {
   public:
@@ -38,7 +41,7 @@ class <!service.name!>Service {
     typedef boost::shared_ptr<<!service.name!>Service> Ptr;
     typedef std::list<Ptr> List;
 
-    <!service.name!>Service(<!capCompName!>ControlData *data,
+    <!service.name!>Service(<!comp.name()!>ControlData *data,
 	int id, std::string clientName <!inputStr!>);
 
     int id() const { return m_id; }
@@ -62,11 +65,11 @@ class <!service.name!>Service {
 <?
   for i in service.inputs():
     t = inputType(i)
-    print "    " + MapTypeToCpp(t) + " in_" + i.identifier + ";"    
+    print "    " + MapTypeToC(t) + " in_" + i.identifier + ";"    
   if service.output.identifier:
     print "    " + outputType + " out_" + service.output.identifier + ";"
   ?>
-    <!capCompName!>ControlData *m_data;
+    <!comp.name()!>ControlData *m_data;
 }; 
 
 <?

@@ -1,7 +1,7 @@
 <?
 def encodeSimpleType(type, name):
   ?>
-    it = cmpnt::YarpCodec<int>::encode(b,(<!name!>));
+    it = YarpCodec<<!type!>>::encode(b,(<!name!>));
     if (it == -1) 
       return -1;
 <?
@@ -21,9 +21,9 @@ def encodeType(t, name):
 def decodeSimpleType(type, name):
   ?>
     try{
-      it = cmpnt::YarpCodec<<!type!>>::decode(b,(<!name!>),it);
+      it = YarpCodec<<!type!>>::decode(b,<!name!>,it);
     }
-    catch(cmpnt::YarpCodecException& e){
+    catch(YarpCodecException& e){
       e.add("<!name!>","<!type!>");
       throw(e);
     }
@@ -46,7 +46,7 @@ def decodeType(t, name):
 def printSimpleType(type, name):
   ?>
       std::cout << "<!name!> ";
-      cmpnt::YarpCodec<int>::print((<!name!>));
+      YarpCodec<<!type!>>::print(<!name!>);
       std::cout << std::endl; 
 <?
 
@@ -62,13 +62,16 @@ def printType(t, name):
 <?
 ?>
 
-#include "yarpcodec.hpp"
+#include "<!comp.name()!>YarpCodec.hpp"
+
+using namespace GenomYarp;
+using namespace std;
 
 <?
 for t in typesVect:
   typeName = t.identifier()
   ?>
-int cmpnt::YarpCodec<<!typeName!>>::encode(yarp::os::Bottle *b,const <!typeName!>& v)
+int YarpCodec<<!typeName!>>::encode(yarp::os::Bottle *b,const <!typeName!>& v)
 {
     int it = 0;
 <?
@@ -79,7 +82,7 @@ int cmpnt::YarpCodec<<!typeName!>>::encode(yarp::os::Bottle *b,const <!typeName!
     return it;
 }
 
-int cmpnt::YarpCodec<<!typeName!>>::decode(const yarp::os::Bottle *b, <!typeName!>& v, int it)
+int YarpCodec<<!typeName!>>::decode(const yarp::os::Bottle *b, <!typeName!>& v, int it)
 {
 <?
   flatList = flatStruct(t, "v", ".")
@@ -89,10 +92,10 @@ int cmpnt::YarpCodec<<!typeName!>>::decode(const yarp::os::Bottle *b, <!typeName
     return it;
 }
 
-int cmpnt::YarpCodec<<!typeName!>>::print (const <!typeName!>& v)
+int YarpCodec<<!typeName!>>::print (const <!typeName!>& v)
 {
 <?
-  flatList = flatStruct(t, typeName, ".")
+  flatList = flatStruct(t, "v", ".")
   for x in flatList:
     printType(x[0], x[1])
   ?>

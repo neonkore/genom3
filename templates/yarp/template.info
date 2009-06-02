@@ -4,13 +4,21 @@ requires: "utils.py";
 main:
   "YarpCodec.hpp" -> "$$YarpCodec.hpp"
   "YarpCodec.cpp" -> "$$YarpCodec.cpp"
-  /*"controlservice.hpp" */
+  "Error.hpp" -> "$$Error.hpp"
   "Module.hpp" -> "$$Module.hpp"
   "Module.cpp" -> "$$Module.cpp"
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
   "CMakeLists.txt"
   "Struct.hpp" -> "$$Struct.hpp"
+  "lib/DataServer.hpp" -> "lib/DataServer.hpp"
+  "lib/OutPort.hpp" -> "lib/OutPort.hpp"
+  "lib/RepliesWriter.hpp" -> "lib/RepliesWriter.hpp"
+  "lib/RqstReader.hpp" -> "lib/RqstReader.hpp"
+  "lib/RqstWriter.hpp" -> "lib/RqstWriter.hpp"
+  "lib/Struct.hpp" -> "lib/Struct.hpp"
+  "lib/YarpCodec.hpp" -> "lib/YarpCodec.hpp"
+  "lib/Header.hpp" -> "lib/Header.hpp"
 ;
 
 task:

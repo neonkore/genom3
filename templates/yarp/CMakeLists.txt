@@ -3,6 +3,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
 FIND_PACKAGE(YARP)
 
+include_directories(lib ${YARP2_INCLUDE_DIRS})
+
 # Component shared library
 SET(<!upperCompName!>_SRC 
       <!comp.name()!>Module.cpp 
@@ -18,7 +20,7 @@ for t in comp.tasksMap():
 )
 
 ADD_LIBRARY(<!capCompName!>Module SHARED ${<!upperCompName!>_SRC})
-TARGET_LINK_LIBRARIES(${YARP_LIBRARIES})
+TARGET_LINK_LIBRARIES(<!capCompName!>Module ${YARP_OS_LIBRARY})
 
 #  Standalone version of the component
 # SET(<!capCompName!>Comp_SRC <!comp.name()!>ControlComp.cpp)

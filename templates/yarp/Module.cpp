@@ -141,10 +141,12 @@ for s in servicesMap:
 <?
 ?>
     // wrong request name
-    string r = "No such service: "  + request_name;
-    cout << r << endl;
-    ReplyWriter<VoidIO>::write(reply, client_name, rqst_id, request_name, r, 0);
-    return true;
+    if(!Module::respond(command, reply)) {
+	string r = "No such service: "  + request_name;
+	cout << r << endl;
+	ReplyWriter<VoidIO>::write(reply, client_name, rqst_id, request_name, r, 0);
+	return true;
+    }
 }
 
 <?

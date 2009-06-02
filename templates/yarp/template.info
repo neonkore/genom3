@@ -6,6 +6,7 @@ main:
   "YarpCodec.cpp" -> "$$YarpCodec.cpp"
   "Module.hpp" -> "$$Module.hpp"
   "Module.cpp" -> "$$Module.cpp"
+  "Comp.cpp" -> "$$Comp.cpp"
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
   "CMakeLists.txt"

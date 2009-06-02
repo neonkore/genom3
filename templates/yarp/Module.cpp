@@ -37,6 +37,27 @@ for e in errorList: ?>
   return "";
 }
 
+// <!comp.name!>ControlData methods
+void <!comp.name()!>ControlData::killAllServices()
+{
+<?
+for s in servicesMap:
+  service = s.data()
+  if service.type == ServiceType.Exec:
+    print "  kill" + service.name + "Services();"
+?>}
+
+<?
+for s in servicesMap:
+  service = s.data()
+  if service.type == ServiceType.Exec:
+    ?>
+void <!comp.name()!>ControlData::kill<!service.name!>Services()
+{
+  <!service.name!>Services.clear();
+}
+<?
+?>
 
 <!comp.name()!>Module::<!comp.name()!>Module()
 : m_data(0) <?
@@ -47,6 +68,9 @@ for t in tasksMap: ?>
 {
     setName("<!comp.name()!>");
 } 
+
+<!comp.name()!>Module::~<!comp.name()!>Module()
+{}
 
 bool <!comp.name()!>Module::open(yarp::os::Searchable& config)
 {

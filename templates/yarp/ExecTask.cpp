@@ -34,6 +34,9 @@ else:?>
 //     setOptions(<!currentTask.stackSize!>);
 } 
 
+<!comp.name()!><!currentTaskName!>::~<!comp.name()!><!currentTaskName!>()
+{}
+
 bool <!comp.name()!><!currentTaskName!>::threadInit()
 {
     m_request_port.open("/<!comp.name()!>/Services/<!currentTaskName!>");

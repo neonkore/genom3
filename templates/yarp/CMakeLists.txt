@@ -23,11 +23,11 @@ ADD_LIBRARY(<!capCompName!>Module SHARED ${<!upperCompName!>_SRC})
 TARGET_LINK_LIBRARIES(<!capCompName!>Module ${YARP_OS_LIBRARY})
 
 #  Standalone version of the component
-# SET(<!capCompName!>Comp_SRC <!comp.name()!>ControlComp.cpp)
-# 
-# ADD_EXECUTABLE(<!comp.name()!>Comp ${<!capCompName!>Comp_SRC})
-# TARGET_LINK_LIBRARIES(<!comp.name()!>Comp <!capCompName!>Control ${YARP_LIBRARIES})
-# 
+SET(<!capCompName!>Comp_SRC <!comp.name()!>Comp.cpp)
+
+ADD_EXECUTABLE(<!comp.name()!>Comp ${<!capCompName!>Comp_SRC})
+TARGET_LINK_LIBRARIES(<!comp.name()!>Comp <!capCompName!>Module ${YARP_OS_LIBRARY})
+
 # # Test component
 # SET(<!capCompName!>TestComp_SRC 
 #     ${IDL_<!capCompName!>ControlIdl_OUTPUTS}

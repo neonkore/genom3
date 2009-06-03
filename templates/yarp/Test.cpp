@@ -73,6 +73,11 @@ for port in outports:
   ?>
   DataServer<<!typeName!>> <!port.name!>_inport;
 <?
+for port in inports:
+  typeName = MapTypeToC(port.idlType)
+  ?>
+  OutPort<<!typeName!>> <!port.name!>_outport;
+<?
 ?>
 
 <!comp.name()!>Test()
@@ -95,6 +100,10 @@ for port in outports: ?>
     <!port.name!>_inport.open("/<!comp.name()!>/Test/InPorts/<!port.name!>");
     Network::connect("/<!comp.name()!>/OutPorts/<!port.name!>", "/<!comp.name()!>/Test/InPorts/<!port.name!>");
 <?
+for port in inports: ?>
+    <!port.name!>_outport.open("/<!comp.name()!>/Test/OutPorts/<!port.name!>");
+    Network::connect("/<!comp.name()!>/Test/OutPorts/<!port.name!>", "/<!comp.name()!>/InPorts/<!port.name!>");
+<?
 ?>
 }
 
@@ -115,6 +124,10 @@ print "  cout << \"---------------------------\" << endl;"
 for port in outports:
   idx += 1
   print "  cout << \"  (" + str(idx) + ") Show " + port.name + "\" << endl;"
+print "  cout << \"---------------------------\" << endl;"
+for port in inports:
+  idx += 1
+  print "  cout << \"  (" + str(idx) + ") Update " + port.name + "\" << endl;"
 ?>
 
 }
@@ -182,6 +195,26 @@ void read<!port.name!>()
   cout << endl;
 }
 <?
+for port in inports:
+  typeName = MapTypeToC(port.idlType)
+  ?>
+void write<!port.name!>()
+{
+  <!typeName!> *v = new <!typeName!>();
+<?
+  flatList = flatStruct(port.idlType, "(*v)", ".")
+  for x in flatList:
+    t = MapTypeToC(x[0], True)
+    ?>
+      cout << "Enter <!t!> <!x[1]!>:  " << endl;
+<?
+    parseInput(x[0], x[1]);
+  ?>
+
+  <!port.name!>_outport.exportData(v);
+  cout << endl;
+}
+<?
 ?>
 
 void executeAction(int action)
@@ -208,7 +241,17 @@ for port in outports:
     case <!idx!>: {
       read<!port.name!>();
       break;
-    }      
+    }
+<?
+for port in inports:
+  idx += 1
+  ?>
+      case <!idx!>: {
+      write<!port.name!>();
+      break;
+    }
+<?
+?>      
   }
 }
 

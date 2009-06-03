@@ -107,10 +107,10 @@ for t in tasksMap:
 bool <!comp.name()!>Module::interruptModule()
 {
 <?
-for p in outports: ?>
+for port in outports: ?>
     m_data-><!port.name!>_outport.interrupt();
 <?
-for p in inports: ?>
+for port in inports: ?>
     m_data-><!port.name!>_inport.interrupt();
 <?
 for t in tasksMap: 

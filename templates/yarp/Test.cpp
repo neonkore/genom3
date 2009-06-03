@@ -36,15 +36,16 @@ class <!task.name!>ReplyReader : public TypedReaderCallback<Bottle>
     serviceInfo = services_info_dict[service.name]
     if not serviceInfo.outputFlag:
       continue
-  ?>
+    ?>
 	if(req == "<!service.name!>") {
 	    ReplyAnswer<<!serviceInfo.outputTypeCpp!>> answer(&b);
-	    cout << "Final reply: " << answer << endl;
+	    cout << "Received reply: " << answer << endl;
 	    return;
 	}
 <?
   ?>
-	cout << "Unknown reply Received" << endl;
+	ReplyAnswer<VoidIO> answer(&b);
+	cout << "Received reply: " << answer << endl;
     }
 };
 <?
@@ -133,13 +134,13 @@ for s in servicesMap:
   if service.type == ServiceType.Control:
     ?>
       RqstWriter<<!serviceInfo.requestType!>>::send(Control_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
-      ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_reply_port.read());
-      cout << "Final reply: " << answer;
+//       ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_reply_port.read());
+//       cout << "Final reply: " << answer;
 <?
   else:?>
       RqstWriter<<!serviceInfo.requestType!>>::send(<!service.taskName!>_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
-      ReplyAnswer<<!serviceInfo.replyType!>> answer(<!service.taskName!>_reply_port.read());
-      cout << "Intermediate reply: " << answer;
+//       ReplyAnswer<<!serviceInfo.replyType!>> answer(<!service.taskName!>_reply_port.read());
+//       cout << "Intermediate reply: " << answer;
 
 //       cout << "Wait final reply ?";
 //       string res;

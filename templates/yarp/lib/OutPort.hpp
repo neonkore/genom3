@@ -21,6 +21,7 @@ public:
   
   void open(const std::string &portName)
   {
+    data = new T_DATA();
     out_port.open(portName.c_str());
   }
 
@@ -43,8 +44,7 @@ public:
   {
     yarp::os::Bottle& b = out_port.prepare();
     b.clear();
-    YarpCodec<T_DATA>::encode(&b,
-				     *data);
+    YarpCodec<T_DATA>::encode(&b,*data);
     out_port.writeStrict();
     return 0;
   }

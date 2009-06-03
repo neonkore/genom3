@@ -183,7 +183,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   m_data-><!service.name!>Services.push_back(s);
 
   // send first reply
-  ReplyWriter<VoidIO>::send(m_reply_port, clientName, rqst_id, "<!service.name!>", "OK", 0);    
+//   ReplyWriter<VoidIO>::send(m_reply_port, clientName, rqst_id, "<!service.name!>", "OK", 0);    
   return true;
 }
 <?

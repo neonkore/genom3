@@ -90,8 +90,10 @@ void printUsage()
 {
   // print usage
   cout << "Available actions:" << endl;
+  cout << "  (0) Exit" << endl;
+  
 <?
-idx = 0
+idx = 10
 for s in servicesMap:
   service = s.data()
   idx += 1
@@ -104,6 +106,9 @@ void executeAction(int action)
 {
   static int rqst_id = 0;
   switch(action) {
+    case 0:
+	exit(0);
+
 <?
 idx = 0
 for s in servicesMap:
@@ -134,8 +139,8 @@ for s in servicesMap:
   if service.type == ServiceType.Control:
     ?>
       RqstWriter<<!serviceInfo.requestType!>>::send(Control_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
-//       ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_reply_port.read());
-//       cout << "Final reply: " << answer;
+      ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_reply_port.read());
+      cout << "Final reply: " << answer;
 <?
   else:?>
       RqstWriter<<!serviceInfo.requestType!>>::send(<!service.taskName!>_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);

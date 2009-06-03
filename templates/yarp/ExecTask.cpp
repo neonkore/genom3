@@ -76,22 +76,9 @@ for s in comp.servicesMap():
   ?>
   for(<!service.name!>Service::List::iterator it = m_data-><!service.name!>Services.begin();
 	it != m_data-><!service.name!>Services.end();) {
-    if(!(*it)->step()) { // delete the service
-<?
-  if serviceInfo.outputFlag: ?>
-      // send the result
-      <!serviceInfo.outputTypeCpp!> res = (*it)->result();
-      ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_reply_port, 
-	  (*it)->clientName(), (*it)->id(), "<!service.name!>", "OK", &res);    
-<?
-  else:?>
-      // send the final reply
-      ReplyWriter<VoidIO>::send(m_reply_port, 
-	  (*it)->clientName(), (*it)->id(), "<!service.name!>", "OK", 0);
-<?
-  ?>
+    if(!(*it)->step()) // delete the service
       it = m_data-><!service.name!>Services.erase(it);
-    } else
+    else
       ++it;
   }
 <?
@@ -179,7 +166,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   ?>
 
   // create the activity
-  <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data, rqst_id, clientName <!args!>));
+  <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data, rqst_id, clientName, m_reply_port <!args!>));
   m_data-><!service.name!>Services.push_back(s);
 
   // send first reply

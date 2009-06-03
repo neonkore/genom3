@@ -5,6 +5,7 @@
 #include <list>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <yarp/os/all.h>
 
 #include "<!comp.name()!>Struct.hpp"
 
@@ -42,12 +43,15 @@ class <!service.name!>Service {
     typedef std::list<Ptr> List;
 
     <!service.name!>Service(<!comp.name()!>ControlData *data,
-	int id, std::string clientName <!inputStr!>);
+	int id, std::string clientName, yarp::os::BufferedPort<yarp::os::Bottle> &replyPort <!inputStr!>);
+    ~<!service.name!>Service();
 
     int id() const { return m_id; }
     std::string clientName() const { return m_clientName; }
 
     bool step();
+    void abort();
+
 <?
   if service.output.identifier:?>
     <!outputType!> result() { return out_<!service.output.identifier!>; }
@@ -59,6 +63,7 @@ class <!service.name!>Service {
   ?>
 
   private:
+    bool m_aborted;
     int m_id;
     int m_status;
     std::string m_clientName;
@@ -70,6 +75,7 @@ class <!service.name!>Service {
     print "    " + outputType + " out_" + service.output.identifier + ";"
   ?>
     <!comp.name()!>ControlData *m_data;
+    yarp::os::BufferedPort<yarp::os::Bottle> &m_replyPort;
 }; 
 
 <?

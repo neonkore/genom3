@@ -54,7 +54,9 @@ for s in servicesMap:
     ?>
 void <!comp.name()!>ControlData::kill<!service.name!>Services()
 {
-  <!service.name!>Services.clear();
+  for(<!service.name!>Service::List::iterator it = <!service.name!>Services.begin();
+	it != <!service.name!>Services.end(); ++it)
+      (*it)->abort(); // will be deleted next step
 }
 <?
 ?>

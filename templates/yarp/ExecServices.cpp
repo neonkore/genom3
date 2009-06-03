@@ -2,6 +2,9 @@
 
 #include "userCodels.h"
 #include "<!comp.name()!>Module.hpp"
+#include "lib/RepliesWriter.hpp"
+
+using namespace GenomYarp;
 
 // forward declaration of user codels
 <?
@@ -19,6 +22,8 @@ for s in comp.servicesMap():
   if service.type == ServiceType.Control:
     continue
 
+  serviceInfo = services_info_dict[service.name]
+
   inputStr = ""
   for i in service.inputs():
     inputStr += ", "
@@ -29,8 +34,8 @@ for s in comp.servicesMap():
 // <!service.name!>Service
 
 <!service.name!>Service::<!service.name!>Service(<!comp.name()!>ControlData *data, 
-    int id, std::string clientName <!inputStr!>)
-: m_data(data), m_id(id), m_clientName(clientName)
+    int id, std::string clientName, yarp::os::BufferedPort<yarp::os::Bottle> &replyPort <!inputStr!>)
+: m_aborted(false), m_data(data), m_id(id), m_clientName(clientName), m_replyPort(replyPort)
 {
 <?
   for i in service.inputs():
@@ -39,8 +44,36 @@ for s in comp.servicesMap():
   m_status = <!startStateForService(service)!>;
 }
 
+<!service.name!>Service::~<!service.name!>Service()
+{
+    // send the reply
+    if(m_aborted) {
+	ReplyWriter<VoidIO>::send(m_replyPort, 
+	    m_clientName, m_id, "<!service.name!>", "Aborted", 0);
+    } else {
+<?
+  if serviceInfo.outputFlag: ?>
+	ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_replyPort, 
+	    m_clientName, m_id, "<!service.name!>", "OK", &out_<!service.output.identifier!>);    
+<?
+  else:?>
+	ReplyWriter<VoidIO>::send(m_replyPort, 
+	    m_clientName, m_id, "<!service.name!>", "OK", 0);
+<?
+  ?>
+  }
+}
+
+void <!service.name!>Service::abort()
+{
+    m_aborted = true;
+}
+
 bool <!service.name!>Service::step()
 {
+  if(m_aborted)
+    return false;
+
   int res;
   switch(m_status) {
 <?

@@ -22,7 +22,7 @@ if currentTask.hasCodel("end"):
     print "int " + real_codel_signature(currentTask.codel("end")) + ";"
 ?>
 
-class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>, public yarp::os::PortReader
+class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>, public yarp::os::TypedReaderCallback<yarp::os::Bottle>
 {
     public:
       <!comp.name()!><!currentTaskName!>(<!comp.name()!>ControlData *data);
@@ -36,7 +36,7 @@ if currentTask.hasCodel("end"): ?>
     virtual bool threadRelease();
 <?
 ?>
-    virtual bool read(yarp::os::ConnectionReader &);
+    virtual void onRead(yarp::os::Bottle& b);
 
     protected:
 <?
@@ -46,7 +46,7 @@ for s in servicesMap:
     continue
   ?>
       bool run<!service.name!>(const std::string &clientName, int rqst_id,
-	    const yarp::os::Bottle &command, yarp::os::Bottle &reply);
+	    const yarp::os::Bottle &command);
 <?
 ?>
 

@@ -87,7 +87,8 @@ for p in inports: ?>
 <?
 ?>
     m_request_port.open("/<!comp.name()!>/Services/Control");
-    attach(m_request_port);
+//     attach(m_request_port);
+    m_request_port.useCallback(*this);
 
     // create exec task and start them
 <?
@@ -126,26 +127,37 @@ bool <!comp.name()!>Module::updateModule()
 
 bool <!comp.name()!>Module::respond(const Bottle &command, Bottle &reply)   
 {
+    Module::respond(command, reply);
+}
+
+void <!comp.name()!>Module::onRead(Bottle& command)
+{
     string client_name  = RqstReader::readClientName(command);
     int rqst_id = RqstReader::readRqstId(command);
     string request_name  = RqstReader::readRequestName(command);
 
+    std::cout << "Control: Received request from " << client_name << ", id=" << rqst_id << ", service=" << request_name << std::endl;
 <?
+first = True
 for s in servicesMap:
   service = s.data()
   if service.type != ServiceType.Control:
     continue
+  if first:
+    first = False
+    elseStr = ""
+  else:
+    elseStr = "else"
   ?>
-    if(request_name == "<!service.name!>") 
-	return run<!service.name!>(client_name, rqst_id, command, reply);
+    <!elseStr!> if(request_name == "<!service.name!>") {
+	run<!service.name!>(client_name, rqst_id, command);
+    }
 <?
 ?>
-    // wrong request name
-    if(!Module::respond(command, reply)) {
-	string r = "No such service: "  + request_name;
-	cout << r << endl;
-	ReplyWriter<VoidIO>::write(reply, client_name, rqst_id, request_name, r, 0);
-	return true;
+    else {
+      string r = "No such service: "  + request_name;
+      cout << r << endl;
+      ReplyWriter<VoidIO>::send(m_request_port, client_name, rqst_id, request_name, r, 0);
     }
 }
 
@@ -156,7 +168,7 @@ for s in servicesMap:
     continue
   serviceInfo = services_info_dict[service.name]
   ?>
-bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command, Bottle &reply)
+bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command)
 {
 <?
   if serviceInfo.inputFlag: ?>
@@ -169,7 +181,7 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
   if(res < 0) { // error
     string r = "<!service.name!> : " + errorString(res);
     cout << r << endl;
-    ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", r, 0);    
+    ReplyWriter<VoidIO>::send(m_request_port, clientName, rqst_id, "<!service.name!>", r, 0);    
   }
 <?
   ?>
@@ -194,10 +206,10 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
 
 <?
   if serviceInfo.outputFlag: ?>
-  ReplyWriter<<!serviceInfo.outputTypeCpp!>>::write(reply, clientName, rqst_id, "<!service.name!>", "OK", &m_data-><!serviceInfo.outputName!>);    
+  ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_request_port, clientName, rqst_id, "<!service.name!>", "OK", &m_data-><!serviceInfo.outputName!>);    
 <?
   else: ?>
-  ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", "OK", 0);    
+  ReplyWriter<VoidIO>::send(m_request_port, clientName, rqst_id, "<!service.name!>", "OK", 0);    
 <?
   ?>
   return true;

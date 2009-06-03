@@ -41,6 +41,8 @@ bool <!comp.name()!><!currentTaskName!>::threadInit()
 {
     m_request_port.open("/<!comp.name()!>/Services/<!currentTaskName!>");
     m_reply_port.open("/<!comp.name()!>/Services/Replies/<!currentTaskName!>");
+    m_request_port.useCallback(*this);
+
 <?
 if currentTask.hasCodel("init"):
   ?>
@@ -96,18 +98,14 @@ for s in comp.servicesMap():
 ?>
 }
     
-bool <!comp.name()!><!currentTaskName!>::read(yarp::os::ConnectionReader &connection)
-/*bool <!comp.name()!><!currentTaskName!>::respond(const Bottle &command, Bottle &reply)   */
+void <!comp.name()!><!currentTaskName!>::onRead(yarp::os::Bottle& command)
 {
-    Bottle command, reply;
-    // read the request
-    if (!command.read(connection)) 
-	return false;
-
     string client_name  = RqstReader::readClientName(command);
     int rqst_id = RqstReader::readRqstId(command);
     string request_name  = RqstReader::readRequestName(command);
 
+    std::cout << "<!currentTaskName!>: Received request from " << client_name
+	<< ", id=" << rqst_id << ", service=" << request_name << std::endl;
 <?
 first = True
 for s in servicesMap:
@@ -121,23 +119,15 @@ for s in servicesMap:
     elseStr = "else"
   ?>
     <!elseStr!> if(request_name == "<!service.name!>") {
-	if(!run<!service.name!>(client_name, rqst_id, command, reply))
-	    return false;
+	run<!service.name!>(client_name, rqst_id, command);
     }
 <?
 ?>
     else {     // wrong request name
 	string r = "No such service: "  + request_name;
 	cout << r << endl;
-	ReplyWriter<VoidIO>::send(m_reply_port, client_name, rqst_id, request_name, r, 0);
+	ReplyWriter<VoidIO>::send(m_request_port, client_name, rqst_id, request_name, r, 0);
     }
-
-    // send the reply
-    ConnectionWriter *writer = connection.getWriter();
-    if(!writer)
-      return false;
-    reply.write(*writer);
-    return true;
 }
 
 
@@ -151,7 +141,7 @@ for s in servicesMap:
   for i in service.inputs():
     args += ", in_" + i.identifier
   ?>
-bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command, Bottle &reply)
+bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command)
 {
 <?
   if serviceInfo.inputFlag: ?>
@@ -164,7 +154,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   if(res < 0) { // error
     string r = "<!service.name!>: " + errorString(res);
     cout << r << endl;
-    ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", r, 0);    
+    ReplyWriter<VoidIO>::send(m_request_port, clientName, rqst_id, "<!service.name!>", r, 0);    
     return true;
   }
 <?
@@ -193,7 +183,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   m_data-><!service.name!>Services.push_back(s);
 
   // send first reply
-  ReplyWriter<VoidIO>::write(reply, clientName, rqst_id, "<!service.name!>", "OK", 0);    
+  ReplyWriter<VoidIO>::send(m_request_port, clientName, rqst_id, "<!service.name!>", "OK", 0);    
   return true;
 }
 <?

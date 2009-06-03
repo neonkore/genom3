@@ -162,14 +162,15 @@ int main()
 {
     yarp::os::Network yarp;
 
-    Contact c = yarp.queryName("<!comp.name()!>");
-    if(!c.isValid()) {
-      cout << "Impossible to contact module." << endl;
-      return 1;
-    }
+//     Contact c = yarp.queryName("<!comp.name()!>");
+//     if(!c.isValid()) {
+//       cout << "Impossible to contact module." << endl;
+//       return 1;
+//     }
 
     <!comp.name()!>Test test;
     while(true) {
+	test.printUsage();
 	int action;  
 	std::cin >> action;
 	test.executeAction(action);

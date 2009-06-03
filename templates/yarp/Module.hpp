@@ -64,7 +64,7 @@ for s in comp.servicesMap():
 ?>
 };
 
-class <!comp.name()!>Module : public yarp::os::Module
+class <!comp.name()!>Module : public yarp::os::Module, public yarp::os::TypedReaderCallback<yarp::os::Bottle>
 {
     public:
       <!comp.name()!>Module();
@@ -75,6 +75,7 @@ class <!comp.name()!>Module : public yarp::os::Module
     bool updateModule();
 
     bool respond(const yarp::os::Bottle &command, yarp::os::Bottle &reply);
+    void onRead(yarp::os::Bottle& b);
 
   protected:
 <?
@@ -84,7 +85,7 @@ for s in servicesMap:
     continue
   ?>
       bool run<!service.name!>(const std::string &clientName, int rqst_id,
-	    const yarp::os::Bottle &command, yarp::os::Bottle &reply);
+	    const yarp::os::Bottle &command);
 <?
 ?>
 

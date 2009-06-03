@@ -102,6 +102,20 @@ namespace GenomYarp{
       return 0;
     }
 
+    void wait()
+    {
+	dataSem.wait();
+    }
+
+    void post()
+    {
+	dataSem.post();
+    }
+
+    T_DATA* getDataPtr()
+    {
+	return data;
+    }
     
     T_DATA& getLatestData(){
       T_DATA* ret = new T_DATA();

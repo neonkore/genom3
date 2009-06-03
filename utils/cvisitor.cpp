@@ -110,8 +110,19 @@ void CVisitor::visitWStringType(WStringType *ws)
 
 void CVisitor::visitSequenceType(SequenceType *seq)
 {
+	m_out << "struct {" << endl;
+	string oldIndent = m_indent;
+	m_indent += INDENT_QUANTUM;
+
+	m_out << m_indent << "int length;" << endl;
+	m_out << m_indent << "int size;" << endl;
+	m_out << m_indent;
 	seq->seqType()->accept(*this);
-	m_out << "*";
+	m_out << " *data;" << endl;
+
+	m_indent = oldIndent;
+
+	m_out << m_indent << "}";
 }
 
 void CVisitor::visitFixedType(FixedType *fixed)

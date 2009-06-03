@@ -7,7 +7,9 @@ def encodeSimpleType(type, name):
 <?
 
 def encodeType(t, name):
-  if t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong :
+  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    encodeType(t.unalias(), name)
+  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong :
     encodeSimpleType("int", name)
   elif t.kind() == IdlKind.Double or t.kind() == IdlKind.Float:
     encodeSimpleType("double", name)
@@ -25,6 +27,17 @@ def encodeType(t, name):
       return -1;
   }
 <?
+  elif t.kind() == IdlKind.Sequence: 
+    s = t.asSequenceType()
+    seqType = MapTypeToC(s.seqType())
+    encodeSimpleType("int", name + ".length") 
+    ?>
+    // data
+    for(int j=0; j < <!name!>.length; ++j) {<?
+    encodeType(s.seqType(), name + ".data[j]")
+    ?>
+    }
+<?
 
 def decodeSimpleType(type, name):
   ?>
@@ -40,7 +53,9 @@ def decodeSimpleType(type, name):
 <?
 
 def decodeType(t, name):
-  if t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong : 
+  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    decodeType(t.unalias(), name)
+  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong : 
     decodeSimpleType("int", name)
   elif t.kind() == IdlKind.Double or t.kind() == IdlKind.Float:
     decodeSimpleType("double", name)
@@ -74,7 +89,17 @@ def decodeType(t, name):
     if (it == -1) 
       return -1;
   }
-
+<?
+  elif t.kind() == IdlKind.Sequence: 
+    s = t.asSequenceType()
+    seqType = MapTypeToC(s.seqType())
+    decodeSimpleType("int", name + ".length")
+    ?>
+    // data
+    for(int j=0; j < <!name!>.length; ++j) {<?
+    decodeType(s.seqType(), name + ".data[j]")
+    ?>
+    }
 <?
 
 def printSimpleType(type, name):
@@ -85,7 +110,9 @@ def printSimpleType(type, name):
 <?
 
 def printType(t, name):
-  if t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong : 
+  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    printType(t.unalias(), name)
+  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong : 
     printSimpleType("int", name)
   elif t.kind() == IdlKind.Double or t.kind() == IdlKind.Float:
     printSimpleType("double", name)
@@ -106,6 +133,16 @@ def printType(t, name):
     ?>
       }
       std::cout << std::endl;
+<?
+  elif t.kind() == IdlKind.Sequence: 
+    s = t.asSequenceType()
+    printSimpleType("int", name + ".length")
+    ?>
+    // data
+    for(int j=0; j < <!name!>.length; ++j) {<?
+    printType(s.seqType(), name + ".data[j]")
+    ?>
+    }
 <?
 ?>
 

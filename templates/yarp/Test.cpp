@@ -21,6 +21,7 @@ using namespace GenomYarp;
 
 <?
 for t in tasksMap:
+  task = t.data()
   ?>
 class <!task.name!>ReplyReader : public TypedReaderCallback<Bottle>
 {
@@ -63,14 +64,14 @@ for t in tasksMap:
 <?
 ?>
   yarp::os::BufferedPort<yarp::os::Bottle> Control_req_port;
-//   yarp::os::BufferedPort<yarp::os::Bottle> Control_reply_port;
+  yarp::os::BufferedPort<yarp::os::Bottle> Control_reply_port;
 
 <!comp.name()!>Test()
 {
     Control_req_port.open("/<!comp.name()!>/Test/Services/Control");
     Network::connect("/<!comp.name()!>/Test/Services/Control", "/<!comp.name()!>/Services/Control");
-//     Control_req_port.open("/<!comp.name()!>/Test/Control_reply");
-//     Network::connect("/<!comp.name()!>/", "/<!comp.name()!>/Control");
+    Control_reply_port.open("/<!comp.name()!>/Test/Services/Replies/Control");
+    Network::connect("/<!comp.name()!>/Services/Replies/Control", "/<!comp.name()!>/Test/Services/Replies/Control");
 <?
 for t in tasksMap:
   task = t.data()
@@ -132,12 +133,12 @@ for s in servicesMap:
   if service.type == ServiceType.Control:
     ?>
       RqstWriter<<!serviceInfo.requestType!>>::send(Control_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
-      ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_req_port.read());
+      ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_reply_port.read());
       cout << "Final reply: " << answer;
 <?
   else:?>
       RqstWriter<<!serviceInfo.requestType!>>::send(<!service.taskName!>_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
-      ReplyAnswer<<!serviceInfo.replyType!>> answer(<!service.taskName!>_req_port.read());
+      ReplyAnswer<<!serviceInfo.replyType!>> answer(<!service.taskName!>_reply_port.read());
       cout << "Intermediate reply: " << answer;
 
 //       cout << "Wait final reply ?";

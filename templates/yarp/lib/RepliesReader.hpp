@@ -15,11 +15,11 @@
 
 namespace GenomYarp {
 
-  const int REPLY_CLIENT_NAME_POS  = 1;
-  const int REPLY_SERVICE_NAME_POS = 2;
-  const int REPLY_RQST_ID_POS      = 3;
-  const int REPLY_REPORT_POS       = 4;
-  const int REPLY_OUTPUT_POS       = 5;
+  const int REPLY_CLIENT_NAME_POS  = 0;
+  const int REPLY_SERVICE_NAME_POS = 1;
+  const int REPLY_RQST_ID_POS      = 2;
+  const int REPLY_REPORT_POS       = 3;
+  const int REPLY_OUTPUT_POS       = 4;
 
 /**
  *Template class used to read replies over the network.
@@ -132,6 +132,7 @@ std::ostream& operator << (std::ostream& oss, const GenomYarp::ReplyAnswer<input
 	GenomYarp::YarpCodec<input_type>::print(ans.get_input());
 	oss << ") ";
 	oss << "(report "   << ans.get_report() << ") ";
+	oss << std::endl;
 	return oss;
 }
 

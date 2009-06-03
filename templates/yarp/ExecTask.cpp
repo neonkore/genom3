@@ -126,7 +126,7 @@ for s in servicesMap:
     else {     // wrong request name
 	string r = "No such service: "  + request_name;
 	cout << r << endl;
-	ReplyWriter<VoidIO>::send(m_request_port, client_name, rqst_id, request_name, r, 0);
+	ReplyWriter<VoidIO>::send(m_reply_port, client_name, rqst_id, request_name, r, 0);
     }
 }
 
@@ -154,7 +154,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   if(res < 0) { // error
     string r = "<!service.name!>: " + errorString(res);
     cout << r << endl;
-    ReplyWriter<VoidIO>::send(m_request_port, clientName, rqst_id, "<!service.name!>", r, 0);    
+    ReplyWriter<VoidIO>::send(m_reply_port, clientName, rqst_id, "<!service.name!>", r, 0);    
     return true;
   }
 <?
@@ -183,7 +183,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   m_data-><!service.name!>Services.push_back(s);
 
   // send first reply
-  ReplyWriter<VoidIO>::send(m_request_port, clientName, rqst_id, "<!service.name!>", "OK", 0);    
+  ReplyWriter<VoidIO>::send(m_reply_port, clientName, rqst_id, "<!service.name!>", "OK", 0);    
   return true;
 }
 <?

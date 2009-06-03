@@ -15,7 +15,8 @@
 namespace GenomYarp {
   class RqstReader;
   
-  static  int RQST_CLIENT_NAME_POS  = 1;
+  static  int RQST_CLIENT_NAME_POS  = 0;
+  static  int RQST_RQST_NAME_POS    = 1;
   static  int RQST_RQST_ID_POS      = 2;
   static  int RQST_INPUT_POS        = 3;
 }
@@ -30,6 +31,13 @@ public:
     std::string clientName;
     YarpCodec<std::string>::decode(&b,clientName,RQST_CLIENT_NAME_POS);
     return clientName;
+  }
+
+  static std::string readRequestName(const yarp::os::Bottle& b)
+  {
+    std::string requestName;
+    YarpCodec<std::string>::decode(&b,requestName,RQST_RQST_NAME_POS);
+    return requestName;
   }
   
   static int readRqstId(const yarp::os::Bottle& b)
@@ -49,11 +57,5 @@ public:
     return input;
   }
 };
-
-
-
-
-
-
 
 #endif

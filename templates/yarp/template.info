@@ -15,6 +15,7 @@ main:
   "lib/DataServer.hpp" -> "lib/DataServer.hpp"
   "lib/OutPort.hpp" -> "lib/OutPort.hpp"
   "lib/RepliesWriter.hpp" -> "lib/RepliesWriter.hpp"
+  "lib/RepliesReader.hpp" -> "lib/RepliesReader.hpp"
   "lib/RqstReader.hpp" -> "lib/RqstReader.hpp"
   "lib/RqstWriter.hpp" -> "lib/RqstWriter.hpp"
   "lib/Struct.hpp" -> "lib/Struct.hpp"

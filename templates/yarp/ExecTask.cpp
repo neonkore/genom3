@@ -106,7 +106,7 @@ bool <!comp.name()!><!currentTaskName!>::read(yarp::os::ConnectionReader &connec
 
     string client_name  = RqstReader::readClientName(command);
     int rqst_id = RqstReader::readRqstId(command);
-    string request_name  = RqstReader::readClientName(command);
+    string request_name  = RqstReader::readRequestName(command);
 
 <?
 first = True

@@ -12,21 +12,20 @@ def parseInput(type, name):
 #include <iostream>
 #include <yarp/os/all.h>
 #include "<!comp.name()!>Struct.hpp"
+#include "lib/RepliesReader.hpp"
+#include "lib/RqstWriter.hpp"
 
 using namespace std;
 using namespace yarp::os;
-
+using namespace GenomYarp;
 
 <?
 for t in tasksMap:
   ?>
-class <!task.name!>ReplyReader : public PortReader
+class <!task.name!>ReplyReader : public TypedReaderCallback<Bottle>
 {
-    virtual bool read(ConnectionReader& connection) 
+    virtual void onRead(Bottle& b)
     {
-	Bottle b;
-	b.read(connection);
-
 	string req = ReplyReader::readRequestName(&b);
 <?
   for s in servicesMap:
@@ -38,14 +37,13 @@ class <!task.name!>ReplyReader : public PortReader
       continue
   ?>
 	if(req == "<!service.name!>") {
-	    ReplyAnswer<<!serviceInfo.outputTypeCpp!>> answer;
+	    ReplyAnswer<<!serviceInfo.outputTypeCpp!>> answer(&b);
 	    cout << "Final reply: " << answer << endl;
-	    return true;
+	    return;
 	}
 <?
   ?>
 	cout << "Unknown reply Received" << endl;
-	return true;
     }
 };
 <?
@@ -61,7 +59,7 @@ for t in tasksMap:
   ?>
   yarp::os::BufferedPort<yarp::os::Bottle> <!task.name!>_req_port;
   yarp::os::BufferedPort<yarp::os::Bottle> <!task.name!>_reply_port;
-  <!task.name!>ReplyReader <!service.name!>Reader;
+  <!task.name!>ReplyReader <!task.name!>Reader;
 <?
 ?>
   yarp::os::BufferedPort<yarp::os::Bottle> Control_req_port;
@@ -81,7 +79,7 @@ for t in tasksMap:
     Network::connect("/<!comp.name()!>/Test/Services/<!task.name!>", "/<!comp.name()!>/Services/<!task.name!>");
     <!task.name!>_reply_port.open("/<!comp.name()!>/Test/Services/Replies/<!task.name!>");
     Network::connect("/<!comp.name()!>/Services/Replies/<!task.name!>", "/<!comp.name()!>/Test/Services/Replies/<!task.name!>");
-    <!task.name!>_reply_port.setReader(<!task.name!>Reader);
+    <!task.name!>_reply_port.useCallback(<!task.name!>Reader);
 <?
 ?>
 }
@@ -102,6 +100,7 @@ for s in servicesMap:
 
 void executeAction(int action)
 {
+  static int rqst_id = 0;
   switch(action) {
 <?
 idx = 0
@@ -110,7 +109,7 @@ for s in servicesMap:
   serviceInfo = services_info_dict[service.name]
   idx += 1
   inputFlatList = inputList(service)
-  serviceArgs = "0"
+  serviceArgs = "input"
   if serviceInfo.inputFlag:
     serviceArgs = serviceInfo.inputName 
   ?>
@@ -120,7 +119,9 @@ for s in servicesMap:
     print "      " + MapTypeToC(inputType(i), True) + " " + i.identifier + ";";
   if service.output.identifier and service.type == ServiceType.Control:
     print "      " + MapTypeToC(inputType(service.output), True) + " " + service.output.identifier + ";";
-
+  if not serviceInfo.inputFlag: ?>
+      VoidIO input; // fake input object for the rqst writer
+<?
   for x in inputFlatList:
     t = MapTypeToC(x[0], True)
     ?>
@@ -130,12 +131,12 @@ for s in servicesMap:
 
   if service.type == ServiceType.Control:
     ?>
-      RqstWriter<<!serviceInfo.requestType!>>::send(Control_req_port, "/<!comp.name()!>/Test", "<!service.name!>", <!serviceArgs!>);
+      RqstWriter<<!serviceInfo.requestType!>>::send(Control_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
       ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_req_port.read());
       cout << "Final reply: " << answer;
 <?
   else:?>
-      RqstWriter<<!serviceInfo.requestType!>>::send(<!service.taskName!>_req_port, "/<!comp.name()!>/Test", "<!service.name!>", <!serviceArgs!>);
+      RqstWriter<<!serviceInfo.requestType!>>::send(<!service.taskName!>_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
       ReplyAnswer<<!serviceInfo.replyType!>> answer(<!service.taskName!>_req_port.read());
       cout << "Intermediate reply: " << answer;
 

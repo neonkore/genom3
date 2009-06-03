@@ -128,7 +128,7 @@ namespace GenomYarp {
     static int decode (const yarp::os::Bottle *b,VoidIO& v,int it){
       return it;
     }
-    static int print  (const int &v){
+    static int print  (const VoidIO &v){
       std::cout << "VoidIO" ;
       return 0;
     }

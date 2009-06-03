@@ -11,6 +11,7 @@
 #include <yarp/os/all.h>
 
 #include "Struct.hpp"
+#include "YarpCodec.hpp"
 
 namespace GenomYarp {
 
@@ -77,7 +78,7 @@ class BadAnswerException {
 template <typename input_type>
 class ReplyAnswer { 
 	private:
-		std::string entityName;
+		std::string requestName;
 		std::string clientName;
 		int rqstId;
 		input_type input;
@@ -85,16 +86,20 @@ class ReplyAnswer {
 
 	public:
 		ReplyAnswer(const yarp::os::Bottle *b) {
-			// All this code can throw exception if the packet is not valide
-			entityName = cmpnt::ReplyReader::readEntityName(b);
-			clientName = cmpnt::ReplyReader::readClientName(b);
-			rqstId = cmpnt::ReplyReader::readRqstID(b);
-			report = cmpnt::ReplyReader::readReport(b);
-			input = cmpnt::ReplyReader::readInput<input_type> (b);
+			// All this code can throw exception if the packet is not valid
+			requestName = ReplyReader::readRequestName(b);
+			clientName = ReplyReader::readClientName(b);
+			rqstId = ReplyReader::readRqstID(b);
+			report = ReplyReader::readReport(b);
+			input = ReplyReader::readInput<input_type> (b);
 		};
 
 		const std::string & get_client_name() const {
 			return clientName;
+		};
+
+		const std::string & get_request_name() const {
+			return requestName;
 		};
 
 		int get_rqst_id() const {
@@ -114,19 +119,20 @@ class ReplyAnswer {
 		}
 };
 
-
+}
+ 
 template <typename input_type>
-std::ostream& operator << (std::ostream& oss, const ReplyAnswer<input_type>& ans)
+std::ostream& operator << (std::ostream& oss, const GenomYarp::ReplyAnswer<input_type>& ans)
 {
 	oss << "( RPLY ) ";
-	oss << "(entity-name "   << ans.get_entity_name() << ") ";
 	oss << "(client-name "   << ans.get_client_name() << ") ";
 	oss << "(rqst-id "       << ans.get_rqst_id() << ") ";
-	oss << "(input "		<< ans.get_input() << ") ";
+	oss << "(request-name "   << ans.get_request_name() << ") ";
+	oss << "(input ";  
+	GenomYarp::YarpCodec<input_type>::print(ans.get_input());
+	oss << ") ";
 	oss << "(report "   << ans.get_report() << ") ";
 	return oss;
-}
-
 }
 
 #endif

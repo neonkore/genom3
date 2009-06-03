@@ -8,10 +8,10 @@
 #ifndef REPLY_WRITER_HPP
 #define REPLY_WRITER_HPP
 
+#include <yarp/os/all.h>
+#include "Struct.hpp"
 
 namespace GenomYarp {
-
-#include "gurus/cmpntStruct.hpp"
 
 /**
  *Template class used to write and read replies over the network.
@@ -26,6 +26,7 @@ public:
     bottle.clear();
 
     bottle.addString(clientName.c_str() );
+    bottle.addString(requestName.c_str() );
     bottle.addInt(rqst_id);
     bottle.addString(report.c_str());
     

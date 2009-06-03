@@ -17,21 +17,22 @@ template<class T_INPUT>
 class RqstWriter{
   
   public:
-    static void write(yarp::os::Bottle &b, const std::string &clientName, int rqstId, const T_INPUT &input)
+    static void write(yarp::os::Bottle &b, const std::string &clientName, int rqstId, const std::string &requestName, const T_INPUT &input)
     {
 	b.clear();
 	
 	b.addString(clientName.c_str());
+	b.addString(requestName.c_str());
 	b.addInt(rqstId);
-	
+
 	yarp::os::Bottle& b_data = b.addList();
 	YarpCodec<T_INPUT>::encode(&b_data,input);
     }
 
-    static void send(yarp::os::BufferedPort<yarp::os::Bottle> &p, const std::string &clientName, int rqstId, const T_INPUT &input)
+    static void send(yarp::os::BufferedPort<yarp::os::Bottle> &p, const std::string &clientName, int rqstId, const std::string &requestName, const T_INPUT &input)
     {
 	yarp::os::Bottle& b = p.prepare();    
-	write(b, clientName, rqstId, input);
+	write(b, clientName, rqstId, requestName, input);
 
 	p.writeStrict();  
 	std::cout << "( RQST ) " << b.toString() << std::endl; 

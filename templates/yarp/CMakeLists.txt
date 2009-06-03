@@ -31,6 +31,7 @@ TARGET_LINK_LIBRARIES(<!comp.name()!>Comp <!capCompName!>Module ${YARP_OS_LIBRAR
 # Test component
 SET(<!capCompName!>Test_SRC 
     <!comp.name()!>Test.cpp
+    <!comp.name()!>YarpCodec.cpp      
 )
 
 ADD_EXECUTABLE(<!comp.name()!>Test ${<!capCompName!>Test_SRC})

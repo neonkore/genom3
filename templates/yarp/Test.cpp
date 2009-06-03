@@ -14,6 +14,7 @@ def parseInput(type, name):
 #include "<!comp.name()!>Struct.hpp"
 #include "lib/RepliesReader.hpp"
 #include "lib/RqstWriter.hpp"
+#include "lib/DataServer.hpp"
 
 using namespace std;
 using namespace yarp::os;
@@ -66,6 +67,13 @@ for t in tasksMap:
 ?>
   yarp::os::BufferedPort<yarp::os::Bottle> Control_req_port;
   yarp::os::BufferedPort<yarp::os::Bottle> Control_reply_port;
+<?
+for port in outports:
+  typeName = MapTypeToC(port.idlType)
+  ?>
+  DataServer<<!typeName!>> <!port.name!>_inport;
+<?
+?>
 
 <!comp.name()!>Test()
 {
@@ -83,6 +91,10 @@ for t in tasksMap:
     Network::connect("/<!comp.name()!>/Services/Replies/<!task.name!>", "/<!comp.name()!>/Test/Services/Replies/<!task.name!>");
     <!task.name!>_reply_port.useCallback(<!task.name!>Reader);
 <?
+for port in outports: ?>
+    <!port.name!>_inport.open("/<!comp.name()!>/Test/InPorts/<!port.name!>");
+    Network::connect("/<!comp.name()!>/OutPorts/<!port.name!>", "/<!comp.name()!>/Test/InPorts/<!port.name!>");
+<?
 ?>
 }
 
@@ -98,19 +110,16 @@ for s in servicesMap:
   service = s.data()
   idx += 1
   print "  cout << \"  (" + str(idx) + ") " + service.name + "\" << endl;"
+
+print "  cout << \"---------------------------\" << endl;"
+for port in outports:
+  idx += 1
+  print "  cout << \"  (" + str(idx) + ") Show " + port.name + "\" << endl;"
 ?>
 
 }
 
-void executeAction(int action)
-{
-  static int rqst_id = 0;
-  switch(action) {
-    case 0:
-	exit(0);
-
 <?
-idx = 0
 for s in servicesMap:
   service = s.data()
   serviceInfo = services_info_dict[service.name]
@@ -120,7 +129,9 @@ for s in servicesMap:
   if serviceInfo.inputFlag:
     serviceArgs = serviceInfo.inputName 
   ?>
-    case <!idx!>: {
+void run<!service.name!>()
+{
+  static int rqst_id = 0;
 <?
   for i in service.inputs():
     print "      " + MapTypeToC(inputType(i), True) + " " + i.identifier + ";";
@@ -156,10 +167,48 @@ for s in servicesMap:
 //       }
 <?
   ?>
+}
+
+<?
+for port in outports:
+  typeName = MapTypeToC(port.idlType)
+  ?>
+void read<!port.name!>()
+{
+  <!typeName!> res;
+  <!port.name!>_inport.getLatestData(res);
+  cout << endl << "<!port.name!> :" << endl;
+  YarpCodec<<!typeName!>>::print(res);
+  cout << endl;
+}
+<?
+?>
+
+void executeAction(int action)
+{
+  switch(action) {
+    case 0:
+	exit(0);
+
+<?
+idx = 10
+for s in servicesMap:
+  service = s.data()
+  idx += 1
+  ?>
+    case <!idx!>: {
+      run<!service.name!>();
       break;
     }
+
 <?
-?>      
+for port in outports:
+  idx += 1
+  ?>
+    case <!idx!>: {
+      read<!port.name!>();
+      break;
+    }      
   }
 }
 
@@ -177,6 +226,7 @@ int main()
 
     <!comp.name()!>Test test;
     while(true) {
+	cout << endl;
 	test.printUsage();
 	int action;  
 	std::cin >> action;

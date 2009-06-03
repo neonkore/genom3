@@ -48,9 +48,9 @@ namespace GenomYarp{
       data       = new T_DATA()   ;
     };
     
-    bool open(const std::string &name)
+    bool open(const char* name)
     {
-      if (!this->open(name)){
+      if (!yarp::os::BufferedPort<yarp::os::Bottle>::open(name)){
 // 	throw DataServerExceptionOpen(clientName,cmpntName,dataName);
 	return false;
       }  

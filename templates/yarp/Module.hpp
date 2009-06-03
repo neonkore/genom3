@@ -43,12 +43,12 @@ if t.kind() == IdlKind.Struct:
   // Data ports
 <?
 for port in inports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToC(port.idlType)
     ?>
   GenomYarp::DataServer<<!typeName!>> <!port.name!>_inport;
 <?
 for port in outports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToC(port.idlType)
     ?>
   GenomYarp::OutPort<<!typeName!>> <!port.name!>_outport;
 <?

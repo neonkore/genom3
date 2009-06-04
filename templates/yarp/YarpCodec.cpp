@@ -100,7 +100,7 @@ def decodeType(t, name):
     // data
     if(<!name!>.data)
       delete[] <!name!>.data;
-    <!name!>.data = new <!seqType!>[v.length];
+    <!name!>.data = new <!seqType!>[<!name!>.length];
     for(int j=0; j < <!name!>.length; ++j)
       it = YarpCodec<<!seqType!>>::decode(b, <!name!>.data[j], it);
 <?

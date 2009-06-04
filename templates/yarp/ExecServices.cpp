@@ -86,7 +86,7 @@ bool <!service.name!>Service::step()
       return true;
 <?
   ?>
-    case GOTO_ETHER:
+    case <!upper(service.name)!>_ETHER:
       return false;
   }
   return true;

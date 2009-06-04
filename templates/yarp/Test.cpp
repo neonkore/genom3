@@ -3,7 +3,7 @@ def parseInput(type, name):
   if type.kind() == IdlKind.Enum:?>
       int tmp;
       cin >> tmp;
-      <!name!> = (<!MapTypeToC(type, True)!>) tmp;
+      <!name!> = (<!MapTypeToCpp(type, True)!>) tmp;
 <?
   else: ?>
       cin >> <!name!>;
@@ -69,12 +69,12 @@ for t in tasksMap:
   yarp::os::BufferedPort<yarp::os::Bottle> Control_reply_port;
 <?
 for port in outports:
-  typeName = MapTypeToC(port.idlType)
+  typeName = MapTypeToCpp(port.idlType)
   ?>
   DataServer<<!typeName!>> <!port.name!>_inport;
 <?
 for port in inports:
-  typeName = MapTypeToC(port.idlType)
+  typeName = MapTypeToCpp(port.idlType)
   ?>
   OutPort<<!typeName!>> <!port.name!>_outport;
 <?
@@ -147,14 +147,14 @@ void run<!service.name!>()
   static int rqst_id = 0;
 <?
   for i in service.inputs():
-    print "      " + MapTypeToC(inputType(i), True) + " " + i.identifier + ";";
+    print "      " + MapTypeToCpp(inputType(i), True) + " " + i.identifier + ";";
   if service.output.identifier and service.type == ServiceType.Control:
-    print "      " + MapTypeToC(inputType(service.output), True) + " " + service.output.identifier + ";";
+    print "      " + MapTypeToCpp(inputType(service.output), True) + " " + service.output.identifier + ";";
   if not serviceInfo.inputFlag: ?>
       VoidIO input; // fake input object for the rqst writer
 <?
   for x in inputFlatList:
-    t = MapTypeToC(x[0], True)
+    t = MapTypeToCpp(x[0], True)
     ?>
       cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?
@@ -187,7 +187,7 @@ void run<!service.name!>()
 
 <?
 for port in outports:
-  typeName = MapTypeToC(port.idlType)
+  typeName = MapTypeToCpp(port.idlType)
   ?>
 void read<!port.name!>()
 {
@@ -199,7 +199,7 @@ void read<!port.name!>()
 }
 <?
 for port in inports:
-  typeName = MapTypeToC(port.idlType)
+  typeName = MapTypeToCpp(port.idlType)
   ?>
 void write<!port.name!>()
 {
@@ -207,7 +207,7 @@ void write<!port.name!>()
 <?
   flatList = flatStruct(port.idlType, "(*v)", ".")
   for x in flatList:
-    t = MapTypeToC(x[0], True)
+    t = MapTypeToCpp(x[0], True)
     ?>
       cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?

@@ -55,7 +55,7 @@ for p in portsMap:
 	inports.append(port)
 
 def pointerTo(t):
-  s = MapTypeToC(t,True)
+  s = MapTypeToCpp(t,True)
   if t.kind() == IdlKind.String:
     return s
   else:
@@ -87,7 +87,7 @@ class ServiceInfo:
       else:
 	self.inputName = service.inputs()[0].identifier
 	self.inputType = inputType(service.inputs()[0])
-      self.inputTypeCpp = MapTypeToC(self.inputType)
+      self.inputTypeCpp = MapTypeToCpp(self.inputType)
       self.requestType = self.inputTypeCpp
 
     if not service.output.identifier:
@@ -97,7 +97,7 @@ class ServiceInfo:
       self.outputFlag = True
       self.outputName = service.output.identifier
       self.outputType = inputType(service.output)
-      self.outputTypeCpp = MapTypeToC(self.outputType)
+      self.outputTypeCpp = MapTypeToCpp(self.outputType)
       self.replyType = self.outputTypeCpp
 
 # create serviceInfo objects

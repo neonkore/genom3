@@ -30,11 +30,11 @@ for s in comp.servicesMap():
     for i in service.inputs():
       inputStr += ", "
       t = inputType(i)
-      inputStr += MapTypeToC(t) + " " + i.identifier
+      inputStr += MapTypeToCpp(t) + " " + i.identifier
 
     if service.output.identifier:
       t = inputType(service.output)
-      outputType = MapTypeToC(t)
+      outputType = MapTypeToCpp(t)
   ?>
 class <!service.name!>Service {
   public:
@@ -70,7 +70,7 @@ class <!service.name!>Service {
 <?
   for i in service.inputs():
     t = inputType(i)
-    print "    " + MapTypeToC(t) + " in_" + i.identifier + ";"    
+    print "    " + MapTypeToCpp(t) + " in_" + i.identifier + ";"    
   if service.output.identifier:
     print "    " + outputType + " out_" + service.output.identifier + ";"
   ?>

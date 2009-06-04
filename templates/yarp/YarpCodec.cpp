@@ -31,7 +31,7 @@ def encodeType(t, name):
 <?
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
-    seqType = MapTypeToC(s.seqType(), True)
+    seqType = MapTypeToCpp(s.seqType(), True)
     encodeSimpleType("int", name + ".length") 
     ?>
     // data
@@ -94,7 +94,7 @@ def decodeType(t, name):
 <?
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
-    seqType = MapTypeToC(s.seqType())
+    seqType = MapTypeToCpp(s.seqType())
     decodeSimpleType("int", name + ".length")
     ?>
     // data
@@ -142,7 +142,7 @@ def printType(t, name):
 <?
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
-    seqType = MapTypeToC(s.seqType(), True)
+    seqType = MapTypeToCpp(s.seqType(), True)
     printSimpleType("int", name + ".length")
     ?>
     // data

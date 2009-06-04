@@ -28,7 +28,7 @@ for s in comp.servicesMap():
   for i in service.inputs():
     inputStr += ", "
     t = inputType(i)
-    inputStr += MapTypeToC(t) + " " + i.identifier
+    inputStr += MapTypeToCpp(t) + " " + i.identifier
 
   ?>
 // <!service.name!>Service

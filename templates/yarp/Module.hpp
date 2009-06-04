@@ -42,18 +42,18 @@ t = comp.IDSType.unalias()
 if t.kind() == IdlKind.Struct:
   s = t.asStructType()
   for m in s.members():
-     print "  " + MapTypeToC(m.data()) + " " + m.key() + ";"
+     print "  " + MapTypeToCpp(m.data()) + " " + m.key() + ";"
 ?>
 
   // Data ports
 <?
 for port in inports:
-    typeName = MapTypeToC(port.idlType)
+    typeName = MapTypeToCpp(port.idlType)
     ?>
   GenomYarp::DataServer<<!typeName!>> <!port.name!>_inport;
 <?
 for port in outports:
-    typeName = MapTypeToC(port.idlType)
+    typeName = MapTypeToCpp(port.idlType)
     ?>
   GenomYarp::OutPort<<!typeName!>> <!port.name!>_outport;
 <?

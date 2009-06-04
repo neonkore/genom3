@@ -5,9 +5,9 @@
 <?
 for t in typesVect:
   if t.identifier() != IDSType.identifier():
-    print MapTypeToC(t) + ";\n"
+    print MapTypeToCpp(t) + ";\n"
 
-print MapTypeToC(IDSType) + ";\n"
+print MapTypeToCpp(IDSType) + ";\n"
 ?>
 
 #endif

@@ -10,7 +10,7 @@ using namespace GenomYarp;
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Exec:
+  if service.type != ServiceType.Control:
     for c in service.codels():
       if c.key() != "control":
 	print "int " + real_codel_signature(c.data(), service) + ";"
@@ -104,7 +104,7 @@ int <!service.name!>Service::<!c.key()!>()
     codelLock(codel, service)
     ?>
   // call the user codel
-  int res = <!real_codel_call(codel, "m_data->", service)!>;
+  int res = <!real_codel_call(codel, "m_data->", service, True)!>;
 
   // update ports, release locks, etc
 <?

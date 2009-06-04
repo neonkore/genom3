@@ -20,9 +20,9 @@ def inputType(i):
     return i.type
 
 def addressOf(t, s):
-  if t.kind() == IdlKind.String:
-    return s
-  else:
+ if t.kind() == IdlKind.String:
+   return s + ".c_str()"
+ else:
     return "&" + s
 
 # returns a flat list of the structure of a type
@@ -55,7 +55,7 @@ for p in portsMap:
 	inports.append(port)
 
 def pointerTo(t):
-  s = MapTypeToCpp(t,True)
+  s = MapTypeToC(t,True)
   if t.kind() == IdlKind.String:
     return s
   else:
@@ -106,7 +106,7 @@ for s in servicesMap:
     service = s.data()
     services_info_dict[service.name] = ServiceInfo(service)    
 
-def real_codel_call(codel, data_prefix="", service=None):
+def real_codel_call(codel, ids_prefix="", service=None, allArgs = False):
   proto = ""
   if service is not None:
     inputPrefix = ""
@@ -114,21 +114,21 @@ def real_codel_call(codel, data_prefix="", service=None):
 	serviceInfo = services_info_dict[service.name]
 	inputPrefix = serviceInfo.inputName + "."
     for i in service.inputs():
-	if inputPrefix:
+	if inputPrefix and not allArgs:
 	    proto += addressOf(inputType(i), "in_" + inputPrefix + i.identifier) + ", "
 	else:
-	    proto += "in_" + i.identifier + ", "
+	    proto += addressOf(inputType(i), "in_" + i.identifier) + ", "
     if service.output.identifier:
-	proto += " out_" + service.output.identifier + ", "
+	proto += "& out_" + service.output.identifier + ", "
 
   for type in codel.inTypes:
-    proto += "& " + data_prefix + type + ", ";
+    proto += "& " + ids_prefix + type + ", ";
   for type in codel.outTypes:
-    proto += "& " + data_prefix + type + ", ";
+    proto += "& " + ids_prefix + type + ", ";
   for port in codel.outPorts:
-    proto +=  data_prefix + port + "_outport.data, "; 
+    proto +=  ids_prefix + port + "_outport.data, "; 
   for port in codel.inPorts:
-    proto += data_prefix + port + "_inport.getDataPtr(), "; 
+    proto += ids_prefix + port + "_inport.getDataPtr(), "; 
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
@@ -138,7 +138,7 @@ def real_codel_signature(codel, service=None):
   if service is not None:
     for s in service.inputs():
 	idstype = inputType(s);
-	proto += pointerTo(idstype) + " in_" + s.identifier + ", ";
+	proto += "const " + pointerTo(idstype) + " in_" + s.identifier + ", ";
     if service.output.identifier:
 	idstype = inputType(service.output);
 	proto += pointerTo(idstype) + " out_" + service.output.identifier + ", "; 

@@ -80,4 +80,30 @@ void CppVisitor::visitConstValue(ConstValue *v)
 	m_out << " " << v->identifier() << " = " << v->value().print() << ";" << endl;
 }
 
+void CppVisitor::visitStructType(StructType *s)
+{
+	m_out << "struct " + s->identifier();
+	if(m_declOnly)
+		return;
+
+	m_out << "{" << endl;
+	string oldIndent = m_indent;
+	m_indent += INDENT_QUANTUM;
+
+	IdlType::Map::const_iterator it = s->members().begin();
+	for(; it != s->members().end(); ++it) {
+		m_out << m_indent;
+
+		it->second->accept(*this); // no need to set declOnly because of NamedType
+		m_out << " " << it->first;
+		//print array if existing
+		if(it->second->kind() == IdlType::Array)
+			m_out << it->second->asType<ArrayType>()->printBounds();
+
+		m_out << ";" << endl;
+	}
+	m_indent = oldIndent;
+	m_out << m_indent << "}";
+}
+
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

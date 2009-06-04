@@ -49,6 +49,7 @@ class CppVisitor : public CVisitor
 		virtual void visitStringType(StringType*);
 		virtual void visitWStringType(WStringType*);
 		virtual void visitConstValue(ConstValue *v);
+		virtual void visitStructType(StructType *s);
 };
 
 }

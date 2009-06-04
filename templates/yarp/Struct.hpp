@@ -2,6 +2,8 @@
 #ifndef <!upperCompName!>_STRUCT_HPP
 #define <!upperCompName!>_STRUCT_HPP
 
+#include <string>
+
 <?
 for t in typesVect:
   if t.identifier() != IDSType.identifier():

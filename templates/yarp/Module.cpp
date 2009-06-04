@@ -192,9 +192,13 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
   <!serviceInfo.inputTypeCpp!> in_<!serviceInfo.inputName!> = RqstReader::readRqstInput<<!serviceInfo.inputTypeCpp!>>(command);
 <?
   if service.hasCodel("control"):
-	?>
+    codelLock(service.codel("control"), service)
+    ?>
   // call real control codel
   int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
+<?
+    codelRelease(service.codel("control"), service)
+    ?>
   if(res < 0) { // error
     string r = "<!service.name!> : " + errorString(res);
     cout << r << endl;
@@ -212,13 +216,23 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
 	for incomp in service.incompatibleServices():
 	  print "  m_data->kill" + incomp + "Services();" 
 
-  if len(service.inputs()) > 1:
+  if len(service.inputs()) > 1: 
+    ?>
+  m_data->idsMutex.acquire_write();
+<?
     for i in service.inputs():
-      if i.type == ServiceInputKind.IDSMember:
-	print "  m_data->" + i.identifier + " = input." + i.identifier + ";" 
+      if i.type == ServiceInputKind.IDSMember: ?>
+  m_data-><!i.identifier!> = input.<!i.identifier!>; 
+<?
+    ?>
+  m_data->idsMutex.release();
+<?
   elif serviceInfo.inputFlag:
-    if service.inputs()[0].kind == ServiceInputKind.IDSMember:
-      print "  m_data->" + serviceInfo.inputName + " = in_" + serviceInfo.inputName + ";" 
+    if service.inputs()[0].kind == ServiceInputKind.IDSMember: ?>
+  m_data->idsMutex.acquire_write();
+  m_data-><!serviceInfo.inputName!> = in_<!serviceInfo.inputName!>; 
+  m_data->idsMutex.release();
+<?
   ?>
 
 <?

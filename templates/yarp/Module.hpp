@@ -33,6 +33,9 @@ for s in servicesMap:
     print "  void kill" + s.data().name + "Services();"
 ?>
   
+  // Locks
+  ACE_RW_Mutex idsMutex;
+
   // members of the ids
 <?
 t = comp.IDSType.unalias()
@@ -41,6 +44,7 @@ if t.kind() == IdlKind.Struct:
   for m in s.members():
      print "  " + MapTypeToCpp(m.data()) + " " + m.key() + ";"
 ?>
+
   // Data ports
 <?
 for port in inports:

@@ -101,24 +101,14 @@ bool <!service.name!>Service::step()
 int <!service.name!>Service::<!c.key()!>()
 {
 <?
-    for p in codel.inPorts:
-      ?>
-  m_data-><!p!>_inport.wait();
-<?
+    codelLock(codel, service)
     ?>
   // call the user codel
   int res = <!real_codel_call(codel, "m_data->", service)!>;
 
-  // update ports
+  // update ports, release locks, etc
 <?
-    for p in codel.outPorts:
-      print "  m_data->" + p + "_outport.exportData();"  
-    ?>
-<?
-    for p in codel.inPorts:
-      ?>
-  m_data-><!p!>_inport.post();
-<?
+    codelRelease(codel, service);
     ?>
   return res;
 }

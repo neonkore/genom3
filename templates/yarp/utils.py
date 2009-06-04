@@ -132,7 +132,7 @@ def real_codel_signature(codel, service=None):
 
   for type in codel.inTypes:
     idstype = comp.typeFromIdsName(type);
-    proto += pointerTo(idstype) + " in_" + type + ", ";
+    proto += "const " + pointerTo(idstype) + " in_" + type + ", ";
   for type in codel.outTypes:
     idstype = comp.typeFromIdsName(type);
     proto += pointerTo(idstype) + " out_" + type + ", ";
@@ -171,3 +171,33 @@ def createErrorList():
   return set(l)
 errorList = createErrorList();
 
+def codelNeedsLock(codel, service):
+  if codel.outTypes:
+    return 2
+  elif service.output.identifier and service.output.kind == ServiceInputKind.IDSMember:
+    return 2
+  elif codel.inTypes:
+    return 1
+  else:
+    for i in service.inputs():
+      if i.kind == ServiceInputKind.IDSMember:
+	return 1
+    return 0
+
+def codelLock(codel, service):
+    for p in codel.inPorts:
+      print "  m_data->" + p + "_inport.wait();"
+    res = codelNeedsLock(codel, service)
+    if res == 2:
+      print "  m_data->idsMutex.acquire_write();"
+    elif res == 1:
+      print "  m_data->idsMutex.acquire_read();"
+
+def codelRelease(codel, service):
+    for p in codel.outPorts:
+      print "  m_data->" + p + "_outport.exportData();"  
+    for p in codel.inPorts:
+      print "  m_data->" + p + "_inport.post();"
+    res = codelNeedsLock(codel, service)
+    if res:
+      print "  m_data->idsMutex.release();"

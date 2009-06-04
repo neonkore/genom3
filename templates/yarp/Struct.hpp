@@ -4,7 +4,10 @@
 
 <?
 for t in typesVect:
-  print MapTypeToC(t) + ";\n"
+  if t.identifier() != IDSType.identifier():
+    print MapTypeToC(t) + ";\n"
+
+print MapTypeToC(IDSType) + ";\n"
 ?>
 
 #endif

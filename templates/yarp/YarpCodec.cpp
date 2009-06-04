@@ -9,10 +9,14 @@ def encodeSimpleType(type, name):
 def encodeType(t, name):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
     encodeType(t.unalias(), name)
-  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong :
+  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
     encodeSimpleType("int", name)
-  elif t.kind() == IdlKind.Double or t.kind() == IdlKind.Float:
+  elif  t.kind() == IdlKind.ULong:
+    encodeSimpleType("unsigned int", name)    
+  elif t.kind() == IdlKind.Double:
     encodeSimpleType("double", name)
+  elif t.kind() == IdlKind.Float:
+    encodeSimpleType("float", name)
   elif t.kind() == IdlKind.String:
     encodeSimpleType("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
@@ -51,10 +55,14 @@ def decodeSimpleType(type, name):
 def decodeType(t, name):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
     decodeType(t.unalias(), name)
-  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong : 
+  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
     decodeSimpleType("int", name)
-  elif t.kind() == IdlKind.Double or t.kind() == IdlKind.Float:
+  elif  t.kind() == IdlKind.ULong:
+    decodeSimpleType("unsigned int", name)    
+  elif t.kind() == IdlKind.Double:
     decodeSimpleType("double", name)
+  elif t.kind() == IdlKind.Float:
+    decodeSimpleType("float", name)
   elif t.kind() == IdlKind.String: 
     decodeSimpleType("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char:
@@ -107,10 +115,14 @@ def printSimpleType(type, name):
 def printType(t, name):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
     printType(t.unalias(), name)
-  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.ULong : 
+  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
     printSimpleType("int", name)
-  elif t.kind() == IdlKind.Double or t.kind() == IdlKind.Float:
+  elif  t.kind() == IdlKind.ULong:
+    printSimpleType("unsigned int", name)    
+  elif t.kind() == IdlKind.Double:
     printSimpleType("double", name)
+  elif t.kind() == IdlKind.Float:
+    printSimpleType("float", name)
   elif t.kind() == IdlKind.String:
     printSimpleType("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 

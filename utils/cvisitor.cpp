@@ -79,6 +79,7 @@ void CVisitor::visitBaseType(BaseType *base)
 		case IdlType::UShort:
 			m_out << "unsigned short"; break;
 		case IdlType::ULong:
+			m_out << "unsigned int"; break;
 		case IdlType::ULongLong:
 			m_out << "unsigned long"; break;
 		case IdlType::Float:

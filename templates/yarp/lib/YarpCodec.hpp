@@ -118,6 +118,28 @@ namespace GenomYarp {
     }
     
   };
+
+  template <> class YarpCodec<unsigned int>{
+    
+  public:
+    static int encode  (yarp::os::Bottle* b,const unsigned int& v){
+      b->addInt(v);
+      return 0;
+    }
+    static int decode (const yarp::os::Bottle *b, unsigned int& v,int it){
+      if (!b->get(it).isInt())
+	throw YarpCodecExceptionInt();
+      
+      v = b->get(it).asInt();
+      it++;
+      return it;
+    }
+    static int print  (const unsigned int &v){
+      std::cout << v ;
+      return 0;
+    }
+    
+  };
   
   template <> class YarpCodec<char>{
     
@@ -177,10 +199,28 @@ namespace GenomYarp {
       std::cout << v ;
 	  return 0;
     }
-
   };
-  
 
+  template <> class YarpCodec<float>{
+  public:
+    static int encode (yarp::os::Bottle* b,const float& v){
+      b->addDouble(v);
+      return 0;
+    }
+    static int decode (const yarp::os::Bottle *b,float& v,int it){
+      if (!b->get(it).isDouble())
+	throw YarpCodecExceptionDouble();
+
+      v = (float) b->get(it).asDouble();
+      it++;
+      return it;
+    }
+    
+    static int print  (const float& v){
+      std::cout << v ;
+	  return 0;
+    }
+  };
   
   template<> class YarpCodec <std::string> {
   public:

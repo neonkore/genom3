@@ -56,7 +56,7 @@ if currentTask.hasCodel("init"):
 <?
 if currentTask.hasCodel("end"):
   ?>
-bool <!comp.name()!><!currentTaskName!>::threadRelease()
+void <!comp.name()!><!currentTaskName!>::threadRelease()
 {
   // call user init func
   int res = <!real_codel_call(currentTask.codel("end"))!>;

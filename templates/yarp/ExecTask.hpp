@@ -35,7 +35,7 @@ class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>, p
     virtual bool threadInit();
 <?
 if currentTask.hasCodel("end"): ?>
-    virtual bool threadRelease();
+    virtual void threadRelease();
 <?
 ?>
     virtual void onRead(yarp::os::Bottle& b);

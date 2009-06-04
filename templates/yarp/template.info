@@ -10,8 +10,9 @@ main:
   "Test.cpp" -> "$$Test.cpp"
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
-  "CMakeLists.txt"
+/*  "CMakeLists.txt" */
   "Struct.hpp" -> "$$Struct.hpp"
+  "UserStruct.hpp" -> "$$UserStruct.hpp"
   "lib/DataServer.hpp" -> "lib/DataServer.hpp"
   "lib/OutPort.hpp" -> "lib/OutPort.hpp"
   "lib/RepliesWriter.hpp" -> "lib/RepliesWriter.hpp"

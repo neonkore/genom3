@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from string import upper
 
-IDSType = comp.IDSType
+IDSType = comp.IDSType.unalias()
 servicesMap = comp.servicesMap()
 tasksMap = comp.tasksMap()
 typesVect = comp.typesVect()
@@ -18,6 +18,12 @@ def inputType(i):
     return comp.typeFromIdsName(i.identifier)
   else:
     return i.type
+
+def addressOf(t, s):
+  if t.kind() == IdlKind.String:
+    return s
+  else:
+    return "&" + s
 
 # returns a flat list of the structure of a type
 def flatStruct(t, name, separator = "_"):
@@ -103,10 +109,17 @@ for s in servicesMap:
 def real_codel_call(codel, data_prefix="", service=None):
   proto = ""
   if service is not None:
+    inputPrefix = ""
+    if len(service.inputs()) > 1:
+	serviceInfo = services_info_dict[service.name]
+	inputPrefix = serviceInfo.inputName + "."
     for i in service.inputs():
-	proto += " &in_" + i.identifier + ", ";
+	if inputPrefix:
+	    proto += addressOf(inputType(i), "in_" + inputPrefix + i.identifier) + ", "
+	else:
+	    proto += "in_" + i.identifier + ", "
     if service.output.identifier:
-	proto += " &out_" + service.output.identifier + ", "; 
+	proto += " out_" + service.output.identifier + ", "
 
   for type in codel.inTypes:
     proto += "& " + data_prefix + type + ", ";
@@ -201,3 +214,4 @@ def codelRelease(codel, service):
     res = codelNeedsLock(codel, service)
     if res:
       print "  m_data->idsMutex.release();"
+

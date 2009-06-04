@@ -15,10 +15,8 @@ def encodeType(t, name):
     encodeSimpleType("double", name)
   elif t.kind() == IdlKind.String:
     encodeSimpleType("string", name)
-  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: ?>
-    b->add(new yarp::os::Value((void *)<!name!>, 1));
-    ++it;
-<?
+  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
+    encodeSimpleType("char", name)
   elif t.kind() == IdlKind.Enum: ?>
   {
     int tmp = (int) <!name!>;
@@ -29,14 +27,12 @@ def encodeType(t, name):
 <?
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
-    seqType = MapTypeToC(s.seqType())
+    seqType = MapTypeToC(s.seqType(), True)
     encodeSimpleType("int", name + ".length") 
     ?>
     // data
-    for(int j=0; j < <!name!>.length; ++j) {<?
-    encodeType(s.seqType(), name + ".data[j]")
-    ?>
-    }
+    for(int j=0; j < <!name!>.length; ++j)
+      it = YarpCodec<<!seqType!>>::encode(b, <!name!>.data[j]);
 <?
 
 def decodeSimpleType(type, name):
@@ -61,10 +57,8 @@ def decodeType(t, name):
     decodeSimpleType("double", name)
   elif t.kind() == IdlKind.String: 
     decodeSimpleType("string", name)
-  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: ?>
-    <!name!> = *(b->get(it).asBlob());
-    it++;
-<?
+  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char:
+    decodeSimpleType("char", name)
   elif t.kind() == IdlKind.Enum: 
     e = t.asEnumType()
     ?>
@@ -96,10 +90,11 @@ def decodeType(t, name):
     decodeSimpleType("int", name + ".length")
     ?>
     // data
-    for(int j=0; j < <!name!>.length; ++j) {<?
-    decodeType(s.seqType(), name + ".data[j]")
-    ?>
-    }
+    if(<!name!>.data)
+      delete[] <!name!>.data;
+    <!name!>.data = new <!seqType!>[v.length];
+    for(int j=0; j < <!name!>.length; ++j)
+      it = YarpCodec<<!seqType!>>::decode(b, <!name!>.data[j], it);
 <?
 
 def printSimpleType(type, name):
@@ -118,9 +113,8 @@ def printType(t, name):
     printSimpleType("double", name)
   elif t.kind() == IdlKind.String:
     printSimpleType("string", name)
-  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: ?>
-      std::cout << "<!name!>" << " Binary-Non-Printable" << std::endl;
-<?
+  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
+    printSimpleType("char", name)
   elif t.kind() == IdlKind.Enum: 
     e = t.asEnumType()
     ?>
@@ -136,13 +130,12 @@ def printType(t, name):
 <?
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
+    seqType = MapTypeToC(s.seqType(), True)
     printSimpleType("int", name + ".length")
     ?>
     // data
-    for(int j=0; j < <!name!>.length; ++j) {<?
-    printType(s.seqType(), name + ".data[j]")
-    ?>
-    }
+    for(int j=0; j < <!name!>.length; ++j)
+      YarpCodec<<!seqType!>>::print(<!name!>.data[j]);
 <?
 ?>
 

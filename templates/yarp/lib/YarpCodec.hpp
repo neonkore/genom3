@@ -119,6 +119,28 @@ namespace GenomYarp {
     
   };
   
+  template <> class YarpCodec<char>{
+    
+  public:
+    static int encode  (yarp::os::Bottle* b,const char& v){
+      b->addInt(v);
+      return 0;
+    }
+    static int decode (const yarp::os::Bottle *b,char& v,int it){
+      if (!b->get(it).isInt())
+	throw YarpCodecExceptionInt();
+      
+      v = (char)b->get(it).asInt();
+      it++;
+      return it;
+    }
+    static int print  (const char &v){
+      std::cout << v ;
+      return 0;
+    }
+    
+  };
+
   template <> class YarpCodec<VoidIO>{
     
   public:

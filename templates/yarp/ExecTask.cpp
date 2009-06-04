@@ -40,7 +40,7 @@ else:?>
 bool <!comp.name()!><!currentTaskName!>::threadInit()
 {
     m_request_port.open("/<!comp.name()!>/Services/<!currentTaskName!>");
-    m_reply_port.open("/<!comp.name()!>/Services/Replies/<!currentTaskName!>");
+//     m_reply_port.open("/<!comp.name()!>/Services/Replies/<!currentTaskName!>");
     m_request_port.useCallback(*this);
 
 <?
@@ -93,6 +93,20 @@ void <!comp.name()!><!currentTaskName!>::onRead(yarp::os::Bottle& command)
 
     std::cout << "<!currentTaskName!>: Received request from " << client_name
 	<< ", id=" << rqst_id << ", service=" << request_name << std::endl;
+
+    if(m_reply_ports.find(client_name) == m_reply_ports.end()) {
+	// unknwon client, create the reply port and connect it
+	string port_name = "/<!comp.name()!>/Services/Replies/<!currentTaskName!>/" + client_name;
+	string client_port_name = client_name + "/<!comp.name()!>/Services/Replies/<!currentTaskName!>";
+
+	m_reply_ports[client_name] = new RequestPort();
+	m_reply_ports[client_name]->open(port_name.c_str());
+	if(!Network::connect(port_name.c_str(), client_port_name.c_str())) {
+	    cout << "Impossible to connect to client " << client_name << " reply port. Aborting." << endl;
+	    return;
+	}
+    }
+
 <?
 first = True
 for s in servicesMap:
@@ -113,7 +127,7 @@ for s in servicesMap:
     else {     // wrong request name
 	string r = "No such service: "  + request_name;
 	cout << r << endl;
-	ReplyWriter<VoidIO>::send(m_reply_port, client_name, rqst_id, request_name, r, 0);
+	ReplyWriter<VoidIO>::send(*m_reply_ports[client_name], client_name, rqst_id, request_name, r, 0);
     }
 }
 
@@ -141,7 +155,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   if(res < 0) { // error
     string r = "<!service.name!>: " + errorString(res);
     cout << r << endl;
-    ReplyWriter<VoidIO>::send(m_reply_port, clientName, rqst_id, "<!service.name!>", r, 0);    
+    ReplyWriter<VoidIO>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", r, 0);    
     return true;
   }
 <?
@@ -166,7 +180,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   ?>
 
   // create the activity
-  <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data, rqst_id, clientName, m_reply_port <!args!>));
+  <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data, rqst_id, clientName, *m_reply_ports[clientName] <!args!>));
   m_data-><!service.name!>Services.push_back(s);
 
   // send first reply

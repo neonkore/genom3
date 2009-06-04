@@ -89,7 +89,7 @@ for p in inports: ?>
 <?
 ?>
     m_request_port.open("/<!comp.name()!>/Services/Control");
-    m_reply_port.open("/<!comp.name()!>/Services/Replies/Control");
+//     m_reply_port.open("/<!comp.name()!>/Services/Replies/Control");
     m_request_port.useCallback(*this);
 
     // create exec task and start them
@@ -139,6 +139,21 @@ void <!comp.name()!>Module::onRead(Bottle& command)
     string request_name  = RqstReader::readRequestName(command);
 
     std::cout << "Control: Received request from " << client_name << ", id=" << rqst_id << ", service=" << request_name << std::endl;
+
+    if(m_reply_ports.find(client_name) == m_reply_ports.end()) {
+	// unknwon client, create the reply port and connect it
+	string port_name = "/<!comp.name()!>/Services/Replies/Control/" + client_name;
+	string client_port_name = client_name + "/<!comp.name()!>/Services/Replies/Control";
+
+	m_reply_ports[client_name] = new RequestPort();
+	m_reply_ports[client_name]->open(port_name.c_str());
+	if(!Network::connect(port_name.c_str(), client_port_name.c_str())) {
+	    cout << "Impossible to connect to client " << client_name << " reply port. Aborting." << endl;
+	    return;
+	}
+    }
+
+
 <?
 first = True
 for s in servicesMap:
@@ -159,7 +174,7 @@ for s in servicesMap:
     else {
       string r = "No such service: "  + request_name;
       cout << r << endl;
-      ReplyWriter<VoidIO>::send(m_reply_port, client_name, rqst_id, request_name, r, 0);
+      ReplyWriter<VoidIO>::send(*m_reply_ports[client_name], client_name, rqst_id, request_name, r, 0);
     }
 }
 
@@ -183,7 +198,7 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
   if(res < 0) { // error
     string r = "<!service.name!> : " + errorString(res);
     cout << r << endl;
-    ReplyWriter<VoidIO>::send(m_reply_port, clientName, rqst_id, "<!service.name!>", r, 0);    
+    ReplyWriter<VoidIO>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", r, 0);    
   }
 <?
   ?>
@@ -208,10 +223,10 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
 
 <?
   if serviceInfo.outputFlag: ?>
-  ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_request_port, clientName, rqst_id, "<!service.name!>", "OK", &m_data-><!serviceInfo.outputName!>);    
+  ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", "OK", &m_data-><!serviceInfo.outputName!>);    
 <?
   else: ?>
-  ReplyWriter<VoidIO>::send(m_reply_port, clientName, rqst_id, "<!service.name!>", "OK", 0);    
+  ReplyWriter<VoidIO>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", "OK", 0);    
 <?
   ?>
   return true;

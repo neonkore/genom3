@@ -9,9 +9,10 @@
 #define CMPNT_STRUCT_HPP
 
 #include <iostream>
-#include <yarp/os/all.h>
+#include <map>
+#include <string>
 
-#include <list>
+#include <yarp/os/all.h>
 
 namespace GenomYarp {
 
@@ -23,7 +24,17 @@ namespace GenomYarp {
     int n;
   } VoidIO;
 
-};
+  typedef yarp::os::BufferedPort<yarp::os::Bottle> RequestPort;
+  class RequestPortMap : public std::map<std::string, RequestPort*>
+  {
+    public:
+	~RequestPortMap()
+	{
+	    for(iterator it = begin(); it != end(); ++it)
+	      delete it->second;
+	}
+  };
 
+}
 
 #endif 

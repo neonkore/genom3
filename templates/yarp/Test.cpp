@@ -84,16 +84,16 @@ for port in inports:
 {
     Control_req_port.open("/<!comp.name()!>/Test/Services/Control");
     Network::connect("/<!comp.name()!>/Test/Services/Control", "/<!comp.name()!>/Services/Control");
-    Control_reply_port.open("/<!comp.name()!>/Test/Services/Replies/Control");
-    Network::connect("/<!comp.name()!>/Services/Replies/Control", "/<!comp.name()!>/Test/Services/Replies/Control");
+    Control_reply_port.open("/<!comp.name()!>/Test/<!comp.name()!>/Services/Replies/Control");
+//     Network::connect("/<!comp.name()!>/Services/Replies/Control", "/<!comp.name()!>/Test/Services/Replies/Control");
 <?
 for t in tasksMap:
   task = t.data()
   ?>
     <!task.name!>_req_port.open("/<!comp.name()!>/Test/Services/<!task.name!>");
     Network::connect("/<!comp.name()!>/Test/Services/<!task.name!>", "/<!comp.name()!>/Services/<!task.name!>");
-    <!task.name!>_reply_port.open("/<!comp.name()!>/Test/Services/Replies/<!task.name!>");
-    Network::connect("/<!comp.name()!>/Services/Replies/<!task.name!>", "/<!comp.name()!>/Test/Services/Replies/<!task.name!>");
+    <!task.name!>_reply_port.open("/<!comp.name()!>/Test/<!comp.name()!>/Services/Replies/<!task.name!>");
+//     Network::connect("/<!comp.name()!>/Services/Replies/<!task.name!>", "/<!comp.name()!>/Test/Services/Replies/<!task.name!>");
     <!task.name!>_reply_port.useCallback(<!task.name!>Reader);
 <?
 for port in outports: ?>
@@ -163,6 +163,9 @@ void run<!service.name!>()
   if service.type == ServiceType.Control:
     ?>
       RqstWriter<<!serviceInfo.requestType!>>::send(Control_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
+      while(!Control_reply_port.getInputCount()) // wait for the connection to be made
+	usleep(50);
+
       ReplyAnswer<<!serviceInfo.replyType!>> answer(Control_reply_port.read());
       cout << "Final reply: " << answer;
 <?

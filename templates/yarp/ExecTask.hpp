@@ -12,6 +12,8 @@ else:
 #include <string>
 #include <yarp/os/all.h>
 
+#include "lib/Struct.hpp"
+
 class <!comp.name()!>ControlData;
 
 // forward declaration of user codels
@@ -53,8 +55,8 @@ for s in servicesMap:
     private:
       <!comp.name()!>ControlData *m_data;
       // Request port
-      yarp::os::BufferedPort<yarp::os::Bottle> m_request_port;
-      yarp::os::BufferedPort<yarp::os::Bottle> m_reply_port;
+      GenomYarp::RequestPort m_request_port;
+      GenomYarp::RequestPortMap m_reply_ports;
 };
 
 #endif

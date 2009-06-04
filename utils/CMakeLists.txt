@@ -7,6 +7,7 @@ set(genutils_SRCS
   dumptypes.cpp
   idlvisitor.cpp
   cvisitor.cpp
+  cppvisitor.cpp
   corbacppvisitor.cpp
 )
 

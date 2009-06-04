@@ -32,6 +32,7 @@
 #include "utils/idltype.h"
 #include "utils/idlvalues.h"
 #include "utils/cvisitor.h"
+#include "utils/cppvisitor.h"
 #include "utils/idlvisitor.h"
 #include "utils/corbacppvisitor.h"
 
@@ -44,7 +45,12 @@ std::string MapTypeToC(IdlType::Ptr t, bool declOnly=false)
 	return CVisitor::mapTypeToC(t, declOnly);
 }
 
-std::string MapTypeToCpp(IdlType::Ptr t, bool declOnly=false, bool isOutType = false)
+std::string MapTypeToCpp(IdlType::Ptr t, bool declOnly=false)
+{
+	return CppVisitor::mapTypeToCpp(t, declOnly);
+}  
+
+std::string MapTypeToCorbaCpp(IdlType::Ptr t, bool declOnly=false, bool isOutType = false)
 {
 	return CorbaCppVisitor::mapTypeToCpp(t, declOnly, isOutType);
 }  
@@ -65,13 +71,15 @@ std::string MapValueToCpp(ConstValue *v)
 } 
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1,2)
-BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1,3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1,2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCorbaCppOverloads, MapTypeToCorbaCpp, 1,3)
 
 void export_idl()
 {
 	def("MapTypeToC", &MapTypeToC, MapTypeToCOverloads());
-	def("MapValueToC", &MapValueToC);
 	def("MapTypeToCpp", &MapTypeToCpp, MapTypeToCppOverloads());
+	def("MapValueToC", &MapValueToC);
+	def("MapTypeToCorbaCpp", &MapTypeToCorbaCpp, MapTypeToCorbaCppOverloads());
 	def("MapValueToCpp", &MapValueToCpp);
 	def("MapTypeToIdl", &MapTypeToIdl);
 

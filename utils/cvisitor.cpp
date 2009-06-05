@@ -133,11 +133,12 @@ void CVisitor::visitFixedType(FixedType *fixed)
 
 void CVisitor::visitStructType(StructType *s)
 {
-	m_out << "struct " + s->identifier();
-	if(m_declOnly)
+	if(m_declOnly) {
+		m_out << s->identifier();
 		return;
+	}
 
-	m_out << "{" << endl;
+	m_out << "typedef struct " + s->identifier() << "{" << endl;
 	string oldIndent = m_indent;
 	m_indent += INDENT_QUANTUM;
 
@@ -160,7 +161,7 @@ void CVisitor::visitStructType(StructType *s)
 		m_out << ";" << endl;
 	}
 	m_indent = oldIndent;
-	m_out << m_indent << "}";
+	m_out << m_indent << "} " << s->identifier();
 }
 
 void CVisitor::visitTypedefType(TypedefType *t)
@@ -177,10 +178,12 @@ void CVisitor::visitTypedefType(TypedefType *t)
 
 void CVisitor::visitEnumType(EnumType *e)
 {
-	m_out << "enum " << e->identifier();
-	if(m_declOnly)
-	  return;
+	if(m_declOnly) {
+		m_out << e->identifier();
+		return;
+	}
 
+	m_out << " typedef enum " << e->identifier();
 	m_out << "{" << endl << m_indent << INDENT_QUANTUM;
 	bool first = true;
 	std::vector<std::string>::const_iterator it;
@@ -192,7 +195,7 @@ void CVisitor::visitEnumType(EnumType *e)
 
 		m_out << *it;
 	}
-	m_out << endl << m_indent << "}" << endl;
+	m_out << endl << m_indent << "} " << e->identifier() << endl;
 }
 
 void CVisitor::visitArrayType(ArrayType *a)

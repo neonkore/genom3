@@ -46,10 +46,10 @@ class CppVisitor : public CVisitor
 		static std::string mapTypeToCpp(IdlType::Ptr t, bool declOnly=false);
 		static std::string mapValueToCpp(ConstValue *v);
 
-		virtual void visitStringType(StringType*);
-		virtual void visitWStringType(WStringType*);
+// 		virtual void visitStringType(StringType*);
+// 		virtual void visitWStringType(WStringType*);
 		virtual void visitConstValue(ConstValue *v);
-		virtual void visitStructType(StructType *s);
+// 		virtual void visitStructType(StructType *s);
 };
 
 }

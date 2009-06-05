@@ -13,6 +13,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <string.h>
 
 namespace GenomYarp {
 
@@ -229,12 +230,27 @@ namespace GenomYarp {
       b->addString(v.c_str());
       return 0;
     } 
+
+    static    int encode(yarp::os::Bottle* b, const char* v){
+      b->addString(v);
+      return 0;
+    } 
     
     static    int decode(const yarp::os::Bottle *b,std::string& v, int it){
       if (!b->get(it).isString())
 	throw YarpCodecExceptionString();
       
       v = b->get(it).asString().c_str();
+      it++;
+      return it;
+    }
+
+    static    int decode(const yarp::os::Bottle *b,char *v, int it){
+      if (!b->get(it).isString())
+	throw YarpCodecExceptionString();
+      
+      yarp::os::ConstString s = b->get(it).asString();
+      strncpy(v, s.c_str(),s.length());
       it++;
       return it;
     }

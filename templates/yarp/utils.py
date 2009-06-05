@@ -21,7 +21,7 @@ def inputType(i):
 
 def addressOf(t, s):
  if t.kind() == IdlKind.String:
-   return s + ".c_str()"
+   return s
  else:
     return "&" + s
 

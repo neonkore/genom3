@@ -47,7 +47,7 @@ bool <!comp.name()!><!currentTaskName!>::threadInit()
 if currentTask.hasCodel("init"):
   ?>
   // call user init func
-  int res = <!real_codel_call(currentTask.codel("init"))!>;
+  int res = <!real_codel_call(currentTask.codel("init"), "m_data->")!>;
   return (res >= 0); // error
 <?
 ?>
@@ -59,8 +59,7 @@ if currentTask.hasCodel("end"):
 void <!comp.name()!><!currentTaskName!>::threadRelease()
 {
   // call user init func
-  int res = <!real_codel_call(currentTask.codel("end"))!>;
-  return (res >= 0); // error
+  <!real_codel_call(currentTask.codel("end"), "m_data->")!>;
 }
 <?
 ?>
@@ -139,8 +138,12 @@ for s in servicesMap:
     continue
   serviceInfo = services_info_dict[service.name]
   args = ""
-  for i in service.inputs():
-    args += ", in_" + i.identifier
+  if len(service.inputs()) > 1:
+    for i in service.inputs():
+      args += ", in_" + serviceInfo.inputName + "." + i.identifier
+  else:
+    for i in service.inputs():
+      args += ", in_" + i.identifier
   ?>
 bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command)
 {
@@ -180,7 +183,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
 	print "  m_data->" + i.identifier + " = input." + i.identifier + ";" 
   elif serviceInfo.inputFlag:
     if service.inputs()[0].kind == ServiceInputKind.IDSMember:
-      print "  m_data->" + serviceInfo.inputName + " = input;" 
+      print "  m_data->" + serviceInfo.inputName + " = in_" + serviceInfo.inputName + ";" 
   ?>
 
   // create the activity

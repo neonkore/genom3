@@ -40,10 +40,15 @@ def flatStruct(t, name, separator = "_"):
 	return [(t, name)]  
 
 def inputList(service):
+  serviceInfo = services_info_dict[service.name]
   res = []
-  for i in service.inputs():
-    res.extend(flatStruct(inputType(i), i.identifier, '.'))
-  return res
+  if len(service.inputs()) > 1:
+    for i in service.inputs():
+      res.extend(flatStruct(inputType(i), serviceInfo.inputName + "." + i.identifier, '.'))
+    return res
+  elif serviceInfo.inputFlag:
+    return flatStruct(serviceInfo.inputType, serviceInfo.inputName, '.')
+  return []
 
 outports = []
 inports = []

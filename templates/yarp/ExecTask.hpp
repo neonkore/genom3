@@ -16,14 +16,6 @@ else:
 
 class <!comp.name()!>ControlData;
 
-// forward declaration of user codels
-<?
-if currentTask.hasCodel("init"):
-    print "int " + real_codel_signature(currentTask.codel("init")) + ";"
-if currentTask.hasCodel("end"):
-    print "int " + real_codel_signature(currentTask.codel("end")) + ";"
-?>
-
 class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>, public yarp::os::TypedReaderCallback<yarp::os::Bottle>
 {
     public:

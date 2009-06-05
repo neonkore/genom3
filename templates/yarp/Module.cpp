@@ -14,6 +14,7 @@ for t in tasksMap:
 using namespace yarp::os;
 
 // forward declaration of user codels
+extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
@@ -22,6 +23,7 @@ for s in servicesMap:
   if service.hasCodel("control"):
     print "int " + real_codel_signature(service.codel("control"), service) + ";"
 ?>
+}
 
 // helper function for codel calls
 std::string errorString(int err)

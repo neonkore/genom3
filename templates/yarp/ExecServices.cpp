@@ -7,6 +7,7 @@
 using namespace GenomYarp;
 
 // forward declaration of user codels
+extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
@@ -15,6 +16,7 @@ for s in servicesMap:
       if c.key() != "control":
 	print "int " + real_codel_signature(c.data(), service) + ";"
 ?>
+}
 
 <?
 for s in comp.servicesMap():

@@ -1,9 +1,11 @@
 <?
 def parseInput(type, name):
   if type.kind() == IdlKind.Enum:?>
+  {
       int tmp;
       cin >> tmp;
       <!name!> = (<!MapTypeToCpp(type, True)!>) tmp;
+  }
 <?
   else: ?>
       cin >> <!name!>;
@@ -144,14 +146,16 @@ for s in servicesMap:
   ?>
 void run<!service.name!>()
 {
-  static int rqst_id = 0;
+    static int rqst_id = 0;
 <?
-  for i in service.inputs():
-    print "      " + MapTypeToCpp(inputType(i), True) + " " + i.identifier + ";";
-  if service.output.identifier and service.type == ServiceType.Control:
-    print "      " + MapTypeToCpp(inputType(service.output), True) + " " + service.output.identifier + ";";
   if not serviceInfo.inputFlag: ?>
       VoidIO input; // fake input object for the rqst writer
+<?
+  else: ?>
+    <!serviceInfo.inputTypeCpp!> <!serviceInfo.inputName!>;
+<?
+  if service.output.identifier and service.type == ServiceType.Control: ?>
+    <!serviceInfo.outputTypeCpp!> <!serviceInfo.outputName!>;
 <?
   for x in inputFlatList:
     t = MapTypeToCpp(x[0], True)

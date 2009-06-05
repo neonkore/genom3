@@ -12,6 +12,7 @@ using namespace GenomYarp;
 using namespace yarp::os;
 
 // forward declaration of user codels
+extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
@@ -19,7 +20,12 @@ for s in servicesMap:
     continue
   if service.hasCodel("control"):
     print "int " + real_codel_signature(service.codel("control"), service) + ";"
+if currentTask.hasCodel("init"):
+    print "int " + real_codel_signature(currentTask.codel("init")) + ";"
+if currentTask.hasCodel("end"):
+    print "int " + real_codel_signature(currentTask.codel("end")) + ";"
 ?>
+}
 
 <!comp.name()!><!currentTaskName!>::<!comp.name()!><!currentTaskName!>(<!comp.name()!>ControlData *data)
 <?

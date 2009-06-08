@@ -205,6 +205,7 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
     string r = "<!service.name!> : " + errorString(res);
     cout << r << endl;
     ReplyWriter<VoidIO>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", r, 0);    
+    return true;
   }
 <?
   ?>

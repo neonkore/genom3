@@ -250,7 +250,7 @@ namespace GenomYarp {
 	throw YarpCodecExceptionString();
       
       yarp::os::ConstString s = b->get(it).asString();
-      strncpy(v, s.c_str(),s.length());
+      strncpy(v, s.c_str(),s.length()+1);
       it++;
       return it;
     }

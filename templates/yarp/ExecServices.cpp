@@ -6,6 +6,8 @@
 
 using namespace GenomYarp;
 
+std::string errorString(int err);
+
 // forward declaration of user codels
 extern "C" {
 <?
@@ -85,6 +87,12 @@ bool <!service.name!>Service::step()
     ?>
     case <!upper(service.name)!>_<!upper(c.key())!>:
       m_status = <!c.key()!>();
+      if(m_status < 0) { // error
+	string r = "<!service.name!> : " + errorString(res);
+	cout << r << endl;
+	ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", r, 0);    
+	return true;
+      }
       return true;
 <?
   ?>

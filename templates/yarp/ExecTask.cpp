@@ -75,7 +75,7 @@ void <!comp.name()!><!currentTaskName!>::run()
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type != ServiceType.Exec or service.taskName != currentTaskName:
+  if service.type == ServiceType.Control or service.taskName != currentTaskName:
     continue
   serviceInfo = services_info_dict[service.name]
   ?>

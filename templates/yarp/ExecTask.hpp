@@ -1,9 +1,5 @@
 <?
 currentTask = comp.task(currentTaskName)
-if not currentTask.period:
-  taskBaseClass = "Thread"
-else:
-  taskBaseClass = "RateThread"
 ?>
 
 #ifndef <!upperCompName!>_<!upper(currentTaskName)!>_HPP
@@ -16,7 +12,7 @@ else:
 
 class <!comp.name()!>ControlData;
 
-class <!comp.name()!><!currentTaskName!> : public yarp::os::<!taskBaseClass!>, public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+class <!comp.name()!><!currentTaskName!> : public yarp::os::RateThread, public yarp::os::TypedReaderCallback<yarp::os::Bottle>
 {
     public:
       <!comp.name()!><!currentTaskName!>(<!comp.name()!>ControlData *data);

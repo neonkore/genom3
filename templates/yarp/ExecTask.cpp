@@ -33,7 +33,7 @@ if currentTask.period:?>
 : RateThread(<!currentTask.period!>), m_data(data)
 <?
 else:?>
-: Thread(), m_data(data)
+: RateThread(50), m_data(data)
 <?
 ?>
 {

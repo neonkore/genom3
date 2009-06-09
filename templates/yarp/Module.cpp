@@ -86,7 +86,14 @@ bool <!comp.name()!>Module::open(yarp::os::Searchable& config)
 for p in outports: ?>
     m_data-><!p.name!>_outport.open("/<!comp.name()!>/OutPorts/<!p.name!>");
 <?
-for p in inports: ?>
+for p in inports: 
+    if p.idlType.kind() == IdlKind.SequenceType: ?>
+    // initialize the inport
+    m_data-><!p.name!>_inport.wait();
+    m_data-><!p.name!>_inport.getDataPtr()->data = 0;
+    m_data-><!p.name!>_inport.post();
+<?
+    ?>
     m_data-><!p.name!>_inport.open("/<!comp.name()!>/InPorts/<!p.name!>");
 <?
 ?>

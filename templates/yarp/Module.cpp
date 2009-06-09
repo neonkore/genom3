@@ -126,7 +126,7 @@ for t in tasksMap:
 
 bool <!comp.name()!>Module::updateModule()
 {
-    return true;
+    return Module::updateModule();
 }
 
 bool <!comp.name()!>Module::respond(const Bottle &command, Bottle &reply)   

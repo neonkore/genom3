@@ -96,7 +96,7 @@ class Task
 
 		Task() {}
 		Task(const std::string id)
-		: name(id)
+		: name(id), period(0)
 		{}
 
 		void debug();

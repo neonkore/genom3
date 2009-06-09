@@ -99,13 +99,6 @@ for t in tasksMap:
     <!task.name!>_reply_port.useCallback(<!task.name!>Reader);
 <?
 for port in outports: ?>
-    if p.idlType.kind() == IdlKind.SequenceType: ?>
-    // initialize the inport
-    m_data-><!p.name!>_inport.wait();
-    m_data-><!p.name!>_inport.getDataPtr()->data = 0;
-    m_data-><!p.name!>_inport.post();
-<?
-    ?>
     <!port.name!>_inport.open("/<!comp.name()!>/Test/InPorts/<!port.name!>");
     Network::connect("/<!comp.name()!>/OutPorts/<!port.name!>", "/<!comp.name()!>/Test/InPorts/<!port.name!>");
 <?

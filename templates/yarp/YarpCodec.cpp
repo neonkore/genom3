@@ -97,9 +97,6 @@ def decodeType(t, name):
     seqType = MapTypeToCpp(s.seqType())
     decodeSimpleType("int", name + ".length")
     ?>
-    // data
-    if(<!name!>.data)
-      delete[] <!name!>.data;
     <!name!>.data = new <!seqType!>[<!name!>.length];
     for(int j=0; j < <!name!>.length; ++j)
       it = YarpCodec<<!seqType!>>::decode(b, <!name!>.data[j], it);
@@ -149,6 +146,16 @@ def printType(t, name):
     for(int j=0; j < <!name!>.length; ++j)
       YarpCodec<<!seqType!>>::print(<!name!>.data[j]);
 <?
+
+def freeType(t, name):
+  s = t.asSequenceType()
+  if t.kind() == IdlKind.Sequence:
+    seqType = MapTypeToCpp(s.seqType())
+    ?>
+      delete[] &<!name!>;
+      for(int j=0; j < <!name!>.length; ++j)
+	  YarpCodec<<!seqType!>>::freeAllocatedMemory(&<!name!>.data[j]);
+<?
 ?>
 
 #include "<!comp.name()!>YarpCodec.hpp"
@@ -191,5 +198,13 @@ int YarpCodec<<!typeName!>>::print (const <!typeName!>& v)
       return 1;
 }
 
+void YarpCodec<<!typeName!>>::freeAllocatedMemory(<!typeName!> *v) 
+{
+<?
+  flatList = flatStruct(t, "(*v)", ".")
+  for x in flatList:
+    freeType(x[0], x[1])
+  ?>
+}
 <?
 ?>

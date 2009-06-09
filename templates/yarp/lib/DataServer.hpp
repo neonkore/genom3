@@ -45,7 +45,7 @@ namespace GenomYarp{
       : yarp::os::BufferedPort<yarp::os::Bottle>()
     {
       
-      data       = new T_DATA()   ;
+      data = 0;
     };
     
     bool open(const char* name)
@@ -65,6 +65,11 @@ namespace GenomYarp{
     virtual void onRead(yarp::os::Bottle& b){
       
       dataSem.wait();
+      if(!data)
+	data = new T_DATA;
+      else // deallocate previously used memory
+	YarpCodec<T_DATA>::freeAllocatedMemory(data);
+
       YarpCodec<T_DATA>::decode(&b,*data,0);
       dataSem.post();
       

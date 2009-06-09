@@ -94,7 +94,8 @@ namespace GenomYarp {
     static int  encode (yarp::os::Bottle *b, const T_STRUCT& v);
     static int  decode (const yarp::os::Bottle *b, T_STRUCT& v,int it); 
     static int  print  (const T_STRUCT& v);
-
+    
+    static void freeAllocatedMemory(T_STRUCT *v);
   };
 
   
@@ -117,7 +118,8 @@ namespace GenomYarp {
       std::cout << v ;
       return 0;
     }
-    
+
+    static void freeAllocatedMemory(int *v) {}
   };
 
   template <> class YarpCodec<unsigned int>{
@@ -139,7 +141,8 @@ namespace GenomYarp {
       std::cout << v ;
       return 0;
     }
-    
+
+    static void freeAllocatedMemory(unsigned int *v) {}
   };
   
   template <> class YarpCodec<char>{
@@ -161,7 +164,8 @@ namespace GenomYarp {
       std::cout << v ;
       return 0;
     }
-    
+
+    static void freeAllocatedMemory(char *v) {}
   };
 
   template <> class YarpCodec<VoidIO>{
@@ -177,7 +181,8 @@ namespace GenomYarp {
       std::cout << "VoidIO" ;
       return 0;
     }
-    
+
+    static void freeAllocatedMemory(VoidIO *v) {}    
   };
 
   
@@ -200,6 +205,8 @@ namespace GenomYarp {
       std::cout << v ;
 	  return 0;
     }
+
+    static void freeAllocatedMemory(double *v) {}
   };
 
   template <> class YarpCodec<float>{
@@ -221,6 +228,8 @@ namespace GenomYarp {
       std::cout << v ;
 	  return 0;
     }
+
+    static void freeAllocatedMemory(float *v) {}
   };
   
   template<> class YarpCodec <std::string> {
@@ -259,7 +268,8 @@ namespace GenomYarp {
       std::cout << v ;
       return 0;
     }
-      
+
+    static void freeAllocatedMemory(std::string *v) {}
   };
 
 }

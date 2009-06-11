@@ -68,6 +68,8 @@ int main(int argc, char* argv[])
 			    "};\n"
 			    "enum essai { value1, value2 };\n"
 			    ;
+		} else if(arg == "testConst") {
+			s = "const long SPIX_PATH_MAX = 256;";
 		} else if (arg == "testFile") {
 			if (!d.parseFile("/home/ccpasteur/work/viam-genom-new/viam.gnm")) {
 				cout << "Error parsing file " << endl;

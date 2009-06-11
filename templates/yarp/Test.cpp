@@ -204,19 +204,26 @@ void read<!port.name!>()
 <?
 for port in inports:
   typeName = MapTypeToCpp(port.idlType)
-  ?>
+  if isDynamic(port.idlType): ?>
+void write<!port.name!>()
+{
+    cout << "Sorry, port contains dynamic data, cannot modify it" << endl;
+}
+<?
+  else: 
+    ?>
 void write<!port.name!>()
 {
   <!typeName!> *v = new <!typeName!>();
 <?
-  flatList = flatStruct(port.idlType, "(*v)", ".")
-  for x in flatList:
-    t = MapTypeToCpp(x[0], True)
-    ?>
+    flatList = flatStruct(port.idlType, "(*v)", ".")
+    for x in flatList:
+      t = MapTypeToCpp(x[0], True)
+      ?>
       cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?
-    parseInput(x[0], x[1]);
-  ?>
+      parseInput(x[0], x[1]);
+    ?>
 
   <!port.name!>_outport.exportData(v);
   cout << endl;

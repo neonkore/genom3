@@ -67,6 +67,11 @@ std::string MapValueToC(ConstValue *v)
 
 std::string MapValueToCpp(ConstValue *v)
 {
+	return CppVisitor::mapValueToCpp(v);
+} 
+
+std::string MapValueToCorbaCpp(ConstValue *v)
+{
 	return CorbaCppVisitor::mapValueToCpp(v);
 } 
 
@@ -81,6 +86,7 @@ void export_idl()
 	def("MapValueToC", &MapValueToC);
 	def("MapTypeToCorbaCpp", &MapTypeToCorbaCpp, MapTypeToCorbaCppOverloads());
 	def("MapValueToCpp", &MapValueToCpp);
+	def("MapValueToCorbaCpp", &MapValueToCorbaCpp);
 	def("MapTypeToIdl", &MapTypeToIdl);
 
 	class_<Literal>("Literal")

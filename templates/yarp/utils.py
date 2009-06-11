@@ -127,9 +127,9 @@ def real_codel_call(codel, ids_prefix="", service=None, allArgs = False):
 	proto += "& out_" + service.output.identifier + ", "
 
   for type in codel.inTypes:
-    proto += "& " + ids_prefix + type + ", ";
+    proto += addressOf(comp.typeFromIdsName(type), ids_prefix + type + ", ");
   for type in codel.outTypes:
-    proto += "& " + ids_prefix + type + ", ";
+    proto +=  addressOf(comp.typeFromIdsName(type), ids_prefix + type + ", ");
   for port in codel.outPorts:
     proto +=  ids_prefix + port + "_outport.data, "; 
   for port in codel.inPorts:
@@ -220,3 +220,16 @@ def codelRelease(codel, service):
     if res:
       print "  m_data->idsMutex.release();"
 
+def isDynamic(t):
+  if t.kind() == IdlKind.Sequence:
+    return True
+  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    return isDynamic(t.unalias())
+  elif t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    for m in s.members():
+      if isDynamic(m.data()):
+	return True
+    return False
+  else:
+    return False

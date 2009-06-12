@@ -71,10 +71,13 @@ for t in tasksMap: ?>
 ?>
 {
     setName("<!comp.name()!>");
+    log_to_file("./<!comp.name()!>.log");
 } 
 
 <!comp.name()!>Module::~<!comp.name()!>Module()
-{}
+{
+  end_logging();
+}
 
 bool <!comp.name()!>Module::open(yarp::os::Searchable& config)
 {
@@ -140,7 +143,7 @@ void <!comp.name()!>Module::onRead(Bottle& command)
     int rqst_id = RqstReader::readRqstId(command);
     string request_name  = RqstReader::readRequestName(command);
 
-    std::cout << "Control: Received request from " << client_name << ", id=" << rqst_id << ", service=" << request_name << std::endl;
+    genom_log("Control: Received request for service '%s' from '%s' with id:%d", request_name.c_str(), client_name.c_str(), rqst_id);
 
     if(m_reply_ports.find(client_name) == m_reply_ports.end()) {
 	// unknwon client, create the reply port and connect it
@@ -175,7 +178,7 @@ for s in servicesMap:
 ?>
     else {
       string r = "No such service: "  + request_name;
-      cout << r << endl;
+      genom_log(r.c_str());
       ReplyWriter<VoidIO>::send(*m_reply_ports[client_name], client_name, rqst_id, request_name, r, 0);
     }
 }
@@ -203,7 +206,7 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
     ?>
   if(res < 0) { // error
     string r = "<!service.name!> : " + errorString(res);
-    cout << r << endl;
+    genom_log(r.c_str());
     ReplyWriter<VoidIO>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", r, 0);    
     return true;
   }
@@ -240,9 +243,11 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
 
 <?
   if serviceInfo.outputFlag: ?>
+  genom_log("Sending \"OK\" reply for \"<!service.name!>\" request from '%s' with id:%d", clientName.c_str(), rqst_id);
   ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", "OK", &m_data-><!serviceInfo.outputName!>);    
 <?
   else: ?>
+  genom_log("Sending \"OK\" reply for \"<!service.name!>\" request from '%s' with id:%d", clientName.c_str(), rqst_id);
   ReplyWriter<VoidIO>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", "OK", 0);    
 <?
   ?>

@@ -8,6 +8,7 @@
 #include "lib/OutPort.hpp"
 #include "lib/DataServer.hpp"
 #include "ExecServices.hpp"
+#include "lib/logger.h"
 
 //forward declaration of Tasks
 <?

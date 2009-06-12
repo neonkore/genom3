@@ -7,11 +7,11 @@ main:
   "Module.hpp" -> "$$Module.hpp"
   "Module.cpp" -> "$$Module.cpp"
   "Comp.cpp" -> "$$Comp.cpp"
-  "Test.cpp" -> "$$Test.cpp"
+/*  "Test.cpp" -> "$$Test.cpp" */
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
 /*  "CMakeLists.txt" */
-  "Struct.hpp" -> "$$Struct.hpp"
+/*  "Struct.hpp" -> "$$Struct.hpp" */
   "UserStruct.hpp" -> "$$UserStruct.hpp"
   "lib/DataServer.hpp" -> "lib/DataServer.hpp"
   "lib/OutPort.hpp" -> "lib/OutPort.hpp"
@@ -22,6 +22,8 @@ main:
   "lib/Struct.hpp" -> "lib/Struct.hpp"
   "lib/YarpCodec.hpp" -> "lib/YarpCodec.hpp"
   "lib/Header.hpp" -> "lib/Header.hpp"
+  "lib/logger.c" -> "lib/logger.c"
+  "lib/logger.h" -> "lib/logger.h"
   "userCodels.h" -> "userCodels.h"
 ;
 

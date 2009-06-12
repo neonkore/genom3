@@ -15,6 +15,7 @@ for t in comp.tasksMap():
   ?>
       <!comp.name()!>User<!t.data().name!>Codels.cpp
       <!comp.name()!><!t.data().name!>.cpp
+      lib/logger.c
 <?
 ?>
 )

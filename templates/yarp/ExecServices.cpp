@@ -52,15 +52,18 @@ for s in comp.servicesMap():
 {
     // send the reply
     if(m_aborted) {
+	genom_log("Service \"<!service.name!>\" from '%s' with id:%d aborted", m_clientName.c_str(), m_id);
 	ReplyWriter<VoidIO>::send(m_replyPort, 
 	    m_clientName, m_id, "<!service.name!>", "Aborted", 0);
     } else {
 <?
   if serviceInfo.outputFlag: ?>
+	genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished", m_clientName.c_str(), m_id);
 	ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_replyPort, 
 	    m_clientName, m_id, "<!service.name!>", "OK", &out_<!service.output.identifier!>);    
 <?
   else:?>
+	genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished", m_clientName.c_str(), m_id);
 	ReplyWriter<VoidIO>::send(m_replyPort, 
 	    m_clientName, m_id, "<!service.name!>", "OK", 0);
 <?

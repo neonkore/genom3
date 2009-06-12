@@ -33,7 +33,11 @@ def encodeType(t, name):
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType(), True)
     encodeSimpleType("int", name + ".length") 
-    ?>
+    if s.seqType().kind() == IdlKind.Char: ?>
+    b->add(new yarp::os::Value((void*) <!name!>.data, <!name!>.length));
+    it++;
+<?
+    else: ?>
     // data
     for(int j=0; j < <!name!>.length; ++j)
       it = YarpCodec<<!seqType!>>::encode(b, <!name!>.data[j]);
@@ -96,7 +100,11 @@ def decodeType(t, name):
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType())
     decodeSimpleType("int", name + ".length")
-    ?>
+    if s.seqType().kind() == IdlKind.Char: ?>
+    memcpy(<!name!>.data, b->get(it).asBlob(), <!name!>.length);
+    it++;
+<?
+    else: ?>
     <!name!>.data = new <!seqType!>[<!name!>.length];
     for(int j=0; j < <!name!>.length; ++j)
       it = YarpCodec<<!seqType!>>::decode(b, <!name!>.data[j], it);

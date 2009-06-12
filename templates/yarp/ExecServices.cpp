@@ -78,7 +78,6 @@ bool <!service.name!>Service::step()
   if(m_aborted)
     return false;
 
-  int res;
   switch(m_status) {
 <?
   for c in service.codels():
@@ -88,7 +87,7 @@ bool <!service.name!>Service::step()
     case <!upper(service.name)!>_<!upper(c.key())!>:
       m_status = <!c.key()!>();
       if(m_status < 0) { // error
-	string r = "<!service.name!> : " + errorString(res);
+	string r = "<!service.name!> : " + errorString(m_status);
 	cout << r << endl;
 	ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", r, 0);    
 	return true;

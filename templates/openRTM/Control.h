@@ -15,6 +15,7 @@
 #include "ControlTaskSkel.h"
 
 #include "ExecServices.h"
+#include "logger.h"
 
 using namespace RTC;
 
@@ -35,12 +36,15 @@ t = comp.IDSType.unalias()
 if t.kind() == IdlKind.Struct:
   s = t.asStructType()
   for m in s.members():
-     print "  " + MapTypeToCpp(m.data()) + " " + m.key() + ";"
+     print "  " + MapTypeToCorbaCpp(m.data()) + " " + m.key() + ";"
 ?>
+  // Locks
+  ACE_RW_Mutex idsMutex;
+
   // DataInPort declaration
 <?
 for port in inports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType, True, True)
     ?>
   <!typeName!> <!port.name!>_data;
   InPort<<!typeName!>> <!port.name!>;
@@ -50,7 +54,7 @@ for port in inports:
   // DataOutPort declaration
 <?
 for port in outports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
   <!typeName!> <!port.name!>_data;
   OutPort<<!typeName!>> <!port.name!>;

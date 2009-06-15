@@ -23,18 +23,18 @@ for s in comp.servicesMap():
       statusStr += ", "
     statusStr += upper(service.name) + "_" + upper(c.key())
       
-    if service.output:
+    if service.output.identifier:
       inputStr = ", CORBA::Long id"
     else:
       inputStr = ""
     for i in service.inputs():
       inputStr += ", "
       t = inputType(i)
-      inputStr += MapTypeToCpp(t) + " " + i.identifier
+      inputStr += MapTypeToCorbaCpp(t) + " " + i.identifier
 
-    if service.output:
-      t = comp.typeFromIdsName(service.output)
-      outputType = MapTypeToCpp(t)
+    if service.output.identifier:
+      t = inputType(service.output)
+      outputType = MapTypeToCorbaCpp(t)
   ?>
 class <!service.name!>Service {
   public:
@@ -43,12 +43,15 @@ class <!service.name!>Service {
     typedef std::list<Ptr> List;
 
     <!service.name!>Service(<!capCompName!>ControlData *data <!inputStr!>);
+    ~<!service.name!>Service();
 
     int id() const { return m_id; }
     bool step();
+    void abort();
+
 <?
-  if service.output:?>
-    <!outputType!> result() { return out_<!service.output!>; }
+  if service.output.identifier:?>
+    <!outputType!> result() { return out_<!service.output.identifier!>; }
 <?
   for c in service.codels():
     if c.key() == "control":
@@ -57,14 +60,15 @@ class <!service.name!>Service {
   ?>
 
   private:
+    bool m_aborted;
     int m_id;
     int m_status;
 <?
   for i in service.inputs():
     t = inputType(i)
-    print "    " + MapTypeToCpp(t) + " in_" + i.identifier + ";"    
-  if service.output:
-    print "    " + outputType + " out_" + service.output + ";"
+    print "    " + MapTypeToCorbaCpp(t) + " in_" + i.identifier + ";"    
+  if service.output.identifier:
+    print "    " + outputType + " out_" + service.output.identifier + ";"
   ?>
     <!capCompName!>ControlData *m_data;
 }; 

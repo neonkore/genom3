@@ -30,7 +30,7 @@ MACRO(IDL_TARGET Name Input)
   SET(WRAPPER_OUTPUTS ${InputPath}/${InputBaseName}Skel.cpp)
   ADD_CUSTOM_COMMAND(OUTPUT ${WRAPPER_OUTPUTS}
     COMMAND ${RTM_WRAPPER} ${WRAPPER_FLAGS} --idl-file=${InputName}
-    DEPENDS ${Input}
+    DEPENDS ${Input} ${IDL_OUTPUTS}
     COMMENT "[OpenRTM Wrapper] Creating skels from ${Input}"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 

@@ -19,14 +19,14 @@ for s in comp.servicesMap():
   if service.type == ServiceType.Control:
     continue
 
-  if service.output:
+  if service.output.identifier:
     inputStr = ", CORBA::Long id"
   else:
     inputStr = ""
   for i in service.inputs():
     inputStr += ", "
     t = inputType(i)
-    inputStr += MapTypeToCpp(t) + " " + i.identifier
+    inputStr += MapTypeToCorbaCpp(t) + " " + i.identifier
 
   ?>
 // <!service.name!>Service
@@ -41,8 +41,35 @@ for s in comp.servicesMap():
   m_status = <!startStateForService(service)!>;
 }
 
+<!service.name!>Service::~<!service.name!>Service()
+{
+    // send the reply
+    if(m_aborted) {
+	genom_log("Service \"<!service.name!>\" with id:%d aborted", m_id);
+    } else {
+	genom_log("Service \"<!service.name!>\" with id:%d finished", m_id);
+<?
+  if service.output.identifier: ?>
+      // get the output result
+      <!service.name!>OutStruct s;
+      s.id = m_id;
+      s.data = result();
+      m_data-><!service.name!>_outport.write(s);
+<?
+  ?>
+  }
+}
+
+void <!service.name!>Service::abort()
+{
+    m_aborted = true;
+}
+
 bool <!service.name!>Service::step()
 {
+  if(m_aborted)
+    return false;
+
   int res;
   switch(m_status) {
 <?
@@ -52,6 +79,8 @@ bool <!service.name!>Service::step()
     ?>
     case <!upper(service.name)!>_<!upper(c.key())!>:
       m_status = <!c.key()!>();
+      if(m_status < 0) // error
+	return false;
       return true;
 <?
   ?>
@@ -69,13 +98,15 @@ bool <!service.name!>Service::step()
     ?>
 int <!service.name!>Service::<!c.key()!>()
 {
+<?
+    codelLock(codel, service)
+    ?>
   // call the user codel
   int res = <!real_codel_call(codel, "m_data->", service)!>;
 
-  // update ports
+  // update ports, release locks, etc
 <?
-    for p in codel.outPorts:
-      print "  m_data->" + p + ".write();"  
+    codelRelease(codel, service);
     ?>
   return res;
 }

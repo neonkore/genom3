@@ -36,7 +36,14 @@ if currentTask.hasCodel("init"):
   ?>
 RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onInitialize()
 {
+<?
+  codelLock(currentTask.codel("init"));
+  ?>
   int res = <!codel_call(currentTask.codel("init"))!>;
+  // update ports, release locks, etc
+<?
+  codelRelease(currentTask.codel("init"));
+  ?>
   if(res < 0) // error
       return RTC::RTC_ERROR;
   return RTC::RTC_OK;
@@ -53,19 +60,9 @@ for s in comp.servicesMap():
   ?>
   for(<!service.name!>Service::List::iterator it = m_data-><!service.name!>Services.begin();
 	it != m_data-><!service.name!>Services.end();) {
-    if(!(*it)->step()) { // delete the service
-<?
-  if service.output:
-    ?>
-      // get the output result
-      <!service.name!>OutStruct s;
-      s.id = (*it)->id();
-      s.data = (*it)->result();
-      m_data-><!service.name!>_outport.write(s);
-<?
-  ?>
+    if(!(*it)->step()) // delete the service
       it = m_data-><!service.name!>Services.erase(it);
-    } else
+    else
       ++it;
   }
 <?
@@ -73,12 +70,25 @@ for s in comp.servicesMap():
   return RTC::RTC_OK;
 }
 
-/*
+<?
+if currentTask.hasCodel("end"):
+  ?>
 RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onFinalize()
 {
+<?
+  codelLock(currentTask.codel("end"));
+  ?>
+  int res = <!codel_call(currentTask.codel("end"))!>;
+  // update ports, release locks, etc
+<?
+  codelRelease(currentTask.codel("end"));
+  ?>
+  if(res < 0) // error
+      return RTC::RTC_ERROR;
   return RTC::RTC_OK;
-}
-*/
+}<?
+?>
+
 /*
 RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onStartup(RTC::UniqueId ec_id)
 {

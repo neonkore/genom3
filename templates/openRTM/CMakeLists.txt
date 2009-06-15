@@ -11,6 +11,7 @@ SET(<!upperCompName!>_SRC
       <!comp.name()!>Control.cpp 
       <!comp.name()!>ControlImpl.cpp  
       ExecServices.cpp
+      logger.c
       <!comp.name()!>UserCntrlTaskCodels.cpp<?
 for t in comp.tasksMap():
   ?>

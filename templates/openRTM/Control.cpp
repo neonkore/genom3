@@ -37,6 +37,7 @@ for name,type in output_ports_map.iteritems():
 : <!portInit[:-2]!>
 {}
 
+// <!comp.name!>ControlData methods
 void <!capCompName!>ControlData::killAllServices()
 {
 <?
@@ -53,7 +54,9 @@ for s in servicesMap:
     ?>
 void <!capCompName!>ControlData::kill<!service.name!>Services()
 {
-  <!service.name!>Services.clear();
+  for(<!service.name!>Service::List::iterator it = <!service.name!>Services.begin();
+	it != <!service.name!>Services.end(); ++it)
+      (*it)->abort(); // will be deleted next step
 }
 <?
 ?>
@@ -67,7 +70,7 @@ void <!capCompName!>ControlData::kill<!service.name!>Services()
   // Set InPort buffers
 <?
 for port in inports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
   registerInPort("<!port.name!>", m_data.<!port.name!>);
 <?
@@ -75,7 +78,7 @@ for port in inports:
   // Set OutPort buffers
 <?
 for port in outports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
   registerOutPort("<!port.name!>", m_data.<!port.name!>);
 <?

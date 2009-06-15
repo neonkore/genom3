@@ -29,7 +29,7 @@ def flatStruct(t, name, separator = "_"):
 def inputList(service):
   res = []
   for i in service.inputs():
-    res.extend(flatStruct(comp.typeFromIdsName(i), i, '.'))
+    res.extend(flatStruct(inputType(i), i.identifier, '.'))
   return res
 
 def service_idl_signature(service):
@@ -38,7 +38,7 @@ def service_idl_signature(service):
 	if service.type != ServiceType.Control:
 	  outputType = BaseType.longType
 	else:
-	  outputType = comp.typeFromIdsName(service.output)
+	  outputType = inputType(service.output)
     else:
 	outputType = BaseType.voidType
 
@@ -54,7 +54,7 @@ def service_cpp_args(service, className=""):
     args = ""
     for i in service.inputs():
 	t = inputType(i)
-	args += MapTypeToCpp(t) + " in_" + i.identifier + ", "
+	args += MapTypeToCorbaCpp(t) + " in_" + i.identifier + ", "
     if className != "":
 	return className + "::" + service.name + "(" + args[:-2] + ")"
     else:
@@ -69,7 +69,7 @@ def service_cpp_signature(service, className=""):
 	  outputType = inputType(service.output)
     else:
 	outputType = BaseType.voidType
-    return MapTypeToCpp(outputType, True, True) + " " + service_cpp_args(service, className)
+    return MapTypeToCorbaCpp(outputType, True) + " " + service_cpp_args(service, className)
 
 def pointerTo(t):
   s = MapTypeToC(t,True)
@@ -198,11 +198,44 @@ def outputPortsMap():
   m = {}
   for s in servicesMap:
     service = s.data()
-    if service.type != ServiceType.Exec or not service.output:
+    if service.type != ServiceType.Exec or not service.output.identifier:
       continue
     typeName = MapTypeToIdl(inputType(service.output))
     m[service.name] = typeName
   return m
 
 output_ports_map = outputPortsMap()
+
+def codelNeedsLock(codel, service=None):
+  if codel.outTypes:
+    return 2
+  elif not service is None and service.output.identifier and service.output.kind == ServiceInputKind.IDSMember:
+    return 2
+  elif codel.inTypes:
+    return 1
+  else:
+    if not service is None:
+      for i in service.inputs():
+	if i.kind == ServiceInputKind.IDSMember:
+	  return 1
+    return 0
+
+def codelLock(codel, service=None):
+    #for p in codel.inPorts:
+      #print "  m_data->" + p + "_inport.wait();"
+    res = codelNeedsLock(codel, service)
+    if res == 2:
+      print "  m_data->idsMutex.acquire_write();"
+    elif res == 1:
+      print "  m_data->idsMutex.acquire_read();"
+
+def codelRelease(codel, service=None):
+    for p in codel.outPorts:
+      print "  m_data->" + p + ".write();"  
+    #for p in codel.inPorts:
+      #print "  m_data->" + p + "_inport.post();"
+    res = codelNeedsLock(codel, service)
+    if res:
+      print "  m_data->idsMutex.release();"
+
 

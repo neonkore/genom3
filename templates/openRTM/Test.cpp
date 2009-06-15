@@ -3,7 +3,7 @@ def parseInput(type, name):
   if type.kind() == IdlKind.Enum:?>
       int tmp;
       cin >> tmp;
-      <!name!> = (<!MapTypeToCpp(type, True)!>) tmp;
+      <!name!> = (<!MapTypeToCorbaCpp(type, True)!>) tmp;
 <?
   else:
     print "cin >> " + name + ";"
@@ -50,7 +50,7 @@ for port in outports:
   // Set InPort buffers
 <?
 for port in inports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
 //   registerOutPort("<!port.name!>", m_data.<!port.name!>);
 <?
@@ -58,7 +58,7 @@ for port in inports:
   // Set OutPort buffers
 <?
 for port in outports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
   registerInPort("<!port.name!>", m_<!port.name!>);
 <?
@@ -138,29 +138,29 @@ for s in servicesMap:
     case <!idx!>: {
 <?
   for i in service.inputs():
-    print "      " + MapTypeToCpp(inputType(i), True) + " " + i.identifier + ";";
-  if service.output and service.type == ServiceType.Control:
-    print "      " + MapTypeToCpp(comp.typeFromIdsName(service.output), True, True) + " " + service.output + ";";
+    print "      " + MapTypeToCorbaCpp(inputType(i), True) + " " + i.identifier + ";";
+  if service.output.identifier and service.type == ServiceType.Control:
+    print "      " + MapTypeToCorbaCpp(inputType(service.output), True, True) + " " + service.output.identifier + ";";
 
   for x in inputFlatList:
-    t = MapTypeToCpp(x[0], True)
+    t = MapTypeToCorbaCpp(x[0], True)
     ?>
       cout << "Enter <!t!> <!x[1]!>:  ";
 <?
     parseInput(x[0], x[1]);
 
   if service.type == ServiceType.Control:
-    if service.output:
-      outputType = MapTypeToCpp(comp.typeFromIdsName(service.output), True)
+    if service.output.identifier:
+      outputType = MapTypeToCorbaCpp(inputType(service.output), True)
       ?>
-      <!service.output!> = m_service-><!service.name!>(<!serviceArgs!>);
-      cout << endl << "Result: " << <!service.output!> << endl;
+      <!service.output.identifier!> = m_service-><!service.name!>(<!serviceArgs!>);
+      cout << endl << "Result: " << <!service.output.identifier!> << endl;
 <?
     else:?>
       m_service-><!service.name!>(<!serviceArgs!>);
 <?
   else:
-    if service.output:?>
+    if service.output.identifier:?>
       cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
 <?
     else:?>

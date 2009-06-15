@@ -75,7 +75,7 @@ for name,typeName in output_ports_map.iteritems():
   // DataInPort declaration
 <?
 for port in outports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
   <!typeName!> m_<!port.name!>_data;
   InPort<<!typeName!>> m_<!port.name!>;
@@ -84,7 +84,7 @@ for port in outports:
   // DataOutPort declaration
 <?
 for port in inports:
-    typeName = MapTypeToCpp(port.idlType)
+    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
 //   <!typeName!> m_<!port.name!>_data;
 //   OutPort<<!typeName!>> m_<!port.name!>;

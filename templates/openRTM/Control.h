@@ -16,6 +16,7 @@
 
 #include "ExecServices.h"
 #include "logger.h"
+#include "<!comp.name()!>Struct.hpp"
 
 using namespace RTC;
 

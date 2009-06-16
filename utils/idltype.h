@@ -257,6 +257,7 @@ class TypedefType : public IdlType
 {
 	public:
 		TypedefType() : IdlType(Typedef) {}
+		TypedefType(IdlType::Ptr aliasType, const std::string &identifier);
 		TypedefType(IdlType::Ptr aliasType, Declarator::VectPtr declarators)
 				: IdlType(Typedef), m_aliasType(aliasType), m_declarators(declarators) {}
 		virtual ~TypedefType() {}

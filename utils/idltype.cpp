@@ -277,6 +277,14 @@ std::string TypedefType::identifier() const
 	return string();
 }
 
+TypedefType::TypedefType(IdlType::Ptr aliasType, const std::string &identifier)
+: IdlType(Typedef), m_aliasType(aliasType)
+{
+	Declarator::Ptr p(new Declarator(identifier));
+	m_declarators = Declarator::VectPtr(new Declarator::Vect());
+	m_declarators->push_back(p);
+}
+
 /************ ArrayType ***************/
 
 std::string ArrayType::printBounds() const

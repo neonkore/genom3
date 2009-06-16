@@ -123,9 +123,13 @@ for t in comp.tasksMap():
 
 <?
 if initServiceNb != -1:
+  codelLock(initService.codel("main"), initService)
   ?>
   // call user init function
-  int res = <!codel_call(initService.codel("exec", initService))!>;
+  int res = <!codel_call(initService.codel("main"), initService)!>;
+<?
+  codelRelease(initService.codel("main"), initService)
+  ?>
   if(res == ERROR)
       return RTC::RTC_ERROR;
 <?

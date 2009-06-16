@@ -128,7 +128,7 @@ void export_idl()
 	class_<EnumType, bases<IdlType> >("EnumType")
 	.def("enumerators", &EnumType::enumerators, return_value_policy<reference_existing_object>());
 
-	class_<TypedefType, bases<IdlType> >("TypedefType")
+	class_<TypedefType, bases<IdlType> >("TypedefType", init<IdlType::Ptr, const std::string &>())
 	.def("aliasType", &TypedefType::aliasType);
 
 	class_<NamedType, bases<IdlType> >("NamedType", init<const std::string &, IdlType::Ptr>())

@@ -2,12 +2,29 @@
 #define <!upper(comp.name())!>_STRUCT_H
 
 <?
-for port in outports:
-  if isDynamicPort(port):
-    print "typedef " + MapTypeToC(port.idlType) + "  " + port.idlType.identifier() + ";\n"
-#for t in comp.typesVect():
-#    if t.identifier() != IDSType.identifier():
-#	print "typedef " + MapTypeToC(t) + "  " + t.identifier() + ";\n"
+def copyTypeCpp(t):
+  if t.kind() == IdlKind.Named:
+    n = t.asNamedType()
+    return NamedType(n.identifier() + "Cpp", copyTypeCpp(n.type()))
+  elif t.kind() == IdlKind.Typedef:
+    ty = t.asTypedefType()
+    return TypedefType(copyTypeCpp(ty.aliasType()), t.identifier() + "Cpp")
+  elif t.kind() == IdlKind.Sequence:
+    s = t.asSequenceType()
+    return SequenceType(copyTypeCpp(s.seqType()), s.bound())
+  elif t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    res = StructType()
+    res.setIdentifier(s.identifier() + "Cpp")
+    for m in s.members():
+      res.addMember(copyTypeCpp(m.data()), m.key())
+    return res
+  else:
+    return t # standard type
+
+for t in comp.typesVect():
+  if isDynamic(t):
+    print MapTypeToCpp(copyTypeCpp(t)) + ";\n"
 ?>
 
 #endif /* <!upper(comp.name())!>_STRUCT_H */

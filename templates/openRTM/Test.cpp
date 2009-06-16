@@ -1,9 +1,11 @@
 <?
 def parseInput(type, name):
   if type.kind() == IdlKind.Enum:?>
+  {
       int tmp;
       cin >> tmp;
       <!name!> = (<!MapTypeToCorbaCpp(type, True)!>) tmp;
+  }
 <?
   else:
     print "cin >> " + name + ";"
@@ -109,21 +111,58 @@ RTC::ReturnCode_t <!comp.name()!>Control::onDeactivated(RTC::UniqueId ec_id)
 }
 */
 
-RTC::ReturnCode_t <!capCompName!>Test::onExecute(RTC::UniqueId ec_id)
+void <!capCompName!>Test::printUsage()
 {
-  int action;  
   // print usage
   cout << "Available actions:" << endl;
+  cout << "  (0) Exit" << endl;
+  
 <?
-idx = 0
+idx = 10
 for s in servicesMap:
   service = s.data()
   idx += 1
   print "  cout << \"  (" + str(idx) + ") " + service.name + "\" << endl;"
+
+print "  cout << \"---------------------------\" << endl;"
+for port in outports:
+  idx += 1
+  print "  cout << \"  (" + str(idx) + ") Show " + port.name + "\" << endl;"
+print "  cout << \"---------------------------\" << endl;"
+for port in inports:
+  idx += 1
+  print "  cout << \"  (" + str(idx) + ") Update " + port.name + "\" << endl;"
 ?>
 
+}
+
+RTC::ReturnCode_t <!capCompName!>Test::onExecute(RTC::UniqueId ec_id)
+{
+  printUsage();
+
+  int action;  
   std::cin >> action;
   switch(action) {
+    case 0:
+	exit();
+
+<?
+idx = 10
+for s in servicesMap:
+  service = s.data()
+  idx += 1
+  ?>
+    case <!idx!>: {
+      run<!service.name!>();
+      break;
+    }
+<?
+?> 
+  }
+
+  return RTC::RTC_OK;
+}
+
 <?
 idx = 0
 for s in servicesMap:
@@ -135,7 +174,8 @@ for s in servicesMap:
     serviceArgs += i.identifier + ", "
   serviceArgs = serviceArgs[:-2]
   ?>
-    case <!idx!>: {
+void <!capCompName!>Test::run<!service.name!>()
+{
 <?
   for i in service.inputs():
     print "      " + MapTypeToCorbaCpp(inputType(i), True) + " " + i.identifier + ";";
@@ -168,12 +208,9 @@ for s in servicesMap:
       cout << endl << "Started activity " << endl;
 <?
   ?>
-      break;
-    }
+}
 <?
 ?>      
-  }
-}
 
 /*
 RTC::ReturnCode_t <!capCompName!>Control::onAborting(RTC::UniqueId ec_id)

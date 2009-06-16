@@ -56,6 +56,15 @@ class <!capCompName!>Test  : public RTC::DataFlowComponentBase
   // The action that is invoked when execution context's rate is changed
   // virtual RTC::ReturnCode_t onRateChanged(RTC::UniqueId ec_id);
 
+ protected:
+  void printUsage();
+<?
+for s in servicesMap:
+  service = s.data()
+  ?>
+  void run<!service.name!>();
+<?
+?>
 
  protected:
   // CORBA Port declaration

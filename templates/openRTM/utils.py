@@ -97,7 +97,10 @@ def real_codel_signature(codel, service=None):
   for port in codel.outPorts:
     p = comp.port(port)
     if p is not None:
-	proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
+	if isDynamic(p.idlType):
+	  proto += MapTypeToCpp(p.idlType) + "Cpp* " + port + "_outport, " 
+	else:
+	  proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
     else:
 	proto += port + ", "
   for port in codel.inPorts:
@@ -161,7 +164,11 @@ def real_codel_call(codel, data_prefix="", service=None):
   for type in codel.outTypes:
     proto += "& " + data_prefix + type + ", ";
   for port in codel.outPorts:
-    proto += "&" + data_prefix + port + "_data, "; 
+    p = comp.port(port)
+    if not p is None and isDynamic(p.idlType):
+      proto += "&" + port + "_outport, "
+    else:
+      proto += "&" + data_prefix + port + "_data, " 
   for port in codel.inPorts:
     proto += "&" + data_prefix + port + ", "; 
   proto = codel.name + "(" + proto[:-2] + ")"

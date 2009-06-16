@@ -98,14 +98,22 @@ def typeProtoPrefix(t):
 	prefix = "string"
     return prefix + t.identifier()
 
-def isDynamicPort(port):
-  if port.idlType.kind == IdlKind.Sequence:
+def isDynamic(t):
+  if t.kind() == IdlKind.Sequence:
     return True
-  else:
-    t = port.idlType.unalias()
-    if t is not None:
-      return t.kind() == IdlKind.Sequence
+  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    return isDynamic(t.unalias())
+  elif t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    for m in s.members():
+      if isDynamic(m.data()):
+	return True
     return False
+  else:
+    return False
+
+def isDynamicPort(port):
+  return isDynamic(port.idlType)
 
 def dynamicPortType(port):
    if port.idlType.kind == IdlKind.Sequence:
@@ -152,18 +160,8 @@ for port in inports:
 
 # create ids member for dynamic posters
 for port in outports:
-  if isDynamicPort(port):
-    t = dynamicPortType(port)
-    s = StructType()
-    s.setIdentifier(port.name + "_outport_struct")
-    s.addMember(BaseType.longType, "size")
-    s.addMember(BaseType.longType, "length")
-    s.addMember(SequenceType(t, 0), "data")
-
-    n = NamedType(port.name + "_outport_struct", s)
-    IDSType.addMember(n, port.name + "_outport")
-  else:
-    sys.stderr.write("Not dynamic " + port.name + "\n")
+  if isDynamic(port.idlType):
+    IDSType.addMember(port.idlType, port.name + "_outport")
 
 class ServiceInfo:
   def __init__(self, service):

@@ -114,7 +114,7 @@ extern int <!real_codel_signature(codel, service)!>;
 
   if(SDI_F-><!p.name!>_outport.data == NULL)
     <!p.name!>_is_empty = 1;
-  struct <!p.name!>_outport_struct* <!posterAddr!> = &SDI_F-><!p.name!>_outport;
+  <!posterType!>* <!posterAddr!> = &SDI_F-><!p.name!>_outport;
 <?
 	    else: ?>
   /* find a pointer to <!port!> poster*/

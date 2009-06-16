@@ -64,7 +64,8 @@ for name, service in servicesDict.iteritems():
 t = IDSType.unalias()
 if t is not None:
     print MapTypeToC(t) + ";"
-print "typedef " + MapTypeToC(IDSType) + " " + upper(comp.name()) + "_STR;";
+print MapTypeToC(IDSType) + ";"
+print "typedef " + MapTypeToC(IDSType, True) + " " + upper(comp.name()) + "_STR;";
 ?>
 
 #endif

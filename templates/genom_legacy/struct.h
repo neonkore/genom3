@@ -4,8 +4,8 @@
 <?
 for port in outports:
   if isDynamicPort(port):
-    t = IDSType.member(port.name + "_outport").unalias()
-    print MapTypeToC(t) + ";\n"
+    ty = port.idlType.asNamedType()
+    print MapTypeToC(ty.type()) + ";\n"
 #for t in comp.typesVect():
 #    if t.identifier() != IDSType.identifier():
 #	print "typedef " + MapTypeToC(t) + "  " + t.identifier() + ";\n"

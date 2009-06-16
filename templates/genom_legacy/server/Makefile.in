@@ -83,6 +83,7 @@ for t in comp.tasksMap():
 
 client_src= \
 	<!comp.name()!>Error.c	\
+	logger.c \
 	<!comp.name()!>Endian.c	\
 	<!comp.name()!>Print.c		\
 	<!comp.name()!>PrintXML.c	\

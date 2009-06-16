@@ -54,6 +54,7 @@
 
 #include "<!comp.name()!>MsgLib.h"
 #include "genom/moduleEvents.h"
+#include "logger.h"
 
 /* Print debugging information */
 #define GENOM_DEBUG_CNTRLTASK
@@ -399,6 +400,8 @@ static STATUS
   int i;
 
   CNTRL_SDI_F = SDI_F;
+
+  log_to_file("./<!comp.name()!>.log");
 
   /* Creation de la boite aux lettres de reception des requetes */
   if (csMboxInit (<!upper(comp.name())!>_MBOX_NAME, 
@@ -1099,6 +1102,8 @@ static void
 	commonStructDelete ((void *) <!comp.name()!>CntrlStrId);
 	posterDelete(<!comp.name()!>CntrlPosterId);
 	logMsg("<!comp.name()!>CntrlTask ended\n");
+	end_logging();
+
 	  /* Remove PID file */
 	  unlink(pidFilePath);
 	  exit(0);
@@ -1164,6 +1169,8 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   if (!controlExecTaskStatus(servId, rqstId))
     return;
 
+  genom_log("Received request for service \"<!service.name!>\"");
+
   /*--------------------------------------------------------------
    * Interruption of the incompatible activities
    */
@@ -1206,9 +1213,12 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 <?
 
 	    ?>
+    genom_log("Called control codel for service \"<!service.name!>\"");
+
     if (status != OK) {
       if (bilan == OK)
 	bilan =  S_<!comp.name()!>_stdGenoM_CONTROL_CODEL_ERROR;
+      genom_log("Error in control codel. Sending final reply for \"<!service.name!>\"");
       if (csServReplySend (servId, rqstId, FINAL_REPLY, bilan, 
 			   (void *) NULL, 0, (FUNCPTR) NULL) != OK)
 	<!comp.name()!>CntrlTaskSuspend (TRUE);
@@ -1242,6 +1252,8 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 		       (FUNCPTR) NULL) != OK)
     <!comp.name()!>CntrlTaskSuspend (TRUE);
 
+  genom_log("Service \"<!service.name!>\" completed");
+
   moduleEventCntrl.eventType = STATE_END_EVENT;
   moduleEventCntrl.activityState = ETHER;
   sendModuleEvent(&moduleEventCntrl);
@@ -1272,7 +1284,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 	  print "  " + serviceInfo.inputVarDecl + ";"
 	?>
 
-
+  genom_log("Received request for service \"<!service.name!>\"");
   /*--------------------------------------------------------------
    * Control init done and exec tasks status 
    */
@@ -1284,6 +1296,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 # "0" below == reentrantFlag
 	?>
  
+
   /*--------------------------------------------------------------
    * Activity allocation
    */
@@ -1315,11 +1328,13 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 
 	    ?>
 
+    genom_log("Called control codel for service \"<!service.name!>\"");
     /* Control not OK: stop there */
     if (status != OK) {
       freeActivity(activity);
       if (bilan == OK)
 	bilan = S_<!comp.name()!>_stdGenoM_CONTROL_CODEL_ERROR;
+      genom_log("Error in control codel. Sending final reply for \"<!service.name!>\"");
       if (csServReplySend (servId, rqstId, FINAL_REPLY, bilan, 
 			   (void *) NULL, 0, (FUNCPTR) NULL) != OK)
 	<!comp.name()!>CntrlTaskSuspend (TRUE);
@@ -1389,6 +1404,8 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   moduleEventCntrl.rqstType = <!serviceNum!>;
   moduleEventCntrl.taskNum = <!comp.taskIndex(service.taskName)!> /*execTaskNum*/;
   sendModuleEvent(&moduleEventCntrl);
+
+  genom_log("Starting activity %d  for service \"<!service.name!>\"", activity);
 
   /*-------------------------------------------------------------
    * Interruption of the incompatible activities

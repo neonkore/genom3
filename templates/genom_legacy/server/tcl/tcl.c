@@ -73,7 +73,7 @@ def processOutput(type, name, allocFlag = False):
       int loop1[1];
       for(loop1[0]=0; loop1[0] < <!a.bound()!>; loop1[0]++) {
 <?
-    flatListArray = flatStruct(a.seqType(), name + "[loop1[0]]", ".")
+    flatListArray = flatStruct(a.seqType(), name + ".data[loop1[0]]", ".")
     for x in flatListArray:
       processOutput(x[0], x[1], allocFlag)
     ?>

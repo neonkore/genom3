@@ -76,10 +76,23 @@ int scan_<!prefix!>( FILE *in, FILE *out,
 		?>
     fprintf(out, "%s<!m.key()!>[<!seq.bound()!>]:\n", indstr);
     { int dims[1] = {<!seq.bound()!>};
-      if (scan_<!typeProtoPrefix(seq.seqType())!>(in, out, (<!MapTypeToC(seq.seqType(), True)!> *)(x+elt)-><!m.key()!>, 
+      if (scan_<!typeProtoPrefix(seq.seqType())!>(in, out, (<!MapTypeToC(seq.seqType(), True)!> *)(x+elt)-><!m.key()!>.data, 
                      indent, 1, dims) == ABORT) {
       free (indstr);
       return ABORT; } }
+
+    fprintf(out, "%s<!m.key()!>.length:\n", indstr);
+    if(scan_int(in, out, &((x+elt)-><!m.key()!>.length), indent, 0, NULL) == ABORT) {
+       free (indstr);
+       return ABORT;
+    }
+
+    fprintf(out, "%s<!m.key()!>.size:\n", indstr);
+    if(scan_int(in, out, &((x+elt)-><!m.key()!>.size), indent, 0, NULL) == ABORT) {
+       free (indstr);
+       return ABORT;
+    }
+
 <?
 	    elif m.data().kind() == IdlKind.String:
 		s = m.data().asStringType()

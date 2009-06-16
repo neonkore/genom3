@@ -73,7 +73,9 @@ void print_<!prefix!>( FILE *out,
 		?>
     fprintf(out, "%s<!m.key()!>[<!seq.bound()!>]:\n", indstr);
     { int dims[1] = {<!seq.bound()!>};
-      print_<!typeProtoPrefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+      print_<!typeProtoPrefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>.data), indent, 1, dims, in); }
+    print_int(out, &((x+elt)-><!m.key()!>.length), indent, 0, NULL, in);
+    print_int(out, &((x+elt)-><!m.key()!>.size), indent, 0, NULL, in);
 <?
 	    else:
 		?>

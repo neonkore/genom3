@@ -70,7 +70,10 @@ void printXML_<!prefix!>( FILE *out, char *name,
 		seq = m.data().asSequenceType()
 		?>
     { int dims[1] = {<!seq.bound()!>};
-      printXML_<!typeProtoPrefix(seq.seqType())!>(out, "<!m.key()!>", (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+      printXML_<!typeProtoPrefix(seq.seqType())!>(out, "<!m.key()!>", (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>.data), indent, 1, dims, in); }
+    printXML_int(out, "<!m.key()!>.length" ,&((x+elt)-><!m.key()!>.length), indent, 0, NULL, in);
+    printXML_int(out, "<!m.key()!>.size" ,&((x+elt)-><!m.key()!>.size), indent, 0, NULL, in);
+
 <?
 	    else:
 		?> 

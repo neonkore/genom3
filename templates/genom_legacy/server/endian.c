@@ -60,7 +60,9 @@ void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
 		seq = m.data().asSequenceType()
 		?>
     { int dims[1] = {<!seq.bound()!>};
-      endianswap_<!typeProtoPrefix(seq.seqType())!>((<!MapTypeToC(seq.seqType(), True)!> *)((x+elt)-><!m.key()!>), 1, dims); }
+      endianswap_<!typeProtoPrefix(seq.seqType())!>((<!MapTypeToC(seq.seqType(), True)!> *)((x+elt)-><!m.key()!>.data), 1, dims); }
+      endianswap_int(&((x+elt)-><!m.key()!>.length), 0, NULL);
+      endianswap_int(&((x+elt)-><!m.key()!>.size), 0, NULL);
 <?
 	  else:
 	    print "   endianswap_" + typeProtoPrefix(m.data()) + "(&((x+elt)->" + m.key() + "), 0, NULL);"

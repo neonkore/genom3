@@ -649,7 +649,10 @@ def codelLock(codel, service = None):
     print "  char init_poster = 0;"
 
     print "/* find a pointer to <!port!> poster*/"
-    print posterType + " *" + posterAddr + " = posterAddr(" + posterId + ");"
+    print posterType + " *" + posterAddr + " = NULL;"
+    print "if(" + posterId + " != NULL)"
+    print "  " + posterAddr + " = posterAddr(" + posterId + ");" 
+
     print "if ("+posterAddr+" == NULL) {"
     print "  " + posterAddr + " = &SDI_F->" + port + "_outport;"
     print "  init_poster = 1;"

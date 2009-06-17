@@ -527,6 +527,8 @@ def counterName(n):
   res = res.replace(".", "_")
   res = res.replace("[", "")
   res = res.replace("]", "")
+  res = res.replace("(*", "")
+  res = res.replace(")", "")
   return res
 
 def isEmptyVar(n):
@@ -551,8 +553,9 @@ def copyType(t, dest, src, useIsEmptyVar = True):
 	print "currentOffset += " + src + ".length * sizeof(" + src + ".data[0]);"
 
 	counter = counterName(dest)
-	print "for(int " + counter + " =0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
-	copyType(s.seqType(), dest + ".data[" + counter + "]", src + "[" + counter + "]", False)
+	print "int " + counter + " = 0;"
+	print "for(; " + counter + " <" + src + ".length; ++" + counter + ") {"
+	copyType(s.seqType(), dest + ".data[" + counter + "]", src + ".data[" + counter + "]", False)
 	print "}"
       else:
 	print dest + ".data = (" + MapTypeToC(s.seqType(), True) + "*) (start + currentOffset);" 
@@ -575,10 +578,11 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
 	print "if(!" + isEmptyVar(src) + ") {"
       if not parentIsEmpty or useIsEmptyVar:
 	if isDynamic(s.seqType()):
-	  print "for(int i=0; i<" + src + ".length(); ++i) {"
-	  copyTypeReverse(s.seqType(), dest + "[i]", src + ".data[i]", False)
+	  counter = counterName(dest)
+	  print "int " + counter + " = 0;"
+	  print "for(; " + counter + "<" + src + ".length; ++" + counter + ") {"
+	  copyTypeReverse(s.seqType(), dest + "[" + counter + "]", src + ".data[" + counter + "]", False)
 	  print "}"
-	  print "delete[] " + src + ".data;"
       if useIsEmptyVar:
 	print "} else if(" + src+ ".data) {"
       if parentIsEmpty or useIsEmptyVar:
@@ -589,8 +593,10 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
 	  print dest + ".length = " + src + ".length;";
 	  print "currentOffset += " + src + ".length * sizeof(" + src + ".data[0]);"
 
-	  print "for(int i=0; i<" + src + ".length(); ++i) {"
-	  copyTypeReverse(s.seqType(), dest + "[i]", src + ".data[i]", False, True)
+	  counter = counterName(dest)
+	  print "int " + counter + " = 0;"
+	  print "for(; " + counter + "<" + src + ".length; ++" + counter + ") {"
+	  copyTypeReverse(s.seqType(), dest + ".data[" + counter + "]", src + ".data[" + counter + "]", False, True)
 	  print "}"
 
 	  print "free(" + src + ".data);"

@@ -6,6 +6,37 @@ def codelNameToValue(n):
   elif n == "MAIN2":
      return "EXEC2"
   return n
+
+def computeTotalSize(t, name, addStructSize = True):
+  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    return computeTotalSize(t.unalias(), name, addStructSize)
+  elif t.kind() == IdlKind.Sequence:
+    s = t.asSequenceType()
+    res = computeTotalSize(s.seqType(), name + ".data[0]")
+
+    if addStructSize:
+      structSize = "2*sizeof(int) + "
+    else:
+      structSize = ""
+
+    if res:
+      return structSize + name + ".length * ( " + res + ")" 
+    else:
+      return structSize + name + ".length * (sizeof(" + name + ".data[0]" + "))" 
+
+  elif t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    if addStructSize:
+      str = "sizeof(" + name + ")"
+    else:
+      str = "0"
+    for m in s.members():
+      res = computeTotalSize(m.data(), name + "." + m.key(), False)
+      if res:
+	str += " + " + res
+    return str
+  else :
+    return ""
 ?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS
@@ -101,53 +132,9 @@ extern int <!real_codel_signature(codel, service)!>;
  */
 
 <!codelSignatureFull(c, service)!>
-{<?
-	for port in codel.outPorts:
-	    p = comp.port(port)
-	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
-	    posterAddr = "outport_" + port
-
-	    if isDynamicPort(p):
-	      posterType = MapTypeToC(dynamicPortType(p), True)
-	      ?>
-  unsigned char <!p.name!>_is_empty = 0;
-
-  if(SDI_F-><!p.name!>_outport.data == NULL)
-    <!p.name!>_is_empty = 1;
-  <!posterType!>* <!posterAddr!> = &SDI_F-><!p.name!>_outport;
+{
 <?
-	    else: ?>
-  /* find a pointer to <!port!> poster*/
-  <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = posterAddr(<!posterId!>);
-  if (<!posterAddr!> == NULL) {
-    *report = errnoGet();
-    return ETHER;
-  }<?
-	for port in codel.inPorts:
-	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
-	    posterAddr = "inport_" + port
-	    ?>
-  /* find a pointer to <!port!> poster*/
-  <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = posterAddr(<!posterId!>);
-  if (<!posterAddr!> == NULL) {
-    *report = errnoGet();
-    return ETHER;
-  }<?
-	?>
-
-  /* Lock access to posters*/<?
-	for port in codel.outPorts:
-	    p = comp.port(port)
-	    if isDynamicPort(p): ?>
-  if(!<!p.name!>_is_empty)
-    posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);
-<?
-	    else: ?>
-  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
-
-	for port in codel.inPorts:
-	    ?>
-  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_READ);<?
+	codelLock(codel, service)
 	?>
 
   /*call real codel */
@@ -155,48 +142,11 @@ extern int <!real_codel_signature(codel, service)!>;
   if(res < 0)
       *report = returnCodeToReport(res);
 
-  /* release lock on posters */<?
-	for port in codel.outPorts:
-	    p = comp.port(port)
-	    if isDynamicPort(p): 
-	      posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
-	      posterType = MapTypeToC(dynamicPortType(p))
-
-	      ?>
-  if(!<!p.name!>_is_empty)
-    posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
-  else {
-      // check if the poster has been alocates by the codel
-      if(SDI_F-><!p.name!>_outport.data != NULL) {
-	// create the real poster
-	if(posterCreate(<!upper(comp.name())!>_<!upper(p.name)!>_POSTER_NAME,
-		SDI_F-><!p.name!>_outport.size,
-		&(<!posterId!>)) != OK) {
-	    *report = S_<!comp.name()!>_stdGenoM_CONTROL_CODEL_ERROR;
-	    return ETHER;
-	}
-
-	// copy the data
-	posterTake(<!posterId!>, POSTER_WRITE);
-	<!posterType!> *<!p.name!>_addr = posterAddr(<!posterId!>);
-	memcpy(<!p.name!>_addr, SDI_F-><!p.name!>_outport.data, SDI_F-><!p.name!>_outport.size);
-	posterGive(<!posterId!>);
-
-	// swap the value of data
-	free(SDI_F-><!p.name!>_outport.data);
-	SDI_F-><!p.name!>_outport.data = <!p.name!>_addr;
-      }
-  }
 <?
-	    else: ?>
-  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
-<?
-	for port in codel.inPorts:
-	    ?>
-  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
-<?
+	codelRelease(codel, service)
 	?>
-  returnCodeToActivityEvent(res);
+
+  return returnCodeToActivityEvent(res);
 }
 
 <?
@@ -215,36 +165,18 @@ extern int <!real_codel_signature(currentTask.codel("init"))!>;
 
 STATUS <!codel_signature(currentTask.codel("init"))!>
 {<?
-	codel = currentTask.codel("init")
-	for port in codel.outPorts:
-	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
-	    posterAddr = "outport_" + port
-	    ?>
-  /* find a pointer to <!port!> poster*/
-  static <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = NULL;
-  <!posterAddr!> = posterAddr(<!posterId!>);
-  if (<!posterAddr!> == NULL) {
-    *report = errnoGet();
-    return ETHER;
-  }<?
-	?>
-  /* Lock access to posters*/<?
-	for port in codel.outPorts:
-	    ?>
-  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
+	codelLock(currentTask.codel("init"))
 	?>
 
   /*call real codel */
-  int res = <!real_codel_call(codel)!>;
+  int res = <!real_codel_call(currentTask.codel("init"))!>;
   if(res < 0)
       *report = returnCodeToReport(res);
 
-  /* release lock on posters */<?
-	for port in codel.outPorts:
-	    ?>
-  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
 <?
+	codelRelease(currentTask.codel("init"))
 	?>
+
   return returnCodeToStatus(res);
 }
 <?

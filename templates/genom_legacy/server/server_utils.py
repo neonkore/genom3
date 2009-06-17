@@ -435,7 +435,7 @@ def real_codel_call(codel, service=None):
   for type in codel.outTypes:
     proto += "out_" + type + ", ";
   for port in codel.outPorts:
-    proto += "outport_" + port + ", "; 
+    proto +=  port + "_outport, "; 
   for port in codel.inPorts:
     proto += "inport_" + port + ", "; 
   proto = codel.name + "(" + proto[:-2] + ")"
@@ -506,6 +506,229 @@ def maxOutputSize():
       if serviceInfo.outputFlag:
 	res = max(res, typeSize(serviceInfo.outputType))
     return res
+
+
+def dynamicMembers(t, name):
+  if t.kind() == IdlKind.Sequence:
+    return [(t, name)]
+  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    return dynamicMembers(t.unalias(), name)
+  elif t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    l = []
+    for m in s.members():
+      l.extend(dynamicMembers(m.data(), name + "." + m.key()))
+    return l
+  else:
+    return []
+
+def counterName(n):
+  res = n + "_counter"
+  res = res.replace(".", "_")
+  res = res.replace("[", "")
+  res = res.replace("]", "")
+  return res
+
+def isEmptyVar(n):
+  res = n + "_is_empty"
+  res = res.replace(".", "_")
+  res = res.replace("[", "")
+  res = res.replace("]", "")
+  res = res.replace("(*", "")
+  res = res.replace(")", "")
+  return res
+
+def copyType(t, dest, src, useIsEmptyVar = True):
+    if t.kind() == IdlKind.Sequence:
+      s = t.asSequenceType()
+      if(useIsEmptyVar):
+	print "if(" + isEmptyVar(dest) + ") {"
+	print dest + ".length = 0;"
+	print dest + ".data = NULL;" 
+	print "} else {"
+      if isDynamic(s.seqType()):
+	print dest + ".data = (" + MapTypeToC(s.seqType(), True) + "*) (start + currentOffset);" 
+	print "currentOffset += " + src + ".length * sizeof(" + src + ".data[0]);"
+
+	counter = counterName(dest)
+	print "for(int " + counter + " =0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
+	copyType(s.seqType(), dest + ".data[" + counter + "]", src + "[" + counter + "]", False)
+	print "}"
+      else:
+	print dest + ".data = (" + MapTypeToC(s.seqType(), True) + "*) (start + currentOffset);" 
+	print "currentOffset += " + src + ".length * sizeof(" + src + ".data[0]);"
+
+      if(useIsEmptyVar):
+	print "}"
+
+    elif t.kind() == IdlKind.Struct:
+      s = t.asStructType()
+      for m in s.members():
+	copyType(m.data(), dest + "." + m.key(), src + "." + m.key(), useIsEmptyVar)
+    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+      copyType(t.unalias(), dest, src, useIsEmptyVar)
+
+def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
+    if t.kind() == IdlKind.Sequence:
+      s = t.asSequenceType()
+      if useIsEmptyVar:
+	print "if(!" + isEmptyVar(src) + ") {"
+      if not parentIsEmpty or useIsEmptyVar:
+	if isDynamic(s.seqType()):
+	  print "for(int i=0; i<" + src + ".length(); ++i) {"
+	  copyTypeReverse(s.seqType(), dest + "[i]", src + ".data[i]", False)
+	  print "}"
+	  print "delete[] " + src + ".data;"
+      if useIsEmptyVar:
+	print "} else if(" + src+ ".data) {"
+      if parentIsEmpty or useIsEmptyVar:
+	if isDynamic(s.seqType()):
+	  #print dest + ".replace(" + src + ".length(), " + src + ".length(), new " + MapTypeToCorbaCpp(s.seqType(), True) + "[" + src + ".length()]);" 
+	  print "memcpy(start + currentOffset, " + src + ".data, " + src + ".length * sizeof(" + src + ".data[0]));"
+	  print dest + ".data = (" + MapTypeToC(s.seqType(), True) + "*) (start + currentOffset);" 
+	  print dest + ".length = " + src + ".length;";
+	  print "currentOffset += " + src + ".length * sizeof(" + src + ".data[0]);"
+
+	  print "for(int i=0; i<" + src + ".length(); ++i) {"
+	  copyTypeReverse(s.seqType(), dest + "[i]", src + ".data[i]", False, True)
+	  print "}"
+
+	  print "free(" + src + ".data);"
+
+	else:
+	  print "memcpy(start + currentOffset, " + src + ".data, " + src + ".length * sizeof(" + src + ".data[0]));"
+	  print dest + ".data = (" + MapTypeToC(s.seqType(), True) + "*) (start + currentOffset);" 
+	  print dest + ".length = " + src + ".length;";
+
+	  print "currentOffset += " + src + ".length * sizeof(" + src + ".data[0]);"
+	  print "free(" + src + ".data);"
+
+	  #print "  " + dest  + ".replace(" + src + ".length, " + src+ ".length, (" + MapTypeToCorbaCpp(s.seqType())  + "*) "+ src + ".data);"
+      if useIsEmptyVar:
+	print "}"
+
+    elif t.kind() == IdlKind.Array:
+      s = t.asArrayType()
+      #print "for(int i=0; i<" + src + ".length(); ++i) {"
+      #copyTypeReverse(s.type(), dest + "[i]", src + ".data[i]", useIsEmptyVar, parentIsEmpty)
+      #print "}"
+    elif t.kind() == IdlKind.Struct:
+      s = t.asStructType()
+      for m in s.members():
+	copyTypeReverse(m.data(), dest + "." + m.key(), src + "." + m.key(), useIsEmptyVar, parentIsEmpty)
+    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+      copyTypeReverse(t.unalias(), dest, src, useIsEmptyVar, parentIsEmpty)
+    #else:
+      #print dest + " = " + src + ";"
+
+def codelLock(codel, service = None):
+  for port in codel.outPorts:
+    p = comp.port(port)
+    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+    posterAddr = port + "_outport"
+    posterType = MapTypeToC(p.idlType, True);
+
+    if not isDynamic(p.idlType):
+      print "/* find a pointer to <!port!> poster*/"
+      print posterType + "* " + posterAddr + " = posterAddr(" + posterId + ");"
+      print "if ("+posterAddr+" == NULL) {"
+      print "  *report = errnoGet();"
+      print "  return ETHER;"
+      print "}"
+      continue
+
+    seqs = dynamicMembers(p.idlType, posterAddr)
+    for x in seqs:  
+      print "  char " + isEmptyVar(x[1]) + " = SDI_F->" + x[1] + ".length == 0;"
+    print "  char init_poster = 0;"
+
+    print "/* find a pointer to <!port!> poster*/"
+    print posterType + " *" + posterAddr + " = posterAddr(" + posterId + ");"
+    print "if ("+posterAddr+" == NULL) {"
+    print "  " + posterAddr + " = &SDI_F->" + port + "_outport;"
+    print "  init_poster = 1;"
+    print "}"
+
+    print "if(!init_poster) {"
+
+    print "char *start = (char*) " + posterAddr + ";"
+    print "int currentOffset = sizeof(" + posterType + ");\n"
+
+    print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_WRITE);"
+    copyType(p.idlType, "(*" + posterAddr + ")",  "(*" + posterAddr + ")")
+
+    print "}"
+  
+  for port in codel.inPorts:
+    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+    posterAddr = "inport_" + port
+
+    if not isDynamic(p.idlType):
+      print "/* find a pointer to <!port!> poster*/"
+      print posterType + " *" + posterAddr + " = posterAddr(" + posterId + ");"
+      print "if ("+posterAddr+" == NULL) {"
+      print "  *report = errnoGet();"
+      print "  return ETHER;"
+      print "}"
+      continue
+
+    posterType = MapTypeToC(p.idlType, True);
+
+    print "/* find a pointer to <!port!> poster*/"
+    print posterType + " *" + posterAddr + " = posterAddr(" + posterId + ");"
+    print "if ("+posterAddr+" == NULL) {"
+    print "  *report = errnoGet();"
+    print "  return ETHER;"
+    print "}"
+
+    print "char *start = (char*) " + p.name + "_addr;"
+    print "int currentOffset = sizeof(" + posterType + ");\n"
+
+    print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_WRITE);"
+    copyType(p.idlType,  "(*" + posterAddr + ")",  "(*" + posterAddr + ")")
+    print "posterGive(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID);"
+
+  for port in codel.inPorts:
+    print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_READ);"
+
+def codelRelease(codel, service=None):
+  for port in codel.outPorts:
+    p = comp.port(port)
+    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+
+    if not isDynamicPort(p): 
+      print "posterGive(" + posterId + ");"
+      continue
+    posterType = MapTypeToC(p.idlType, True);
+
+    print "if(!init_poster) {"
+    print "  posterGive(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID);"
+    print "} else {"
+    
+    # compute the total size of the poster
+    print "int totalSize = " + computeTotalSize(p.idlType, "(*" + p.name + "_outport)") + ";"
+
+    # allocate the space in shared memory
+    print "if(posterCreate(" + upper(comp.name()) + "_" + upper(p.name) + "_POSTER_NAME, totalSize, &("+posterId+")) != OK) {"
+    print "  *report = S_" + comp.name() + "_stdGenoM_CONTROL_CODEL_ERROR;"
+    print "  return ETHER;"
+    print "}"
+
+    # copy the data
+    print "posterTake(" + posterId + ", POSTER_WRITE);"
+    print posterType + " *" + p.name + "_addr = posterAddr(" + posterId + ");"
+    print "int currentOffset = sizeof(" + posterType + ");"
+    print "char *start = (char*) " + p.name + "_addr;"
+
+    copyTypeReverse(p.idlType, "(*" + p.name + "_addr)", "(*" + p.name + "_outport)")  
+    
+    print "posterGive(" + posterId + ");\n\n"
+    print "}"
+
+  for port in codel.inPorts:
+    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
+    print "posterGive(" + posterId + ");"
+
 
 # other vars
 nbServices = len(servicesDict)

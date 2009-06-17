@@ -86,39 +86,9 @@ extern int <!real_codel_signature(codel, service)!>;
  */
 
 <!codelSignatureFull(c, service)!>
-{<?
-	for port in codel.outPorts:
-	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
-	    posterAddr = "outport_" + port
-	    ?>
-  /* find a pointer to <!port!> poster*/
-  static <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = NULL;
-  <!posterAddr!> = posterAddr(<!posterId!>);
-  if (<!posterAddr!> == NULL) {
-    *report = errnoGet();
-    return ERROR;
-  }
+{
 <?
-	for port in codel.inPorts:
-	    posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
-	    posterAddr = "inport_" + port
-	    ?>
-  /* find a pointer to inport <!port!> */
-  static <!upper(comp.name())!>_<!upper(port)!>_POSTER_STR *<!posterAddr!> = NULL;
-  <!posterAddr!> = posterAddr(<!posterId!>);
-  if (<!posterAddr!> == NULL) {
-    *report = errnoGet();
-    return ERROR;
-  }<?
-	?>
-  /* Lock access to posters*/<?
-	for port in codel.outPorts:
-	    ?>
-  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_WRITE);<?
-
-	for port in codel.inPorts:
-	    ?>
-  posterTake(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID, POSTER_READ);<?
+	codelLock(codel, service)
 	?>
 
   /*call real codel */
@@ -126,16 +96,10 @@ extern int <!real_codel_signature(codel, service)!>;
   if(res < 0)
       *report = returnCodeToReport(res);
 
-  /* release lock on posters */<?
-	for port in codel.outPorts:
-	    ?>
-  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
 <?
-	for port in codel.inPorts:
-	    ?>
-  posterGive(<!upper(comp.name())!>_<!upper(port)!>_POSTER_ID);
-<?
+	codelRelease(codel, service)
 	?>
+
   return returnCodeToStatus(res);
 }
 <?

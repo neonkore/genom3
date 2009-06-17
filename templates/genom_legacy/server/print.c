@@ -77,6 +77,13 @@ void print_<!prefix!>( FILE *out,
     print_int(out, &((x+elt)-><!m.key()!>.length), indent, 0, NULL, in);
     print_int(out, &((x+elt)-><!m.key()!>.size), indent, 0, NULL, in);
 <?
+	    elif m.data().kind() == IdlKind.String: 
+	      s = m.data().asStringType()
+	      ?>
+    fprintf(out, "%s<!m.key()!>:\n", indstr);
+    { int dims[1] = {<!s.bound()!>};
+      print_string(out, ((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+<?
 	    else:
 		?>
     fprintf(out, "%s<!m.key()!>:\n", indstr);

@@ -265,8 +265,10 @@ def copyType(t, dest, src, useIsEmptyVar = True):
 	print "} else {"
       if isDynamic(s.seqType()):
 	print dest + ".data = new " + MapTypeToCpp(s.seqType(), True) + "Cpp[" + src + ".length()];"
-	print "for(int i=0; i<" + src + ".length(); ++i) {"
-	copyType(s.seqType(), dest + ".data[i]", src + "[i]", False)
+
+	counter = dest.replace(".", "_") + "_counter"
+	print "for(int " + counter + " =0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
+	copyType(s.seqType(), dest + ".data[" + counter + "]", src + "[" + counter + "]", False)
 	print "}"
       else:
 	print dest + ".length = " + src + ".length();"
@@ -276,8 +278,9 @@ def copyType(t, dest, src, useIsEmptyVar = True):
 
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
-      print "for(int i=0; i<" + src + ".length(); ++i) {"
-      copyType(s.type(), dest + ".data[i]", src + "[i]")
+      counter = dest.replace(".", "_") + "_counter"
+      print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
+      copyType(s.type(), dest + ".data[" + counter + "]", src + "[" + counter + "]")
       print "}"
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
@@ -295,8 +298,9 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
 	print "if(!" + src.replace(".", "_") + "_is_empty) {"
       if not parentIsEmpty or useIsEmptyVar:
 	if isDynamic(s.seqType()):
-	  print "for(int i=0; i<" + src + ".length(); ++i) {"
-	  copyTypeReverse(s.seqType(), dest + "[i]", src + ".data[i]", False)
+	  counter = src.replace(".", "_") + "_counter"
+	  print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter  + ") {"
+	  copyTypeReverse(s.seqType(), dest + "[" + counter + "]", src + ".data[" + counter + "]", False)
 	  print "}"
 	  print "delete[] " + src + ".data;"
       if useIsEmptyVar:
@@ -304,8 +308,10 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
       if parentIsEmpty or useIsEmptyVar:
 	if isDynamic(s.seqType()):
 	  print dest + ".replace(" + src + ".length(), " + src + ".length(), new " + MapTypeToCorbaCpp(s.seqType(), True) + "[" + src + ".length()]);" 
-	  print "for(int i=0; i<" + src + ".length(); ++i) {"
-	  copyTypeReverse(s.seqType(), dest + "[i]", src + ".data[i]", False, True)
+
+	  counter = src.replace(".", "_") + "_counter"
+	  print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter  + ") {"
+	  copyTypeReverse(s.seqType(), dest + "[" + counter + "]", src + ".data[" + counter + "]", False, True)
 	  print "}"
 	else:
 	  print "  " + dest  + ".replace(" + src + ".length, " + src+ ".length, (" + MapTypeToCorbaCpp(s.seqType())  + "*) "+ src + ".data);"
@@ -314,8 +320,9 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
 
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
-      print "for(int i=0; i<" + src + ".length(); ++i) {"
-      copyTypeReverse(s.type(), dest + "[i]", src + ".data[i]", useIsEmptyVar, parentIsEmpty)
+      counter = src.replace(".", "_") + "_counter"
+      print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
+      copyTypeReverse(s.type(), dest + "[" + counter + "]", src + ".data[" + counter + "]", useIsEmptyVar, parentIsEmpty)
       print "}"
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()

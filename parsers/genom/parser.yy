@@ -327,6 +327,22 @@ port_decl:
     }
     Port::Ptr p(new Port($3, type, false));
     driver.component().addPort(p);
+}
+| OUTPORT IDENTIFIER IDENTIFIER LBRACE CODEL IDENTIFIER COLON codel_prototype SEMICOLON RBRACE
+{
+    Idl::IdlType::Ptr type = driver.component().typeFromName($2);
+    if(!type.get()) {
+	error(yyloc, std::string("Unknown type: ") + $2);
+	YYERROR;
+    }
+    Port::Ptr p(new Port($3, type, false));
+    if($6 == "size")
+      p->sizeCodel = $8;
+    else {
+	error(yyloc, std::string("Unknown codel for an outport : ") + $6);
+	YYERROR;
+    }
+    driver.component().addPort(p);
 };
 
 /*** Task declaration ***/

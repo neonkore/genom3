@@ -14,7 +14,9 @@ struct demoStruct {
     demoSpeed speedRef;
 };
 
-outport demoState MobileState;
+outport demoState MobileState {
+  codel size: MobileStateSize();
+}
 inport demoState MobileIn;
 
 component demo {

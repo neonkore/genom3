@@ -40,24 +40,6 @@
 namespace G3nom
 {
 
-class Port
-{
-	public:
-		enum Type { Incoming, Outgoing};
-		typedef boost::shared_ptr<Port> Ptr;
-		typedef std::map<std::string, Ptr> Map;
-
-		Port() {}
-		Port(std::string name, Idl::IdlType::Ptr idlType, bool incoming)
-				: name(name), type(incoming ? Incoming : Outgoing), idlType(idlType) {}
-
-		void debug();
-
-		std::string name;
-		Type type;
-		Idl::IdlType::Ptr idlType;
-};
-
 class Codel
 {
 	public:
@@ -86,6 +68,25 @@ class Codel
 
 	private:
 			std::string m_name;
+};
+
+class Port
+{
+	public:
+		enum Type { Incoming, Outgoing};
+		typedef boost::shared_ptr<Port> Ptr;
+		typedef std::map<std::string, Ptr> Map;
+
+		Port() {}
+		Port(std::string name, Idl::IdlType::Ptr idlType, bool incoming)
+				: name(name), type(incoming ? Incoming : Outgoing), idlType(idlType) {}
+
+		void debug();
+
+		std::string name;
+		Type type;
+		Idl::IdlType::Ptr idlType;
+		Codel::Ptr sizeCodel;
 };
 
 class Task

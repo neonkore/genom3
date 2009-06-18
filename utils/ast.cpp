@@ -269,10 +269,16 @@ void Port::debug()
 {
 	if (type == Incoming)
 		cout << "Inport; ";
-	else
+	else {
 		cout << "Outport; ";
+		if(sizeCodel.get()) {
+			cout << endl << "Size codel: ";
+			sizeCodel->debug();
+			cout << endl;
+		}
+	}
 
-	cout << "type: " << /*idlType->debug() <<*/ endl;
+	cout << "type: " << DumpType::dumpType(idlType) << endl;
 }
 
 /******** Task ***************/

@@ -530,9 +530,15 @@ else:?>
 /*  strcpy (EXEC_TASK_NAME(<!currentTaskNum!>), "execTaskName"); */
 
 <?
-if currentTask.hasCodel("init"):?>
+if currentTask.hasCodel("init"):
+  initFunParams = ""
+  for type in currentTask.codel("init").inTypes:
+    initFunParams += "& SDI_F->" + type + ","
+  for type in currentTask.codel("init").outTypes:
+    initFunParams += "& SDI_F->" + type + ","
+  ?>
     /* Execution de la fonction d'initialisation */
-  if (<!currentTask.codel("init").name!> (&bilan) != OK) {
+  if (<!currentTask.codel("init").name!>_codel(<!initFunParams!> &bilan) != OK) {
     errnoSet(bilan);
     h2perror("<!comp.name()!><!currentTask.name!>InitTaskFunc: <!currentTask.codel("init").name!>");
     return (ERROR);

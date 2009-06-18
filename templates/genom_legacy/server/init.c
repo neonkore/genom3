@@ -39,8 +39,8 @@ else:
 	flatList = []
 	inputDeclare = ""
     else:
-	inputName = initService.inputs()[0]
-	inputType = typeFromIdsName(inputName)
+	inputName = initService.inputs()[0].identifier
+	inputType = inputType(initService.inputs()[0])
 	inputDeclare = MapTypeToC(inputType,True) + " " + inputName + ";"
 	inputSize = "sizeof(" + MapTypeToC(inputType,True) + ")"
 # todo: reuse name from print.c
@@ -200,14 +200,18 @@ if requestFlag:
   /* Instanciation de la structure parametre de la requete */
 <?
     for x in flatList:
-	print "   " + inputName + "." + x[1].replace("__", ".") + " = " + x[1] + ";"
+	if x[0].kind() == IdlKind.String:
+	  s = x[0].asStringType()
+	  print "   strncpy(" + x[1].replace("_", ".") + ", " + x[1] + ", strlen(" + x[1] + " + 1));"
+	else:
+	  print "   " + x[1].replace("_", ".") + " = " + x[1] + ";"
     ?>
   
   /* Affichage de la structure parametre de la requete */
 <?
     for x in flatList:
-	write("   printf(\"" + inputName + "." + x[1].replace("__", ".") + " = " + formatStringForType(x[0]) + "\\n\", ")
-	print inputName + "." + x[1].replace("__", ".") + ");"
+	write("   printf(\"" + x[1].replace("_", ".") + " = " + formatStringForType(x[0]) + "\\n\", ")
+	print x[1].replace("_", ".") + ");"
     ?>
 
   /* Pb: il faut la bibliotheque print.c (possible mais lourd)

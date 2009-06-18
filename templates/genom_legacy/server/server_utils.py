@@ -198,6 +198,11 @@ class ServiceInfo:
       self.inputTypeProto = typeProtoPrefix(self.inputType)
 
       self.inputSize = "sizeof(" + MapTypeToC(self.inputType, True) + ")"
+      if self.inputFlag and self.inputType.kind() == IdlKind.String:
+	self.inputSize = str(self.inputType.asStringType().bound())
+	if self.inputSize == "0":
+	  self.inputSize = "0"
+
       self.inputNamePtr = addressOf(self.inputType, self.inputName)
       self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
  
@@ -646,7 +651,7 @@ def codelLock(codel, service = None):
     seqs = dynamicMembers(p.idlType, posterAddr)
     for x in seqs:  
       print "  char " + isEmptyVar(x[1]) + " = SDI_F->" + x[1] + ".length == 0;"
-    print "  char init_poster = 0;"
+    print "  char init_poster_" + port + " = 0;"
 
     print "/* find a pointer to <!port!> poster*/"
     print posterType + " *" + posterAddr + " = NULL;"
@@ -655,10 +660,10 @@ def codelLock(codel, service = None):
 
     print "if ("+posterAddr+" == NULL) {"
     print "  " + posterAddr + " = &SDI_F->" + port + "_outport;"
-    print "  init_poster = 1;"
+    print "  init_poster_" + port + " = 1;"
     print "}"
 
-    print "if(!init_poster) {"
+    print "if(!init_poster_" + port + ") {"
 
     print "char *start = (char*) " + posterAddr + ";"
     print "int currentOffset = sizeof(" + posterType + ");\n"
@@ -669,6 +674,7 @@ def codelLock(codel, service = None):
     print "}"
   
   for port in codel.inPorts:
+    p = comp.port(port)
     posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
     posterAddr = "inport_" + port
 
@@ -683,6 +689,10 @@ def codelLock(codel, service = None):
 
     posterType = MapTypeToC(p.idlType, True);
 
+    seqs = dynamicMembers(p.idlType, posterAddr)
+    for x in seqs:  
+      print "  char " + isEmptyVar(x[1]) + " = 0;"
+
     print "/* find a pointer to <!port!> poster*/"
     print posterType + " *" + posterAddr + " = posterAddr(" + posterId + ");"
     print "if ("+posterAddr+" == NULL) {"
@@ -690,15 +700,15 @@ def codelLock(codel, service = None):
     print "  return ETHER;"
     print "}"
 
-    print "char *start = (char*) " + p.name + "_addr;"
+    print "char *start = (char*) " + posterAddr + ";"
     print "int currentOffset = sizeof(" + posterType + ");\n"
 
     print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_WRITE);"
     copyType(p.idlType,  "(*" + posterAddr + ")",  "(*" + posterAddr + ")")
-    print "posterGive(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID);"
+#    print "posterGive(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID);"
 
-  for port in codel.inPorts:
-    print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_READ);"
+#  for port in codel.inPorts:
+#    print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_READ);"
 
 def codelRelease(codel, service=None):
   for port in codel.outPorts:
@@ -710,7 +720,7 @@ def codelRelease(codel, service=None):
       continue
     posterType = MapTypeToC(p.idlType, True);
 
-    print "if(!init_poster) {"
+    print "if(!init_poster_" + port + ") {"
     print "  posterGive(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID);"
     print "} else {"
     

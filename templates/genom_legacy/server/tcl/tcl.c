@@ -26,9 +26,9 @@ def parseInput(inputType, name):
 <?
   elif inputType.kind() == IdlKind.Float: ?>
   {
-    double tmpDouble;\n"
+    double tmpDouble;
     ret = Tcl_GetDoubleFromObj(interp, objv[++curObjc], &tmpDouble);
-    <!name!> = (float)tmpDouble;\n"
+    <!name!> = (float)tmpDouble;
   }
 <?
   elif inputType.kind() == IdlKind.Double: ?>

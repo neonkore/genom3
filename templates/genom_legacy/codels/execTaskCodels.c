@@ -6,37 +6,6 @@ def codelNameToValue(n):
   elif n == "MAIN2":
      return "EXEC2"
   return n
-
-def computeTotalSize(t, name, addStructSize = True):
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return computeTotalSize(t.unalias(), name, addStructSize)
-  elif t.kind() == IdlKind.Sequence:
-    s = t.asSequenceType()
-    res = computeTotalSize(s.seqType(), name + ".data[0]")
-
-    if addStructSize:
-      structSize = "2*sizeof(int) + "
-    else:
-      structSize = ""
-
-    if res:
-      return structSize + name + ".length * ( " + res + ")" 
-    else:
-      return structSize + name + ".length * (sizeof(" + name + ".data[0]" + "))" 
-
-  elif t.kind() == IdlKind.Struct:
-    s = t.asStructType()
-    if addStructSize:
-      str = "sizeof(" + name + ")"
-    else:
-      str = "0"
-    for m in s.members():
-      res = computeTotalSize(m.data(), name + "." + m.key(), False)
-      if res:
-	str += " + " + res
-    return str
-  else :
-    return ""
 ?>
 /* 
  * Copyright (c) 1993-2003 LAAS/CNRS

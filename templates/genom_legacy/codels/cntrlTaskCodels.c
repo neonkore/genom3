@@ -109,6 +109,9 @@ idx = len(outports)
 for port in inports:
   name = "connect" + port.name
   service = servicesDict[name]
+  posterAddr = port.name + "_inport"
+  posterType = MapTypeToC(port.idlType, True);
+  posterId = upper(comp.name()) + "_" + upper(port.name) + "_POSTER_ID"
   ?>
 /*------------------------------------------------------------------------
  * <!name!>_codel  -  control codel of CONTROL request <!name!>
@@ -125,8 +128,22 @@ STATUS <!codel_signature(service.codel("control"), service)!>
 	*report = errnoGet();
 	return ERROR;
     }
-
     CNTRL_TASK_POSTER_ID[<!idx!>] = posterId;
+
+<?
+  if isDynamic(port.idlType):
+    print "/* find a pointer to " + port.name + " poster*/"
+    print posterType + " *" + posterAddr + " = posterAddr(" + posterId + ");"
+    print "if ("+posterAddr+" == NULL) {"
+    print "  *report = errnoGet();"
+    print "  return ETHER;"
+    print "}"
+
+    print "posterTake(" + posterId + ", POSTER_READ);"
+    copyType(port.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")")
+    print "posterGive(" + posterId + ");"
+  ?>
+
     return OK;
 }
 <?

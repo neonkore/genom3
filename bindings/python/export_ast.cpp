@@ -118,6 +118,7 @@ void export_ast()
 	class_<Port, Port::Ptr>("Port")
 	.def_readonly("name", &Port::name)
 	.def_readonly("idlType", &Port::idlType)
+	.def_readonly("sizeCodel", &Port::sizeCodel)
 	.def_readonly("type", &Port::type);
 
 	enum_<Port::Type>("PortType")

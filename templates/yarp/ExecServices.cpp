@@ -17,6 +17,10 @@ for s in servicesMap:
     for c in service.codels():
       if c.key() != "control":
 	print "int " + real_codel_signature(c.data(), service) + ";"
+
+for port in outports:
+  if isDynamic(port.idlType):
+    print sizeCodelSignature(port) + ";"
 ?>
 }
 

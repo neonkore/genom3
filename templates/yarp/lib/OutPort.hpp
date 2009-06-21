@@ -16,7 +16,7 @@ template<class T_DATA>
 class OutPort {
 
 public:  
-  OutPort() {}
+  OutPort() : isInit(false) {}
   ~OutPort() {}
   
   void open(const std::string &portName)
@@ -60,11 +60,19 @@ public:
       out_port.interrupt();
   }
 
+  void initialize()
+  {
+    isInit = true;
+  }
+
+  bool isInitialized() const { return isInit; }
+
     T_DATA* data;
 
   private:
     std::string portName;
     yarp::os::BufferedPort<yarp::os::Bottle> out_port;
+    bool isInit;
 };
 
 }

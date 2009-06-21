@@ -189,6 +189,63 @@ def createErrorList():
   return set(l)
 errorList = createErrorList();
 
+def toIdentifier(n):
+  res = n.replace(".", "_")
+  res = res.replace("[", "")
+  res = res.replace("]", "")
+  res = res.replace("(*", "")
+  res = res.replace(")", "")
+  res = res.replace("m_data->", "")
+  return res
+
+def counterName(n):
+  return toIdentifier(n) + "_counter"
+
+def lengthVar(n):
+  return toIdentifier(n) + "_length"
+
+def dynamicMembers(t, name, recursive = False):
+  if t.kind() == IdlKind.Sequence:
+    if recursive:
+      s = t.asSequenceType()
+      l = [(t, name)]
+      l.extend(dynamicMembers(s.seqType(), name + ".data", True))
+      return l
+    else:
+      return [(t, name)]
+  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    return dynamicMembers(t.unalias(), name, recursive)
+  elif t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    l = []
+    for m in s.members():
+      l.extend(dynamicMembers(m.data(), name + "." + m.key(), recursive))
+    return l
+  else:
+    return []
+
+def allocMemory(t, dest, scopedName):
+    if t.kind() == IdlKind.Sequence:
+      s = t.asSequenceType()
+      seqType = MapTypeToC(s.seqType(), True)
+      print dest + ".data = new " + seqType + "[" + lengthVar(scopedName) + "];"
+      print dest + ".length = " + lengthVar(scopedName) + ";"
+      print ""
+
+      if isDynamic(s.seqType()):
+	counter = counterName(dest)
+	print "int " + counter + " = 0;"
+	print "for(; " + counter + "<" + dest + ".length; ++" + counter + ") {"
+	allocMemory(s.seqType(), dest + ".data[" + counter + "]", scopedName + ".data")
+	print "}"
+
+    elif t.kind() == IdlKind.Struct:
+      s = t.asStructType()
+      for m in s.members():
+	allocMemory(m.data(), dest + "." + m.key(), scopedName + "." + m.key())
+    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+      allocMemory(t.unalias(), dest, scopedName)
+
 def codelNeedsLock(codel, service):
   if codel.outTypes:
     return 2
@@ -202,7 +259,59 @@ def codelNeedsLock(codel, service):
 	return 1
     return 0
 
+def sizeCodelSignature(port):
+  sizeCodelArgs = ""
+  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
+    sizeCodelArgs += "int *" + lengthVar(x[1]) + ", "
+
+  for s in port.sizeCodel.inTypes:
+    idstype = comp.typeFromIdsName(s);
+    sizeCodelArgs += pointerTo(idstype) + " in_" + s + ", "
+  for s in port.sizeCodel.outTypes:
+    idstype = comp.typeFromIdsName(s);
+    sizeCodelArgs += pointerTo(idstype) + " out_" + s + ", "
+  for s in port.sizeCodel.inPorts:
+    p = comp.port(s)
+    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_inport, "
+  for s in port.sizeCodel.outPorts:
+    p = comp.port(s)
+    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_outport, "
+
+  return "int " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ")"
+
+def callSizeCodel(port):
+  sizeCodelArgs = ""
+  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
+    print "int " + lengthVar(x[1]) + " = 0;"
+    sizeCodelArgs += "&" + lengthVar(x[1]) + ", "
+
+  for s in port.sizeCodel.inTypes:
+    sizeCodelArgs += "&m_data->" + s + ", "
+  for s in port.sizeCodel.outTypes:
+    sizeCodelArgs += "&m_data->" + s + ", "
+  for s in port.sizeCodel.inPorts:
+    sizeCodelArgs += s + "_inport, "
+  for s in port.sizeCodel.outPorts:
+    sizeCodelArgs += s + "_outport, "
+
+  print "int res = " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ");"
+
 def codelLock(codel, service):
+    for p in codel.outPorts:
+      port = comp.port(p)
+      if not isDynamic(port.idlType):
+	continue
+
+      print "if(!m_data->" + p + "_outport.isInitialized()) {"
+
+      callSizeCodel(port)
+
+      print "  if(res >= 0) {"
+      print "    m_data->" + p + "_outport.initialize();"
+      allocMemory(port.idlType, "(*m_data->" + p + "_outport.data)", p + "_outport")
+      print "  }"
+      print "}"
+ 
     for p in codel.inPorts:
       print "  m_data->" + p + "_inport.wait();"
     res = codelNeedsLock(codel, service)

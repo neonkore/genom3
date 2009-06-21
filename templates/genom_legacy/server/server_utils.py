@@ -592,21 +592,22 @@ def computeTotalSize(t, name, addStructSize = True):
 def copyType(t, dest, src):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
+      seqType = MapTypeToC(s.seqType(), True)
       if isDynamic(s.seqType()):
-	seqType = MapTypeToC(s.seqType(), True)
 	print dest + ".data = malloc(" + src + ".length * sizeof(" + seqType + "));"
 	print dest + ".length = " + src + ".length;"
+	print seqType + "* " + toIdentifier(src) + "_name = (" + seqType + "*) (start + currentOffset);"
 
 	counter = counterName(dest)
 	print "int " + counter + " = 0;"
 	print "for(; " + counter + "<" + src + ".length; ++" + counter + ") {"
-	copyType(s.seqType(), dest + ".data[" + counter + "]", src + ".data[" + counter + "]")
+	copyType(s.seqType(), dest + ".data[" + counter + "]", toIdentifier(src) + "_name[" + counter + "]")
 	print "}"
 
       else:
-	print dest + ".data = " + src + ".data;"
+	print dest + ".data = (" + seqType + "*) (start + currentOffset);"
+	print "currentOffset += " + dest + ".length * sizeof(" + seqType + ");"
 	print dest + ".length = " + src + ".length;"
-
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
@@ -662,7 +663,7 @@ def allocateMemory(t, dest, idsDest, scopedName):
       seqType = MapTypeToC(s.seqType(), True)
       print dest + ".data = (" + seqType + "*) (start + currentOffset);"
       print dest + ".length = " + lengthVar(scopedName) + ";"
-      print "currentOffset += " + dest + ".length * sizeof(" + lengthVar(scopedName) + ");"
+      print "currentOffset += " + lengthVar(scopedName) + " * sizeof(" + seqType + ");"
       print ""
 
       if isDynamic(s.seqType()):
@@ -717,9 +718,9 @@ def codelLock(codel, service = None):
       sizeCodelArgs += "&" + lengthVar(x[1]) + ", "
 
     for s in p.sizeCodel.inTypes:
-      sizeCodelArgs += "SDI_F->" + s + ", "
+      sizeCodelArgs += "&SDI_F->" + s + ", "
     for s in p.sizeCodel.outTypes:
-      sizeCodelArgs += "SDI_F->" + s + ", "
+      sizeCodelArgs += "&SDI_F->" + s + ", "
     for s in p.sizeCodel.inPorts:
       sizeCodelArgs += s + "_inport, "
     for s in p.sizeCodel.outPorts:

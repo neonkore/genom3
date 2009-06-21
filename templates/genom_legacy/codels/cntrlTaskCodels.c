@@ -140,6 +140,10 @@ STATUS <!codel_signature(service.codel("control"), service)!>
     print "}"
 
     print "posterTake(" + posterId + ", POSTER_READ);"
+
+    print "int currentOffset = sizeof(" + posterType + ");"
+    print "char *start = (char*) " + posterAddr + ";"
+
     copyType(port.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")")
     print "posterGive(" + posterId + ");"
   ?>

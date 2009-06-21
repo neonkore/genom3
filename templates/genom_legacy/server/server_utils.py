@@ -547,6 +547,7 @@ def toIdentifier(n):
   res = res.replace("]", "")
   res = res.replace("(*", "")
   res = res.replace(")", "")
+  res = res.replace("SDI_F->", "")
   return res
 
 def counterName(n):
@@ -589,38 +590,42 @@ def computeTotalSize(t, name, addStructSize = True):
   else :
     return ""
 
-def copyType(t, dest, src):
+def copyType(t, dest, src, allocateMemory=True):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
       if isDynamic(s.seqType()):
-	print dest + ".data = malloc(" + src + ".length * sizeof(" + seqType + "));"
-	print dest + ".length = " + src + ".length;"
+	if allocateMemory:
+	  print dest + ".data = malloc(" + src + ".length * sizeof(" + seqType + "));"
+	  print dest + ".length = " + src + ".length;"
+
 	print seqType + "* " + toIdentifier(src) + "_name = (" + seqType + "*) (start + currentOffset);"
+	print "currentOffset += " + src + ".length * sizeof(" + seqType + ");"
 
 	counter = counterName(dest)
 	print "int " + counter + " = 0;"
 	print "for(; " + counter + "<" + src + ".length; ++" + counter + ") {"
-	copyType(s.seqType(), dest + ".data[" + counter + "]", toIdentifier(src) + "_name[" + counter + "]")
+	copyType(s.seqType(), dest + ".data[" + counter + "]", toIdentifier(src) + "_name[" + counter + "]", allocateMemory)
 	print "}"
 
       else:
-	print dest + ".data = (" + seqType + "*) (start + currentOffset);"
-	print "currentOffset += " + dest + ".length * sizeof(" + seqType + ");"
-	print dest + ".length = " + src + ".length;"
+	if allocateMemory:
+	  print dest + ".data = (" + seqType + "*) (start + currentOffset);"
+	  print dest + ".length = " + src + ".length;"
+	print "currentOffset += " + src + ".length * sizeof(" + seqType + ");"
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyType(m.data(), dest + "." + m.key(), src + "." + m.key())
+	copyType(m.data(), dest + "." + m.key(), src + "." + m.key(), allocateMemory)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      copyType(t.unalias(), dest, src)
+      copyType(t.unalias(), dest, src, allocateMemory)
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
       counter = counterName(dest)
       print "int " + counter + " = 0;"
       print "for(; " + counter + "<" + str(s.bounds()[0]) + "; ++" + counter + ") {"
-      copyType(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
+      copyType(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", allocateMemory)
       print "}"
     elif t.kind() == IdlKind.String:
       s = t.asStringType()
@@ -767,7 +772,11 @@ def codelLock(codel, service = None):
       continue
 
     print "posterTake(" + posterId + ", POSTER_READ);"
-    copyTypeReverse(p.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")")
+
+    print "int currentOffset = sizeof(" + posterType + ");"
+    print "char *start = (char*) " + posterAddr + ";"
+
+    copyType(p.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")", False)
 
 def codelRelease(codel, service=None):
   for port in codel.outPorts:

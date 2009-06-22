@@ -101,6 +101,7 @@ def decodeType(t, name):
     seqType = MapTypeToCpp(s.seqType())
     decodeSimpleType("int", name + ".length")
     if s.seqType().kind() == IdlKind.Char: ?>
+    <!name!>.data = new char[<!name!>.length];
     memcpy(<!name!>.data, b->get(it).asBlob(), <!name!>.length);
     it++;
 <?

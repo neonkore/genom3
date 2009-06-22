@@ -109,8 +109,14 @@ void IdlVisitor::visitStructType(StructType *s)
 	IdlType::Map::const_iterator it;
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
-		it->second->accept(*this);
-		m_out << " " << it->first << ";";
+		if(it->second->kind() == IdlType::Array) {
+			ArrayType *a = it->second->asArrayType();
+			a->type()->accept(*this);
+			m_out << " " << it->first << a->printBounds() << ";";
+		} else {
+			it->second->accept(*this);
+			m_out << " " << it->first << ";";
+		}
 	}
 	m_out << "\n}";
 }

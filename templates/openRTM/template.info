@@ -13,7 +13,7 @@ main:
   "ControlTask.idl"
   "ExecServices.h"
   "ExecServices.cpp"
-  "CMakeLists.txt"
+/*  "CMakeLists.txt" */
   "FindOpenRTM.cmake"
   "rtc.conf"
   "struct.h" -> "$$Struct.hpp"

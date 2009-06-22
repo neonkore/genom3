@@ -32,6 +32,18 @@ def inputList(service):
     res.extend(flatStruct(inputType(i), i.identifier, '.'))
   return res
 
+def addressOf(t, s):
+ if t.kind() == IdlKind.String:
+   return s
+ else:
+    return "&" + s
+
+def needsConversion(t):
+  if t.kind() == IdlKind.Long:
+    return True
+  else:
+    return False
+
 def service_idl_signature(service):
     # find the service output type
     if service.output.identifier:
@@ -49,16 +61,27 @@ def service_idl_signature(service):
 	args += "in " + MapTypeToIdl(t) + " " + i.identifier + ", "
     return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ");"
 
+def cpp_arg(t,name):
+  cppType = MapTypeToCorbaCpp(t)
+  if t.kind() == IdlKind.Struct:  
+    return "const " + cppType + " &" + name
+  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    if t.unalias().kind() == IdlKind.Struct:
+      return "const " + cppType + " &" + name
+    else:
+      return cppType + " " + name
+  elif t.kind() == IdlKind.String:
+    return "const " + cppType + " " + name
+  else:
+    return cppType + " " + name
+
 def service_cpp_args(service, className=""):
     # create the args list
     args = ""
     for i in service.inputs():
 	t = inputType(i)
-	args += MapTypeToCorbaCpp(t) + " in_" + i.identifier + ", "
-    if className != "":
-	return className + "::" + service.name + "(" + args[:-2] + ")"
-    else:
-	return service.name + "(" + args[:-2] + ")"
+	args += cpp_arg(t," in_" + i.identifier) + ", "
+    return service.name + "(" + args[:-2] + ")"
 
 def service_cpp_signature(service, className=""):
     # find the service output type
@@ -69,7 +92,10 @@ def service_cpp_signature(service, className=""):
 	  outputType = inputType(service.output)
     else:
 	outputType = BaseType.voidType
-    return MapTypeToCorbaCpp(outputType, True) + " " + service_cpp_args(service, className)
+    if className:
+      return MapTypeToCorbaCpp(outputType, True) + " " + className + "::" + service_cpp_args(service, className)
+    else:
+      return MapTypeToCorbaCpp(outputType, True) + " " + service_cpp_args(service, className)
 
 def pointerTo(t):
   s = MapTypeToC(t,True)
@@ -83,14 +109,14 @@ def real_codel_signature(codel, service=None):
   if service is not None:
     for s in service.inputs():
 	idstype = inputType(s);
-	proto += pointerTo(idstype) + " in_" + s.identifier + ", ";
+	proto += "const " + pointerTo(idstype) + " in_" + s.identifier + ", ";
     if service.output.identifier:
 	idstype = inputType(service.output);
 	proto += pointerTo(idstype) + " out_" + service.output.identifier + ", "; 
 
   for type in codel.inTypes:
     idstype = comp.typeFromIdsName(type);
-    proto += pointerTo(idstype) + " in_" + type + ", ";
+    proto += "const " + pointerTo(idstype) + " in_" + type + ", ";
   for type in codel.outTypes:
     idstype = comp.typeFromIdsName(type);
     proto += pointerTo(idstype) + " out_" + type + ", ";
@@ -132,37 +158,24 @@ for p in comp.portsMap():
     else:
 	inports.append(p.data())
 
-def codel_call(codel, service=None):
-  proto = ""
-  if service is not None:
-    for s in service.inputs():
-	proto += " in_" + s.identifier + ", ";
-    if service.output.identifier:
-	proto += " out_" + service.output.identifier + ", "; 
-
-  for type in codel.inTypes:
-    proto += "& in_" + type + ", ";
-  for type in codel.outTypes:
-    proto += "& out_" + type + ", ";
-  for port in codel.outPorts:
-    proto += port + ", "; 
-  for port in codel.inPorts:
-    proto += port + ", "; 
-  proto = codel.name + "(" + proto[:-2] + ")"
-  return proto
-
 def real_codel_call(codel, data_prefix="", service=None):
   proto = ""
   if service is not None:
     for i in service.inputs():
-	proto += " &in_" + i.identifier + ", ";
+      t = inputType(i)
+      if needsConversion(t):
+	proto += addressOf(inputType(i), i.identifier) + ", "
+      else:
+	proto += addressOf(inputType(i), " in_" + i.identifier) + ", "
     if service.output.identifier:
-	proto += " &out_" + service.output.identifier + ", "; 
+	proto += " &out_" + service.output.identifier + ", " 
 
   for type in codel.inTypes:
-    proto += "& " + data_prefix + type + ", ";
+    t = comp.typeFromIdsName(type)
+    proto += addressOf(t, data_prefix + type) + ", "
   for type in codel.outTypes:
-    proto += "& " + data_prefix + type + ", ";
+    t = comp.typeFromIdsName(type)
+    proto += addressOf(t, data_prefix + type) + ", "
   for port in codel.outPorts:
     p = comp.port(port)
     if not p is None and isDynamic(p.idlType):
@@ -241,98 +254,86 @@ def isDynamic(t):
   else:
     return False
 
-def dynamicMembers(t, name):
+def dynamicMembers(t, name, recursive = False):
   if t.kind() == IdlKind.Sequence:
-    return [(t, name)]
+    if recursive:
+      s = t.asSequenceType()
+      l = [(t, name)]
+      l.extend(dynamicMembers(s.seqType(), name + ".data", True))
+      return l
+    else:
+      return [(t, name)]
   elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return dynamicMembers(t.unalias(), name)
+    return dynamicMembers(t.unalias(), name, recursive)
   elif t.kind() == IdlKind.Struct:
     s = t.asStructType()
     l = []
     for m in s.members():
-      l.extend(dynamicMembers(m.data(), name + "." + m.key()))
+      l.extend(dynamicMembers(m.data(), name + "." + m.key(), recursive))
     return l
   else:
     return []
 
-def counterName(n):
-  res = n + "_counter"
-  res = res.replace(".", "_")
+def toIdentifier(n):
+  res = n.replace(".", "_")
   res = res.replace("[", "")
   res = res.replace("]", "")
+  res = res.replace("(*", "")
+  res = res.replace(")", "")
+  res = res.replace("m_data->", "")
   return res
 
-def copyType(t, dest, src, useIsEmptyVar = True):
+def counterName(n):
+  return toIdentifier(n) + "_counter"
+
+def lengthVar(n):
+  return toIdentifier(n) + "_length"
+
+def copyType(t, dest, src):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
-      if(useIsEmptyVar):
-	print "if(" + dest.replace(".", "_") + "_is_empty) {"
-	print dest + ".length = 0;"
-	print dest + ".data = 0;" 
-	print "} else {"
       if isDynamic(s.seqType()):
 	print dest + ".data = new " + MapTypeToCpp(s.seqType(), True) + "Cpp[" + src + ".length()];"
 
 	counter = counterName(dest)
 	print "for(int " + counter + " =0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
-	copyType(s.seqType(), dest + ".data[" + counter + "]", src + "[" + counter + "]", False)
+	copyType(s.seqType(), dest + ".data[" + counter + "]", src + "[" + counter + "]")
 	print "}"
       else:
 	print dest + ".length = " + src + ".length();"
 	print dest + ".data = (" + MapTypeToCpp(s.seqType())  + "*) " + src + ".get_buffer();"
-      if(useIsEmptyVar):
-	print "}"
 
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
       counter = counterName(dest)
-      print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
-      copyType(s.type(), dest + ".data[" + counter + "]", src + "[" + counter + "]")
+      print "for(int " + counter + "=0; " + counter + " < " + str(s.bounds()[0])  + "; ++" + counter + ") {"
+      copyType(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
       print "}"
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyType(m.data(), dest + "." + m.key(), src + "." + m.key(), useIsEmptyVar)
+	copyType(m.data(), dest + "." + m.key(), src + "." + m.key())
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      copyType(t.unalias(), dest, src, useIsEmptyVar)
+      copyType(t.unalias(), dest, src)
     else:
       print dest + " = " + src + ";"
 
 def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
-      if useIsEmptyVar:
-	print "if(!" + src.replace(".", "_") + "_is_empty) {"
       if not parentIsEmpty or useIsEmptyVar:
 	if isDynamic(s.seqType()):
 	  counter = counterName(src)
-	  print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter  + ") {"
+	  print "for(int " + counter + "=0; " + counter + " < " + src + ".length; ++" + counter  + ") {"
 	  copyTypeReverse(s.seqType(), dest + "[" + counter + "]", src + ".data[" + counter + "]", False)
 	  print "}"
 	  print "delete[] " + src + ".data;"
-      if useIsEmptyVar:
-	print "} else if(" + src+ ".data) {"
-      if parentIsEmpty or useIsEmptyVar:
-	if isDynamic(s.seqType()):
-	  print dest + ".replace(" + src + ".length(), " + src + ".length(), new " + MapTypeToCorbaCpp(s.seqType(), True) + "[" + src + ".length()]);" 
-
-	  counter = counterName(src)
-	  print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter  + ") {"
-	  copyTypeReverse(s.seqType(), dest + "[" + counter + "]", src + ".data[" + counter + "]", False, True)
-	  print "}"
-
-	  print "free(" + src + ".data);"
-
-	else:
-	  print "  " + dest  + ".replace(" + src + ".length, " + src+ ".length, (" + MapTypeToCorbaCpp(s.seqType())  + "*) "+ src + ".data);"
-      if useIsEmptyVar:
-	print "}"
 
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
       counter = counterName(src)
-      print "for(int " + counter + "=0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
-      copyTypeReverse(s.type(), dest + "[" + counter + "]", src + ".data[" + counter + "]", useIsEmptyVar, parentIsEmpty)
+      print "for(int " + counter + "=0; " + counter + "<" + str(s.bounds()[0]) + "; ++" + counter + ") {"
+      copyTypeReverse(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", useIsEmptyVar, parentIsEmpty)
       print "}"
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
@@ -343,7 +344,72 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
     else:
       print dest + " = " + src + ";"
 
+def allocMemory(t, dest, scopedName):
+    if t.kind() == IdlKind.Sequence:
+      s = t.asSequenceType()
+      seqType = MapTypeToCorbaCpp(s.seqType(), True)
+      print dest + ".replace(" + lengthVar(scopedName) + ", " + lengthVar(scopedName) + ", new " + seqType + "[" + lengthVar(scopedName) + "]);"
+      print ""
+
+      if isDynamic(s.seqType()):
+	counter = counterName(dest)
+	print "int " + counter + " = 0;"
+	print "for(; " + counter + "<" + dest + ".length(); ++" + counter + ") {"
+	allocMemory(s.seqType(), dest + "[" + counter + "]", scopedName + ".data")
+	print "}"
+
+    elif t.kind() == IdlKind.Struct:
+      s = t.asStructType()
+      for m in s.members():
+	allocMemory(m.data(), dest + "." + m.key(), scopedName + "." + m.key())
+    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+      allocMemory(t.unalias(), dest, scopedName)
+
+
+def sizeCodelSignature(port):
+  sizeCodelArgs = ""
+  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
+    sizeCodelArgs += "int *" + lengthVar(x[1]) + ", "
+
+  for s in port.sizeCodel.inTypes:
+    idstype = comp.typeFromIdsName(s);
+    sizeCodelArgs += pointerTo(idstype) + " in_" + s + ", "
+  for s in port.sizeCodel.outTypes:
+    idstype = comp.typeFromIdsName(s);
+    sizeCodelArgs += pointerTo(idstype) + " out_" + s + ", "
+  for s in port.sizeCodel.inPorts:
+    p = comp.port(s)
+    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_inport, "
+  for s in port.sizeCodel.outPorts:
+    p = comp.port(s)
+    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_outport, "
+
+  return "int " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ")"
+
+def callSizeCodel(port):
+  sizeCodelArgs = ""
+  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
+    print "int " + lengthVar(x[1]) + " = 0;"
+    sizeCodelArgs += "&" + lengthVar(x[1]) + ", "
+
+  for s in port.sizeCodel.inTypes:
+    sizeCodelArgs += "&m_data->" + s + ", "
+  for s in port.sizeCodel.outTypes:
+    sizeCodelArgs += "&m_data->" + s + ", "
+  for s in port.sizeCodel.inPorts:
+    sizeCodelArgs += s + "_inport, "
+  for s in port.sizeCodel.outPorts:
+    sizeCodelArgs += s + "_outport, "
+
+  print "int res = " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ");"
+
 def codelLock(codel, service=None):
+    if not service is None:
+      for i in service.inputs():
+	t = inputType(i)
+	if needsConversion(t):
+	  print MapTypeToCpp(t, True) + " " + i.identifier + " = in_" + i.identifier + ";"
+
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.wait();"
     for p in codel.outPorts:
@@ -354,8 +420,19 @@ def codelLock(codel, service=None):
       newType = MapTypeToCpp(port.idlType, True) + "Cpp"
       print "  " + newType + " " + p + "_outport;"
 
+      str = ""
       for x in seqs:  
-	print "  bool " + x[1].replace(".", "_") + "_outport_is_empty = m_data->" + x[1] + ".length() == 0;"
+	str += "m_data->" + x[1] + ".length() == 0 && "
+      print "bool " +  p + "_outport_is_empty = " + str[:-3] + ";"
+
+      print "if(" + p + "_outport_is_empty) {"
+
+      callSizeCodel(port)
+
+      print "  if(res >= 0) {"
+      allocMemory(port.idlType, "m_data->" + p + "_data", p + "_outport")
+      print "  }"
+      print "}\n\n"
 
       copyType(port.idlType, p + "_outport", "m_data->" + p + "_data")
 
@@ -366,6 +443,12 @@ def codelLock(codel, service=None):
       print "  m_data->idsMutex.acquire_read();"
 
 def codelRelease(codel, service=None):
+    if not service is None:
+      for i in service.inputs():
+	t = inputType(i)
+	if needsConversion(t):
+	  print "in_" + i.identifier + " = " + i.identifier + ";"
+
     for p in codel.outPorts:
       port = comp.port(p)
       if not isDynamic(port.idlType):

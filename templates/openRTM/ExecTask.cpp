@@ -39,7 +39,7 @@ RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onInitialize()
 <?
   codelLock(currentTask.codel("init"));
   ?>
-  int res = <!codel_call(currentTask.codel("init"))!>;
+  int res = <!real_codel_call(currentTask.codel("init"))!>;
   // update ports, release locks, etc
 <?
   codelRelease(currentTask.codel("init"));
@@ -78,7 +78,7 @@ RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onFinalize()
 <?
   codelLock(currentTask.codel("end"));
   ?>
-  int res = <!codel_call(currentTask.codel("end"))!>;
+  int res = <!real_codel_call(currentTask.codel("end"))!>;
   // update ports, release locks, etc
 <?
   codelRelease(currentTask.codel("end"));

@@ -97,7 +97,7 @@ void CorbaCppVisitor::visitBaseType(BaseType *base)
 
 void CorbaCppVisitor::visitStringType(StringType *s)
 {
-	m_out << "String_var";
+	m_out << "char *";
 }
 
 void CorbaCppVisitor::visitWStringType(WStringType *ws)

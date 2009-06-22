@@ -110,30 +110,20 @@ for t in comp.tasksMap():
   RTObject_var rtobj = m_<!capCompName!><!task.name!>->getObjRef();
 <?
   if task.period > 0: ?>
-  PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new PeriodicExecutionContext(::DataFlowComponent::_narrow(rtobj));
+  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(::DataFlowComponent::_narrow(rtobj));
   m_<!capCompName!><!task.name!>_exc->set_rate(1000 / <!task.period!>);
 <? 
   else: ?>
-  ExtTriggerExecutionContext *m_<!capCompName!><!task.name!>_exc = new ExtTriggerExecutionContext(::DataFlowComponent::_narrow(rtobj));
+  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(::DataFlowComponent::_narrow(rtobj));
+  m_<!capCompName!><!task.name!>_exc->set_rate(50);
 <?
   ?>
   m_<!capCompName!><!task.name!>_exc->add(rtobj);
   m_<!capCompName!><!task.name!>_exc->activate_component(rtobj);
   m_<!capCompName!><!task.name!>_exc->start();
 
-<?
-if initServiceNb != -1:
-  codelLock(initService.codel("main"), initService)
-  ?>
-  // call user init function
-  int res = <!codel_call(initService.codel("main"), initService)!>;
-<?
-  codelRelease(initService.codel("main"), initService)
-  ?>
-  if(res == ERROR)
-      return RTC::RTC_ERROR;
-<?
-?>
+  // todo: call init service
+
   return RTC::RTC_OK;
 }
 

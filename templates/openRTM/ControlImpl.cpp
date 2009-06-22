@@ -32,7 +32,7 @@ for s in servicesMap:
     if service.hasCodel("control"):
 	codelLock(service.codel("control"), service)
 	?>
-  int res = <!real_codel_call(service.codel("control"), "", service)!>;
+  int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
 <?
 	codelRelease(service.codel("control"), service)
 	?>

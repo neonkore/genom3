@@ -4,14 +4,20 @@
 #include "<!comp.name()!>Control.h"
 
 // forward declaration of user codels
+extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Exec:
+  if service.type != ServiceType.Control:
     for c in service.codels():
       if c.key() != "control":
 	print "int " + real_codel_signature(c.data(), service) + ";"
+
+for port in outports:
+  if isDynamic(port.idlType):
+    print sizeCodelSignature(port) + ";"
 ?>
+}
 
 <?
 for s in comp.servicesMap():
@@ -84,7 +90,7 @@ bool <!service.name!>Service::step()
       return true;
 <?
   ?>
-    case GOTO_ETHER:
+    case <!upper(service.name)!>_ETHER:
       return false;
   }
   return true;

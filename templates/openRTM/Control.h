@@ -37,7 +37,7 @@ t = comp.IDSType.unalias()
 if t.kind() == IdlKind.Struct:
   s = t.asStructType()
   for m in s.members():
-     print "  " + MapTypeToCorbaCpp(m.data()) + " " + m.key() + ";"
+     print "  " + MapTypeToCpp(m.data()) + " " + m.key() + ";"
 ?>
   // Locks
   ACE_RW_Mutex idsMutex;

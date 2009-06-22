@@ -3,7 +3,9 @@
 
 <?
 def copyTypeCpp(t):
-  if t.kind() == IdlKind.Named:
+  if not isDynamic(t):
+    return t
+  elif t.kind() == IdlKind.Named:
     n = t.asNamedType()
     return NamedType(n.identifier() + "Cpp", copyTypeCpp(n.type()))
   elif t.kind() == IdlKind.Typedef:

@@ -11,11 +11,12 @@ SET(<!upperCompName!>_SRC
       <!comp.name()!>Control.cpp 
       <!comp.name()!>ControlImpl.cpp  
       ExecServices.cpp
+      <!comp.name()!>Convert.cpp
       logger.c
-      <!comp.name()!>UserCntrlTaskCodels.cpp<?
+      <!comp.name()!>UserCntrlTaskCodels.c<?
 for t in comp.tasksMap():
   ?>
-      <!comp.name()!>User<!t.data().name!>Codels.cpp
+      <!comp.name()!>User<!t.data().name!>Codels.c
       <!comp.name()!><!t.data().name!>.cpp
 <?
 ?>

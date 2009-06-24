@@ -33,6 +33,8 @@
 #include "idltype.h"
 #include "idlvalues.h"
 
+#define CORBA_SUFFIX "_Corba"
+
 using namespace G3nom;
 using namespace Idl;
 using namespace std;
@@ -94,7 +96,7 @@ void IdlVisitor::printDeclaratorVectString(ostream &m_out, Declarator::VectPtr v
 			m_out << ", ";
 		else
 			first = false;
-		m_out << (*it)->identifier();
+		m_out << (*it)->identifier() << CORBA_SUFFIX;
 
 		//print array if existing
 		std::vector<int>::const_iterator it2 = (*it)->bounds().begin();
@@ -105,7 +107,7 @@ void IdlVisitor::printDeclaratorVectString(ostream &m_out, Declarator::VectPtr v
 
 void IdlVisitor::visitStructType(StructType *s)
 {
-	m_out << "struct " << s->identifier() << " {";
+	m_out << "struct " << s->identifier() << CORBA_SUFFIX << " {";
 	IdlType::Map::const_iterator it;
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
@@ -131,7 +133,7 @@ void IdlVisitor::visitTypedefType(TypedefType *t)
 
 void IdlVisitor::visitEnumType(EnumType *e)
 {
-	m_out << "enum " << e->identifier() << " { ";
+	m_out << "enum " << e->identifier() << CORBA_SUFFIX << " { ";
 
 	bool first = true;
 	std::vector<std::string>::const_iterator it;
@@ -141,7 +143,7 @@ void IdlVisitor::visitEnumType(EnumType *e)
 		else
 			first = false;
 
-		m_out << *it;
+		m_out << *it << CORBA_SUFFIX;
 	}
 	m_out << "} ";
 }
@@ -153,7 +155,7 @@ void IdlVisitor::visitArrayType(ArrayType *a)
 
 void IdlVisitor::visitNamedType(NamedType *n)
 {
-	m_out << n->identifier();
+	m_out << n->identifier() << CORBA_SUFFIX;
 }
 
 void IdlVisitor::visitConstValue(ConstValue *v) 

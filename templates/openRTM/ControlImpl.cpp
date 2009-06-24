@@ -6,12 +6,14 @@
 #include "ExecServices.h"
 
 // forward declaration of user codels
+extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
   if service.hasCodel("control"):
     print "int " + real_codel_signature(service.codel("control"), service) + ";"
 ?>
+}
 
 <!capCompName!>ControlImpl::<!capCompName!>ControlImpl(<!capCompName!>ControlData *data)
 : m_data(data)
@@ -30,11 +32,13 @@ for s in servicesMap:
 {
 <?
     if service.hasCodel("control"):
+	copyCodelArgs(service.codel("control"), service)
 	codelLock(service.codel("control"), service)
 	?>
   int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
 <?
 	codelRelease(service.codel("control"), service)
+	copyCodelArgsReverse(service.codel("control"), service)
 	?>
   if(res < 0) //error
       return;
@@ -49,9 +53,12 @@ for s in servicesMap:
 	  print "  m_data->kill" + incomp + "Services();" 
 
     if service.inputs():
-      if service.inputs()[0].kind == ServiceInputKind.IDSMember: ?>
+      if service.inputs()[0].kind == ServiceInputKind.IDSMember: 
+	?>
   m_data->idsMutex.acquire_write();
-  m_data-><!service.inputs()[0].identifier!> = in_<!service.inputs()[0].identifier !>; 
+<?
+	copyTypeFromCorba(inputType(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
+	?> 
   m_data->idsMutex.release();
 <?
     if service.output.identifier:?>
@@ -75,7 +82,10 @@ for s in comp.servicesMap():
     else:
       args = ""
     for i in service.inputs():
-      args += ", in_" + i.identifier
+      if needsConversion(inputType(i)):
+	args += ", " + i.identifier
+      else:
+	args += ", in_" + i.identifier
     ?>
 <!service_cpp_signature(service, prefix)!>
 {
@@ -83,12 +93,14 @@ for s in comp.servicesMap():
     if service.output.identifier: ?>
   static long m_serviceCount = 0;
 <?
+    copyCodelArgs(service.codel("control"), service)
     if service.hasCodel("control"):
 	codelLock(service.codel("control"), service)
 	?>
   int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
 <?
 	codelRelease(service.codel("control"), service)
+	copyCodelArgsReverse(service.codel("control"), service)
 	?>
   if(res < 0) // error
       <!returnStr!>

@@ -4,7 +4,16 @@ def parseInput(type, name):
   {
       int tmp;
       cin >> tmp;
-      <!name!> = (<!MapTypeToCorbaCpp(type, True)!>) tmp;
+      <!name!> = (<!MapTypeToCorbaCpp(type, True)!>_Corba) tmp;
+  }
+<?
+  elif type.kind() == IdlKind.String: 
+    s = type.asStringType()
+    ?>
+  {
+      std::string tmp;
+      cin >> tmp;
+      strncpy(<!name!>, tmp.c_str(), <!s.bound()!>);
   }
 <?
   else:
@@ -52,7 +61,6 @@ for port in outports:
   // Set InPort buffers
 <?
 for port in inports:
-    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
 //   registerOutPort("<!port.name!>", m_data.<!port.name!>);
 <?
@@ -60,7 +68,6 @@ for port in inports:
   // Set OutPort buffers
 <?
 for port in outports:
-    typeName = MapTypeToCorbaCpp(port.idlType)
     ?>
   registerInPort("<!port.name!>", m_<!port.name!>);
 <?
@@ -178,9 +185,15 @@ void <!capCompName!>Test::run<!service.name!>()
 {
 <?
   for i in service.inputs():
-    print "      " + MapTypeToCorbaCpp(inputType(i), True) + " " + i.identifier + ";";
+    input = MapTypeToCorbaCpp(inputType(i), True)
+    if inputType(i).identifier():
+      input += "_Corba"
+    print "      " + input + " " + i.identifier + ";";
   if service.output.identifier and service.type == ServiceType.Control:
-    print "      " + MapTypeToCorbaCpp(inputType(service.output), True, True) + " " + service.output.identifier + ";";
+    output = MapTypeToCorbaCpp(inputType(service.output), True, True)
+    if inputType(service.ouput).identifier():
+      output += "_Corba"    
+    print "      " + output + " " + service.output.identifier + ";";
 
   for x in inputFlatList:
     t = MapTypeToCorbaCpp(x[0], True)

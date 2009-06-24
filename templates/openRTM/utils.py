@@ -39,9 +39,27 @@ def addressOf(t, s):
     return "&" + s
 
 def needsConversion(t):
+  if t.isNative():
+    return True
   if t.kind() == IdlKind.Long:
     return True
+  elif t.kind() == IdlKind.Struct:
+    return True
+  elif t.kind() == IdlKind.Enum:
+    return True
+  elif t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
+    return needsConversion(t.unalias())
   else:
+    return False
+
+def needsConversionFun(t):
+  if t.kind() == IdlKind.Struct:
+    return True
+  elif t.kind() == IdlKind.Enum:
+    return True
+  elif t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
+    return needsConversionFun(t.unalias())
+  else: 
     return False
 
 def service_idl_signature(service):
@@ -62,7 +80,10 @@ def service_idl_signature(service):
     return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ");"
 
 def cpp_arg(t,name):
-  cppType = MapTypeToCorbaCpp(t)
+  if t.identifier():
+    cppType = MapTypeToCorbaCpp(t) + "_Corba"
+  else:
+    cppType = MapTypeToCorbaCpp(t)
   if t.kind() == IdlKind.Struct:  
     return "const " + cppType + " &" + name
   elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
@@ -124,7 +145,7 @@ def real_codel_signature(codel, service=None):
     p = comp.port(port)
     if p is not None:
 	if isDynamic(p.idlType):
-	  proto += MapTypeToCpp(p.idlType) + "Cpp* " + port + "_outport, " 
+	  proto += MapTypeToCpp(p.idlType) + "* " + port + "_outport, " 
 	else:
 	  proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
     else:
@@ -158,12 +179,12 @@ for p in comp.portsMap():
     else:
 	inports.append(p.data())
 
-def real_codel_call(codel, data_prefix="", service=None):
+def real_codel_call(codel, data_prefix="", service=None, useCopiedArgs = True):
   proto = ""
   if service is not None:
     for i in service.inputs():
       t = inputType(i)
-      if needsConversion(t):
+      if needsConversion(t) and useCopiedArgs:
 	proto += addressOf(inputType(i), i.identifier) + ", "
       else:
 	proto += addressOf(inputType(i), " in_" + i.identifier) + ", "
@@ -293,7 +314,7 @@ def copyType(t, dest, src):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       if isDynamic(s.seqType()):
-	print dest + ".data = new " + MapTypeToCpp(s.seqType(), True) + "Cpp[" + src + ".length()];"
+	print dest + ".data = new " + MapTypeToCpp(s.seqType(), True) + "[" + src + ".length()];"
 
 	counter = counterName(dest)
 	print "for(int " + counter + " =0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
@@ -316,7 +337,11 @@ def copyType(t, dest, src):
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       copyType(t.unalias(), dest, src)
     else:
-      print dest + " = " + src + ";"
+      copyTypeFromCorba(t, src, dest, False)
+      #if needsConversionFun(t):
+	#print "convertFromCorba_" + t.identifier() + "(&" + src + ", &" + dest + ");"
+      #else:
+	#print dest + " = " + src + ";"
 
 def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
     if t.kind() == IdlKind.Sequence:
@@ -342,12 +367,19 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       copyTypeReverse(t.unalias(), dest, src, useIsEmptyVar, parentIsEmpty)
     else:
-      print dest + " = " + src + ";"
+      copyTypeFromCorba(t, src, dest, True)
+      #if needsConversionFun(t):
+	#print "convertFromCorbaReverse_" + t.identifier() + "(&" + src + ", &" + dest + ");"
+      #else:
+	#print dest + " = " + src + ";"
 
 def allocMemory(t, dest, scopedName):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToCorbaCpp(s.seqType(), True)
+      if s.seqType().identifier():
+	seqType += "_Corba"
+
       print dest + ".replace(" + lengthVar(scopedName) + ", " + lengthVar(scopedName) + ", new " + seqType + "[" + lengthVar(scopedName) + "]);"
       print ""
 
@@ -403,13 +435,18 @@ def callSizeCodel(port):
 
   print "int res = " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ");"
 
-def codelLock(codel, service=None):
+def copyCodelArgs(codel, service):
     if not service is None:
       for i in service.inputs():
 	t = inputType(i)
 	if needsConversion(t):
-	  print MapTypeToCpp(t, True) + " " + i.identifier + " = in_" + i.identifier + ";"
+	  if needsConversionFun(t):
+	    print MapTypeToCpp(t, True) + " " + i.identifier + ";"
+	    print "convertFromCorba_" + t.identifier() + "(&in_" + i.identifier + ", &" + i.identifier + ");"
+	  else:
+	    print MapTypeToCpp(t, True) + " " + i.identifier + " = in_" + i.identifier + ";"
 
+def codelLock(codel, service=None):
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.wait();"
     for p in codel.outPorts:
@@ -417,7 +454,7 @@ def codelLock(codel, service=None):
       if not isDynamic(port.idlType):
 	continue
       seqs = dynamicMembers(port.idlType, p)
-      newType = MapTypeToCpp(port.idlType, True) + "Cpp"
+      newType = MapTypeToCpp(port.idlType, True)
       print "  " + newType + " " + p + "_outport;"
 
       str = ""
@@ -442,13 +479,14 @@ def codelLock(codel, service=None):
     elif res == 1:
       print "  m_data->idsMutex.acquire_read();"
 
-def codelRelease(codel, service=None):
+def copyCodelArgsReverse(codel, service):
     if not service is None:
       for i in service.inputs():
 	t = inputType(i)
 	if needsConversion(t):
-	  print "in_" + i.identifier + " = " + i.identifier + ";"
+	  print "//in_" + i.identifier + " = " + i.identifier + ";"
 
+def codelRelease(codel, service=None):
     for p in codel.outPorts:
       port = comp.port(p)
       if not isDynamic(port.idlType):

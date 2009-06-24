@@ -27,8 +27,12 @@ if currentTask.hasCodel("init"): ?>
 <?
 ?>
 
+<?
+if currentTask.hasCodel("end"): ?>
   // The finalize action (on ALIVE->END transition)
-  // virtual RTC::ReturnCode_t onFinalize();
+  virtual RTC::ReturnCode_t onFinalize();
+<?
+?>
 
   // The startup action when ExecutionContext startup
   // virtual RTC::ReturnCode_t onStartup(RTC::UniqueId ec_id);

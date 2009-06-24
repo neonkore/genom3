@@ -2,6 +2,7 @@ language: Python;
 requires: "utils.py";
 
 main:
+  "convert.cpp" -> "$$Convert.cpp" 
   "ControlComp.cpp" -> "$$ControlComp.cpp"
   "Control.h" -> "$$Control.h"
   "Control.cpp" -> "$$Control.cpp"
@@ -16,7 +17,8 @@ main:
 /*  "CMakeLists.txt" */
   "FindOpenRTM.cmake"
   "rtc.conf"
-  "struct.h" -> "$$Struct.hpp"
+  "struct.h" -> "$$Struct.hpp" 
+/*  "userStruct.h" -> "$$UserStruct.h" */
 ;
 
 task:

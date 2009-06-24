@@ -2,7 +2,7 @@
 #ifndef <!upperCompName!>_CONTROL_IMPL_H
 #define <!upperCompName!>_CONTROL_IMPL_H
 
-#include "ControlTaskSkel.h"
+#include "<!comp.name()!>Struct.hpp"
 
 class <!capCompName!>ControlData;
  

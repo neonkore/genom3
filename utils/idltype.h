@@ -55,7 +55,7 @@ class IdlType
 		typedef std::map<std::string, Ptr> Map;
 		typedef std::vector<Ptr> Vector;
 
-		IdlType() : m_kind(Null) {}
+		IdlType() : m_kind(Null), m_isNative(false) {}
 		IdlType(Kind k);
 		virtual ~IdlType() {};
 
@@ -63,6 +63,9 @@ class IdlType
 			return m_kind;
 		}
 		std::string kindAsString() const;
+
+		virtual bool isNative() const { return m_isNative; }
+		void setNative(bool isNative) { m_isNative = isNative; }
 
 		// casting functions
 		template<class T> T* asType() {
@@ -89,6 +92,7 @@ class IdlType
 
 	private:
 		Kind m_kind;
+		bool m_isNative;
 };
 
 /* Simple declarator (eg int a;) or arrray declarator (eg int a[10][10])*/
@@ -263,6 +267,7 @@ class TypedefType : public IdlType
 		virtual ~TypedefType() {}
 
 		const std::string kindAsString() const;
+		virtual bool isNative() const;
 
 		IdlType::Ptr  aliasType() const {
 			return m_aliasType;
@@ -383,6 +388,8 @@ class NamedType : public IdlType {
 		NamedType(const std::string &name, IdlType::Ptr type)
 		: IdlType(Named), m_identifier(name), m_type(type)
 		{}
+
+		virtual bool isNative() const;
 
 		IdlType::Ptr type() const { return m_type; }
 		virtual std::string identifier() const {

@@ -11,10 +11,14 @@ else:
 #include "ExecServices.h"
 
 // forward declaration of user codels
+extern "C" {
 <?
 if currentTask.hasCodel("init"):
     print "int " + real_codel_signature(currentTask.codel("init")) + ";"
+if currentTask.hasCodel("end"):
+    print "int " + real_codel_signature(currentTask.codel("end")) + ";"
 ?>
+}
 
 <!capCompName!><!currentTaskName!>::<!capCompName!><!currentTaskName!>(RTC::Manager* manager)
   : RTC::DataFlowComponentBase(manager),
@@ -39,7 +43,7 @@ RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onInitialize()
 <?
   codelLock(currentTask.codel("init"));
   ?>
-  int res = <!real_codel_call(currentTask.codel("init"))!>;
+  int res = <!real_codel_call(currentTask.codel("init"), "m_data->")!>;
   // update ports, release locks, etc
 <?
   codelRelease(currentTask.codel("init"));
@@ -78,7 +82,7 @@ RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onFinalize()
 <?
   codelLock(currentTask.codel("end"));
   ?>
-  int res = <!real_codel_call(currentTask.codel("end"))!>;
+  int res = <!real_codel_call(currentTask.codel("end"), "m_data->")!>;
   // update ports, release locks, etc
 <?
   codelRelease(currentTask.codel("end"));

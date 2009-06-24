@@ -4,7 +4,7 @@
 
 #include <list>
 #include <boost/shared_ptr.hpp>
-#include "ControlTaskSkel.h"
+#include "<!comp.name()!>Struct.hpp"
 
 class <!capCompName!>ControlData;
 
@@ -24,17 +24,17 @@ for s in comp.servicesMap():
     statusStr += upper(service.name) + "_" + upper(c.key())
       
     if service.output.identifier:
-      inputStr = ", CORBA::Long id"
+      inputStr = ", int id"
     else:
       inputStr = ""
     for i in service.inputs():
       inputStr += ", "
       t = inputType(i)
-      inputStr += MapTypeToCorbaCpp(t) + " " + i.identifier
+      inputStr += MapTypeToCpp(t) + " " + i.identifier
 
     if service.output.identifier:
       t = inputType(service.output)
-      outputType = MapTypeToCorbaCpp(t)
+      outputType = MapTypeToCpp(t)
   ?>
 class <!service.name!>Service {
   public:
@@ -50,9 +50,6 @@ class <!service.name!>Service {
     void abort();
 
 <?
-  if service.output.identifier:?>
-    <!outputType!> result() { return out_<!service.output.identifier!>; }
-<?
   for c in service.codels():
     if c.key() == "control":
       continue
@@ -66,7 +63,7 @@ class <!service.name!>Service {
 <?
   for i in service.inputs():
     t = inputType(i)
-    print "    " + MapTypeToCorbaCpp(t) + " in_" + i.identifier + ";"    
+    print "    " + MapTypeToCpp(t) + " in_" + i.identifier + ";"    
   if service.output.identifier:
     print "    " + outputType + " out_" + service.output.identifier + ";"
   ?>

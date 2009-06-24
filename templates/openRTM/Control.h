@@ -9,14 +9,12 @@
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
 
+#include "<!comp.name()!>Struct.hpp"
 // Service implementation headers
 #include "<!comp.name()!>ControlImpl.h"
-// stub headers
-#include "ControlTaskSkel.h"
 
 #include "ExecServices.h"
 #include "logger.h"
-#include "<!comp.name()!>Struct.hpp"
 
 using namespace RTC;
 
@@ -46,6 +44,8 @@ if t.kind() == IdlKind.Struct:
 <?
 for port in inports:
     typeName = MapTypeToCorbaCpp(port.idlType, True, True)
+    if t.identifier():
+      typeName += "_Corba"
     ?>
   <!typeName!> <!port.name!>_data;
   InPort<<!typeName!>> <!port.name!>;
@@ -56,6 +56,8 @@ for port in inports:
 <?
 for port in outports:
     typeName = MapTypeToCorbaCpp(port.idlType)
+    if t.identifier():
+      typeName += "_Corba"
     ?>
   <!typeName!> <!port.name!>_data;
   OutPort<<!typeName!>> <!port.name!>;

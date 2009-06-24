@@ -788,9 +788,11 @@ TYPEDEF type_spec declarators
 | struct_type              { $$ = $1; }
 /*| union_type               { $$ = $1; } */
 | enum_type                { $$ = $1; }
-/*  | NATIVE IDENTIFIER {
-      $$ = new Native(currentFile, yylineno, mainFile, $2);
-    }*/
+| NATIVE type_decl 
+{
+    $2->setNative(true);
+    $$ = $2;
+}
 /*  | constr_forward_decl      { $$ = $1; }*/
     ;
 

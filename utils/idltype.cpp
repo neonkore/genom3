@@ -37,7 +37,7 @@ using namespace Idl;
 using namespace std;
 
 IdlType::IdlType(Kind k)
-		: m_kind(k)
+		: m_kind(k), m_isNative(false)
 {
 }
 
@@ -259,6 +259,11 @@ void EnumType::addEnumerator(const std::string &e)
 
 /************ TypedefType ***************/
 
+bool TypedefType::isNative() const
+{
+	return aliasType()->isNative();
+}
+
 bool TypedefType::hasIdentifier(const std::string &name)
 {
 	Declarator::Vect::const_iterator it = m_declarators->begin();
@@ -300,6 +305,13 @@ ArrayType::ArrayType(IdlType::Ptr p, int bound)
 : IdlType(Array), m_type(p)
 {
 	m_bounds.push_back(bound);
+}
+
+/************ NamedType ***************/
+
+bool NamedType::isNative() const
+{
+	return type()->isNative();
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;  replace-tabs off;

@@ -1,32 +1,25 @@
 #ifndef <!upper(comp.name())!>_STRUCT_H
 #define <!upper(comp.name())!>_STRUCT_H
 
-<?
-def copyTypeCpp(t):
-  if not isDynamic(t):
-    return t
-  elif t.kind() == IdlKind.Named:
-    n = t.asNamedType()
-    return NamedType(n.identifier() + "Cpp", copyTypeCpp(n.type()))
-  elif t.kind() == IdlKind.Typedef:
-    ty = t.asTypedefType()
-    return TypedefType(copyTypeCpp(ty.aliasType()), t.identifier() + "Cpp")
-  elif t.kind() == IdlKind.Sequence:
-    s = t.asSequenceType()
-    return SequenceType(copyTypeCpp(s.seqType()), s.bound())
-  elif t.kind() == IdlKind.Struct:
-    s = t.asStructType()
-    res = StructType()
-    res.setIdentifier(s.identifier() + "Cpp")
-    for m in s.members():
-      res.addMember(copyTypeCpp(m.data()), m.key())
-    return res
-  else:
-    return t # standard type
+#include "ControlTaskSkel.h"
+#include "<!comp.name()!>UserStruct.h"
 
+<?
+#for t in comp.typesVect():
+#  if t.identifier() and t.identifier() != IDSType.identifier() and not t.isNative():
+#    print "typedef " + t.identifier() + "_Corba " + t.identifier() + ";"
+?>
+
+<?
 for t in comp.typesVect():
-  if isDynamic(t):
-    print MapTypeToCpp(copyTypeCpp(t)) + ";\n"
+  if needsConversionFun(t) and t.identifier() != IDSType.identifier():
+    cppType = MapTypeToCpp(t, True)
+    corbaType = MapTypeToCorbaCpp(t, True)
+    if t.identifier():
+      corbaType += "_Corba"
+
+    print "void convertFromCorba_" + t.identifier() + "(const " + corbaType + "*in, " + cppType + "* out);"
+    print "void convertFromCorbaReverse_" + t.identifier() + "(const " + cppType + "*in, " + corbaType + "* out);"
 ?>
 
 #endif /* <!upper(comp.name())!>_STRUCT_H */

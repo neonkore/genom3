@@ -85,6 +85,8 @@ for name,typeName in output_ports_map.iteritems():
 <?
 for port in outports:
     typeName = MapTypeToCorbaCpp(port.idlType)
+    if port.idlType.identifier():
+      typeName += "_Corba"
     ?>
   <!typeName!> m_<!port.name!>_data;
   InPort<<!typeName!>> m_<!port.name!>;

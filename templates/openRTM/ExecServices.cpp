@@ -26,13 +26,13 @@ for s in comp.servicesMap():
     continue
 
   if service.output.identifier:
-    inputStr = ", CORBA::Long id"
+    inputStr = ", int id"
   else:
     inputStr = ""
   for i in service.inputs():
     inputStr += ", "
     t = inputType(i)
-    inputStr += MapTypeToCorbaCpp(t) + " " + i.identifier
+    inputStr += MapTypeToCpp(t) + " " + i.identifier
 
   ?>
 // <!service.name!>Service
@@ -55,11 +55,15 @@ for s in comp.servicesMap():
     } else {
 	genom_log("Service \"<!service.name!>\" with id:%d finished", m_id);
 <?
-  if service.output.identifier: ?>
+  if service.output.identifier: 
+    outputMember = "out_" + service.output.identifier
+    ?>
       // get the output result
       <!service.name!>OutStruct s;
       s.id = m_id;
-      s.data = result();
+<?
+    copyTypeFromCorba(inputType(service.output), outputMember, "s.data", True)
+    ?>
       m_data-><!service.name!>_outport.write(s);
 <?
   ?>
@@ -108,7 +112,7 @@ int <!service.name!>Service::<!c.key()!>()
     codelLock(codel, service)
     ?>
   // call the user codel
-  int res = <!real_codel_call(codel, "m_data->", service)!>;
+  int res = <!real_codel_call(codel, "m_data->", service, False)!>;
 
   // update ports, release locks, etc
 <?

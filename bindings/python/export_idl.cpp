@@ -106,6 +106,7 @@ void export_idl()
 	.def("asSequenceType", &IdlType::asType<SequenceType>, return_value_policy<reference_existing_object>())
 	.def("unalias", &IdlType::unalias)
 	.def("identifier", &IdlType::identifier)
+	.def("isNative", &IdlType::isNative)
 	.def("kind", &IdlType::kind);
 
 	object baseTypeClass = class_<BaseType, bases<IdlType> >("BaseType", init<IdlType::Kind>());

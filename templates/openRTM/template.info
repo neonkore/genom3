@@ -14,18 +14,14 @@ main:
   "ControlTask.idl"
   "ExecServices.h"
   "ExecServices.cpp"
-/*  "CMakeLists.txt" */
+  "CMakeLists.txt" 
   "FindOpenRTM.cmake"
   "rtc.conf"
   "struct.h" -> "$$Struct.hpp" 
-/*  "userStruct.h" -> "$$UserStruct.h" */
+  "userStruct.h" -> "$$UserStruct.h" 
 ;
 
 task:
-/*  "ExecTask.idl" -> "I$component$$task$.idl" */
   "ExecTask.h" -> "$component$$task$.h" 
   "ExecTask.cpp" -> "$component$$task$.cpp"
-/*  "ExecTaskComp.cpp" -> "$component$$task$Comp.cpp"  
-  "ExecTaskImpl.h" -> "$component$$task$Impl.h" 
-  "ExecTaskImpl.cpp" -> "$component$$task$Impl.cpp" */
 ;

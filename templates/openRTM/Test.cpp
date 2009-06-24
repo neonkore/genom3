@@ -190,8 +190,9 @@ void <!capCompName!>Test::run<!service.name!>()
       input += "_Corba"
     print "      " + input + " " + i.identifier + ";";
   if service.output.identifier and service.type == ServiceType.Control:
-    output = MapTypeToCorbaCpp(inputType(service.output), True, True)
-    if inputType(service.ouput).identifier():
+    outputType = inputType(service.output)
+    output = MapTypeToCorbaCpp(outputType, True)
+    if outputType.identifier():
       output += "_Corba"    
     print "      " + output + " " + service.output.identifier + ";";
 

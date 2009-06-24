@@ -61,7 +61,19 @@ for s in servicesMap:
 	?> 
   m_data->idsMutex.release();
 <?
-    if service.output.identifier:?>
+    if service.output.identifier:
+      outputType = inputType(service.output)
+      output = MapTypeToCorbaCpp(outputType, True)
+      if outputType.identifier():
+	output += "_Corba"
+    
+      if needsConversion(outputType):
+	print "  " + output + " out;"
+	copyTypeFromCorba(outputType, "m_data->" + service.output.identifier, "out", True)
+	?>
+  return out;
+<?
+      else: ?>
   return m_data-><!service.output.identifier!>;
 <?
     ?>

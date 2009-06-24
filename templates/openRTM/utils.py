@@ -113,10 +113,15 @@ def service_cpp_signature(service, className=""):
 	  outputType = inputType(service.output)
     else:
 	outputType = BaseType.voidType
+
+    output = MapTypeToCorbaCpp(outputType, True)
+    if outputType.identifier():
+      output += "_Corba"
+
     if className:
-      return MapTypeToCorbaCpp(outputType, True) + " " + className + "::" + service_cpp_args(service, className)
+      return output + " " + className + "::" + service_cpp_args(service, className)
     else:
-      return MapTypeToCorbaCpp(outputType, True) + " " + service_cpp_args(service, className)
+      return output + " " + service_cpp_args(service, className)
 
 def pointerTo(t):
   s = MapTypeToC(t,True)
@@ -199,12 +204,21 @@ def real_codel_call(codel, data_prefix="", service=None, useCopiedArgs = True):
     proto += addressOf(t, data_prefix + type) + ", "
   for port in codel.outPorts:
     p = comp.port(port)
-    if not p is None and isDynamic(p.idlType):
+    if isDynamic(p.idlType):
       proto += "&" + port + "_outport, "
+    elif needsConversion(p.idlType):
+      proto += "&" + port + ", "
     else:
       proto += "&" + data_prefix + port + "_data, " 
   for port in codel.inPorts:
-    proto += "&" + data_prefix + port + ", "; 
+    p = comp.port(port)
+    if isDynamic(p.idlType):
+      proto += "&" + port + "_inport, "
+    elif needsConversion(p.idlType):
+      proto += "&" + port + ", "
+    else:
+      proto += "&" + data_prefix + port + "_data, "  
+
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
@@ -479,6 +493,30 @@ def codelLock(codel, service=None):
     elif res == 1:
       print "  m_data->idsMutex.acquire_read();"
 
+    for p in codel.outPorts:
+      port = comp.port(p)
+      if isDynamic(port.idlType):
+	continue
+      
+      if needsConversion(port.idlType):
+	if needsConversionFun(port.idlType):
+	  print MapTypeToCpp(port.idlType, True) + " " + port.name + ";"
+	  print "convertFromCorba_" + port.idlType.identifier() + "(&m_data->" + port.name + "_data, &" + port.name + ");"
+	else:
+	  print MapTypeToCpp(port.idlType, True) + " " + port.name + " = m_data->" + port.name + "_data;"
+
+    for p in codel.inPorts:
+      port = comp.port(p)
+      if isDynamic(port.idlType):
+	continue
+      
+      if needsConversion(port.idlType):
+	if needsConversionFun(port.idlType):
+	  print MapTypeToCpp(port.idlType, True) + " " + port.name + ";"
+	  print "convertFromCorba_" + port.idlType.identifier() + "(&m_data->" + port.name + "_data.data, &" + port.name + ");"
+	else:
+	  print MapTypeToCpp(port.idlType, True) + " " + port.name + " = m_data->" + port.name + "_data;"
+
 def copyCodelArgsReverse(codel, service):
     if not service is None:
       for i in service.inputs():
@@ -487,11 +525,26 @@ def copyCodelArgsReverse(codel, service):
 	  print "//in_" + i.identifier + " = " + i.identifier + ";"
 
 def codelRelease(codel, service=None):
+    # update dynamic ports
     for p in codel.outPorts:
       port = comp.port(p)
       if not isDynamic(port.idlType):
-	continue
-      copyTypeReverse(port.idlType,  "m_data->" + p + "_data", p + "_outport")
+	if needsConversion(port.idlType):
+	  if needsConversionFun(port.idlType):
+	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data);"
+	  else:
+	    print MapTypeToCpp(port.idlType, True) + " m_data->" + port.name + "_data = " + port.name + ";"
+      else:
+	copyTypeReverse(port.idlType,  "m_data->" + p + "_data", p + "_outport")
+
+    for p in codel.inPorts:
+      port = comp.port(p)
+      if not isDynamic(port.idlType):
+	if needsConversion(port.idlType):
+	  if needsConversionFun(port.idlType):
+	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data.data);"
+	  else:
+	    print "m_data->" + port.name + "_data = " + port.name + ";"
 
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.post();"

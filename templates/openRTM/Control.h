@@ -44,11 +44,11 @@ if t.kind() == IdlKind.Struct:
 <?
 for port in inports:
     typeName = MapTypeToCorbaCpp(port.idlType, True, True)
-    if t.identifier():
+    if port.idlType.identifier() and port.idlType.unalias().kind() != IdlKind.Enum:
       typeName += "_Corba"
     ?>
-  <!typeName!> <!port.name!>_data;
-  InPort<<!typeName!>> <!port.name!>;
+  <!port.name!>Struct <!port.name!>_data;
+  InPort<<!port.name!>Struct> <!port.name!>;
 <?
 ?>
 
@@ -56,7 +56,7 @@ for port in inports:
 <?
 for port in outports:
     typeName = MapTypeToCorbaCpp(port.idlType)
-    if t.identifier():
+    if port.idlType.identifier():
       typeName += "_Corba"
     ?>
   <!typeName!> <!port.name!>_data;

@@ -10,6 +10,16 @@ struct <!name!>OutStruct {
     long id;
     <!typeName!> data;
 };
+
+<?
+for port in inports:
+  ?>
+struct <!port.name!>Struct {
+  <!MapTypeToIdl(port.idlType)!> data;
+};
+<?
+?>
+
 <?
 ?>
 interface I<!capCompName!>

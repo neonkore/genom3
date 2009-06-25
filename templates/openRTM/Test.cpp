@@ -197,12 +197,6 @@ void <!capCompName!>Test::run<!service.name!>()
     if inputType(i).identifier():
       input += "_Corba"
     print "      " + input + " " + i.identifier + ";";
-  if service.output.identifier and service.type == ServiceType.Control:
-    outputType = inputType(service.output)
-    output = MapTypeToCorbaCpp(outputType, True)
-    if outputType.identifier():
-      output += "_Corba"    
-    print "      " + output + " " + service.output.identifier + ";";
 
   for x in inputFlatList:
     t = MapTypeToCorbaCpp(x[0], True)
@@ -216,11 +210,18 @@ void <!capCompName!>Test::run<!service.name!>()
       outputType = MapTypeToCorbaCpp(inputType(service.output), True)
       if inputType(service.output).identifier():
 	outputType += "_Corba"     
+      if isCorbaDynamic(inputType(service.output)):
+	outputName = "*out"
+      else:
+	outputName = "out"
       ?>
-      <!service.output.identifier!> = m_service-><!service.name!>(<!serviceArgs!>);
+      <!outputType!> <!outputName!> = m_service-><!service.name!>(<!serviceArgs!>);
       cout << endl << "Result: ";
-      Printer<<!outputType!>>::print(<!service.output.identifier!>);
+      Printer<<!outputType!>>::print(<!outputName!>);
       cout << endl;
+<?
+      if isCorbaDynamic(inputType(service.output)):?>
+      delete out;
 <?
     else:?>
       m_service-><!service.name!>(<!serviceArgs!>);

@@ -121,6 +121,7 @@ for t in comp.tasksMap():
   m_<!capCompName!><!task.name!>_exc->add_component(rtobj);
   m_<!capCompName!><!task.name!>_exc->activate_component(rtobj);
   m_<!capCompName!><!task.name!>_exc->start();
+  m_<!capCompName!><!task.name!>->initialize();
 
   // todo: call init service
 

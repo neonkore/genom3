@@ -39,6 +39,10 @@ def copyTypeFromCorba(t, src, out, reverse):
 <?
       elif m.data().kind() == IdlKind.String: 
 	s = m.data().asStringType()
+	if reverse: ?>
+    if(!strlen(<!out!>.<!m.key()!>))
+      <!out!>.<!m.key()!> = CORBA::string_alloc(<!s.bound()!>);
+<?
 	?>
     strncpy(<!out!>.<!m.key()!>, <!src!>.<!m.key()!>, <!s.bound()!>);
 <?
@@ -50,6 +54,10 @@ def copyTypeFromCorba(t, src, out, reverse):
 <?
   elif t.kind() == IdlKind.String:
     s = t.asStringType()
+    if reverse: ?>
+    if(!strlen(<!out!>))
+      <!out!> = CORBA::string_alloc(<!s.bound()!>);
+<?
     ?>
     strncpy(<!out!>, <!src!>, <!s.bound()!>);
 <?

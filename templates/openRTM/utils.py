@@ -329,6 +329,7 @@ def copyType(t, dest, src):
       s = t.asSequenceType()
       if isDynamic(s.seqType()):
 	print dest + ".data = new " + MapTypeToCpp(s.seqType(), True) + "[" + src + ".length()];"
+	print dest + ".length = " + src + ".length();"
 
 	counter = counterName(dest)
 	print "for(int " + counter + " =0; " + counter + "<" + src + ".length(); ++" + counter + ") {"

@@ -13,7 +13,8 @@ def parseInput(type, name):
   {
       std::string tmp;
       cin >> tmp;
-      strncpy(<!name!>, tmp.c_str(), <!s.bound()!>);
+      <!name!> = CORBA::string_alloc(tmp.length());
+      strncpy(<!name!>, tmp.c_str(), tmp.length() + 1);
   }
 <?
   else:
@@ -225,8 +226,19 @@ void <!capCompName!>Test::run<!service.name!>()
       m_service-><!service.name!>(<!serviceArgs!>);
 <?
   else:
-    if service.output.identifier:?>
+    if service.output.identifier:
+      outputType = MapTypeToCorbaCpp(inputType(service.output), True)
+      if inputType(service.output).identifier():
+	outputType += "_Corba"     
+      ?>
       cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
+      while(!m_<!service.name!>_inport.isNew())
+	coil::usleep(1000);
+
+      m_<!service.name!>_inport.read();
+      cout << "Received final answer from service <!service.name!> with id: " << m_<!service.name!>_data.id << " = ";
+      Printer<<!outputType!>>::print(m_<!service.name!>_data.data);
+      cout << endl;
 <?
     else:?>
       m_service-><!service.name!>(<!serviceArgs!>);

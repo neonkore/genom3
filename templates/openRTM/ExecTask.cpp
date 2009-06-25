@@ -59,7 +59,7 @@ RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onExecute(RTC::UniqueId ec
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type != ServiceType.Exec or service.taskName != currentTaskName:
+  if service.type == ServiceType.Control or service.taskName != currentTaskName:
     continue
   ?>
   for(<!service.name!>Service::List::iterator it = m_data-><!service.name!>Services.begin();

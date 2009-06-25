@@ -126,6 +126,16 @@ for s in comp.servicesMap():
       else:
 	for incomp in service.incompatibleServices():
 	  print "  m_data->kill" + incomp + "Services();" 
+
+    if service.inputs():
+      if service.inputs()[0].kind == ServiceInputKind.IDSMember: 
+	?>
+  m_data->idsMutex.acquire_write();
+<?
+	copyTypeFromCorba(inputType(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
+	?> 
+  m_data->idsMutex.release();
+<?
     ?>
 
   // create the activity

@@ -3,6 +3,8 @@ requires: "utils.py";
 
 main:
   "convert.cpp" -> "$$Convert.cpp" 
+  "printer.h" -> "$$Printer.h"
+  "printer.cpp" -> "$$Printer.cpp"
   "ControlComp.cpp" -> "$$ControlComp.cpp"
   "Control.h" -> "$$Control.h"
   "Control.cpp" -> "$$Control.cpp"
@@ -14,11 +16,11 @@ main:
   "ControlTask.idl"
   "ExecServices.h"
   "ExecServices.cpp"
-  "CMakeLists.txt" 
+/*  "CMakeLists.txt" */
   "FindOpenRTM.cmake"
   "rtc.conf"
   "struct.h" -> "$$Struct.hpp" 
-  "userStruct.h" -> "$$UserStruct.h" 
+/*  "userStruct.h" -> "$$UserStruct.h" */
 ;
 
 task:

@@ -20,8 +20,7 @@ def parseInput(type, name):
     print "cin >> " + name + ";"
 ?>
 #include "<!comp.name()!>Test.h"
-
-#include <iostream>
+#include "<!comp.name()!>Printer.h"
 
 using namespace std;
 
@@ -208,7 +207,9 @@ void <!capCompName!>Test::run<!service.name!>()
       outputType = MapTypeToCorbaCpp(inputType(service.output), True)
       ?>
       <!service.output.identifier!> = m_service-><!service.name!>(<!serviceArgs!>);
-      cout << endl << "Result: " << <!service.output.identifier!> << endl;
+      cout << endl << "Result: ";
+      Printer<<!outputType!>>::print(<!service.output.identifier!>);
+      cout << endl;
 <?
     else:?>
       m_service-><!service.name!>(<!serviceArgs!>);

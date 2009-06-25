@@ -163,6 +163,14 @@ for s in servicesMap:
       break;
     }
 <?
+for port in outports:
+  idx += 1
+  ?>
+    case <!idx!>: {
+      read<!port.name!>();
+      break;
+    }
+<?
 ?> 
   }
 
@@ -205,6 +213,8 @@ void <!capCompName!>Test::run<!service.name!>()
   if service.type == ServiceType.Control:
     if service.output.identifier:
       outputType = MapTypeToCorbaCpp(inputType(service.output), True)
+      if inputType(service.output).identifier():
+	outputType += "_Corba"     
       ?>
       <!service.output.identifier!> = m_service-><!service.name!>(<!serviceArgs!>);
       cout << endl << "Result: ";
@@ -227,37 +237,22 @@ void <!capCompName!>Test::run<!service.name!>()
 <?
 ?>      
 
-/*
-RTC::ReturnCode_t <!capCompName!>Control::onAborting(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
-/*
-RTC::ReturnCode_t <!capCompName!>Control::onError(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
-/*
-RTC::ReturnCode_t <!capCompName!>Control::onReset(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
-/*
-RTC::ReturnCode_t <!comp.name()!>Control::onStateUpdate(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
-/*
-RTC::ReturnCode_t <!capCompName!>Control::onRateChanged(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
+<?
+for port in outports:
+  typeName = MapTypeToCorbaCpp(port.idlType)
+  if port.idlType.identifier():
+    typeName += "_Corba"
+  ?>
+void <!capCompName!>Test::read<!port.name!>()
+{
+  m_<!port.name!>.update();
+  cout << endl << "<!port.name!> :" << endl;
+  Printer<<!typeName!>>::print(m_<!port.name!>_data.data);
+  cout << endl;
+}
+<?
+?>
 
 extern "C"
 {

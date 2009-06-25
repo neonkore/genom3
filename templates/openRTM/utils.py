@@ -539,6 +539,9 @@ def codelRelease(codel, service=None):
       else:
 	copyTypeReverse(port.idlType,  "m_data->" + p + "_data.data", p + "_outport")
 
+    for p in codel.outPorts:
+      print "m_data->" + port.name + ".write();"
+
     for p in codel.inPorts:
       port = comp.port(p)
       if not isDynamic(port.idlType):

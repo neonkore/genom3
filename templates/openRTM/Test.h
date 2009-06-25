@@ -64,6 +64,11 @@ for s in servicesMap:
   ?>
   void run<!service.name!>();
 <?
+
+for port in outports:
+  ?>
+  void read<!port.name!>();
+<?
 ?>
 
  protected:

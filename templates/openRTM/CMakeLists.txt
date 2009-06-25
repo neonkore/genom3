@@ -37,6 +37,7 @@ SET(<!capCompName!>TestComp_SRC
     ${IDL_<!capCompName!>ControlIdl_OUTPUTS}
     <!comp.name()!>TestComp.cpp
     <!comp.name()!>Test.cpp
+    <!comp.name()!>Printer.cpp
 )
 
 ADD_EXECUTABLE(<!comp.name()!>TestComp ${<!capCompName!>TestComp_SRC})

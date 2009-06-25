@@ -238,6 +238,8 @@ def allocMemory(t, dest, scopedName):
 	print "for(; " + counter + "<" + dest + ".length; ++" + counter + ") {"
 	allocMemory(s.seqType(), dest + ".data[" + counter + "]", scopedName + ".data")
 	print "}"
+      else:
+	print "memset(" + dest + " , 0, " + lengthVar(scopedName) + " * sizeof(" + seqType + "));"
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()

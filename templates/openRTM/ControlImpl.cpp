@@ -68,8 +68,13 @@ for s in servicesMap:
 	output += "_Corba"
     
       if needsConversion(outputType):
-	print "  " + output + " out;"
-	copyTypeFromCorba(outputType, "m_data->" + service.output.identifier, "out", True)
+	if isCorbaDynamic(outputType):
+	  outputName = "(*out)"
+	  print "  " + output + " *out = new " + output + ";"
+	else:
+	  outputName = "out"
+	  print "  " + output + " out;"
+	copyTypeFromCorba(outputType, "m_data->" + service.output.identifier, outputName, True)
 	?>
   return out;
 <?

@@ -117,6 +117,8 @@ def service_cpp_signature(service, className=""):
     output = MapTypeToCorbaCpp(outputType, True)
     if outputType.identifier():
       output += "_Corba"
+    if isCorbaDynamic(outputType):
+      output += "*"
 
     if className:
       return output + " " + className + "::" + service_cpp_args(service, className)
@@ -274,6 +276,20 @@ def codelNeedsLock(codel, service=None):
 	if i.kind == ServiceInputKind.IDSMember:
 	  return 1
     return 0
+
+def isCorbaDynamic(t):
+  if t.kind() == IdlKind.String:
+    return True
+  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    return isCorbaDynamic(t.unalias())
+  elif t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    for m in s.members():
+      if isCorbaDynamic(m.data()):
+	return True
+    return False
+  else:
+    return False
 
 def isDynamic(t):
   if t.kind() == IdlKind.Sequence:

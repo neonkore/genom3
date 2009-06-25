@@ -467,7 +467,7 @@ def codelLock(codel, service=None):
       port = comp.port(p)
       if not isDynamic(port.idlType):
 	continue
-      seqs = dynamicMembers(port.idlType, p)
+      seqs = dynamicMembers(port.idlType, p + "_data.data")
       newType = MapTypeToCpp(port.idlType, True)
       print "  " + newType + " " + p + "_outport;"
 
@@ -481,11 +481,11 @@ def codelLock(codel, service=None):
       callSizeCodel(port)
 
       print "  if(res >= 0) {"
-      allocMemory(port.idlType, "m_data->" + p + "_data", p + "_outport")
+      allocMemory(port.idlType, "m_data->" + p + "_data.data", p + "_outport")
       print "  }"
       print "}\n\n"
 
-      copyType(port.idlType, p + "_outport", "m_data->" + p + "_data")
+      copyType(port.idlType, p + "_outport", "m_data->" + p + "_data.data")
 
     res = codelNeedsLock(codel, service)
     if res == 2:

@@ -8,6 +8,7 @@
 #include <rtm/CorbaPort.h>
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
+#include <ace/RW_Mutex.h>
 
 #include "<!comp.name()!>Struct.hpp"
 // Service implementation headers
@@ -43,9 +44,6 @@ if t.kind() == IdlKind.Struct:
   // DataInPort declaration
 <?
 for port in inports:
-    typeName = MapTypeToCorbaCpp(port.idlType, True, True)
-    if port.idlType.identifier() and port.idlType.unalias().kind() != IdlKind.Enum:
-      typeName += "_Corba"
     ?>
   <!port.name!>Struct <!port.name!>_data;
   InPort<<!port.name!>Struct> <!port.name!>;
@@ -55,12 +53,9 @@ for port in inports:
   // DataOutPort declaration
 <?
 for port in outports:
-    typeName = MapTypeToCorbaCpp(port.idlType)
-    if port.idlType.identifier():
-      typeName += "_Corba"
     ?>
-  <!typeName!> <!port.name!>_data;
-  OutPort<<!typeName!>> <!port.name!>;
+  <!port.name!>Struct <!port.name!>_data;
+  OutPort<<!port.name!>Struct> <!port.name!>;
 <?
 ?>
   // Services' output ports

@@ -110,15 +110,15 @@ for t in comp.tasksMap():
   RTObject_var rtobj = m_<!capCompName!><!task.name!>->getObjRef();
 <?
   if task.period > 0: ?>
-  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(::DataFlowComponent::_narrow(rtobj));
+  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(OpenRTM::DataFlowComponent::_narrow(rtobj));
   m_<!capCompName!><!task.name!>_exc->set_rate(1000 / <!task.period!>);
 <? 
   else: ?>
-  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(::DataFlowComponent::_narrow(rtobj));
+  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(OpenRTM::DataFlowComponent::_narrow(rtobj));
   m_<!capCompName!><!task.name!>_exc->set_rate(50);
 <?
   ?>
-  m_<!capCompName!><!task.name!>_exc->add(rtobj);
+  m_<!capCompName!><!task.name!>_exc->add_component(rtobj);
   m_<!capCompName!><!task.name!>_exc->activate_component(rtobj);
   m_<!capCompName!><!task.name!>_exc->start();
 

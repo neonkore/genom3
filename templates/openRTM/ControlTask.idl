@@ -1,3 +1,5 @@
+#include <BasicDataType.idl>
+
 <?
 # print all types except ids in idl format
 for t in comp.typesVect():
@@ -9,12 +11,24 @@ for name,typeName in output_ports_map.iteritems():
 struct <!name!>OutStruct {
     long id;
     <!typeName!> data;
+    RTC::Time tm;
 };
+
+<?
+for port in outports:
+  ?>
+struct <!port.name!>Struct {
+  RTC::Time tm;
+  <!MapTypeToIdl(port.idlType)!> data;
+};
+<?
+?>
 
 <?
 for port in inports:
   ?>
 struct <!port.name!>Struct {
+  RTC::Time tm;
   <!MapTypeToIdl(port.idlType)!> data;
 };
 <?

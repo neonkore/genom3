@@ -23,7 +23,7 @@ for t in comp.tasksMap():
 )
 
 ADD_LIBRARY(<!capCompName!>Control SHARED ${<!upperCompName!>_SRC})
-TARGET_LINK_LIBRARIES(<!capCompName!>Control ${RTM_LIBRARIES})
+TARGET_LINK_LIBRARIES(<!capCompName!>Control ${RTM_LIBRARIES} ACE)
 
 #  Standalone version of the component
 SET(<!capCompName!>Comp_SRC <!comp.name()!>ControlComp.cpp)

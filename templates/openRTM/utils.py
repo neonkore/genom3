@@ -501,9 +501,9 @@ def codelLock(codel, service=None):
       if needsConversion(port.idlType):
 	if needsConversionFun(port.idlType):
 	  print MapTypeToCpp(port.idlType, True) + " " + port.name + ";"
-	  print "convertFromCorba_" + port.idlType.identifier() + "(&m_data->" + port.name + "_data, &" + port.name + ");"
+	  print "convertFromCorba_" + port.idlType.identifier() + "(&m_data->" + port.name + "_data.data, &" + port.name + ");"
 	else:
-	  print MapTypeToCpp(port.idlType, True) + " " + port.name + " = m_data->" + port.name + "_data;"
+	  print MapTypeToCpp(port.idlType, True) + " " + port.name + " = m_data->" + port.name + "_data.data;"
 
     for p in codel.inPorts:
       port = comp.port(p)
@@ -515,7 +515,7 @@ def codelLock(codel, service=None):
 	  print MapTypeToCpp(port.idlType, True) + " " + port.name + ";"
 	  print "convertFromCorba_" + port.idlType.identifier() + "(&m_data->" + port.name + "_data.data, &" + port.name + ");"
 	else:
-	  print MapTypeToCpp(port.idlType, True) + " " + port.name + " = m_data->" + port.name + "_data;"
+	  print MapTypeToCpp(port.idlType, True) + " " + port.name + " = m_data->" + port.name + "_data.data;"
 
 def copyCodelArgsReverse(codel, service):
     if not service is None:
@@ -531,11 +531,11 @@ def codelRelease(codel, service=None):
       if not isDynamic(port.idlType):
 	if needsConversion(port.idlType):
 	  if needsConversionFun(port.idlType):
-	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data);"
+	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data.data);"
 	  else:
 	    print MapTypeToCpp(port.idlType, True) + " m_data->" + port.name + "_data = " + port.name + ";"
       else:
-	copyTypeReverse(port.idlType,  "m_data->" + p + "_data", p + "_outport")
+	copyTypeReverse(port.idlType,  "m_data->" + p + "_data.data", p + "_outport")
 
     for p in codel.inPorts:
       port = comp.port(p)
@@ -544,7 +544,7 @@ def codelRelease(codel, service=None):
 	  if needsConversionFun(port.idlType):
 	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data.data);"
 	  else:
-	    print "m_data->" + port.name + "_data = " + port.name + ";"
+	    print "m_data->" + port.name + "_data.data = " + port.name + ";"
 
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.post();"

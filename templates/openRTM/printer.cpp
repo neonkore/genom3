@@ -1,5 +1,9 @@
 #include "<!comp.name()!>Printer.h"
 
+#include <iostream>
+
+using namespace std;
+
 <?
 def simpleTypePrintFunction(type):
   ?>
@@ -16,6 +20,11 @@ simpleTypePrintFunction("float")
 simpleTypePrintFunction("double")
 simpleTypePrintFunction("std::string")
 ?>
+
+void Printer<string>::print(const CORBA::String_member& v)
+{
+  std::cout << v;
+}
 
 <?
 def printSimpleType(type, name):
@@ -47,7 +56,7 @@ def printType(t, name):
       switch(<!name!>) {
 <?
     for x in e.enumerators():?>
-	case <!x!>: std::cout << "<!x!>"; break;
+	case <!x!>_Corba: std::cout << "<!x!>"; break;
 <?
     ?>
       }
@@ -56,21 +65,23 @@ def printType(t, name):
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType(), True)
-    printSimpleType("int", name + ".length")
+    if s.seqType().identifier():
+      seqType += "_Corba"
+    printSimpleType("int", name + ".length()")
     ?>
     // data
-    for(int j=0; j < <!name!>.length; ++j)
-      YarpCodec<<!seqType!>>::print(<!name!>.data[j]);
+    for(int j=0; j < <!name!>.length(); ++j)
+      Printer<<!seqType!>>::print(<!name!>[j]);
 <?
 ?>
 
 <?
 for t in comp.typesVect():
-  if not t.identifier():
+  if not t.identifier() or t.identifier() == IDSType.identifier():
     continue
-  typeName = t.identifier()
+  typeName = t.identifier() + "_Corba"
   ?>
-int Printer<<!typeName!>>::print (const <!typeName!>& v)
+void Printer<<!typeName!>>::print (const <!typeName!>& v)
 {
 <?
   flatList = flatStruct(t, "v", ".")

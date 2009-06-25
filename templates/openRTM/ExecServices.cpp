@@ -38,7 +38,7 @@ for s in comp.servicesMap():
 // <!service.name!>Service
 
 <!service.name!>Service::<!service.name!>Service(<!capCompName!>ControlData *data <!inputStr!>)
-: m_data(data), m_aborted(false)
+:  m_aborted(false), m_data(data)
 {
 <?
   for i in service.inputs():

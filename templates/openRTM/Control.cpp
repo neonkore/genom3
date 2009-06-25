@@ -100,31 +100,15 @@ for name,typeName in output_ports_map.iteritems():
 
 RTC::ReturnCode_t <!capCompName!>Control::onInitialize()
 {
-    // create tasks and connect them
 <?
 for t in comp.tasksMap():
   task = t.data()
-  ?>  
-  <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!> = new <!capCompName!><!task.name!>(m_pManager); 
+  ?> 
+  m_<!capCompName!><!task.name!> = new <!capCompName!><!task.name!>(m_pManager); 
   m_<!capCompName!><!task.name!>->setData(&m_data);
-  RTObject_var rtobj = m_<!capCompName!><!task.name!>->getObjRef();
-<?
-  if task.period > 0: ?>
-  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(OpenRTM::DataFlowComponent::_narrow(rtobj));
-  m_<!capCompName!><!task.name!>_exc->set_rate(1000 / <!task.period!>);
-<? 
-  else: ?>
-  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(OpenRTM::DataFlowComponent::_narrow(rtobj));
-  m_<!capCompName!><!task.name!>_exc->set_rate(50);
-<?
-  ?>
-  m_<!capCompName!><!task.name!>_exc->add_component(rtobj);
-  m_<!capCompName!><!task.name!>_exc->activate_component(rtobj);
-  m_<!capCompName!><!task.name!>_exc->start();
   m_<!capCompName!><!task.name!>->initialize();
-
-  // todo: call init service
-
+<?
+?>
   return RTC::RTC_OK;
 }
 
@@ -146,12 +130,34 @@ RTC::ReturnCode_t <!capCompName!>Control::onShutdown(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 */
-/*
+
 RTC::ReturnCode_t <!capCompName!>Control::onActivated(RTC::UniqueId ec_id)
 {
+    // create tasks and connect them
+<?
+for t in comp.tasksMap():
+  task = t.data()
+  ?>  
+  RTObject_var rtobj = m_<!capCompName!><!task.name!>->getObjRef();
+<?
+  if task.period > 0: ?>
+  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(OpenRTM::DataFlowComponent::_narrow(rtobj));
+  m_<!capCompName!><!task.name!>_exc->set_rate(1000 / <!task.period!>);
+<? 
+  else: ?>
+  RTC::PeriodicExecutionContext *m_<!capCompName!><!task.name!>_exc = new RTC::PeriodicExecutionContext(OpenRTM::DataFlowComponent::_narrow(rtobj));
+  m_<!capCompName!><!task.name!>_exc->set_rate(50);
+<?
+  ?>
+  m_<!capCompName!><!task.name!>_exc->add_component(rtobj);
+  m_<!capCompName!><!task.name!>_exc->activate_component(rtobj);
+  m_<!capCompName!><!task.name!>_exc->start();
+<?
+?>
+
   return RTC::RTC_OK;
 }
-*/
+
 /*
 RTC::ReturnCode_t <!comp.name()!>Control::onDeactivated(RTC::UniqueId ec_id)
 {

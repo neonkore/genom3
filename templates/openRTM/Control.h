@@ -19,6 +19,14 @@
 
 using namespace RTC;
 
+<?
+for t in comp.tasksMap(): 
+  task = t.data()
+  ?>
+class <!capCompName!><!task.name!>;
+<?
+?>
+
 // definition of th ids
 struct <!capCompName!>ControlData {
   <!capCompName!>ControlData();
@@ -98,7 +106,7 @@ class <!capCompName!>Control  : public RTC::DataFlowComponentBase
   // virtual RTC::ReturnCode_t onShutdown(RTC::UniqueId ec_id);
 
   // The activated action (Active state entry action)
-  // virtual RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id);
+  virtual RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id);
 
   // The deactivated action (Active state exit action)
   // virtual RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id);
@@ -131,6 +139,13 @@ class <!capCompName!>Control  : public RTC::DataFlowComponentBase
 
  private:
     <!capCompName!>ControlData m_data;
+<?
+for t in comp.tasksMap(): 
+  task = t.data()
+  ?>
+    <!capCompName!><!task.name!> *m_<!capCompName!><!task.name!>;
+<?
+?>
 };
 
 

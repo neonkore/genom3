@@ -404,6 +404,24 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
       #else:
 	#print dest + " = " + src + ";"
 
+def freeMemory(t, src):
+    if t.kind() == IdlKind.Sequence:
+      s = t.asSequenceType()
+      if isDynamic(s.seqType()):
+	counter = counterName(src)
+	print "for(int " + counter + "=0; " + counter + " < " + src + ".length; ++" + counter  + ") {"
+	freeMemory(s.seqType(), src + ".data[" + counter + "]")
+	print "}"
+	print "delete[] " + src + ".data;"
+
+    elif t.kind() == IdlKind.Struct:
+      s = t.asStructType()
+      for m in s.members():
+	freeMemory(m.data(), src + "." + m.key())
+    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+      freeMemory(t.unalias(), src)
+
+
 def allocMemory(t, dest, scopedName):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
@@ -506,6 +524,16 @@ def codelLock(codel, service=None):
 
       copyType(port.idlType, p + "_outport", "m_data->" + p + "_data.data")
 
+
+    for p in codel.inPorts:
+      port = comp.port(p)
+      if not isDynamic(port.idlType):
+	continue
+      newType = MapTypeToCpp(port.idlType, True)
+      print "  " + newType + " " + p + "_inport;"
+      copyType(port.idlType, p + "_inport", "m_data->" + p + "_data.data")
+
+
     res = codelNeedsLock(codel, service)
     if res == 2:
       print "  m_data->idsMutex.acquire_write();"
@@ -555,6 +583,7 @@ def codelRelease(codel, service=None):
 	    print MapTypeToCpp(port.idlType, True) + " m_data->" + port.name + "_data = " + port.name + ";"
       else:
 	copyTypeReverse(port.idlType,  "m_data->" + p + "_data.data", p + "_outport")
+	freeMemory(port.idlType, p + "_outport")
 
     for p in codel.outPorts:
       print "m_data->" + port.name + ".write();"
@@ -567,6 +596,8 @@ def codelRelease(codel, service=None):
 	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data.data);"
 	  else:
 	    print "m_data->" + port.name + "_data.data = " + port.name + ";"
+      else:
+	freeMemory(port.idlType, p + "_inport")
 
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.post();"

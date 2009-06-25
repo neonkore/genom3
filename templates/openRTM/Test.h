@@ -88,8 +88,8 @@ for port in outports:
     if port.idlType.identifier():
       typeName += "_Corba"
     ?>
-  <!typeName!> m_<!port.name!>_data;
-  InPort<<!typeName!>> m_<!port.name!>;
+  <!port.name!>Struct m_<!port.name!>_data;
+  InPort<<!port.name!>Struct> m_<!port.name!>;
 <?
 ?>
   // DataOutPort declaration

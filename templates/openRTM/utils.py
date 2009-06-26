@@ -590,6 +590,7 @@ def codelRelease(codel, service=None):
 
     for p in codel.inPorts:
       port = comp.port(p)
+      print "m_data->" + p + ".read();"
       if not isDynamic(port.idlType):
 	if needsConversion(port.idlType):
 	  if needsConversionFun(port.idlType):

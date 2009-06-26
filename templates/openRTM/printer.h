@@ -27,6 +27,7 @@ public:
 classDeclaration("int")
 classDeclaration("unsigned int")
 classDeclaration("char")
+classDeclaration("unsigned char")
 classDeclaration("float")
 classDeclaration("double")
 

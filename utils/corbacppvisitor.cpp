@@ -34,6 +34,7 @@
 #include "idlvalues.h"
 
 #define INDENT_QUANTUM "    "
+#define CORBA_SUFFIX "_Corba"
 
 using namespace G3nom;
 using namespace Idl;
@@ -118,11 +119,11 @@ void CorbaCppVisitor::visitFixedType(FixedType *fixed)
 void CorbaCppVisitor::visitStructType(StructType *s)
 {
 	if(m_declOnly) {
-		m_out << s->identifier();
+		m_out << s->identifier() << CORBA_SUFFIX;
 		return;
 	}
 
-	m_out << "struct " + s->identifier();
+	m_out << "struct " + s->identifier() << CORBA_SUFFIX;
 	m_out << "{" << endl;
 	string oldIndent = m_indent;
 	m_indent += INDENT_QUANTUM;
@@ -157,7 +158,7 @@ void CorbaCppVisitor::visitTypedefType(TypedefType *t)
 	}
 	m_out << "typedef ";
 	t->aliasType()->accept(*this);
-	m_out << " " << id;
+	m_out << " " << id << CORBA_SUFFIX;
 }
 
 void CorbaCppVisitor::visitEnumType(EnumType *e)
@@ -166,11 +167,11 @@ void CorbaCppVisitor::visitEnumType(EnumType *e)
 		if(m_isOutType)
 			m_out << "CORBA::Long";
 		else
-			m_out << e->identifier();
+			m_out << e->identifier() << CORBA_SUFFIX;
 		return;
 	}
 
-	m_out << "enum " << e->identifier();
+	m_out << "enum " << e->identifier() << CORBA_SUFFIX;
 	m_out << "{" << endl << m_indent;
 	bool first = true;
 	std::vector<std::string>::const_iterator it;

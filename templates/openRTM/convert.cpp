@@ -66,8 +66,6 @@ def copyTypeFromCorba(t, src, out, reverse):
 def convertFromCorba(t, reverse = False):
   cppType = MapTypeToCpp(t, True)
   corbaType = MapTypeToCorbaCpp(t, True)
-  if t.identifier():
-    corbaType += "_Corba"
   if reverse: ?>
 void convertFromCorbaReverse_<!t.identifier()!>(const <!cppType!> *in, <!corbaType!> *out)
 <?

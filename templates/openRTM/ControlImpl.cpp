@@ -64,8 +64,6 @@ for s in servicesMap:
     if service.output.identifier:
       outputType = inputType(service.output)
       output = MapTypeToCorbaCpp(outputType, True)
-      if outputType.identifier():
-	output += "_Corba"
     
       if needsConversion(outputType):
 	if isCorbaDynamic(outputType):

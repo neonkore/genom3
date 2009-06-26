@@ -15,8 +15,6 @@ for t in comp.typesVect():
   if needsConversionFun(t) and t.identifier() != IDSType.identifier():
     cppType = MapTypeToCpp(t, True)
     corbaType = MapTypeToCorbaCpp(t, True)
-    if t.identifier():
-      corbaType += "_Corba"
 
     print "void convertFromCorba_" + t.identifier() + "(const " + corbaType + "*in, " + cppType + "* out);"
     print "void convertFromCorbaReverse_" + t.identifier() + "(const " + cppType + "*in, " + corbaType + "* out);"

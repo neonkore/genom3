@@ -80,10 +80,7 @@ def service_idl_signature(service):
     return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ");"
 
 def cpp_arg(t,name):
-  if t.identifier():
-    cppType = MapTypeToCorbaCpp(t) + "_Corba"
-  else:
-    cppType = MapTypeToCorbaCpp(t)
+  cppType = MapTypeToCorbaCpp(t)
   if t.kind() == IdlKind.Struct:  
     return "const " + cppType + " &" + name
   elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
@@ -115,8 +112,6 @@ def service_cpp_signature(service, className=""):
 	outputType = BaseType.voidType
 
     output = MapTypeToCorbaCpp(outputType, True)
-    if outputType.identifier():
-      output += "_Corba"
     if isCorbaDynamic(outputType):
       output += "*"
 
@@ -426,8 +421,6 @@ def allocMemory(t, dest, scopedName):
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToCorbaCpp(s.seqType(), True)
-      if s.seqType().identifier():
-	seqType += "_Corba"
 
       print dest + ".replace(" + lengthVar(scopedName) + ", " + lengthVar(scopedName) + ", new " + seqType + "[" + lengthVar(scopedName) + "]);"
       print ""

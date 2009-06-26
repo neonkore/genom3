@@ -4,7 +4,7 @@ def parseInput(type, name):
   {
       int tmp;
       cin >> tmp;
-      <!name!> = (<!MapTypeToCorbaCpp(type, True)!>_Corba) tmp;
+      <!name!> = (<!MapTypeToCorbaCpp(type, True)!>) tmp;
   }
 <?
   elif type.kind() == IdlKind.String: 
@@ -194,8 +194,6 @@ void <!capCompName!>Test::run<!service.name!>()
 <?
   for i in service.inputs():
     input = MapTypeToCorbaCpp(inputType(i), True)
-    if inputType(i).identifier():
-      input += "_Corba"
     print "      " + input + " " + i.identifier + ";";
 
   for x in inputFlatList:
@@ -207,9 +205,7 @@ void <!capCompName!>Test::run<!service.name!>()
 
   if service.type == ServiceType.Control:
     if service.output.identifier:
-      outputType = MapTypeToCorbaCpp(inputType(service.output), True)
-      if inputType(service.output).identifier():
-	outputType += "_Corba"     
+      outputType = MapTypeToCorbaCpp(inputType(service.output), True)    
       if isCorbaDynamic(inputType(service.output)):
 	outputName = "*out"
       else:
@@ -228,9 +224,7 @@ void <!capCompName!>Test::run<!service.name!>()
 <?
   else:
     if service.output.identifier:
-      outputType = MapTypeToCorbaCpp(inputType(service.output), True)
-      if inputType(service.output).identifier():
-	outputType += "_Corba"     
+      outputType = MapTypeToCorbaCpp(inputType(service.output), True)   
       ?>
       cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
       while(!m_<!service.name!>_inport.isNew())
@@ -254,8 +248,6 @@ void <!capCompName!>Test::run<!service.name!>()
 <?
 for port in outports:
   typeName = MapTypeToCorbaCpp(port.idlType)
-  if port.idlType.identifier():
-    typeName += "_Corba"
   ?>
 void <!capCompName!>Test::read<!port.name!>()
 {

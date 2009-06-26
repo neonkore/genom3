@@ -16,6 +16,7 @@ void Printer<<!type!>>::print(const <!type!>& v)
 simpleTypePrintFunction("int")
 simpleTypePrintFunction("unsigned int")
 simpleTypePrintFunction("char")
+simpleTypePrintFunction("unsigned char")
 simpleTypePrintFunction("float")
 simpleTypePrintFunction("double")
 simpleTypePrintFunction("std::string")
@@ -64,9 +65,7 @@ def printType(t, name):
 <?
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
-    seqType = MapTypeToCpp(s.seqType(), True)
-    if s.seqType().identifier():
-      seqType += "_Corba"
+    seqType = MapTypeToCorbaCpp(s.seqType(), True)
     printSimpleType("int", name + ".length()")
     ?>
     // data

@@ -47,7 +47,8 @@ namespace Idl {
 /** \short The base class for all IDL types
 
 * IdlType should only be stored using IDlType::Ptr (which is a shared ptr) to avoir memory leak.
-* Casting can be done using #asType() that return a regular pointer that should not be stored.
+* Casting can be done using #asType() that return a regular pointer that should never be stored or used to
+* create a new shared ptr.
 */
 class IdlType
 {
@@ -80,7 +81,12 @@ class IdlType
 		}
 
 		/** \return an equivalent IdlType object with aliases stripped 
-		* or IdlType::Ptr() if the type is not an alias. */
+		* or IdlType::Ptr() if the type is not an alias. 
+		* This function cannot return a shared ptr to this because this would not work
+		* every time #asType() is called. To be able to return a shared ptr, we neet to be 
+		* absolutely sure that every time this function is called, the corresponding object
+		* is hold by a shared ptr, which is not always the case. The solution avoids some
+		* tricky bugs.*/
 		IdlType::Ptr unalias();
 
 		/** This function is used to implement the Visitor pattern together with

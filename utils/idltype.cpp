@@ -99,48 +99,6 @@ string IdlType::kindAsString() const
 	}
 }
 
-StructType* IdlType::asStructType()
-{
-	if(m_kind != Struct)
-		return 0;
-	return static_cast<StructType*>(this);
-}
-
-EnumType* IdlType::asEnumType()
-{
-	if(m_kind != Enum)
-		return 0;
-	return static_cast<EnumType*>(this);
-}
-
-TypedefType* IdlType::asTypedefType()
-{
-	if(m_kind != Typedef)
-		return 0;
-	return static_cast<TypedefType*>(this);
-}
-
-NamedType* IdlType::asNamedType()
-{
-	if(m_kind != Named)
-		return 0;
-	return static_cast<NamedType*>(this);
-}
-
-StringType* IdlType::asStringType()
-{
-	if(m_kind != String)
-		return 0;
-	return static_cast<StringType*>(this);
-}
-
-ArrayType* IdlType::asArrayType()
-{
-	if(m_kind != Array)
-		return 0;
-	return static_cast<ArrayType*>(this);
-}
-
 IdlType::Ptr IdlType::unalias()
 {
 	switch(m_kind) {

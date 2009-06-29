@@ -78,12 +78,6 @@ class IdlType
 		template<class T> T* asType() {
 			return static_cast<T*>(this);
 		}
-		NamedType* asNamedType();
-		StructType* asStructType();
-		EnumType* asEnumType();
-		TypedefType* asTypedefType();
-		StringType* asStringType();
-		ArrayType* asArrayType();
 
 		/** \return an equivalent IdlType object with aliases stripped 
 		* or IdlType::Ptr() if the type is not an alias. */

@@ -112,7 +112,7 @@ void IdlVisitor::visitStructType(StructType *s)
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
 		if(it->second->kind() == IdlType::Array) {
-			ArrayType *a = it->second->asArrayType();
+			ArrayType *a = it->second->asType<ArrayType>();
 			a->type()->accept(*this);
 			m_out << " " << it->first << a->printBounds() << ";";
 		} else {

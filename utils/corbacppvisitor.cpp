@@ -132,7 +132,7 @@ void CorbaCppVisitor::visitStructType(StructType *s)
 	for(; it != s->members().end(); ++it) {
 			m_out << m_indent;
 		if(it->second->kind() == IdlType::String) {
-			StringType *st = it->second->asStringType();
+			StringType *st = it->second->asType<StringType>();
 			if(st)
 				m_out << "char " << it->first << "[" << st->bound() <<  "];" << endl;
 			continue;

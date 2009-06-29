@@ -214,19 +214,19 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 	for (it4 = m_types.begin(); it4 != m_types.end(); ++it4) {
 		switch ((*it4)->kind()) {
 			case IdlType::Struct: {
-					StructType *s = static_cast<StructType*>(it4->get());
+					StructType *s = (*it4)->asType<StructType>();
 					if (s->identifier() == name)
 						res = *it4;
 					break;
 				}
 			case IdlType::Typedef: {
-					TypedefType *t = static_cast<TypedefType*>(it4->get());
+					TypedefType *t = (*it4)->asType<TypedefType>();
 					if (t->hasIdentifier(name))
 						res = *it4;
 					break;
 				}
 			case IdlType::Enum: {
-					EnumType *e = static_cast<EnumType*>(it4->get());
+					EnumType *e = (*it4)->asType<EnumType>();
 					if(e->identifier() == name)
 						res = *it4;
 						break;
@@ -249,7 +249,7 @@ IdlType::Ptr Component::typeFromIdsName(const std::string &name)
 	IdlType::Ptr ids = IDSType->unalias();
 	switch(ids->kind()) {
 		case IdlType::Struct:{
-			StructType *s = static_cast<StructType*>(ids.get());
+			StructType *s = ids->asType<StructType>();
 			if(s)
 				return s->member(name);
 		}

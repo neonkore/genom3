@@ -36,6 +36,12 @@ namespace G3nom
 {
 namespace Idl {
 
+/** \short A visitor for the C++ language
+
+* The only difference with the C Visitor is the handling of const values.
+* You should not create an object of this type. Instead, use the static #mapTypeToCpp()
+* and #mapValueToCpp() that directly output a string.
+*/
 class CppVisitor : public CVisitor
 {
 	public:

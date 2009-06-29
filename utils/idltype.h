@@ -41,8 +41,14 @@
 namespace G3nom
 {
 
+/** Base namespace for classes related to IDL types */
 namespace Idl {
 
+/** \short The base class for all IDL types
+
+* IdlType should only be stored using IDlType::Ptr (which is a shared ptr) to avoir memory leak.
+* Casting can be done using #asType() that return a regular pointer that should not be stored.
+*/
 class IdlType
 {
 	public:
@@ -51,6 +57,7 @@ class IdlType
 			Float, Double, LongDouble, Fixed, Boolean, Char, WChar, Octet, String,
 			WString, Any, Struct, Union, Enum, Sequence, Typedef, Array, Named
 		};
+		/// A (shared) pointer to a IdlType
 		typedef boost::shared_ptr<IdlType> Ptr;
 		typedef std::map<std::string, Ptr> Map;
 		typedef std::vector<Ptr> Vector;
@@ -79,9 +86,12 @@ class IdlType
 		ArrayType* asArrayType();
 
 		/** \return an equivalent IdlType object with aliases stripped 
-		* or IdlType::Ptr() if the type is not an alias */
+		* or IdlType::Ptr() if the type is not an alias. */
 		IdlType::Ptr unalias();
 
+		/** This function is used to implement the Visitor pattern together with
+		* the TypeVisitor class.
+		*/
 		virtual void accept(TypeVisitor& visitor) {}
 
 // 		virtual std::vector<std::string> identifiers() {
@@ -95,7 +105,10 @@ class IdlType
 		bool m_isNative;
 };
 
-/* Simple declarator (eg int a;) or arrray declarator (eg int a[10][10])*/
+/** \short A declarator (ie what is found after a type name in a type definition)
+
+It can be either a simple declarator (eg int a;) or an array declarator (eg int a[10][10])
+*/
 class Declarator
 {
 	public:
@@ -137,6 +150,10 @@ typedef std::pair<IdlType::Ptr, Declarator::VectPtr> TypeDeclarator;
 
 /* Basic Types */
 
+/** \short Idl base types
+
+* These types are allocated once at the beginning of the program to avoid duplication.
+*/
 class BaseType : public IdlType
 {
 	public:
@@ -257,6 +274,8 @@ class FixedType : public IdlType
 
 /* More complex types*/
 
+/** \short A typedef
+*/
 class TypedefType : public IdlType
 {
 	public:
@@ -303,6 +322,10 @@ class StructType : public IdlType
 			m_identifier = id;
 		}
 
+		/** This overload, using a Declarator::VectPtr argument, should only be used
+		* by the parser. If you want to add a member by hand (eg from a script), use
+		* the simpler version expecting an identifier and a type. 
+		*/
 		void addMember(IdlType::Ptr t, Declarator::VectPtr declarators);
 		void addMember(IdlType::Ptr t, const std::string &name);
 		const IdlType::Map& members() const {
@@ -328,6 +351,10 @@ class StructType : public IdlType
 		bool m_isRecursive;
 };
 
+/** \short An enumeration
+* A value is simply a name (Idl does not allow to set the value like 
+* eg in C)
+*/
 class EnumType : public IdlType
 {
 	public:
@@ -358,6 +385,7 @@ class EnumType : public IdlType
 		std::vector<std::string> m_enum;
 };
 
+/** \short A n-dimension array*/
 class ArrayType : public IdlType {
 	public:
 		ArrayType() : IdlType(Array) {}
@@ -382,6 +410,26 @@ class ArrayType : public IdlType {
 		std::vector<int> m_bounds;
 };
 
+/** \short A pointer to a type with an identifier
+
+* This type is the result of G3nom::Component::findByName(). It is used to differentiate
+* between a type definition and its use (see example below).
+\code
+struct B {
+  long y;
+}
+
+struct A {
+  B b;
+}
+
+struct A_bis {
+  struct B {
+	long y;
+  } b;
+}
+\endcode
+*/
 class NamedType : public IdlType {
 	public:
 		NamedType() : IdlType(Named) {}

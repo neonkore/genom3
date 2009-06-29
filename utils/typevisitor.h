@@ -50,6 +50,11 @@ class NamedType;
 class IdlType;
 class ConstValue;
 
+/** \short A visitor for Idl Types
+
+* This class implements the Visitor pattern for Idl types and values.
+* it can be inherited to create eg to output the types in a given language.
+*/
 class TypeVisitor
 {
 	public:

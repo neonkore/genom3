@@ -36,6 +36,13 @@ namespace G3nom
 {
 namespace Idl {
 
+/** \short A visitor for CORBA C++
+
+* This visitor is tweaked to do what the openRTM template expects. For instance,
+* all identifiers are suffixed with "_Corba".
+* You should not create an object of this type. Instead, use the static #mapTypeToCpp()
+* and #mapValueToCpp() that directly output a string.
+*/
 class CorbaCppVisitor : public TypeVisitor
 {
 	public:

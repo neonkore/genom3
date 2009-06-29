@@ -37,18 +37,43 @@ namespace G3nom
 
 class Component;
 
+/** \short A template file interpreter 
+
+* \sa TemplateInterpreter
+*/
 class Interpreter
 {
 	public:
 		Interpreter();
 		virtual ~Interpreter();
 
+		/** Initialize the interpreter with the Component \a c . For instance, 
+		* assign the value of a global var to a pointer to this component.
+		*/
 		virtual void start(Component *c) = 0;
+
+		/** Interpret \a s .
+		* \return the output of the code (for instance the text that was written to stdout)
+		*/
 		virtual std::string interpret(const std::string &s) = 0;
+		/** Print the value of \a s.*/
 		virtual std::string eval(const std::string &s) = 0;
+
+		/** Defines the var \a name in the interpreter and assign it \a value.*/
 		virtual void exportVar(const std::string &name, const std::string &value) = 0;
+
+		/** \return the code to print the string \a s (for instance to stdout if it is redirected).
+		* This code will be inserted in the template file 
+		* between '?>' and '<?' tags.
+		*/
 		virtual std::string printString(const std::string &s) = 0;
+		/** \return the code to print the evaluate \a s and print its value (for instance to stdout if it is redirected).
+		* This code will be inserted in the template file 
+		* between '<!' and '!>' tags.
+		*/
 		virtual std::string evalString(const std::string &s) = 0;
+
+		/** \return The currently active component. */
 		Component* component();
 
 	protected:

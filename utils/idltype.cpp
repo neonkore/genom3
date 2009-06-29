@@ -167,24 +167,6 @@ IdlType::Ptr IdlType::unalias()
 	return IdlType::Ptr();
 }
 
-
-// IdlType* IdlType::scopedNameToType(const char* file, int line, const ScopedName* sn)
-// {
-//   const Scope::Entry* se = Scope::current()->findForUse(sn, file, line);
-//
-//   if (se) {
-//     if (se->kind() == Scope::Entry::E_DECL) {
-//       IdlType *t = se->idltype();
-//       if (t) return t;
-//     }
-//     char* ssn = sn->toString();
-//     IdlError(file, line, "'%s' is not a type", ssn);
-//     IdlErrorCont(se->file(), se->line(), "('%s' declared here)", ssn);
-//     delete [] ssn;
-//   }
-//   return 0;
-// }
-
 // Static type object pointers
 BaseType::Ptr BaseType::nullType = IdlType::Ptr(new BaseType(IdlType::Null));
 BaseType::Ptr BaseType::voidType = IdlType::Ptr(new BaseType(IdlType::Void));

@@ -44,6 +44,13 @@ namespace G3nom
 
 namespace Idl {
 
+/** \short A IDL literal
+
+* Supported values are integers, double, strings.
+* This class is a wrapper around boost::variant that stores the kind of 
+* the data stored, in order to be able to differentiate eg a char from an int.
+* It can also represent a struct or an operation using the #m_members, which is a list of children literals
+*/
 class Literal {
 	public:
 		enum Kind { None, Bool, Char, Int, Double, String, Struct, Plus, Minus, Times,
@@ -58,6 +65,9 @@ class Literal {
 		Literal(double d) : m_kind(Double), m_value(d), m_isEmpty(false)  {}
 		Literal(bool b) : m_kind(Bool), m_value(b), m_isEmpty(false)  {}
 
+		/** Made necessary by boost.Python.
+		\sa G3nom::Service::Input
+		*/
 		bool operator==(const G3nom::Idl::Literal& rhs);  // necessary for boost.python
 
 		void addMember(const Literal &l);
@@ -79,6 +89,7 @@ class Literal {
 		Literal::Vector m_members;
 };
 
+/** \short A const value definition*/
 class ConstValue {
 	public:
 		typedef std::map<std::string, ConstValue> Map;

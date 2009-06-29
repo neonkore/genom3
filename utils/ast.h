@@ -37,9 +37,16 @@
 #include "idltype.h"
 #include "idlvalues.h"
 
+/** \short Base namespace for all classes related to G3nom.*/
 namespace G3nom
 {
 
+/** 
+* A codel represents a user function called during a service execution.
+* \li #inTypes (resp. #outTypes) are names of IDS members, that the codel can read (resp. read and write to).
+* \li #inPorts (resp. #outPorts) are names of inports the codel can read (resp. write to).
+* \short Class representing a codel
+*/
 class Codel
 {
 	public:
@@ -63,6 +70,7 @@ class Codel
 
 		std::vector<std::string> inTypes;
 		std::vector<std::string> outTypes;
+		/** List of in ports used by this codel*/
 		std::vector<std::string> inPorts;
 		std::vector<std::string> outPorts;
 
@@ -70,6 +78,13 @@ class Codel
 			std::string m_name;
 };
 
+/**
+*  The #sizeCodel is a regular codel (ie it can have tha same arguments as a regular codel). It will
+* be called before a dynamic port (ie a port containing a sequence) is initialized. A int* parameter
+* is added to the codel args for each sequence in the port type, in which the user writes the desired size for 
+* the corresponding sequence.
+* \short A data port
+*/
 class Port
 {
 	public:
@@ -89,6 +104,9 @@ class Port
 		Codel::Ptr sizeCodel;
 };
 
+/** \short An execution task
+* 
+*/
 class Task
 {
 	public:
@@ -121,6 +139,7 @@ class Task
 		//std::string connectedPort;
 };
 
+/** \short A service*/
 class Service
 {
 	public:
@@ -128,12 +147,20 @@ class Service
 		typedef std::map<std::string, Ptr> Map;
 		enum Type { Control, Exec, Init };
 
+		/** 
+		* It can either be an IDS member (eg IDS:speedRef) in which case #type is null, or 
+		* defined by its type (eg double d). In both cases, it can have a default value.
+		* \short A service's input or output parameter
+		*/
 		struct Input {
 			typedef std::vector<Input> Vect;
 			enum Kind { IDSMember, Type};
 			
 			Input() : kind(IDSMember) {}
 
+			/** It is necessary to overload this operator because boost.python
+			* expects types stored in a vect to be comparable with operator==()
+			*/
 			bool operator==(const Input &rhs); // necessary for boost.python
 
 			Kind kind;
@@ -177,6 +204,9 @@ class Service
 		std::vector<std::string> m_errorMessages;
 };
 
+/** \short A component
+* 
+*/
 class Component
 {
 	public:
@@ -192,21 +222,24 @@ class Component
 		void addService(Service::Ptr task);
 		void addPort(Port::Ptr port);
 
-		void addConstValue(const Idl::ConstValue &val);
-		void addType(Idl::IdlType::Ptr type);
-
 		Task::Map& tasksMap();
 		std::vector<std::string> tasksList();
 		Task::Ptr task(const std::string &name);
 		int taskIndex(const std::string &name) const;
 		
 		Service::Map& servicesMap();
+		/** \return the service named \a name*/
 		Service::Ptr service(const std::string &name);
+		/** \return the index of the service named \a name inside the services map*/
 		int serviceIndex(const std::string &name) const;
 
 		Port::Ptr port(const std::string &name);
 		Port::Map& portsMap() { return ports; }
+		/** \return the index of the port named \a name inside the ports map*/
 		int portIndex(const std::string &name) const;
+
+		void addConstValue(const Idl::ConstValue &val);
+		void addType(Idl::IdlType::Ptr type);
 
 		Idl::IdlType::Vector& typesVect() { return m_types; }
 		Idl::ConstValue::Map& valuesMap() { return m_constValues; }
@@ -214,7 +247,12 @@ class Component
 		void addImportedComponent(const std::string &s);
 		std::vector<std::string>& importedComponents() { return m_importedComponents; }
 
+		/** This function is used to search a type by its identifier.
+		* It returns either a new NamedType pointing to the found type, 
+		* or an invalid IdlType::Ptr if no such type is found.
+		*/
 		Idl::IdlType::Ptr typeFromName(const std::string &name);
+		/** \return the type of the IDS element \a name */
 		Idl::IdlType::Ptr typeFromIdsName(const std::string &name);
 
 		std::string pluginLanguage;

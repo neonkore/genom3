@@ -44,23 +44,28 @@ using namespace boost::python;
 
 PythonInterpreter* PythonInterpreter::m_instance = 0;
 
-/********************** Python module definition ********/
 
 void writeStdout(const char *text)
 {
 	PythonInterpreter::getInstance()->writeStdout(text);
 }
 
+// The Logger modules is used to redirect stdout to 
+// a string. The Logger.write function replaces builtin
+// sys.stdout.write.
 BOOST_PYTHON_MODULE_INIT(Logger)
 {
   def("write", &writeStdout);
 }
+
+/********************** Python module definition ********/
 
 Component* pygetCurrentComponent()
 {
 	PythonInterpreter *i = PythonInterpreter::getInstance();
 	return i->component();
 }
+
 
 void export_idl();
 void export_ast();
@@ -90,8 +95,8 @@ namespace G3nom
 class PythonInterpreterPrivate
 {
 	public:
-		boost::python::object pydict;
-		std::string outbuf;
+		boost::python::object pydict; // current dict of defined objects
+		std::string outbuf; // buffer stdout is redirected to
 };
 }
 
@@ -102,8 +107,11 @@ PythonInterpreter::PythonInterpreter()
 {
 	char *s = newString("G3nom"); // we can't delete this string
 	char *ss = newString("Logger"); // we can't delete this string
+
+	// import G3nom and Logger modules init function
 	PyImport_AppendInittab(s, initG3nom);
 	PyImport_AppendInittab(ss, initLogger);
+	// initialize the interpreter
 	Py_Initialize();
 
 	// create global dict object
@@ -167,6 +175,8 @@ std::string PythonInterpreter::evalString(const std::string &s)
 	return "sys.stdout.write(str(" + s + "));";
 }
 
+/** Replaces all occurrences of \a pattern in the string \a s with \a replaceWith
+*/
 std::string replaceAllOccurrences(std::string s, const std::string &pattern, const std::string &replaceWith)
 {
 	uint idx = 0;

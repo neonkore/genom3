@@ -37,6 +37,11 @@ namespace G3nom
 {
 namespace Idl {
 
+/** \short A debug visitor 
+
+* You should not create an object of this type. Instead, use the static #dumpType()
+* and #dumpValue() that directly output a string.
+*/
 class DumpType : public TypeVisitor
 {
 	public:

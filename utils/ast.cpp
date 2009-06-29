@@ -235,6 +235,8 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 				break;
 		}
 	}
+
+	// create a new named refering to the found type
 	if(res.get()) {
 		IdlType::Ptr p(new NamedType(name, res));
 		return p;

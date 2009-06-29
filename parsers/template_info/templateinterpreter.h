@@ -31,6 +31,7 @@
 #define G3NOM_TEMPLATE_INTERPRETER_H
 
 #include <string>
+#include <utils/interpreter.h>
 
 namespace G3nom
 {
@@ -39,6 +40,16 @@ class Interpreter;
 class Component;
 class TemplateInfoLexer;
 
+/** \short Template file interpreter
+
+* This class parses a template.info file and interprets the files listed in it.
+* It replaces text within '<!' and '!>' tags with the result of Interpreter::evalString
+* and the text between a closing tag and the next opening tag with the result
+* of Interpreter::printString. The code between '<?' and '?>' tags is kept.
+
+* The result of these transformations is sent to the interpreter using Interpreter::interpret()
+* and the result is written to the output file.
+*/
 class TemplateInterpreter
 {
 	public:

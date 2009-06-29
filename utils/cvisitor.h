@@ -36,6 +36,12 @@ namespace G3nom
 {
 namespace Idl {
 
+/** \short A visitor for the C language
+
+* This visitor outputs the types in C. It is the version that the codels expects.
+* You should not create an object of this type. Instead, use the static #mapTypeToC()
+* and #mapValueToC() that directly output a string.
+*/
 class CVisitor : public TypeVisitor
 {
 	public:

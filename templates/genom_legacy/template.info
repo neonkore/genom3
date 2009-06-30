@@ -1,5 +1,7 @@
 language: Python;
-requires: "server/server_utils.py";
+requires:
+  "../utils.py"
+  "server/server_utils.py";
 
 main:
 /*build related files*/

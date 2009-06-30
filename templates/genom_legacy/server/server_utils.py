@@ -27,19 +27,6 @@ def inputType(i):
   else:
     return i.type
 
-def pointerTo(t):
-  s = MapTypeToC(t,True)
-  if t.kind() == IdlKind.String:
-    return s
-  else:
-    return s+"*"
-
-def addressOf(t, s):
-  if t.kind() == IdlKind.String:
-    return s
-  else:
-    return "&" + s
-
 def idsNameForType(t):
   return "_" + MapTypeToC(t, True).replace(' ', '_')
 
@@ -60,20 +47,6 @@ def idsMemberForInput(i, service):
       name = service.name + "_" + i.identifier
       IDSType.addMember(i.type, name)
       return name
-
-# returns a flat list of the structure of a type
-def flatStruct(t, name, separator = "_"):
-    if t.kind() == IdlKind.Named:
-	n = t.asNamedType()
-	return flatStruct(n.type(), name, separator)
-    elif t.kind() == IdlKind.Struct:
-	s = t.asStructType()
-	l = [] 
-	for m in s.members():
-	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator))
-	return l
-    else:
-	return [(t, name)]   
 
 def typeProtoPrefix(t):
     prefix = ""
@@ -98,23 +71,6 @@ def typeProtoPrefix(t):
 	prefix = "string"
     return prefix + t.identifier()
 
-def isDynamic(t):
-  if t.kind() == IdlKind.Sequence:
-    return True
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return isDynamic(t.unalias())
-  elif t.kind() == IdlKind.Struct:
-    s = t.asStructType()
-    for m in s.members():
-      if isDynamic(m.data()):
-	return True
-    return False
-  else:
-    return False
-
-def isDynamicPort(port):
-  return isDynamic(port.idlType)
-
 def dynamicPortType(port):
    if port.idlType.kind == IdlKind.Sequence:
      return port.idlType.asSequenceType().seqType()
@@ -132,14 +88,6 @@ s = comp.IDSType.unalias().asStructType()
 for m in s.members():
     IDSType.addMember(m.data(), m.key())
 
-# create a list of out ports, because we don't use inports
-outports = []
-inports = []
-for p in comp.portsMap():
-    if p.data().type == PortType.Outgoing:
-	outports.append(p.data())
-    else:
-	inports.append(p.data())
 # add a member in the ids for connect services 
 if inports:
   IDSType.addMember(StringType(256), connectIDSMember)
@@ -322,28 +270,7 @@ def sizeOfIdsMember(name):
 	return "0"
     return sizeOfType(type)
 
-# try to find an init service
-def findInitService():
-  i=-1
-  for name, service in servicesDict.iteritems():
-    i += 1
-    if service.type == ServiceType.Init:
-      return service, i
-  return 0,-1
-
-initService,initServiceNb = findInitService()
-
 # error related functions
-def createErrorList():
-  l = []
-  for name, service in servicesDict.iteritems():
-    for e in service.errorMessages():
-	l.append(e)
-  for t in comp.tasksMap():
-    for e in t.data().errorMessages():
-	l.append(e)
-  return set(l)
-
 def encodeError(i):
     return comp.uniqueId << 16 | 0x8000 | 100 << 8 | i
 
@@ -392,33 +319,6 @@ def codelSignatureFull(codel, service):
 	return "STATUS " + codel_signature(codel.data(), service)
     else:
 	return "ACTIVITY_EVENT " + codel_signature(codel.data(), service)
-
-def real_codel_signature(codel, service=None):
-  proto = ""
-  if service is not None:
-    serviceInfo = services_info_dict[service.name]
-    proto += serviceInfo.userSignatureProto
-
-  for type in codel.inTypes:
-    idstype = typeFromIdsName(type);
-    proto += pointerTo(idstype) + " in_" + type + ", ";
-  for type in codel.outTypes:
-    idstype = typeFromIdsName(type);
-    proto += pointerTo(idstype) + " out_" + type + ", ";
-  for port in codel.outPorts:
-    p = comp.port(port)
-    if p is not None:
-      proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
-    else:
-      proto += port + ", "
-  for port in codel.inPorts:
-    p = comp.port(port)
-    if p is not None:
-	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
-    else:
-	proto += port + ", "
-  proto = codel.name + "(" + proto[:-2] + ")"
-  return proto
 
 def real_codel_call(codel, service=None):
   proto = ""
@@ -519,45 +419,6 @@ def maxOutputSize():
       if serviceInfo.outputFlag:
 	res = max(res, typeSize(serviceInfo.outputType))
     return res
-
-
-def dynamicMembers(t, name, recursive = False):
-  if t.kind() == IdlKind.Sequence:
-    if recursive:
-      s = t.asSequenceType()
-      l = [(t, name)]
-      l.extend(dynamicMembers(s.seqType(), name + ".data", True))
-      return l
-    else:
-      return [(t, name)]
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return dynamicMembers(t.unalias(), name, recursive)
-  elif t.kind() == IdlKind.Struct:
-    s = t.asStructType()
-    l = []
-    for m in s.members():
-      l.extend(dynamicMembers(m.data(), name + "." + m.key(), recursive))
-    return l
-  else:
-    return []
-
-def toIdentifier(n):
-  res = n.replace(".", "_")
-  res = res.replace("[", "")
-  res = res.replace("]", "")
-  res = res.replace("(*", "")
-  res = res.replace(")", "")
-  res = res.replace("SDI_F->", "")
-  return res
-
-def counterName(n):
-  return toIdentifier(n) + "_counter"
-
-def lengthVar(n):
-  return toIdentifier(n) + "_length"
-
-def isEmptyVar(n):
-  return toIdentifier(n) + "_is_empty"
 
 def computeTotalSize(t, name, addStructSize = True):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:

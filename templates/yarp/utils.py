@@ -13,32 +13,6 @@ typesVect = []
 for t in comp.typesVect():
   typesVect.append(t)
 
-def inputType(i):
-  if i.kind == ServiceInputKind.IDSMember:
-    return comp.typeFromIdsName(i.identifier)
-  else:
-    return i.type
-
-def addressOf(t, s):
- if t.kind() == IdlKind.String:
-   return s
- else:
-    return "&" + s
-
-# returns a flat list of the structure of a type
-def flatStruct(t, name, separator = "_"):
-    if t.kind() == IdlKind.Named:
-	n = t.asNamedType()
-	return flatStruct(n.type(), name, separator)
-    elif t.kind() == IdlKind.Struct:
-	s = t.asStructType()
-	l = []
-	for m in s.members():
-	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator))
-	return l
-    else:
-	return [(t, name)]  
-
 def inputList(service):
   serviceInfo = services_info_dict[service.name]
   res = []
@@ -49,22 +23,6 @@ def inputList(service):
   elif serviceInfo.inputFlag:
     return flatStruct(serviceInfo.inputType, serviceInfo.inputName, '.')
   return []
-
-outports = []
-inports = []
-for p in portsMap:
-    port = p.data()
-    if port.type == PortType.Outgoing:
-	outports.append(port)
-    else:
-	inports.append(port)
-
-def pointerTo(t):
-  s = MapTypeToC(t,True)
-  if t.kind() == IdlKind.String:
-    return s
-  else:
-    return s+"*"
 
 class ServiceInfo:
   def __init__(self, service):
@@ -137,92 +95,11 @@ def real_codel_call(codel, ids_prefix="", service=None, allArgs = False):
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
-
-def real_codel_signature(codel, service=None):
-  proto = ""
-  if service is not None:
-    for s in service.inputs():
-	idstype = inputType(s);
-	proto += "const " + pointerTo(idstype) + " in_" + s.identifier + ", ";
-    if service.output.identifier:
-	idstype = inputType(service.output);
-	proto += pointerTo(idstype) + " out_" + service.output.identifier + ", "; 
-
-  for type in codel.inTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto += "const " + pointerTo(idstype) + " in_" + type + ", ";
-  for type in codel.outTypes:
-    idstype = comp.typeFromIdsName(type);
-    proto += pointerTo(idstype) + " out_" + type + ", ";
-  for port in codel.outPorts:
-    p = comp.port(port)
-    if p is not None:
-	proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
-    else:
-	proto += port + ", "
-  for port in codel.inPorts:
-    p = comp.port(port)
-    if p is not None:
-	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
-    else:
-	proto += port + ", "
-  proto = codel.name + "(" + proto[:-2] + ")"
-  return proto
-
-
 def startStateForService(service):
   if service.hasCodel("start"):
     return upper(service.name) + "_START"
   else:
     return upper(service.name) + "_MAIN"
-
-# error related functions
-def createErrorList():
-  l = []
-  for s in servicesMap:
-    service = s.data()
-    for e in service.errorMessages():
-	l.append(e)
-  for t in comp.tasksMap():
-    for e in t.data().errorMessages():
-	l.append(e)
-  return set(l)
-errorList = createErrorList();
-
-def toIdentifier(n):
-  res = n.replace(".", "_")
-  res = res.replace("[", "")
-  res = res.replace("]", "")
-  res = res.replace("(*", "")
-  res = res.replace(")", "")
-  res = res.replace("m_data->", "")
-  return res
-
-def counterName(n):
-  return toIdentifier(n) + "_counter"
-
-def lengthVar(n):
-  return toIdentifier(n) + "_length"
-
-def dynamicMembers(t, name, recursive = False):
-  if t.kind() == IdlKind.Sequence:
-    if recursive:
-      s = t.asSequenceType()
-      l = [(t, name)]
-      l.extend(dynamicMembers(s.seqType(), name + ".data", True))
-      return l
-    else:
-      return [(t, name)]
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return dynamicMembers(t.unalias(), name, recursive)
-  elif t.kind() == IdlKind.Struct:
-    s = t.asStructType()
-    l = []
-    for m in s.members():
-      l.extend(dynamicMembers(m.data(), name + "." + m.key(), recursive))
-    return l
-  else:
-    return []
 
 def allocMemory(t, dest, scopedName):
     if t.kind() == IdlKind.Sequence:
@@ -260,26 +137,6 @@ def codelNeedsLock(codel, service):
       if i.kind == ServiceInputKind.IDSMember:
 	return 1
     return 0
-
-def sizeCodelSignature(port):
-  sizeCodelArgs = ""
-  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
-    sizeCodelArgs += "int *" + lengthVar(x[1]) + ", "
-
-  for s in port.sizeCodel.inTypes:
-    idstype = comp.typeFromIdsName(s);
-    sizeCodelArgs += pointerTo(idstype) + " in_" + s + ", "
-  for s in port.sizeCodel.outTypes:
-    idstype = comp.typeFromIdsName(s);
-    sizeCodelArgs += pointerTo(idstype) + " out_" + s + ", "
-  for s in port.sizeCodel.inPorts:
-    p = comp.port(s)
-    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_inport, "
-  for s in port.sizeCodel.outPorts:
-    p = comp.port(s)
-    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_outport, "
-
-  return "int " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ")"
 
 def callSizeCodel(port):
   sizeCodelArgs = ""
@@ -331,16 +188,4 @@ def codelRelease(codel, service):
     if res:
       print "  m_data->idsMutex.release();"
 
-def isDynamic(t):
-  if t.kind() == IdlKind.Sequence:
-    return True
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return isDynamic(t.unalias())
-  elif t.kind() == IdlKind.Struct:
-    s = t.asStructType()
-    for m in s.members():
-      if isDynamic(m.data()):
-	return True
-    return False
-  else:
-    return False
+

@@ -1,5 +1,7 @@
 language: Python;
-requires: "utils.py";
+requires: 
+  "../utils.py"
+  "utils.py";
 
 main:
   "YarpCodec.hpp" -> "$$YarpCodec.hpp"

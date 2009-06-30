@@ -662,6 +662,17 @@ def codelRelease(codel, service=None):
     print "posterGive(" + posterId + ");"
 
 
+# try to find an init service
+def findInitService():
+  i=-1
+  for name,service in servicesDict.iteritems():
+    i += 1
+    if service.type == ServiceType.Init:
+      return service, i
+  return 0,-1
+
+initService,initServiceNb = findInitService()
+
 # other vars
 nbServices = len(servicesDict)
 abortRequestNum = nbServices;

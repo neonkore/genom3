@@ -35,6 +35,12 @@ struct <!port.name!>Struct {
 ?>
 
 <?
+for e in errorList: ?>
+exception <!e!> {};
+<?
+?>
+
+<?
 ?>
 interface I<!capCompName!>
 {

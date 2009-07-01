@@ -153,7 +153,7 @@ void CorbaCppVisitor::visitTypedefType(TypedefType *t)
 {
 	string id = t->declarators()->at(0)->identifier(); 
 	if(m_declOnly) {
-		m_out << id;
+		m_out << id << CORBA_SUFFIX;
 		return;
 	}
 	m_out << "typedef ";

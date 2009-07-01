@@ -211,22 +211,38 @@ void <!capCompName!>Test::run<!service.name!>()
       else:
 	outputName = "out"
       ?>
+    try {
       <!outputType!> <!outputName!> = m_service-><!service.name!>(<!serviceArgs!>);
       cout << endl << "Result: ";
       Printer<<!outputType!>>::print(<!outputName!>);
       cout << endl;
+    } catch (CORBA::UserException& ex) {
+      cout << "Error when calling service \"<!service.name!>\": " << ex._name() << endl;
+      return;
+    }
 <?
       if isCorbaDynamic(inputType(service.output)):?>
       delete out;
 <?
     else:?>
+    try {
       m_service-><!service.name!>(<!serviceArgs!>);
+    } catch (CORBA::UserException& ex) {
+      cout << "Error when calling service \"<!service.name!>\": " << ex._name() << endl;
+      return;
+    }
 <?
   else:
     if service.output.identifier:
       outputType = MapTypeToCorbaCpp(inputType(service.output), True)   
       ?>
-      cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
+      try {
+	cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
+      } catch (CORBA::UserException& ex) {
+	cout << "Error when calling service \"<!service.name!>\" control codel: " << ex._name() << endl;
+	return;
+      }
+
       while(!m_<!service.name!>_inport.isNew())
 	coil::usleep(1000);
 
@@ -236,7 +252,12 @@ void <!capCompName!>Test::run<!service.name!>()
       cout << endl;
 <?
     else:?>
-      m_service-><!service.name!>(<!serviceArgs!>);
+      try {
+	m_service-><!service.name!>(<!serviceArgs!>);
+      } catch (CORBA::UserException& ex) {
+	cout << "Error when calling service \"<!service.name!>\" control codel: " << ex._name() << endl;
+	return;
+      }
       cout << endl << "Started activity " << endl;
 <?
   ?>

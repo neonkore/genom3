@@ -5,6 +5,22 @@
 #include "userCodels.h"
 #include "ExecServices.h"
 
+
+void throwError(int e)
+{
+  switch(e) {
+<?
+errorSet = createErrorList()
+for e in errorSet:
+    print "    case ERROR_" + e + ": throw " + e + "();"
+?>
+    case USER_OK:  return;
+    default:
+	return;
+  }
+}
+  
+
 // forward declaration of user codels
 extern "C" {
 <?
@@ -41,7 +57,7 @@ for s in servicesMap:
 	copyCodelArgsReverse(service.codel("control"), service)
 	?>
   if(res < 0) //error
-      return;
+      throwError(res);
 
   // kill existing incompatible services
 <?
@@ -118,7 +134,7 @@ for s in comp.servicesMap():
 	copyCodelArgsReverse(service.codel("control"), service)
 	?>
   if(res < 0) // error
-      <!returnStr!>
+      throwError(res);
 <?
     ?>
   // kill existing incompatible services

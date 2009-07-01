@@ -808,6 +808,7 @@ static void <!comp.name()!>SendFinalReply (SERV_ID servId,
   /* 
    * Send the final reply 
    */
+  genom_log("Sending final reply : %d for request %d\n", bilan, ACTIVITY_RQST_TYPE(activity));
   if (csServReplySend (servId, ACTIVITY_RQST_ID(activity), FINAL_REPLY, 
 		       bilan, (void *) ACTIVITY_OUTPUT_ID(activity),
 		       ACTIVITY_OUTPUT_SIZE(activity), (FUNCPTR) NULL) != OK)

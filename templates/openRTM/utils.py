@@ -45,7 +45,14 @@ def service_idl_signature(service):
     for i in service.inputs():
 	t = inputType(i)
 	args += "in " + MapTypeToIdl(t) + " " + i.identifier + ", "
-    return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ");"
+ 
+    exceptions = ""
+    for e in service.errorMessages():
+      exceptions += e + ", "
+    if exceptions:
+      exceptions = " raises(" + exceptions[:-2] + ") "
+      
+    return MapTypeToIdl(outputType) + " " + service.name + "(" + args[:-2] + ")" + exceptions + ";"
 
 def cpp_arg(t,name):
   cppType = MapTypeToCorbaCpp(t)

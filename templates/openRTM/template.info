@@ -13,7 +13,7 @@ main:
   "ControlImpl.h" -> "$$ControlImpl.h"
   "ControlImpl.cpp" -> "$$ControlImpl.cpp"
   "TestComp.cpp" -> "$$TestComp.cpp"
-/*  "Test.cpp" -> "$$Test.cpp" */
+  "Test.cpp" -> "$$Test.cpp" 
   "Test.h" -> "$$Test.h"
   "ControlTask.idl"
   "ExecServices.h"

@@ -78,6 +78,82 @@ class Codel
 			std::string m_name;
 };
 
+class Event 
+{
+	public:
+		typedef boost::shared_ptr<Event> Ptr;
+		typedef std::map<std::string, Ptr> Map;
+		typedef std::map<Ptr, std::string> RevMap;
+		typedef std::vector<Ptr> Vect;
+
+		enum Kind { NamedEvent, PortEvent, ServiceEvent};
+
+		Event(Kind k) : m_kind(k) {}
+		virtual ~Event() {}
+
+		virtual std::string identifier() const = 0;
+		Kind kind() { return m_kind; }
+
+	protected:
+		Kind m_kind;
+};
+
+typedef std::vector< std::pair<Event::Ptr, std::string> > EventCodelVect;
+
+class NamedEvent : public Event 
+{
+	public:
+		NamedEvent(const std::string &id, Event::Ptr event = Event::Ptr()) 
+		: Event(Event::NamedEvent), m_identifier(id), m_event(event) 
+		{}
+
+		virtual std::string identifier() const { return m_identifier; }
+
+	protected:
+		std::string m_identifier;
+		Event::Ptr m_event;
+};
+
+class PortEvent : public Event
+{
+	public:
+		enum Kind { OnUpdate, OnWrite, OnRead, OnInitialize };
+
+		PortEvent(const std::string &portName, Kind k) 
+		: Event(Event::PortEvent), m_port(portName), m_portKind(k)
+		{}
+
+		virtual std::string identifier() const { return m_port + "_" + kindAsString(); }
+		std::string portName() const { return m_port; }
+		std::string kindAsString() const;
+
+	protected:
+		std::string m_port;
+		Kind m_portKind;
+};
+
+class ServiceEvent : public Event
+{
+	public:
+		enum Kind { OnStart, OnEnd, OnInter, OnCodel };
+
+		ServiceEvent(const std::string &serviceName, Kind k) 
+		: Event(Event::ServiceEvent), m_service(serviceName), m_serviceKind(k)
+		{}
+		ServiceEvent(const std::string &serviceName, const std::string codelName)
+		: Event(Event::ServiceEvent), m_service(serviceName), m_codelName(codelName), m_serviceKind(OnCodel)
+		{}
+
+		virtual std::string identifier() const { return m_service + "_" + kindAsString(); }
+		std::string serviceName() const { return m_service; }
+		std::string kindAsString() const;
+
+	protected:
+		std::string m_service;
+		std::string m_codelName;
+		Kind m_serviceKind;
+};
+
 /**
 *  The #sizeCodel is a regular codel (ie it can have tha same arguments as a regular codel). It will
 * be called before a dynamic port (ie a port containing a sequence) is initialized. A int* parameter
@@ -191,6 +267,8 @@ class Service
 		void addIncompatibleService(const std::string &name);
 		std::vector<std::string> & incompatibleServices() { return m_incompatibleServices; }
 
+		void addEvent(Event::Ptr event, const std::string &target);
+
 		std::string name;
 		Type type;
 		std::string doc;
@@ -202,6 +280,7 @@ class Service
 		Input::Vect m_inputs;
 		std::vector<std::string> m_incompatibleServices;
 		std::vector<std::string> m_errorMessages;
+		Event::RevMap m_events;
 };
 
 /** \short A component
@@ -221,6 +300,7 @@ class Component
 		void addTask(Task::Ptr task);
 		void addService(Service::Ptr task);
 		void addPort(Port::Ptr port);
+		void addEvent(Event::Ptr ev);
 
 		Task::Map& tasksMap();
 		std::vector<std::string> tasksList();
@@ -237,6 +317,8 @@ class Component
 		Port::Map& portsMap() { return ports; }
 		/** \return the index of the port named \a name inside the ports map*/
 		int portIndex(const std::string &name) const;
+
+		Event::Ptr event(const std::string &ev);
 
 		void addConstValue(const Idl::ConstValue &val);
 		void addType(Idl::IdlType::Ptr type);
@@ -266,6 +348,7 @@ class Component
 		Task::Map tasks;
 		Service::Map services;
 		Port::Map ports;
+		Event::Map events;
 		Idl::IdlType::Vector m_types;
 		Idl::ConstValue::Map m_constValues;
 		std::vector<std::string> m_importedComponents;

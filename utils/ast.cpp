@@ -79,6 +79,12 @@ void Component::debug()
 		cout << endl;
 	}
 
+	cout << endl << "Events: " << events.size() << endl;
+	for (Event::Map::const_iterator it = events.begin();
+			it != events.end(); ++it) {
+		cout << "\t* " << it->first << " : " << endl;
+	}
+
 	cout << endl << "Types: " << m_types.size() << endl;
 	for (IdlType::Vector::const_iterator it = m_types.begin();
 			it != m_types.end(); ++it) {
@@ -116,6 +122,13 @@ void Component::addPort(Port::Ptr port)
 	if (ports.find(port->name) != ports.end())
 		cerr << "Warning: already existing port name: " << port->name << endl;
 	ports[port->name] = port;
+}
+
+void Component::addEvent(Event::Ptr ev)
+{
+	if (events.find(ev->identifier()) != events.end())
+		cerr << "Warning: already existing event name: " << ev->identifier() << endl;
+	events[ev->identifier()] = ev;
 }
 
 void Component::addType(IdlType::Ptr type)
@@ -264,6 +277,13 @@ void Component::addImportedComponent(const std::string &s)
 	m_importedComponents.push_back(s);
 }
 
+Event::Ptr Component::event(const std::string &name)
+{
+	Event::Map::const_iterator it = events.find(name);
+	if (it != events.end())
+		return it->second;
+	return Event::Ptr();
+}
 
 /******** Port ***************/
 
@@ -439,6 +459,12 @@ void Service::addIncompatibleService(const std::string &name)
 	m_incompatibleServices.push_back(name);
 }
 
+void Service::addEvent(Event::Ptr event, const std::string &target)
+{
+// 	m_events.push_back(make_pair(event, target));
+	m_events[event] = target;
+}
+
 /******** Codel ***************/
 
 void Codel::debug()
@@ -480,5 +506,41 @@ void Codel::addOutPort(const std::string &t)
 {
 	outPorts.push_back(t);
 }
+
+/******** PortEvent ***************/
+
+std::string PortEvent::kindAsString() const
+{
+	switch(m_portKind) {
+		case OnRead:
+			return "onRead";
+		case OnWrite:
+			return "onWrite";
+		case OnUpdate:
+			return "onUpdate";
+		case OnInitialize:
+			return "onInitialize";
+	}
+	return "";
+}
+
+
+/******** ServiceEvent ***************/
+
+std::string ServiceEvent::kindAsString() const
+{
+	switch(m_serviceKind) {
+		case OnStart:
+			return "onStart";
+		case OnEnd:
+			return "onEnd";
+		case OnInter:
+			return "onInter";
+		case OnCodel:
+			return "onCodel_" + m_codelName;
+	}
+	return "";
+}
+
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

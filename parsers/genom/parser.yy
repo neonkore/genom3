@@ -56,6 +56,7 @@ struct variant_type {
     double 			doubleVal;
     std::string			stringVal;
     G3nom::Codel::Ptr		codelVal;
+    G3nom::Event::Ptr		eventVal;
     G3nom::Idl::IdlType::Ptr		typeVal;
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
     G3nom::Idl::Declarator::Ptr		declaratorVal;
@@ -126,14 +127,14 @@ struct variant_type {
 %token			SERVICE		"service"
 %token			CODEL		"codel"
 
-%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL 
+%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL DOT
 
 %token IN OUT INPORT OUTPORT
 // type tokens
 %token TRUE FALSE
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE CONST
-%token TYPEDEF UNSIGNED OBJECT IDS INPUT OUTPUT
+%token TYPEDEF UNSIGNED OBJECT IDS INPUT OUTPUT EVENT
 
 /*token SPECIAL_CHAR	"char"
 %token INTEGERLIT	"integer"
@@ -157,6 +158,7 @@ struct variant_type {
 %type <stringVal>		identifier_list
 %type <stringVal>		identifiers
 %type <codelVal>		codel_prototype
+%type <eventVal>		event_spec
 %type <typeVal>			type_decl
 %type <typeVal>  		type_spec
 %type <typeVal> 		simple_type_spec
@@ -251,6 +253,8 @@ declaration:
     driver.component().addType($1);
 }
 | const_decl
+{}
+| event_decl
 {}
 ;
 
@@ -426,6 +430,11 @@ service_field:
 {
     driver.currentService()->addCodel($2, $4);
 }
+| EVENT event_spec COLON codel_prototype
+{
+    driver.currentService()->addCodel($2->identifier(), $4);
+    driver.currentService()->addEvent($2, $2->identifier());
+}
 | INPUT COLON inputs
 {
 }
@@ -551,6 +560,80 @@ input_type:
     i.type = $1;
     $$ = i;
 };
+
+/*** Events declaration and use ***/
+event_spec:
+  IDENTIFIER
+{
+    Event::Ptr ev = driver.component().event($1);
+    if(ev.get()) { // external event
+      Event::Ptr e(new NamedEvent($1, ev));
+      $$ = e;
+    } else { // service event
+      Service::Ptr s = driver.currentService();
+
+      if($1 == "onStart") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnStart));
+      else if($1 == "onEnd") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnEnd));
+      else if($1 == "onInter") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnInter));
+      else {
+	  error(yyloc, std::string("Unknown service event: ") + $1);
+	  YYERROR;
+      }
+    }
+}
+| IDENTIFIER DOT IDENTIFIER
+{
+    //try to find what type of event this is
+    Port::Ptr p = driver.component().port($1);
+    if(p.get()) { // port event
+      if($3 == "onUpdate") 
+	$$ = Event::Ptr(new PortEvent(p->name, PortEvent::OnUpdate));
+      else if($3 == "onRead") 
+	$$ = Event::Ptr(new PortEvent(p->name, PortEvent::OnRead));
+      else if($3 == "onWrite") 
+	$$ = Event::Ptr(new PortEvent(p->name, PortEvent::OnWrite));
+      else if($3 == "onInitialize") 
+	$$ = Event::Ptr(new PortEvent(p->name, PortEvent::OnInitialize));
+      else {
+	  error(yyloc, std::string("Unknown port event: ") + $3);
+	  YYERROR;
+      }
+    } else {
+    }
+}
+| IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER
+{
+    if($3 != "onCodel") {
+	  error(yyloc, std::string("Unknwon port syntax") );
+	  YYERROR;
+    }
+
+    Service::Ptr s = driver.component().service($1);
+    if(!s.get()) {
+	  error(yyloc, std::string("Unknwon service : ") + $1 );
+	  YYERROR;
+    }  
+
+    Event::Ptr e(new ServiceEvent(s->name, $5));
+    $$ = e;
+}
+;
+
+event_decl:
+  EVENT IDENTIFIER 
+{
+    Event::Ptr ev(new NamedEvent($2));
+    driver.component().addEvent(ev);
+}
+| EVENT IDENTIFIER EQUAL event_spec
+{
+    Event::Ptr ev(new NamedEvent($2, $4));
+    driver.component().addEvent(ev);
+}
+;
 
 /*** Codel Declaration ***/
 

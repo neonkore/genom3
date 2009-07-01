@@ -32,13 +32,12 @@ def needsConversionFun(t):
 
 def service_idl_signature(service):
     # find the service output type
-    if service.output.identifier:
-	if service.type != ServiceType.Control:
-	  outputType = BaseType.longType
-	else:
-	  outputType = inputType(service.output)
+    if service.type != ServiceType.Control:
+      outputType = BaseType.longType
+    elif service.output.identifier:
+      outputType = inputType(service.output)
     else:
-	outputType = BaseType.voidType
+      outputType = BaseType.voidType
 
     # then create the args list
     args = ""
@@ -78,11 +77,10 @@ def service_cpp_args(service, className=""):
 
 def service_cpp_signature(service, className=""):
     # find the service output type
-    if service.output.identifier:
-	if service.type != ServiceType.Control:
-	  outputType = BaseType.longType
-	else:
-	  outputType = inputType(service.output)
+    if service.type != ServiceType.Control:
+      outputType = BaseType.longType
+    elif service.output.identifier:
+      outputType = inputType(service.output)
     else:
 	outputType = BaseType.voidType
 
@@ -164,9 +162,12 @@ def outputPortsMap():
   m = {}
   for s in servicesMap:
     service = s.data()
-    if service.type != ServiceType.Exec or not service.output.identifier:
+    if service.type == ServiceType.Control:
       continue
-    typeName = MapTypeToIdl(inputType(service.output))
+    if not service.output.identifier:
+      typeName = ""
+    else:
+      typeName = MapTypeToIdl(inputType(service.output))
     m[service.name] = typeName
   return m
 

@@ -34,9 +34,10 @@
 #define <!comp.name()!>_USER_CODELS_H
 
 #define USER_OK 0
+#define SERVICE_ABORTED (-1)
 <?
 errorSet = createErrorList()
-i = 1
+i = 2
 for e in errorSet:
     print "#define ERROR_" + e + " (-" + str(i) + ")"
     i += 1

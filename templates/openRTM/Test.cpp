@@ -233,9 +233,7 @@ void <!capCompName!>Test::run<!service.name!>()
     }
 <?
   else:
-    if service.output.identifier:
-      outputType = MapTypeToCorbaCpp(inputType(service.output), True)   
-      ?>
+    ?>
       try {
 	cout << endl << "Started activity " << m_service-><!service.name!>(<!serviceArgs!>) << endl;
       } catch (CORBA::UserException& ex) {
@@ -247,18 +245,15 @@ void <!capCompName!>Test::run<!service.name!>()
 	coil::usleep(1000);
 
       m_<!service.name!>_inport.read();
-      cout << "Received final answer from service <!service.name!> with id: " << m_<!service.name!>_data.id << " = ";
+      cout << "Received final answer : " << m_<!service.name!>_data.res << " from \"<!service.name!>\" with id: ";
+      cout << m_<!service.name!>_data.id << endl;
+<?
+    if service.output.identifier:
+      outputType = MapTypeToCorbaCpp(inputType(service.output), True)
+      ?>
+      cout << "Result is : ";
       Printer<<!outputType!>>::print(m_<!service.name!>_data.data);
       cout << endl;
-<?
-    else:?>
-      try {
-	m_service-><!service.name!>(<!serviceArgs!>);
-      } catch (CORBA::UserException& ex) {
-	cout << "Error when calling service \"<!service.name!>\" control codel: " << ex._name() << endl;
-	return;
-      }
-      cout << endl << "Started activity " << endl;
 <?
   ?>
 }

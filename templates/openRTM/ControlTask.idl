@@ -10,7 +10,12 @@ for name,typeName in output_ports_map.iteritems():
   ?>
 struct <!name!>OutStruct {
     long id;
+    long res;
+<?
+  if typeName: ?>
     <!typeName!> data;
+<?
+  ?>
     RTC::Time tm;
 };
 

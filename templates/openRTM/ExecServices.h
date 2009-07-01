@@ -23,10 +23,7 @@ for s in comp.servicesMap():
       statusStr += ", "
     statusStr += upper(service.name) + "_" + upper(c.key())
       
-    if service.output.identifier:
-      inputStr = ", int id"
-    else:
-      inputStr = ""
+    inputStr = ", int id"
     for i in service.inputs():
       inputStr += ", "
       t = inputType(i)

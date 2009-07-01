@@ -103,15 +103,7 @@ prefix = capCompName + "ControlImpl"
 for s in comp.servicesMap():
   service = s.data()
   if service.type != ServiceType.Control:
-    if service.output.identifier:
-      returnStr = "  return m_data->" + service.output.identifier + ";"
-    else:
-      returnStr = "  return;"
-
-    if service.output.identifier:
-      args = ", m_serviceCount++ "
-    else:
-      args = ""
+    args = ", m_serviceCount++ "
     for i in service.inputs():
       if needsConversion(inputType(i)):
 	args += ", " + i.identifier
@@ -120,8 +112,6 @@ for s in comp.servicesMap():
     ?>
 <!service_cpp_signature(service, prefix)!>
 {
-<?
-    if service.output.identifier: ?>
   static long m_serviceCount = 0;
 <?
     copyCodelArgs(service.codel("control"), service)
@@ -160,10 +150,7 @@ for s in comp.servicesMap():
   // create the activity
   <!service.name!>Service::Ptr s = <!service.name!>Service::Ptr(new <!service.name!>Service(m_data <!args!>));
   m_data-><!service.name!>Services.push_back(s);
-<?
-    if service.output.identifier: ?>
-  return m_serviceCount;<?
-    ?>
+  return m_serviceCount;
 }
 <?
 ?>

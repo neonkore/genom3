@@ -25,10 +25,7 @@ for s in comp.servicesMap():
   if service.type == ServiceType.Control:
     continue
 
-  if service.output.identifier:
-    inputStr = ", int id"
-  else:
-    inputStr = ""
+  inputStr = ", int id"
   for i in service.inputs():
     inputStr += ", "
     t = inputType(i)
@@ -49,25 +46,29 @@ for s in comp.servicesMap():
 
 <!service.name!>Service::~<!service.name!>Service()
 {
+    <!service.name!>OutStruct s;
+    s.id = m_id;
+
     // send the reply
     if(m_aborted) {
 	genom_log("Service \"<!service.name!>\" with id:%d aborted", m_id);
+	  s.res = SERVICE_ABORTED;
     } else {
-	genom_log("Service \"<!service.name!>\" with id:%d finished", m_id);
+	if(m_status < 0) { // error
+	  genom_log("Service \"<!service.name!>\" with id:%d finished with error %d", m_id, s.res);
+	  s.res = m_status;
+	} else {
+	  s.res = USER_OK;
+	  genom_log("Service \"<!service.name!>\" with id:%d finished successfully", m_id);
+
 <?
-  if service.output.identifier: 
+  if service.output.identifier:
     outputMember = "out_" + service.output.identifier
-    ?>
-      // get the output result
-      <!service.name!>OutStruct s;
-      s.id = m_id;
-<?
     copyTypeFromCorba(inputType(service.output), outputMember, "s.data", True)
-    ?>
-      m_data-><!service.name!>_outport.write(s);
-<?
   ?>
-  }
+	}
+    }
+    m_data-><!service.name!>_outport.write(s);
 }
 
 void <!service.name!>Service::abort()

@@ -50,10 +50,42 @@ for s in comp.servicesMap():
     print "  in_" + i.identifier + " = " + i.identifier + ";"
   ?>
   m_status.push_front(<!startStateForService(service)!>);
+
+  // connect events if necessary
+<?
+  for e in service.events():
+    ev = e.key()
+    codel = e.data().replace(".", "_")
+    if ev.kind() == EventKind.PortEv:
+      pev = ev.asPortEvent()
+      port = comp.port(pev.portName())
+
+      if port.type == PortType.Outgoing:
+	portName = port.name + "_outport"
+      else:
+	portName = port.name + "_inport"
+      print "  m_data->" + portName + ".registerReceiver(\"" + pev.kindAsString() + "\", this);"
+  ?>
 }
 
 <!service.name!>Service::~<!service.name!>Service()
 {
+  // disconnect events if necessary
+<?
+  for e in service.events():
+    ev = e.key()
+    codel = e.data().replace(".", "_")
+    if ev.kind() == EventKind.PortEv:
+      pev = ev.asPortEvent()
+      port = comp.port(pev.portName())
+
+      if port.type == PortType.Outgoing:
+	portName = port.name + "_outport"
+      else:
+	portName = port.name + "_inport"
+      print "  m_data->" + portName + ".unregisterReceiver(\"" + pev.kindAsString() + "\", this);"
+  ?>
+
     // send the reply
     if(m_aborted) {
 	genom_log("Service \"<!service.name!>\" from '%s' with id:%d aborted", m_clientName.c_str(), m_id);

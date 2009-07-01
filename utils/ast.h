@@ -78,6 +78,10 @@ class Codel
 			std::string m_name;
 };
 
+class PortEvent;
+class ServiceEvent;
+class NamedEvent;
+
 class Event 
 {
 	public:
@@ -86,13 +90,17 @@ class Event
 		typedef std::map<Ptr, std::string> RevMap;
 		typedef std::vector<Ptr> Vect;
 
-		enum Kind { NamedEvent, PortEvent, ServiceEvent};
+		enum Kind { NamedEv, PortEv, ServiceEv};
 
 		Event(Kind k) : m_kind(k) {}
 		virtual ~Event() {}
 
 		virtual std::string identifier() const = 0;
 		Kind kind() { return m_kind; }
+
+		PortEvent* asPortEvent();
+		NamedEvent* asNamedEvent();
+		ServiceEvent* asServiceEvent();
 
 	protected:
 		Kind m_kind;
@@ -104,7 +112,7 @@ class NamedEvent : public Event
 {
 	public:
 		NamedEvent(const std::string &id, Event::Ptr event = Event::Ptr()) 
-		: Event(Event::NamedEvent), m_identifier(id), m_event(event) 
+		: Event(Event::NamedEv), m_identifier(id), m_event(event) 
 		{}
 
 		virtual std::string identifier() const { return m_identifier; }
@@ -120,7 +128,7 @@ class PortEvent : public Event
 		enum Kind { OnUpdate, OnWrite, OnRead, OnInitialize };
 
 		PortEvent(const std::string &portName, Kind k) 
-		: Event(Event::PortEvent), m_port(portName), m_portKind(k)
+		: Event(Event::PortEv), m_port(portName), m_portKind(k)
 		{}
 
 		virtual std::string identifier() const { return m_port + "_" + kindAsString(); }
@@ -138,10 +146,10 @@ class ServiceEvent : public Event
 		enum Kind { OnStart, OnEnd, OnInter, OnCodel };
 
 		ServiceEvent(const std::string &serviceName, Kind k) 
-		: Event(Event::ServiceEvent), m_service(serviceName), m_serviceKind(k)
+		: Event(Event::ServiceEv), m_service(serviceName), m_serviceKind(k)
 		{}
 		ServiceEvent(const std::string &serviceName, const std::string codelName)
-		: Event(Event::ServiceEvent), m_service(serviceName), m_codelName(codelName), m_serviceKind(OnCodel)
+		: Event(Event::ServiceEv), m_service(serviceName), m_codelName(codelName), m_serviceKind(OnCodel)
 		{}
 
 		virtual std::string identifier() const { return m_service + "_" + kindAsString(); }
@@ -268,6 +276,7 @@ class Service
 		std::vector<std::string> & incompatibleServices() { return m_incompatibleServices; }
 
 		void addEvent(Event::Ptr event, const std::string &target);
+		const Event::RevMap & events() const { return m_events; } 
 
 		std::string name;
 		Type type;
@@ -319,6 +328,7 @@ class Component
 		int portIndex(const std::string &name) const;
 
 		Event::Ptr event(const std::string &ev);
+		std::vector<std::string> eventsForPort(const std::string &name);
 
 		void addConstValue(const Idl::ConstValue &val);
 		void addType(Idl::IdlType::Ptr type);

@@ -285,6 +285,24 @@ Event::Ptr Component::event(const std::string &name)
 	return Event::Ptr();
 }
 
+std::vector<std::string> Component::eventsForPort(const std::string &name)
+{
+	std::vector<std::string> v;
+	Service::Map::const_iterator it = services.begin();
+	for(; it != services.end(); ++it) {
+		Event::RevMap::const_iterator it2 = it->second->events().begin();
+		for(; it2 != it->second->events().end(); ++it2) {
+			if(it2->first->kind() == Event::PortEv) {
+				PortEvent *pev = it2->first->asPortEvent();
+				if(pev->portName() == name)
+					v.push_back(pev->kindAsString());
+			}
+		}
+	}
+
+	return v;
+}
+
 /******** Port ***************/
 
 void Port::debug()
@@ -505,6 +523,23 @@ void Codel::addInPort(const std::string &t)
 void Codel::addOutPort(const std::string &t)
 {
 	outPorts.push_back(t);
+}
+
+/******** Event ***************/
+
+PortEvent* Event::asPortEvent()
+{
+	return static_cast<PortEvent*>(this);
+}
+
+NamedEvent* Event::asNamedEvent()
+{
+	return static_cast<NamedEvent*>(this);
+}
+
+ServiceEvent* Event::asServiceEvent()
+{
+	return static_cast<ServiceEvent*>(this);
 }
 
 /******** PortEvent ***************/

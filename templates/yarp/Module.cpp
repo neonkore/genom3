@@ -88,9 +88,11 @@ bool <!comp.name()!>Module::open(yarp::os::Searchable& config)
 <?
 for p in outports: ?>
     m_data-><!p.name!>_outport.open("/<!comp.name()!>/OutPorts/<!p.name!>");
+    m_data-><!p.name!>_outport.setName("<!p.name!>");
 <?
 for p in inports: ?>
     m_data-><!p.name!>_inport.open("/<!comp.name()!>/InPorts/<!p.name!>");
+    m_data-><!p.name!>_outport.setName("<!p.name!>");
 <?
 ?>
     m_request_port.open("/<!comp.name()!>/Services/Control");

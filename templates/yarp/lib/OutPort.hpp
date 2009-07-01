@@ -8,12 +8,14 @@
 #ifndef DATA_EXPORTER_HPP
 #define DATA_EXPORTER_HPP
 
-#include <YarpCodec.hpp>
+#include "YarpCodec.hpp"
+#include "Events.hpp"
 
 namespace GenomYarp {
 
 template<class T_DATA>
-class OutPort {
+class OutPort : public EventSender 
+{
 
 public:  
   OutPort() : isInit(false) {}
@@ -46,6 +48,7 @@ public:
     b.clear();
     YarpCodec<T_DATA>::encode(&b,*data);
     out_port.writeStrict();
+    sendEvent("onWrite");
     return 0;
   }
 
@@ -63,6 +66,7 @@ public:
   void initialize()
   {
     isInit = true;
+    sendEvent("onInitialize");
   }
 
   bool isInitialized() const { return isInit; }

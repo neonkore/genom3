@@ -40,7 +40,7 @@
 /** \short Base namespace for all classes related to G3nom.*/
 namespace G3nom
 {
-
+  
 /** 
 * A codel represents a user function called during a service execution.
 * \li #inTypes (resp. #outTypes) are names of IDS members, that the codel can read (resp. read and write to).
@@ -116,6 +116,7 @@ class NamedEvent : public Event
 		{}
 
 		virtual std::string identifier() const { return m_identifier; }
+		Event::Ptr aliasEvent() const { return m_event; }
 
 	protected:
 		std::string m_identifier;
@@ -131,7 +132,7 @@ class PortEvent : public Event
 		: Event(Event::PortEv), m_port(portName), m_portKind(k)
 		{}
 
-		virtual std::string identifier() const { return m_port + "_" + kindAsString(); }
+		virtual std::string identifier() const { return m_port + "." + kindAsString(); }
 		std::string portName() const { return m_port; }
 		std::string kindAsString() const;
 
@@ -152,7 +153,7 @@ class ServiceEvent : public Event
 		: Event(Event::ServiceEv), m_service(serviceName), m_codelName(codelName), m_serviceKind(OnCodel)
 		{}
 
-		virtual std::string identifier() const { return m_service + "_" + kindAsString(); }
+		virtual std::string identifier() const;
 		std::string serviceName() const { return m_service; }
 		std::string kindAsString() const;
 

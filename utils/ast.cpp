@@ -36,6 +36,16 @@ using namespace std;
 using namespace G3nom;
 using namespace Idl;
 
+void replaceAll(string &str, const string &find_what, const string &replace_with)
+{
+	string::size_type pos=0;
+	while((pos=str.find(find_what, pos))!=string::npos) {
+		str.erase(pos, find_what.length());
+		str.insert(pos, replace_with);
+		pos+=replace_with.length();
+	}
+}
+
 /******** Component ***************/
 
 Component::Component()
@@ -82,7 +92,11 @@ void Component::debug()
 	cout << endl << "Events: " << events.size() << endl;
 	for (Event::Map::const_iterator it = events.begin();
 			it != events.end(); ++it) {
-		cout << "\t* " << it->first << " : " << endl;
+		cout << "\t* " << it->first;
+		Event::Ptr e = it->second->asNamedEvent()->aliasEvent();
+		if(e.get())
+			cout << " : " << e->identifier();
+		cout << endl;
 	}
 
 	cout << endl << "Types: " << m_types.size() << endl;
@@ -450,7 +464,10 @@ Idl::Literal Service::inputDefaultArg(const std::string &n)
 
 void Service::addCodel(const std::string &name, Codel::Ptr c)
 {
-	m_codels.insert(make_pair(name,c));
+	string fixedName = name;
+	// make sure the name doesn't contain '.' (for events codels)
+	replaceAll(fixedName, ".", "_");
+	m_codels.insert(make_pair(fixedName,c));
 }
 
 Codel::Ptr Service::codel(const std::string &name)
@@ -565,16 +582,26 @@ std::string PortEvent::kindAsString() const
 std::string ServiceEvent::kindAsString() const
 {
 	switch(m_serviceKind) {
+		case OnCalled:
+			return "control";
 		case OnStart:
-			return "onStart";
+			return "start";
 		case OnEnd:
-			return "onEnd";
+			return "end";
 		case OnInter:
-			return "onInter";
+			return "inter";
 		case OnCodel:
-			return "onCodel_" + m_codelName;
+			return m_codelName;
 	}
 	return "";
+}
+
+std::string ServiceEvent::identifier() const 
+{
+	if(m_service.empty())
+		return kindAsString();
+	else
+		return m_service + "." + kindAsString(); 
 }
 
 

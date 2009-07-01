@@ -953,16 +953,14 @@ namespace G3nom {
       Event::Ptr e(new NamedEvent((yysemantic_stack_[(1) - (1)].stringVal), ev));
       (yyval.eventVal) = e;
     } else { // service event
-      Service::Ptr s = driver.currentService();
-
       if((yysemantic_stack_[(1) - (1)].stringVal) == "onCalled") 
-	(yyval.eventVal) = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnCalled));
+	(yyval.eventVal) = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnCalled));
       else if((yysemantic_stack_[(1) - (1)].stringVal) == "onStart") 
-	(yyval.eventVal) = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnStart));
+	(yyval.eventVal) = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnStart));
       else if((yysemantic_stack_[(1) - (1)].stringVal) == "onEnd") 
-	(yyval.eventVal) = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnEnd));
+	(yyval.eventVal) = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnEnd));
       else if((yysemantic_stack_[(1) - (1)].stringVal) == "onInter") 
-	(yyval.eventVal) = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnInter));
+	(yyval.eventVal) = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnInter));
       else {
 	  error(yyloc, std::string("Unknown service internal event: ") + (yysemantic_stack_[(1) - (1)].stringVal));
 	  YYERROR;
@@ -974,7 +972,7 @@ namespace G3nom {
   case 52:
 
 /* Line 678 of lalr1.cc  */
-#line 590 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 588 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     //try to find what type of event this is
     Port::Ptr p = driver.component().port((yysemantic_stack_[(3) - (1)].stringVal));
@@ -1016,7 +1014,7 @@ namespace G3nom {
   case 53:
 
 /* Line 678 of lalr1.cc  */
-#line 627 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 625 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     if((yysemantic_stack_[(5) - (3)].stringVal) != "onCodel") {
 	  error(yyloc, std::string("Unknwon port syntax") );
@@ -1037,7 +1035,7 @@ namespace G3nom {
   case 54:
 
 /* Line 678 of lalr1.cc  */
-#line 646 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 644 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Event::Ptr ev(new NamedEvent((yysemantic_stack_[(2) - (2)].stringVal)));
     driver.component().addEvent(ev);
@@ -1047,7 +1045,7 @@ namespace G3nom {
   case 55:
 
 /* Line 678 of lalr1.cc  */
-#line 651 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 649 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Event::Ptr ev(new NamedEvent((yysemantic_stack_[(4) - (2)].stringVal), (yysemantic_stack_[(4) - (4)].eventVal)));
     driver.component().addEvent(ev);
@@ -1057,7 +1055,7 @@ namespace G3nom {
   case 56:
 
 /* Line 678 of lalr1.cc  */
-#line 661 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 659 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Codel::Ptr c(new Codel((yysemantic_stack_[(1) - (1)].stringVal)));
     driver.setCurrentCodel(c);
@@ -1067,7 +1065,7 @@ namespace G3nom {
   case 57:
 
 /* Line 678 of lalr1.cc  */
-#line 666 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 664 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.codelVal) = driver.currentCodel();
 }
@@ -1076,28 +1074,28 @@ namespace G3nom {
   case 58:
 
 /* Line 678 of lalr1.cc  */
-#line 672 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 670 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 59:
 
 /* Line 678 of lalr1.cc  */
-#line 674 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 672 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 60:
 
 /* Line 678 of lalr1.cc  */
-#line 676 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 674 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 61:
 
 /* Line 678 of lalr1.cc  */
-#line 680 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 678 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName((yysemantic_stack_[(2) - (2)].stringVal));
@@ -1113,7 +1111,7 @@ namespace G3nom {
   case 62:
 
 /* Line 678 of lalr1.cc  */
-#line 691 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 689 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName((yysemantic_stack_[(2) - (2)].stringVal));
@@ -1129,7 +1127,7 @@ namespace G3nom {
   case 63:
 
 /* Line 678 of lalr1.cc  */
-#line 702 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 700 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     driver.currentCodel()->addInPort((yysemantic_stack_[(2) - (2)].stringVal));
 }
@@ -1138,7 +1136,7 @@ namespace G3nom {
   case 64:
 
 /* Line 678 of lalr1.cc  */
-#line 706 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 704 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     driver.currentCodel()->addOutPort((yysemantic_stack_[(2) - (2)].stringVal));
 }
@@ -1147,7 +1145,7 @@ namespace G3nom {
   case 65:
 
 /* Line 678 of lalr1.cc  */
-#line 714 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 712 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     ConstValue c((yysemantic_stack_[(5) - (3)].stringVal), (yysemantic_stack_[(5) - (2)].typeVal), (yysemantic_stack_[(5) - (5)].literalVal));
     driver.component().addConstValue(c);
@@ -1157,7 +1155,7 @@ namespace G3nom {
   case 75:
 
 /* Line 678 of lalr1.cc  */
-#line 734 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 732 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].integerVal));
 }
@@ -1166,7 +1164,7 @@ namespace G3nom {
   case 76:
 
 /* Line 678 of lalr1.cc  */
-#line 738 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 736 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].doubleVal));
 }
@@ -1175,7 +1173,7 @@ namespace G3nom {
   case 77:
 
 /* Line 678 of lalr1.cc  */
-#line 742 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 740 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = Literal("\"" + (yysemantic_stack_[(1) - (1)].stringVal) + "\"");
 }
@@ -1184,7 +1182,7 @@ namespace G3nom {
   case 78:
 
 /* Line 678 of lalr1.cc  */
-#line 746 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 744 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].charVal));
 }
@@ -1193,7 +1191,7 @@ namespace G3nom {
   case 79:
 
 /* Line 678 of lalr1.cc  */
-#line 750 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 748 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = (yysemantic_stack_[(1) - (1)].literalVal);
 }
@@ -1202,7 +1200,7 @@ namespace G3nom {
   case 80:
 
 /* Line 678 of lalr1.cc  */
-#line 754 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 752 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     /*enum value*/
     (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].stringVal));
@@ -1212,7 +1210,7 @@ namespace G3nom {
   case 81:
 
 /* Line 678 of lalr1.cc  */
-#line 759 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 757 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = (yysemantic_stack_[(3) - (2)].literalVal);
 }
@@ -1221,7 +1219,7 @@ namespace G3nom {
   case 82:
 
 /* Line 678 of lalr1.cc  */
-#line 763 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 761 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = (yysemantic_stack_[(3) - (2)].literalVal);
 }
@@ -1230,14 +1228,14 @@ namespace G3nom {
   case 83:
 
 /* Line 678 of lalr1.cc  */
-#line 767 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 765 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 84:
 
 /* Line 678 of lalr1.cc  */
-#line 771 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 769 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = Literal(true);
 }
@@ -1246,7 +1244,7 @@ namespace G3nom {
   case 85:
 
 /* Line 678 of lalr1.cc  */
-#line 775 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 773 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = Literal(false);
 }
@@ -1255,7 +1253,7 @@ namespace G3nom {
   case 86:
 
 /* Line 678 of lalr1.cc  */
-#line 782 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 780 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Neg);
     l.addMember((yysemantic_stack_[(2) - (2)].literalVal));
@@ -1266,7 +1264,7 @@ namespace G3nom {
   case 87:
 
 /* Line 678 of lalr1.cc  */
-#line 788 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 786 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.literalVal) = (yysemantic_stack_[(2) - (2)].literalVal);
 }
@@ -1275,7 +1273,7 @@ namespace G3nom {
   case 88:
 
 /* Line 678 of lalr1.cc  */
-#line 792 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 790 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::LNeg);
     l.addMember((yysemantic_stack_[(2) - (2)].literalVal));
@@ -1286,7 +1284,7 @@ namespace G3nom {
   case 89:
 
 /* Line 678 of lalr1.cc  */
-#line 799 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 797 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Plus);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1298,7 +1296,7 @@ namespace G3nom {
   case 90:
 
 /* Line 678 of lalr1.cc  */
-#line 806 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 804 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Minus);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1310,7 +1308,7 @@ namespace G3nom {
   case 91:
 
 /* Line 678 of lalr1.cc  */
-#line 813 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 811 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Times);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1322,7 +1320,7 @@ namespace G3nom {
   case 92:
 
 /* Line 678 of lalr1.cc  */
-#line 820 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 818 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Divide);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1334,7 +1332,7 @@ namespace G3nom {
   case 93:
 
 /* Line 678 of lalr1.cc  */
-#line 827 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 825 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Mod);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1346,7 +1344,7 @@ namespace G3nom {
   case 94:
 
 /* Line 678 of lalr1.cc  */
-#line 834 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 832 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::And);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1358,7 +1356,7 @@ namespace G3nom {
   case 95:
 
 /* Line 678 of lalr1.cc  */
-#line 841 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 839 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Or);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1370,7 +1368,7 @@ namespace G3nom {
   case 96:
 
 /* Line 678 of lalr1.cc  */
-#line 848 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 846 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Xor);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1382,7 +1380,7 @@ namespace G3nom {
   case 97:
 
 /* Line 678 of lalr1.cc  */
-#line 855 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 853 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::LShift);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1394,7 +1392,7 @@ namespace G3nom {
   case 98:
 
 /* Line 678 of lalr1.cc  */
-#line 862 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 860 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::RShift);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
@@ -1406,7 +1404,7 @@ namespace G3nom {
   case 99:
 
 /* Line 678 of lalr1.cc  */
-#line 871 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 869 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Literal l(Literal::Struct);
     l.addMember((yysemantic_stack_[(1) - (1)].literalVal));
@@ -1417,7 +1415,7 @@ namespace G3nom {
   case 100:
 
 /* Line 678 of lalr1.cc  */
-#line 877 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 875 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yysemantic_stack_[(3) - (1)].literalVal).addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = (yysemantic_stack_[(3) - (1)].literalVal);
@@ -1427,7 +1425,7 @@ namespace G3nom {
   case 101:
 
 /* Line 678 of lalr1.cc  */
-#line 886 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 884 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new TypedefType((yysemantic_stack_[(3) - (2)].typeVal), (yysemantic_stack_[(3) - (3)].declaratorVectVal)));
     (yyval.typeVal) = p;
@@ -1437,21 +1435,21 @@ namespace G3nom {
   case 102:
 
 /* Line 678 of lalr1.cc  */
-#line 890 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 888 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 103:
 
 /* Line 678 of lalr1.cc  */
-#line 892 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 890 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 104:
 
 /* Line 678 of lalr1.cc  */
-#line 894 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 892 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yysemantic_stack_[(2) - (2)].typeVal)->setNative(true);
     (yyval.typeVal) = (yysemantic_stack_[(2) - (2)].typeVal);
@@ -1461,7 +1459,7 @@ namespace G3nom {
   case 105:
 
 /* Line 678 of lalr1.cc  */
-#line 909 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 907 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal);
 }
@@ -1470,7 +1468,7 @@ namespace G3nom {
   case 106:
 
 /* Line 678 of lalr1.cc  */
-#line 913 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 911 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { 
     (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal);
 }
@@ -1479,21 +1477,21 @@ namespace G3nom {
   case 107:
 
 /* Line 678 of lalr1.cc  */
-#line 918 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 916 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 108:
 
 /* Line 678 of lalr1.cc  */
-#line 919 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 917 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 109:
 
 /* Line 678 of lalr1.cc  */
-#line 921 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 919 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr type = driver.component().typeFromName((yysemantic_stack_[(1) - (1)].stringVal));
     if(!type.get()) {
@@ -1507,98 +1505,98 @@ namespace G3nom {
   case 110:
 
 /* Line 678 of lalr1.cc  */
-#line 931 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 929 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 111:
 
 /* Line 678 of lalr1.cc  */
-#line 932 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 930 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 112:
 
 /* Line 678 of lalr1.cc  */
-#line 933 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 931 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 113:
 
 /* Line 678 of lalr1.cc  */
-#line 934 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 932 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 114:
 
 /* Line 678 of lalr1.cc  */
-#line 935 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 933 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 115:
 
 /* Line 678 of lalr1.cc  */
-#line 936 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 934 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 116:
 
 /* Line 678 of lalr1.cc  */
-#line 937 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 935 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 117:
 
 /* Line 678 of lalr1.cc  */
-#line 943 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 941 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 118:
 
 /* Line 678 of lalr1.cc  */
-#line 944 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 942 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 119:
 
 /* Line 678 of lalr1.cc  */
-#line 945 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 943 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 120:
 
 /* Line 678 of lalr1.cc  */
-#line 946 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 944 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 121:
 
 /* Line 678 of lalr1.cc  */
-#line 950 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 948 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 122:
 
 /* Line 678 of lalr1.cc  */
-#line 952 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 950 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 123:
 
 /* Line 678 of lalr1.cc  */
-#line 957 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 955 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { 
     Declarator::VectPtr v(new Declarator::Vect());
     v->push_back((yysemantic_stack_[(1) - (1)].declaratorVal));
@@ -1609,7 +1607,7 @@ namespace G3nom {
   case 124:
 
 /* Line 678 of lalr1.cc  */
-#line 963 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 961 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
       if((yysemantic_stack_[(3) - (1)].declaratorVectVal)) {
 	  (yysemantic_stack_[(3) - (1)].declaratorVectVal)->push_back((yysemantic_stack_[(3) - (3)].declaratorVal));
@@ -1624,21 +1622,21 @@ namespace G3nom {
   case 125:
 
 /* Line 678 of lalr1.cc  */
-#line 974 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 972 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.declaratorVal) = (yysemantic_stack_[(1) - (1)].declaratorVal); }
     break;
 
   case 126:
 
 /* Line 678 of lalr1.cc  */
-#line 975 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 973 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.declaratorVal) = (yysemantic_stack_[(1) - (1)].declaratorVal); }
     break;
 
   case 127:
 
 /* Line 678 of lalr1.cc  */
-#line 980 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 978 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Declarator::Ptr p(new Declarator((yysemantic_stack_[(1) - (1)].stringVal)));
     (yyval.declaratorVal) = p;
@@ -1648,7 +1646,7 @@ namespace G3nom {
   case 128:
 
 /* Line 678 of lalr1.cc  */
-#line 987 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 985 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yysemantic_stack_[(2) - (1)].declaratorVal)->addBound((yysemantic_stack_[(2) - (2)].integerVal));
     (yyval.declaratorVal) = (yysemantic_stack_[(2) - (1)].declaratorVal);
@@ -1658,7 +1656,7 @@ namespace G3nom {
   case 129:
 
 /* Line 678 of lalr1.cc  */
-#line 992 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 990 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yysemantic_stack_[(2) - (1)].declaratorVal)->addBound((yysemantic_stack_[(2) - (2)].integerVal));
     (yyval.declaratorVal) = (yysemantic_stack_[(2) - (1)].declaratorVal);
@@ -1668,7 +1666,7 @@ namespace G3nom {
   case 130:
 
 /* Line 678 of lalr1.cc  */
-#line 999 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 997 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.integerVal) = (yysemantic_stack_[(3) - (2)].integerVal);
 }
@@ -1677,28 +1675,28 @@ namespace G3nom {
   case 131:
 
 /* Line 678 of lalr1.cc  */
-#line 1007 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1005 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::floatType; }
     break;
 
   case 132:
 
 /* Line 678 of lalr1.cc  */
-#line 1008 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1006 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::doubleType; }
     break;
 
   case 133:
 
 /* Line 678 of lalr1.cc  */
-#line 1009 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1007 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::longdoubleType; }
     break;
 
   case 134:
 
 /* Line 678 of lalr1.cc  */
-#line 1014 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1012 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new FixedType((yysemantic_stack_[(6) - (3)].integerVal), (yysemantic_stack_[(6) - (5)].integerVal)));
     (yyval.typeVal) = p;
@@ -1708,147 +1706,147 @@ namespace G3nom {
   case 135:
 
 /* Line 678 of lalr1.cc  */
-#line 1019 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1017 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 136:
 
 /* Line 678 of lalr1.cc  */
-#line 1022 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1020 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 137:
 
 /* Line 678 of lalr1.cc  */
-#line 1023 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1021 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 138:
 
 /* Line 678 of lalr1.cc  */
-#line 1027 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1025 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 139:
 
 /* Line 678 of lalr1.cc  */
-#line 1028 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1026 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 140:
 
 /* Line 678 of lalr1.cc  */
-#line 1029 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1027 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 141:
 
 /* Line 678 of lalr1.cc  */
-#line 1033 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1031 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::shortType; }
     break;
 
   case 142:
 
 /* Line 678 of lalr1.cc  */
-#line 1037 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1035 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::longType; }
     break;
 
   case 143:
 
 /* Line 678 of lalr1.cc  */
-#line 1041 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1039 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::longlongType; }
     break;
 
   case 144:
 
 /* Line 678 of lalr1.cc  */
-#line 1045 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1043 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 145:
 
 /* Line 678 of lalr1.cc  */
-#line 1046 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1044 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 146:
 
 /* Line 678 of lalr1.cc  */
-#line 1047 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1045 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 147:
 
 /* Line 678 of lalr1.cc  */
-#line 1051 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1049 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::ushortType; }
     break;
 
   case 148:
 
 /* Line 678 of lalr1.cc  */
-#line 1055 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1053 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::ulongType; }
     break;
 
   case 149:
 
 /* Line 678 of lalr1.cc  */
-#line 1059 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1057 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::ulonglongType; }
     break;
 
   case 150:
 
 /* Line 678 of lalr1.cc  */
-#line 1063 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1061 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::charType; }
     break;
 
   case 151:
 
 /* Line 678 of lalr1.cc  */
-#line 1067 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1065 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::wcharType; }
     break;
 
   case 152:
 
 /* Line 678 of lalr1.cc  */
-#line 1071 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1069 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::booleanType; }
     break;
 
   case 153:
 
 /* Line 678 of lalr1.cc  */
-#line 1075 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1073 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::octetType; }
     break;
 
   case 154:
 
 /* Line 678 of lalr1.cc  */
-#line 1079 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1077 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = BaseType::anyType; }
     break;
 
   case 155:
 
 /* Line 678 of lalr1.cc  */
-#line 1088 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1086 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new StringType((yysemantic_stack_[(4) - (3)].integerVal)));
     (yyval.typeVal) = p; 
@@ -1858,7 +1856,7 @@ namespace G3nom {
   case 156:
 
 /* Line 678 of lalr1.cc  */
-#line 1093 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1091 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.typeVal) = StringType::unboundedStringType;
 }
@@ -1867,7 +1865,7 @@ namespace G3nom {
   case 157:
 
 /* Line 678 of lalr1.cc  */
-#line 1099 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1097 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { 
     IdlType::Ptr p(new WStringType((yysemantic_stack_[(4) - (3)].integerVal)));
     (yyval.typeVal) = p; 
@@ -1877,7 +1875,7 @@ namespace G3nom {
   case 158:
 
 /* Line 678 of lalr1.cc  */
-#line 1104 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1102 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.typeVal) = WStringType::unboundedWStringType;
 }
@@ -1886,7 +1884,7 @@ namespace G3nom {
   case 159:
 
 /* Line 678 of lalr1.cc  */
-#line 1114 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1112 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p = driver.currentType();
     StructType *s = static_cast<StructType*>(p.get());
@@ -1903,21 +1901,21 @@ namespace G3nom {
   case 160:
 
 /* Line 678 of lalr1.cc  */
-#line 1128 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1126 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 161:
 
 /* Line 678 of lalr1.cc  */
-#line 1130 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1128 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 162:
 
 /* Line 678 of lalr1.cc  */
-#line 1134 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1132 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     StructType *s = dynamic_cast<StructType*>(driver.currentType().get());
     if(!s) {
@@ -1932,7 +1930,7 @@ namespace G3nom {
   case 163:
 
 /* Line 678 of lalr1.cc  */
-#line 1220 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1218 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p = driver.currentType();
     EnumType *s = dynamic_cast<EnumType*>(p.get());
@@ -1949,21 +1947,21 @@ namespace G3nom {
   case 164:
 
 /* Line 678 of lalr1.cc  */
-#line 1233 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1231 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 165:
 
 /* Line 678 of lalr1.cc  */
-#line 1235 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1233 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 166:
 
 /* Line 678 of lalr1.cc  */
-#line 1239 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1237 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     EnumType *s = dynamic_cast<EnumType*>(driver.currentType().get());
     if(!s) {
@@ -1978,7 +1976,7 @@ namespace G3nom {
   case 167:
 
 /* Line 678 of lalr1.cc  */
-#line 1253 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1251 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new SequenceType((yysemantic_stack_[(6) - (3)].typeVal), (yysemantic_stack_[(6) - (5)].integerVal)));
     (yyval.typeVal) = p;
@@ -1988,7 +1986,7 @@ namespace G3nom {
   case 168:
 
 /* Line 678 of lalr1.cc  */
-#line 1258 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1256 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new SequenceType((yysemantic_stack_[(4) - (3)].typeVal), 0));  
     (yyval.typeVal) = p;
@@ -1998,7 +1996,7 @@ namespace G3nom {
 
 
 /* Line 678 of lalr1.cc  */
-#line 2002 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
+#line 2000 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
 	default:
           break;
       }
@@ -2613,18 +2611,18 @@ namespace G3nom {
      335,   356,   355,   366,   367,   371,   375,   392,   401,   405,
      414,   413,   424,   425,   429,   433,   438,   441,   445,   490,
      500,   505,   508,   514,   518,   524,   526,   530,   535,   541,
-     555,   566,   589,   626,   645,   650,   661,   660,   672,   673,
-     675,   679,   690,   701,   705,   713,   720,   721,   722,   723,
-     724,   725,   726,   727,   728,   733,   737,   741,   745,   749,
-     753,   758,   762,   766,   770,   774,   781,   787,   791,   798,
-     805,   812,   819,   826,   833,   840,   847,   854,   861,   870,
-     876,   885,   890,   892,   893,   908,   912,   918,   919,   920,
-     931,   932,   933,   934,   935,   936,   937,   943,   944,   945,
-     946,   950,   952,   956,   962,   974,   975,   979,   986,   991,
-     998,  1007,  1008,  1009,  1013,  1018,  1022,  1023,  1027,  1028,
-    1029,  1033,  1037,  1041,  1045,  1046,  1047,  1051,  1055,  1059,
-    1063,  1067,  1071,  1075,  1079,  1087,  1092,  1098,  1103,  1113,
-    1127,  1129,  1133,  1219,  1233,  1234,  1238,  1252,  1257
+     555,   566,   587,   624,   643,   648,   659,   658,   670,   671,
+     673,   677,   688,   699,   703,   711,   718,   719,   720,   721,
+     722,   723,   724,   725,   726,   731,   735,   739,   743,   747,
+     751,   756,   760,   764,   768,   772,   779,   785,   789,   796,
+     803,   810,   817,   824,   831,   838,   845,   852,   859,   868,
+     874,   883,   888,   890,   891,   906,   910,   916,   917,   918,
+     929,   930,   931,   932,   933,   934,   935,   941,   942,   943,
+     944,   948,   950,   954,   960,   972,   973,   977,   984,   989,
+     996,  1005,  1006,  1007,  1011,  1016,  1020,  1021,  1025,  1026,
+    1027,  1031,  1035,  1039,  1043,  1044,  1045,  1049,  1053,  1057,
+    1061,  1065,  1069,  1073,  1077,  1085,  1090,  1096,  1101,  1111,
+    1125,  1127,  1131,  1217,  1231,  1232,  1236,  1250,  1255
   };
 
   // Print the state stack on the debug stream.
@@ -2723,11 +2721,11 @@ namespace G3nom {
 } // G3nom
 
 /* Line 1054 of lalr1.cc  */
-#line 2727 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
+#line 2725 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
 
 
 /* Line 1056 of lalr1.cc  */
-#line 1263 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1261 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
  /*** Additional Code ***/
 
 void G3nom::Parser::error(const Parser::location_type& l,

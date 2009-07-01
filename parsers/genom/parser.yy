@@ -570,16 +570,14 @@ event_spec:
       Event::Ptr e(new NamedEvent($1, ev));
       $$ = e;
     } else { // service event
-      Service::Ptr s = driver.currentService();
-
       if($1 == "onCalled") 
-	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnCalled));
+	$$ = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnCalled));
       else if($1 == "onStart") 
-	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnStart));
+	$$ = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnStart));
       else if($1 == "onEnd") 
-	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnEnd));
+	$$ = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnEnd));
       else if($1 == "onInter") 
-	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnInter));
+	$$ = Event::Ptr(new ServiceEvent(std::string(), ServiceEvent::OnInter));
       else {
 	  error(yyloc, std::string("Unknown service internal event: ") + $1);
 	  YYERROR;

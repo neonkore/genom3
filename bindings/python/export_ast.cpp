@@ -124,4 +124,40 @@ void export_ast()
 	enum_<Port::Type>("PortType")
 	.value("Incoming", Port::Incoming)
 	.value("Outgoing", Port::Outgoing);
+
+	enum_<Event::Kind>("EventKind")
+	.value("NamedEv", Event::NamedEv)
+	.value("ServiceEv", Event::ServiceEv)
+	.value("PortEv", Event::PortEv);
+
+	class_<Event, Event::Ptr, boost::noncopyable>("Event", no_init)
+	.def("identifier", &Event::identifier)
+	.def("kind", &Event::kind)
+	.def("asPortEvent", &Event::asPortEvent, return_value_policy<reference_existing_object>())
+	.def("asNamedEvent", &Event::asNamedEvent, return_value_policy<reference_existing_object>())
+	.def("asServiceEvent", &Event::asServiceEvent, return_value_policy<reference_existing_object>());
+
+	class_<NamedEvent, bases<Event> >("NamedEvent", init<const std::string &, Event::Ptr>())
+	.def("aliasEvent", &NamedEvent::aliasEvent);
+
+	enum_<PortEvent::Kind>("PortEventKind")
+	.value("OnUpdate", PortEvent::OnUpdate)
+	.value("OnRead", PortEvent::OnRead)
+	.value("OnWrite", PortEvent::OnWrite)
+	.value("OnInitialize", PortEvent::OnInitialize);
+
+	class_<PortEvent, bases<Event> >("PortEvent", init<const std::string &, PortEvent::Kind>())
+	.def("portName", &PortEvent::portName)
+	.def("kindAsString", &PortEvent::kindAsString);
+
+	enum_<ServiceEvent::Kind>("ServiceEventKind")
+	.value("OnCalled", ServiceEvent::OnCalled)
+	.value("OnStart", ServiceEvent::OnStart)
+	.value("OnEnd", ServiceEvent::OnEnd)
+	.value("OnInter", ServiceEvent::OnInter)
+	.value("OnCodel", ServiceEvent::OnCodel);
+
+	class_<ServiceEvent, bases<Event> >("ServiceEvent", init<const std::string &, ServiceEvent::Kind>())
+	.def("serviceName", &ServiceEvent::serviceName)
+	.def("kindAsString", &ServiceEvent::kindAsString);
 }

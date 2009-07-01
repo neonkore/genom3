@@ -49,7 +49,7 @@ for s in comp.servicesMap():
   for i in service.inputs():
     print "  in_" + i.identifier + " = " + i.identifier + ";"
   ?>
-  m_status = <!startStateForService(service)!>;
+  m_status.push_front(<!startStateForService(service)!>);
 }
 
 <!service.name!>Service::~<!service.name!>Service()
@@ -62,14 +62,27 @@ for s in comp.servicesMap():
     } else {
 <?
   if serviceInfo.outputFlag: ?>
-	genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished", m_clientName.c_str(), m_id);
-	ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_replyPort, 
+    if(m_status.empty()) {
+      genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished successfully", m_clientName.c_str(), m_id);
+      ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_replyPort, 
 	    m_clientName, m_id, "<!service.name!>", "OK", &out_<!service.output.identifier!>);    
+    } else {
+      std::string r = errorString(m_status.front());      
+      genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished with errror: %s", m_clientName.c_str(), m_id, r.c_str());
+      ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", "<!service.name!> Error: " + r, 0);    
+    }
+
 <?
   else:?>
+    if(m_status.empty()) {
 	genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished", m_clientName.c_str(), m_id);
 	ReplyWriter<VoidIO>::send(m_replyPort, 
 	    m_clientName, m_id, "<!service.name!>", "OK", 0);
+    } else {
+      std::string r = errorString(m_status.front());      
+      genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished with errror: %s", m_clientName.c_str(), m_id, r.c_str());
+      ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", "<!service.name!> Error: " + r, 0);    
+    }
 <?
   ?>
   }
@@ -77,34 +90,96 @@ for s in comp.servicesMap():
 
 void <!service.name!>Service::abort()
 {
-    m_aborted = true;
+  m_status.clear();
+<?
+  if service.events(): 
+    ?>
+  m_status.push_front(statusFromEventString("inter"));
+<?
+  ?>
+  m_aborted = true;
 }
+
+<?
+  if service.events(): 
+    ?>
+int <!service.name!>Service::statusFromEventString(const std::string &ev)
+{
+<?
+    for e in service.events():
+      ev = e.key()
+      codel = e.data().replace(".", "_")
+      if codel == "control":
+	continue
+      ?>
+  if(ev == "<!ev.identifier()!>") 
+    return <!upper(service.name)!>_<!upper(codel)!>;
+<?
+    ?>
+
+  genom_log("Received unknown event: %s", ev.c_str());
+  return <!upper(service.name)!>_ETHER;
+}
+
+<?
+  ?>
 
 bool <!service.name!>Service::step()
 {
+<?
+  if service.events(): 
+    ?>
+  while(!isEmpty()) {
+    std::string ev = takeEvent();
+    m_status.push_front(statusFromEventString(ev));
+  }
+<?
+  else:?>
   if(m_aborted)
     return false;
+<?
+  ?>
 
-  switch(m_status) {
+  int res = <!upper(service.name)!>_ETHER;
+  switch(m_status.front()) {
 <?
   for c in service.codels():
     if c.key() == "control":
       continue
     ?>
     case <!upper(service.name)!>_<!upper(c.key())!>:
-      m_status = <!c.key()!>();
-      if(m_status < 0) { // error
-	string r = "<!service.name!> : " + errorString(m_status);
-	cout << r << endl;
-	ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", r, 0);    
-	return true;
-      }
-      return true;
+      res = <!c.key()!>();
+      break;
 <?
   ?>
     case <!upper(service.name)!>_ETHER:
-      return false;
+      break;
+
+    case <!upper(service.name)!>_SLEEP:
+      res = <!upper(service.name)!>_SLEEP;
+      break;
+
+    default:
+      std::cout << "Error unknown status value : " << m_status.front() << std::endl;
+      break;
   }
+
+  if(res < 0) { // error
+// 	m_status.clear();
+    m_status.push_front(res);
+    return false;
+  }
+
+  // remove the executed step
+  m_status.pop_front();
+  // and add the new one
+  if(res != <!upper(service.name)!>_ETHER)
+    m_status.push_back(res);
+  m_status.unique();
+
+  if(m_status.empty())
+    return false; // service is done
+
   return true;
 }
 

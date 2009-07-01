@@ -92,7 +92,7 @@ for p in outports: ?>
 <?
 for p in inports: ?>
     m_data-><!p.name!>_inport.open("/<!comp.name()!>/InPorts/<!p.name!>");
-    m_data-><!p.name!>_outport.setName("<!p.name!>");
+    m_data-><!p.name!>_inport.setName("<!p.name!>");
 <?
 ?>
     m_request_port.open("/<!comp.name()!>/Services/Control");

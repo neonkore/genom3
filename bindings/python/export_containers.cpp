@@ -73,4 +73,9 @@ void export_containers()
 	.def(map_indexing_suite<IdlType::Map, true>());
 	class_<ConstValue::Map>("ConstValueMap")
 	.def(map_indexing_suite<ConstValue::Map, true>());
+
+	class_<Event::RevMap>("EventRevMap")
+	.def(map_indexing_suite<Event::RevMap, true>());
+	class_<Event::Map>("EventMap")
+	.def(map_indexing_suite<Event::Map, true>());
 }

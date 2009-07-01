@@ -143,7 +143,7 @@ class PortEvent : public Event
 class ServiceEvent : public Event
 {
 	public:
-		enum Kind { OnStart, OnEnd, OnInter, OnCodel };
+		enum Kind { OnCalled, OnStart, OnEnd, OnInter, OnCodel };
 
 		ServiceEvent(const std::string &serviceName, Kind k) 
 		: Event(Event::ServiceEv), m_service(serviceName), m_serviceKind(k)

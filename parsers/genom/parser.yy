@@ -572,14 +572,16 @@ event_spec:
     } else { // service event
       Service::Ptr s = driver.currentService();
 
-      if($1 == "onStart") 
+      if($1 == "onCalled") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnCalled));
+      else if($1 == "onStart") 
 	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnStart));
       else if($1 == "onEnd") 
 	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnEnd));
       else if($1 == "onInter") 
 	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnInter));
       else {
-	  error(yyloc, std::string("Unknown service event: ") + $1);
+	  error(yyloc, std::string("Unknown service internal event: ") + $1);
 	  YYERROR;
       }
     }
@@ -588,6 +590,8 @@ event_spec:
 {
     //try to find what type of event this is
     Port::Ptr p = driver.component().port($1);
+    Service::Ptr s = driver.component().service($1);
+    std::cout << "Reading " << $1 << " and " << $3 << std::endl;
     if(p.get()) { // port event
       if($3 == "onUpdate") 
 	$$ = Event::Ptr(new PortEvent(p->name, PortEvent::OnUpdate));
@@ -601,7 +605,22 @@ event_spec:
 	  error(yyloc, std::string("Unknown port event: ") + $3);
 	  YYERROR;
       }
+    } else if(s.get()) {
+      if($3 == "onCalled") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnCalled));
+      else if($3 == "onStart") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnStart));
+      else if($3 == "onEnd") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnEnd));
+      else if($3 == "onInter") 
+	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnInter));
+      else {
+	  error(yyloc, std::string("Unknown service event: ") + $3);
+	  YYERROR;
+      }
     } else {
+      error(yyloc, std::string("Unknown object: ") + $1);
+      YYERROR;
     }
 }
 | IDENTIFIER DOT IDENTIFIER DOT IDENTIFIER

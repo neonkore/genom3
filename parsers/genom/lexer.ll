@@ -96,7 +96,7 @@ chartext				([^\'])|(\\.)
 }
 
  /* One char keywords */
-"->"			{ return token::DOT; }
+"."			{ return token::DOT; }
 "{"			{ return token::LBRACE; }
 "}"			{ return token::RBRACE; }
 ";"			{ return token::SEMICOLON; }

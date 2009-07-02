@@ -51,7 +51,7 @@ class EventInPort: public EventSender, public EventPort
 {
   public:
     EventInPort();
-    ~EventInPort();
+    ~EventInPort() {}
 
     virtual void onRead(yarp::os::Bottle &t);
 };

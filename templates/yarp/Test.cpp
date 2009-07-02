@@ -17,6 +17,7 @@ def parseInput(type, name):
 #include "lib/RepliesReader.hpp"
 #include "lib/RqstWriter.hpp"
 #include "lib/DataServer.hpp"
+#include "lib/Events.hpp"
 
 using namespace std;
 using namespace yarp::os;
@@ -65,6 +66,8 @@ for t in tasksMap:
   yarp::os::BufferedPort<yarp::os::Bottle> <!task.name!>_req_port;
   yarp::os::BufferedPort<yarp::os::Bottle> <!task.name!>_reply_port;
   <!task.name!>ReplyReader <!task.name!>Reader;
+
+  yarp::os::BufferedPort<yarp::os::Bottle> events_port;
 <?
 ?>
   yarp::os::BufferedPort<yarp::os::Bottle> Control_req_port;
@@ -107,6 +110,9 @@ for port in inports: ?>
     Network::connect("/<!comp.name()!>/Test/OutPorts/<!port.name!>", "/<!comp.name()!>/InPorts/<!port.name!>");
 <?
 ?>
+
+    events_port.open("/<!comp.name()!>/Test/Events");
+    Network::connect("/<!comp.name()!>/Test/Events", "/<!comp.name()!>/Events");
 }
 
 void printUsage()
@@ -130,6 +136,13 @@ print "  cout << \"---------------------------\" << endl;"
 for port in inports:
   idx += 1
   print "  cout << \"  (" + str(idx) + ") Update " + port.name + "\" << endl;"
+print "  cout << \"---------------------------\" << endl;"
+for e in comp.eventsMap():
+  ev = e.data()
+  if not ev.asNamedEvent().aliasEvent() is None:
+    continue
+  idx += 1
+  print "  cout << \"  (" + str(idx) + ") Send " + ev.identifier() + "\" << endl;"
 ?>
 
 }
@@ -231,6 +244,22 @@ void write<!port.name!>()
 <?
 ?>
 
+<?
+for e in comp.eventsMap():
+  ev = e.data()
+  if not ev.asNamedEvent().aliasEvent() is None:
+    continue
+?>
+void send<!ev.identifier()!>()
+{
+  Bottle &b = events_port.prepare();
+  b.addString("<!ev.identifier()!>");
+
+  events_port.writeStrict();
+}
+<?
+?>
+
 void executeAction(int action)
 {
   switch(action) {
@@ -266,6 +295,20 @@ for port in inports:
     }
 <?
 ?>      
+
+<?
+for e in comp.eventsMap():
+  ev = e.data()
+  if not ev.asNamedEvent().aliasEvent() is None:
+    continue
+  idx += 1
+  ?>
+      case <!idx!>: {
+      send<!ev.identifier()!>();
+      break;
+    }
+<?
+?>   
   }
 }
 

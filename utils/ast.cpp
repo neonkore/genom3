@@ -431,6 +431,12 @@ void Service::debug()
 		it->second->debug();
 		cout << endl;
 	}
+
+	cout << "Events: " << endl;
+	Event::RevMap::const_iterator it3;
+	for (it3 = m_events.begin(); it3 != m_events.end(); ++it3) {
+		cout << "\t" << it3->first->identifier() << " -> " << it3->second << endl;
+	}
 }
 
 // void Service::addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue)

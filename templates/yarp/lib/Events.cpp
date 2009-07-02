@@ -8,7 +8,10 @@ using namespace GenomYarp;
 
 void EventReceiver::addEvent(const std::string sender, const std::string &ev)
 {
-  m_eventsStack.push_back(sender + "." + ev);
+  if(sender.empty())
+    m_eventsStack.push_back(ev);
+  else
+    m_eventsStack.push_back(sender + "." + ev);
 }
 
 std::string EventReceiver::takeEvent()
@@ -70,6 +73,11 @@ void EventOutPort::addAlias(const std::string &ev, const std::string &alias)
 }
 
 /****** EventInPort *************/
+
+EventInPort::EventInPort()
+{
+  useCallback();
+}
 
 void EventInPort::onRead(yarp::os::Bottle &b)
 {

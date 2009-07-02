@@ -99,6 +99,8 @@ for p in inports: ?>
 //     m_reply_port.open("/<!comp.name()!>/Services/Replies/Control");
     m_request_port.useCallback(*this);
 
+    m_data->events_port.open("/<!comp.name()!>/Events");
+
     // create exec task and start them
 <?
 for t in tasksMap:

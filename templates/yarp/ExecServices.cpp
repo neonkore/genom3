@@ -65,6 +65,9 @@ for s in comp.servicesMap():
       else:
 	portName = port.name + "_inport"
       print "  m_data->" + portName + ".registerReceiver(\"" + pev.kindAsString() + "\", this);"
+
+    elif ev.kind() == EventKind.NamedEv:
+      print "  m_data->events_port.registerReceiver(\"" + ev.identifier() + "\", this);"
   ?>
 }
 
@@ -84,6 +87,8 @@ for s in comp.servicesMap():
       else:
 	portName = port.name + "_inport"
       print "  m_data->" + portName + ".unregisterReceiver(\"" + pev.kindAsString() + "\", this);"
+    elif ev.kind() == EventKind.NamedEv:
+      print "  m_data->events_port.unregisterReceiver(\"" + ev.identifier() + "\", this);"
   ?>
 
     // send the reply

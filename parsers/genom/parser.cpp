@@ -906,8 +906,8 @@ namespace G3nom {
       YYERROR;
     }
 
-    Service::Input i;
-    i.kind = Service::Input::IDSMember;
+    ServiceInput i;
+    i.kind = ServiceInput::IDSMember;
     i.identifier = (yysemantic_stack_[(3) - (3)].stringVal);
     (yyval.serviceInputVal) = i;
 }
@@ -918,8 +918,8 @@ namespace G3nom {
 /* Line 678 of lalr1.cc  */
 #line 547 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Service::Input i;
-    i.kind = Service::Input::Type;
+    ServiceInput i;
+    i.kind = ServiceInput::Type;
     i.identifier = (yysemantic_stack_[(2) - (2)].stringVal);
     i.type = (yysemantic_stack_[(2) - (1)].typeVal);
     (yyval.serviceInputVal) = i;

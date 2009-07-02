@@ -60,7 +60,7 @@ struct variant_type {
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
     G3nom::Idl::Declarator::Ptr		declaratorVal;
     G3nom::Idl::Literal		literalVal;
-    G3nom::Service::Input	serviceInputVal;
+    G3nom::ServiceInput		serviceInputVal;
 };
 #define YYSTYPE variant_type
 
@@ -538,15 +538,15 @@ input_type:
       YYERROR;
     }
 
-    Service::Input i;
-    i.kind = Service::Input::IDSMember;
+    ServiceInput i;
+    i.kind = ServiceInput::IDSMember;
     i.identifier = $3;
     $$ = i;
 }
 | type_spec IDENTIFIER
 {
-    Service::Input i;
-    i.kind = Service::Input::Type;
+    ServiceInput i;
+    i.kind = ServiceInput::Type;
     i.identifier = $2;
     i.type = $1;
     $$ = i;

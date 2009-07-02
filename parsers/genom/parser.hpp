@@ -59,7 +59,7 @@ struct variant_type {
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
     G3nom::Idl::Declarator::Ptr		declaratorVal;
     G3nom::Idl::Literal		literalVal;
-    G3nom::Service::Input	serviceInputVal;
+    G3nom::ServiceInput		serviceInputVal;
 };
 #define YYSTYPE variant_type
 

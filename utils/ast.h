@@ -139,6 +139,28 @@ class Task
 		//std::string connectedPort;
 };
 
+/** 
+* It can either be an IDS member (eg IDS:speedRef) in which case #type is null, or 
+* defined by its type (eg double d). In both cases, it can have a default value.
+* \short A service's input or output parameter
+*/
+struct ServiceInput {
+	typedef std::vector<ServiceInput> Vect;
+	enum Kind { IDSMember, Type};
+	
+	ServiceInput() : kind(IDSMember) {}
+
+	/** It is necessary to overload this operator because boost.python
+	* expects types stored in a vect to be comparable with operator==()
+	*/
+	bool operator==(const ServiceInput &rhs); // necessary for boost.python
+
+	Kind kind;
+	std::string identifier;
+	Idl::IdlType::Ptr type;
+	Idl::Literal defaultValue;
+};
+
 /** \short A service*/
 class Service
 {
@@ -147,28 +169,6 @@ class Service
 		typedef std::map<std::string, Ptr> Map;
 		enum Type { Control, Exec, Init };
 
-		/** 
-		* It can either be an IDS member (eg IDS:speedRef) in which case #type is null, or 
-		* defined by its type (eg double d). In both cases, it can have a default value.
-		* \short A service's input or output parameter
-		*/
-		struct Input {
-			typedef std::vector<Input> Vect;
-			enum Kind { IDSMember, Type};
-			
-			Input() : kind(IDSMember) {}
-
-			/** It is necessary to overload this operator because boost.python
-			* expects types stored in a vect to be comparable with operator==()
-			*/
-			bool operator==(const Input &rhs); // necessary for boost.python
-
-			Kind kind;
-			std::string identifier;
-			Idl::IdlType::Ptr type;
-			Idl::Literal defaultValue;
-		};
-
 		Service() {}
 		Service(const std::string &id) 
 		: name(id) {}
@@ -176,8 +176,8 @@ class Service
 		void debug();
 
 // 		void addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue = Idl::Literal());
-		void addInput(const Service::Input &i);
-		Input::Vect& inputs() { return m_inputs; }
+		void addInput(const ServiceInput &i);
+		ServiceInput::Vect& inputs() { return m_inputs; }
 		Idl::Literal inputDefaultArg(const std::string &n); 
 
 		std::vector<std::string>& errorMessages() { return m_errorMessages; }
@@ -195,11 +195,11 @@ class Service
 		Type type;
 		std::string doc;
 		std::string taskName;
-		Input output;
+		ServiceInput output;
 
 	private:
 		Codel::Map m_codels;
-		Input::Vect m_inputs;
+		ServiceInput::Vect m_inputs;
 		std::vector<std::string> m_incompatibleServices;
 		std::vector<std::string> m_errorMessages;
 };

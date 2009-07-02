@@ -183,6 +183,11 @@ IdlType::Ptr StructType::member(const std::string &name)
 	return m_members[name];
 }
 
+const std::string StructType::kindAsString() const
+{
+	return "string";
+}
+
 string intToString(int i)
 {
 	stringstream ss;
@@ -195,6 +200,11 @@ string intToString(int i)
 void EnumType::addEnumerator(const std::string &e)
 {
 	m_enum.push_back(e);
+}
+
+const std::string EnumType::kindAsString() const
+{
+	return "enum";
 }
 
 /************ TypedefType ***************/
@@ -228,6 +238,11 @@ TypedefType::TypedefType(IdlType::Ptr aliasType, const std::string &identifier)
 	Declarator::Ptr p(new Declarator(identifier));
 	m_declarators = Declarator::VectPtr(new Declarator::Vect());
 	m_declarators->push_back(p);
+}
+
+const std::string TypedefType::kindAsString() const
+{
+	return "typedef";
 }
 
 /************ ArrayType ***************/

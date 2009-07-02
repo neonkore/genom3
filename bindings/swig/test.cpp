@@ -27,41 +27,39 @@
  * DAMAGE.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#include <string>
+#include <iostream>
 
-#include "utils/ast.h"
-#include "utils/idltype.h"
-#include "utils/idlvalues.h"
+#include "tclinterpreter.h"
+#include "driver.h"
 
+using namespace std;
 using namespace G3nom;
-using namespace Idl;
-using namespace boost::python;
 
-void export_containers()
+int main(int argc, char* argv[])
 {
-	// Vectors
-	class_<std::vector<int> >("IntVec")
-	.def(vector_indexing_suite<std::vector<int> >());
-	class_<std::vector<std::string> >("StringVec")
-	.def(vector_indexing_suite<std::vector<std::string> >());
-	class_<IdlType::Vector>("IdlTypeVec")
-	.def(vector_indexing_suite<IdlType::Vector, true>());
-	class_<ServiceInput::Vect>("ServiceInputVec")
-	.def(vector_indexing_suite<ServiceInput::Vect>());
+	string s = "task main { "
+	           "priority: 100;"
+	           "period: 5;\n"
+	           "stack:  100;"
+// 		  "codel start:	tstart(inout param);\n"
+// 		  "codel main:	tmain();\n"
+	           "};";
 
-	// Maps
-	class_<Task::Map>("TaskMap")
-	.def(map_indexing_suite<Task::Map, true>());
-	class_<Service::Map>("ServiceMap")
-	.def(map_indexing_suite<Service::Map, true>());
-	class_<Codel::Map>("CodelMap")
-	.def(map_indexing_suite<Codel::Map, true>());
-	class_<Port::Map>("PortMap")
-	.def(map_indexing_suite<Port::Map, true>());
-	class_<IdlType::Map>("IdlTypeMap")
-	.def(map_indexing_suite<IdlType::Map, true>());
-	class_<ConstValue::Map>("ConstValueMap")
-	.def(map_indexing_suite<ConstValue::Map, true>());
+	Driver d;
+//      d.setDebug(true);
+	d.parseString(s);
+//       d.component().debug();
+
+	TclInterpreter *i = TclInterpreter::getInstance();
+	i->start(&(d.component()));
+//       i->interpret("set comp2 [Component];");
+//       i->interpret("debugComp $comp");
+//       i->interpret("debugComp $comp2");
+//       i->interpret("$comp debug");
+	i->interpret("set task [$comp task \"main\"]");
+	i->interpret("$task debug");
+	i->interpret("set l [tasksList $comp]");
+	i->interpret("foreach x $l { puts \"task: $x\" }");
 }
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

@@ -94,15 +94,15 @@ void export_ast()
 	.value("Control", Service::Control)
 	.value("Exec", Service::Exec);
 
-	class_<Service::Input>("ServiceInput")
-	.def_readwrite("kind", &Service::Input::kind)
-	.def_readwrite("identifier", &Service::Input::identifier)
-	.def_readwrite("type", &Service::Input::type)
-	.def_readwrite("defaultValue", &Service::Input::defaultValue);
+	class_<ServiceInput>("ServiceInput")
+	.def_readwrite("kind", &ServiceInput::kind)
+	.def_readwrite("identifier", &ServiceInput::identifier)
+	.def_readwrite("type", &ServiceInput::type)
+	.def_readwrite("defaultValue", &ServiceInput::defaultValue);
 
-	enum_<Service::Input::Kind>("ServiceInputKind")
-	.value("IDSMember", Service::Input::IDSMember)
-	.value("Type", Service::Input::Type);
+	enum_<ServiceInput::Kind>("ServiceInputKind")
+	.value("IDSMember", ServiceInput::IDSMember)
+	.value("Type", ServiceInput::Type);
 
 	class_<Codel, Codel::Ptr>("Codel", init<const std::string &>())
 	.def_readonly("name", &Codel::name)

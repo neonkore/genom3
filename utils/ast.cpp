@@ -329,7 +329,7 @@ void Task::addErrorMessage(const std::string &s)
 
 /******** Service ***************/
 
-bool Service::Input::operator==(const Service::Input &rhs)
+bool ServiceInput::operator==(const ServiceInput &rhs)
 {
 	return kind == rhs.kind && identifier == rhs.identifier && defaultValue == rhs.defaultValue && type.get() == rhs.type.get();
 }
@@ -340,8 +340,8 @@ void Service::debug()
 	cout << "Parent task: " << taskName << endl;
 
 	cout << "Inputs: ";
-	for(Input::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
-		if(it->kind == Input::IDSMember)
+	for(ServiceInput::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
+		if(it->kind == ServiceInput::IDSMember)
 			cout << "IDS:" << it->identifier;
 		else
 			cout << DumpType::dumpType(it->type) << " " << it->identifier;
@@ -352,7 +352,7 @@ void Service::debug()
 	cout << endl << "Output: ";
 	if(output.identifier.empty())
 		cout << "None" << endl;
-	else if(output.kind == Input::IDSMember)
+	else if(output.kind == ServiceInput::IDSMember)
 		cout << "IDS:" << output.identifier << endl;
 	else
 		cout << DumpType::dumpType(output.type) << " " << output.identifier << endl;
@@ -396,14 +396,14 @@ void Service::debug()
 // 	m_inputs.push_back(i);
 // }
 
-void Service::addInput(const Service::Input &i)
+void Service::addInput(const ServiceInput &i)
 {
 	m_inputs.push_back(i);
 }
 
 Idl::Literal Service::inputDefaultArg(const std::string &n)
 {
-	for(Input::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
+	for(ServiceInput::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
 		if(it->identifier == n)
 			return it->defaultValue;
 	}

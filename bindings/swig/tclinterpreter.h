@@ -27,41 +27,42 @@
  * DAMAGE.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#ifndef G3NOM_TCL_INTERPRETER_H
+#define G3NOM_TCL_INTERPRETER_H
 
-#include "utils/ast.h"
-#include "utils/idltype.h"
-#include "utils/idlvalues.h"
+#include "utils/interpreter.h"
+#include <string>
+#include <auto_ptr.h>
 
-using namespace G3nom;
-using namespace Idl;
-using namespace boost::python;
-
-void export_containers()
+namespace G3nom
 {
-	// Vectors
-	class_<std::vector<int> >("IntVec")
-	.def(vector_indexing_suite<std::vector<int> >());
-	class_<std::vector<std::string> >("StringVec")
-	.def(vector_indexing_suite<std::vector<std::string> >());
-	class_<IdlType::Vector>("IdlTypeVec")
-	.def(vector_indexing_suite<IdlType::Vector, true>());
-	class_<ServiceInput::Vect>("ServiceInputVec")
-	.def(vector_indexing_suite<ServiceInput::Vect>());
 
-	// Maps
-	class_<Task::Map>("TaskMap")
-	.def(map_indexing_suite<Task::Map, true>());
-	class_<Service::Map>("ServiceMap")
-	.def(map_indexing_suite<Service::Map, true>());
-	class_<Codel::Map>("CodelMap")
-	.def(map_indexing_suite<Codel::Map, true>());
-	class_<Port::Map>("PortMap")
-	.def(map_indexing_suite<Port::Map, true>());
-	class_<IdlType::Map>("IdlTypeMap")
-	.def(map_indexing_suite<IdlType::Map, true>());
-	class_<ConstValue::Map>("ConstValueMap")
-	.def(map_indexing_suite<ConstValue::Map, true>());
+class Component;
+class TclInterpreterPrivate;
+
+class TclInterpreter : public Interpreter
+{
+	public:
+		TclInterpreter();
+		~TclInterpreter();
+
+		virtual void start(Component *c);
+		virtual std::string interpret(const std::string &s);
+		virtual std::string eval(const std::string &s);
+		virtual void exportVar(const std::string &name, const std::string &value);
+		virtual std::string printString(const std::string &s);
+		virtual std::string evalString(const std::string &s);
+
+		static TclInterpreter *getInstance();
+
+		void writeStdout(std::string text);
+
+	private:
+		static TclInterpreter* m_instance;
+		std::auto_ptr<TclInterpreterPrivate> d;
+};
+
 }
+
+#endif
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

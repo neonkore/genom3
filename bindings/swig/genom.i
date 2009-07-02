@@ -54,7 +54,7 @@ namespace boost {
 
 
 %{
-void tclWriteStdout(const char *text)
+void gputs(const char *text)
 {
   TclInterpreter::getInstance()->writeStdout(text);
 }
@@ -67,5 +67,5 @@ Component* getCurrentComponent()
 %}
 
 G3nom::Component* getCurrentComponent();
-void tclWriteStdout(const char *text);
+void gputs(const char *text);
 

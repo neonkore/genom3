@@ -63,12 +63,12 @@ int main(int argc, char* argv[])
 	ti.setDebug(true);
 
 	Driver d;
-	if (!d.parseFile("/home/ccpasteur/work/viam-genom-1.3/viam.gnm"))
+	if (!d.parseFile("/home/ccpasteur/work/viam-openRTM/viam.gnm"))
 		cout << "Error parsing gen file " << endl;
 
 	ti.setComponent(&(d.component()));
 // 	i->exportVar("currentTaskName", "MotionTask");
- 	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
+//  	ti.executeFile("/home/ccpasteur/work/git/g3nom/templates/genom_legacy/server/server_utils.py");
  	ti.interpretFile(infile, outfile);
 	return 0;
 }

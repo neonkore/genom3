@@ -182,7 +182,7 @@ std::string replaceAllOccurrences(std::string s, const std::string &pattern, con
 	uint idx = 0;
 	while((idx = s.find(pattern, idx)) != string::npos) {
 		s = s.replace(idx, pattern.length(), replaceWith);
-		idx = idx + 3;
+		idx = idx + replaceWith.length();
 	}
 	return s;
 }

@@ -140,14 +140,27 @@ void TclInterpreter::exportVar(const std::string &name, const std::string &value
 	interpret("set " + name + " " + value);
 }
 
+std::string treplaceAllOccurrences(std::string s, const std::string &pattern, const std::string &replaceWith)
+{
+	uint idx = 0;
+	while((idx = s.find(pattern, idx)) != string::npos) {
+		s = s.replace(idx, pattern.length(), replaceWith);
+		idx = idx + replaceWith.length();
+	}
+	return s;
+}
+
 std::string TclInterpreter::printString(const std::string &s)
 {
-	return s;
+	string ss = treplaceAllOccurrences(s, "{", "\\{");
+	ss = treplaceAllOccurrences(ss, "}", "\\}");
+	ss = treplaceAllOccurrences(s, "\"", "\\\"");
+	return "gputs \"" + ss + "\";\n";
 }
 
 std::string TclInterpreter::evalString(const std::string &s)
 {
-	return "puts " + s  + ";";
+	return "gputs " + s  + ";\n";
 }
 
 void TclInterpreter::writeStdout(string text)

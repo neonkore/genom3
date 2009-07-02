@@ -39,15 +39,6 @@ using namespace G3nom;
 using namespace Idl;
 using namespace boost::python;
 
-struct Essai {
-  bool operator==(const Essai &rhs) {
-      return a == rhs.a && b == rhs.b;
-  }
-
-  int a;
-  int b;
-};
-
 void export_containers()
 {
 	// Vectors

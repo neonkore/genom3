@@ -6,6 +6,7 @@
  #include "../../utils/idltype.h"
  #include "../../utils/ast.h"
  #include "../../utils/typevisitor.h"
+ #include "../../bindings/swig/tclinterpreter.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -34,7 +35,7 @@ namespace boost {
 %template(CodelPtr) boost::shared_ptr<G3nom::Codel>;
 %template(PortPtr) boost::shared_ptr<G3nom::Port>;
 %template(TaskPtr) boost::shared_ptr<G3nom::Task>;
-/* %template(EventPtr) boost::shared_ptr<G3nom::Event>; */
+/* %template(EventPtr) boost::shared_ptr<G3nom::Event>;  */
 
 /* Maps */
 %template(ServiceMap) std::map<std::string, G3nom::Service::Ptr >;
@@ -48,5 +49,23 @@ namespace boost {
 /* Vectors */
 %template(IntVect) std::vector<int>;
 %template(StringVect) std::vector<std::string> ;
-/* %template(IdlTypeVect) std::vector<G3nom::Idl::IdlType::Ptr >; */
+%template(IdlTypeVect) std::vector< IdlTypePtr >;
 %template(ServiceInputVect) std::vector<G3nom::ServiceInput>;
+
+
+%{
+void tclWriteStdout(const char *text)
+{
+  TclInterpreter::getInstance()->writeStdout(text);
+}
+
+Component* getCurrentComponent()
+{
+  TclInterpreter *i = TclInterpreter::getInstance();
+  return i->component();
+}
+%}
+
+G3nom::Component* getCurrentComponent();
+void tclWriteStdout(const char *text);
+

@@ -34,54 +34,26 @@
 
 #include "utils/ast.h"
 
+#define PTR_MAP_FORWARD_DECL(ptrBaseType) int foreach_##ptrBaseType##_map(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[])
+#define PTR_MAP_EXPORT(ptrBaseType) Tcl_CreateObjCommand(d->interp, "foreach_" #ptrBaseType "_map", foreach_##ptrBaseType##_map, (ClientData) NULL, NULL)
+
 using namespace G3nom;
 using namespace std;
 
 int Genom_SafeInit(Tcl_Interp *);
 
+PTR_MAP_FORWARD_DECL(Service);
+PTR_MAP_FORWARD_DECL(Task);
+PTR_MAP_FORWARD_DECL(Codel);
+PTR_MAP_FORWARD_DECL(Port);
+PTR_MAP_FORWARD_DECL(IdlType);
+int foreach_ConstValue_map(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]);
+int foreach_int_vect(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]);
+int foreach_string_vect(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]);
+int foreach_ServiceInput_vect(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]);
+int foreach_IdlType_vect(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]);
+
 TclInterpreter* TclInterpreter::m_instance = 0;
-
-Component* getCurrentComponent()
-{
-	TclInterpreter *i = TclInterpreter::getInstance();
-	return i->component();
-}
-
-void tclWriteStdout(const char *text)
-{
-	TclInterpreter::getInstance()->writeStdout(text);
-}
-
-// void debug(Component *c)
-// {
-// 	c->debug();
-// }
-
-// string tasksList(Component *c)
-// {
-// 	string out;
-// 
-// 	Task::Map map = c->tasksMap();
-// 	Task::Map::const_iterator it;
-// 	for (it = map.begin(); it != map.end(); ++it) {
-// 		out.append(" \"").append(it->first).append("\"");
-// 		out.append(" \"").append(it->first).append("\"");
-// 	}
-// 
-// 	return out;
-// }
-
-// Tcl::object tasksList(interpreter &i, Component *c)
-// {
-//     object tab;
-//
-//     Task::Map map = c->tasksMap();
-//     Task::Map::const_iterator it;
-//     for(it = map.begin(); it != map.end(); ++it)
-// 	tab.append(i, object(it->first));
-//
-//     return tab;
-// }
 
 namespace G3nom
 {
@@ -100,6 +72,18 @@ TclInterpreter::TclInterpreter()
 
 	if (TCL_OK != Tcl_Init(d->interp))
 		cout << "Tcl_Init error: " << Tcl_GetStringResult(d->interp) << endl;
+
+	PTR_MAP_EXPORT(Service);
+	PTR_MAP_EXPORT(Task);
+	PTR_MAP_EXPORT(Codel);
+	PTR_MAP_EXPORT(Port);
+	PTR_MAP_EXPORT(IdlType);
+	Tcl_CreateObjCommand(d->interp, "foreach_ConstValue_map", foreach_ConstValue_map, (ClientData) NULL, NULL);
+	Tcl_CreateObjCommand(d->interp, "foreach_int_vect", foreach_string_vect, (ClientData) NULL, NULL);
+	Tcl_CreateObjCommand(d->interp, "foreach_string_vect", foreach_string_vect, (ClientData) NULL, NULL);
+	Tcl_CreateObjCommand(d->interp, "foreach_ServiceInput_vect", foreach_ServiceInput_vect, (ClientData) NULL, NULL);
+	Tcl_CreateObjCommand(d->interp, "foreach_IdlType_vect", foreach_IdlType_vect, (ClientData) NULL, NULL);
+
 	if(TCL_OK != Genom_SafeInit(d->interp))
 		cout << "Genom_Init error: " << Tcl_GetStringResult(d->interp) << endl;
 }
@@ -119,7 +103,7 @@ TclInterpreter* TclInterpreter::getInstance()
 void TclInterpreter::start(G3nom::Component* c)
 {
 	m_component = c;
-	interpret("set comp [getComponent]");
+	interpret("set comp [getCurrentComponent]");
 
 	// create list of tasks
 //     object o("set taskList");

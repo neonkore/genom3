@@ -105,6 +105,8 @@ class IdlType
 		bool m_isNative;
 };
 
+typedef IdlType::Ptr IdlTypePtr;
+
 /** \short A declarator (ie what is found after a type name in a type definition)
 
 It can be either a simple declarator (eg int a;) or an array declarator (eg int a[10][10])

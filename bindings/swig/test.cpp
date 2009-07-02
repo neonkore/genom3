@@ -38,13 +38,28 @@ using namespace G3nom;
 
 int main(int argc, char* argv[])
 {
-	string s = "task main { "
-	           "priority: 100;"
-	           "period: 5;\n"
-	           "stack:  100;"
-// 		  "codel start:	tstart(inout param);\n"
-// 		  "codel main:	tmain();\n"
-	           "};";
+// 	string s = "task main { "
+// 	           "priority: 100;"
+// 	           "period: 5;\n"
+// 	           "stackSize:  100;"
+// 			   "errors: TOO_FAR_AWAY OTHER_ERROR;"
+// // 		  "codel start:	tstart(inout param);\n"
+// // 		  "codel main:	tmain();\n"
+// 	           "};"
+// 			   "task main2 { "
+// 	           "priority: 100;"
+// 	           "period: 5;\n"
+// 	           "stackSize:  100;"
+// // 		  "codel start:	tstart(inout param);\n"
+// // 		  "codel main:	tmain();\n"
+// 	           "};"
+	string s = "service ser {"
+				"taskName: MotionTask;"
+				"};\n"
+				"service sss {"
+				"taskName: MotionTask;"
+				"};"
+			   ;
 
 	Driver d;
 //      d.setDebug(true);
@@ -57,9 +72,11 @@ int main(int argc, char* argv[])
 //       i->interpret("debugComp $comp");
 //       i->interpret("debugComp $comp2");
 //       i->interpret("$comp debug");
-	i->interpret("set task [$comp task \"main\"]");
-	i->interpret("$task debug");
-	i->interpret("set l [tasksList $comp]");
-	i->interpret("foreach x $l { puts \"task: $x\" }");
+// 	i->interpret("set task [$comp task \"main\"]");
+/*	i->interpret("set t [$m get \"main\"];");*/
+	i->interpret("set m [$comp servicesMap]");
+	i->interpret("foreach_service {key data} $m { puts \"$key  is == = \"; $data debug }");
+
+// 	i->interpret("dict for {key task} $m { puts $key }");/**/
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4; 

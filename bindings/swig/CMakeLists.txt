@@ -13,7 +13,7 @@ MACRO(SWIG_TARGET Name Input)
 
   SET(SWIG_OUTPUTS ${InputPath}/${InputBaseName}_wrap.cxx)
   ADD_CUSTOM_COMMAND(OUTPUT ${SWIG_OUTPUTS}
-    COMMAND ${SWIG_EXECUTABLE} ${SWIG_FLAGS} -tcl8 -oh ${Input}_wrap.hpp ${Input}
+    COMMAND ${SWIG_EXECUTABLE} ${SWIG_FLAGS} -tcl8 ${Input}
     DEPENDS ${Input}
     COMMENT "[SWIG] Generating wrappers from ${Input}"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -26,8 +26,10 @@ SWIG_TARGET(GENOM_TCL ${PROJECT_SOURCE_DIR}/bindings/swig/genom.i)
 
 set(genom_tcl_binding_SRCS
   tclinterpreter.cpp
-  ${SWIG_GENOM_TCL_OUTPUTS}
+  tclwrappers.cpp
 )
+
+set_source_files_properties(tclwrappers.cpp OBJECT_DEPENDS ${SWIG_GENOM_TCL_OUTPUTS})
 
 add_library(genom_tcl_binding ${genom_tcl_binding_SRCS})
 target_link_libraries(genom_tcl_binding ${TCL_LIBRARY} genutils)

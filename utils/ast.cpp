@@ -317,6 +317,24 @@ std::vector<std::string> Component::eventsForPort(const std::string &name)
 	return v;
 }
 
+std::vector<std::string> Component::eventsForService(const std::string &name)
+{
+	std::vector<std::string> v;
+	Event::Map::const_iterator it = events.begin();
+	for(; it != events.end(); ++it) {
+		NamedEvent *nev = it->second->asNamedEvent();
+		if(!nev || !nev->aliasEvent().get())
+			continue;
+
+		if(nev->aliasEvent()->kind() == Event::ServiceEv) {
+			if(nev->aliasEvent()->asServiceEvent()->serviceName() == name)
+				v.push_back(nev->aliasEvent()->asServiceEvent()->kindAsString());
+		}
+	}
+
+	return v;
+}
+
 /******** Port ***************/
 
 void Port::debug()

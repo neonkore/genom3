@@ -62,7 +62,8 @@ for port in outports:
 ?>
 
   // Events port
-  GenomYarp::EventInPort events_port;
+  GenomYarp::EventInPort events_inport;
+  GenomYarp::EventOutPort events_outport;
 
   // Activities list
 <?

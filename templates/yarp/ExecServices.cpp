@@ -31,6 +31,7 @@ for s in comp.servicesMap():
     continue
 
   serviceInfo = services_info_dict[service.name]
+  eventsList = comp.eventsForService(service.name)
 
   inputStr = ""
   for i in service.inputs():
@@ -67,7 +68,16 @@ for s in comp.servicesMap():
       print "  m_data->" + portName + ".registerReceiver(\"" + pev.kindAsString() + "\", this);"
 
     elif ev.kind() == EventKind.NamedEv:
-      print "  m_data->events_port.registerReceiver(\"" + ev.identifier() + "\", this);"
+      print "  m_data->events_inport.registerReceiver(\"" + ev.identifier() + "\", this);"
+
+  if eventsList:?>
+  m_eventsSender.setName("<!service.name!>");
+<?
+  for ev in eventsList: 
+    evName = codelToEvName(ev)
+    ?>
+  m_eventsSender.registerReceiver("<!evName!>", &m_data->events_outport);
+<?
   ?>
 }
 
@@ -88,7 +98,7 @@ for s in comp.servicesMap():
 	portName = port.name + "_inport"
       print "  m_data->" + portName + ".unregisterReceiver(\"" + pev.kindAsString() + "\", this);"
     elif ev.kind() == EventKind.NamedEv:
-      print "  m_data->events_port.unregisterReceiver(\"" + ev.identifier() + "\", this);"
+      print "  m_data->events_inport.unregisterReceiver(\"" + ev.identifier() + "\", this);"
   ?>
 
     // send the reply
@@ -234,6 +244,14 @@ int <!service.name!>Service::<!c.key()!>()
   // call the user codel
   int res = <!real_codel_call(codel, "m_data->", service, True)!>;
 
+<?
+    if c.key() in eventsList: 
+      evName = codelToEvName(c.key())
+      ?>
+  // raise event
+  m_eventsSender.sendEvent("<!evName!>");
+<?
+    ?>
   // update ports, release locks, etc
 <?
     codelRelease(codel, service);

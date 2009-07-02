@@ -18,6 +18,8 @@ for s in comp.servicesMap():
   if service.type == ServiceType.Control:
     continue
 
+  eventsList = comp.eventsForService(service.name)
+
   statusStr = ""
   first = True
   for c in service.codels():
@@ -86,6 +88,11 @@ class <!service.name!>Service
   ?>
     <!comp.name()!>ControlData *m_data;
     yarp::os::BufferedPort<yarp::os::Bottle> &m_replyPort;
+<?
+  if eventsList:?>
+  GenomYarp::EventSender m_eventsSender;
+<?
+  ?>
 }; 
 
 <?

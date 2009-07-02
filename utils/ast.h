@@ -330,6 +330,7 @@ class Component
 
 		Event::Ptr event(const std::string &ev);
 		std::vector<std::string> eventsForPort(const std::string &name);
+		std::vector<std::string> eventsForService(const std::string &name);
 		Event::Map& eventsMap() { return events; }
 
 		void addConstValue(const Idl::ConstValue &val);

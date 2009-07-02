@@ -61,6 +61,7 @@ void export_ast()
 	.def("valuesMap", &Component::valuesMap, return_value_policy<reference_existing_object>())
 	.def("importedComponents", &Component::importedComponents, return_value_policy<reference_existing_object>())
 	.def("eventsMap", &Component::eventsMap, return_value_policy<reference_existing_object>())
+	.def("eventsForService", &Component::eventsForService)
 	.def("typeFromIdsName", &Component::typeFromIdsName);
 
 	class_<Task, Task::Ptr>("Task")

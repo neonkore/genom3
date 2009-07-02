@@ -23,6 +23,14 @@ using namespace std;
 using namespace yarp::os;
 using namespace GenomYarp;
 
+class TestEventReader : public TypedReaderCallback<Bottle>
+{
+    virtual void onRead(Bottle& b)
+    {
+	cout << "Received event " << b.get(0).asString().c_str() << endl;
+    }
+};
+
 <?
 for t in tasksMap:
   task = t.data()
@@ -67,7 +75,9 @@ for t in tasksMap:
   yarp::os::BufferedPort<yarp::os::Bottle> <!task.name!>_reply_port;
   <!task.name!>ReplyReader <!task.name!>Reader;
 
-  yarp::os::BufferedPort<yarp::os::Bottle> events_port;
+  yarp::os::BufferedPort<yarp::os::Bottle> events_inport;
+  yarp::os::BufferedPort<yarp::os::Bottle> events_outport;
+  TestEventReader testReader;
 <?
 ?>
   yarp::os::BufferedPort<yarp::os::Bottle> Control_req_port;
@@ -111,8 +121,12 @@ for port in inports: ?>
 <?
 ?>
 
-    events_port.open("/<!comp.name()!>/Test/Events");
-    Network::connect("/<!comp.name()!>/Test/Events", "/<!comp.name()!>/Events");
+    events_outport.open("/<!comp.name()!>/Test/Events/Out");
+    Network::connect("/<!comp.name()!>/Test/Events/Out", "/<!comp.name()!>/Events/In");
+
+    events_inport.open("/<!comp.name()!>/Test/Events/In");
+    Network::connect("/<!comp.name()!>/Events/Out", "/<!comp.name()!>/Test/Events/In");
+    events_inport.useCallback(testReader);
 }
 
 void printUsage()
@@ -249,13 +263,14 @@ for e in comp.eventsMap():
   ev = e.data()
   if not ev.asNamedEvent().aliasEvent() is None:
     continue
-?>
+  ?>
 void send<!ev.identifier()!>()
 {
-  Bottle &b = events_port.prepare();
+  Bottle &b = events_outport.prepare();
+  b.clear();
   b.addString("<!ev.identifier()!>");
 
-  events_port.writeStrict();
+  events_outport.writeStrict();
 }
 <?
 ?>

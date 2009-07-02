@@ -48,11 +48,10 @@ void EventSender::registerReceiver(const std::string &event, EventReceiver *r)
 
 void EventSender::unregisterReceiver(const std::string &event, EventReceiver *r)
 {
-   if(m_receivers.find(event) == m_receivers.end()) {
-     std::cout << "Unregistered event: " << m_name << "." << event << std::endl;
+   if(m_receivers.find(event) == m_receivers.end()) 
     return;
-  } 
-
+ 
+  std::cout << "Unregistered event: " << m_name << "." << event << std::endl;
   m_receivers[event].remove(r);
 
 }
@@ -62,6 +61,7 @@ void EventSender::unregisterReceiver(const std::string &event, EventReceiver *r)
 void EventOutPort::addEvent(const std::string sender, const std::string &ev)
 {
   yarp::os::Bottle &b = prepare();
+  b.clear();
   b.addString(m_eventsAlias[sender + "." + ev].c_str());
 
   writeStrict();
@@ -114,6 +114,7 @@ void EventProxy::onRead(yarp::os::Bottle& b)
   std::string s = b.get(0).asString().c_str();
   
   yarp::os::Bottle &out = m_outPort.prepare();
+  out.clear();
   out.addString(m_eventsAlias[s].c_str());
   m_outPort.writeStrict();
 }

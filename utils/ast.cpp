@@ -528,21 +528,38 @@ void Service::addEvent(Event::Ptr event, const std::string &target)
 
 void Codel::debug()
 {
-	cout << m_name << "( inports: ";
-	for (vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
-		cout << *it << ", ";
+	cout << "(" << m_name;
 
-	cout << "; outports: ";
-	for (vector<string>::const_iterator it = outPorts.begin(); it != outPorts.end(); ++it)
-		cout << *it << ", ";
+	if(!inPorts.empty()) {
+		cout << "inports: ";
+		for (vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
+			cout << *it << ", ";
+	}
 
-	cout << "; intType: ";
-	for (vector<string>::const_iterator it = inTypes.begin(); it != inTypes.end(); ++it)
-		cout << *it << ", ";
+	if(!outPorts.empty()) {
+		cout << "; outports: ";
+		for (vector<string>::const_iterator it = outPorts.begin(); it != outPorts.end(); ++it)
+			cout << *it << ", ";
+	}
 
-	cout << "; outTypes: ";
-	for (vector<string>::const_iterator it = outTypes.begin(); it != outTypes.end(); ++it)
-		cout << *it << ", ";
+	if(!inTypes.empty()) {
+		cout << "; intType: ";
+		for (vector<string>::const_iterator it = inTypes.begin(); it != inTypes.end(); ++it)
+			cout << *it << ", ";
+	}
+
+	if(!outTypes.empty()) {
+		cout << "; outTypes: ";
+		for (vector<string>::const_iterator it = outTypes.begin(); it != outTypes.end(); ++it)
+			cout << *it << ", ";
+	}
+
+	if(!nextCodels.empty()) {
+		cout << "; Next codels: ";
+		for (vector<string>::const_iterator it = nextCodels.begin(); it != nextCodels.end(); ++it)
+			cout << *it << ", ";
+	}
+
 	cout << ")";
 }
 

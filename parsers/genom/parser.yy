@@ -127,7 +127,7 @@ struct variant_type {
 %token			SERVICE		"service"
 %token			CODEL		"codel"
 
-%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL DOT
+%token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL DOT LARROW
 
 %token IN OUT INPORT OUTPORT
 // type tokens
@@ -515,9 +515,9 @@ identifiers:
 {
    $$ = $1;
 }
-| identifiers IDENTIFIER
+| identifiers COMMA IDENTIFIER
 {
-    $$ = $1 + " " + $2;
+    $$ = $1 + " " + $3;
 };
 
 inputs:
@@ -660,9 +660,17 @@ codel_prototype:
     Codel::Ptr c(new Codel($1));
     driver.setCurrentCodel(c);
 }
-  LPAREN codel_fields RPAREN
+  LPAREN codel_fields RPAREN codel_next
 {
     $$ = driver.currentCodel();
+};
+
+codel_next:
+/*empty*/
+{}
+| LARROW identifiers
+{
+    driver.split($2, driver.currentCodel()->nextCodels); 
 };
 
 codel_fields:

@@ -73,6 +73,7 @@ class Codel
 		/** List of in ports used by this codel*/
 		std::vector<std::string> inPorts;
 		std::vector<std::string> outPorts;
+		std::vector<std::string> nextCodels;
 
 	private:
 			std::string m_name;

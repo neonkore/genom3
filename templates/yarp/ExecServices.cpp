@@ -187,43 +187,49 @@ bool <!service.name!>Service::step()
 <?
   ?>
 
-  int res = <!upper(service.name)!>_ETHER;
-  switch(m_status.front()) {
+  std::list<int> res_list;
+  while(!m_status.empty()) {
+    int res = <!upper(service.name)!>_ETHER;
+    switch(m_status.front()) {
 <?
   for c in service.codels():
     if c.key() == "control":
       continue
     ?>
-    case <!upper(service.name)!>_<!upper(c.key())!>:
-      res = <!c.key()!>();
-      break;
+      case <!upper(service.name)!>_<!upper(c.key())!>:
+        res = <!c.key()!>();
+        break;
 <?
   ?>
-    case <!upper(service.name)!>_ETHER:
-      break;
+      case <!upper(service.name)!>_ETHER:
+        break;
 
-    case <!upper(service.name)!>_SLEEP:
-      res = <!upper(service.name)!>_SLEEP;
-      break;
+      case <!upper(service.name)!>_SLEEP:
+        res = <!upper(service.name)!>_SLEEP;
+        break;
 
-    default:
-      std::cout << "Error unknown status value : " << m_status.front() << std::endl;
-      break;
-  }
+      default:
+        std::cout << "Error unknown status value : " << m_status.front() << std::endl;
+        break;
+    }
 
-  if(res < 0) { // error
+    if(res < 0) { // error
 // 	m_status.clear();
-    m_status.push_front(res);
-    return false;
+      m_status.push_front(res);
+      return false;
+    }
+
+    // remove the executed step
+    m_status.pop_front();
+    // and add the new one
+    if(res != <!upper(service.name)!>_ETHER)
+      res_list.push_back(res);
+
   }
 
-  // remove the executed step
-  m_status.pop_front();
-  // and add the new one
-  if(res != <!upper(service.name)!>_ETHER)
-    m_status.push_back(res);
-  m_status.unique();
-
+  m_status = res_list;
+  // make sure there is no duplicate in the list
+  m_status.unique(); 
   if(m_status.empty())
     return false; // service is done
 

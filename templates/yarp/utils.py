@@ -116,7 +116,7 @@ def allocMemory(t, dest, scopedName):
 	allocMemory(s.seqType(), dest + ".data[" + counter + "]", scopedName + ".data")
 	print "}"
       else:
-	print "memset(" + dest + " , 0, " + lengthVar(scopedName) + " * sizeof(" + seqType + "));"
+	print "memset(&" + dest + " , 0, " + lengthVar(scopedName) + " * sizeof(" + seqType + "));"
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
@@ -188,4 +188,21 @@ def codelRelease(codel, service):
     if res:
       print "  m_data->idsMutex.release();"
 
+def codelToEvName(name):
+  #if name == "control":
+    #return "onCalled"
+  #elif name == "start":
+    #return "onStart"
+  #elif name == "end":
+    #return "onEnd"
+  #elif name == "inter":
+    #return "onInter"
+  return name
+
+def fullPortName(p):
+  port = comp.port(pev.portName())
+  if port.type == PortType.Incoming:
+    return p + "_inport"
+  else:
+    return p + "_outport"
 

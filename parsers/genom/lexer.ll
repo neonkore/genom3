@@ -96,6 +96,8 @@ chartext				([^\'])|(\\.)
 }
 
  /* One char keywords */
+"."			{ return token::DOT; }
+"->"			{ return token::LARROW; }
 "{"			{ return token::LBRACE; }
 "}"			{ return token::RBRACE; }
 ";"			{ return token::SEMICOLON; }
@@ -160,6 +162,7 @@ chartext				([^\'])|(\\.)
 "IDS"			{ return token::IDS; }
 "input"			{ return token::INPUT; }
 "output"		{ return token::OUTPUT; }
+"event"			{ return token::EVENT; }
 
  /* ints */
 "0"[xX][0-9a-fA-F]+{intsuffix}? { 
@@ -207,7 +210,7 @@ chartext				([^\'])|(\\.)
 
  /* identifiers */
 
-[A-Za-z][A-Za-z0-9_.]* {
+[A-Za-z][A-Za-z0-9_]* {
     yylval->stringVal = std::string(yytext, yyleng);
 /*    std::cout << "read identifier " << *(yylval->stringVal) << std::endl;*/
     return token::IDENTIFIER;

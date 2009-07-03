@@ -17,10 +17,19 @@ def parseInput(type, name):
 #include "lib/RepliesReader.hpp"
 #include "lib/RqstWriter.hpp"
 #include "lib/DataServer.hpp"
+#include "lib/Events.hpp"
 
 using namespace std;
 using namespace yarp::os;
 using namespace GenomYarp;
+
+class TestEventReader : public TypedReaderCallback<Bottle>
+{
+    virtual void onRead(Bottle& b)
+    {
+	cout << "Received event " << b.get(0).asString().c_str() << endl;
+    }
+};
 
 <?
 for t in tasksMap:
@@ -65,6 +74,10 @@ for t in tasksMap:
   yarp::os::BufferedPort<yarp::os::Bottle> <!task.name!>_req_port;
   yarp::os::BufferedPort<yarp::os::Bottle> <!task.name!>_reply_port;
   <!task.name!>ReplyReader <!task.name!>Reader;
+
+  yarp::os::BufferedPort<yarp::os::Bottle> events_inport;
+  yarp::os::BufferedPort<yarp::os::Bottle> events_outport;
+  TestEventReader testReader;
 <?
 ?>
   yarp::os::BufferedPort<yarp::os::Bottle> Control_req_port;
@@ -107,6 +120,13 @@ for port in inports: ?>
     Network::connect("/<!comp.name()!>/Test/OutPorts/<!port.name!>", "/<!comp.name()!>/InPorts/<!port.name!>");
 <?
 ?>
+
+    events_outport.open("/<!comp.name()!>/Test/Events/Out");
+    Network::connect("/<!comp.name()!>/Test/Events/Out", "/<!comp.name()!>/Events/In");
+
+    events_inport.open("/<!comp.name()!>/Test/Events/In");
+    Network::connect("/<!comp.name()!>/Events/Out", "/<!comp.name()!>/Test/Events/In");
+    events_inport.useCallback(testReader);
 }
 
 void printUsage()
@@ -130,6 +150,13 @@ print "  cout << \"---------------------------\" << endl;"
 for port in inports:
   idx += 1
   print "  cout << \"  (" + str(idx) + ") Update " + port.name + "\" << endl;"
+print "  cout << \"---------------------------\" << endl;"
+for e in comp.eventsMap():
+  ev = e.data()
+  if not ev.asNamedEvent().aliasEvent() is None:
+    continue
+  idx += 1
+  print "  cout << \"  (" + str(idx) + ") Send " + ev.identifier() + "\" << endl;"
 ?>
 
 }
@@ -231,6 +258,23 @@ void write<!port.name!>()
 <?
 ?>
 
+<?
+for e in comp.eventsMap():
+  ev = e.data()
+  if not ev.asNamedEvent().aliasEvent() is None:
+    continue
+  ?>
+void send<!ev.identifier()!>()
+{
+  Bottle &b = events_outport.prepare();
+  b.clear();
+  b.addString("<!ev.identifier()!>");
+
+  events_outport.writeStrict();
+}
+<?
+?>
+
 void executeAction(int action)
 {
   switch(action) {
@@ -266,6 +310,20 @@ for port in inports:
     }
 <?
 ?>      
+
+<?
+for e in comp.eventsMap():
+  ev = e.data()
+  if not ev.asNamedEvent().aliasEvent() is None:
+    continue
+  idx += 1
+  ?>
+      case <!idx!>: {
+      send<!ev.identifier()!>();
+      break;
+    }
+<?
+?>   
   }
 }
 

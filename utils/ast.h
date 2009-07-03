@@ -40,7 +40,7 @@
 /** \short Base namespace for all classes related to G3nom.*/
 namespace G3nom
 {
-
+  
 /** 
 * A codel represents a user function called during a service execution.
 * \li #inTypes (resp. #outTypes) are names of IDS members, that the codel can read (resp. read and write to).
@@ -73,9 +73,95 @@ class Codel
 		/** List of in ports used by this codel*/
 		std::vector<std::string> inPorts;
 		std::vector<std::string> outPorts;
+		std::vector<std::string> nextCodels;
 
 	private:
 			std::string m_name;
+};
+
+class PortEvent;
+class ServiceEvent;
+class NamedEvent;
+
+class Event 
+{
+	public:
+		typedef boost::shared_ptr<Event> Ptr;
+		typedef std::map<std::string, Ptr> Map;
+		typedef std::map<Ptr, std::string> RevMap;
+		typedef std::vector<Ptr> Vect;
+
+		enum Kind { NamedEv, PortEv, ServiceEv};
+
+		Event(Kind k) : m_kind(k) {}
+		virtual ~Event() {}
+
+		virtual std::string identifier() const = 0;
+		Kind kind() { return m_kind; }
+
+		PortEvent* asPortEvent();
+		NamedEvent* asNamedEvent();
+		ServiceEvent* asServiceEvent();
+
+	protected:
+		Kind m_kind;
+};
+
+typedef std::vector< std::pair<Event::Ptr, std::string> > EventCodelVect;
+
+class NamedEvent : public Event 
+{
+	public:
+		NamedEvent(const std::string &id, Event::Ptr event = Event::Ptr()) 
+		: Event(Event::NamedEv), m_identifier(id), m_event(event) 
+		{}
+
+		virtual std::string identifier() const { return m_identifier; }
+		Event::Ptr aliasEvent() const { return m_event; }
+
+	protected:
+		std::string m_identifier;
+		Event::Ptr m_event;
+};
+
+class PortEvent : public Event
+{
+	public:
+		enum Kind { OnUpdate, OnWrite, OnRead, OnInitialize };
+
+		PortEvent(const std::string &portName, Kind k) 
+		: Event(Event::PortEv), m_port(portName), m_portKind(k)
+		{}
+
+		virtual std::string identifier() const { return m_port + "." + kindAsString(); }
+		std::string portName() const { return m_port; }
+		std::string kindAsString() const;
+
+	protected:
+		std::string m_port;
+		Kind m_portKind;
+};
+
+class ServiceEvent : public Event
+{
+	public:
+		enum Kind { OnCalled, OnStart, OnEnd, OnInter, OnCodel };
+
+		ServiceEvent(const std::string &serviceName, Kind k) 
+		: Event(Event::ServiceEv), m_service(serviceName), m_serviceKind(k)
+		{}
+		ServiceEvent(const std::string &serviceName, const std::string codelName)
+		: Event(Event::ServiceEv), m_service(serviceName), m_codelName(codelName), m_serviceKind(OnCodel)
+		{}
+
+		virtual std::string identifier() const;
+		std::string serviceName() const { return m_service; }
+		std::string kindAsString() const;
+
+	protected:
+		std::string m_service;
+		std::string m_codelName;
+		Kind m_serviceKind;
 };
 
 /**
@@ -191,6 +277,9 @@ class Service
 		void addIncompatibleService(const std::string &name);
 		std::vector<std::string> & incompatibleServices() { return m_incompatibleServices; }
 
+		void addEvent(Event::Ptr event, const std::string &target);
+		const Event::RevMap & events() const { return m_events; } 
+
 		std::string name;
 		Type type;
 		std::string doc;
@@ -202,6 +291,7 @@ class Service
 		ServiceInput::Vect m_inputs;
 		std::vector<std::string> m_incompatibleServices;
 		std::vector<std::string> m_errorMessages;
+		Event::RevMap m_events;
 };
 
 /** \short A component
@@ -221,6 +311,7 @@ class Component
 		void addTask(Task::Ptr task);
 		void addService(Service::Ptr task);
 		void addPort(Port::Ptr port);
+		void addEvent(Event::Ptr ev);
 
 		Task::Map& tasksMap();
 		std::vector<std::string> tasksList();
@@ -237,6 +328,11 @@ class Component
 		Port::Map& portsMap() { return ports; }
 		/** \return the index of the port named \a name inside the ports map*/
 		int portIndex(const std::string &name) const;
+
+		Event::Ptr event(const std::string &ev);
+		std::vector<std::string> eventsForPort(const std::string &name);
+		std::vector<std::string> eventsForService(const std::string &name);
+		Event::Map& eventsMap() { return events; }
 
 		void addConstValue(const Idl::ConstValue &val);
 		void addType(Idl::IdlType::Ptr type);
@@ -266,6 +362,7 @@ class Component
 		Task::Map tasks;
 		Service::Map services;
 		Port::Map ports;
+		Event::Map events;
 		Idl::IdlType::Vector m_types;
 		Idl::ConstValue::Map m_constValues;
 		std::vector<std::string> m_importedComponents;

@@ -8,6 +8,7 @@
 #include <yarp/os/all.h>
 
 #include "<!comp.name()!>Struct.hpp"
+#include "lib/Events.hpp"
 
 class <!comp.name()!>ControlData;
 
@@ -16,6 +17,8 @@ for s in comp.servicesMap():
   service = s.data()
   if service.type == ServiceType.Control:
     continue
+
+  eventsList = comp.eventsForService(service.name)
 
   statusStr = ""
   first = True
@@ -36,7 +39,12 @@ for s in comp.servicesMap():
       t = inputType(service.output)
       outputType = MapTypeToCpp(t)
   ?>
-class <!service.name!>Service {
+class <!service.name!>Service
+<?
+  if service.events():
+    print ": public GenomYarp::EventReceiver"
+  ?>
+{
   public:
 //     enum Status { <!statusStr!>}
     typedef boost::shared_ptr<<!service.name!>Service> Ptr;
@@ -48,7 +56,11 @@ class <!service.name!>Service {
 
     int id() const { return m_id; }
     std::string clientName() const { return m_clientName; }
-
+<?
+  if service.events(): ?>
+    static int statusFromEventString(const std::string &ev);
+<?
+  ?>
     bool step();
     void abort();
 
@@ -65,7 +77,7 @@ class <!service.name!>Service {
   private:
     bool m_aborted;
     int m_id;
-    int m_status;
+    std::list<int> m_status;
     std::string m_clientName;
 <?
   for i in service.inputs():
@@ -76,6 +88,11 @@ class <!service.name!>Service {
   ?>
     <!comp.name()!>ControlData *m_data;
     yarp::os::BufferedPort<yarp::os::Bottle> &m_replyPort;
+<?
+  if eventsList:?>
+  GenomYarp::EventSender m_eventsSender;
+<?
+  ?>
 }; 
 
 <?

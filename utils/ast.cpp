@@ -36,6 +36,16 @@ using namespace std;
 using namespace G3nom;
 using namespace Idl;
 
+void replaceAll(string &str, const string &find_what, const string &replace_with)
+{
+	string::size_type pos=0;
+	while((pos=str.find(find_what, pos))!=string::npos) {
+		str.erase(pos, find_what.length());
+		str.insert(pos, replace_with);
+		pos+=replace_with.length();
+	}
+}
+
 /******** Component ***************/
 
 Component::Component()
@@ -79,6 +89,16 @@ void Component::debug()
 		cout << endl;
 	}
 
+	cout << endl << "Events: " << events.size() << endl;
+	for (Event::Map::const_iterator it = events.begin();
+			it != events.end(); ++it) {
+		cout << "\t* " << it->first;
+		Event::Ptr e = it->second->asNamedEvent()->aliasEvent();
+		if(e.get())
+			cout << " : " << e->identifier();
+		cout << endl;
+	}
+
 	cout << endl << "Types: " << m_types.size() << endl;
 	for (IdlType::Vector::const_iterator it = m_types.begin();
 			it != m_types.end(); ++it) {
@@ -116,6 +136,13 @@ void Component::addPort(Port::Ptr port)
 	if (ports.find(port->name) != ports.end())
 		cerr << "Warning: already existing port name: " << port->name << endl;
 	ports[port->name] = port;
+}
+
+void Component::addEvent(Event::Ptr ev)
+{
+	if (events.find(ev->identifier()) != events.end())
+		cerr << "Warning: already existing event name: " << ev->identifier() << endl;
+	events[ev->identifier()] = ev;
 }
 
 void Component::addType(IdlType::Ptr type)
@@ -264,6 +291,49 @@ void Component::addImportedComponent(const std::string &s)
 	m_importedComponents.push_back(s);
 }
 
+Event::Ptr Component::event(const std::string &name)
+{
+	Event::Map::const_iterator it = events.find(name);
+	if (it != events.end())
+		return it->second;
+	return Event::Ptr();
+}
+
+std::vector<std::string> Component::eventsForPort(const std::string &name)
+{
+	std::vector<std::string> v;
+	Service::Map::const_iterator it = services.begin();
+	for(; it != services.end(); ++it) {
+		Event::RevMap::const_iterator it2 = it->second->events().begin();
+		for(; it2 != it->second->events().end(); ++it2) {
+			if(it2->first->kind() == Event::PortEv) {
+				PortEvent *pev = it2->first->asPortEvent();
+				if(pev->portName() == name)
+					v.push_back(pev->kindAsString());
+			}
+		}
+	}
+
+	return v;
+}
+
+std::vector<std::string> Component::eventsForService(const std::string &name)
+{
+	std::vector<std::string> v;
+	Event::Map::const_iterator it = events.begin();
+	for(; it != events.end(); ++it) {
+		NamedEvent *nev = it->second->asNamedEvent();
+		if(!nev || !nev->aliasEvent().get())
+			continue;
+
+		if(nev->aliasEvent()->kind() == Event::ServiceEv) {
+			if(nev->aliasEvent()->asServiceEvent()->serviceName() == name)
+				v.push_back(nev->aliasEvent()->asServiceEvent()->kindAsString());
+		}
+	}
+
+	return v;
+}
 
 /******** Port ***************/
 
@@ -379,6 +449,12 @@ void Service::debug()
 		it->second->debug();
 		cout << endl;
 	}
+
+	cout << "Events: " << endl;
+	Event::RevMap::const_iterator it3;
+	for (it3 = m_events.begin(); it3 != m_events.end(); ++it3) {
+		cout << "\t" << it3->first->identifier() << " -> " << it3->second << endl;
+	}
 }
 
 // void Service::addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue)
@@ -412,7 +488,10 @@ Idl::Literal Service::inputDefaultArg(const std::string &n)
 
 void Service::addCodel(const std::string &name, Codel::Ptr c)
 {
-	m_codels.insert(make_pair(name,c));
+	string fixedName = name;
+	// make sure the name doesn't contain '.' (for events codels)
+	replaceAll(fixedName, ".", "_");
+	m_codels.insert(make_pair(fixedName,c));
 }
 
 Codel::Ptr Service::codel(const std::string &name)
@@ -439,25 +518,48 @@ void Service::addIncompatibleService(const std::string &name)
 	m_incompatibleServices.push_back(name);
 }
 
+void Service::addEvent(Event::Ptr event, const std::string &target)
+{
+// 	m_events.push_back(make_pair(event, target));
+	m_events[event] = target;
+}
+
 /******** Codel ***************/
 
 void Codel::debug()
 {
-	cout << m_name << "( inports: ";
-	for (vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
-		cout << *it << ", ";
+	cout << "(" << m_name;
 
-	cout << "; outports: ";
-	for (vector<string>::const_iterator it = outPorts.begin(); it != outPorts.end(); ++it)
-		cout << *it << ", ";
+	if(!inPorts.empty()) {
+		cout << "inports: ";
+		for (vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
+			cout << *it << ", ";
+	}
 
-	cout << "; intType: ";
-	for (vector<string>::const_iterator it = inTypes.begin(); it != inTypes.end(); ++it)
-		cout << *it << ", ";
+	if(!outPorts.empty()) {
+		cout << "; outports: ";
+		for (vector<string>::const_iterator it = outPorts.begin(); it != outPorts.end(); ++it)
+			cout << *it << ", ";
+	}
 
-	cout << "; outTypes: ";
-	for (vector<string>::const_iterator it = outTypes.begin(); it != outTypes.end(); ++it)
-		cout << *it << ", ";
+	if(!inTypes.empty()) {
+		cout << "; intType: ";
+		for (vector<string>::const_iterator it = inTypes.begin(); it != inTypes.end(); ++it)
+			cout << *it << ", ";
+	}
+
+	if(!outTypes.empty()) {
+		cout << "; outTypes: ";
+		for (vector<string>::const_iterator it = outTypes.begin(); it != outTypes.end(); ++it)
+			cout << *it << ", ";
+	}
+
+	if(!nextCodels.empty()) {
+		cout << "; Next codels: ";
+		for (vector<string>::const_iterator it = nextCodels.begin(); it != nextCodels.end(); ++it)
+			cout << *it << ", ";
+	}
+
 	cout << ")";
 }
 
@@ -480,5 +582,68 @@ void Codel::addOutPort(const std::string &t)
 {
 	outPorts.push_back(t);
 }
+
+/******** Event ***************/
+
+PortEvent* Event::asPortEvent()
+{
+	return static_cast<PortEvent*>(this);
+}
+
+NamedEvent* Event::asNamedEvent()
+{
+	return static_cast<NamedEvent*>(this);
+}
+
+ServiceEvent* Event::asServiceEvent()
+{
+	return static_cast<ServiceEvent*>(this);
+}
+
+/******** PortEvent ***************/
+
+std::string PortEvent::kindAsString() const
+{
+	switch(m_portKind) {
+		case OnRead:
+			return "onRead";
+		case OnWrite:
+			return "onWrite";
+		case OnUpdate:
+			return "onUpdate";
+		case OnInitialize:
+			return "onInitialize";
+	}
+	return "";
+}
+
+
+/******** ServiceEvent ***************/
+
+std::string ServiceEvent::kindAsString() const
+{
+	switch(m_serviceKind) {
+		case OnCalled:
+			return "control";
+		case OnStart:
+			return "start";
+		case OnEnd:
+			return "end";
+		case OnInter:
+			return "inter";
+		case OnCodel:
+			return m_codelName;
+	}
+	return "";
+}
+
+std::string ServiceEvent::identifier() const 
+{
+	if(m_service.empty())
+		return kindAsString();
+	else
+		return m_service + "." + kindAsString(); 
+}
+
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

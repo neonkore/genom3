@@ -8,6 +8,7 @@
 #include "lib/OutPort.hpp"
 #include "lib/DataServer.hpp"
 #include "ExecServices.hpp"
+#include "lib/Events.hpp"
 #include "lib/logger.h"
 
 //forward declaration of Tasks
@@ -59,6 +60,11 @@ for port in outports:
   GenomYarp::OutPort<<!typeName!>> <!port.name!>_outport;
 <?
 ?>
+
+  // Events port
+  GenomYarp::EventInPort events_inport;
+  GenomYarp::EventOutPort events_outport;
+
   // Activities list
 <?
 for s in comp.servicesMap():

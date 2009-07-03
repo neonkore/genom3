@@ -55,6 +55,7 @@ struct variant_type {
     double 			doubleVal;
     std::string			stringVal;
     G3nom::Codel::Ptr		codelVal;
+    G3nom::Event::Ptr		eventVal;
     G3nom::Idl::IdlType::Ptr		typeVal;
     G3nom::Idl::Declarator::VectPtr	declaratorVectVal;
     G3nom::Idl::Declarator::Ptr		declaratorVal;
@@ -67,7 +68,7 @@ struct variant_type {
 
 
 /* Line 35 of lalr1.cc  */
-#line 71 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 72 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
 
 #include <string>
@@ -81,7 +82,7 @@ struct variant_type {
 namespace G3nom {
 
 /* Line 35 of lalr1.cc  */
-#line 85 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 86 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
   class position;
   class location;
 
@@ -91,7 +92,7 @@ namespace G3nom {
 } // G3nom
 
 /* Line 35 of lalr1.cc  */
-#line 95 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 96 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
 #include "location.hh"
 
@@ -139,7 +140,7 @@ do {							\
 namespace G3nom {
 
 /* Line 35 of lalr1.cc  */
-#line 143 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 144 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
   /// A Bison parser.
   class Parser
@@ -173,58 +174,61 @@ namespace G3nom {
      LPAREN = 269,
      RPAREN = 270,
      EQUAL = 271,
-     IN = 272,
-     OUT = 273,
-     INPORT = 274,
-     OUTPORT = 275,
-     TRUE = 276,
-     FALSE = 277,
-     SHORT = 278,
-     LONG = 279,
-     FLOAT = 280,
-     DOUBLE = 281,
-     FIXED = 282,
-     CHAR = 283,
-     WCHAR = 284,
-     STRING = 285,
-     WSTRING = 286,
-     BOOLEAN = 287,
-     OCTET = 288,
-     ANY = 289,
-     VOID = 290,
-     NATIVE = 291,
-     ENUM = 292,
-     UNION = 293,
-     SWITCH = 294,
-     CASE = 295,
-     DEFAULT = 296,
-     STRUCT = 297,
-     SEQUENCE = 298,
-     CONST = 299,
-     TYPEDEF = 300,
-     UNSIGNED = 301,
-     OBJECT = 302,
-     IDS = 303,
-     INPUT = 304,
-     OUTPUT = 305,
-     CHARLIT = 306,
-     INTEGERLIT = 307,
-     DOUBLELIT = 308,
-     STRINGLIT = 309,
-     IDENTIFIER = 310,
-     MINUS = 311,
-     PLUS = 312,
-     SLASH = 313,
-     TIMES = 314,
-     MOD = 315,
-     XOR = 316,
-     OR = 317,
-     AND = 318,
-     RSHIFT = 319,
-     LSHIFT = 320,
-     TILDE = 321,
-     POS = 322,
-     NEG = 323
+     DOT = 272,
+     LARROW = 273,
+     IN = 274,
+     OUT = 275,
+     INPORT = 276,
+     OUTPORT = 277,
+     TRUE = 278,
+     FALSE = 279,
+     SHORT = 280,
+     LONG = 281,
+     FLOAT = 282,
+     DOUBLE = 283,
+     FIXED = 284,
+     CHAR = 285,
+     WCHAR = 286,
+     STRING = 287,
+     WSTRING = 288,
+     BOOLEAN = 289,
+     OCTET = 290,
+     ANY = 291,
+     VOID = 292,
+     NATIVE = 293,
+     ENUM = 294,
+     UNION = 295,
+     SWITCH = 296,
+     CASE = 297,
+     DEFAULT = 298,
+     STRUCT = 299,
+     SEQUENCE = 300,
+     CONST = 301,
+     TYPEDEF = 302,
+     UNSIGNED = 303,
+     OBJECT = 304,
+     IDS = 305,
+     INPUT = 306,
+     OUTPUT = 307,
+     EVENT = 308,
+     CHARLIT = 309,
+     INTEGERLIT = 310,
+     DOUBLELIT = 311,
+     STRINGLIT = 312,
+     IDENTIFIER = 313,
+     MINUS = 314,
+     PLUS = 315,
+     SLASH = 316,
+     TIMES = 317,
+     MOD = 318,
+     XOR = 319,
+     OR = 320,
+     AND = 321,
+     RSHIFT = 322,
+     LSHIFT = 323,
+     TILDE = 324,
+     POS = 325,
+     NEG = 326
    };
 
     };
@@ -321,7 +325,7 @@ namespace G3nom {
     static const short int yytable_[];
     static const signed char yytable_ninf_;
 
-    static const short int yycheck_[];
+    static const unsigned short int yycheck_[];
 
     /// For a state, its accessing symbol.
     static const unsigned char yystos_[];
@@ -401,7 +405,7 @@ namespace G3nom {
 } // G3nom
 
 /* Line 35 of lalr1.cc  */
-#line 405 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 409 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
 
 

@@ -32,9 +32,9 @@ namespace GenomYarp{
 
   template <class T_DATA>
   class DataServer 
-    : public 
-    yarp::os::BufferedPort<yarp::os::Bottle>{
-    
+    : public yarp::os::BufferedPort<yarp::os::Bottle>, 
+      public EventSender
+{    
   protected:
     T_DATA*             data;
     yarp::os::Semaphore dataSem;
@@ -62,8 +62,8 @@ namespace GenomYarp{
     }
 
     
-    virtual void onRead(yarp::os::Bottle& b){
-      
+    virtual void onRead(yarp::os::Bottle& b)
+    {      
       dataSem.wait();
       if(!data)
 	data = new T_DATA;
@@ -74,6 +74,7 @@ namespace GenomYarp{
       dataSem.post();
       
       dataCondition->broadcast();
+      sendEvent("onUpdate");
     }
     
     virtual void printData(){
@@ -119,6 +120,7 @@ namespace GenomYarp{
 
     T_DATA* getDataPtr()
     {
+	sendEvent("onRead");
 	return data;
     }
     

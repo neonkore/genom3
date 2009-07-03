@@ -88,14 +88,36 @@ bool <!comp.name()!>Module::open(yarp::os::Searchable& config)
 <?
 for p in outports: ?>
     m_data-><!p.name!>_outport.open("/<!comp.name()!>/OutPorts/<!p.name!>");
+    m_data-><!p.name!>_outport.setName("<!p.name!>");
 <?
 for p in inports: ?>
     m_data-><!p.name!>_inport.open("/<!comp.name()!>/InPorts/<!p.name!>");
+    m_data-><!p.name!>_inport.setName("<!p.name!>");
 <?
 ?>
     m_request_port.open("/<!comp.name()!>/Services/Control");
 //     m_reply_port.open("/<!comp.name()!>/Services/Replies/Control");
     m_request_port.useCallback(*this);
+
+    m_data->events_inport.open("/<!comp.name()!>/Events/In");
+    m_data->events_outport.open("/<!comp.name()!>/Events/Out");
+
+<?
+for e in comp.eventsMap():
+  ev = e.data()
+  aliasEv = ev.asNamedEvent().aliasEvent()
+  if aliasEv is None:
+    continue
+  ?>
+    m_data->events_outport.addAlias("<!ev.asNamedEvent().aliasEvent().identifier()!>", "<!e.key()!>");
+<?
+  if aliasEv.kind() == EventKind.PortEv:
+    pev = aliasEv.asPortEvent()
+    portName = fullPortName(pev.portName())
+    ?>
+    m_data-><!portName!>.registerReceiver("<!pev.kindAsString()!>", &m_data->events_outport);
+<?
+?>
 
     // create exec task and start them
 <?

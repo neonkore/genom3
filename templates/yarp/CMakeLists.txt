@@ -10,12 +10,13 @@ SET(<!upperCompName!>_SRC
       <!comp.name()!>Module.cpp 
       <!comp.name()!>YarpCodec.cpp  
       ExecServices.cpp
-      <!comp.name()!>UserCntrlTaskCodels.cpp<?
+      <!comp.name()!>UserCntrlTaskCodels.c<?
 for t in comp.tasksMap():
   ?>
-      <!comp.name()!>User<!t.data().name!>Codels.cpp
+      <!comp.name()!>User<!t.data().name!>Codels.c
       <!comp.name()!><!t.data().name!>.cpp
       lib/logger.c
+      lib/Events.cpp
 <?
 ?>
 )
@@ -32,7 +33,8 @@ TARGET_LINK_LIBRARIES(<!comp.name()!>Comp <!capCompName!>Module ${YARP_OS_LIBRAR
 # Test component
 SET(<!capCompName!>Test_SRC 
     <!comp.name()!>Test.cpp
-    <!comp.name()!>YarpCodec.cpp      
+    <!comp.name()!>YarpCodec.cpp 
+    lib/Events.cpp     
 )
 
 ADD_EXECUTABLE(<!comp.name()!>Test ${<!capCompName!>Test_SRC})

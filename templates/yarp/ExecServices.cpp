@@ -31,6 +31,7 @@ for s in comp.servicesMap():
     continue
 
   serviceInfo = services_info_dict[service.name]
+  eventsList = comp.eventsForService(service.name)
 
   inputStr = ""
   for i in service.inputs():
@@ -49,11 +50,57 @@ for s in comp.servicesMap():
   for i in service.inputs():
     print "  in_" + i.identifier + " = " + i.identifier + ";"
   ?>
-  m_status = <!startStateForService(service)!>;
+  m_status.push_front(<!startStateForService(service)!>);
+
+  // connect events if necessary
+<?
+  for e in service.events():
+    ev = e.key()
+    codel = e.data().replace(".", "_")
+    if ev.kind() == EventKind.PortEv:
+      pev = ev.asPortEvent()
+      port = comp.port(pev.portName())
+
+      if port.type == PortType.Outgoing:
+	portName = port.name + "_outport"
+      else:
+	portName = port.name + "_inport"
+      print "  m_data->" + portName + ".registerReceiver(\"" + pev.kindAsString() + "\", this);"
+
+    elif ev.kind() == EventKind.NamedEv:
+      print "  m_data->events_inport.registerReceiver(\"" + ev.identifier() + "\", this);"
+
+  if eventsList:?>
+  m_eventsSender.setName("<!service.name!>");
+<?
+  for ev in eventsList: 
+    evName = codelToEvName(ev)
+    ?>
+  m_eventsSender.registerReceiver("<!evName!>", &m_data->events_outport);
+<?
+  ?>
 }
 
 <!service.name!>Service::~<!service.name!>Service()
 {
+  // disconnect events if necessary
+<?
+  for e in service.events():
+    ev = e.key()
+    codel = e.data().replace(".", "_")
+    if ev.kind() == EventKind.PortEv:
+      pev = ev.asPortEvent()
+      port = comp.port(pev.portName())
+
+      if port.type == PortType.Outgoing:
+	portName = port.name + "_outport"
+      else:
+	portName = port.name + "_inport"
+      print "  m_data->" + portName + ".unregisterReceiver(\"" + pev.kindAsString() + "\", this);"
+    elif ev.kind() == EventKind.NamedEv:
+      print "  m_data->events_inport.unregisterReceiver(\"" + ev.identifier() + "\", this);"
+  ?>
+
     // send the reply
     if(m_aborted) {
 	genom_log("Service \"<!service.name!>\" from '%s' with id:%d aborted", m_clientName.c_str(), m_id);
@@ -62,14 +109,27 @@ for s in comp.servicesMap():
     } else {
 <?
   if serviceInfo.outputFlag: ?>
-	genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished", m_clientName.c_str(), m_id);
-	ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_replyPort, 
+    if(m_status.empty()) {
+      genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished successfully", m_clientName.c_str(), m_id);
+      ReplyWriter<<!serviceInfo.outputTypeCpp!>>::send(m_replyPort, 
 	    m_clientName, m_id, "<!service.name!>", "OK", &out_<!service.output.identifier!>);    
+    } else {
+      std::string r = errorString(m_status.front());      
+      genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished with errror: %s", m_clientName.c_str(), m_id, r.c_str());
+      ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", "<!service.name!> Error: " + r, 0);    
+    }
+
 <?
   else:?>
+    if(m_status.empty()) {
 	genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished", m_clientName.c_str(), m_id);
 	ReplyWriter<VoidIO>::send(m_replyPort, 
 	    m_clientName, m_id, "<!service.name!>", "OK", 0);
+    } else {
+      std::string r = errorString(m_status.front());      
+      genom_log("Service \"<!service.name!>\" from '%s' with id:%d finished with errror: %s", m_clientName.c_str(), m_id, r.c_str());
+      ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", "<!service.name!> Error: " + r, 0);    
+    }
 <?
   ?>
   }
@@ -77,34 +137,102 @@ for s in comp.servicesMap():
 
 void <!service.name!>Service::abort()
 {
-    m_aborted = true;
+  m_status.clear();
+<?
+  if service.events(): 
+    ?>
+  m_status.push_front(statusFromEventString("inter"));
+<?
+  ?>
+  m_aborted = true;
 }
+
+<?
+  if service.events(): 
+    ?>
+int <!service.name!>Service::statusFromEventString(const std::string &ev)
+{
+<?
+    for e in service.events():
+      ev = e.key()
+      codel = e.data().replace(".", "_")
+      if codel == "control":
+	continue
+      ?>
+  if(ev == "<!ev.identifier()!>") 
+    return <!upper(service.name)!>_<!upper(codel)!>;
+<?
+    ?>
+
+  genom_log("Received unknown event: %s", ev.c_str());
+  return <!upper(service.name)!>_ETHER;
+}
+
+<?
+  ?>
 
 bool <!service.name!>Service::step()
 {
+<?
+  if service.events(): 
+    ?>
+  while(!isEmpty()) {
+    std::string ev = takeEvent();
+    m_status.push_front(statusFromEventString(ev));
+  }
+<?
+  else:?>
   if(m_aborted)
     return false;
+<?
+  ?>
 
-  switch(m_status) {
+  std::list<int> res_list;
+  while(!m_status.empty()) {
+    int res = <!upper(service.name)!>_ETHER;
+    switch(m_status.front()) {
 <?
   for c in service.codels():
     if c.key() == "control":
       continue
     ?>
-    case <!upper(service.name)!>_<!upper(c.key())!>:
-      m_status = <!c.key()!>();
-      if(m_status < 0) { // error
-	string r = "<!service.name!> : " + errorString(m_status);
-	cout << r << endl;
-	ReplyWriter<VoidIO>::send(m_replyPort, m_clientName, m_id, "<!service.name!>", r, 0);    
-	return true;
-      }
-      return true;
+      case <!upper(service.name)!>_<!upper(c.key())!>:
+        res = <!c.key()!>();
+        break;
 <?
   ?>
-    case <!upper(service.name)!>_ETHER:
+      case <!upper(service.name)!>_ETHER:
+        break;
+
+      case <!upper(service.name)!>_SLEEP:
+        res = <!upper(service.name)!>_SLEEP;
+        break;
+
+      default:
+        std::cout << "Error unknown status value : " << m_status.front() << std::endl;
+        break;
+    }
+
+    if(res < 0) { // error
+// 	m_status.clear();
+      m_status.push_front(res);
       return false;
+    }
+
+    // remove the executed step
+    m_status.pop_front();
+    // and add the new one
+    if(res != <!upper(service.name)!>_ETHER)
+      res_list.push_back(res);
+
   }
+
+  m_status = res_list;
+  // make sure there is no duplicate in the list
+  m_status.unique(); 
+  if(m_status.empty())
+    return false; // service is done
+
   return true;
 }
 
@@ -122,6 +250,14 @@ int <!service.name!>Service::<!c.key()!>()
   // call the user codel
   int res = <!real_codel_call(codel, "m_data->", service, True)!>;
 
+<?
+    if c.key() in eventsList: 
+      evName = codelToEvName(c.key())
+      ?>
+  // raise event
+  m_eventsSender.sendEvent("<!evName!>");
+<?
+    ?>
   // update ports, release locks, etc
 <?
     codelRelease(codel, service);

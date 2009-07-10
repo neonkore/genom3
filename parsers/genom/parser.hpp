@@ -211,24 +211,26 @@ namespace G3nom {
      INPUT = 306,
      OUTPUT = 307,
      EVENT = 308,
-     CHARLIT = 309,
-     INTEGERLIT = 310,
-     DOUBLELIT = 311,
-     STRINGLIT = 312,
-     IDENTIFIER = 313,
-     MINUS = 314,
-     PLUS = 315,
-     SLASH = 316,
-     TIMES = 317,
-     MOD = 318,
-     XOR = 319,
-     OR = 320,
-     AND = 321,
-     RSHIFT = 322,
-     LSHIFT = 323,
-     TILDE = 324,
-     POS = 325,
-     NEG = 326
+     IMPORT = 309,
+     FROM = 310,
+     CHARLIT = 311,
+     INTEGERLIT = 312,
+     DOUBLELIT = 313,
+     STRINGLIT = 314,
+     IDENTIFIER = 315,
+     MINUS = 316,
+     PLUS = 317,
+     SLASH = 318,
+     TIMES = 319,
+     MOD = 320,
+     XOR = 321,
+     OR = 322,
+     AND = 323,
+     RSHIFT = 324,
+     LSHIFT = 325,
+     TILDE = 326,
+     POS = 327,
+     NEG = 328
    };
 
     };
@@ -405,7 +407,7 @@ namespace G3nom {
 } // G3nom
 
 /* Line 35 of lalr1.cc  */
-#line 409 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 411 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
 
 

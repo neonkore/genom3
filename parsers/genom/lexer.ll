@@ -166,6 +166,8 @@ chartext				([^\'])|(\\.)
 "input"			{ return token::INPUT; }
 "output"		{ return token::OUTPUT; }
 "event"			{ return token::EVENT; }
+"import"		{ return token::IMPORT; }
+"from"			{ return token::FROM; }
 
  /* ints */
 "0"[xX][0-9a-fA-F]+{intsuffix}? { 

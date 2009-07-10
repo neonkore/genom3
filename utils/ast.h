@@ -336,6 +336,8 @@ class Component
 
 		void addConstValue(const Idl::ConstValue &val);
 		void addType(Idl::IdlType::Ptr type);
+		void addNativeTypeInclude(const std::string &s);
+		const std::vector<std::string>& nativeTypesIncludes() const { return m_typesIncludes; }
 
 		Idl::IdlType::Vector& typesVect() { return m_types; }
 		Idl::ConstValue::Map& valuesMap() { return m_constValues; }
@@ -365,6 +367,7 @@ class Component
 		Port::Map ports;
 		Event::Map events;
 		Idl::IdlType::Vector m_types;
+		std::vector<std::string> m_typesIncludes;
 		Idl::ConstValue::Map m_constValues;
 		std::vector<std::string> m_importedComponents;
 };

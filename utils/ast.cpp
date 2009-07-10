@@ -107,7 +107,13 @@ void Component::debug()
 		cout << endl;
 	}
 
-	cout << endl << "Const Values: " << m_types.size() << endl;
+	cout << endl << "Types Includes: " << m_typesIncludes.size() << " : ";
+	for (std::vector<std::string>::const_iterator it = m_typesIncludes.begin();
+			it != m_typesIncludes.end(); ++it) {
+			cout << *it << ", ";
+	}
+
+	cout << endl << "Const Values: " << m_constValues.size() << endl;
 	for (ConstValue::Map::iterator it = m_constValues.begin();
 			it != m_constValues.end(); ++it) {
 		cout << "* ";
@@ -295,6 +301,11 @@ void Component::addImportedComponents(const std::vector<std::string> &v)
 {
 	for(std::vector<std::string>::const_iterator it = v.begin(); it != v.begin(); ++it)
 		m_importedComponents.push_back(*it);
+}
+
+void Component::addNativeTypeInclude(const std::string &s)
+{
+	m_typesIncludes.push_back(s);
 }
 
 Event::Ptr Component::event(const std::string &name)

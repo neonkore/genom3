@@ -134,7 +134,7 @@ struct variant_type {
 %token TRUE FALSE
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
 %token ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE CONST
-%token TYPEDEF UNSIGNED OBJECT IDS INPUT OUTPUT EVENT
+%token TYPEDEF UNSIGNED OBJECT IDS INPUT OUTPUT EVENT IMPORT FROM
 
 /*token SPECIAL_CHAR	"char"
 %token INTEGERLIT	"integer"
@@ -252,6 +252,8 @@ declaration:
 {
     driver.component().addType($1);
 }
+| native_type_decl
+{}
 | const_decl
 {}
 | event_decl
@@ -897,6 +899,24 @@ literals:
 
 /*** IDL Type Declaration ***/
 
+native_type_decl:
+  IMPORT FROM STRINGLIT LBRACE type_decl_list RBRACE
+{
+    driver.component().addNativeTypeInclude($3);
+};
+
+type_decl_list:
+  type_decl SEMICOLON
+{
+    $1->setNative(true);
+    driver.component().addType($1);
+}
+  | type_decl_list SEMICOLON type_decl SEMICOLON
+{
+    $3->setNative(true);
+    driver.component().addType($3);
+};
+
 type_decl:
 TYPEDEF type_spec declarators
 {
@@ -906,11 +926,7 @@ TYPEDEF type_spec declarators
 | struct_type              { $$ = $1; }
 /*| union_type               { $$ = $1; } */
 | enum_type                { $$ = $1; }
-| NATIVE type_decl 
-{
-    $2->setNative(true);
-    $$ = $2;
-}
+;
 /*  | constr_forward_decl      { $$ = $1; }*/
     ;
 

@@ -2,6 +2,11 @@
 #define <!upper(comp.name())!>_USERSTRUCT_H
 
 <?
+for i in comp.nativeTypesIncludes():
+  print "#include <" + i + ">"
+?>
+
+<?
 for t in comp.typesVect():
   if not t.isNative() and t.identifier() and t.identifier() != IDSType.identifier():
     print MapTypeToCpp(t) + ";"

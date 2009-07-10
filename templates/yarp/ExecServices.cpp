@@ -234,7 +234,7 @@ bool <!service.name!>Service::step()
 
   m_status = res_list;
   // make sure there is no duplicate in the list
-  m_status.unique(); 
+//   m_status.unique(); 
   if(m_status.empty())
     return false; // service is done
 

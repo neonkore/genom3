@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 	string sourceDir = templatesDir + templ + "/";
 
 	Driver d;
-	redi::ipstream in(string("cpp -P ") + argv[idx]);
+	redi::ipstream in(string("cpp -p ") + argv[idx]);
 	if (!d.parseStream(in)) {
 		cout << "Error parsing .gnm file: " << argv[idx] << endl;
 		exit(1);

@@ -51,7 +51,7 @@ floatsuffix				[fFlL]
 stringtext				([^\"])|(\\.)
 chartext				([^\'])|(\\.)
 
-%x IN_COMMENT
+%x IN_COMMENT PREPROCESSOR_DIRECTIVE
 
 /* The following paragraph suffices to track locations accurately. Each time
  * yylex is invoked, the begin position is moved onto the end position. */
@@ -217,6 +217,14 @@ chartext				([^\'])|(\\.)
     yylval->stringVal = std::string(yytext, yyleng);
 /*    std::cout << "read identifier " << *(yylval->stringVal) << std::endl;*/
     return token::IDENTIFIER;
+}
+
+<INITIAL>"#"              { BEGIN(PREPROCESSOR_DIRECTIVE); }
+     
+<PREPROCESSOR_DIRECTIVE>{
+    \n      BEGIN(INITIAL);
+    "\""{stringtext}*"\"" { yylloc->begin.filename = new std::string(yytext); yylloc->end.filename = new std::string(yytext); }
+    [0-9]+{intsuffix}? {  char *end; yylloc->end.line = strtol(yytext, &end, 0); }
 }
 
  /* pass all other characters up to bison */

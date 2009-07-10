@@ -178,6 +178,11 @@ bool <!service.name!>Service::step()
     ?>
   while(!isEmpty()) {
     std::string ev = takeEvent();
+    if(ev == "inter") { // module is interrupted, abort all (even sleep)
+      m_status.clear();
+      m_status.push_front(statusFromEventString(ev);
+      break;
+    }
     m_status.push_front(statusFromEventString(ev));
   }
 <?

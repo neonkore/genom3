@@ -341,6 +341,7 @@ class Component
 		Idl::ConstValue::Map& valuesMap() { return m_constValues; }
 
 		void addImportedComponent(const std::string &s);
+		void addImportedComponents(const std::vector<std::string> &v);
 		std::vector<std::string>& importedComponents() { return m_importedComponents; }
 
 		/** This function is used to search a type by its identifier.

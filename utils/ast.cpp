@@ -291,6 +291,12 @@ void Component::addImportedComponent(const std::string &s)
 	m_importedComponents.push_back(s);
 }
 
+void Component::addImportedComponents(const std::vector<std::string> &v)
+{
+	for(std::vector<std::string>::const_iterator it = v.begin(); it != v.begin(); ++it)
+		m_importedComponents.push_back(*it);
+}
+
 Event::Ptr Component::event(const std::string &name)
 {
 	Event::Map::const_iterator it = events.find(name);

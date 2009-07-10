@@ -291,7 +291,8 @@ component_field:
     } else {
       error(yyloc, std::string("Unknown component field: ") + $1);
       YYERROR;
-    }}
+    }
+}
 | IDENTIFIER COLON IDENTIFIER
 {
     if($1 == "ids") {
@@ -301,10 +302,19 @@ component_field:
 	    YYERROR;
 	}
 	driver.component().IDSType = p;
-    } else if($1 == "requires") {
-	driver.component().addImportedComponent($3);
     } else {
       error(yyloc, std::string("Unknown component field: ") + $1);
+      YYERROR;
+    }
+}
+| IDENTIFIER COLON identifier_list
+{
+    if($1 == "requires") {
+      std::vector<std::string> v;
+      driver.split($3, v);
+      driver.component().addImportedComponents(v);
+    } else {
+      error(yyloc, std::string("Unknown syntax for component field: ") + $1);
       YYERROR;
     }
 };
@@ -538,7 +548,7 @@ input:
 };
 
 input_type:
-  IDS COLON IDENTIFIER
+  IDS DOT IDENTIFIER
 {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);

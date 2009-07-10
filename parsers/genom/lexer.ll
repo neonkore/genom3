@@ -51,7 +51,7 @@ floatsuffix				[fFlL]
 stringtext				([^\"])|(\\.)
 chartext				([^\'])|(\\.)
 
-%s IN_COMMENT
+%x IN_COMMENT
 
 /* The following paragraph suffices to track locations accurately. Each time
  * yylex is invoked, the begin position is moved onto the end position. */
@@ -92,7 +92,10 @@ chartext				([^\'])|(\\.)
      "*/"      BEGIN(INITIAL);
      [^*\n]+   // eat comment in chunks
      "*"       // eat the lone star
-     \n        //
+     \n { 
+	yylloc->lines(yyleng); 
+	yylloc->step(); 
+    }
 }
 
  /* One char keywords */

@@ -50,7 +50,7 @@ for name, service in servicesDict.iteritems():
  *
  * Returns:    OK or ERROR
  */
-int <!real_codel_signature(codel)!>
+<!real_codel_signature(codel)!>
 {
 
 }

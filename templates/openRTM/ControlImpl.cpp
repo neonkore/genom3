@@ -27,7 +27,7 @@ extern "C" {
 for s in servicesMap:
   service = s.data()
   if service.hasCodel("control"):
-    print "int " + real_codel_signature(service.codel("control"), service) + ";"
+    print real_codel_signature(service.codel("control"), service) + ";"
 ?>
 }
 

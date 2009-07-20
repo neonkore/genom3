@@ -21,7 +21,7 @@ for s in servicesMap:
   if service.type != ServiceType.Control:
     continue
   if service.hasCodel("control"):
-    print "int " + real_codel_signature(service.codel("control"), service) + ";"
+    print real_codel_signature(service.codel("control"), service) + ";"
 ?>
 }
 

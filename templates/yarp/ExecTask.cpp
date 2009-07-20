@@ -19,11 +19,11 @@ for s in servicesMap:
   if service.type == ServiceType.Control or service.taskName != currentTaskName:
     continue
   if service.hasCodel("control"):
-    print "int " + real_codel_signature(service.codel("control"), service) + ";"
+    print real_codel_signature(service.codel("control"), service) + ";"
 if currentTask.hasCodel("init"):
-    print "int " + real_codel_signature(currentTask.codel("init")) + ";"
+    print real_codel_signature(currentTask.codel("init")) + ";"
 if currentTask.hasCodel("end"):
-    print "int " + real_codel_signature(currentTask.codel("end")) + ";"
+    print real_codel_signature(currentTask.codel("end")) + ";"
 ?>
 }
 

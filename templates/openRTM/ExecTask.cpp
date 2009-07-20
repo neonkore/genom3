@@ -14,9 +14,9 @@ else:
 extern "C" {
 <?
 if currentTask.hasCodel("init"):
-    print "int " + real_codel_signature(currentTask.codel("init")) + ";"
+    print real_codel_signature(currentTask.codel("init")) + ";"
 if currentTask.hasCodel("end"):
-    print "int " + real_codel_signature(currentTask.codel("end")) + ";"
+    print real_codel_signature(currentTask.codel("end")) + ";"
 ?>
 }
 

@@ -136,13 +136,13 @@ def real_codel_signature(codel, service=None):
 	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
     else:
 	proto += port + ", "
-  proto = codel.name + "(" + proto[:-2] + ")"
+  proto = "return_t " + codel.name + "(" + proto[:-2] + ")"
   return proto
 
 def sizeCodelSignature(port):
   sizeCodelArgs = ""
   for x in dynamicMembers(port.idlType, port.name + "_outport", True):
-    sizeCodelArgs += "int *" + lengthVar(x[1]) + ", "
+    sizeCodelArgs += "size_t *" + lengthVar(x[1]) + ", "
 
   for s in port.sizeCodel.inTypes:
     idstype = comp.typeFromIdsName(s);
@@ -157,7 +157,7 @@ def sizeCodelSignature(port):
     p = comp.port(s)
     sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_outport, "
 
-  return "int " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ")"
+  return "return_t " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ")"
 
 
 # create a list of outports and inports

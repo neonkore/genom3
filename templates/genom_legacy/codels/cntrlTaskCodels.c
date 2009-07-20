@@ -70,7 +70,7 @@ for name, service in servicesDict.iteritems():
 	if len(service.inputs()) == 1 and service.inputs()[0].identifier == connectIDSMember:
 	    continue
 	?>
-extern int <!real_codel_signature(codel, service)!>;
+extern <!real_codel_signature(codel, service)!>;
 
 /*------------------------------------------------------------------------
  * <!codel.name!>_codel  -  control codel of CONTROL request <!service.name!>

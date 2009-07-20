@@ -54,7 +54,7 @@ for name, service in servicesDict.iteritems():
  *
  * Returns:    OK or ERROR
  */
-int <!real_codel_signature(codel)!>
+<!real_codel_signature(codel)!>
 {
 
 }
@@ -71,7 +71,7 @@ if currentTask.hasCodel("init"):
  * Returns:    OK or ERROR
  */
 
-int <!real_codel_signature(currentTask.codel("init"))!>
+<!real_codel_signature(currentTask.codel("init"))!>
 {
 
 }

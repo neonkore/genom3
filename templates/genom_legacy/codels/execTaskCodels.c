@@ -85,7 +85,7 @@ for name, service in servicesDict.iteritems():
 	alreadyDefinedCodels.append(codel.name)
 	?>
 
-extern int <!real_codel_signature(codel, service)!>;
+extern <!real_codel_signature(codel, service)!>;
 
 /*------------------------------------------------------------------------
  * <!codel.name!>_codel  -  control codel of EXEC request <!service.name!>
@@ -121,7 +121,7 @@ extern int <!real_codel_signature(codel, service)!>;
 <?
 if currentTask.hasCodel("init"):
 	?>
-extern int <!real_codel_signature(currentTask.codel("init"))!>;
+extern <!real_codel_signature(currentTask.codel("init"))!>;
 
 /*------------------------------------------------------------------------
  *

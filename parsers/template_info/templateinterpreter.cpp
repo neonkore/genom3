@@ -33,6 +33,11 @@
 #include <iostream>
 #include <sstream>
 // #include <cstdio>
+#include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <libgen.h>
 #include <auto_ptr.h>
 
 #include "utils/interpreter.h"
@@ -42,6 +47,36 @@
 
 using namespace G3nom;
 using namespace std;
+
+int safe_mkdir(std::string directory)
+{
+  int len;
+
+  if(directory.at(directory.length()-1) != '/')
+	 directory += '/';
+
+  for(int i = 1; i < len; i++)
+    if(directory[i] == '/'){
+      directory[i] = 0;
+
+      if(access(directory.c_str(), X_OK)){
+		cout << "Creating directory : " << directory << endl;
+		mkdir(directory.c_str(), 0755);
+      }
+      directory[i] = '/';
+    }
+
+  /* returns 0 on success (the directory is created and we can write inside */
+  return access(directory.c_str(), X_OK|W_OK);
+}
+
+int create_file_dir(std::string filename)
+{
+	char *file = new char[filename.length() + 1];
+	strncpy(file, filename.c_str(), filename.length() + 1);
+	char *dir = dirname(file);
+	return safe_mkdir(dir);
+}
 
 TemplateInterpreter::TemplateInterpreter()
 : m_interpreter(0), m_component(0), m_verboseLexing(false), m_verboseParsing(false)
@@ -119,8 +154,11 @@ void TemplateInterpreter::executeFile(const std::string& infile)
 
 void TemplateInterpreter::interpretFileInternal(const std::string &infile, const std::string &outfile)
 {
-	ofstream out(outfile.c_str());
 	string s;
+	// create subdir if necessary
+	create_file_dir(outfile);
+
+	ofstream out(outfile.c_str());
 
 	if (!out.is_open()) {
 		cerr << "Error opening file for writing: " << outfile << endl;

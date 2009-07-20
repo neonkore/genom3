@@ -36,12 +36,18 @@ namespace G3nom
 {
 namespace Idl {
 
+/** \short A visitor for the Idl language
+
+* You should not create an object of this type. Instead, use the static #mapTypeToIdl()
+* that directly output a string.
+*/
 class IdlVisitor : public TypeVisitor
 {
 	public:
 		IdlVisitor(std::ostream &out) : m_out(out) {}
 		virtual ~IdlVisitor() {}
 
+		/** Print the Idl definition of the type. */
 		static std::string mapTypeToIdl(IdlType::Ptr t);
 
 		virtual void visitBaseType(BaseType*);

@@ -83,6 +83,10 @@ class PortEvent;
 class ServiceEvent;
 class NamedEvent;
 
+/** There are 3 types of events: Service events, Ports events and Named events
+* which correspond to external events.
+* \short An internal event
+*/
 class Event 
 {
 	public:
@@ -96,6 +100,7 @@ class Event
 		Event(Kind k) : m_kind(k) {}
 		virtual ~Event() {}
 
+		/** \return The string representing the event (the same as in the .gnm file) */
 		virtual std::string identifier() const = 0;
 		Kind kind() { return m_kind; }
 
@@ -109,6 +114,8 @@ class Event
 
 typedef std::vector< std::pair<Event::Ptr, std::string> > EventCodelVect;
 
+/** 
+* \short A named event (triggered externally)*/
 class NamedEvent : public Event 
 {
 	public:
@@ -124,6 +131,8 @@ class NamedEvent : public Event
 		Event::Ptr m_event;
 };
 
+/** 
+* \short A Port event*/
 class PortEvent : public Event
 {
 	public:
@@ -142,6 +151,9 @@ class PortEvent : public Event
 		Kind m_portKind;
 };
 
+
+/** 
+* \short A Service event*/
 class ServiceEvent : public Event
 {
 	public:
@@ -154,6 +166,8 @@ class ServiceEvent : public Event
 		: Event(Event::ServiceEv), m_service(serviceName), m_codelName(codelName), m_serviceKind(OnCodel)
 		{}
 
+		/** Internal service events (ie used inside the same service) do not have
+		* the service name in their identifier. */
 		virtual std::string identifier() const;
 		std::string serviceName() const { return m_service; }
 		std::string kindAsString() const;

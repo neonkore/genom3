@@ -50,7 +50,12 @@ class CorbaCppVisitor : public TypeVisitor
 		: m_out(out), m_declOnly(declOnly), m_isOutType(isOutType) {}
 		virtual ~CorbaCppVisitor() {}
 
+		/** Print the C++ mapping of the type. The \a declOnly argument is used
+		* to indicate wheter to print the full definition of the type or just a declaration (ie its name). 
+		* The \a out indicates whether the type is used as a return value, in which case the mapping can be
+		* different. */
 		static std::string mapTypeToCpp(IdlType::Ptr t, bool declOnly=false, bool out=false);
+		/** Print the C++ mapping of the const value. They are mapped to global const variables. */
 		static std::string mapValueToCpp(ConstValue *v);
 
 		virtual void visitBaseType(BaseType*);

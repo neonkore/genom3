@@ -48,7 +48,10 @@ class CVisitor : public TypeVisitor
 		CVisitor(std::ostream &out, bool declOnly) : m_out(out), m_declOnly(declOnly) {}
 		virtual ~CVisitor() {}
 
+		/** Print the C mapping of the type. The \a declOnly argument is used
+		* to indicate wheter to print the full definition of the type or just a declaration (ie its name). */
 		static std::string mapTypeToC(IdlType::Ptr t, bool declOnly=false);
+		/** Print the C mapping of the const value. They are mapped to #define. */
 		static std::string mapValueToC(ConstValue *v);
 
 		virtual void visitBaseType(BaseType*);

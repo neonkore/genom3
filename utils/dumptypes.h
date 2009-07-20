@@ -40,7 +40,7 @@ namespace Idl {
 /** \short A debug visitor 
 
 * You should not create an object of this type. Instead, use the static #dumpType()
-* and #dumpValue() that directly output a string.
+* and #dumpConstValue() that directly output a string.
 */
 class DumpType : public TypeVisitor
 {
@@ -48,7 +48,9 @@ class DumpType : public TypeVisitor
 		DumpType(std::ostream &out) : m_out(out) {}
 		virtual ~DumpType() {}
 
+		/** Print the contents of the type for debugging. */
 		static std::string dumpType(IdlType::Ptr t);
+		/** Print the contents of the const value for debugging. */
 		static std::string dumpConstValue(ConstValue &v);
 
 		virtual void visitBaseType(BaseType*);

@@ -154,6 +154,17 @@ for s in servicesMap:
 bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command)
 {
 <?
+  if service.type == ServiceType.Init: ?>
+  m_data->init_service_ran = true;
+<?
+  else:?>
+  if(!m_data->init_service_ran) { // init service not ran, abort
+    string r = "<!service.name!> : Init Service not yet started." ;
+    genom_log(r.c_str());
+    ReplyWriter<VoidIO>::send(*m_reply_ports[clientName], clientName, rqst_id, "<!service.name!>", r, 0);    
+    return true;
+  }
+<?
   if serviceInfo.inputFlag: ?>
   <!serviceInfo.inputTypeCpp!> in_<!serviceInfo.inputName!> = RqstReader::readRqstInput<<!serviceInfo.inputTypeCpp!>>(command);
 <?

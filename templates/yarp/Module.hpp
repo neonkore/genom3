@@ -23,7 +23,7 @@ std::string errorString(int err);
 
 // definition of the ids
 struct <!comp.name()!>ControlData {
-  <!comp.name()!>ControlData() {}
+  <!comp.name()!>ControlData();
 
   void lockForRead();
   void lockForWrite();
@@ -72,6 +72,9 @@ for s in comp.servicesMap():
   if service.type != ServiceType.Control:
     ?>
    <!service.name!>Service::List <!service.name!>Services;
+<?
+if initService >= 0: ?>
+  bool init_service_ran;
 <?
 ?>
 };

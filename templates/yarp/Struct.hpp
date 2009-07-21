@@ -7,6 +7,8 @@ for i in comp.nativeTypesIncludes():
   print "#include <" + i + ">"
 ?>
 
+typedef int return_t;
+
 <?
 for t in typesVect:
   if t.identifier() != IDSType.identifier() and not t.isNative():

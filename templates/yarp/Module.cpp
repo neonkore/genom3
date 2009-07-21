@@ -40,6 +40,14 @@ for e in errorList: ?>
 }
 
 // <!comp.name!>ControlData methods
+<!comp.name()!>ControlData::<!comp.name()!>ControlData()
+<?
+if initServiceNb >= 0: ?>
+: init_service_ran(false)
+<?
+?>
+{}
+
 void <!comp.name()!>ControlData::killAllServices()
 {
 <?

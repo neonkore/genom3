@@ -141,7 +141,7 @@ def codelNeedsLock(codel, service):
 def callSizeCodel(port):
   sizeCodelArgs = ""
   for x in dynamicMembers(port.idlType, port.name + "_outport", True):
-    print "int " + lengthVar(x[1]) + " = 0;"
+    print "size_t " + lengthVar(x[1]) + " = 0;"
     sizeCodelArgs += "&" + lengthVar(x[1]) + ", "
 
   for s in port.sizeCodel.inTypes:

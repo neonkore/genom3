@@ -1,0 +1,78 @@
+
+REQUIREMENTS
+
+core:
+* cmake (>= 2.6)
+* Boost: tested with v1.37
+
+Parser generation (optional)
+* flex
+* bison (>= 2.4)
+
+Python binding:
+* Python2 libs 
+* Boost.Python (for the Python binding)
+
+Tcl binding:
+* Tcl8 libs
+* SWIG (>= 1.3)  (Tcl binding)
+
+INSTALL
+
+The installation process is the same as for any app managed by cmake.
+
+* Create a build dir
+mkdir build && cd build/
+
+* Configure the project:
+cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/prefix/ ..
+or for a devel build
+cmake -DCMAKE_BUILD_TYPE=debug -DCMAKE_INSTALL_PREFIX=/path/to/install/prefix/ ..
+
+* Build and install the project (only static libs are used so installation is not necessary to run the app)
+make && make install
+
+* Build api documentation (doc will be in build/doc/html)
+make doc
+
+CONTENTS
+
+* cmake/ : cmake files used to find bison and flex
+* parsers/
+    * genom/: .gen file parser
+    * template_info/: template_info file parser
+* utils/: .gen file AST (incl Idl types) + interpreter interface
+* core: main app and test app
+* bindings: 
+    * python/: python binding
+    * tcl/: tcl binding
+
+USAGE
+
+* Main app (build/core/genom3):
+  Parses a .gnm file and generates code according to its contents and to the template used.
+
+Usage:
+  genom3 [-d] [-t template] [-o out_dir] gnm_file
+with
+  -h Display this help message
+  -t Set the template to use (this will be appended to the template base dir which
+  is currently hardcoded in the app) (Supported templates: genom_legacy (default), yarp, openRTM)
+  -o Sets the directory where to output files. By default, files will be put in the same directory 
+  as the .gnm file
+
+* Test app (build/core/test_gen)
+  Interpret one file from a template (.gnm file path is hardcoded). Can be useful when creating a new template.
+
+Usage:
+   test_gen interpreter_name in_file out_file
+
+* Genom Parser test app: (build/parsers/genom/test/lexertest)
+  Parses a .gnm file and prints the corresponding information.
+
+Usage:
+  lexertest target
+with target: testComponent, testTask, testPorts, testTypes, testConst, testFile
+
+Use testFile for the most common test (it parses a hardcoded file and prints it)
+  

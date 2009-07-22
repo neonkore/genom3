@@ -46,5 +46,5 @@ else(GENERATE_PARSER)
 endif(GENERATE_PARSER)
 
 add_library(template_info_parser ${template_info_parser_SRCS})
-target_link_libraries(template_info_parser genutils)
+target_link_libraries(template_info_parser genutils genom_tcl_binding genom_python_binding)
 # install(TARGETS genparser LIBRARY DESTINATION lib)

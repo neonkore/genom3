@@ -44,6 +44,8 @@
 #include "utils/ast.h"
 #include "parsers/template_info/lexer.h"
 #include "parsers/template_info/parser.hpp"
+#include "bindings/python/pythoninterpreter.h"
+#include "bindings/tcl/tclinterpreter.h"
 
 using namespace G3nom;
 using namespace std;
@@ -265,8 +267,19 @@ void TemplateInterpreter::interpretTaskFile(const std::string &infile, std::stri
 	}
 }
 
+void TemplateInterpreter::setLanguage(const std::string &lang) 
+{
+	m_language = lang;
+	if(m_language == "Python" || m_language == "python")
+		setInterpreter(PythonInterpreter::getInstance());
+	else if(m_language == "Tcl" || m_language == "tcl")
+		setInterpreter(TclInterpreter::getInstance());
+}
+
 void TemplateInterpreter::setInterpreter(G3nom::Interpreter* i)
 {
+	if(!m_interpreter) // first time we set the interpreter, register component
+		i->start(m_component);
 	m_interpreter = i;
 }
 

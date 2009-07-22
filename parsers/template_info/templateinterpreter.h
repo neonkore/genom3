@@ -96,9 +96,7 @@ class TemplateInterpreter
 		/* Pass the file to the interpreter before parsing any other file*/
 		void executeFile(const std::string& infile);
 
-		void setLanguage(const std::string &lang) {
-			m_language = lang;
-		}
+		void setLanguage(const std::string &lang);
 		void setComponent(Component *c);
 
 	protected:

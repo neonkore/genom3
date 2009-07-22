@@ -32,8 +32,6 @@
 #include "libgen.h"
 
 #include "parsers/template_info/templateinterpreter.h"
-#include "bindings/tcl/tclinterpreter.h"
-#include "bindings/python/pythoninterpreter.h"
 #include "parsers/genom/driver.h"
 #include "pstream.h"
 
@@ -42,46 +40,25 @@ using namespace G3nom;
 
 int main(int argc, char* argv[])
 {
-	Interpreter *i = 0;
-
 	string usage_str(
 		"Usage:\n"
-		"genom [-d] [-i interpreter_name] [-t template] --onefile out_dir file\n"
-		"genom [-d] [-i interpreter_name] [-t template] out_dir file\n"
+		"  genom3 [-t template] [-o out_dir] file\n"
 		"with\n"
-		"-h Display this help message\n"
-		"-d Display debug information\n");
+		"  -h Display this help message\n"
+		"  -d Display debug information\n");
 
 	string templatesDir("/home/ccpasteur/work/git/g3nom/templates/");
 	string templ("genom_legacy");
-
-	bool oneFileMode = false;
-	bool debug = false;
 
 	string outputDir;
 
 	int idx = 1;
 	while ((idx < argc) && (argv[idx][0]=='-')) {
 		string sw = argv[idx];
-		if(sw == "-i") {
-			string name = argv[++idx];
-			if(name == "tcl")
-				i  = TclInterpreter::getInstance();
-			else if(name == "python")
-				i = PythonInterpreter::getInstance();
-			else {
-				cout << "Unknown interpreter: " << name << endl;
-				exit(1);
-			}
-		} else if(sw == "-o") {
+		if(sw == "-o") {
 			outputDir = argv[++idx];
 		} else if(sw == "-t") {
 			templ = argv[++idx];
-		}
-		else if(sw == "--onefile") {
-			oneFileMode = true;
-		} else if (sw == "-d") {
-			debug = true;
 		} else if(sw == "-u" || sw == "--help" || sw == "-h") {
 			cout << usage_str << endl;
 			exit(0);
@@ -97,9 +74,6 @@ int main(int argc, char* argv[])
 	}
 
 	TemplateInterpreter ti;
-	if(!i)
-		i = PythonInterpreter::getInstance();
-	ti.setInterpreter(i);
 	ti.setPrintGeneratedFile(false);
 	string sourceDir = templatesDir + templ + "/";
 

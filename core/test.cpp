@@ -45,6 +45,7 @@ int main(int argc, char* argv[])
 
 	if (argc < 4) {
 		cout << "Not enough arguments " << endl;
+		cout << "Usage: test_gen interpreter_name in_file out_file" << endl;
 		exit(0);
 	}
 

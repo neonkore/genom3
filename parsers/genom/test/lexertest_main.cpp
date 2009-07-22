@@ -31,7 +31,6 @@
 #include <iostream>
 
 #include "driver.h"
-#include "core/pstream.h"
 
 using namespace std;
 using namespace G3nom;
@@ -72,9 +71,7 @@ int main(int argc, char* argv[])
 		} else if(arg == "testConst") {
 			s = "const long SPIX_PATH_MAX = 256;";
 		} else if (arg == "testFile") {
-			std::string filename = "/home/ccpasteur/work/git/g3nom/output/yarpnew/demo.gnm";
-			redi::ipstream in(string("cpp -p ") + filename);
-			if (!d.parseStream(in)) {
+			if (!d.parseFile( "/home/ccpasteur/work/git/g3nom/output/yarpnew/demo.gnm")) {
 				cout << "Error parsing file " << endl;
 				return 1;
 			}

@@ -33,7 +33,6 @@
 
 #include "parsers/template_info/templateinterpreter.h"
 #include "parsers/genom/driver.h"
-#include "pstream.h"
 
 using namespace std;
 using namespace G3nom;
@@ -78,8 +77,7 @@ int main(int argc, char* argv[])
 	string sourceDir = templatesDir + templ + "/";
 
 	Driver d;
-	redi::ipstream in(string("cpp -p ") + argv[idx]);
-	if (!d.parseStream(in)) {
+	if (!d.parseFile(argv[idx])) {
 		cout << "Error parsing .gnm file: " << argv[idx] << endl;
 		exit(1);
 	}

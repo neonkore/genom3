@@ -7,6 +7,7 @@
 #include "driver.h"
 #include "lexer.h"
 #include "parser.hpp"
+#include "pstream.h"
 
 using namespace G3nom;
 using namespace Idl;
@@ -35,7 +36,7 @@ bool Driver::parseStream(std::istream& in, const std::string& sname)
 
 bool Driver::parseFile(const char *filename)
 {
-	std::ifstream in(filename);
+	redi::ipstream in(string("cpp -p ") + filename);
 	if (!in.good())
 		return false;
 	return parseStream(in, filename);

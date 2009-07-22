@@ -7,10 +7,12 @@ servicesDict = dict()
 for s in comp.servicesMap():
   servicesDict[s.key()] = s.data()
 
+# copy the type vector to append elements
 typesVect = []
 for t in comp.typesVect():
   typesVect.append(t)
 
+# name of the special ids member for connect requests
 connectIDSMember = "_connect_str"
 
 # we have to intercept this call because the connect service use 
@@ -28,10 +30,13 @@ def inputType(i):
     return i.type
 
 def idsNameForType(t):
+""" Returns the ids name for values with this type."""
   return "_" + MapTypeToC(t, True).replace(' ', '_')
 
 ids_members = []
 def idsMemberForInput(i, service):
+""" Find the correct IDS member to use to store the input i
+  belonging to this service."""
   if i.kind == ServiceInputKind.IDSMember:
     return i.identifier
   else:
@@ -49,6 +54,7 @@ def idsMemberForInput(i, service):
       return name
 
 def typeProtoPrefix(t):
+""" Returns the prefix corresponding to this type to use for print, scan, etc. functions."""
     prefix = ""
     if t.kind() == IdlKind.Named:
 	n = t.asNamedType()
@@ -115,6 +121,9 @@ for port in inports:
     IDSType.addMember(port.idlType, port.name + "_inport")
 
 class ServiceInfo:
+""" This class is used to store all types of information about a service to
+  avoid computing them again and again. Only the __init__ function is used to fill 
+  the class."""
   def __init__(self, service):
     # inputs
     if not service.inputs():
@@ -233,6 +242,7 @@ for name, service in servicesDict.iteritems():
     services_info_dict[name] = ServiceInfo(service)    
 
 def convertFun(t):
+""" returns the function to use to convert from a const char* to type t."""
     if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
         return ""
     elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
@@ -244,6 +254,7 @@ def convertFun(t):
     return ""
 
 def formatStringForType(t):
+""" Returns the printf format string corresponding to the type t."""
    if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
        return "%c";
    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
@@ -258,6 +269,7 @@ def formatStringForType(t):
        return ""
 
 def sizeOfType(t):
+""" Returns a string to compute the size of type t."""
     if t.kind() == IdlKind.String:
 	s = t.asStringType()
 	return str(s.bound())
@@ -265,6 +277,7 @@ def sizeOfType(t):
 	return "sizeof(" + MapTypeToC(t,True) + ")"
 
 def sizeOfIdsMember(name):
+""" Returns a string to compute the size of the IDS member name."""
     type = typeFromIdsName(name)
     if type is None:
 	return "0"
@@ -289,8 +302,8 @@ def serviceDescString(s):
     return ""
 
 def findServiceWithSameOutput(service, inputName):
+""" Find other services with an output corresponding to the service's input """
     l = []
-    # find another service with an output corresponding to the service's input
     for name, ss in servicesDict.iteritems():
 	if name == service.name:
 	    break; 
@@ -298,8 +311,8 @@ def findServiceWithSameOutput(service, inputName):
 	    l.append(ss)
     return l
 
-# creates the signature of the function corresponding to a codel
 def codel_signature(codel, service=None):
+""" Creates the signature (withot return value) of the internal function corresponding to a codel. """
   proto = codel.name + "_codel(";
   if service is not None:
     serviceInfo = services_info_dict[service.name]
@@ -315,12 +328,14 @@ def codel_signature(codel, service=None):
   return proto
 
 def codelSignatureFull(codel, service):
+""" Creates the full signature of the internal function corresponding to a codel. """
     if service.type != ServiceType.Exec or codel.key() == "control":
 	return "STATUS " + codel_signature(codel.data(), service)
     else:
 	return "ACTIVITY_EVENT " + codel_signature(codel.data(), service)
 
 def real_codel_call(codel, service=None):
+""" Creates the string to call the user codel. """
   proto = ""
   if service is not None:
     inputPrefix = ""
@@ -355,6 +370,7 @@ def real_codel_call(codel, service=None):
   return proto
 
 def nbExecService():
+""" Computes the number of exec services in the component """
     count = 0
     for name, service in servicesDict.iteritems():
 	if service.type != ServiceType.Control:
@@ -368,6 +384,8 @@ def maxServiceNameLength():
     return maxLen
 
 def typeSize(t):
+""" Returns the size of the type (or rather an estimation of it).
+  This is used to compute the max resquest arg and output size (in posterLib.h)."""
     if t.kind() == IdlKind.Named:
 	return typeSize(t.asNamedType().type())
     if t.kind() == IdlKind.Struct:
@@ -403,8 +421,8 @@ def typeSize(t):
 	  return s.bound()
     return 0
 
-# compute the max request and result size
 def maxArgsSize():
+""" compute the max request size """
     res = 8
     for name, service in servicesDict.iteritems():
       serviceInfo = services_info_dict[name]
@@ -413,6 +431,7 @@ def maxArgsSize():
     return res
 
 def maxOutputSize():
+""" compute the max result size """
     res = 8
     for name, service in servicesDict.iteritems():
       serviceInfo = services_info_dict[name]
@@ -421,6 +440,8 @@ def maxOutputSize():
     return res
 
 def computeTotalSize(t, name, addStructSize = True):
+""" Prints the string used to compute the total size of the static elements of a type. This is used
+  when allocating sequences."""
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
     return computeTotalSize(t.unalias(), name, addStructSize)
   elif t.kind() == IdlKind.Sequence:
@@ -452,6 +473,8 @@ def computeTotalSize(t, name, addStructSize = True):
     return ""
 
 def copyType(t, dest, src, allocateMemory=True):
+""" Updates the IDS copy of a sequence type from the value stored in shared memory.
+  If allocateMemory is True (for InPorts), memory will be allocated to store sequences."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
@@ -495,6 +518,7 @@ def copyType(t, dest, src, allocateMemory=True):
       print dest + " = " + src + ";"
 
 def copyTypeReverse(t, dest, src):
+""" Updates the shared memory contents after a codel call. """
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       if isDynamic(s.seqType()):
@@ -524,6 +548,7 @@ def copyTypeReverse(t, dest, src):
       print dest + " = " + src + ";"
 
 def allocateMemory(t, dest, idsDest, scopedName):
+""" Allocate the memory requested by the user after the size codel has been called."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
@@ -556,6 +581,8 @@ def allocateMemory(t, dest, idsDest, scopedName):
       allocateMemory(t.unalias(), dest, idsDest, scopedName)
 
 def codelLock(codel, service = None):
+""" Prepare the execution of a user codel. Finds posters pointers, initialize dynamic ports if 
+  necessary, etc."""
   for port in codel.outPorts:
     p = comp.port(port)
     posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
@@ -640,6 +667,7 @@ def codelLock(codel, service = None):
     copyType(p.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")", False)
 
 def codelRelease(codel, service=None):
+"""  Cleanup after a codel has been called. Updates posters in shared memory if necessary. """
   for port in codel.outPorts:
     p = comp.port(port)
     posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"

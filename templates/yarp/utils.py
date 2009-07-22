@@ -25,6 +25,9 @@ def inputList(service):
   return []
 
 class ServiceInfo:
+""" This class is used to store all types of information about a service to
+  avoid computing them again and again. Only the __init__ function is used to fill 
+  the class."""
   def __init__(self, service):
     # inputs
     if not service.inputs():
@@ -70,6 +73,7 @@ for s in servicesMap:
     services_info_dict[service.name] = ServiceInfo(service)    
 
 def real_codel_call(codel, ids_prefix="", service=None, allArgs = False):
+""" Creates the code to call user codel. """
   proto = ""
   if service is not None:
     inputPrefix = ""
@@ -102,6 +106,7 @@ def startStateForService(service):
     return upper(service.name) + "_MAIN"
 
 def allocMemory(t, dest, scopedName):
+""" Allocate the memory as requested by the size codel."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
@@ -126,6 +131,8 @@ def allocMemory(t, dest, scopedName):
       allocMemory(t.unalias(), dest, scopedName)
 
 def codelNeedsLock(codel, service):
+""" Returns whether it is necessary to lock the IDS when calling the codel. 0 means no locking,
+  1 means lock for read and 2 read for write. """
   if codel.outTypes:
     return 2
   elif service.output.identifier and service.output.kind == ServiceInputKind.IDSMember:
@@ -139,6 +146,7 @@ def codelNeedsLock(codel, service):
     return 0
 
 def callSizeCodel(port):
+""" String to call the size codel. """
   sizeCodelArgs = ""
   for x in dynamicMembers(port.idlType, port.name + "_outport", True):
     print "size_t " + lengthVar(x[1]) + " = 0;"
@@ -156,6 +164,7 @@ def callSizeCodel(port):
   print "int res = " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ");"
 
 def codelLock(codel, service):
+""" prepare to call user codel. Lock the ids, initialize ports, etc."""
     for p in codel.outPorts:
       port = comp.port(p)
       if not isDynamic(port.idlType):
@@ -180,6 +189,7 @@ def codelLock(codel, service):
       print "  m_data->idsMutex.acquire_read();"
 
 def codelRelease(codel, service):
+""" Release locks, etc after codel has been called"""
     for p in codel.outPorts:
       print "  m_data->" + p + "_outport.exportData();"  
     for p in codel.inPorts:
@@ -200,6 +210,7 @@ def codelToEvName(name):
   return name
 
 def fullPortName(p):
+""" Returns the name of the port in internal data structure."""
   port = comp.port(pev.portName())
   if port.type == PortType.Incoming:
     return p + "_inport"

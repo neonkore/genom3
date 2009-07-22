@@ -53,7 +53,7 @@ USAGE
   Parses a .gnm file and generates code according to its contents and to the template used.
 
 Usage:
-  genom3 [-d] [-t template] [-o out_dir] gnm_file
+  genom3 [-t template] [-o out_dir] gnm_file
 with
   -h Display this help message
   -t Set the template to use (this will be appended to the template base dir which

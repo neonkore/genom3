@@ -44,7 +44,7 @@ for name, service in servicesDict.iteritems():
 	codel = c.data()
 	?>
 /*------------------------------------------------------------------------
- * <!codel.name!>  -  control codel of EXEC request <!service.name!>
+ * <!codel.name!>  -  codel <!c.key()!> request <!service.name!>
  *
  * Description:    
 <?
@@ -52,7 +52,7 @@ for name, service in servicesDict.iteritems():
 	    print " * ERROR_" + m
 	?> *         
  *
- * Returns:    OK or ERROR
+ * Returns:    USER_OK or ERROR
  */
 <!real_codel_signature(codel)!>
 {
@@ -68,7 +68,7 @@ if currentTask.hasCodel("init"):
  *
  * Description: 
  * 
- * Returns:    OK or ERROR
+ * Returns:    USER_OK or ERROR
  */
 
 <!real_codel_signature(currentTask.codel("init"))!>

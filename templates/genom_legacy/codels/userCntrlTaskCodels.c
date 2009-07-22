@@ -41,14 +41,14 @@ for name, service in servicesDict.iteritems():
 /*------------------------------------------------------------------------
  * <!codel.name!>_codel  -  control codel of CONTROL request <!service.name!>
  *
- * Description:    
- * Report: OK
+ * Description:         
+ *
+ * Returns:    
+ *  USER_OK
 <?
 	for m in service.errorMessages():
-	    print " * ERROR_" + m
-	?> *         
- *
- * Returns:    OK or ERROR
+	    print " *  ERROR_" + m
+	?> * 
  */
 <!real_codel_signature(codel)!>
 {

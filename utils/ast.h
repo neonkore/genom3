@@ -259,6 +259,7 @@ struct ServiceInput {
 	std::string identifier;
 	Idl::IdlType::Ptr type;
 	Idl::Literal defaultValue;
+	std::string doc;
 };
 
 /** \short A service*/

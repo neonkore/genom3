@@ -919,7 +919,7 @@ namespace G3nom {
 /* Line 678 of lalr1.cc  */
 #line 543 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yysemantic_stack_[(3) - (1)].serviceInputVal).defaultValue = (yysemantic_stack_[(3) - (3)].literalVal);
+    (yysemantic_stack_[(3) - (1)].serviceInputVal).doc = (yysemantic_stack_[(3) - (3)].stringVal);
     driver.currentService()->addInput((yysemantic_stack_[(3) - (1)].serviceInputVal));
 }
     break;
@@ -929,7 +929,9 @@ namespace G3nom {
 /* Line 678 of lalr1.cc  */
 #line 548 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    driver.currentService()->addInput((yysemantic_stack_[(1) - (1)].serviceInputVal));
+    (yysemantic_stack_[(5) - (1)].serviceInputVal).defaultValue = (yysemantic_stack_[(5) - (3)].literalVal);
+    (yysemantic_stack_[(5) - (1)].serviceInputVal).doc = (yysemantic_stack_[(5) - (5)].stringVal);
+    driver.currentService()->addInput((yysemantic_stack_[(5) - (1)].serviceInputVal));
 }
     break;
 
@@ -937,6 +939,36 @@ namespace G3nom {
 
 /* Line 678 of lalr1.cc  */
 #line 554 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yysemantic_stack_[(5) - (1)].serviceInputVal).defaultValue = (yysemantic_stack_[(5) - (5)].literalVal);
+    (yysemantic_stack_[(5) - (1)].serviceInputVal).doc = (yysemantic_stack_[(5) - (3)].stringVal);
+    driver.currentService()->addInput((yysemantic_stack_[(5) - (1)].serviceInputVal));
+}
+    break;
+
+  case 52:
+
+/* Line 678 of lalr1.cc  */
+#line 560 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yysemantic_stack_[(3) - (1)].serviceInputVal).defaultValue = (yysemantic_stack_[(3) - (3)].literalVal);
+    driver.currentService()->addInput((yysemantic_stack_[(3) - (1)].serviceInputVal));
+}
+    break;
+
+  case 53:
+
+/* Line 678 of lalr1.cc  */
+#line 565 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    driver.currentService()->addInput((yysemantic_stack_[(1) - (1)].serviceInputVal));
+}
+    break;
+
+  case 54:
+
+/* Line 678 of lalr1.cc  */
+#line 571 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName((yysemantic_stack_[(3) - (3)].stringVal));
@@ -952,10 +984,10 @@ namespace G3nom {
 }
     break;
 
-  case 52:
+  case 55:
 
 /* Line 678 of lalr1.cc  */
-#line 568 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 585 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     ServiceInput i;
     i.kind = ServiceInput::Type;
@@ -965,10 +997,10 @@ namespace G3nom {
 }
     break;
 
-  case 53:
+  case 56:
 
 /* Line 678 of lalr1.cc  */
-#line 579 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 596 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Event::Ptr ev = driver.component().event((yysemantic_stack_[(1) - (1)].stringVal));
     if(ev.get()) { // external event
@@ -991,10 +1023,10 @@ namespace G3nom {
 }
     break;
 
-  case 54:
+  case 57:
 
 /* Line 678 of lalr1.cc  */
-#line 600 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 617 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     //try to find what type of event this is
     Port::Ptr p = driver.component().port((yysemantic_stack_[(3) - (1)].stringVal));
@@ -1033,10 +1065,10 @@ namespace G3nom {
 }
     break;
 
-  case 55:
+  case 58:
 
 /* Line 678 of lalr1.cc  */
-#line 637 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 654 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     if((yysemantic_stack_[(5) - (3)].stringVal) != "onCodel") {
 	  error(yyloc, std::string("Unknwon port syntax") );
@@ -1054,86 +1086,86 @@ namespace G3nom {
 }
     break;
 
-  case 56:
+  case 59:
 
 /* Line 678 of lalr1.cc  */
-#line 656 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 673 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Event::Ptr ev(new NamedEvent((yysemantic_stack_[(2) - (2)].stringVal)));
     driver.component().addEvent(ev);
 }
     break;
 
-  case 57:
+  case 60:
 
 /* Line 678 of lalr1.cc  */
-#line 661 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 678 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Event::Ptr ev(new NamedEvent((yysemantic_stack_[(4) - (2)].stringVal), (yysemantic_stack_[(4) - (4)].eventVal)));
     driver.component().addEvent(ev);
 }
     break;
 
-  case 58:
+  case 61:
 
 /* Line 678 of lalr1.cc  */
-#line 671 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 688 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     Codel::Ptr c(new Codel((yysemantic_stack_[(1) - (1)].stringVal)));
     driver.setCurrentCodel(c);
 }
     break;
 
-  case 59:
+  case 62:
 
 /* Line 678 of lalr1.cc  */
-#line 676 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 693 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.codelVal) = driver.currentCodel();
 }
     break;
 
-  case 60:
-
-/* Line 678 of lalr1.cc  */
-#line 682 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {}
-    break;
-
-  case 61:
-
-/* Line 678 of lalr1.cc  */
-#line 684 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    driver.split((yysemantic_stack_[(2) - (2)].stringVal), driver.currentCodel()->nextCodels); 
-}
-    break;
-
-  case 62:
-
-/* Line 678 of lalr1.cc  */
-#line 690 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {}
-    break;
-
   case 63:
 
 /* Line 678 of lalr1.cc  */
-#line 692 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 699 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
   case 64:
 
 /* Line 678 of lalr1.cc  */
-#line 694 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {}
+#line 701 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    driver.split((yysemantic_stack_[(2) - (2)].stringVal), driver.currentCodel()->nextCodels); 
+}
     break;
 
   case 65:
 
 /* Line 678 of lalr1.cc  */
-#line 698 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 707 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {}
+    break;
+
+  case 66:
+
+/* Line 678 of lalr1.cc  */
+#line 709 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {}
+    break;
+
+  case 67:
+
+/* Line 678 of lalr1.cc  */
+#line 711 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {}
+    break;
+
+  case 68:
+
+/* Line 678 of lalr1.cc  */
+#line 715 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName((yysemantic_stack_[(2) - (2)].stringVal));
@@ -1146,10 +1178,10 @@ namespace G3nom {
 }
     break;
 
-  case 66:
+  case 69:
 
 /* Line 678 of lalr1.cc  */
-#line 709 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 726 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName((yysemantic_stack_[(2) - (2)].stringVal));
@@ -1162,141 +1194,112 @@ namespace G3nom {
 }
     break;
 
-  case 67:
+  case 70:
 
 /* Line 678 of lalr1.cc  */
-#line 720 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 737 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     driver.currentCodel()->addInPort((yysemantic_stack_[(2) - (2)].stringVal));
 }
     break;
 
-  case 68:
+  case 71:
 
 /* Line 678 of lalr1.cc  */
-#line 724 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 741 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     driver.currentCodel()->addOutPort((yysemantic_stack_[(2) - (2)].stringVal));
 }
     break;
 
-  case 69:
+  case 72:
 
 /* Line 678 of lalr1.cc  */
-#line 732 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 749 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     ConstValue c((yysemantic_stack_[(5) - (3)].stringVal), (yysemantic_stack_[(5) - (2)].typeVal), (yysemantic_stack_[(5) - (5)].literalVal));
     driver.component().addConstValue(c);
 }
     break;
 
-  case 79:
-
-/* Line 678 of lalr1.cc  */
-#line 752 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].integerVal));
-}
-    break;
-
-  case 80:
-
-/* Line 678 of lalr1.cc  */
-#line 756 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].doubleVal));
-}
-    break;
-
-  case 81:
-
-/* Line 678 of lalr1.cc  */
-#line 760 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    (yyval.literalVal) = Literal("\"" + (yysemantic_stack_[(1) - (1)].stringVal) + "\"");
-}
-    break;
-
   case 82:
 
 /* Line 678 of lalr1.cc  */
-#line 764 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 769 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].charVal));
+    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].integerVal));
 }
     break;
 
   case 83:
 
 /* Line 678 of lalr1.cc  */
-#line 768 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 773 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.literalVal) = (yysemantic_stack_[(1) - (1)].literalVal);
+    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].doubleVal));
 }
     break;
 
   case 84:
 
 /* Line 678 of lalr1.cc  */
-#line 772 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 777 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    /*enum value*/
-    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].stringVal));
+    (yyval.literalVal) = Literal("\"" + (yysemantic_stack_[(1) - (1)].stringVal) + "\"");
 }
     break;
 
   case 85:
 
 /* Line 678 of lalr1.cc  */
-#line 777 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 781 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.literalVal) = (yysemantic_stack_[(3) - (2)].literalVal);
+    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].charVal));
 }
     break;
 
   case 86:
 
 /* Line 678 of lalr1.cc  */
-#line 781 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 785 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.literalVal) = (yysemantic_stack_[(3) - (2)].literalVal);
+    (yyval.literalVal) = (yysemantic_stack_[(1) - (1)].literalVal);
 }
     break;
 
   case 87:
 
 /* Line 678 of lalr1.cc  */
-#line 785 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {}
+#line 789 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    /*enum value*/
+    (yyval.literalVal) = Literal((yysemantic_stack_[(1) - (1)].stringVal));
+}
     break;
 
   case 88:
 
 /* Line 678 of lalr1.cc  */
-#line 789 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 794 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.literalVal) = Literal(true);
+    (yyval.literalVal) = (yysemantic_stack_[(3) - (2)].literalVal);
 }
     break;
 
   case 89:
 
 /* Line 678 of lalr1.cc  */
-#line 793 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 798 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.literalVal) = Literal(false);
+    (yyval.literalVal) = (yysemantic_stack_[(3) - (2)].literalVal);
 }
     break;
 
   case 90:
 
 /* Line 678 of lalr1.cc  */
-#line 800 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    Literal l(Literal::Neg);
-    l.addMember((yysemantic_stack_[(2) - (2)].literalVal));
-    (yyval.literalVal) = l;
-}
+#line 802 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {}
     break;
 
   case 91:
@@ -1304,7 +1307,7 @@ namespace G3nom {
 /* Line 678 of lalr1.cc  */
 #line 806 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.literalVal) = (yysemantic_stack_[(2) - (2)].literalVal);
+    (yyval.literalVal) = Literal(true);
 }
     break;
 
@@ -1313,9 +1316,7 @@ namespace G3nom {
 /* Line 678 of lalr1.cc  */
 #line 810 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::LNeg);
-    l.addMember((yysemantic_stack_[(2) - (2)].literalVal));
-    (yyval.literalVal) = l;
+    (yyval.literalVal) = Literal(false);
 }
     break;
 
@@ -1324,9 +1325,8 @@ namespace G3nom {
 /* Line 678 of lalr1.cc  */
 #line 817 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Plus);
-    l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
-    l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
+    Literal l(Literal::Neg);
+    l.addMember((yysemantic_stack_[(2) - (2)].literalVal));
     (yyval.literalVal) = l;
 }
     break;
@@ -1334,23 +1334,19 @@ namespace G3nom {
   case 94:
 
 /* Line 678 of lalr1.cc  */
-#line 824 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 823 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Minus);
-    l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
-    l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
-    (yyval.literalVal) = l;
+    (yyval.literalVal) = (yysemantic_stack_[(2) - (2)].literalVal);
 }
     break;
 
   case 95:
 
 /* Line 678 of lalr1.cc  */
-#line 831 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 827 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Times);
-    l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
-    l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
+    Literal l(Literal::LNeg);
+    l.addMember((yysemantic_stack_[(2) - (2)].literalVal));
     (yyval.literalVal) = l;
 }
     break;
@@ -1358,9 +1354,9 @@ namespace G3nom {
   case 96:
 
 /* Line 678 of lalr1.cc  */
-#line 838 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 834 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Divide);
+    Literal l(Literal::Plus);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
     l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
@@ -1370,9 +1366,9 @@ namespace G3nom {
   case 97:
 
 /* Line 678 of lalr1.cc  */
-#line 845 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 841 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Mod);
+    Literal l(Literal::Minus);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
     l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
@@ -1382,9 +1378,9 @@ namespace G3nom {
   case 98:
 
 /* Line 678 of lalr1.cc  */
-#line 852 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 848 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::And);
+    Literal l(Literal::Times);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
     l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
@@ -1394,9 +1390,9 @@ namespace G3nom {
   case 99:
 
 /* Line 678 of lalr1.cc  */
-#line 859 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 855 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Or);
+    Literal l(Literal::Divide);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
     l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
@@ -1406,9 +1402,9 @@ namespace G3nom {
   case 100:
 
 /* Line 678 of lalr1.cc  */
-#line 866 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 862 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Xor);
+    Literal l(Literal::Mod);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
     l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
@@ -1418,9 +1414,9 @@ namespace G3nom {
   case 101:
 
 /* Line 678 of lalr1.cc  */
-#line 873 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 869 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::LShift);
+    Literal l(Literal::And);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
     l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
@@ -1430,9 +1426,9 @@ namespace G3nom {
   case 102:
 
 /* Line 678 of lalr1.cc  */
-#line 880 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 876 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::RShift);
+    Literal l(Literal::Or);
     l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
     l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
@@ -1442,10 +1438,11 @@ namespace G3nom {
   case 103:
 
 /* Line 678 of lalr1.cc  */
-#line 889 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 883 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    Literal l(Literal::Struct);
-    l.addMember((yysemantic_stack_[(1) - (1)].literalVal));
+    Literal l(Literal::Xor);
+    l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
+    l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
     (yyval.literalVal) = l;
 }
     break;
@@ -1453,102 +1450,137 @@ namespace G3nom {
   case 104:
 
 /* Line 678 of lalr1.cc  */
-#line 895 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 890 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yysemantic_stack_[(3) - (1)].literalVal).addMember((yysemantic_stack_[(3) - (3)].literalVal));
-    (yyval.literalVal) = (yysemantic_stack_[(3) - (1)].literalVal);
+    Literal l(Literal::LShift);
+    l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
+    l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
+    (yyval.literalVal) = l;
 }
     break;
 
   case 105:
 
 /* Line 678 of lalr1.cc  */
-#line 904 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 897 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    driver.component().addNativeTypeInclude((yysemantic_stack_[(6) - (3)].stringVal));
+    Literal l(Literal::RShift);
+    l.addMember((yysemantic_stack_[(3) - (1)].literalVal));
+    l.addMember((yysemantic_stack_[(3) - (3)].literalVal));
+    (yyval.literalVal) = l;
 }
     break;
 
   case 106:
 
 /* Line 678 of lalr1.cc  */
-#line 910 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 906 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yysemantic_stack_[(2) - (1)].typeVal)->setNative(true);
-    driver.component().addType((yysemantic_stack_[(2) - (1)].typeVal));
+    Literal l(Literal::Struct);
+    l.addMember((yysemantic_stack_[(1) - (1)].literalVal));
+    (yyval.literalVal) = l;
 }
     break;
 
   case 107:
 
 /* Line 678 of lalr1.cc  */
-#line 915 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 912 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yysemantic_stack_[(4) - (3)].typeVal)->setNative(true);
-    driver.component().addType((yysemantic_stack_[(4) - (3)].typeVal));
+    (yysemantic_stack_[(3) - (1)].literalVal).addMember((yysemantic_stack_[(3) - (3)].literalVal));
+    (yyval.literalVal) = (yysemantic_stack_[(3) - (1)].literalVal);
 }
     break;
 
   case 108:
 
 /* Line 678 of lalr1.cc  */
-#line 922 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 921 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    IdlType::Ptr p(new TypedefType((yysemantic_stack_[(3) - (2)].typeVal), (yysemantic_stack_[(3) - (3)].declaratorVectVal)));
-    (yyval.typeVal) = p;
+    driver.component().addNativeTypeInclude((yysemantic_stack_[(6) - (3)].stringVal));
 }
     break;
 
   case 109:
 
 /* Line 678 of lalr1.cc  */
-#line 926 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+#line 927 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yysemantic_stack_[(2) - (1)].typeVal)->setNative(true);
+    driver.component().addType((yysemantic_stack_[(2) - (1)].typeVal));
+}
     break;
 
   case 110:
 
 /* Line 678 of lalr1.cc  */
-#line 928 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+#line 932 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yysemantic_stack_[(4) - (3)].typeVal)->setNative(true);
+    driver.component().addType((yysemantic_stack_[(4) - (3)].typeVal));
+}
     break;
 
   case 111:
 
 /* Line 678 of lalr1.cc  */
-#line 941 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 939 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal);
+    IdlType::Ptr p(new TypedefType((yysemantic_stack_[(3) - (2)].typeVal), (yysemantic_stack_[(3) - (3)].declaratorVectVal)));
+    (yyval.typeVal) = p;
 }
     break;
 
   case 112:
 
 /* Line 678 of lalr1.cc  */
-#line 945 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { 
-    (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal);
-}
+#line 943 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 113:
 
 /* Line 678 of lalr1.cc  */
-#line 950 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 945 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 114:
 
 /* Line 678 of lalr1.cc  */
-#line 951 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+#line 958 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal);
+}
     break;
 
   case 115:
 
 /* Line 678 of lalr1.cc  */
-#line 953 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 962 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { 
+    (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal);
+}
+    break;
+
+  case 116:
+
+/* Line 678 of lalr1.cc  */
+#line 967 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+    break;
+
+  case 117:
+
+/* Line 678 of lalr1.cc  */
+#line 968 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+    break;
+
+  case 118:
+
+/* Line 678 of lalr1.cc  */
+#line 970 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr type = driver.component().typeFromName((yysemantic_stack_[(1) - (1)].stringVal));
     if(!type.get()) {
@@ -1559,101 +1591,101 @@ namespace G3nom {
 }
     break;
 
-  case 116:
-
-/* Line 678 of lalr1.cc  */
-#line 963 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
-    break;
-
-  case 117:
-
-/* Line 678 of lalr1.cc  */
-#line 964 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
-    break;
-
-  case 118:
-
-/* Line 678 of lalr1.cc  */
-#line 965 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
-    break;
-
   case 119:
 
 /* Line 678 of lalr1.cc  */
-#line 966 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 980 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 120:
 
 /* Line 678 of lalr1.cc  */
-#line 967 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 981 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 121:
 
 /* Line 678 of lalr1.cc  */
-#line 968 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 982 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 122:
 
 /* Line 678 of lalr1.cc  */
-#line 969 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 983 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 123:
 
 /* Line 678 of lalr1.cc  */
-#line 975 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 984 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 124:
 
 /* Line 678 of lalr1.cc  */
-#line 976 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 985 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 125:
 
 /* Line 678 of lalr1.cc  */
-#line 977 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 986 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 126:
 
 /* Line 678 of lalr1.cc  */
-#line 978 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 992 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 127:
 
 /* Line 678 of lalr1.cc  */
-#line 982 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 993 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 128:
 
 /* Line 678 of lalr1.cc  */
-#line 984 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 994 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 129:
 
 /* Line 678 of lalr1.cc  */
-#line 989 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 995 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+    break;
+
+  case 130:
+
+/* Line 678 of lalr1.cc  */
+#line 999 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+    break;
+
+  case 131:
+
+/* Line 678 of lalr1.cc  */
+#line 1001 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+    break;
+
+  case 132:
+
+/* Line 678 of lalr1.cc  */
+#line 1006 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { 
     Declarator::VectPtr v(new Declarator::Vect());
     v->push_back((yysemantic_stack_[(1) - (1)].declaratorVal));
@@ -1661,10 +1693,10 @@ namespace G3nom {
 }
     break;
 
-  case 130:
+  case 133:
 
 /* Line 678 of lalr1.cc  */
-#line 995 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1012 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
       if((yysemantic_stack_[(3) - (1)].declaratorVectVal)) {
 	  (yysemantic_stack_[(3) - (1)].declaratorVectVal)->push_back((yysemantic_stack_[(3) - (3)].declaratorVal));
@@ -1676,272 +1708,272 @@ namespace G3nom {
 }
     break;
 
-  case 131:
-
-/* Line 678 of lalr1.cc  */
-#line 1006 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.declaratorVal) = (yysemantic_stack_[(1) - (1)].declaratorVal); }
-    break;
-
-  case 132:
-
-/* Line 678 of lalr1.cc  */
-#line 1007 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.declaratorVal) = (yysemantic_stack_[(1) - (1)].declaratorVal); }
-    break;
-
-  case 133:
-
-/* Line 678 of lalr1.cc  */
-#line 1012 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    Declarator::Ptr p(new Declarator((yysemantic_stack_[(1) - (1)].stringVal)));
-    (yyval.declaratorVal) = p;
-}
-    break;
-
   case 134:
 
 /* Line 678 of lalr1.cc  */
-#line 1019 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    (yysemantic_stack_[(2) - (1)].declaratorVal)->addBound((yysemantic_stack_[(2) - (2)].integerVal));
-    (yyval.declaratorVal) = (yysemantic_stack_[(2) - (1)].declaratorVal);
-}
+#line 1023 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.declaratorVal) = (yysemantic_stack_[(1) - (1)].declaratorVal); }
     break;
 
   case 135:
 
 /* Line 678 of lalr1.cc  */
 #line 1024 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {
-    (yysemantic_stack_[(2) - (1)].declaratorVal)->addBound((yysemantic_stack_[(2) - (2)].integerVal));
-    (yyval.declaratorVal) = (yysemantic_stack_[(2) - (1)].declaratorVal);
-}
+    { (yyval.declaratorVal) = (yysemantic_stack_[(1) - (1)].declaratorVal); }
     break;
 
   case 136:
 
 /* Line 678 of lalr1.cc  */
-#line 1031 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1029 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
-    (yyval.integerVal) = (yysemantic_stack_[(3) - (2)].integerVal);
+    Declarator::Ptr p(new Declarator((yysemantic_stack_[(1) - (1)].stringVal)));
+    (yyval.declaratorVal) = p;
 }
     break;
 
   case 137:
 
 /* Line 678 of lalr1.cc  */
-#line 1039 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::floatType; }
+#line 1036 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yysemantic_stack_[(2) - (1)].declaratorVal)->addBound((yysemantic_stack_[(2) - (2)].integerVal));
+    (yyval.declaratorVal) = (yysemantic_stack_[(2) - (1)].declaratorVal);
+}
     break;
 
   case 138:
 
 /* Line 678 of lalr1.cc  */
-#line 1040 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::doubleType; }
+#line 1041 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yysemantic_stack_[(2) - (1)].declaratorVal)->addBound((yysemantic_stack_[(2) - (2)].integerVal));
+    (yyval.declaratorVal) = (yysemantic_stack_[(2) - (1)].declaratorVal);
+}
     break;
 
   case 139:
 
 /* Line 678 of lalr1.cc  */
-#line 1041 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::longdoubleType; }
+#line 1048 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {
+    (yyval.integerVal) = (yysemantic_stack_[(3) - (2)].integerVal);
+}
     break;
 
   case 140:
 
 /* Line 678 of lalr1.cc  */
-#line 1046 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1056 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::floatType; }
+    break;
+
+  case 141:
+
+/* Line 678 of lalr1.cc  */
+#line 1057 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::doubleType; }
+    break;
+
+  case 142:
+
+/* Line 678 of lalr1.cc  */
+#line 1058 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::longdoubleType; }
+    break;
+
+  case 143:
+
+/* Line 678 of lalr1.cc  */
+#line 1063 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new FixedType((yysemantic_stack_[(6) - (3)].integerVal), (yysemantic_stack_[(6) - (5)].integerVal)));
     (yyval.typeVal) = p;
 }
     break;
 
-  case 141:
-
-/* Line 678 of lalr1.cc  */
-#line 1051 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    {}
-    break;
-
-  case 142:
-
-/* Line 678 of lalr1.cc  */
-#line 1054 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
-    break;
-
-  case 143:
-
-/* Line 678 of lalr1.cc  */
-#line 1055 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
-    break;
-
   case 144:
 
 /* Line 678 of lalr1.cc  */
-#line 1059 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+#line 1068 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    {}
     break;
 
   case 145:
 
 /* Line 678 of lalr1.cc  */
-#line 1060 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1071 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 146:
 
 /* Line 678 of lalr1.cc  */
-#line 1061 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1072 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 147:
 
 /* Line 678 of lalr1.cc  */
-#line 1065 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::shortType; }
+#line 1076 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 148:
-
-/* Line 678 of lalr1.cc  */
-#line 1069 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::longType; }
-    break;
-
-  case 149:
-
-/* Line 678 of lalr1.cc  */
-#line 1073 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::longlongType; }
-    break;
-
-  case 150:
 
 /* Line 678 of lalr1.cc  */
 #line 1077 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
-  case 151:
+  case 149:
 
 /* Line 678 of lalr1.cc  */
 #line 1078 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
+  case 150:
+
+/* Line 678 of lalr1.cc  */
+#line 1082 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::shortType; }
+    break;
+
+  case 151:
+
+/* Line 678 of lalr1.cc  */
+#line 1086 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::longType; }
+    break;
+
   case 152:
 
 /* Line 678 of lalr1.cc  */
-#line 1079 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
+#line 1090 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::longlongType; }
     break;
 
   case 153:
 
 /* Line 678 of lalr1.cc  */
-#line 1083 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::ushortType; }
+#line 1094 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 154:
 
 /* Line 678 of lalr1.cc  */
-#line 1087 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::ulongType; }
+#line 1095 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 155:
 
 /* Line 678 of lalr1.cc  */
-#line 1091 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::ulonglongType; }
+#line 1096 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = (yysemantic_stack_[(1) - (1)].typeVal); }
     break;
 
   case 156:
 
 /* Line 678 of lalr1.cc  */
-#line 1095 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::charType; }
+#line 1100 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::ushortType; }
     break;
 
   case 157:
 
 /* Line 678 of lalr1.cc  */
-#line 1099 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::wcharType; }
+#line 1104 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::ulongType; }
     break;
 
   case 158:
 
 /* Line 678 of lalr1.cc  */
-#line 1103 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::booleanType; }
+#line 1108 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::ulonglongType; }
     break;
 
   case 159:
 
 /* Line 678 of lalr1.cc  */
-#line 1107 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::octetType; }
+#line 1112 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::charType; }
     break;
 
   case 160:
 
 /* Line 678 of lalr1.cc  */
-#line 1111 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
-    { (yyval.typeVal) = BaseType::anyType; }
+#line 1116 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::wcharType; }
     break;
 
   case 161:
 
 /* Line 678 of lalr1.cc  */
 #line 1120 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::booleanType; }
+    break;
+
+  case 162:
+
+/* Line 678 of lalr1.cc  */
+#line 1124 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::octetType; }
+    break;
+
+  case 163:
+
+/* Line 678 of lalr1.cc  */
+#line 1128 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+    { (yyval.typeVal) = BaseType::anyType; }
+    break;
+
+  case 164:
+
+/* Line 678 of lalr1.cc  */
+#line 1137 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new StringType((yysemantic_stack_[(4) - (3)].integerVal)));
     (yyval.typeVal) = p; 
 }
     break;
 
-  case 162:
+  case 165:
 
 /* Line 678 of lalr1.cc  */
-#line 1125 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1142 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.typeVal) = StringType::unboundedStringType;
 }
     break;
 
-  case 163:
+  case 166:
 
 /* Line 678 of lalr1.cc  */
-#line 1131 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1148 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     { 
     IdlType::Ptr p(new WStringType((yysemantic_stack_[(4) - (3)].integerVal)));
     (yyval.typeVal) = p; 
 }
     break;
 
-  case 164:
+  case 167:
 
 /* Line 678 of lalr1.cc  */
-#line 1136 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1153 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     (yyval.typeVal) = WStringType::unboundedWStringType;
 }
     break;
 
-  case 165:
+  case 168:
 
 /* Line 678 of lalr1.cc  */
-#line 1146 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1163 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p = driver.currentType();
     StructType *s = static_cast<StructType*>(p.get());
@@ -1955,24 +1987,24 @@ namespace G3nom {
 }
     break;
 
-  case 166:
+  case 169:
 
 /* Line 678 of lalr1.cc  */
-#line 1160 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1177 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
-  case 167:
+  case 170:
 
 /* Line 678 of lalr1.cc  */
-#line 1162 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1179 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
-  case 168:
+  case 171:
 
 /* Line 678 of lalr1.cc  */
-#line 1166 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1183 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     StructType *s = dynamic_cast<StructType*>(driver.currentType().get());
     if(!s) {
@@ -1984,10 +2016,10 @@ namespace G3nom {
 }
     break;
 
-  case 169:
+  case 172:
 
 /* Line 678 of lalr1.cc  */
-#line 1252 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1269 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p = driver.currentType();
     EnumType *s = dynamic_cast<EnumType*>(p.get());
@@ -2001,24 +2033,24 @@ namespace G3nom {
 }
     break;
 
-  case 170:
+  case 173:
 
 /* Line 678 of lalr1.cc  */
-#line 1265 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1282 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
-  case 171:
+  case 174:
 
 /* Line 678 of lalr1.cc  */
-#line 1267 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1284 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {}
     break;
 
-  case 172:
+  case 175:
 
 /* Line 678 of lalr1.cc  */
-#line 1271 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1288 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     EnumType *s = dynamic_cast<EnumType*>(driver.currentType().get());
     if(!s) {
@@ -2030,20 +2062,20 @@ namespace G3nom {
 }
     break;
 
-  case 173:
+  case 176:
 
 /* Line 678 of lalr1.cc  */
-#line 1285 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1302 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new SequenceType((yysemantic_stack_[(6) - (3)].typeVal), (yysemantic_stack_[(6) - (5)].integerVal)));
     (yyval.typeVal) = p;
 }
     break;
 
-  case 174:
+  case 177:
 
 /* Line 678 of lalr1.cc  */
-#line 1290 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1307 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
     {
     IdlType::Ptr p(new SequenceType((yysemantic_stack_[(4) - (3)].typeVal), 0));  
     (yyval.typeVal) = p;
@@ -2053,7 +2085,7 @@ namespace G3nom {
 
 
 /* Line 678 of lalr1.cc  */
-#line 2057 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
+#line 2089 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
 	default:
           break;
       }
@@ -2258,41 +2290,41 @@ namespace G3nom {
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
-  const short int Parser::yypact_ninf_ = -205;
+  const short int Parser::yypact_ninf_ = -224;
   const short int
   Parser::yypact_[] =
   {
-       153,   -39,   -26,    25,    34,    46,    55,    59,   154,   221,
-      71,   -16,    92,    86,   127,  -205,  -205,  -205,  -205,  -205,
-    -205,  -205,  -205,  -205,  -205,   152,  -205,  -205,   103,   113,
-     155,   170,  -205,    14,  -205,  -205,   167,  -205,  -205,   179,
-     180,  -205,  -205,    97,   133,  -205,  -205,  -205,  -205,  -205,
-    -205,  -205,  -205,  -205,  -205,  -205,  -205,  -205,  -205,  -205,
-    -205,  -205,  -205,   183,  -205,   135,  -205,  -205,  -205,  -205,
-    -205,  -205,  -205,  -205,  -205,  -205,  -205,  -205,  -205,  -205,
-    -205,  -205,  -205,   182,   137,  -205,  -205,   192,  -205,   143,
-     197,   198,  -205,   201,   149,   221,  -205,  -205,   165,   166,
-     168,  -205,   200,   215,   257,  -205,   219,  -205,   160,   160,
-     176,   230,  -205,   228,    -4,   231,    22,    27,   233,  -205,
-      -3,  -205,   135,   116,  -205,   229,   232,   246,  -205,    12,
-     114,   135,   184,  -205,  -205,   226,  -205,   -24,   -35,  -205,
-     250,  -205,   202,   251,    21,   254,   204,   258,   270,   176,
-     284,    24,   286,   207,  -205,   149,    28,  -205,  -205,   239,
-    -205,  -205,    12,    12,  -205,  -205,  -205,  -205,  -205,  -205,
-    -205,    12,    12,    12,   209,  -205,  -205,  -205,   240,  -205,
-     223,   241,   120,   290,  -205,  -205,   287,  -205,   291,  -205,
-     293,   -48,  -205,   297,  -205,   298,   185,   185,   299,    61,
-    -205,   301,  -205,   302,  -205,  -205,   295,   209,    -2,    35,
-    -205,  -205,  -205,    12,    12,    12,    12,    12,    12,    12,
-      12,    12,    12,   303,  -205,   294,  -205,   -24,  -205,   253,
-     256,  -205,  -205,   259,  -205,   256,   304,   305,  -205,   306,
-     260,  -205,   256,  -205,  -205,   263,  -205,   256,  -205,  -205,
-      12,  -205,   102,   102,   -21,   -21,    44,    65,    65,    65,
-      84,    84,  -205,   264,   316,  -205,  -205,  -205,  -205,  -205,
-     266,   185,    12,  -205,  -205,  -205,  -205,   318,   209,  -205,
-    -205,   300,  -205,  -205,   209,   320,    32,  -205,   269,   271,
-     272,   273,    42,  -205,  -205,  -205,  -205,  -205,    32,   312,
-    -205,   263,  -205,   291
+       176,   -51,    23,    51,    76,    85,    92,    94,   177,   242,
+     101,    64,    55,   109,   173,  -224,  -224,  -224,  -224,  -224,
+    -224,  -224,  -224,  -224,  -224,   187,  -224,  -224,   135,   136,
+     193,   194,  -224,   -18,  -224,  -224,   202,  -224,  -224,   203,
+     205,  -224,  -224,   125,   157,  -224,  -224,  -224,  -224,  -224,
+    -224,  -224,  -224,  -224,  -224,  -224,  -224,  -224,  -224,  -224,
+    -224,  -224,  -224,   207,  -224,   159,  -224,  -224,  -224,  -224,
+    -224,  -224,  -224,  -224,  -224,  -224,  -224,  -224,  -224,  -224,
+    -224,  -224,  -224,   208,   162,  -224,  -224,   217,  -224,   183,
+     237,   239,  -224,   240,   188,   242,  -224,  -224,   192,   195,
+     196,  -224,   229,   241,   278,  -224,   245,  -224,   185,   185,
+     200,   254,  -224,   252,    -4,   255,    25,    27,   257,  -224,
+      13,  -224,   159,   139,  -224,   266,   253,   268,  -224,    11,
+     145,   159,   225,  -224,  -224,   267,  -224,    71,    32,  -224,
+     274,  -224,   228,   275,    21,   280,   231,   282,   283,   200,
+     284,    24,   286,   236,  -224,   188,    77,  -224,  -224,   243,
+    -224,  -224,    11,    11,  -224,  -224,  -224,  -224,  -224,  -224,
+    -224,    11,    11,    11,   -16,  -224,  -224,  -224,   244,  -224,
+     222,   238,   151,   290,  -224,  -224,   302,  -224,   303,  -224,
+     307,    89,  -224,   309,  -224,   310,   206,   206,   311,    75,
+    -224,   313,  -224,   314,  -224,  -224,   315,   -16,    15,    59,
+    -224,  -224,  -224,    11,    11,    11,    11,    11,    11,    11,
+      11,    11,    11,   316,  -224,   308,  -224,    71,  -224,   259,
+     269,  -224,  -224,   270,  -224,   269,   317,   318,  -224,    -5,
+     272,  -224,   269,  -224,  -224,   273,  -224,   269,  -224,  -224,
+      11,  -224,   -27,   -27,    74,    74,   123,   107,   107,   107,
+     116,   116,  -224,   276,   326,  -224,  -224,  -224,  -224,  -224,
+     277,   206,   281,    11,  -224,  -224,  -224,  -224,   330,   -16,
+    -224,  -224,   327,  -224,  -224,   328,    34,   334,    86,    11,
+     287,  -224,   285,   288,   289,   291,     7,  -224,   -16,  -224,
+    -224,  -224,  -224,  -224,    86,   325,  -224,   273,  -224,   303
   };
 
   /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -2303,49 +2335,49 @@ namespace G3nom {
   {
          0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     6,     5,     7,     8,    12,
-      11,    10,     9,   109,   110,     0,    23,    32,     0,     0,
-       0,     0,   147,   148,   137,   138,   141,   156,   157,   162,
-     164,   158,   159,     0,     0,    74,    77,    70,   142,   144,
-     145,   146,   143,   150,   151,   152,    71,    72,    73,    78,
-      75,    76,   160,     0,   115,     0,   111,   113,   114,   112,
-     116,   126,   117,   118,   119,   120,   121,   122,   124,   125,
-     127,   128,   123,    56,     0,     1,     2,     0,     3,     0,
-       0,     0,    20,    21,     0,     0,   149,   139,     0,     0,
-       0,   153,   154,     0,     0,   133,   108,   129,   131,   132,
-       0,     0,     4,     0,     0,     0,     0,     0,     0,   172,
-       0,   170,     0,     0,   166,     0,     0,     0,   155,     0,
-       0,     0,     0,   134,   135,    53,    57,     0,    43,    13,
+      11,    10,     9,   112,   113,     0,    23,    32,     0,     0,
+       0,     0,   150,   151,   140,   141,   144,   159,   160,   165,
+     167,   161,   162,     0,     0,    77,    80,    73,   145,   147,
+     148,   149,   146,   153,   154,   155,    74,    75,    76,    81,
+      78,    79,   163,     0,   118,     0,   114,   116,   117,   115,
+     119,   129,   120,   121,   122,   123,   124,   125,   127,   128,
+     130,   131,   126,    59,     0,     1,     2,     0,     3,     0,
+       0,     0,    20,    21,     0,     0,   152,   142,     0,     0,
+       0,   156,   157,     0,     0,   136,   111,   132,   134,   135,
+       0,     0,     4,     0,     0,     0,     0,     0,     0,   175,
+       0,   173,     0,     0,   169,     0,     0,     0,   158,     0,
+       0,     0,     0,   137,   138,    56,    60,     0,    43,    13,
        0,    14,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,   169,     0,     0,   165,   167,     0,
-     161,   163,     0,     0,    88,    89,    82,    79,    80,    81,
-      84,     0,     0,     0,    69,    83,    87,   174,     0,   130,
+       0,     0,     0,     0,   172,     0,     0,   168,   170,     0,
+     164,   166,     0,     0,    91,    92,    85,    82,    83,    84,
+      87,     0,     0,     0,    72,    86,    90,   177,     0,   133,
        0,     0,     0,     0,    17,    16,    18,    19,    44,    15,
        0,     0,    24,     0,    25,     0,     0,     0,     0,     0,
-      33,     0,    34,     0,   171,   168,     0,   103,     0,     0,
-      90,    91,    92,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,   136,    54,   105,     0,   106,     0,
-       0,    28,    30,    29,    26,     0,     0,    38,    47,    50,
-       0,    39,     0,    42,    41,    43,    35,     0,   140,    85,
-       0,    86,    94,    93,    96,    95,    97,   100,    99,    98,
-     102,   101,   173,     0,     0,    46,    58,    27,    31,    36,
-       0,     0,     0,    52,    37,    45,    40,     0,   104,    55,
-     107,     0,    51,    48,    49,     0,    62,    22,     0,     0,
-       0,     0,     0,    63,    65,    66,    67,    68,     0,    60,
-      64,     0,    59,    61
+      33,     0,    34,     0,   174,   171,     0,   106,     0,     0,
+      93,    94,    95,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,   139,    57,   108,     0,   109,     0,
+       0,    28,    30,    29,    26,     0,     0,    38,    47,    53,
+       0,    39,     0,    42,    41,    43,    35,     0,   143,    88,
+       0,    89,    97,    96,    99,    98,   100,   103,   102,   101,
+     105,   104,   176,     0,     0,    46,    61,    27,    31,    36,
+       0,     0,     0,     0,    55,    37,    45,    40,     0,   107,
+      58,   110,     0,    54,    48,    49,    52,     0,    65,     0,
+       0,    22,     0,     0,     0,     0,     0,    66,    51,    50,
+      68,    69,    70,    71,     0,    63,    67,     0,    62,    64
   };
 
   /* YYPGOTO[NTERM-NUM].  */
   const short int
   Parser::yypgoto_[] =
   {
-      -205,  -205,  -205,   321,  -205,  -205,   222,  -205,  -205,  -205,
-    -205,   191,  -205,  -205,  -205,  -205,   186,    93,    38,  -205,
-      69,   144,   193,  -205,  -204,  -205,  -205,  -205,    45,  -205,
-    -205,  -155,  -205,  -205,  -205,  -205,  -205,  -134,    -7,   242,
-    -205,  -205,  -205,   225,   213,  -205,  -205,   236,   340,   341,
-     342,  -205,  -205,  -205,  -205,  -205,  -205,  -205,  -205,   343,
-     344,   345,   346,  -205,   347,   348,     0,  -205,   234,     1,
-    -205,   203,  -205
+      -224,  -224,  -224,   337,  -224,  -224,   233,  -224,  -224,  -224,
+    -224,   209,  -224,  -224,  -224,  -224,   201,   110,    47,  -224,
+      87,   160,   210,  -224,  -223,  -224,  -224,  -224,    52,  -224,
+    -224,  -156,  -224,  -224,  -224,  -224,  -224,  -134,    -7,   256,
+    -224,  -224,  -224,   246,   230,  -224,  -224,   258,   354,   355,
+     356,  -224,  -224,  -224,  -224,  -224,  -224,  -224,  -224,   357,
+     358,   361,   362,  -224,   363,   364,     0,  -224,   250,     1,
+    -224,   219,  -224
   };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -2354,7 +2386,7 @@ namespace G3nom {
   {
         -1,    12,    13,    14,    15,   114,   115,    16,    17,    90,
      144,   145,   233,    18,    91,   151,   152,   187,   188,   237,
-     238,   239,   136,    19,   267,   281,   302,   292,   293,    20,
+     238,   239,   136,    19,   267,   282,   308,   296,   297,    20,
       44,   174,   175,   176,   208,    21,   182,    22,   240,    66,
       67,    68,    69,   106,   107,   108,   109,   133,    70,    71,
       72,    48,    49,    50,    51,    52,    53,    54,    55,    73,
@@ -2369,84 +2401,88 @@ namespace G3nom {
   const short int
   Parser::yytable_[] =
   {
-        23,    24,    65,   183,   139,   154,   249,   207,   209,   231,
-     155,   250,   232,    23,    24,     6,   210,   211,   212,   162,
-       7,    25,   184,     9,   185,   186,   163,   142,   142,   192,
-     146,   269,   200,   146,    26,   164,   165,   205,   274,    84,
-      96,   131,    97,   277,   217,   218,   219,   220,   221,   222,
-     251,   288,   289,   290,   291,   298,   113,   299,   252,   253,
-     254,   255,   256,   257,   258,   259,   260,   261,   166,   167,
-     168,   169,   170,   171,   172,   147,   148,   149,   147,   148,
-     149,   143,   143,   173,   150,    27,    86,   150,   122,     1,
-       2,     3,    85,   264,    28,   278,   213,   214,   215,   216,
-     217,   218,   219,   220,   221,   222,    29,     4,     5,   -46,
-     218,   219,   220,   221,   222,    30,   122,   284,   243,    31,
-     244,   245,   101,   102,   157,     6,   177,   178,   226,   227,
-       7,    83,     8,     9,   221,   222,    88,    23,    24,    10,
-      11,    32,    33,    34,    35,    36,    37,    38,    39,    40,
-      41,    42,    62,   -46,   -46,     6,     1,     2,     3,    89,
-       7,    63,    94,    92,    43,   215,   216,   217,   218,   219,
-     220,   221,   222,    93,     4,     5,    64,    95,    98,    32,
-      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
-      99,   100,     6,   103,   104,   105,   111,     7,   110,     8,
-       9,   112,    43,   113,   116,   117,    10,    11,   118,   119,
-      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
-      42,    62,   125,   126,     6,   127,   128,    23,    24,     7,
-      63,   129,   131,    43,   132,   236,   135,   137,   138,   153,
-     141,   180,   159,   181,   160,    64,    32,    33,    34,    35,
-      36,    37,    38,    39,    40,    41,    42,    62,   161,   189,
-       6,   191,   190,   194,   195,     7,    63,   203,   196,    43,
+        23,    24,    65,   183,   139,   272,   207,   209,    96,    25,
+      97,   273,   269,    23,    24,   210,   211,   212,   162,   275,
+     304,   154,   305,   249,   278,   163,   155,   142,   250,   192,
+     146,   142,   200,   146,   164,   165,   215,   216,   217,   218,
+     219,   220,   221,   222,   290,   213,   214,   215,   216,   217,
+     218,   219,   220,   221,   222,    85,   113,   252,   253,   254,
+     255,   256,   257,   258,   259,   260,   261,   166,   167,   168,
+     169,   170,   171,   172,   251,   147,   148,   149,   147,   148,
+     149,   143,   173,    26,   150,   143,   205,   150,   122,   184,
+     131,   185,   186,   264,   279,   213,   214,   215,   216,   217,
+     218,   219,   220,   221,   222,   292,   293,   294,   295,    86,
+       6,    27,     1,     2,     3,     7,   122,   286,     9,    84,
      213,   214,   215,   216,   217,   218,   219,   220,   221,   222,
-     197,    64,    32,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,    62,   199,   202,   206,   223,   224,   228,
-     -45,   225,    63,   230,   229,    43,   234,   248,   235,   242,
-     246,   263,   247,   265,   286,   262,   266,    64,   271,   268,
-     273,   270,   272,   275,   279,   280,   282,   285,   287,   294,
-     301,   295,   296,   297,    87,   193,   140,   201,   276,   303,
-     283,   241,   198,   300,   179,   134,   130,   156,    45,    46,
-      47,    56,    57,    58,    59,    60,    61,   158,   204
+       4,     5,   243,   298,   244,   245,    28,    23,    24,   217,
+     218,   219,   220,   221,   222,    29,   231,   157,     6,   232,
+     101,   102,    30,     7,    31,     8,     9,   177,   178,   226,
+     227,    83,    10,    11,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    62,   221,   222,     6,     1,
+       2,     3,    88,     7,    63,   -46,   -46,    43,   -46,   218,
+     219,   220,   221,   222,    89,    92,    93,     4,     5,    64,
+      94,    95,    32,    33,    34,    35,    36,    37,    38,    39,
+      40,    41,    42,    98,    99,     6,   100,   103,   104,   105,
+       7,   111,     8,     9,   110,    43,   112,    23,    24,    10,
+      11,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    62,   113,   116,     6,   117,   118,   119,   125,
+       7,    63,   126,   127,    43,   128,   236,   129,   131,   132,
+     135,   137,   138,   153,   141,   160,    64,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    62,   159,
+     161,     6,   180,   189,   181,   191,     7,    63,   190,   194,
+      43,   195,   196,   197,   199,   202,   203,   224,   225,   228,
+     206,   223,    64,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,    62,   -45,   229,   230,   234,   265,
+     235,   242,   246,    63,   247,   263,    43,   248,   262,   266,
+     268,   271,   274,   276,   270,   281,   280,   283,    64,   287,
+     285,   288,   291,   307,   289,   300,   299,   140,   301,   302,
+      87,   303,   201,   193,   309,   277,   306,   241,   284,   198,
+     130,   179,    45,    46,    47,    56,    57,   134,   156,    58,
+      59,    60,    61,   158,   204
   };
 
   /* YYCHECK.  */
   const unsigned short int
   Parser::yycheck_[] =
   {
-         0,     0,     9,   137,     8,     8,     8,   162,   163,    57,
-      13,    13,    60,    13,    13,    39,   171,   172,   173,     7,
-      44,    60,    57,    47,    59,    60,    14,     6,     6,     8,
-       6,   235,     8,     6,    60,    23,    24,     9,   242,    55,
-      26,    13,    28,   247,    65,    66,    67,    68,    69,    70,
-      15,    19,    20,    21,    22,    13,    60,    15,   213,   214,
-     215,   216,   217,   218,   219,   220,   221,   222,    56,    57,
-      58,    59,    60,    61,    62,    51,    52,    53,    51,    52,
-      53,    60,    60,    71,    60,    60,     0,    60,    95,     3,
-       4,     5,     0,   227,    60,   250,    61,    62,    63,    64,
-      65,    66,    67,    68,    69,    70,    60,    21,    22,    65,
-      66,    67,    68,    69,    70,    60,   123,   272,    57,    60,
-      59,    60,    25,    26,     8,    39,    12,    13,     8,     9,
-      44,    60,    46,    47,    69,    70,     9,   137,   137,    53,
-      54,    25,    26,    27,    28,    29,    30,    31,    32,    33,
-      34,    35,    36,    69,    70,    39,     3,     4,     5,     7,
-      44,    45,     7,    60,    48,    63,    64,    65,    66,    67,
-      68,    69,    70,    60,    21,    22,    60,     7,    11,    25,
-      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
-      11,    11,    39,    60,    11,    60,    59,    44,    16,    46,
-      47,     9,    48,    60,     7,     7,    53,    54,     7,    60,
-      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    57,    57,    39,    57,    26,   227,   227,    44,
-      45,    16,    13,    48,    74,    50,    60,     7,    10,     6,
-       9,    57,    13,    17,    12,    60,    25,    26,    27,    28,
-      29,    30,    31,    32,    33,    34,    35,    36,    12,     9,
-      39,    10,    60,     9,    60,    44,    45,    60,    10,    48,
+         0,     0,     9,   137,     8,    10,   162,   163,    26,    60,
+      28,    16,   235,    13,    13,   171,   172,   173,     7,   242,
+      13,     8,    15,     8,   247,    14,    13,     6,    13,     8,
+       6,     6,     8,     6,    23,    24,    63,    64,    65,    66,
+      67,    68,    69,    70,    10,    61,    62,    63,    64,    65,
+      66,    67,    68,    69,    70,     0,    60,   213,   214,   215,
+     216,   217,   218,   219,   220,   221,   222,    56,    57,    58,
+      59,    60,    61,    62,    15,    51,    52,    53,    51,    52,
+      53,    60,    71,    60,    60,    60,     9,    60,    95,    57,
+      13,    59,    60,   227,   250,    61,    62,    63,    64,    65,
+      66,    67,    68,    69,    70,    19,    20,    21,    22,     0,
+      39,    60,     3,     4,     5,    44,   123,   273,    47,    55,
       61,    62,    63,    64,    65,    66,    67,    68,    69,    70,
-      10,    60,    25,    26,    27,    28,    29,    30,    31,    32,
-      33,    34,    35,    36,    10,     9,    57,    57,    75,     9,
-      13,    60,    45,    10,    13,    48,     9,    12,    10,    10,
-       9,    17,    10,    60,    14,    12,    60,    60,    13,    60,
-      60,    17,    16,    60,    60,     9,    60,     9,     8,    60,
-      18,    60,    60,    60,    13,   144,   114,   151,   245,   301,
-     271,   197,   149,   298,   131,   109,   104,   122,     8,     8,
-       8,     8,     8,     8,     8,     8,     8,   123,   155
+      21,    22,    57,   289,    59,    60,    60,   137,   137,    65,
+      66,    67,    68,    69,    70,    60,    57,     8,    39,    60,
+      25,    26,    60,    44,    60,    46,    47,    12,    13,     8,
+       9,    60,    53,    54,    25,    26,    27,    28,    29,    30,
+      31,    32,    33,    34,    35,    36,    69,    70,    39,     3,
+       4,     5,     9,    44,    45,    69,    70,    48,    65,    66,
+      67,    68,    69,    70,     7,    60,    60,    21,    22,    60,
+       7,     7,    25,    26,    27,    28,    29,    30,    31,    32,
+      33,    34,    35,    11,    11,    39,    11,    60,    11,    60,
+      44,    59,    46,    47,    16,    48,     9,   227,   227,    53,
+      54,    25,    26,    27,    28,    29,    30,    31,    32,    33,
+      34,    35,    36,    60,     7,    39,     7,     7,    60,    57,
+      44,    45,    57,    57,    48,    26,    50,    16,    13,    74,
+      60,     7,    10,     6,     9,    12,    60,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    13,
+      12,    39,    57,     9,    17,    10,    44,    45,    60,     9,
+      48,    60,    10,    10,    10,     9,    60,    75,    60,     9,
+      57,    57,    60,    25,    26,    27,    28,    29,    30,    31,
+      32,    33,    34,    35,    36,    13,    13,    10,     9,    60,
+      10,    10,     9,    45,    10,    17,    48,    12,    12,    60,
+      60,    13,    60,    60,    17,     9,    60,    60,    60,     9,
+      59,    14,     8,    18,    16,    60,    59,   114,    60,    60,
+      13,    60,   151,   144,   307,   245,   304,   197,   271,   149,
+     104,   131,     8,     8,     8,     8,     8,   109,   122,     8,
+       8,     8,     8,   123,   155
   };
 
   /* STOS_[STATE-NUM] -- The (internal number of the) accessing
@@ -2481,10 +2517,10 @@ namespace G3nom {
      114,    97,    10,    57,    59,    60,     9,    10,    12,     8,
       13,    15,   107,   107,   107,   107,   107,   107,   107,   107,
      107,   107,    12,    17,   113,    60,    60,   100,    60,   100,
-      17,    13,    16,    60,   100,    60,    93,   100,   107,    60,
-       9,   101,    60,    96,   107,     9,    14,     8,    19,    20,
-      21,    22,   103,   104,    60,    60,    60,    60,    13,    15,
-     104,    18,   102,    94
+      17,    13,    10,    16,    60,   100,    60,    93,   100,   107,
+      60,     9,   101,    60,    96,    59,   107,     9,    14,    16,
+      10,     8,    19,    20,    21,    22,   103,   104,   107,    59,
+      60,    60,    60,    60,    13,    15,   104,    18,   102,    94
   };
 
 #if YYDEBUG
@@ -2513,19 +2549,19 @@ namespace G3nom {
       83,    83,    83,    85,    84,    86,    86,    87,    87,    87,
       88,    88,    90,    89,    91,    91,    92,    92,    92,    92,
       92,    92,    92,    93,    93,    94,    94,    95,    95,    96,
-      96,    97,    97,    98,    98,    98,    99,    99,   101,   100,
-     102,   102,   103,   103,   103,   104,   104,   104,   104,   105,
-     106,   106,   106,   106,   106,   106,   106,   106,   106,   107,
-     107,   107,   107,   107,   107,   107,   107,   107,   108,   108,
-     109,   109,   109,   109,   109,   109,   109,   109,   109,   109,
-     109,   109,   109,   110,   110,   111,   112,   112,   113,   113,
-     113,   114,   114,   115,   115,   115,   116,   116,   116,   116,
-     116,   116,   116,   117,   117,   117,   117,   118,   118,   119,
-     119,   120,   120,   121,   122,   122,   123,   124,   124,   124,
-     125,   125,   126,   126,   127,   127,   127,   128,   129,   130,
-     131,   131,   131,   132,   133,   134,   135,   136,   137,   138,
-     139,   140,   140,   141,   141,   142,   143,   143,   144,   145,
-     146,   146,   147,   148,   148
+      96,    96,    96,    96,    97,    97,    98,    98,    98,    99,
+      99,   101,   100,   102,   102,   103,   103,   103,   104,   104,
+     104,   104,   105,   106,   106,   106,   106,   106,   106,   106,
+     106,   106,   107,   107,   107,   107,   107,   107,   107,   107,
+     107,   108,   108,   109,   109,   109,   109,   109,   109,   109,
+     109,   109,   109,   109,   109,   109,   110,   110,   111,   112,
+     112,   113,   113,   113,   114,   114,   115,   115,   115,   116,
+     116,   116,   116,   116,   116,   116,   117,   117,   117,   117,
+     118,   118,   119,   119,   120,   120,   121,   122,   122,   123,
+     124,   124,   124,   125,   125,   126,   126,   127,   127,   127,
+     128,   129,   130,   131,   131,   131,   132,   133,   134,   135,
+     136,   137,   138,   139,   140,   140,   141,   141,   142,   143,
+     143,   144,   145,   146,   146,   147,   148,   148
   };
 
   /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -2537,19 +2573,19 @@ namespace G3nom {
        3,     3,    10,     0,     6,     2,     3,     4,     3,     3,
        1,     2,     0,     6,     2,     3,     4,     4,     3,     3,
        4,     3,     3,     0,     1,     1,     3,     1,     3,     3,
-       1,     3,     2,     1,     3,     5,     2,     4,     0,     6,
-       0,     2,     0,     1,     3,     2,     2,     2,     2,     5,
+       5,     5,     3,     1,     3,     2,     1,     3,     5,     2,
+       4,     0,     6,     0,     2,     0,     1,     3,     2,     2,
+       2,     2,     5,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     3,     3,
+       1,     1,     1,     2,     2,     2,     3,     3,     3,     3,
+       3,     3,     3,     3,     3,     3,     1,     3,     6,     2,
+       4,     3,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     3,     3,     1,     1,     1,
-       2,     2,     2,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     1,     3,     6,     2,     4,     3,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       3,     1,     1,     1,     2,     2,     3,     1,     1,     2,
-       6,     1,     1,     1,     1,     1,     1,     1,     1,     2,
-       1,     1,     1,     2,     2,     3,     1,     1,     1,     1,
-       1,     4,     1,     4,     1,     5,     1,     2,     3,     5,
-       1,     3,     1,     6,     4
+       1,     1,     1,     3,     1,     1,     1,     2,     2,     3,
+       1,     1,     2,     6,     1,     1,     1,     1,     1,     1,
+       1,     1,     2,     1,     1,     1,     2,     2,     3,     1,
+       1,     1,     1,     1,     4,     1,     4,     1,     5,     1,
+       2,     3,     5,     1,     3,     1,     6,     4
   };
 
 #if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
@@ -2612,43 +2648,45 @@ namespace G3nom {
       10,    97,    -1,    60,    10,    60,    93,    -1,    60,    10,
       59,    -1,    60,    10,    57,    -1,    -1,    94,    -1,    60,
       -1,    94,    13,    60,    -1,    96,    -1,    95,    13,    96,
-      -1,    97,    16,   107,    -1,    97,    -1,    50,    17,    60,
-      -1,   114,    60,    -1,    60,    -1,    60,    17,    60,    -1,
-      60,    17,    60,    17,    60,    -1,    53,    60,    -1,    53,
-      60,    16,    98,    -1,    -1,    60,   101,    14,   103,    15,
-     102,    -1,    -1,    18,    94,    -1,    -1,   104,    -1,   103,
-      13,   104,    -1,    19,    60,    -1,    20,    60,    -1,    21,
-      60,    -1,    22,    60,    -1,    46,   106,    60,    16,   107,
-      -1,   126,    -1,   135,    -1,   136,    -1,   137,    -1,   124,
-      -1,   140,    -1,   141,    -1,   125,    -1,   138,    -1,    57,
-      -1,    58,    -1,    59,    -1,    56,    -1,   108,    -1,    60,
-      -1,     7,   110,     8,    -1,    14,   107,    15,    -1,   109,
-      -1,    23,    -1,    24,    -1,    61,   107,    -1,    62,   107,
-      -1,    71,   107,    -1,   107,    62,   107,    -1,   107,    61,
-     107,    -1,   107,    64,   107,    -1,   107,    63,   107,    -1,
-     107,    65,   107,    -1,   107,    68,   107,    -1,   107,    67,
-     107,    -1,   107,    66,   107,    -1,   107,    70,   107,    -1,
-     107,    69,   107,    -1,   107,    -1,   110,    13,   107,    -1,
-      54,    55,    59,     7,   112,     8,    -1,   113,     9,    -1,
-     112,     9,   113,     9,    -1,    47,   114,   119,    -1,   142,
-      -1,   145,    -1,   115,    -1,   118,    -1,   116,    -1,   117,
-      -1,    60,    -1,   124,    -1,   126,    -1,   135,    -1,   136,
-      -1,   137,    -1,   138,    -1,   139,    -1,   148,    -1,   140,
-      -1,   141,    -1,   125,    -1,   142,    -1,   145,    -1,   120,
-      -1,   119,    13,   120,    -1,   121,    -1,   122,    -1,    60,
-      -1,   121,   123,    -1,   122,   123,    -1,    74,    57,    75,
-      -1,    27,    -1,    28,    -1,    26,    28,    -1,    29,    11,
-      57,    13,    57,    12,    -1,    29,    -1,   127,    -1,   131,
-      -1,   128,    -1,   129,    -1,   130,    -1,    25,    -1,    26,
-      -1,    26,    26,    -1,   132,    -1,   133,    -1,   134,    -1,
-      48,    25,    -1,    48,    26,    -1,    48,    26,    26,    -1,
-      30,    -1,    31,    -1,    34,    -1,    35,    -1,    36,    -1,
-      32,    11,    57,    12,    -1,    32,    -1,    33,    11,    57,
-      12,    -1,    33,    -1,    44,    60,     7,   143,     8,    -1,
-     144,    -1,   143,   144,    -1,   114,   119,     9,    -1,    39,
-      60,     7,   146,     8,    -1,   147,    -1,   146,    13,   147,
-      -1,    60,    -1,    45,    11,   115,    13,    57,    12,    -1,
-      45,    11,   115,    12,    -1
+      -1,    97,    10,    59,    -1,    97,    16,   107,    10,    59,
+      -1,    97,    10,    59,    16,   107,    -1,    97,    16,   107,
+      -1,    97,    -1,    50,    17,    60,    -1,   114,    60,    -1,
+      60,    -1,    60,    17,    60,    -1,    60,    17,    60,    17,
+      60,    -1,    53,    60,    -1,    53,    60,    16,    98,    -1,
+      -1,    60,   101,    14,   103,    15,   102,    -1,    -1,    18,
+      94,    -1,    -1,   104,    -1,   103,    13,   104,    -1,    19,
+      60,    -1,    20,    60,    -1,    21,    60,    -1,    22,    60,
+      -1,    46,   106,    60,    16,   107,    -1,   126,    -1,   135,
+      -1,   136,    -1,   137,    -1,   124,    -1,   140,    -1,   141,
+      -1,   125,    -1,   138,    -1,    57,    -1,    58,    -1,    59,
+      -1,    56,    -1,   108,    -1,    60,    -1,     7,   110,     8,
+      -1,    14,   107,    15,    -1,   109,    -1,    23,    -1,    24,
+      -1,    61,   107,    -1,    62,   107,    -1,    71,   107,    -1,
+     107,    62,   107,    -1,   107,    61,   107,    -1,   107,    64,
+     107,    -1,   107,    63,   107,    -1,   107,    65,   107,    -1,
+     107,    68,   107,    -1,   107,    67,   107,    -1,   107,    66,
+     107,    -1,   107,    70,   107,    -1,   107,    69,   107,    -1,
+     107,    -1,   110,    13,   107,    -1,    54,    55,    59,     7,
+     112,     8,    -1,   113,     9,    -1,   112,     9,   113,     9,
+      -1,    47,   114,   119,    -1,   142,    -1,   145,    -1,   115,
+      -1,   118,    -1,   116,    -1,   117,    -1,    60,    -1,   124,
+      -1,   126,    -1,   135,    -1,   136,    -1,   137,    -1,   138,
+      -1,   139,    -1,   148,    -1,   140,    -1,   141,    -1,   125,
+      -1,   142,    -1,   145,    -1,   120,    -1,   119,    13,   120,
+      -1,   121,    -1,   122,    -1,    60,    -1,   121,   123,    -1,
+     122,   123,    -1,    74,    57,    75,    -1,    27,    -1,    28,
+      -1,    26,    28,    -1,    29,    11,    57,    13,    57,    12,
+      -1,    29,    -1,   127,    -1,   131,    -1,   128,    -1,   129,
+      -1,   130,    -1,    25,    -1,    26,    -1,    26,    26,    -1,
+     132,    -1,   133,    -1,   134,    -1,    48,    25,    -1,    48,
+      26,    -1,    48,    26,    26,    -1,    30,    -1,    31,    -1,
+      34,    -1,    35,    -1,    36,    -1,    32,    11,    57,    12,
+      -1,    32,    -1,    33,    11,    57,    12,    -1,    33,    -1,
+      44,    60,     7,   143,     8,    -1,   144,    -1,   143,   144,
+      -1,   114,   119,     9,    -1,    39,    60,     7,   146,     8,
+      -1,   147,    -1,   146,    13,   147,    -1,    60,    -1,    45,
+      11,   115,    13,    57,    12,    -1,    45,    11,   115,    12,
+      -1
   };
 
   /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
@@ -2661,19 +2699,19 @@ namespace G3nom {
       58,    62,    66,    77,    78,    85,    88,    92,    97,   101,
      105,   107,   110,   111,   118,   121,   125,   130,   135,   139,
      143,   148,   152,   156,   157,   159,   161,   165,   167,   171,
-     175,   177,   181,   184,   186,   190,   196,   199,   204,   205,
-     212,   213,   216,   217,   219,   223,   226,   229,   232,   235,
-     241,   243,   245,   247,   249,   251,   253,   255,   257,   259,
-     261,   263,   265,   267,   269,   271,   275,   279,   281,   283,
-     285,   288,   291,   294,   298,   302,   306,   310,   314,   318,
-     322,   326,   330,   334,   336,   340,   347,   350,   355,   359,
-     361,   363,   365,   367,   369,   371,   373,   375,   377,   379,
-     381,   383,   385,   387,   389,   391,   393,   395,   397,   399,
-     401,   405,   407,   409,   411,   414,   417,   421,   423,   425,
-     428,   435,   437,   439,   441,   443,   445,   447,   449,   451,
-     454,   456,   458,   460,   463,   466,   470,   472,   474,   476,
-     478,   480,   485,   487,   492,   494,   500,   502,   505,   509,
-     515,   517,   521,   523,   530
+     175,   181,   187,   191,   193,   197,   200,   202,   206,   212,
+     215,   220,   221,   228,   229,   232,   233,   235,   239,   242,
+     245,   248,   251,   257,   259,   261,   263,   265,   267,   269,
+     271,   273,   275,   277,   279,   281,   283,   285,   287,   291,
+     295,   297,   299,   301,   304,   307,   310,   314,   318,   322,
+     326,   330,   334,   338,   342,   346,   350,   352,   356,   363,
+     366,   371,   375,   377,   379,   381,   383,   385,   387,   389,
+     391,   393,   395,   397,   399,   401,   403,   405,   407,   409,
+     411,   413,   415,   417,   421,   423,   425,   427,   430,   433,
+     437,   439,   441,   444,   451,   453,   455,   457,   459,   461,
+     463,   465,   467,   470,   472,   474,   476,   479,   482,   486,
+     488,   490,   492,   494,   496,   501,   503,   508,   510,   516,
+     518,   521,   525,   531,   533,   537,   539,   546
   };
 
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
@@ -2685,19 +2723,19 @@ namespace G3nom {
      327,   337,   347,   368,   367,   378,   379,   383,   387,   404,
      413,   417,   426,   425,   436,   437,   441,   445,   450,   453,
      457,   502,   512,   517,   520,   526,   530,   536,   538,   542,
-     547,   553,   567,   578,   599,   636,   655,   660,   671,   670,
-     682,   683,   690,   691,   693,   697,   708,   719,   723,   731,
-     738,   739,   740,   741,   742,   743,   744,   745,   746,   751,
-     755,   759,   763,   767,   771,   776,   780,   784,   788,   792,
-     799,   805,   809,   816,   823,   830,   837,   844,   851,   858,
-     865,   872,   879,   888,   894,   903,   909,   914,   921,   926,
-     928,   940,   944,   950,   951,   952,   963,   964,   965,   966,
-     967,   968,   969,   975,   976,   977,   978,   982,   984,   988,
-     994,  1006,  1007,  1011,  1018,  1023,  1030,  1039,  1040,  1041,
-    1045,  1050,  1054,  1055,  1059,  1060,  1061,  1065,  1069,  1073,
-    1077,  1078,  1079,  1083,  1087,  1091,  1095,  1099,  1103,  1107,
-    1111,  1119,  1124,  1130,  1135,  1145,  1159,  1161,  1165,  1251,
-    1265,  1266,  1270,  1284,  1289
+     547,   553,   559,   564,   570,   584,   595,   616,   653,   672,
+     677,   688,   687,   699,   700,   707,   708,   710,   714,   725,
+     736,   740,   748,   755,   756,   757,   758,   759,   760,   761,
+     762,   763,   768,   772,   776,   780,   784,   788,   793,   797,
+     801,   805,   809,   816,   822,   826,   833,   840,   847,   854,
+     861,   868,   875,   882,   889,   896,   905,   911,   920,   926,
+     931,   938,   943,   945,   957,   961,   967,   968,   969,   980,
+     981,   982,   983,   984,   985,   986,   992,   993,   994,   995,
+     999,  1001,  1005,  1011,  1023,  1024,  1028,  1035,  1040,  1047,
+    1056,  1057,  1058,  1062,  1067,  1071,  1072,  1076,  1077,  1078,
+    1082,  1086,  1090,  1094,  1095,  1096,  1100,  1104,  1108,  1112,
+    1116,  1120,  1124,  1128,  1136,  1141,  1147,  1152,  1162,  1176,
+    1178,  1182,  1268,  1282,  1283,  1287,  1301,  1306
   };
 
   // Print the state stack on the debug stream.
@@ -2778,7 +2816,7 @@ namespace G3nom {
   }
 
   const int Parser::yyeof_ = 0;
-  const int Parser::yylast_ = 358;
+  const int Parser::yylast_ = 374;
   const int Parser::yynnts_ = 73;
   const int Parser::yyempty_ = -2;
   const int Parser::yyfinal_ = 85;
@@ -2796,11 +2834,11 @@ namespace G3nom {
 } // G3nom
 
 /* Line 1054 of lalr1.cc  */
-#line 2800 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
+#line 2838 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.cpp"
 
 
 /* Line 1056 of lalr1.cc  */
-#line 1295 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
+#line 1312 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.yy"
  /*** Additional Code ***/
 
 void G3nom::Parser::error(const Parser::location_type& l,

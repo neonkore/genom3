@@ -539,7 +539,24 @@ inputs:
 {};
 
 input:
-  input_type EQUAL literal
+  input_type COLON STRINGLIT 
+{
+    $1.doc = $3;
+    driver.currentService()->addInput($1);
+}
+| input_type EQUAL literal COLON STRINGLIT 
+{
+    $1.defaultValue = $3;
+    $1.doc = $5;
+    driver.currentService()->addInput($1);
+}
+| input_type COLON STRINGLIT EQUAL literal 
+{
+    $1.defaultValue = $5;
+    $1.doc = $3;
+    driver.currentService()->addInput($1);
+}
+| input_type EQUAL literal
 {
     $1.defaultValue = $3;
     driver.currentService()->addInput($1);

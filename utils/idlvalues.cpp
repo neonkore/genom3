@@ -55,6 +55,9 @@ std::string Literal::print() const
 			}
 			ss << "}";
 			break;
+		} case String: {
+			ss << boost::get<std::string>(m_value);
+			break;
 		} case Plus: {
 			ss << m_members.front().print();
 			ss << " + " << m_members.back().print();

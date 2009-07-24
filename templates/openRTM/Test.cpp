@@ -198,8 +198,12 @@ void <!capCompName!>Test::run<!service.name!>()
 
   for i in service.inputs():
     flat = flatStruct(inputType(i), i.identifier)
+    if i.defaultValue.isEmpty():
+      defValue = ""
+    else:
+      defValue = "(default : \" << " + i.defaultValue.toString() + " << \")"
     ?>
-     cout << "Enter <!i.identifier!> (<!i.doc!>) :" << endl;
+     cout << "Enter <!i.identifier!> (<!i.doc!>) <!defValue!> :" << endl;
 <?
     for x in flat:
       t = MapTypeToCpp(x[0], True)

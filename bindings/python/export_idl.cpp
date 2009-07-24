@@ -90,7 +90,7 @@ void export_idl()
 	def("MapTypeToIdl", &MapTypeToIdl);
 
 	class_<Literal>("Literal")
-	.def("print", &Literal::print)
+	.def("toString", &Literal::print)
 	.def("isEmpty", &Literal::isEmpty);
 
 	class_<ConstValue>("ConstValue")

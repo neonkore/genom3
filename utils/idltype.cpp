@@ -105,7 +105,7 @@ IdlType::Ptr IdlType::unalias()
 		case Typedef: {
 			TypedefType *t = asType<TypedefType>();
 			IdlType::Ptr p = t->aliasType()->unalias();
-			if(p.get())
+			if(p)
 				return p;
 			else
 				return t->aliasType();
@@ -113,7 +113,7 @@ IdlType::Ptr IdlType::unalias()
 		} case Named: {
 			NamedType *n = asType<NamedType>();
 			IdlType::Ptr pp = n->type()->unalias();
-			if(pp.get())
+			if(pp)
 				return pp;
 			else
 				return n->type();

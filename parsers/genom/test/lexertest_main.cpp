@@ -46,8 +46,9 @@ int main(int argc, char* argv[])
 		if (arg == "testComponent") {
 			s = "component test {\n"
 			    "language:	\"c\";\n"
-			    "ids:		testids;\n"
+// 			    "ids:		testids;\n"
 			    "version: 	\"0.1\";\n"
+				"requires: pilo, loco;"
 			    "};\n";
 		} else if (arg == "testTask") {
 			s = "task main { "

@@ -94,7 +94,7 @@ void Component::debug()
 			it != events.end(); ++it) {
 		cout << "\t* " << it->first;
 		Event::Ptr e = it->second->asNamedEvent()->aliasEvent();
-		if(e.get())
+		if(e)
 			cout << " : " << e->identifier();
 		cout << endl;
 	}
@@ -270,7 +270,7 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 	}
 
 	// create a new named refering to the found type
-	if(res.get()) {
+	if(res) {
 		IdlType::Ptr p(new NamedType(name, res));
 		return p;
 	} else
@@ -279,6 +279,11 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 
 IdlType::Ptr Component::typeFromIdsName(const std::string &name)
 {
+	if(!IDSType) {
+		cout << "Warning: Trying to access an IDS type but there is no IDS type defined yet" << endl;
+		return IdlType::Ptr();
+	}
+  
 	IdlType::Ptr ids = IDSType->unalias();
 	switch(ids->kind()) {
 		case IdlType::Struct:{
@@ -295,12 +300,6 @@ IdlType::Ptr Component::typeFromIdsName(const std::string &name)
 void Component::addImportedComponent(const std::string &s)
 {
 	m_importedComponents.push_back(s);
-}
-
-void Component::addImportedComponents(const std::vector<std::string> &v)
-{
-	for(std::vector<std::string>::const_iterator it = v.begin(); it != v.begin(); ++it)
-		m_importedComponents.push_back(*it);
 }
 
 void Component::addNativeTypeInclude(const std::string &s)
@@ -340,7 +339,7 @@ std::vector<std::string> Component::eventsForService(const std::string &name)
 	Event::Map::const_iterator it = events.begin();
 	for(; it != events.end(); ++it) {
 		NamedEvent *nev = it->second->asNamedEvent();
-		if(!nev || !nev->aliasEvent().get())
+		if(!nev || !nev->aliasEvent())
 			continue;
 
 		if(nev->aliasEvent()->kind() == Event::ServiceEv) {
@@ -360,7 +359,7 @@ void Port::debug()
 		cout << "Inport; ";
 	else {
 		cout << "Outport; ";
-		if(sizeCodel.get()) {
+		if(sizeCodel) {
 			cout << endl << "Size codel: ";
 			sizeCodel->debug();
 			cout << endl;
@@ -477,7 +476,7 @@ void Service::debug()
 // void Service::addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue)
 // {
 // 	Input i;
-// 	if(!t.get())
+// 	if(!t)
 // 		i.kind = Input::IDSMember;
 // 	else {
 // 		i.kind = Input::Type;

@@ -155,7 +155,6 @@ struct variant_type {
 
 %type <serviceInputVal>		input_type;
 
-%type <stringVal>		identifier_list
 %type <stringVal>		identifiers
 %type <codelVal>		codel_prototype
 %type <eventVal>		event_spec
@@ -295,63 +294,52 @@ component_field:
       YYERROR;
     }
 }
-| IDENTIFIER COLON IDENTIFIER
+| IDENTIFIER COLON identifiers
 {
-    if($1 == "ids") {
-	Idl::IdlType::Ptr p = driver.component().typeFromName($3);
-	if(!p.get()) {
-	    error(yyloc, std::string("Unknown type: ") + $3);
-	    YYERROR;
+    std::vector<std::string> v;
+    driver.split($3, v);
+
+    if(v.size() > 1) {
+	if($1 == "requires") {
+	  for(std::vector<std::string>::const_iterator it = v.begin(); it != v.end(); ++it)
+	      driver.component().addImportedComponent(*it);
+	} else {
+	  error(yyloc, std::string("Unknown syntax for component field: ") + $1);
+	  YYERROR;
 	}
-	driver.component().IDSType = p;
     } else {
-      error(yyloc, std::string("Unknown component field: ") + $1);
-      YYERROR;
-    }
-}
-| IDENTIFIER COLON identifier_list
-{
-    if($1 == "requires") {
-      std::vector<std::string> v;
-      driver.split($3, v);
-      driver.component().addImportedComponents(v);
-    } else {
-      error(yyloc, std::string("Unknown syntax for component field: ") + $1);
-      YYERROR;
+      if($1 == "ids") {
+	  Idl::IdlType::Ptr p = driver.component().typeFromName($3);
+	  if(!p) {
+	      error(yyloc, std::string("Unknown type: ") + $3);
+	      YYERROR;
+	  }
+	  driver.component().IDSType = p;
+      } else if($1 == "requires") {
+	  driver.component().addImportedComponent($3);
+      } else {
+	error(yyloc, std::string("Unknown component field: ") + $1);
+	YYERROR;
+      }
     }
 };
 
 /*** Inport or outport declaration ***/
 
 port_decl:
-  INPORT IDENTIFIER IDENTIFIER
+  INPORT type_spec IDENTIFIER
 {
-    Idl::IdlType::Ptr type = driver.component().typeFromName($2);
-    if(!type.get()) {
-	error(yyloc, std::string("Unknown type: ") + $2);
-	YYERROR;
-    }
-    Port::Ptr p(new Port($3, type, true));
+    Port::Ptr p(new Port($3, $2, true));
     driver.component().addPort(p);
 }
-| OUTPORT IDENTIFIER IDENTIFIER
+| OUTPORT type_spec IDENTIFIER
 {
-    Idl::IdlType::Ptr type = driver.component().typeFromName($2);
-    if(!type.get()) {
-	error(yyloc, std::string("Unknown type: ") + $2);
-	YYERROR;
-    }
-    Port::Ptr p(new Port($3, type, false));
+    Port::Ptr p(new Port($3, $2, false));
     driver.component().addPort(p);
 }
-| OUTPORT IDENTIFIER IDENTIFIER LBRACE CODEL IDENTIFIER COLON codel_prototype SEMICOLON RBRACE
+| OUTPORT type_spec IDENTIFIER LBRACE CODEL IDENTIFIER COLON codel_prototype SEMICOLON RBRACE
 {
-    Idl::IdlType::Ptr type = driver.component().typeFromName($2);
-    if(!type.get()) {
-	error(yyloc, std::string("Unknown type: ") + $2);
-	YYERROR;
-    }
-    Port::Ptr p(new Port($3, type, false));
+    Port::Ptr p(new Port($3, $2, false));
     if($6 == "size")
       p->sizeCodel = $8;
     else {
@@ -401,22 +389,18 @@ task_field:
       YYERROR;
     }
 } 
-| IDENTIFIER COLON task_errors_list
+| IDENTIFIER COLON identifiers
 {
     if($1 != "errors") {
       error(yyloc, std::string("Wrong arguments for field: ") + $1);
       YYERROR;
     }
-};
 
-task_errors_list:
-  IDENTIFIER 
-{
-    driver.currentTask()->addErrorMessage($1);
-}
-| task_errors_list IDENTIFIER
-{
-    driver.currentTask()->addErrorMessage($2);
+    std::vector<std::string> ids;
+    driver.split($3, ids);
+    std::vector<std::string>::const_iterator it = ids.begin();
+    for(; it != ids.end(); ++it)
+      driver.currentTask()->addErrorMessage(*it);
 };
 
 /*** Service Declaration ***/
@@ -454,11 +438,13 @@ service_field:
 {
     driver.currentService()->output = $3;
 }
-| IDENTIFIER COLON IDENTIFIER identifier_list
+| IDENTIFIER COLON identifiers
 {
     Service::Ptr s = driver.currentService();
+    std::vector<std::string> v;
+    driver.split($3, v);
 
-    if($4 == "") {
+    if(v.size() == 1) {
 	if($1 == "type") {
 	    if($3 == "init")
 	      s->type = Service::Init;
@@ -481,17 +467,13 @@ service_field:
 	  YYERROR;
 	}
     } else {
-	std::vector<std::string> ids;
-	driver.split($4, ids);
-	std::vector<std::string>::const_iterator it = ids.begin();
+	std::vector<std::string>::const_iterator it = v.begin();
 
 	if($1 == "errors") {
-	    driver.currentService()->addErrorMessage($3);
-	    for(; it != ids.end(); ++it)
+	    for(; it != v.end(); ++it)
 		driver.currentService()->addErrorMessage(*it);
 	} else if ($1 == "interrupts") {
-	    driver.currentService()->addIncompatibleService($3);
-	    for(; it != ids.end(); ++it)
+	    for(; it != v.end(); ++it)
 		driver.currentService()->addIncompatibleService(*it);
 	} else {
 	  error(yyloc, std::string("Unknown service field (or wrong number of arguments): ") + $1);
@@ -508,19 +490,7 @@ service_field:
       error(yyloc, std::string("Unknown service field: ") + $1);
       YYERROR;
     }
-}
-| IDENTIFIER COLON INTEGERLIT 
-{};
-
-identifier_list:
-/*empty*/
-{
-    $$ = "";
-}
-| identifiers
-{
-    $$ = $1;
-}
+};
 
 identifiers:
  IDENTIFIER 
@@ -571,7 +541,7 @@ input_type:
 {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName($3);
-    if(!t.get()) {
+    if(!t) {
       error(yyloc, std::string("Input is not in the IDS: ") + $3);
       YYERROR;
     }
@@ -595,7 +565,7 @@ event_spec:
   IDENTIFIER
 {
     Event::Ptr ev = driver.component().event($1);
-    if(ev.get()) { // external event
+    if(ev) { // external event
       Event::Ptr e(new NamedEvent($1, ev));
       $$ = e;
     } else { // service event
@@ -618,8 +588,8 @@ event_spec:
     //try to find what type of event this is
     Port::Ptr p = driver.component().port($1);
     Service::Ptr s = driver.component().service($1);
-    std::cout << "Reading " << $1 << " and " << $3 << std::endl;
-    if(p.get()) { // port event
+
+    if(p) { // port event
       if($3 == "onUpdate") 
 	$$ = Event::Ptr(new PortEvent(p->name, PortEvent::OnUpdate));
       else if($3 == "onRead") 
@@ -632,7 +602,7 @@ event_spec:
 	  error(yyloc, std::string("Unknown port event: ") + $3);
 	  YYERROR;
       }
-    } else if(s.get()) {
+    } else if(s) {
       if($3 == "onCalled") 
 	$$ = Event::Ptr(new ServiceEvent(s->name, ServiceEvent::OnCalled));
       else if($3 == "onStart") 
@@ -658,7 +628,7 @@ event_spec:
     }
 
     Service::Ptr s = driver.component().service($1);
-    if(!s.get()) {
+    if(!s) {
 	  error(yyloc, std::string("Unknwon service : ") + $1 );
 	  YYERROR;
     }  
@@ -669,14 +639,23 @@ event_spec:
 ;
 
 event_decl:
-  EVENT IDENTIFIER 
+  EVENT event_declarators
+
+event_declarators:
+  event_declarator
+{}
+| event_declarators COMMA event_declarator
+{};
+
+event_declarator:
+  IDENTIFIER 
 {
-    Event::Ptr ev(new NamedEvent($2));
+    Event::Ptr ev(new NamedEvent($1));
     driver.component().addEvent(ev);
 }
-| EVENT IDENTIFIER EQUAL event_spec
+| IDENTIFIER EQUAL event_spec
 {
-    Event::Ptr ev(new NamedEvent($2, $4));
+    Event::Ptr ev(new NamedEvent($1, $3));
     driver.component().addEvent(ev);
 }
 ;
@@ -715,7 +694,7 @@ codel_field:
 {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName($2);
-    if(!t.get()) {
+    if(!t) {
       error(yyloc, std::string("Input is not in the IDS: ") + $2);
       YYERROR;
     }
@@ -726,7 +705,7 @@ codel_field:
 {
     // check if the name given is in the ids
     Idl::IdlType::Ptr t = driver.component().typeFromIdsName($2);
-    if(!t.get()) {
+    if(!t) {
       error(yyloc, std::string("Output is not in the IDS: ") + $2);
       YYERROR;
     }
@@ -969,7 +948,7 @@ simple_type_spec:
 | IDENTIFIER
 {
     IdlType::Ptr type = driver.component().typeFromName($1);
-    if(!type.get()) {
+    if(!type) {
 	error(yyloc, std::string("Unknown type: ") + $1);
 	YYERROR;
     }

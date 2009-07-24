@@ -44,12 +44,14 @@ int main(int argc, char* argv[])
 		"  genom3 [-t template] [-o out_dir] file\n"
 		"with\n"
 		"  -h Display this help message\n"
-		"  -d Display debug information\n");
+		"  -d Display debug information\n"
+		"  -s Do not generate anything, only check the .gnm syntax");
 
 	string templatesDir("/home/ccpasteur/work/git/g3nom/templates/");
 	string templ("genom_legacy");
 
 	string outputDir;
+	bool checkSyntaxMode;
 
 	int idx = 1;
 	while ((idx < argc) && (argv[idx][0]=='-')) {
@@ -58,6 +60,8 @@ int main(int argc, char* argv[])
 			outputDir = argv[++idx];
 		} else if(sw == "-t") {
 			templ = argv[++idx];
+		} else if(sw == "-s") {
+			checkSyntaxMode = true;
 		} else if(sw == "-u" || sw == "--help" || sw == "-h") {
 			cout << usage_str << endl;
 			exit(0);
@@ -65,7 +69,6 @@ int main(int argc, char* argv[])
 		idx++;
 	}
 
-	cout << "n rags: " << argc << " idx: " << idx << endl;
 	if(idx >= argc) { // not enough args
 		cout << "Not enough arguments" << endl;
 		cout << usage_str << endl;
@@ -81,6 +84,11 @@ int main(int argc, char* argv[])
 		cout << "Error parsing .gnm file: " << argv[idx] << endl;
 		exit(1);
 	}
+	if(checkSyntaxMode) {
+		cout << "File syntax is correct." << endl;
+		exit(0);
+	}
+
 	ti.setComponent(&(d.component()));
 
 	if(outputDir.empty())

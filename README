@@ -60,6 +60,7 @@ with
   is currently hardcoded in the app) (Supported templates: genom_legacy (default), yarp, openRTM)
   -o Sets the directory where to output files. By default, files will be put in the same directory 
   as the .gnm file
+  -s Do not generate anything, only check the .gnm syntax.
 
 * Test app (build/core/test_gen)
   Interpret one file from a template (.gnm file path is hardcoded). Can be useful when creating a new template.

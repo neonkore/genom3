@@ -8525,6 +8525,65 @@ fail:
 
 
 SWIGINTERN int
+_wrap_ServiceInput_doc_set(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::ServiceInput *arg1 = (G3nom::ServiceInput *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"oo:ServiceInput_doc_set self doc ",(void *)0,(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__ServiceInput, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ServiceInput_doc_set" "', argument " "1"" of type '" "G3nom::ServiceInput *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::ServiceInput * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string SWIG_TCL_CALL_ARGS_2(objv[2], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ServiceInput_doc_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ServiceInput_doc_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  if (arg1) (arg1)->doc = *arg2;
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_OK;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_ServiceInput_doc_get(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::ServiceInput *arg1 = (G3nom::ServiceInput *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::string *result = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"o:ServiceInput_doc_get self ",(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__ServiceInput, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ServiceInput_doc_get" "', argument " "1"" of type '" "G3nom::ServiceInput *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::ServiceInput * >(argp1);
+  {
+    std::string const &_result_ref =  ((arg1)->doc);
+    result = (std::string *) &_result_ref;
+  }
+  Tcl_SetObjResult(interp,SWIG_From_std_string(static_cast< std::string >(*result)));
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
 _wrap_delete_ServiceInput(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::ServiceInput *arg1 = (G3nom::ServiceInput *) 0 ;
   void *argp1 = 0 ;
@@ -8556,6 +8615,7 @@ static swig_attribute swig_G3nom_ServiceInput_attributes[] = {
     { "-identifier",_wrap_ServiceInput_identifier_get, _wrap_ServiceInput_identifier_set},
     { "-type",_wrap_ServiceInput_type_get, _wrap_ServiceInput_type_set},
     { "-defaultValue",_wrap_ServiceInput_defaultValue_get, _wrap_ServiceInput_defaultValue_set},
+    { "-doc",_wrap_ServiceInput_doc_get, _wrap_ServiceInput_doc_set},
     {0,0,0}
 };
 static swig_class *swig_G3nom_ServiceInput_bases[] = {0};
@@ -10149,6 +10209,65 @@ fail:
 
 
 SWIGINTERN int
+_wrap_Component_addNativeTypeInclude(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::Component *arg1 = (G3nom::Component *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"oo:Component_addNativeTypeInclude self s ",(void *)0,(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__Component, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Component_addNativeTypeInclude" "', argument " "1"" of type '" "G3nom::Component *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::Component * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string SWIG_TCL_CALL_ARGS_2(objv[2], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Component_addNativeTypeInclude" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Component_addNativeTypeInclude" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  (arg1)->addNativeTypeInclude((std::string const &)*arg2);
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_OK;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_Component_nativeTypesIncludes(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::Component *arg1 = (G3nom::Component *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::string > *result = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"o:Component_nativeTypesIncludes self ",(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__Component, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Component_nativeTypesIncludes" "', argument " "1"" of type '" "G3nom::Component const *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::Component * >(argp1);
+  {
+    std::vector< std::string > const &_result_ref = ((G3nom::Component const *)arg1)->nativeTypesIncludes();
+    result = (std::vector< std::string > *) &_result_ref;
+  }
+  Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_t,0));
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
 _wrap_Component_typesVect(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Component *arg1 = (G3nom::Component *) 0 ;
   void *argp1 = 0 ;
@@ -10227,37 +10346,6 @@ _wrap_Component_addImportedComponent(ClientData clientData SWIGUNUSED, Tcl_Inter
   return TCL_OK;
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
-  return TCL_ERROR;
-}
-
-
-SWIGINTERN int
-_wrap_Component_addImportedComponents(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
-  G3nom::Component *arg1 = (G3nom::Component *) 0 ;
-  std::vector< std::string > *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 ;
-  int res2 = 0 ;
-  
-  if (SWIG_GetArgs(interp, objc, objv,"oo:Component_addImportedComponents self v ",(void *)0,(void *)0) == TCL_ERROR) SWIG_fail;
-  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__Component, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Component_addImportedComponents" "', argument " "1"" of type '" "G3nom::Component *""'"); 
-  }
-  arg1 = reinterpret_cast< G3nom::Component * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_std__vectorT_std__string_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Component_addImportedComponents" "', argument " "2"" of type '" "std::vector< std::string > const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Component_addImportedComponents" "', argument " "2"" of type '" "std::vector< std::string > const &""'"); 
-  }
-  arg2 = reinterpret_cast< std::vector< std::string > * >(argp2);
-  (arg1)->addImportedComponents((std::vector< std::string > const &)*arg2);
-  
-  return TCL_OK;
-fail:
   return TCL_ERROR;
 }
 
@@ -10602,10 +10690,11 @@ static swig_method swig_G3nom_Component_methods[] = {
     {"eventsMap", _wrap_Component_eventsMap}, 
     {"addConstValue", _wrap_Component_addConstValue}, 
     {"addType", _wrap_Component_addType}, 
+    {"addNativeTypeInclude", _wrap_Component_addNativeTypeInclude}, 
+    {"nativeTypesIncludes", _wrap_Component_nativeTypesIncludes}, 
     {"typesVect", _wrap_Component_typesVect}, 
     {"valuesMap", _wrap_Component_valuesMap}, 
     {"addImportedComponent", _wrap_Component_addImportedComponent}, 
-    {"addImportedComponents", _wrap_Component_addImportedComponents}, 
     {"importedComponents", _wrap_Component_importedComponents}, 
     {"typeFromName", _wrap_Component_typeFromName}, 
     {"typeFromIdsName", _wrap_Component_typeFromIdsName}, 
@@ -17447,6 +17536,8 @@ static swig_command_info swig_commands[] = {
     { SWIG_prefix "ServiceInput_type_get", (swig_wrapper_func) _wrap_ServiceInput_type_get, NULL},
     { SWIG_prefix "ServiceInput_defaultValue_set", (swig_wrapper_func) _wrap_ServiceInput_defaultValue_set, NULL},
     { SWIG_prefix "ServiceInput_defaultValue_get", (swig_wrapper_func) _wrap_ServiceInput_defaultValue_get, NULL},
+    { SWIG_prefix "ServiceInput_doc_set", (swig_wrapper_func) _wrap_ServiceInput_doc_set, NULL},
+    { SWIG_prefix "ServiceInput_doc_get", (swig_wrapper_func) _wrap_ServiceInput_doc_get, NULL},
     { SWIG_prefix "delete_ServiceInput", (swig_wrapper_func) _wrap_delete_ServiceInput, NULL},
     { SWIG_prefix "ServiceInput", (swig_wrapper_func) SWIG_ObjectConstructor, (ClientData)&_wrap_class_G3nom_ServiceInput},
     { SWIG_prefix "new_Service", (swig_wrapper_func) _wrap_new_Service, NULL},
@@ -17501,10 +17592,11 @@ static swig_command_info swig_commands[] = {
     { SWIG_prefix "Component_eventsMap", (swig_wrapper_func) _wrap_Component_eventsMap, NULL},
     { SWIG_prefix "Component_addConstValue", (swig_wrapper_func) _wrap_Component_addConstValue, NULL},
     { SWIG_prefix "Component_addType", (swig_wrapper_func) _wrap_Component_addType, NULL},
+    { SWIG_prefix "Component_addNativeTypeInclude", (swig_wrapper_func) _wrap_Component_addNativeTypeInclude, NULL},
+    { SWIG_prefix "Component_nativeTypesIncludes", (swig_wrapper_func) _wrap_Component_nativeTypesIncludes, NULL},
     { SWIG_prefix "Component_typesVect", (swig_wrapper_func) _wrap_Component_typesVect, NULL},
     { SWIG_prefix "Component_valuesMap", (swig_wrapper_func) _wrap_Component_valuesMap, NULL},
     { SWIG_prefix "Component_addImportedComponent", (swig_wrapper_func) _wrap_Component_addImportedComponent, NULL},
-    { SWIG_prefix "Component_addImportedComponents", (swig_wrapper_func) _wrap_Component_addImportedComponents, NULL},
     { SWIG_prefix "Component_importedComponents", (swig_wrapper_func) _wrap_Component_importedComponents, NULL},
     { SWIG_prefix "Component_typeFromName", (swig_wrapper_func) _wrap_Component_typeFromName, NULL},
     { SWIG_prefix "Component_typeFromIdsName", (swig_wrapper_func) _wrap_Component_typeFromIdsName, NULL},

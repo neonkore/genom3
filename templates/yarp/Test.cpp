@@ -166,7 +166,7 @@ for s in servicesMap:
   service = s.data()
   serviceInfo = services_info_dict[service.name]
   idx += 1
-  inputFlatList = inputList(service)
+  
   serviceArgs = "input"
   if serviceInfo.inputFlag:
     serviceArgs = serviceInfo.inputName 
@@ -184,9 +184,14 @@ void run<!service.name!>()
   if service.output.identifier and service.type == ServiceType.Control: ?>
     <!serviceInfo.outputTypeCpp!> <!serviceInfo.outputName!>;
 <?
-  for x in inputFlatList:
-    t = MapTypeToCpp(x[0], True)
+  for i in service.inputs():
+    flat = flatStruct(inputType(i), i.identifier)
     ?>
+     cout << "Enter <!i.identifier!> (<!i.doc!>) :" << endl;
+<?
+    for x in flat:
+      t = MapTypeToCpp(x[0], True)
+      if len(flat) > 1: ?>
       cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?
     parseInput(x[0], x[1]);

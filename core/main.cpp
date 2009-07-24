@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 	string templ("genom_legacy");
 
 	string outputDir;
-	bool checkSyntaxMode;
+	bool checkSyntaxMode = false;
 
 	int idx = 1;
 	while ((idx < argc) && (argv[idx][0]=='-')) {

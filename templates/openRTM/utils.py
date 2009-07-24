@@ -7,7 +7,7 @@ capCompName = comp.name().capitalize()
 upperCompName = upper(comp.name())
 
 def needsConversion(t):
-""" Returns whether it is necessary to convert from the CORBA type to the type
+  """ Returns whether it is necessary to convert from the CORBA type to the type
   used by codels """
   if t.isNative():
     return True
@@ -23,7 +23,7 @@ def needsConversion(t):
     return False
 
 def needsConversionFun(t):
-""" Returns whether it is necessary to used a generated function to convert
+  """ Returns whether it is necessary to used a generated function to convert
   from CORBA to codel type. True for structured types"""
   if t.kind() == IdlKind.Struct:
     return True
@@ -35,7 +35,7 @@ def needsConversionFun(t):
     return False
 
 def service_idl_signature(service):
-""" Returns the idl function corresponding to a service."""
+    """ Returns the idl function corresponding to a service."""
     # find the service output type
     if service.type != ServiceType.Control:
       outputType = BaseType.longType
@@ -73,7 +73,7 @@ def cpp_arg(t,name):
     return cppType + " " + name
 
 def service_cpp_args(service, className=""):
- """ Create the args list for the service constructor (for exec services) or functions (control services). """
+    """ Create the args list for the service constructor (for exec services) or functions (control services). """
     args = ""
     for i in service.inputs():
 	t = inputType(i)
@@ -81,7 +81,7 @@ def service_cpp_args(service, className=""):
     return service.name + "(" + args[:-2] + ")"
 
 def service_cpp_signature(service, className=""):
-""" Create the full prototype for a (control) service function."""
+    """ Create the full prototype for a (control) service function."""
     # find the service output type
     if service.type != ServiceType.Control:
       outputType = BaseType.longType
@@ -100,7 +100,7 @@ def service_cpp_signature(service, className=""):
       return output + " " + service_cpp_args(service, className)
 
 def real_codel_call(codel, data_prefix="", service=None, useCopiedArgs = True):
-""" Creates the string to call the user codel. useCopiedArgs indicates whether to use 
+  """ Creates the string to call the user codel. useCopiedArgs indicates whether to use 
   copied vars created with codelLock."""
   proto = ""
   if service is not None:
@@ -147,7 +147,7 @@ def service_call(service):
     return service.name + "(" + args[:-2] + ")"
 
 def serviceOutportsSet(service):
-""" Returns a set of all the outports used by all the service's codels. """
+  """ Returns a set of all the outports used by all the service's codels. """
   portList = []
   for c in service.codels():
     for port in c.data().outPorts:
@@ -155,7 +155,7 @@ def serviceOutportsSet(service):
   return set(portList)
 
 def serviceInportsSet(service):
-""" Returns a set of all the inports used by all the service's codels. """
+  """ Returns a set of all the inports used by all the service's codels. """
   portList = []
   for c in service.codels():
     for port in c.data().inPorts:
@@ -169,7 +169,7 @@ def startStateForService(service):
     return upper(service.name) + "_MAIN"
 
 def outputPortsMap():
-""" Returns a map, matching services name with its output type (or an empty string)
+  """ Returns a map, matching services name with its output type (or an empty string)
   to create the output ports. """
   m = {}
   for s in servicesMap:
@@ -186,7 +186,7 @@ def outputPortsMap():
 output_ports_map = outputPortsMap()
 
 def codelNeedsLock(codel, service=None):
-""" Returns whether it is necessary to lock the IDS when calling the codel. 0 means no locking,
+  """ Returns whether it is necessary to lock the IDS when calling the codel. 0 means no locking,
   1 means lock for read and 2 read for write. """
   if codel.outTypes:
     return 2
@@ -202,7 +202,7 @@ def codelNeedsLock(codel, service=None):
     return 0
 
 def isCorbaDynamic(t):
-""" returns whether the type t is dynamic from CORBA point of view
+  """ returns whether the type t is dynamic from CORBA point of view
   (ie contains a string). These types have to be allocated dynamically."""
   if t.kind() == IdlKind.String:
     return True
@@ -218,7 +218,7 @@ def isCorbaDynamic(t):
     return False
 
 def copyType(t, dest, src):
-""" Copy the CORBA data into the var created for use in the codels.""" 
+    """ Copy the CORBA data into the var created for use in the codels.""" 
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       if isDynamic(s.seqType()):
@@ -253,7 +253,7 @@ def copyType(t, dest, src):
 	#print dest + " = " + src + ";"
 
 def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
-""" Copy data back to the CORBA data structures."""
+    """ Copy data back to the CORBA data structures."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       if not parentIsEmpty or useIsEmptyVar:
@@ -284,7 +284,7 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
 	#print dest + " = " + src + ";"
 
 def freeMemory(t, src):
-""" free the memory allocated dynamically in codelLock taht won't be needed anymore. """
+    """ free the memory allocated dynamically in codelLock taht won't be needed anymore. """
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       if isDynamic(s.seqType()):
@@ -303,7 +303,7 @@ def freeMemory(t, src):
 
 
 def allocMemory(t, dest, scopedName):
-  """ Allocate memory (on CORBA side) after the size codel has been called. """
+    """ Allocate memory (on CORBA side) after the size codel has been called. """
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToCorbaCpp(s.seqType(), True)
@@ -346,7 +346,7 @@ def callSizeCodel(port):
   print "int res = " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ");"
 
 def copyCodelArgs(codel, service):
-""" Copy the codel args to types suitable for the codels."""
+    """ Copy the codel args to types suitable for the codels."""
     if not service is None:
       for i in service.inputs():
 	t = inputType(i)
@@ -358,8 +358,8 @@ def copyCodelArgs(codel, service):
 	    print MapTypeToCpp(t, True) + " " + i.identifier + " = in_" + i.identifier + ";"
 
 def codelLock(codel, service=None):
-""" Prepare to run a codel. Lock the ids if necessary, copy data from CORBA data structures to the structures
-  used by the codel, allocated in this function."""
+    """ Prepare to run a codel. Lock the ids if necessary, copy data from CORBA data structures to the structures
+    used by the codel, allocated in this function."""
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.wait();"
     for p in codel.outPorts:
@@ -434,7 +434,7 @@ def copyCodelArgsReverse(codel, service):
 	  print "//in_" + i.identifier + " = " + i.identifier + ";"
 
 def codelRelease(codel, service=None):
-""" Cleanup after a codel call. Release locks, update the CORBA data structures by copying the codel data structures."""
+    """ Cleanup after a codel call. Release locks, update the CORBA data structures by copying the codel data structures."""
     # update dynamic ports
     for p in codel.outPorts:
       port = comp.port(p)

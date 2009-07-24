@@ -2,7 +2,7 @@
 # This file groups some functions used by multiple templates
 
 def isDynamic(t):
-""" Checks whether the type t is dynamic (ie contains a sequence type)"""
+  """ Checks whether the type t is dynamic (ie contains a sequence type)"""
   if t.kind() == IdlKind.Sequence:
     return True
   elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
@@ -17,11 +17,11 @@ def isDynamic(t):
     return False
 
 def isDynamicPort(port):
-""" Checks whether the port type is dynamic (ie contains a sequence type)"""
+  """ Checks whether the port type is dynamic (ie contains a sequence type)"""
   return isDynamic(port.idlType)
 
 def dynamicMembers(t, name, recursive = False):
-""" Returns a list of all sequences inside the type t. It returns 
+  """ Returns a list of all sequences inside the type t. It returns 
   pairs containing the type and the full identifier of the member.
   The recursive parameter indicates whether to include nested sequences or not.
   name is the name of the type instance."""
@@ -45,7 +45,7 @@ def dynamicMembers(t, name, recursive = False):
     return []
 
 def toIdentifier(n):
-""" Transforms an variable name (containg dots, arrays subscripts and pointers)
+  """ Transforms an variable name (containg dots, arrays subscripts and pointers)
   into a identifier suitable for use in the program."""
   res = n.replace(".", "_")
   res = res.replace("[", "")
@@ -56,19 +56,19 @@ def toIdentifier(n):
   return res
 
 def counterName(n):
-""" Returns a counter name that uniquely identifies the var n."""
+  """ Returns a counter name that uniquely identifies the var n."""
   return toIdentifier(n) + "_counter"
 
 def lengthVar(n):
-""" Returns a length var name that uniquely identifies the var n."""
+  """ Returns a length var name that uniquely identifies the var n."""
   return toIdentifier(n) + "_length"
 
 def isEmptyVar(n):
-""" Returns a name for a special var that uniquely identifies the var n."""
+  """ Returns a name for a special var that uniquely identifies the var n."""
   return toIdentifier(n) + "_is_empty"
 
 def findInitService():
-""" Try to find an init service. Returns the Service object and its index. """
+  """ Try to find an init service. Returns the Service object and its index. """
   i=-1
   for s in comp.servicesMap():
     i += 1
@@ -79,8 +79,8 @@ def findInitService():
 initService,initServiceNb = findInitService()
 
 def flatStruct(t, name, separator = "_"):
-""" Creates a flat list of the structure of a type. The list is composed
-  of pairs containing the member type and identifier."""
+    """ Creates a flat list of the structure of a type. The list is composed
+    of pairs containing the member type and identifier."""
     if t.kind() == IdlKind.Named:
 	n = t.asNamedType()
 	return flatStruct(n.type(), name, separator)
@@ -94,14 +94,14 @@ def flatStruct(t, name, separator = "_"):
 	return [(t, name)]  
 
 def inputList(service):
-""" Creates a flat list of all the service inputs."""
+  """ Creates a flat list of all the service inputs."""
   res = []
   for i in service.inputs():
     res.extend(flatStruct(inputType(i), i.identifier, '.'))
   return res
 
 def inputType(i):
-""" Returns the idl type of a ServiceInput. """
+  """ Returns the idl type of a ServiceInput. """
   if i.kind == ServiceInputKind.IDSMember:
     return comp.typeFromIdsName(i.identifier)
   else:
@@ -109,7 +109,7 @@ def inputType(i):
 
 # codel related functions
 def pointerTo(t):
-""" Pointer to an IdlType. """
+  """ Pointer to an IdlType. """
   s = MapTypeToC(t,True)
   if t.kind() == IdlKind.String:
     return s
@@ -117,15 +117,15 @@ def pointerTo(t):
     return s+"*"
 
 def addressOf(t, s):
-""" Address of an IdlType. """
+ """ Address of an IdlType. """
  if t.kind() == IdlKind.String:
    return s
  else:
     return "&" + s
 
 def real_codel_signature(codel, service=None):
-""" Returns the full prototype of a codel. service arg is
- None only for task-related codels (init/end). """
+  """ Returns the full prototype of a codel. service arg is
+  None only for task-related codels (init/end). """
   proto = ""
   if service is not None:
     for s in service.inputs():
@@ -157,7 +157,7 @@ def real_codel_signature(codel, service=None):
   return proto
 
 def sizeCodelSignature(port):
-""" Returns the full prototype of the size codel corresponding to the port. """
+  """ Returns the full prototype of the size codel corresponding to the port. """
   sizeCodelArgs = ""
   for x in dynamicMembers(port.idlType, port.name + "_outport", True):
     sizeCodelArgs += "size_t *" + lengthVar(x[1]) + ", "
@@ -188,7 +188,7 @@ for p in comp.portsMap():
 	inports.append(p.data())
 
 def createErrorList():
-""" Create a set of all errors defined in the component."""
+  """ Create a set of all errors defined in the component."""
   l = []
   for s in comp.servicesMap():
     service = s.data()

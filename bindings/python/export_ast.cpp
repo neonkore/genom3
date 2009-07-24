@@ -102,6 +102,7 @@ void export_ast()
 	.def_readwrite("kind", &ServiceInput::kind)
 	.def_readwrite("identifier", &ServiceInput::identifier)
 	.def_readwrite("type", &ServiceInput::type)
+	.def_readwrite("doc", &ServiceInput::doc)
 	.def_readwrite("defaultValue", &ServiceInput::defaultValue);
 
 	enum_<ServiceInput::Kind>("ServiceInputKind")

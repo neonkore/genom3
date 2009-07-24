@@ -196,10 +196,15 @@ void <!capCompName!>Test::run<!service.name!>()
     input = MapTypeToCorbaCpp(inputType(i), True)
     print "      " + input + " " + i.identifier + ";";
 
-  for x in inputFlatList:
-    t = MapTypeToCorbaCpp(x[0], True)
+  for i in service.inputs():
+    flat = flatStruct(inputType(i), i.identifier)
     ?>
-      cout << "Enter <!t!> <!x[1]!>:  ";
+     cout << "Enter <!i.identifier!> (<!i.doc!>) :" << endl;
+<?
+    for x in flat:
+      t = MapTypeToCpp(x[0], True)
+      if len(flat) > 1: ?>
+      cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?
     parseInput(x[0], x[1]);
 

@@ -907,10 +907,10 @@ type_decl_list:
     $1->setNative(true);
     driver.component().addType($1);
 }
-  | type_decl_list SEMICOLON type_decl SEMICOLON
+  | type_decl_list type_decl SEMICOLON
 {
-    $3->setNative(true);
-    driver.component().addType($3);
+    $2->setNative(true);
+    driver.component().addType($2);
 };
 
 type_decl:

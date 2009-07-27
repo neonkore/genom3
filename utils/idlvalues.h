@@ -75,6 +75,7 @@ class Literal {
 
 		bool isEmpty() const { return m_isEmpty; }
 		std::string print() const;
+		Kind kind() const { return m_kind; };
 
 		int asBool() const { return boost::get<bool>(m_value); }
 		char asChar() const { return (char) boost::get<int>(m_value); }

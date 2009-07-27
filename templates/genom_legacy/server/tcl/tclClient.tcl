@@ -1,6 +1,7 @@
 <?
-def inputFormat(type, name):
+def inputFormat(type, name, value, serviceInput = None):
   str = "    lappend format [list "
+
   defValue = ""
   if type.kind() == IdlKind.Short or type.kind() == IdlKind.Char:
       str += "short"
@@ -26,7 +27,20 @@ def inputFormat(type, name):
       for en in type.asEnumType().enumerators():
 	str += "\"" + en + "\" "
       str += "}"
-  str += " \"" + name + "\" " + defValue + " ]"
+
+  if not value is None:
+    defValue = value.toString()
+
+  if serviceInput is None:
+    doc = name
+  else:
+#    defValue = serviceInput.defaultValue.toString()
+    doc = serviceInput.doc
+
+  if not defValue.startswith("\""):
+    defValue = "\"" + defValue + "\"" 
+
+  str += " \"" + doc + "\" " + defValue + " ]"
   return str
 
 def outputFormat(type, name):
@@ -120,8 +134,11 @@ proc ::<!comp.name()!><!service.name!> { name args } {
     set format {}
 <?
   if serviceInfo.inputFlag:
-    for x in serviceInfo.inputFlatList:
-      print inputFormat(x[0], x[1])
+    for i in service.inputs():
+      flat = flatStruct(inputType(i), i.identifier, ".", i.defaultValue)
+      if len(flat) == 1:
+	for x in flat:
+	  print inputFormat(x[0], x[1], x[2], i)
   ?>
     return [ ::cs::rqstSend "${name}" "<!service.name!>" \
 	"<!service.doc!>" \

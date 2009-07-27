@@ -50,6 +50,8 @@ void export_containers()
 	.def(vector_indexing_suite<IdlType::Vector, true>());
 	class_<ServiceInput::Vect>("ServiceInputVec")
 	.def(vector_indexing_suite<ServiceInput::Vect>());
+	class_<Literal::Vector>("LiteralVec")
+	.def(vector_indexing_suite<Literal::Vector>());
 
 	// Maps
 	class_<Task::Map>("TaskMap")

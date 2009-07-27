@@ -78,20 +78,24 @@ def findInitService():
 
 initService,initServiceNb = findInitService()
 
-def flatStruct(t, name, separator = "_"):
+def flatStruct(t, name, separator = "_", defValue = None):
     """ Creates a flat list of the structure of a type. The list is composed
     of pairs containing the member type and identifier."""
     if t.kind() == IdlKind.Named:
 	n = t.asNamedType()
-	return flatStruct(n.type(), name, separator)
+	return flatStruct(n.type(), name, separator, defValue)
     elif t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	l = []
-	for m in s.members():
+	if defValue is None:
+	  for m in s.members():
 	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator))
+	else:
+	  for (m, value) in map(None, s.members(), defValue.members()):
+	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator, value))
 	return l
     else:
-	return [(t, name)]  
+	return [(t, name, defValue)]  
 
 def inputList(service):
   """ Creates a flat list of all the service inputs."""

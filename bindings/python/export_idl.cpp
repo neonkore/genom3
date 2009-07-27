@@ -91,6 +91,8 @@ void export_idl()
 
 	class_<Literal>("Literal")
 	.def("toString", &Literal::print)
+	.def("kind", &Literal::kind)
+	.def("members", &Literal::members, return_value_policy<reference_existing_object>())
 	.def("isEmpty", &Literal::isEmpty);
 
 	class_<ConstValue>("ConstValue")

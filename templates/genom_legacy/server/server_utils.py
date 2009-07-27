@@ -449,7 +449,7 @@ def computeTotalSize(t, name, addStructSize = True):
     res = computeTotalSize(s.seqType(), name + ".data")
 
     if addStructSize:
-      structSize = "2*sizeof(int) + sizeof(" + MapTypeToC(s.seqType(), True) + "*) + "
+      structSize = "sizeof(int) + sizeof(" + MapTypeToC(s.seqType(), True) + "*) + "
     else:
       structSize = ""
 

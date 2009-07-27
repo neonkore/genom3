@@ -10,7 +10,7 @@ def isDynamic(t):
   elif t.kind() == IdlKind.Struct:
     s = t.asStructType()
     for m in s.members():
-      if isDynamic(m.data()):
+      if isDynamic(m.data):
 	return True
     return False
   else:
@@ -39,7 +39,7 @@ def dynamicMembers(t, name, recursive = False):
     s = t.asStructType()
     l = []
     for m in s.members():
-      l.extend(dynamicMembers(m.data(), name + "." + m.key(), recursive))
+      l.extend(dynamicMembers(m.data, name + "." + m.key, recursive))
     return l
   else:
     return []
@@ -89,10 +89,10 @@ def flatStruct(t, name, separator = "_", defValue = None):
 	l = []
 	if defValue is None:
 	  for m in s.members():
-	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator))
+	    l.extend(flatStruct(m.data, name + separator + m.key, separator))
 	else:
 	  for (m, value) in map(None, s.members(), defValue.members()):
-	    l.extend(flatStruct(m.data(), name + separator + m.key(), separator, value))
+	    l.extend(flatStruct(m.data, name + separator + m.key, separator, value))
 	return l
     else:
 	return [(t, name, defValue)]  

@@ -54,7 +54,7 @@ def outputFormat(type, name):
   if type.kind() == IdlKind.Struct:
     str += "{ " + name + " "
     for m in type.asStructType().members():
-      str += outputFormat(m.data(), m.key()) + " "
+      str += outputFormat(m.data, m.key) + " "
     str += "}"
   else:
     str += name

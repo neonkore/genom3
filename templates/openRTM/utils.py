@@ -211,7 +211,7 @@ def isCorbaDynamic(t):
   elif t.kind() == IdlKind.Struct:
     s = t.asStructType()
     for m in s.members():
-      if isCorbaDynamic(m.data()):
+      if isCorbaDynamic(m.data):
 	return True
     return False
   else:
@@ -242,7 +242,7 @@ def copyType(t, dest, src):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyType(m.data(), dest + "." + m.key(), src + "." + m.key())
+	copyType(m.data, dest + "." + m.key, src + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       copyType(t.unalias(), dest, src)
     else:
@@ -273,7 +273,7 @@ def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyTypeReverse(m.data(), dest + "." + m.key(), src + "." + m.key(), useIsEmptyVar, parentIsEmpty)
+	copyTypeReverse(m.data, dest + "." + m.key, src + "." + m.key, useIsEmptyVar, parentIsEmpty)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       copyTypeReverse(t.unalias(), dest, src, useIsEmptyVar, parentIsEmpty)
     else:
@@ -297,7 +297,7 @@ def freeMemory(t, src):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	freeMemory(m.data(), src + "." + m.key())
+	freeMemory(m.data, src + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       freeMemory(t.unalias(), src)
 
@@ -323,7 +323,7 @@ def allocMemory(t, dest, scopedName):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	allocMemory(m.data(), dest + "." + m.key(), scopedName + "." + m.key())
+	allocMemory(m.data, dest + "." + m.key, scopedName + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       allocMemory(t.unalias(), dest, scopedName)
 

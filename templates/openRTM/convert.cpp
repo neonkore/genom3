@@ -26,30 +26,30 @@ def copyTypeFromCorba(t, src, out, reverse):
     else:
       convertFun = "convertFromCorba"
     for m in s.members(): 
-      if m.data().kind() == IdlKind.Array: 
-	a = m.data().asArrayType()
+      if m.data.kind() == IdlKind.Array: 
+	a = m.data.asArrayType()
 	?>
   for(int i=0; i < <!a.bounds()[0]!>; ++i)
 <?
 	if needsConversionFun(a.type()): ?>
-    <!convertFun!>_<!a.type().identifier()!>(&<!src!>.<!m.key()!>[i], &<!out!>.<!m.key()!>[i]);
+    <!convertFun!>_<!a.type().identifier()!>(&<!src!>.<!m.key!>[i], &<!out!>.<!m.key!>[i]);
 <?
 	else: ?>
-    <!out!>.<!m.key()!>[i] = <!src!>.<!m.key()!>[i];
+    <!out!>.<!m.key!>[i] = <!src!>.<!m.key!>[i];
 <?
-      elif m.data().kind() == IdlKind.String: 
-	s = m.data().asStringType()
+      elif m.data.kind() == IdlKind.String: 
+	s = m.data.asStringType()
 	if reverse: ?>
-    <!out!>.<!m.key()!> = CORBA::string_dup(<!src!>.<!m.key()!>);
+    <!out!>.<!m.key!> = CORBA::string_dup(<!src!>.<!m.key!>);
 <?
 	else:?>
-    strncpy(<!out!>.<!m.key()!>, <!src!>.<!m.key()!>, <!s.bound()!>);
+    strncpy(<!out!>.<!m.key!>, <!src!>.<!m.key!>, <!s.bound()!>);
 <?
-      elif needsConversionFun(m.data()): ?>
-  <!convertFun!>_<!m.data().identifier()!>(&<!src!>.<!m.key()!>, &<!out!>.<!m.key()!>);
+      elif needsConversionFun(m.data): ?>
+  <!convertFun!>_<!m.data.identifier()!>(&<!src!>.<!m.key!>, &<!out!>.<!m.key!>);
 <?
       else: ?>
-  <!out!>.<!m.key()!> = <!src!>.<!m.key()!>;
+  <!out!>.<!m.key!> = <!src!>.<!m.key!>;
 <?
   elif t.kind() == IdlKind.String:
     s = t.asStringType()

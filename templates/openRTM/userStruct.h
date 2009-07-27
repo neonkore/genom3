@@ -32,7 +32,7 @@ def copyTypeCpp(t):
     res = StructType()
     res.setIdentifier(s.identifier() + "Cpp")
     for m in s.members():
-      res.addMember(copyTypeCpp(m.data()), m.key())
+      res.addMember(copyTypeCpp(m.data), m.key)
     return res
   else:
     return t # standard type

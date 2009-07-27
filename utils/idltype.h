@@ -61,6 +61,8 @@ class IdlType
 		/// A (shared) pointer to a IdlType
 		typedef boost::shared_ptr<IdlType> Ptr;
 		typedef std::map<std::string, Ptr> Map;
+		/** Map that keeps the order of insertion. */
+		typedef std::vector< std::pair<std::string, Ptr> > OrderedMap; 
 		typedef std::vector<Ptr> Vector;
 
 		IdlType() : m_kind(Null), m_isNative(false) {}
@@ -330,7 +332,7 @@ class StructType : public IdlType
 		*/
 		void addMember(IdlType::Ptr t, Declarator::VectPtr declarators);
 		void addMember(IdlType::Ptr t, const std::string &name);
-		const IdlType::Map& members() const {
+		const IdlType::OrderedMap& members() const {
 			return m_members;
 		}
 		IdlType::Ptr member(const std::string &name) ;
@@ -349,7 +351,7 @@ class StructType : public IdlType
 	private:
 		std::string m_identifier;
 // 		std::vector<TypeDeclarator> m_members;
-		IdlType::Map m_members;
+		IdlType::OrderedMap m_members;
 		bool m_isRecursive;
 };
 

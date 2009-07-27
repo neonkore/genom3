@@ -47,25 +47,25 @@ void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	for m in s.members():
-	  if m.data().kind() == IdlKind.Array:
-		a = m.data().asArrayType()
+	  if m.data.kind() == IdlKind.Array:
+		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
 		  dims += str(n) + ", "
 		?>  
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      endianswap_<!typeProtoPrefix(a.type())!>((<!MapTypeToC(a.type(), True)!> *)((x+elt)-><!m.key()!>), 1, dims); }
+      endianswap_<!typeProtoPrefix(a.type())!>((<!MapTypeToC(a.type(), True)!> *)((x+elt)-><!m.key!>), 1, dims); }
 <?
-	  elif m.data().kind() == IdlKind.Sequence:
-		seq = m.data().asSequenceType()
+	  elif m.data.kind() == IdlKind.Sequence:
+		seq = m.data.asSequenceType()
 		?>
     { int dims[1] = {<!seq.bound()!>};
-      endianswap_<!typeProtoPrefix(seq.seqType())!>((<!MapTypeToC(seq.seqType(), True)!> *)((x+elt)-><!m.key()!>.data), 1, dims); }
-      endianswap_int(&((x+elt)-><!m.key()!>.length), 0, NULL);
-      endianswap_int(&((x+elt)-><!m.key()!>.size), 0, NULL);
+      endianswap_<!typeProtoPrefix(seq.seqType())!>((<!MapTypeToC(seq.seqType(), True)!> *)((x+elt)-><!m.key!>.data), 1, dims); }
+      endianswap_int(&((x+elt)-><!m.key!>.length), 0, NULL);
+      endianswap_int(&((x+elt)-><!m.key!>.size), 0, NULL);
 <?
 	  else:
-	    print "   endianswap_" + typeProtoPrefix(m.data()) + "(&((x+elt)->" + m.key() + "), 0, NULL);"
+	    print "   endianswap_" + typeProtoPrefix(m.data) + "(&((x+elt)->" + m.key + "), 0, NULL);"
     elif t.kind() == IdlKind.Enum:
 	print "    endianswap_int((int *)x+elt, 0, NULL);"
     ?>

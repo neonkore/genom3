@@ -108,7 +108,7 @@ void IdlVisitor::printDeclaratorVectString(ostream &m_out, Declarator::VectPtr v
 void IdlVisitor::visitStructType(StructType *s)
 {
 	m_out << "struct " << s->identifier() << CORBA_SUFFIX << " {";
-	IdlType::Map::const_iterator it;
+	IdlType::OrderedMap::const_iterator it;
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
 		if(it->second->kind() == IdlType::Array) {

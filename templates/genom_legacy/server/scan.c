@@ -58,59 +58,59 @@ int scan_<!prefix!>( FILE *in, FILE *out,
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	for m in s.members():
-	    if m.data().kind() == IdlKind.Array:
-		a = m.data().asArrayType()
+	    if m.data.kind() == IdlKind.Array:
+		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
 		  dims += str(n) + ", "
 		?>
-    fprintf(out, "%s<!m.key()!><!a.printBounds()!>:\n", indstr);
+    fprintf(out, "%s<!m.key!><!a.printBounds()!>:\n", indstr);
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      if (scan_<!typeProtoPrefix(a.type())!>(in, out, (<!MapTypeToC(a.type(), True)!> *)(x+elt)-><!m.key()!>, 
+      if (scan_<!typeProtoPrefix(a.type())!>(in, out, (<!MapTypeToC(a.type(), True)!> *)(x+elt)-><!m.key!>, 
                      indent, 1, dims) == ABORT) {
       free (indstr);
       return ABORT; } }
 <?
-	    elif m.data().kind() == IdlKind.Sequence:
-		seq = m.data().asSequenceType()
+	    elif m.data.kind() == IdlKind.Sequence:
+		seq = m.data.asSequenceType()
 		?>
-    fprintf(out, "%s<!m.key()!>[<!seq.bound()!>]:\n", indstr);
+    fprintf(out, "%s<!m.key!>[<!seq.bound()!>]:\n", indstr);
     { int dims[1] = {<!seq.bound()!>};
-      if (scan_<!typeProtoPrefix(seq.seqType())!>(in, out, (<!MapTypeToC(seq.seqType(), True)!> *)(x+elt)-><!m.key()!>.data, 
+      if (scan_<!typeProtoPrefix(seq.seqType())!>(in, out, (<!MapTypeToC(seq.seqType(), True)!> *)(x+elt)-><!m.key!>.data, 
                      indent, 1, dims) == ABORT) {
       free (indstr);
       return ABORT; } }
 
-    fprintf(out, "%s<!m.key()!>.length:\n", indstr);
-    if(scan_int(in, out, &((x+elt)-><!m.key()!>.length), indent, 0, NULL) == ABORT) {
+    fprintf(out, "%s<!m.key!>.length:\n", indstr);
+    if(scan_int(in, out, &((x+elt)-><!m.key!>.length), indent, 0, NULL) == ABORT) {
        free (indstr);
        return ABORT;
     }
 
-    fprintf(out, "%s<!m.key()!>.size:\n", indstr);
-    if(scan_int(in, out, &((x+elt)-><!m.key()!>.size), indent, 0, NULL) == ABORT) {
+    fprintf(out, "%s<!m.key!>.size:\n", indstr);
+    if(scan_int(in, out, &((x+elt)-><!m.key!>.size), indent, 0, NULL) == ABORT) {
        free (indstr);
        return ABORT;
     }
 
 <?
-	    elif m.data().kind() == IdlKind.String:
-		s = m.data().asStringType()
+	    elif m.data.kind() == IdlKind.String:
+		s = m.data.asStringType()
 		length = s.bound()
 		if length == 0:
 		    length = 1024
 		?>
-    fprintf(out, "%s<!m.key()!>[<!length!>]:\n", indstr);
+    fprintf(out, "%s<!m.key!>[<!length!>]:\n", indstr);
     { int dims[1] = {<!length!>};
-      if (scan_string(in, out, (char *)(x+elt)-><!m.key()!>, 
+      if (scan_string(in, out, (char *)(x+elt)-><!m.key!>, 
                      indent, 1, dims) == ABORT) {
       free (indstr);
       return ABORT; } }
 <?
 	    else:
 	      ?>
-    fprintf(out, "%s<!m.key()!>:\n", indstr);
-    if(scan_<!typeProtoPrefix(m.data())!>(in, out, &((x+elt)-><!m.key()!>), indent, 0, NULL) == ABORT) {
+    fprintf(out, "%s<!m.key!>:\n", indstr);
+    if(scan_<!typeProtoPrefix(m.data)!>(in, out, &((x+elt)-><!m.key!>), indent, 0, NULL) == ABORT) {
        free (indstr);
        return ABORT;
     }

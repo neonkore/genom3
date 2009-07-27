@@ -53,6 +53,15 @@ void export_containers()
 	class_<Literal::Vector>("LiteralVec")
 	.def(vector_indexing_suite<Literal::Vector>());
 
+	class_<std::pair<std::string, IdlType::Ptr> >("StringIdlTypePtrPair")
+	.def_readonly("first", &std::pair<std::string, IdlType::Ptr>::first)
+	.def_readonly("key", &std::pair<std::string, IdlType::Ptr>::first)
+	.def_readonly("second", &std::pair<std::string, IdlType::Ptr>::second)
+	.def_readonly("data", &std::pair<std::string, IdlType::Ptr>::second);
+
+	class_<IdlType::OrderedMap>("IdlTypeOrderedMap")
+	.def(vector_indexing_suite<IdlType::OrderedMap>());
+
 	// Maps
 	class_<Task::Map>("TaskMap")
 	.def(map_indexing_suite<Task::Map, true>());

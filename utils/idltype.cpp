@@ -165,22 +165,25 @@ void StructType::addMember(IdlType::Ptr t, Declarator::VectPtr v)
 	for(; it != v->end(); ++it) {
 		if((*it)->isArray()) {
 			IdlType::Ptr p(new ArrayType(t, (*it)->bounds()));
-			m_members[(*it)->identifier()] = p;
+			m_members.push_back(make_pair((*it)->identifier(), p));
 		} else
-			m_members[(*it)->identifier()] = t;
+			m_members.push_back(make_pair((*it)->identifier(), t));
 	}
 }
 
 void StructType::addMember(IdlType::Ptr t, const std::string &name)
 {
-	m_members[name] = t;
+	m_members.push_back(make_pair(name, t));
 }
 
 IdlType::Ptr StructType::member(const std::string &name) 
 {
-	if(m_members.find(name) == m_members.end())
-		return IdlType::Ptr();
-	return m_members[name];
+	for(IdlType::OrderedMap::const_iterator it = m_members.begin(); it != m_members.end(); ++it) {
+		if(it->first == name)
+			return it->second;
+	}
+
+	return IdlType::Ptr();
 }
 
 const std::string StructType::kindAsString() const

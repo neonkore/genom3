@@ -44,7 +44,7 @@ t = comp.IDSType.unalias()
 if t.kind() == IdlKind.Struct:
   s = t.asStructType()
   for m in s.members():
-     print "  " + MapTypeToCpp(m.data()) + " " + m.key() + ";"
+     print "  " + MapTypeToCpp(m.data) + " " + m.key + ";"
 ?>
 
   // Data ports

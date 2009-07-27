@@ -126,7 +126,7 @@ def allocMemory(t, dest, scopedName):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	allocMemory(m.data(), dest + "." + m.key(), scopedName + "." + m.key())
+	allocMemory(m.data, dest + "." + m.key, scopedName + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       allocMemory(t.unalias(), dest, scopedName)
 

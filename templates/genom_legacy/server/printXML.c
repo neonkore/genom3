@@ -57,27 +57,27 @@ void printXML_<!prefix!>( FILE *out, char *name,
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	for m in s.members():
-	    if m.data().kind() == IdlKind.Array:
-		a = m.data().asArrayType()
+	    if m.data.kind() == IdlKind.Array:
+		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
 		  dims += str(n) + ", "
 		?>
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      printXML_<!typeProtoPrefix(a.type())!>(out, "<!m.key()!>", (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+      printXML_<!typeProtoPrefix(a.type())!>(out, "<!m.key!>", (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
 <?
-	    elif m.data().kind() == IdlKind.Sequence:
-		seq = m.data().asSequenceType()
+	    elif m.data.kind() == IdlKind.Sequence:
+		seq = m.data.asSequenceType()
 		?>
     { int dims[1] = {<!seq.bound()!>};
-      printXML_<!typeProtoPrefix(seq.seqType())!>(out, "<!m.key()!>", (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>.data), indent, 1, dims, in); }
-    printXML_int(out, "<!m.key()!>.length" ,&((x+elt)-><!m.key()!>.length), indent, 0, NULL, in);
-    printXML_int(out, "<!m.key()!>.size" ,&((x+elt)-><!m.key()!>.size), indent, 0, NULL, in);
+      printXML_<!typeProtoPrefix(seq.seqType())!>(out, "<!m.key!>", (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key!>.data), indent, 1, dims, in); }
+    printXML_int(out, "<!m.key!>.length" ,&((x+elt)-><!m.key!>.length), indent, 0, NULL, in);
+    printXML_int(out, "<!m.key!>.size" ,&((x+elt)-><!m.key!>.size), indent, 0, NULL, in);
 
 <?
 	    else:
 		?> 
-    printXML_<!typeProtoPrefix(m.data())!>(out, "<!m.key()!>" ,&((x+elt)-><!m.key()!>), indent, 0, NULL, in);
+    printXML_<!typeProtoPrefix(m.data)!>(out, "<!m.key!>" ,&((x+elt)-><!m.key!>), indent, 0, NULL, in);
 <? 
     elif t.kind() == IdlKind.Enum:
 	e = t.asEnumType()

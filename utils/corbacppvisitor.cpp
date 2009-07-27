@@ -128,7 +128,7 @@ void CorbaCppVisitor::visitStructType(StructType *s)
 	string oldIndent = m_indent;
 	m_indent += INDENT_QUANTUM;
 	
-	IdlType::Map::const_iterator it = s->members().begin();
+	IdlType::OrderedMap::const_iterator it = s->members().begin();
 	for(; it != s->members().end(); ++it) {
 			m_out << m_indent;
 		if(it->second->kind() == IdlType::String) {

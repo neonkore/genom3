@@ -114,7 +114,7 @@ void printDeclaratorVectString(ostream &m_out, Declarator::VectPtr v)
 void DumpType::visitStructType(StructType *s)
 {
 	m_out << "Struct " << s->identifier() << " {";
-	IdlType::Map::const_iterator it;
+	IdlType::OrderedMap::const_iterator it;
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
 		it->second->accept(*this);

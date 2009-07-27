@@ -58,36 +58,36 @@ void print_<!prefix!>( FILE *out,
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	for m in s.members(): 
-	    if m.data().kind() == IdlKind.Array:
-		a = m.data().asArrayType()
+	    if m.data.kind() == IdlKind.Array:
+		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
 		  dims += str(n) + ", "
 		?>
-    fprintf(out, "%s<!m.key()!><!a.printBounds()!>:\n", indstr);
+    fprintf(out, "%s<!m.key!><!a.printBounds()!>:\n", indstr);
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      print_<!typeProtoPrefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+      print_<!typeProtoPrefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
 <?
-	    elif m.data().kind() == IdlKind.Sequence:
-		seq = m.data().asSequenceType()
+	    elif m.data.kind() == IdlKind.Sequence:
+		seq = m.data.asSequenceType()
 		?>
-    fprintf(out, "%s<!m.key()!>[<!seq.bound()!>]:\n", indstr);
+    fprintf(out, "%s<!m.key!>[<!seq.bound()!>]:\n", indstr);
     { int dims[1] = {<!seq.bound()!>};
-      print_<!typeProtoPrefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key()!>.data), indent, 1, dims, in); }
-    print_int(out, &((x+elt)-><!m.key()!>.length), indent, 0, NULL, in);
-    print_int(out, &((x+elt)-><!m.key()!>.size), indent, 0, NULL, in);
+      print_<!typeProtoPrefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key!>.data), indent, 1, dims, in); }
+    print_int(out, &((x+elt)-><!m.key!>.length), indent, 0, NULL, in);
+    print_int(out, &((x+elt)-><!m.key!>.size), indent, 0, NULL, in);
 <?
-	    elif m.data().kind() == IdlKind.String: 
-	      s = m.data().asStringType()
+	    elif m.data.kind() == IdlKind.String: 
+	      s = m.data.asStringType()
 	      ?>
-    fprintf(out, "%s<!m.key()!>:\n", indstr);
+    fprintf(out, "%s<!m.key!>:\n", indstr);
     { int dims[1] = {<!s.bound()!>};
-      print_string(out, ((x+elt)-><!m.key()!>), indent, 1, dims, in); }
+      print_string(out, ((x+elt)-><!m.key!>), indent, 1, dims, in); }
 <?
 	    else:
 		?>
-    fprintf(out, "%s<!m.key()!>:\n", indstr);
-    print_<!typeProtoPrefix(m.data())!>(out, &((x+elt)-><!m.key()!>), indent, 0, NULL, in);
+    fprintf(out, "%s<!m.key!>:\n", indstr);
+    print_<!typeProtoPrefix(m.data)!>(out, &((x+elt)-><!m.key!>), indent, 0, NULL, in);
 <? 
     elif t.kind() == IdlKind.Enum:
 	e = t.asEnumType()

@@ -92,7 +92,7 @@ IDSType = StructType()
 IDSType.setIdentifier(comp.IDSType.identifier())
 s = comp.IDSType.unalias().asStructType()
 for m in s.members():
-    IDSType.addMember(m.data(), m.key())
+    IDSType.addMember(m.data, m.key)
 
 # add a member in the ids for connect services 
 if inports:
@@ -392,7 +392,7 @@ def typeSize(t):
 	s = t.asStructType()
 	res = 0
 	for m in s.members():
-	    res += typeSize(m.data())
+	    res += typeSize(m.data)
 	return res
     elif t.kind() == IdlKind.Typedef:
 	return typeSize(t.asTypedefType().type())
@@ -465,7 +465,7 @@ def computeTotalSize(t, name, addStructSize = True):
     else:
       str = "0"
     for m in s.members():
-      res = computeTotalSize(m.data(), name + "." + m.key(), False)
+      res = computeTotalSize(m.data, name + "." + m.key, False)
       if res:
 	str += " + " + res
     return str
@@ -501,7 +501,7 @@ def copyType(t, dest, src, allocateMemory=True):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyType(m.data(), dest + "." + m.key(), src + "." + m.key(), allocateMemory)
+	copyType(m.data, dest + "." + m.key, src + "." + m.key, allocateMemory)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       copyType(t.unalias(), dest, src, allocateMemory)
     elif t.kind() == IdlKind.Array:
@@ -541,7 +541,7 @@ def copyTypeReverse(t, dest, src):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyTypeReverse(m.data(), dest + "." + m.key(), src + "." + m.key())
+	copyTypeReverse(m.data, dest + "." + m.key, src + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       copyTypeReverse(t.unalias(), dest, src)
     else:
@@ -576,7 +576,7 @@ def allocateMemory(t, dest, idsDest, scopedName):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	allocateMemory(m.data(), dest + "." + m.key(), idsDest + "." + m.key(), scopedName + "." + m.key())
+	allocateMemory(m.data, dest + "." + m.key, idsDest + "." + m.key, scopedName + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
       allocateMemory(t.unalias(), dest, idsDest, scopedName)
 

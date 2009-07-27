@@ -152,7 +152,7 @@ STATUS <!comp.name()!>CntrlPosterActivityShow ()
 /* Fonciton locale d'affichage des activitées */
 static void <!comp.name()!>ActivityShow (<!upper(comp.name())!>_CNTRL_STR *sdic)
 {
-#define <!upper(comp.name())!>_NB_RQST_EXEC <!nbExecService()!>
+#define <!upper(comp.name())!>_NB_RQST_EXEC <!nb_exec_service()!>
 #if <!upper(comp.name())!>_NB_RQST_EXEC != 0
 
 <? #  $requestNameTabDeclare$
@@ -231,9 +231,9 @@ print l[:-2] + "};"
 <?
 for port in outports:
     poster_type = upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR"
-    if isDynamicPort(port):
+    if is_dynamic_port(port):
       sys.stderr.write("Dynamic poster " + port.name + "\n")
-      t = dynamicPortType(port)
+      t = dynamic_port_type(port)
     else:
       t = port.idlType
     ?>
@@ -252,7 +252,7 @@ STATUS <!comp.name()!><!port.name!>PosterShow(void)
      free(x);
      return ERROR;
   }
-  print_<!typeProtoPrefix(t)!>(stdout, x, 0, 0, NULL, stdin);
+  print_<!type_proto_prefix(t)!>(stdout, x, 0, 0, NULL, stdin);
   free(x);
   return OK;
 }

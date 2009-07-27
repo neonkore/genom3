@@ -57,7 +57,7 @@ def processOutput(type, name, allocFlag = False):
       int loop1[<!len(a.bounds())!>];
       for(loop1[0]=0; loop1[0] < <!a.bounds()[0]!>; loop1[0]++) {
 <?
-    flatListArray = flatStruct(a.type(), name + "[loop1[0]]", ".")
+    flatListArray = flat_struct(a.type(), name + "[loop1[0]]", ".")
     for x in flatListArray:
       processOutput(x[0], x[1], allocFlag)
     ?>
@@ -73,7 +73,7 @@ def processOutput(type, name, allocFlag = False):
       int loop1[1];
       for(loop1[0]=0; loop1[0] < <!a.bound()!>; loop1[0]++) {
 <?
-    flatListArray = flatStruct(a.seqType(), name + ".data[loop1[0]]", ".")
+    flatListArray = flat_struct(a.seqType(), name + ".data[loop1[0]]", ".")
     for x in flatListArray:
       processOutput(x[0], x[1], allocFlag)
     ?>
@@ -491,8 +491,8 @@ static int
 
 <?
 for port in outports:
-  if isDynamicPort(port):
-      t = dynamicPortType(port)
+  if is_dynamic_port(port):
+      t = dynamic_port_type(port)
   else:
       t = port.idlType
   ?>
@@ -532,7 +532,7 @@ static int
    }
 
 <?
-  portFlatList = flatStruct(t, "(*_posterData)", ".") 
+  portFlatList = flat_struct(t, "(*_posterData)", ".") 
   for x in portFlatList:
     processOutput(x[0], x[1], True)
   ?>
@@ -571,7 +571,7 @@ static int
 <!comp.name()!>Install(Tcl_Interp *interp, struct ModuleInfo *m, int install)
 {
    int offset;
-   char name[<!maxServiceNameLength() + 50!>];
+   char name[<!max_service_name_length() + 50!>];
 
    strcpy(name, "::");
    strcat(name, m->name);

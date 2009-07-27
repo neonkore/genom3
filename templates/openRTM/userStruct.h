@@ -16,7 +16,7 @@ for t in comp.typesVect():
 
 <?
 def copyTypeCpp(t):
-  if not isDynamic(t):
+  if not is_dynamic(t):
     return t
   elif t.kind() == IdlKind.Named:
     n = t.asNamedType()
@@ -38,7 +38,7 @@ def copyTypeCpp(t):
     return t # standard type
 
 #for t in comp.typesVect():
-#  if isDynamic(t):
+#  if is_dynamic(t):
 #    print MapTypeToCpp(copyTypeCpp(t)) + ";\n"
 ?>
 

@@ -5,7 +5,7 @@
 using namespace std;
 
 <?
-def simpleTypePrintFunction(type):
+def simple_type_print_function(type):
   ?>
 void Printer<<!type!>>::print(const <!type!>& v)
 {
@@ -13,13 +13,13 @@ void Printer<<!type!>>::print(const <!type!>& v)
 }
 
 <?
-simpleTypePrintFunction("int")
-simpleTypePrintFunction("unsigned int")
-simpleTypePrintFunction("char")
-simpleTypePrintFunction("unsigned char")
-simpleTypePrintFunction("float")
-simpleTypePrintFunction("double")
-simpleTypePrintFunction("std::string")
+simple_type_print_function("int")
+simple_type_print_function("unsigned int")
+simple_type_print_function("char")
+simple_type_print_function("unsigned char")
+simple_type_print_function("float")
+simple_type_print_function("double")
+simple_type_print_function("std::string")
 ?>
 
 void Printer<string>::print(const CORBA::String_member& v)
@@ -28,28 +28,28 @@ void Printer<string>::print(const CORBA::String_member& v)
 }
 
 <?
-def printSimpleType(type, name):
+def print_simple_type(type, name):
   ?>
       std::cout << "<!name!> ";
       Printer<<!type!>>::print(<!name!>);
       std::cout << std::endl; 
 <?
 
-def printType(t, name):
+def print_type(t, name):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    printType(t.unalias(), name)
+    print_type(t.unalias(), name)
   elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
-    printSimpleType("int", name)
+    print_simple_type("int", name)
   elif  t.kind() == IdlKind.ULong:
-    printSimpleType("unsigned int", name)    
+    print_simple_type("unsigned int", name)    
   elif t.kind() == IdlKind.Double:
-    printSimpleType("double", name)
+    print_simple_type("double", name)
   elif t.kind() == IdlKind.Float:
-    printSimpleType("float", name)
+    print_simple_type("float", name)
   elif t.kind() == IdlKind.String:
-    printSimpleType("string", name)
+    print_simple_type("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
-    printSimpleType("char", name)
+    print_simple_type("char", name)
   elif t.kind() == IdlKind.Enum: 
     e = t.asEnumType()
     ?>
@@ -66,7 +66,7 @@ def printType(t, name):
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCorbaCpp(s.seqType(), True)
-    printSimpleType("int", name + ".length()")
+    print_simple_type("int", name + ".length()")
     ?>
     // data
     for(int j=0; j < <!name!>.length(); ++j)
@@ -83,8 +83,8 @@ for t in comp.typesVect():
 void Printer<<!typeName!>>::print (const <!typeName!>& v)
 {
 <?
-  flatList = flatStruct(t, "v", ".")
+  flatList = flat_struct(t, "v", ".")
   for x in flatList:
-    printType(x[0], x[1])
+    print_type(x[0], x[1])
   ?>
 }

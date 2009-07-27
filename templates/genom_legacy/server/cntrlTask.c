@@ -477,7 +477,7 @@ static STATUS
 i = -1
 for p in outports:
     i += 1
-    if isDynamicPort(p):
+    if is_dynamic_port(p):
       ?>
   // dynamic poster, only initialize the struct
 //   SDI_F-><!p.name!>_outport.size = 0;

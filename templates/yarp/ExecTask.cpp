@@ -169,12 +169,12 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   <!serviceInfo.inputTypeCpp!> in_<!serviceInfo.inputName!> = RqstReader::readRqstInput<<!serviceInfo.inputTypeCpp!>>(command);
 <?
   if service.hasCodel("control"):
-	codelLock(service.codel("control"), service)
+	codel_lock(service.codel("control"), service)
 	?>
   // call real control codel
   int res = <!real_codel_call(service.codel("control"), "m_data->",service)!>;
 <?
-	codelRelease(service.codel("control"), service)
+	codel_release(service.codel("control"), service)
 	?>
   if(res < 0) { // error
     string r = "<!service.name!>: " + errorString(res);

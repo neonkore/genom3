@@ -7,8 +7,8 @@
 <?
 for p in comp.portsMap():
     port = p.data()
-    if isDynamicPort(port):
-      t = dynamicPortType(port)
+    if is_dynamic_port(port):
+      t = dynamic_port_type(port)
 #       print MapTypeToC(t) + ";";
       print "typedef " + MapTypeToC(t, True) + " " + upper(comp.name()) + "_" + upper(port.name) + "_POSTER_STR;"      
     else:

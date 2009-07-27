@@ -135,7 +135,7 @@ proc ::<!comp.name()!><!service.name!> { name args } {
 <?
   if serviceInfo.inputFlag:
     for i in service.inputs():
-      flat = flatStruct(inputType(i), i.identifier, ".", i.defaultValue)
+      flat = flat_struct(input_type(i), i.identifier, ".", i.defaultValue)
       if len(flat) == 1:
 	for x in flat:
 	  print inputFormat(x[0], x[1], x[2], i)

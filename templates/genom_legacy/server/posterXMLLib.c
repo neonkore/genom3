@@ -109,7 +109,7 @@ web<!comp.name()!>(FILE *f, int argc, char **argv, char **argn)
 static void 
 <!comp.name()!>ActivitiesXML (FILE *f, <!upper(comp.name())!>_CNTRL_STR *sdic)
 {
-#define <!upper(comp.name())!>_NB_RQST_EXEC <!nbExecService()!>
+#define <!upper(comp.name())!>_NB_RQST_EXEC <!nb_exec_service()!>
 #if <!upper(comp.name())!>_NB_RQST_EXEC != 0
 
 <? #  $requestNameTabDeclare$
@@ -290,8 +290,8 @@ STATUS <!comp.name()!>CntrlPosterActivityXML (FILE *f)
 <?
 for p in outports:
     poster_type = upper(comp.name()) + "_" + upper(p.name) + "_POSTER_STR"
-    if isDynamicPort(port):
-      t = dynamicPortType(port)
+    if is_dynamic_port(port):
+      t = dynamic_port_type(port)
     else:
       t = port.idlType
     ?>
@@ -313,7 +313,7 @@ STATUS <!comp.name()!><!p.name!>PosterXML(FILE *f)
   }
   fprintfBuf(f, "</error>\n");
   if (!err) {
-    printXML_<!typeProtoPrefix(t)!>(f, "data", &x, 2, 0, NULL, NULL);
+    printXML_<!type_proto_prefix(t)!>(f, "data", &x, 2, 0, NULL, NULL);
     posterIoctl(<!comp.name()!><!p.name!>PosterID(), FIO_GETDATE, &posterDate);
     xmlBalise("date",BEGIN_BALISE,f,2);
     fprintf(f, "%04d/%02d/%02d %02d:%02d:%02d.%03d",

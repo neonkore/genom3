@@ -1,26 +1,26 @@
 <?
-def encodeSimpleType(type, name):
+def encode_simple_type(type, name):
   ?>
     it = YarpCodec<<!type!>>::encode(b,<!name!>);
     if (it == -1) 
       return -1;
 <?
 
-def encodeType(t, name):
+def encode_type(t, name):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    encodeType(t.unalias(), name)
+    encode_type(t.unalias(), name)
   elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
-    encodeSimpleType("int", name)
+    encode_simple_type("int", name)
   elif  t.kind() == IdlKind.ULong:
-    encodeSimpleType("unsigned int", name)    
+    encode_simple_type("unsigned int", name)    
   elif t.kind() == IdlKind.Double:
-    encodeSimpleType("double", name)
+    encode_simple_type("double", name)
   elif t.kind() == IdlKind.Float:
-    encodeSimpleType("float", name)
+    encode_simple_type("float", name)
   elif t.kind() == IdlKind.String:
-    encodeSimpleType("string", name)
+    encode_simple_type("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
-    encodeSimpleType("char", name)
+    encode_simple_type("char", name)
   elif t.kind() == IdlKind.Enum: ?>
   {
     int tmp = (int) <!name!>;
@@ -32,7 +32,7 @@ def encodeType(t, name):
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType(), True)
-    encodeSimpleType("int", name + ".length") 
+    encode_simple_type("int", name + ".length") 
     if s.seqType().kind() == IdlKind.Char: ?>
     b->add(new yarp::os::Value((void*) <!name!>.data, <!name!>.length));
     it++;
@@ -43,7 +43,7 @@ def encodeType(t, name):
       it = YarpCodec<<!seqType!>>::encode(b, <!name!>.data[j]);
 <?
 
-def decodeSimpleType(type, name):
+def decode_simple_type(type, name):
   ?>
     try{
       it = YarpCodec<<!type!>>::decode(b,<!name!>,it);
@@ -56,21 +56,21 @@ def decodeSimpleType(type, name):
       return -1;
 <?
 
-def decodeType(t, name):
+def decode_type(t, name):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    decodeType(t.unalias(), name)
+    decode_type(t.unalias(), name)
   elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
-    decodeSimpleType("int", name)
+    decode_simple_type("int", name)
   elif  t.kind() == IdlKind.ULong:
-    decodeSimpleType("unsigned int", name)    
+    decode_simple_type("unsigned int", name)    
   elif t.kind() == IdlKind.Double:
-    decodeSimpleType("double", name)
+    decode_simple_type("double", name)
   elif t.kind() == IdlKind.Float:
-    decodeSimpleType("float", name)
+    decode_simple_type("float", name)
   elif t.kind() == IdlKind.String: 
-    decodeSimpleType("string", name)
+    decode_simple_type("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char:
-    decodeSimpleType("char", name)
+    decode_simple_type("char", name)
   elif t.kind() == IdlKind.Enum: 
     e = t.asEnumType()
     ?>
@@ -99,7 +99,7 @@ def decodeType(t, name):
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType())
-    decodeSimpleType("int", name + ".length")
+    decode_simple_type("int", name + ".length")
     if s.seqType().kind() == IdlKind.Char: ?>
     <!name!>.data = new char[<!name!>.length];
     memcpy(<!name!>.data, b->get(it).asBlob(), <!name!>.length);
@@ -111,28 +111,28 @@ def decodeType(t, name):
       it = YarpCodec<<!seqType!>>::decode(b, <!name!>.data[j], it);
 <?
 
-def printSimpleType(type, name):
+def print_simple_type(type, name):
   ?>
       std::cout << "<!name!> ";
       YarpCodec<<!type!>>::print(<!name!>);
       std::cout << std::endl; 
 <?
 
-def printType(t, name):
+def print_type(t, name):
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    printType(t.unalias(), name)
+    print_type(t.unalias(), name)
   elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
-    printSimpleType("int", name)
+    print_simple_type("int", name)
   elif  t.kind() == IdlKind.ULong:
-    printSimpleType("unsigned int", name)    
+    print_simple_type("unsigned int", name)    
   elif t.kind() == IdlKind.Double:
-    printSimpleType("double", name)
+    print_simple_type("double", name)
   elif t.kind() == IdlKind.Float:
-    printSimpleType("float", name)
+    print_simple_type("float", name)
   elif t.kind() == IdlKind.String:
-    printSimpleType("string", name)
+    print_simple_type("string", name)
   elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
-    printSimpleType("char", name)
+    print_simple_type("char", name)
   elif t.kind() == IdlKind.Enum: 
     e = t.asEnumType()
     ?>
@@ -149,14 +149,14 @@ def printType(t, name):
   elif t.kind() == IdlKind.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType(), True)
-    printSimpleType("int", name + ".length")
+    print_simple_type("int", name + ".length")
     ?>
     // data
     for(int j=0; j < <!name!>.length; ++j)
       YarpCodec<<!seqType!>>::print(<!name!>.data[j]);
 <?
 
-def freeType(t, name):
+def free_type(t, name):
   s = t.asSequenceType()
   if t.kind() == IdlKind.Sequence:
     seqType = MapTypeToCpp(s.seqType())
@@ -180,9 +180,9 @@ int YarpCodec<<!typeName!>>::encode(yarp::os::Bottle *b,const <!typeName!>& v)
 {
     int it = 0;
 <?
-  flatList = flatStruct(t, "v", ".")
+  flatList = flat_struct(t, "v", ".")
   for x in flatList:
-    encodeType(x[0], x[1])
+    encode_type(x[0], x[1])
   ?>
     return it;
 }
@@ -190,9 +190,9 @@ int YarpCodec<<!typeName!>>::encode(yarp::os::Bottle *b,const <!typeName!>& v)
 int YarpCodec<<!typeName!>>::decode(const yarp::os::Bottle *b, <!typeName!>& v, int it)
 {
 <?
-  flatList = flatStruct(t, "v", ".")
+  flatList = flat_struct(t, "v", ".")
   for x in flatList:
-    decodeType(x[0], x[1])
+    decode_type(x[0], x[1])
   ?>
     return it;
 }
@@ -200,9 +200,9 @@ int YarpCodec<<!typeName!>>::decode(const yarp::os::Bottle *b, <!typeName!>& v, 
 int YarpCodec<<!typeName!>>::print (const <!typeName!>& v)
 {
 <?
-  flatList = flatStruct(t, "v", ".")
+  flatList = flat_struct(t, "v", ".")
   for x in flatList:
-    printType(x[0], x[1])
+    print_type(x[0], x[1])
   ?>
       return 1;
 }
@@ -210,9 +210,9 @@ int YarpCodec<<!typeName!>>::print (const <!typeName!>& v)
 void YarpCodec<<!typeName!>>::freeAllocatedMemory(<!typeName!> *v) 
 {
 <?
-  flatList = flatStruct(t, "(*v)", ".")
+  flatList = flat_struct(t, "(*v)", ".")
   for x in flatList:
-    freeType(x[0], x[1])
+    free_type(x[0], x[1])
   ?>
 }
 <?

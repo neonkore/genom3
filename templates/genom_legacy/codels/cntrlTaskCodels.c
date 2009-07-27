@@ -37,7 +37,7 @@ STATUS returnCodeToStatus(int res)
 {
   switch(res) {
 <?
-errorSet = createErrorList()
+errorSet = create_error_list()
 for e in errorSet:
     print "    case ERROR_" + e + ": return ERROR;"
 ?>
@@ -51,7 +51,7 @@ int returnCodeToReport(int res)
 {
   switch(res) {
 <?
-errorSet = createErrorList()
+errorSet = create_error_list()
 for e in errorSet:
     print "    case ERROR_" + e + ": return S_"+ comp.name() + "_" + e + ";"
 ?>
@@ -85,10 +85,10 @@ extern <!real_codel_signature(codel, service)!>;
  * Returns:    OK or ERROR
  */
 
-<!codelSignatureFull(c, service)!>
+<!codel_full_signature(c, service)!>
 {
 <?
-	codelLock(codel, service)
+	codel_lock(codel, service)
 	?>
 
   /*call real codel */
@@ -97,7 +97,7 @@ extern <!real_codel_signature(codel, service)!>;
       *report = returnCodeToReport(res);
 
 <?
-	codelRelease(codel, service)
+	codel_release(codel, service)
 	?>
 
   return returnCodeToStatus(res);
@@ -131,7 +131,7 @@ STATUS <!codel_signature(service.codel("control"), service)!>
     CNTRL_TASK_POSTER_ID[<!idx!>] = posterId;
 
 <?
-  if isDynamic(port.idlType):
+  if is_dynamic(port.idlType):
     print "/* find a pointer to " + port.name + " poster*/"
     print posterType + " *" + posterAddr + " = posterAddr(" + posterId + ");"
     print "if ("+posterAddr+" == NULL) {"
@@ -144,7 +144,7 @@ STATUS <!codel_signature(service.codel("control"), service)!>
     print "int currentOffset = sizeof(" + posterType + ");"
     print "char *start = (char*) " + posterAddr + ";"
 
-    copyType(port.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")")
+    copy_type(port.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")")
     print "posterGive(" + posterId + ");"
   ?>
 

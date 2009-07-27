@@ -12,7 +12,7 @@
 
 <?
 for t in comp.typesVect():
-  if needsConversionFun(t) and t.identifier() != IDSType.identifier():
+  if needs_conversion_fun(t) and t.identifier() != IDSType.identifier():
     cppType = MapTypeToCpp(t, True)
     corbaType = MapTypeToCorbaCpp(t, True)
 

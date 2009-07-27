@@ -36,7 +36,7 @@
 #define USER_OK 0
 #define SERVICE_ABORTED (-1)
 <?
-errorSet = createErrorList()
+errorSet = create_error_list()
 i = 2
 for e in errorSet:
     print "#define ERROR_" + e + " (-" + str(i) + ")"

@@ -1,5 +1,5 @@
 <?
-def parseInput(type, name):
+def parse_input(type, name):
   if type.kind() == IdlKind.Enum:?>
   {
       int tmp;
@@ -183,7 +183,7 @@ idx = 0
 for s in servicesMap:
   service = s.data()
   idx += 1
-  inputFlatList = inputList(service)
+  inputFlatList = input_list(service)
   serviceArgs = ""
   for i in service.inputs():
     serviceArgs += i.identifier + ", "
@@ -193,11 +193,11 @@ void <!capCompName!>Test::run<!service.name!>()
 {
 <?
   for i in service.inputs():
-    input = MapTypeToCorbaCpp(inputType(i), True)
+    input = MapTypeToCorbaCpp(input_type(i), True)
     print "      " + input + " " + i.identifier + ";";
 
   for i in service.inputs():
-    flat = flatStruct(inputType(i), i.identifier)
+    flat = flat_struct(input_type(i), i.identifier)
     if i.defaultValue.isEmpty():
       defValue = ""
     else:
@@ -210,12 +210,12 @@ void <!capCompName!>Test::run<!service.name!>()
       if len(flat) > 1: ?>
       cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?
-    parseInput(x[0], x[1]);
+    parse_input(x[0], x[1]);
 
   if service.type == ServiceType.Control:
     if service.output.identifier:
-      outputType = MapTypeToCorbaCpp(inputType(service.output), True)    
-      if isCorbaDynamic(inputType(service.output)):
+      outputType = MapTypeToCorbaCpp(input_type(service.output), True)    
+      if is_corba_dynamic(input_type(service.output)):
 	outputName = "*out"
       else:
 	outputName = "out"
@@ -230,7 +230,7 @@ void <!capCompName!>Test::run<!service.name!>()
       return;
     }
 <?
-      if isCorbaDynamic(inputType(service.output)):?>
+      if is_corba_dynamic(input_type(service.output)):?>
       delete out;
 <?
     else:?>
@@ -258,7 +258,7 @@ void <!capCompName!>Test::run<!service.name!>()
       cout << m_<!service.name!>_data.id << endl;
 <?
     if service.output.identifier:
-      outputType = MapTypeToCorbaCpp(inputType(service.output), True)
+      outputType = MapTypeToCorbaCpp(input_type(service.output), True)
       ?>
       cout << "Result is : ";
       Printer<<!outputType!>>::print(m_<!service.name!>_data.data);

@@ -13,15 +13,15 @@ typesVect = []
 for t in comp.typesVect():
   typesVect.append(t)
 
-def inputList(service):
+def input_list(service):
   serviceInfo = services_info_dict[service.name]
   res = []
   if len(service.inputs()) > 1:
     for i in service.inputs():
-      res.extend(flatStruct(inputType(i), serviceInfo.inputName + "." + i.identifier, '.'))
+      res.extend(flat_struct(input_type(i), serviceInfo.inputName + "." + i.identifier, '.'))
     return res
   elif serviceInfo.inputFlag:
-    return flatStruct(serviceInfo.inputType, serviceInfo.inputName, '.')
+    return flat_struct(serviceInfo.inputType, serviceInfo.inputName, '.')
   return []
 
 class ServiceInfo:
@@ -42,7 +42,7 @@ class ServiceInfo:
 	s = StructType()
 	s.setIdentifier(service.name + "_input_struct")
 	for i in service.inputs():
-	  t = inputType(i)
+	  t = input_type(i)
 	  s.addMember(t, i.identifier)
 	self.inputName = service.name + "_input"
 	self.inputType = NamedType(service.name + "_input_struct", s)
@@ -52,7 +52,7 @@ class ServiceInfo:
 
       else:
 	self.inputName = service.inputs()[0].identifier
-	self.inputType = inputType(service.inputs()[0])
+	self.inputType = input_type(service.inputs()[0])
       self.inputTypeCpp = MapTypeToCpp(self.inputType)
       self.requestType = self.inputTypeCpp
 
@@ -62,7 +62,7 @@ class ServiceInfo:
     else:
       self.outputFlag = True
       self.outputName = service.output.identifier
-      self.outputType = inputType(service.output)
+      self.outputType = input_type(service.output)
       self.outputTypeCpp = MapTypeToCpp(self.outputType)
       self.replyType = self.outputTypeCpp
 
@@ -82,16 +82,16 @@ def real_codel_call(codel, ids_prefix="", service=None, allArgs = False):
 	inputPrefix = serviceInfo.inputName + "."
     for i in service.inputs():
 	if inputPrefix and not allArgs:
-	    proto += addressOf(inputType(i), "in_" + inputPrefix + i.identifier) + ", "
+	    proto += address_of(input_type(i), "in_" + inputPrefix + i.identifier) + ", "
 	else:
-	    proto += addressOf(inputType(i), "in_" + i.identifier) + ", "
+	    proto += address_of(input_type(i), "in_" + i.identifier) + ", "
     if service.output.identifier:
 	proto += "& out_" + service.output.identifier + ", "
 
   for type in codel.inTypes:
-    proto += addressOf(comp.typeFromIdsName(type), ids_prefix + type + ", ");
+    proto += address_of(comp.typeFromIdsName(type), ids_prefix + type + ", ");
   for type in codel.outTypes:
-    proto +=  addressOf(comp.typeFromIdsName(type), ids_prefix + type + ", ");
+    proto +=  address_of(comp.typeFromIdsName(type), ids_prefix + type + ", ");
   for port in codel.outPorts:
     proto +=  ids_prefix + port + "_outport.data, "; 
   for port in codel.inPorts:
@@ -99,38 +99,38 @@ def real_codel_call(codel, ids_prefix="", service=None, allArgs = False):
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
-def startStateForService(service):
+def start_state_for_service(service):
   if service.hasCodel("start"):
     return upper(service.name) + "_START"
   else:
     return upper(service.name) + "_MAIN"
 
-def allocMemory(t, dest, scopedName):
+def allocate_memory(t, dest, scopedName):
     """ Allocate the memory as requested by the size codel."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
-      print dest + ".data = new " + seqType + "[" + lengthVar(scopedName) + "];"
-      print dest + ".length = " + lengthVar(scopedName) + ";"
+      print dest + ".data = new " + seqType + "[" + length_var(scopedName) + "];"
+      print dest + ".length = " + length_var(scopedName) + ";"
       print ""
 
-      if isDynamic(s.seqType()):
-	counter = counterName(dest)
+      if is_dynamic(s.seqType()):
+	counter = counter_name(dest)
 	print "int " + counter + " = 0;"
 	print "for(; " + counter + "<" + dest + ".length; ++" + counter + ") {"
-	allocMemory(s.seqType(), dest + ".data[" + counter + "]", scopedName + ".data")
+	allocate_memory(s.seqType(), dest + ".data[" + counter + "]", scopedName + ".data")
 	print "}"
       else:
-	print "memset(&" + dest + " , 0, " + lengthVar(scopedName) + " * sizeof(" + seqType + "));"
+	print "memset(&" + dest + " , 0, " + length_var(scopedName) + " * sizeof(" + seqType + "));"
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	allocMemory(m.data, dest + "." + m.key, scopedName + "." + m.key)
+	allocate_memory(m.data, dest + "." + m.key, scopedName + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      allocMemory(t.unalias(), dest, scopedName)
+      allocate_memory(t.unalias(), dest, scopedName)
 
-def codelNeedsLock(codel, service):
+def codel_needs_lock(codel, service):
   """ Returns whether it is necessary to lock the IDS when calling the codel. 0 means no locking,
   1 means lock for read and 2 read for write. """
   if codel.outTypes:
@@ -145,12 +145,12 @@ def codelNeedsLock(codel, service):
 	return 1
     return 0
 
-def callSizeCodel(port):
+def call_size_codel(port):
   """ String to call the size codel. """
   sizeCodelArgs = ""
-  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
-    print "size_t " + lengthVar(x[1]) + " = 0;"
-    sizeCodelArgs += "&" + lengthVar(x[1]) + ", "
+  for x in dynamic_members(port.idlType, port.name + "_outport", True):
+    print "size_t " + length_var(x[1]) + " = 0;"
+    sizeCodelArgs += "&" + length_var(x[1]) + ", "
 
   for s in port.sizeCodel.inTypes:
     sizeCodelArgs += "&m_data->" + s + ", "
@@ -163,42 +163,42 @@ def callSizeCodel(port):
 
   print "int res = " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ");"
 
-def codelLock(codel, service):
+def codel_lock(codel, service):
     """ prepare to call user codel. Lock the ids, initialize ports, etc."""
     for p in codel.outPorts:
       port = comp.port(p)
-      if not isDynamic(port.idlType):
+      if not is_dynamic(port.idlType):
 	continue
 
       print "if(!m_data->" + p + "_outport.isInitialized()) {"
 
-      callSizeCodel(port)
+      call_size_codel(port)
 
       print "  if(res >= 0) {"
       print "    m_data->" + p + "_outport.initialize();"
-      allocMemory(port.idlType, "(*m_data->" + p + "_outport.data)", p + "_outport")
+      allocate_memory(port.idlType, "(*m_data->" + p + "_outport.data)", p + "_outport")
       print "  }"
       print "}"
  
     for p in codel.inPorts:
       print "  m_data->" + p + "_inport.wait();"
-    res = codelNeedsLock(codel, service)
+    res = codel_needs_lock(codel, service)
     if res == 2:
       print "  m_data->idsMutex.acquire_write();"
     elif res == 1:
       print "  m_data->idsMutex.acquire_read();"
 
-def codelRelease(codel, service):
+def codel_release(codel, service):
     """ Release locks, etc after codel has been called"""
     for p in codel.outPorts:
       print "  m_data->" + p + "_outport.exportData();"  
     for p in codel.inPorts:
       print "  m_data->" + p + "_inport.post();"
-    res = codelNeedsLock(codel, service)
+    res = codel_needs_lock(codel, service)
     if res:
       print "  m_data->idsMutex.release();"
 
-def codelToEvName(name):
+def codel_to_event_name(name):
   #if name == "control":
     #return "onCalled"
   #elif name == "start":
@@ -209,7 +209,7 @@ def codelToEvName(name):
     #return "onInter"
   return name
 
-def fullPortName(p):
+def full_port_name(p):
   """ Returns the name of the port in internal data structure."""
   port = comp.port(pev.portName())
   if port.type == PortType.Incoming:

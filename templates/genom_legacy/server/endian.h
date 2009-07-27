@@ -51,7 +51,7 @@ for i in comp.importedComponents():
 
 <?
 for t in typesVect:
-    prefix = typeProtoPrefix(t)
+    prefix = type_proto_prefix(t)
     if prefix:
       print funProto % (prefix, MapTypeToC(t,True))
 ?>

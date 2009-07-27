@@ -40,7 +40,7 @@ else:
 	inputDeclare = ""
     else:
 	inputName = initService.inputs()[0].identifier
-	inputType = inputType(initService.inputs()[0])
+	inputType = input_type(initService.inputs()[0])
 	inputDeclare = MapTypeToC(inputType,True) + " " + inputName + ";"
 	inputSize = "sizeof(" + MapTypeToC(inputType,True) + ")"
 # todo: reuse name from print.c
@@ -51,7 +51,7 @@ else:
 	nbInputParams = "0"
 	inputUsage = ""
 
-	flatList = flatStruct(inputType, inputName)
+	flatList = flat_struct(inputType, inputName)
 	inputFlatNamePtrC = ""
 	inputFlat = ""
 	first = True
@@ -159,7 +159,7 @@ if requestFlag:
 if requestFlag:
     i = 0
     for x in flatList:
-	c = convertFun(x[0])
+	c = convert_fun(x[0])
 	if c == "":
 	    print "   " + x[1] + " = "  + "argv[" + str(i) + "];"
 	else:
@@ -210,7 +210,7 @@ if requestFlag:
   /* Affichage de la structure parametre de la requete */
 <?
     for x in flatList:
-	write("   printf(\"" + x[1].replace("_", ".") + " = " + formatStringForType(x[0]) + "\\n\", ")
+	write("   printf(\"" + x[1].replace("_", ".") + " = " + format_string_for_type(x[0]) + "\\n\", ")
 	print x[1].replace("_", ".") + ");"
     ?>
 

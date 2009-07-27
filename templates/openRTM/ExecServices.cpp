@@ -14,8 +14,8 @@ for s in servicesMap:
 	print real_codel_signature(c.data(), service) + ";"
 
 for port in outports:
-  if isDynamic(port.idlType):
-    print sizeCodelSignature(port) + ";"
+  if is_dynamic(port.idlType):
+    print size_codel_signature(port) + ";"
 ?>
 }
 
@@ -28,7 +28,7 @@ for s in comp.servicesMap():
   inputStr = ", int id"
   for i in service.inputs():
     inputStr += ", "
-    t = inputType(i)
+    t = input_type(i)
     inputStr += MapTypeToCpp(t) + " " + i.identifier
 
   ?>
@@ -41,7 +41,7 @@ for s in comp.servicesMap():
   for i in service.inputs():
     print "  in_" + i.identifier + " = " + i.identifier + ";"
   ?>
-  m_status = <!startStateForService(service)!>;
+  m_status = <!start_state_for_service(service)!>;
 }
 
 <!service.name!>Service::~<!service.name!>Service()
@@ -64,7 +64,7 @@ for s in comp.servicesMap():
 <?
   if service.output.identifier:
     outputMember = "out_" + service.output.identifier
-    copyTypeFromCorba(inputType(service.output), outputMember, "s.data", True)
+    copyTypeFromCorba(input_type(service.output), outputMember, "s.data", True)
   ?>
 	}
     }
@@ -110,14 +110,14 @@ bool <!service.name!>Service::step()
 int <!service.name!>Service::<!c.key()!>()
 {
 <?
-    codelLock(codel, service)
+    codel_lock(codel, service)
     ?>
   // call the user codel
   int res = <!real_codel_call(codel, "m_data->", service, False)!>;
 
   // update ports, release locks, etc
 <?
-    codelRelease(codel, service);
+    codel_release(codel, service);
     ?>
   return res;
 }

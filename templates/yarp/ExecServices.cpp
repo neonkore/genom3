@@ -19,8 +19,8 @@ for s in servicesMap:
 	print real_codel_signature(c.data(), service) + ";"
 
 for port in outports:
-  if isDynamic(port.idlType):
-    print sizeCodelSignature(port) + ";"
+  if is_dynamic(port.idlType):
+    print size_codel_signature(port) + ";"
 ?>
 }
 
@@ -36,7 +36,7 @@ for s in comp.servicesMap():
   inputStr = ""
   for i in service.inputs():
     inputStr += ", "
-    t = inputType(i)
+    t = input_type(i)
     inputStr += MapTypeToCpp(t) + " " + i.identifier
 
   ?>
@@ -50,7 +50,7 @@ for s in comp.servicesMap():
   for i in service.inputs():
     print "  in_" + i.identifier + " = " + i.identifier + ";"
   ?>
-  m_status.push_front(<!startStateForService(service)!>);
+  m_status.push_front(<!start_state_for_service(service)!>);
 
   // connect events if necessary
 <?
@@ -74,7 +74,7 @@ for s in comp.servicesMap():
   m_eventsSender.setName("<!service.name!>");
 <?
   for ev in eventsList: 
-    evName = codelToEvName(ev)
+    evName = codel_to_event_name(ev)
     ?>
   m_eventsSender.registerReceiver("<!evName!>", &m_data->events_outport);
 <?
@@ -250,14 +250,14 @@ bool <!service.name!>Service::step()
 int <!service.name!>Service::<!c.key()!>()
 {
 <?
-    codelLock(codel, service)
+    codel_lock(codel, service)
     ?>
   // call the user codel
   int res = <!real_codel_call(codel, "m_data->", service, True)!>;
 
 <?
     if c.key() in eventsList: 
-      evName = codelToEvName(c.key())
+      evName = codel_to_event_name(c.key())
       ?>
   // raise event
   m_eventsSender.sendEvent("<!evName!>");
@@ -265,7 +265,7 @@ int <!service.name!>Service::<!c.key()!>()
     ?>
   // update ports, release locks, etc
 <?
-    codelRelease(codel, service);
+    codel_release(codel, service);
     ?>
   return res;
 }

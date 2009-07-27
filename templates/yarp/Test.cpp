@@ -1,5 +1,5 @@
 <?
-def parseInput(type, name):
+def parse_input(type, name):
   if type.kind() == IdlKind.Enum:?>
   {
       int tmp;
@@ -185,7 +185,7 @@ void run<!service.name!>()
     <!serviceInfo.outputTypeCpp!> <!serviceInfo.outputName!>;
 <?
   for i in service.inputs():
-    flat = flatStruct(inputType(i), i.identifier)
+    flat = flat_struct(input_type(i), i.identifier)
     if i.defaultValue.isEmpty():
       defValue = ""
     else:
@@ -198,7 +198,7 @@ void run<!service.name!>()
       if len(flat) > 1: ?>
       cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?
-    parseInput(x[0], x[1]);
+    parse_input(x[0], x[1]);
 
   if service.type == ServiceType.Control:
     ?>
@@ -240,7 +240,7 @@ void read<!port.name!>()
 <?
 for port in inports:
   typeName = MapTypeToCpp(port.idlType)
-  if isDynamic(port.idlType): ?>
+  if is_dynamic(port.idlType): ?>
 void write<!port.name!>()
 {
     cout << "Sorry, port contains dynamic data, cannot modify it" << endl;
@@ -252,13 +252,13 @@ void write<!port.name!>()
 {
   <!typeName!> *v = new <!typeName!>();
 <?
-    flatList = flatStruct(port.idlType, "(*v)", ".")
+    flatList = flat_struct(port.idlType, "(*v)", ".")
     for x in flatList:
       t = MapTypeToCpp(x[0], True)
       ?>
       cout << "Enter <!t!> <!x[1]!>:  " << endl;
 <?
-      parseInput(x[0], x[1]);
+      parse_input(x[0], x[1]);
     ?>
 
   <!port.name!>_outport.exportData(v);

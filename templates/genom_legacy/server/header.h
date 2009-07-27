@@ -114,7 +114,7 @@ for name, service in servicesDict.iteritems():
 #    if service.type == ServiceType.Init:
 #	continue
     for codel in service.codels():
-	print "extern " + codelSignatureFull(codel, service) + ";"
+	print "extern " + codel_full_signature(codel, service) + ";"
 
 #### todo: print task init function signature
 #if initServiceNb != -1:

@@ -1,9 +1,9 @@
 #include "<!comp.name()!>Struct.hpp"
 
 <?
-def copyTypeFromCorba(t, src, out, reverse):
+def copy_type_from_corba(t, src, out, reverse):
   if t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
-    copyTypeFromCorba(t.unalias(), src, out, reverse)
+    copy_type_from_corba(t.unalias(), src, out, reverse)
   elif t.kind() == IdlKind.Enum:
     e = t.asEnumType()
     ?>
@@ -31,7 +31,7 @@ def copyTypeFromCorba(t, src, out, reverse):
 	?>
   for(int i=0; i < <!a.bounds()[0]!>; ++i)
 <?
-	if needsConversionFun(a.type()): ?>
+	if needs_conversion_fun(a.type()): ?>
     <!convertFun!>_<!a.type().identifier()!>(&<!src!>.<!m.key!>[i], &<!out!>.<!m.key!>[i]);
 <?
 	else: ?>
@@ -45,7 +45,7 @@ def copyTypeFromCorba(t, src, out, reverse):
 	else:?>
     strncpy(<!out!>.<!m.key!>, <!src!>.<!m.key!>, <!s.bound()!>);
 <?
-      elif needsConversionFun(m.data): ?>
+      elif needs_conversion_fun(m.data): ?>
   <!convertFun!>_<!m.data.identifier()!>(&<!src!>.<!m.key!>, &<!out!>.<!m.key!>);
 <?
       else: ?>
@@ -63,7 +63,7 @@ def copyTypeFromCorba(t, src, out, reverse):
   <!out!> = <!src!>;
 <?
 
-def convertFromCorba(t, reverse = False):
+def convert_from_corba(t, reverse = False):
   cppType = MapTypeToCpp(t, True)
   corbaType = MapTypeToCorbaCpp(t, True)
   if reverse: ?>
@@ -75,13 +75,13 @@ void convertFromCorba_<!t.identifier()!>(const <!corbaType!> *in, <!cppType!> *o
   ?>
 {
 <?
-  copyTypeFromCorba(t, "(*in)", "(*out)", reverse)
+  copy_type_from_corba(t, "(*in)", "(*out)", reverse)
   ?>
 }
 
 <?
 for t in comp.typesVect():
-  if needsConversionFun(t) and t.identifier() != IDSType.identifier() and not isDynamic(t):
-    convertFromCorba(t)
-    convertFromCorba(t, True)
+  if needs_conversion_fun(t) and t.identifier() != IDSType.identifier() and not is_dynamic(t):
+    convert_from_corba(t)
+    convert_from_corba(t, True)
 ?>

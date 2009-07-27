@@ -32,11 +32,11 @@ for s in comp.servicesMap():
     inputStr = "";
     for i in service.inputs():
       inputStr += ", "
-      t = inputType(i)
+      t = input_type(i)
       inputStr += MapTypeToCpp(t) + " " + i.identifier
 
     if service.output.identifier:
-      t = inputType(service.output)
+      t = input_type(service.output)
       outputType = MapTypeToCpp(t)
   ?>
 class <!service.name!>Service
@@ -81,7 +81,7 @@ class <!service.name!>Service
     std::string m_clientName;
 <?
   for i in service.inputs():
-    t = inputType(i)
+    t = input_type(i)
     print "    " + MapTypeToCpp(t) + " in_" + i.identifier + ";"    
   if service.output.identifier:
     print "    " + outputType + " out_" + service.output.identifier + ";"

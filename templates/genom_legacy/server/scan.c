@@ -40,7 +40,7 @@
 
 <?
 for t in typesVect:
-    prefix = typeProtoPrefix(t)
+    prefix = type_proto_prefix(t)
     if not prefix:
       continue
     ?>
@@ -66,7 +66,7 @@ int scan_<!prefix!>( FILE *in, FILE *out,
 		?>
     fprintf(out, "%s<!m.key!><!a.printBounds()!>:\n", indstr);
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      if (scan_<!typeProtoPrefix(a.type())!>(in, out, (<!MapTypeToC(a.type(), True)!> *)(x+elt)-><!m.key!>, 
+      if (scan_<!type_proto_prefix(a.type())!>(in, out, (<!MapTypeToC(a.type(), True)!> *)(x+elt)-><!m.key!>, 
                      indent, 1, dims) == ABORT) {
       free (indstr);
       return ABORT; } }
@@ -76,7 +76,7 @@ int scan_<!prefix!>( FILE *in, FILE *out,
 		?>
     fprintf(out, "%s<!m.key!>[<!seq.bound()!>]:\n", indstr);
     { int dims[1] = {<!seq.bound()!>};
-      if (scan_<!typeProtoPrefix(seq.seqType())!>(in, out, (<!MapTypeToC(seq.seqType(), True)!> *)(x+elt)-><!m.key!>.data, 
+      if (scan_<!type_proto_prefix(seq.seqType())!>(in, out, (<!MapTypeToC(seq.seqType(), True)!> *)(x+elt)-><!m.key!>.data, 
                      indent, 1, dims) == ABORT) {
       free (indstr);
       return ABORT; } }
@@ -110,7 +110,7 @@ int scan_<!prefix!>( FILE *in, FILE *out,
 	    else:
 	      ?>
     fprintf(out, "%s<!m.key!>:\n", indstr);
-    if(scan_<!typeProtoPrefix(m.data)!>(in, out, &((x+elt)-><!m.key!>), indent, 0, NULL) == ABORT) {
+    if(scan_<!type_proto_prefix(m.data)!>(in, out, &((x+elt)-><!m.key!>), indent, 0, NULL) == ABORT) {
        free (indstr);
        return ABORT;
     }

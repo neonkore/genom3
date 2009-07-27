@@ -6,7 +6,7 @@ servicesMap = comp.servicesMap()
 capCompName = comp.name().capitalize()
 upperCompName = upper(comp.name())
 
-def needsConversion(t):
+def needs_conversion(t):
   """ Returns whether it is necessary to convert from the CORBA type to the type
   used by codels """
   if t.isNative():
@@ -18,11 +18,11 @@ def needsConversion(t):
   elif t.kind() == IdlKind.Enum:
     return True
   elif t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
-    return needsConversion(t.unalias())
+    return needs_conversion(t.unalias())
   else:
     return False
 
-def needsConversionFun(t):
+def needs_conversion_fun(t):
   """ Returns whether it is necessary to used a generated function to convert
   from CORBA to codel type. True for structured types"""
   if t.kind() == IdlKind.Struct:
@@ -30,7 +30,7 @@ def needsConversionFun(t):
   elif t.kind() == IdlKind.Enum:
     return True
   elif t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
-    return needsConversionFun(t.unalias())
+    return needs_conversion_fun(t.unalias())
   else: 
     return False
 
@@ -40,14 +40,14 @@ def service_idl_signature(service):
     if service.type != ServiceType.Control:
       outputType = BaseType.longType
     elif service.output.identifier:
-      outputType = inputType(service.output)
+      outputType = input_type(service.output)
     else:
       outputType = BaseType.voidType
 
     # then create the args list
     args = ""
     for i in service.inputs():
-	t = inputType(i)
+	t = input_type(i)
 	args += "in " + MapTypeToIdl(t) + " " + i.identifier + ", "
  
     exceptions = ""
@@ -76,7 +76,7 @@ def service_cpp_args(service, className=""):
     """ Create the args list for the service constructor (for exec services) or functions (control services). """
     args = ""
     for i in service.inputs():
-	t = inputType(i)
+	t = input_type(i)
 	args += cpp_arg(t," in_" + i.identifier) + ", "
     return service.name + "(" + args[:-2] + ")"
 
@@ -86,12 +86,12 @@ def service_cpp_signature(service, className=""):
     if service.type != ServiceType.Control:
       outputType = BaseType.longType
     elif service.output.identifier:
-      outputType = inputType(service.output)
+      outputType = input_type(service.output)
     else:
 	outputType = BaseType.voidType
 
     output = MapTypeToCorbaCpp(outputType, True)
-    if isCorbaDynamic(outputType):
+    if is_corba_dynamic(outputType):
       output += "*"
 
     if className:
@@ -105,33 +105,33 @@ def real_codel_call(codel, data_prefix="", service=None, useCopiedArgs = True):
   proto = ""
   if service is not None:
     for i in service.inputs():
-      t = inputType(i)
-      if needsConversion(t) and useCopiedArgs:
-	proto += addressOf(inputType(i), i.identifier) + ", "
+      t = input_type(i)
+      if needs_conversion(t) and useCopiedArgs:
+	proto += address_of(input_type(i), i.identifier) + ", "
       else:
-	proto += addressOf(inputType(i), " in_" + i.identifier) + ", "
+	proto += address_of(input_type(i), " in_" + i.identifier) + ", "
     if service.output.identifier:
 	proto += " &out_" + service.output.identifier + ", " 
 
   for type in codel.inTypes:
     t = comp.typeFromIdsName(type)
-    proto += addressOf(t, data_prefix + type) + ", "
+    proto += address_of(t, data_prefix + type) + ", "
   for type in codel.outTypes:
     t = comp.typeFromIdsName(type)
-    proto += addressOf(t, data_prefix + type) + ", "
+    proto += address_of(t, data_prefix + type) + ", "
   for port in codel.outPorts:
     p = comp.port(port)
-    if isDynamic(p.idlType):
+    if is_dynamic(p.idlType):
       proto += "&" + port + "_outport, "
-    elif needsConversion(p.idlType):
+    elif needs_conversion(p.idlType):
       proto += "&" + port + ", "
     else:
       proto += "&" + data_prefix + port + "_data, " 
   for port in codel.inPorts:
     p = comp.port(port)
-    if isDynamic(p.idlType):
+    if is_dynamic(p.idlType):
       proto += "&" + port + "_inport, "
-    elif needsConversion(p.idlType):
+    elif needs_conversion(p.idlType):
       proto += "&" + port + ", "
     else:
       proto += "&" + data_prefix + port + "_data, "  
@@ -146,7 +146,7 @@ def service_call(service):
 	args += "in_" + i.identifier + ", "
     return service.name + "(" + args[:-2] + ")"
 
-def serviceOutportsSet(service):
+def service_outports_set(service):
   """ Returns a set of all the outports used by all the service's codels. """
   portList = []
   for c in service.codels():
@@ -154,7 +154,7 @@ def serviceOutportsSet(service):
       portList.append(port)
   return set(portList)
 
-def serviceInportsSet(service):
+def service_inports_set(service):
   """ Returns a set of all the inports used by all the service's codels. """
   portList = []
   for c in service.codels():
@@ -162,13 +162,13 @@ def serviceInportsSet(service):
       portList.append(port)
   return set(portList)
 
-def startStateForService(service):
+def start_state_for_service(service):
   if service.hasCodel("start"):
     return upper(service.name) + "_START"
   else:
     return upper(service.name) + "_MAIN"
 
-def outputPortsMap():
+def output_ports_map():
   """ Returns a map, matching services name with its output type (or an empty string)
   to create the output ports. """
   m = {}
@@ -179,13 +179,13 @@ def outputPortsMap():
     if not service.output.identifier:
       typeName = ""
     else:
-      typeName = MapTypeToIdl(inputType(service.output))
+      typeName = MapTypeToIdl(input_type(service.output))
     m[service.name] = typeName
   return m
 
-output_ports_map = outputPortsMap()
+output_ports_map = output_ports_map()
 
-def codelNeedsLock(codel, service=None):
+def codel_needs_lock(codel, service=None):
   """ Returns whether it is necessary to lock the IDS when calling the codel. 0 means no locking,
   1 means lock for read and 2 read for write. """
   if codel.outTypes:
@@ -201,33 +201,33 @@ def codelNeedsLock(codel, service=None):
 	  return 1
     return 0
 
-def isCorbaDynamic(t):
+def is_corba_dynamic(t):
   """ returns whether the type t is dynamic from CORBA point of view
   (ie contains a string). These types have to be allocated dynamically."""
   if t.kind() == IdlKind.String:
     return True
   elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return isCorbaDynamic(t.unalias())
+    return is_corba_dynamic(t.unalias())
   elif t.kind() == IdlKind.Struct:
     s = t.asStructType()
     for m in s.members():
-      if isCorbaDynamic(m.data):
+      if is_corba_dynamic(m.data):
 	return True
     return False
   else:
     return False
 
-def copyType(t, dest, src):
+def copy_type(t, dest, src):
     """ Copy the CORBA data into the var created for use in the codels.""" 
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
-      if isDynamic(s.seqType()):
+      if is_dynamic(s.seqType()):
 	print dest + ".data = new " + MapTypeToCpp(s.seqType(), True) + "[" + src + ".length()];"
 	print dest + ".length = " + src + ".length();"
 
-	counter = counterName(dest)
+	counter = counter_name(dest)
 	print "for(int " + counter + " =0; " + counter + "<" + src + ".length(); ++" + counter + ") {"
-	copyType(s.seqType(), dest + ".data[" + counter + "]", src + "[" + counter + "]")
+	copy_type(s.seqType(), dest + ".data[" + counter + "]", src + "[" + counter + "]")
 	print "}"
       else:
 	print dest + ".length = " + src + ".length();"
@@ -235,104 +235,104 @@ def copyType(t, dest, src):
 
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
-      counter = counterName(dest)
+      counter = counter_name(dest)
       print "for(int " + counter + "=0; " + counter + " < " + str(s.bounds()[0])  + "; ++" + counter + ") {"
-      copyType(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
+      copy_type(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
       print "}"
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyType(m.data, dest + "." + m.key, src + "." + m.key)
+	copy_type(m.data, dest + "." + m.key, src + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      copyType(t.unalias(), dest, src)
+      copy_type(t.unalias(), dest, src)
     else:
       copyTypeFromCorba(t, src, dest, False)
-      #if needsConversionFun(t):
+      #if needs_conversion_fun(t):
 	#print "convertFromCorba_" + t.identifier() + "(&" + src + ", &" + dest + ");"
       #else:
 	#print dest + " = " + src + ";"
 
-def copyTypeReverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
+def copy_type_reverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
     """ Copy data back to the CORBA data structures."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       if not parentIsEmpty or useIsEmptyVar:
-	if isDynamic(s.seqType()):
-	  counter = counterName(src)
+	if is_dynamic(s.seqType()):
+	  counter = counter_name(src)
 	  print "for(int " + counter + "=0; " + counter + " < " + src + ".length; ++" + counter  + ") {"
-	  copyTypeReverse(s.seqType(), dest + "[" + counter + "]", src + ".data[" + counter + "]", False)
+	  copy_type_reverse(s.seqType(), dest + "[" + counter + "]", src + ".data[" + counter + "]", False)
 	  print "}"
 	  print "delete[] " + src + ".data;"
 
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
-      counter = counterName(src)
+      counter = counter_name(src)
       print "for(int " + counter + "=0; " + counter + "<" + str(s.bounds()[0]) + "; ++" + counter + ") {"
-      copyTypeReverse(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", useIsEmptyVar, parentIsEmpty)
+      copy_type_reverse(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", useIsEmptyVar, parentIsEmpty)
       print "}"
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyTypeReverse(m.data, dest + "." + m.key, src + "." + m.key, useIsEmptyVar, parentIsEmpty)
+	copy_type_reverse(m.data, dest + "." + m.key, src + "." + m.key, useIsEmptyVar, parentIsEmpty)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      copyTypeReverse(t.unalias(), dest, src, useIsEmptyVar, parentIsEmpty)
+      copy_type_reverse(t.unalias(), dest, src, useIsEmptyVar, parentIsEmpty)
     else:
       copyTypeFromCorba(t, src, dest, True)
-      #if needsConversionFun(t):
+      #if needs_conversion_fun(t):
 	#print "convertFromCorbaReverse_" + t.identifier() + "(&" + src + ", &" + dest + ");"
       #else:
 	#print dest + " = " + src + ";"
 
-def freeMemory(t, src):
+def free_memory(t, src):
     """ free the memory allocated dynamically in codelLock taht won't be needed anymore. """
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
-      if isDynamic(s.seqType()):
-	counter = counterName(src)
+      if is_dynamic(s.seqType()):
+	counter = counter_name(src)
 	print "for(int " + counter + "=0; " + counter + " < " + src + ".length; ++" + counter  + ") {"
-	freeMemory(s.seqType(), src + ".data[" + counter + "]")
+	free_memory(s.seqType(), src + ".data[" + counter + "]")
 	print "}"
 	print "delete[] " + src + ".data;"
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	freeMemory(m.data, src + "." + m.key)
+	free_memory(m.data, src + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      freeMemory(t.unalias(), src)
+      free_memory(t.unalias(), src)
 
 
-def allocMemory(t, dest, scopedName):
+def allocate_memory(t, dest, scopedName):
     """ Allocate memory (on CORBA side) after the size codel has been called. """
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToCorbaCpp(s.seqType(), True)
 
-      print dest + ".replace(" + lengthVar(scopedName) + ", " + lengthVar(scopedName) + ", new " + seqType + "[" + lengthVar(scopedName) + "]);"
+      print dest + ".replace(" + length_var(scopedName) + ", " + length_var(scopedName) + ", new " + seqType + "[" + length_var(scopedName) + "]);"
       print ""
 
-      if isDynamic(s.seqType()):
-	counter = counterName(dest)
+      if is_dynamic(s.seqType()):
+	counter = counter_name(dest)
 	print "int " + counter + " = 0;"
 	print "for(; " + counter + "<" + dest + ".length(); ++" + counter + ") {"
-	allocMemory(s.seqType(), dest + "[" + counter + "]", scopedName + ".data")
+	allocate_memory(s.seqType(), dest + "[" + counter + "]", scopedName + ".data")
 	print "}"
       else:
-	print "memset(" + dest + ".get_buffer() , 0, " + lengthVar(scopedName) + " * sizeof(" + seqType + "));"
+	print "memset(" + dest + ".get_buffer() , 0, " + length_var(scopedName) + " * sizeof(" + seqType + "));"
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	allocMemory(m.data, dest + "." + m.key, scopedName + "." + m.key)
+	allocate_memory(m.data, dest + "." + m.key, scopedName + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      allocMemory(t.unalias(), dest, scopedName)
+      allocate_memory(t.unalias(), dest, scopedName)
 
-def callSizeCodel(port):
+def call_size_codel(port):
   """ Create the string to call the size codel."""
   sizeCodelArgs = ""
-  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
-    print "int " + lengthVar(x[1]) + " = 0;"
-    sizeCodelArgs += "&" + lengthVar(x[1]) + ", "
+  for x in dynamic_members(port.idlType, port.name + "_outport", True):
+    print "int " + length_var(x[1]) + " = 0;"
+    sizeCodelArgs += "&" + length_var(x[1]) + ", "
 
   for s in port.sizeCodel.inTypes:
     sizeCodelArgs += "&m_data->" + s + ", "
@@ -345,28 +345,28 @@ def callSizeCodel(port):
 
   print "int res = " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ");"
 
-def copyCodelArgs(codel, service):
+def copy_codel_args(codel, service):
     """ Copy the codel args to types suitable for the codels."""
     if not service is None:
       for i in service.inputs():
-	t = inputType(i)
-	if needsConversion(t):
-	  if needsConversionFun(t):
+	t = input_type(i)
+	if needs_conversion(t):
+	  if needs_conversion_fun(t):
 	    print MapTypeToCpp(t, True) + " " + i.identifier + ";"
 	    print "convertFromCorba_" + t.identifier() + "(&in_" + i.identifier + ", &" + i.identifier + ");"
 	  else:
 	    print MapTypeToCpp(t, True) + " " + i.identifier + " = in_" + i.identifier + ";"
 
-def codelLock(codel, service=None):
+def codel_lock(codel, service=None):
     """ Prepare to run a codel. Lock the ids if necessary, copy data from CORBA data structures to the structures
     used by the codel, allocated in this function."""
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.wait();"
     for p in codel.outPorts:
       port = comp.port(p)
-      if not isDynamic(port.idlType):
+      if not is_dynamic(port.idlType):
 	continue
-      seqs = dynamicMembers(port.idlType, p + "_data.data")
+      seqs = dynamic_members(port.idlType, p + "_data.data")
       newType = MapTypeToCpp(port.idlType, True)
       print "  " + newType + " " + p + "_outport;"
 
@@ -377,26 +377,26 @@ def codelLock(codel, service=None):
 
       print "if(" + p + "_outport_is_empty) {"
 
-      callSizeCodel(port)
+      call_size_codel(port)
 
       print "  if(res >= 0) {"
-      allocMemory(port.idlType, "m_data->" + p + "_data.data", p + "_outport")
+      allocate_memory(port.idlType, "m_data->" + p + "_data.data", p + "_outport")
       print "  }"
       print "}\n\n"
 
-      copyType(port.idlType, p + "_outport", "m_data->" + p + "_data.data")
+      copy_type(port.idlType, p + "_outport", "m_data->" + p + "_data.data")
 
 
     for p in codel.inPorts:
       port = comp.port(p)
-      if not isDynamic(port.idlType):
+      if not is_dynamic(port.idlType):
 	continue
       newType = MapTypeToCpp(port.idlType, True)
       print "  " + newType + " " + p + "_inport;"
-      copyType(port.idlType, p + "_inport", "m_data->" + p + "_data.data")
+      copy_type(port.idlType, p + "_inport", "m_data->" + p + "_data.data")
 
 
-    res = codelNeedsLock(codel, service)
+    res = codel_needs_lock(codel, service)
     if res == 2:
       print "  m_data->idsMutex.acquire_write();"
     elif res == 1:
@@ -404,11 +404,11 @@ def codelLock(codel, service=None):
 
     for p in codel.outPorts:
       port = comp.port(p)
-      if isDynamic(port.idlType):
+      if is_dynamic(port.idlType):
 	continue
       
-      if needsConversion(port.idlType):
-	if needsConversionFun(port.idlType):
+      if needs_conversion(port.idlType):
+	if needs_conversion_fun(port.idlType):
 	  print MapTypeToCpp(port.idlType, True) + " " + port.name + ";"
 	  print "convertFromCorba_" + port.idlType.identifier() + "(&m_data->" + port.name + "_data.data, &" + port.name + ");"
 	else:
@@ -416,37 +416,37 @@ def codelLock(codel, service=None):
 
     for p in codel.inPorts:
       port = comp.port(p)
-      if isDynamic(port.idlType):
+      if is_dynamic(port.idlType):
 	continue
       
-      if needsConversion(port.idlType):
-	if needsConversionFun(port.idlType):
+      if needs_conversion(port.idlType):
+	if needs_conversion_fun(port.idlType):
 	  print MapTypeToCpp(port.idlType, True) + " " + port.name + ";"
 	  print "convertFromCorba_" + port.idlType.identifier() + "(&m_data->" + port.name + "_data.data, &" + port.name + ");"
 	else:
 	  print MapTypeToCpp(port.idlType, True) + " " + port.name + " = m_data->" + port.name + "_data.data;"
 
-def copyCodelArgsReverse(codel, service):
+def copy_codel_args_reverse(codel, service):
     if not service is None:
       for i in service.inputs():
-	t = inputType(i)
-	if needsConversion(t):
+	t = input_type(i)
+	if needs_conversion(t):
 	  print "//in_" + i.identifier + " = " + i.identifier + ";"
 
-def codelRelease(codel, service=None):
+def codel_release(codel, service=None):
     """ Cleanup after a codel call. Release locks, update the CORBA data structures by copying the codel data structures."""
     # update dynamic ports
     for p in codel.outPorts:
       port = comp.port(p)
-      if not isDynamic(port.idlType):
-	if needsConversion(port.idlType):
-	  if needsConversionFun(port.idlType):
+      if not is_dynamic(port.idlType):
+	if needs_conversion(port.idlType):
+	  if needs_conversion_fun(port.idlType):
 	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data.data);"
 	  else:
 	    print MapTypeToCpp(port.idlType, True) + " m_data->" + port.name + "_data = " + port.name + ";"
       else:
-	copyTypeReverse(port.idlType,  "m_data->" + p + "_data.data", p + "_outport")
-	freeMemory(port.idlType, p + "_outport")
+	copy_type_reverse(port.idlType,  "m_data->" + p + "_data.data", p + "_outport")
+	free_memory(port.idlType, p + "_outport")
 
     for p in codel.outPorts:
       print "m_data->" + port.name + ".write();"
@@ -454,18 +454,18 @@ def codelRelease(codel, service=None):
     for p in codel.inPorts:
       port = comp.port(p)
       print "m_data->" + p + ".read();"
-      if not isDynamic(port.idlType):
-	if needsConversion(port.idlType):
-	  if needsConversionFun(port.idlType):
+      if not is_dynamic(port.idlType):
+	if needs_conversion(port.idlType):
+	  if needs_conversion_fun(port.idlType):
 	    print "convertFromCorbaReverse_" + port.idlType.identifier() + "(&" + port.name + ", &m_data->" + port.name + "_data.data);"
 	  else:
 	    print "m_data->" + port.name + "_data.data = " + port.name + ";"
       else:
-	freeMemory(port.idlType, p + "_inport")
+	free_memory(port.idlType, p + "_inport")
 
     #for p in codel.inPorts:
       #print "  m_data->" + p + "_inport.post();"
-    res = codelNeedsLock(codel, service)
+    res = codel_needs_lock(codel, service)
     if res:
       print "  m_data->idsMutex.release();"
 

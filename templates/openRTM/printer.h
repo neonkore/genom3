@@ -7,7 +7,7 @@
 #include "<!comp.name()!>Struct.hpp"
 
 <?
-def classDeclaration(typeName): 
+def class_declaration(typeName): 
   ?>	
 template<> class Printer<<!typeName!>> {
 public:
@@ -24,16 +24,16 @@ public:
 };
 
 <?
-classDeclaration("int")
-classDeclaration("unsigned int")
-classDeclaration("char")
-classDeclaration("unsigned char")
-classDeclaration("float")
-classDeclaration("double")
+class_declaration("int")
+class_declaration("unsigned int")
+class_declaration("char")
+class_declaration("unsigned char")
+class_declaration("float")
+class_declaration("double")
 
 for t in comp.typesVect():
   if t.identifier() and t.identifier() != IDSType.identifier():
-    classDeclaration(t.identifier() + "_Corba")
+    class_declaration(t.identifier() + "_Corba")
 ?>
 
 template<> class Printer<std::string> {

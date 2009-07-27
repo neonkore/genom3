@@ -49,7 +49,7 @@ ACTIVITY_EVENT returnCodeToActivityEvent(int res)
 {
   switch(res) {
 <?
-errorSet = createErrorList()
+errorSet = create_error_list()
 for e in errorSet:
     print "    case ERROR_" + e + ": return ETHER;"
 for name, service in servicesDict.iteritems():
@@ -100,10 +100,10 @@ extern <!real_codel_signature(codel, service)!>;
  * Returns:    OK or ERROR
  */
 
-<!codelSignatureFull(c, service)!>
+<!codel_full_signature(c, service)!>
 {
 <?
-	codelLock(codel, service)
+	codel_lock(codel, service)
 	?>
 
   /*call real codel */
@@ -112,7 +112,7 @@ extern <!real_codel_signature(codel, service)!>;
       *report = returnCodeToReport(res);
 
 <?
-	codelRelease(codel, service)
+	codel_release(codel, service)
 	?>
 
   return returnCodeToActivityEvent(res);
@@ -134,7 +134,7 @@ extern <!real_codel_signature(currentTask.codel("init"))!>;
 
 STATUS <!codel_signature(currentTask.codel("init"))!>
 {<?
-	codelLock(currentTask.codel("init"))
+	codel_lock(currentTask.codel("init"))
 	?>
 
   /*call real codel */
@@ -143,7 +143,7 @@ STATUS <!codel_signature(currentTask.codel("init"))!>
       *report = returnCodeToReport(res);
 
 <?
-	codelRelease(currentTask.codel("init"))
+	codel_release(currentTask.codel("init"))
 	?>
 
   return returnCodeToStatus(res);

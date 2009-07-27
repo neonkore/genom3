@@ -53,7 +53,7 @@ extern "C" {
 
 <?
 for t in typesVect:
-    prefix = typeProtoPrefix(t)
+    prefix = type_proto_prefix(t)
     if not prefix:
       continue
     ?>

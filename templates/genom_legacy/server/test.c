@@ -92,7 +92,7 @@ static char *<!comp.name()!>TestRequestNameTab[] = {
 <? # $requestNameTabDeclare$
 out = ""
 for name, service in servicesDict.iteritems():
-    out += "   \"" + name + serviceDescString(service)
+    out += "   \"" + name + service_description_string(service)
     out+= "\",\n"
 print out[:-2] + "\n};" 
 ?>
@@ -216,7 +216,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 <?
  # $inputScan$
     if serviceInfo.inputFlag:
-	outputServices = findServiceWithSameOutput(service,serviceInfo.inputName)
+	outputServices = find_service_with_same_output(service,serviceInfo.inputName)
 	#similarPosters = findPosterWithSameOutput()
 	#todo meme chose avec les posters
 
@@ -224,7 +224,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 	for ss in outputServices:
 	    if funcnames != "":
 		funcnames += ", "
-	    funcnames += "\"request " + ss.name + " " + serviceDescString(ss) 
+	    funcnames += "\"request " + ss.name + " " + service_description_string(ss) 
 	    if ss.inputs():
 		funcnames += " - needs input "
 	    funcnames += "\""

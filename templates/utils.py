@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 # This file groups some functions used by multiple templates
 
-def isDynamic(t):
+def is_dynamic(t):
   """ Checks whether the type t is dynamic (ie contains a sequence type)"""
   if t.kind() == IdlKind.Sequence:
     return True
   elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return isDynamic(t.unalias())
+    return is_dynamic(t.unalias())
   elif t.kind() == IdlKind.Struct:
     s = t.asStructType()
     for m in s.members():
-      if isDynamic(m.data):
+      if is_dynamic(m.data):
 	return True
     return False
   else:
     return False
 
-def isDynamicPort(port):
+def is_dynamic_port(port):
   """ Checks whether the port type is dynamic (ie contains a sequence type)"""
-  return isDynamic(port.idlType)
+  return is_dynamic(port.idlType)
 
-def dynamicMembers(t, name, recursive = False):
+def dynamic_members(t, name, recursive = False):
   """ Returns a list of all sequences inside the type t. It returns 
   pairs containing the type and the full identifier of the member.
   The recursive parameter indicates whether to include nested sequences or not.
@@ -29,22 +29,22 @@ def dynamicMembers(t, name, recursive = False):
     if recursive:
       s = t.asSequenceType()
       l = [(t, name)]
-      l.extend(dynamicMembers(s.seqType(), name + ".data", True))
+      l.extend(dynamic_members(s.seqType(), name + ".data", True))
       return l
     else:
       return [(t, name)]
   elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return dynamicMembers(t.unalias(), name, recursive)
+    return dynamic_members(t.unalias(), name, recursive)
   elif t.kind() == IdlKind.Struct:
     s = t.asStructType()
     l = []
     for m in s.members():
-      l.extend(dynamicMembers(m.data, name + "." + m.key, recursive))
+      l.extend(dynamic_members(m.data, name + "." + m.key, recursive))
     return l
   else:
     return []
 
-def toIdentifier(n):
+def to_identifier(n):
   """ Transforms an variable name (containg dots, arrays subscripts and pointers)
   into a identifier suitable for use in the program."""
   res = n.replace(".", "_")
@@ -55,19 +55,19 @@ def toIdentifier(n):
   res = res.replace("->", "")
   return res
 
-def counterName(n):
+def counter_name(n):
   """ Returns a counter name that uniquely identifies the var n."""
-  return toIdentifier(n) + "_counter"
+  return to_identifier(n) + "_counter"
 
-def lengthVar(n):
+def length_var(n):
   """ Returns a length var name that uniquely identifies the var n."""
-  return toIdentifier(n) + "_length"
+  return to_identifier(n) + "_length"
 
-def isEmptyVar(n):
+def is_empty_var(n):
   """ Returns a name for a special var that uniquely identifies the var n."""
-  return toIdentifier(n) + "_is_empty"
+  return to_identifier(n) + "_is_empty"
 
-def findInitService():
+def find_init_service():
   """ Try to find an init service. Returns the Service object and its index. """
   i=-1
   for s in comp.servicesMap():
@@ -76,35 +76,35 @@ def findInitService():
       return s.data(), i
   return 0,-1
 
-initService,initServiceNb = findInitService()
+initService,initServiceNb = find_init_service()
 
-def flatStruct(t, name, separator = "_", defValue = None):
+def flat_struct(t, name, separator = "_", defValue = None):
     """ Creates a flat list of the structure of a type. The list is composed
     of pairs containing the member type and identifier."""
     if t.kind() == IdlKind.Named:
 	n = t.asNamedType()
-	return flatStruct(n.type(), name, separator, defValue)
+	return flat_struct(n.type(), name, separator, defValue)
     elif t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	l = []
 	if defValue is None:
 	  for m in s.members():
-	    l.extend(flatStruct(m.data, name + separator + m.key, separator))
+	    l.extend(flat_struct(m.data, name + separator + m.key, separator))
 	else:
 	  for (m, value) in map(None, s.members(), defValue.members()):
-	    l.extend(flatStruct(m.data, name + separator + m.key, separator, value))
+	    l.extend(flat_struct(m.data, name + separator + m.key, separator, value))
 	return l
     else:
 	return [(t, name, defValue)]  
 
-def inputList(service):
+def input_list(service):
   """ Creates a flat list of all the service inputs."""
   res = []
   for i in service.inputs():
-    res.extend(flatStruct(inputType(i), i.identifier, '.'))
+    res.extend(flat_struct(input_type(i), i.identifier, '.'))
   return res
 
-def inputType(i):
+def input_type(i):
   """ Returns the idl type of a ServiceInput. """
   if i.kind == ServiceInputKind.IDSMember:
     return comp.typeFromIdsName(i.identifier)
@@ -112,7 +112,7 @@ def inputType(i):
     return i.type
 
 # codel related functions
-def pointerTo(t):
+def pointer_to(t):
   """ Pointer to an IdlType. """
   s = MapTypeToC(t,True)
   if t.kind() == IdlKind.String:
@@ -120,7 +120,7 @@ def pointerTo(t):
   else:
     return s+"*"
 
-def addressOf(t, s):
+def address_of(t, s):
  """ Address of an IdlType. """
  if t.kind() == IdlKind.String:
    return s
@@ -133,51 +133,51 @@ def real_codel_signature(codel, service=None):
   proto = ""
   if service is not None:
     for s in service.inputs():
-	idstype = inputType(s);
-	proto += "const " + pointerTo(idstype) + " in_" + s.identifier + ", ";
+	idstype = input_type(s);
+	proto += "const " + pointer_to(idstype) + " in_" + s.identifier + ", ";
     if service.output.identifier:
-	idstype = inputType(service.output);
-	proto += pointerTo(idstype) + " out_" + service.output.identifier + ", "; 
+	idstype = input_type(service.output);
+	proto += pointer_to(idstype) + " out_" + service.output.identifier + ", "; 
 
   for type in codel.inTypes:
     idstype = comp.typeFromIdsName(type);
-    proto += "const " + pointerTo(idstype) + " in_" + type + ", ";
+    proto += "const " + pointer_to(idstype) + " in_" + type + ", ";
   for type in codel.outTypes:
     idstype = comp.typeFromIdsName(type);
-    proto += pointerTo(idstype) + " out_" + type + ", ";
+    proto += pointer_to(idstype) + " out_" + type + ", ";
   for port in codel.outPorts:
     p = comp.port(port)
     if p is not None:
-      proto += pointerTo(p.idlType) + " outport_" + port + ", "; 
+      proto += pointer_to(p.idlType) + " outport_" + port + ", "; 
     else:
       proto += port + ", "
   for port in codel.inPorts:
     p = comp.port(port)
     if p is not None:
-	proto += pointerTo(p.idlType) + " inport_" + port + ", "; 
+	proto += pointer_to(p.idlType) + " inport_" + port + ", "; 
     else:
 	proto += port + ", "
   proto = "return_t " + codel.name + "(" + proto[:-2] + ")"
   return proto
 
-def sizeCodelSignature(port):
+def size_codel_signature(port):
   """ Returns the full prototype of the size codel corresponding to the port. """
   sizeCodelArgs = ""
-  for x in dynamicMembers(port.idlType, port.name + "_outport", True):
-    sizeCodelArgs += "size_t *" + lengthVar(x[1]) + ", "
+  for x in dynamic_members(port.idlType, port.name + "_outport", True):
+    sizeCodelArgs += "size_t *" + length_var(x[1]) + ", "
 
   for s in port.sizeCodel.inTypes:
     idstype = comp.typeFromIdsName(s);
-    sizeCodelArgs += pointerTo(idstype) + " in_" + s + ", "
+    sizeCodelArgs += pointer_to(idstype) + " in_" + s + ", "
   for s in port.sizeCodel.outTypes:
     idstype = comp.typeFromIdsName(s);
-    sizeCodelArgs += pointerTo(idstype) + " out_" + s + ", "
+    sizeCodelArgs += pointer_to(idstype) + " out_" + s + ", "
   for s in port.sizeCodel.inPorts:
     p = comp.port(s)
-    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_inport, "
+    sizeCodelArgs += pointer_to(port.idlType) + " " + s + "_inport, "
   for s in port.sizeCodel.outPorts:
     p = comp.port(s)
-    sizeCodelArgs += pointerTo(port.idlType) + " " + s + "_outport, "
+    sizeCodelArgs += pointer_to(port.idlType) + " " + s + "_outport, "
 
   return "return_t " + port.sizeCodel.name + "(" + sizeCodelArgs[:-2] + ")"
 
@@ -191,7 +191,7 @@ for p in comp.portsMap():
     else:
 	inports.append(p.data())
 
-def createErrorList():
+def create_error_list():
   """ Create a set of all errors defined in the component."""
   l = []
   for s in comp.servicesMap():
@@ -202,5 +202,5 @@ def createErrorList():
     for e in t.data().errorMessages():
 	l.append(e)
   return set(l)
-errorList = createErrorList();
+errorList = create_error_list();
 

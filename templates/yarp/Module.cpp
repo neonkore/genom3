@@ -121,7 +121,7 @@ for e in comp.eventsMap():
 <?
   if aliasEv.kind() == EventKind.PortEv:
     pev = aliasEv.asPortEvent()
-    portName = fullPortName(pev.portName())
+    portName = full_port_name(pev.portName())
     ?>
     m_data-><!portName!>.registerReceiver("<!pev.kindAsString()!>", &m_data->events_outport);
 <?
@@ -227,12 +227,12 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
   <!serviceInfo.inputTypeCpp!> in_<!serviceInfo.inputName!> = RqstReader::readRqstInput<<!serviceInfo.inputTypeCpp!>>(command);
 <?
   if service.hasCodel("control"):
-    codelLock(service.codel("control"), service)
+    codel_lock(service.codel("control"), service)
     ?>
   // call real control codel
   int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
 <?
-    codelRelease(service.codel("control"), service)
+    codel_release(service.codel("control"), service)
     ?>
   if(res < 0) { // error
     string r = "<!service.name!> : " + errorString(res);

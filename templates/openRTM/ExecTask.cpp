@@ -41,12 +41,12 @@ if currentTask.hasCodel("init"):
 RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onInitialize()
 {
 <?
-  codelLock(currentTask.codel("init"));
+  codel_lock(currentTask.codel("init"));
   ?>
   int res = <!real_codel_call(currentTask.codel("init"), "m_data->")!>;
   // update ports, release locks, etc
 <?
-  codelRelease(currentTask.codel("init"));
+  codel_release(currentTask.codel("init"));
   ?>
   if(res < 0) // error
       return RTC::RTC_ERROR;
@@ -80,12 +80,12 @@ if currentTask.hasCodel("end"):
 RTC::ReturnCode_t <!capCompName!><!currentTaskName!>::onFinalize()
 {
 <?
-  codelLock(currentTask.codel("end"));
+  codel_lock(currentTask.codel("end"));
   ?>
   int res = <!real_codel_call(currentTask.codel("end"), "m_data->")!>;
   // update ports, release locks, etc
 <?
-  codelRelease(currentTask.codel("end"));
+  codel_release(currentTask.codel("end"));
   ?>
   if(res < 0) // error
       return RTC::RTC_ERROR;

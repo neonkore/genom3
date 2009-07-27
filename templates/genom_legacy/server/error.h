@@ -7,7 +7,7 @@ stdGenomErrors = ["ACTIVITY_INTERRUPTED", \
   "CONTROL_CODEL_ERROR", "BAD_BLOCK_TYPE", \
   "BAD_POSTER_TYPE"]
 
-errorSet = createErrorList()
+errorSet = create_error_list()
 ?>
 /* 
  * Copyright (c) 1993-2005 LAAS/CNRS
@@ -65,7 +65,7 @@ for e in errorSet:
 <? # $listStdFailures$
 i = 1
 for s in stdGenomErrors:
-    print "#define S_" + comp.name() + "_stdGenoM_" + s + " " + str(encodeError(i))
+    print "#define S_" + comp.name() + "_stdGenoM_" + s + " " + str(encode_error(i))
     i += 1
 ?>
 

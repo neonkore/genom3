@@ -23,18 +23,18 @@ def typeFromIdsName(name):
   else:
     return comp.typeFromIdsName(name)
 
-def inputType(i):
+def input_type(i):
   if i.kind == ServiceInputKind.IDSMember:
     return typeFromIdsName(i.identifier)
   else:
     return i.type
 
-def idsNameForType(t):
+def ids_name_for_type(t):
   """ Returns the ids name for values with this type."""
   return "_" + MapTypeToC(t, True).replace(' ', '_')
 
 ids_members = []
-def idsMemberForInput(i, service):
+def ids_member_for_input(i, service):
   """ Find the correct IDS member to use to store the input i
   belonging to this service."""
   if i.kind == ServiceInputKind.IDSMember:
@@ -43,7 +43,7 @@ def idsMemberForInput(i, service):
     # control service can share their input
     # (when they just have one input)
     if service.type == ServiceType.Control:
-      name = idsNameForType(i.type)
+      name = ids_name_for_type(i.type)
       if name not in ids_members: # create a new ids member for this type
 	IDSType.addMember(i.type, name)
 	ids_members.append(name)
@@ -53,12 +53,12 @@ def idsMemberForInput(i, service):
       IDSType.addMember(i.type, name)
       return name
 
-def typeProtoPrefix(t):
+def type_proto_prefix(t):
     """ Returns the prefix corresponding to this type to use for print, scan, etc. functions."""
     prefix = ""
     if t.kind() == IdlKind.Named:
 	n = t.asNamedType()
-	return typeProtoPrefix(n.type())
+	return type_proto_prefix(n.type())
     if t.kind() == IdlKind.Struct:
 	prefix = "struct_"
     elif t.kind() == IdlKind.Enum:
@@ -77,7 +77,7 @@ def typeProtoPrefix(t):
 	prefix = "string"
     return prefix + t.identifier()
 
-def dynamicPortType(port):
+def dynamic_port_type(port):
    if port.idlType.kind == IdlKind.Sequence:
      return port.idlType.asSequenceType().seqType()
    else:
@@ -114,10 +114,10 @@ for port in inports:
 
 # create ids member for dynamic posters
 for port in outports:
-  if isDynamic(port.idlType):
+  if is_dynamic(port.idlType):
     IDSType.addMember(port.idlType, port.name + "_outport")
 for port in inports:
-  if isDynamic(port.idlType):
+  if is_dynamic(port.idlType):
     IDSType.addMember(port.idlType, port.name + "_inport")
 
 class ServiceInfo:
@@ -142,7 +142,7 @@ class ServiceInfo:
 	s = StructType()
 	s.setIdentifier(service.name + "_input_struct")
 	for i in service.inputs():
-	  t = inputType(i)
+	  t = input_type(i)
 	  s.addMember(t, i.identifier)
 	self.inputName = service.name + "_input"
 	self.inputType = NamedType(service.name + "_input_struct", s)
@@ -151,11 +151,11 @@ class ServiceInfo:
 	IDSType.addMember(self.inputType, service.name + "_input")
 
       else:
-	self.inputName = idsMemberForInput(service.inputs()[0], service)
-	self.inputType = inputType(service.inputs()[0])
+	self.inputName = ids_member_for_input(service.inputs()[0], service)
+	self.inputType = input_type(service.inputs()[0])
 
-      self.inputTypePtr = pointerTo(self.inputType)
-      self.inputTypeProto = typeProtoPrefix(self.inputType)
+      self.inputTypePtr = pointer_to(self.inputType)
+      self.inputTypeProto = type_proto_prefix(self.inputType)
 
       self.inputSize = "sizeof(" + MapTypeToC(self.inputType, True) + ")"
       if self.inputFlag and self.inputType.kind() == IdlKind.String:
@@ -163,7 +163,7 @@ class ServiceInfo:
 	if self.inputSize == "0":
 	  self.inputSize = "0"
 
-      self.inputNamePtr = addressOf(self.inputType, self.inputName)
+      self.inputNamePtr = address_of(self.inputType, self.inputName)
       self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
  
       if self.inputType.kind() == IdlKind.Struct or self.inputType.kind() == IdlKind.Typedef \
@@ -172,7 +172,7 @@ class ServiceInfo:
       else:
 	  self.inputNewline = "0"
 
-      self.inputFlatList = flatStruct(self.inputType, self.inputName, ".") 
+      self.inputFlatList = flat_struct(self.inputType, self.inputName, ".") 
       if self.inputType.kind() == IdlKind.String:
 	  st = self.inputType.asStringType()
 	  self.inputVarDecl = "char " + self.inputName + "[" + str(st.bound()) + "]"
@@ -182,14 +182,14 @@ class ServiceInfo:
       self.signatureProto = ""
       self.userSignatureProto = ""
       for i in service.inputs():
-	  idstype = inputType(i);
-	  self.userSignatureProto += pointerTo(idstype) + " in_" + i.identifier + ", "
+	  idstype = input_type(i);
+	  self.userSignatureProto += pointer_to(idstype) + " in_" + i.identifier + ", "
       if self.inputFlag:
-	  self.signatureProto += pointerTo(self.inputType) + " in_" + self.inputName + ", "
+	  self.signatureProto += pointer_to(self.inputType) + " in_" + self.inputName + ", "
       if service.output.identifier:
-	  idstype = inputType(service.output);
-	  self.signatureProto += pointerTo(idstype) + " out_" + service.output.identifier + ", "  
-	  self.userSignatureProto += pointerTo(idstype) + " out_" + service.output.identifier + ", "  
+	  idstype = input_type(service.output);
+	  self.signatureProto += pointer_to(idstype) + " out_" + service.output.identifier + ", "  
+	  self.userSignatureProto += pointer_to(idstype) + " out_" + service.output.identifier + ", "  
 
     # outputs
     if not service.output.identifier:
@@ -200,11 +200,11 @@ class ServiceInfo:
       self.outputFlatList = []
     else:
       self.outputFlag = True
-      self.outputName = idsMemberForInput(service.output, service)
-      self.outputType = inputType(service.output)
+      self.outputName = ids_member_for_input(service.output, service)
+      self.outputType = input_type(service.output)
       self.outputTypeC = MapTypeToC(self.outputType,True)
-      self.outputTypeProto = typeProtoPrefix(self.outputType)
-      self.outputTypePtr = pointerTo(self.outputType)
+      self.outputTypeProto = type_proto_prefix(self.outputType)
+      self.outputTypePtr = pointer_to(self.outputType)
 
       self.outputSize = "sizeof(" + MapTypeToC(self.outputType, True) + ")"
 
@@ -220,7 +220,7 @@ class ServiceInfo:
       else:
 	self.outputNewline = "0"
 
-      self.outputFlatList = flatStruct(self.outputType, self.outputName, ".")
+      self.outputFlatList = flat_struct(self.outputType, self.outputName, ".")
       if self.outputType.kind() == IdlKind.String:
 	  st = self.outputType.asStringType()
 	  self.outputVarDecl = "char " + self.outputName + "[" + str(st.bound()) + "]"
@@ -241,7 +241,7 @@ services_info_dict = dict()
 for name, service in servicesDict.iteritems():
     services_info_dict[name] = ServiceInfo(service)    
 
-def convertFun(t):
+def convert_fun(t):
     """ returns the function to use to convert from a const char* to type t."""
     if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
         return ""
@@ -253,7 +253,7 @@ def convertFun(t):
         return "atof"
     return ""
 
-def formatStringForType(t):
+def format_string_for_type(t):
    """ Returns the printf format string corresponding to the type t."""
    if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
        return "%c";
@@ -268,7 +268,7 @@ def formatStringForType(t):
    else:
        return ""
 
-def sizeOfType(t):
+def size_of_type(t):
     """ Returns a string to compute the size of type t."""
     if t.kind() == IdlKind.String:
 	s = t.asStringType()
@@ -276,24 +276,24 @@ def sizeOfType(t):
     else:
 	return "sizeof(" + MapTypeToC(t,True) + ")"
 
-def sizeOfIdsMember(name):
+def size_of_ids_member(name):
     """ Returns a string to compute the size of the IDS member name."""
     type = typeFromIdsName(name)
     if type is None:
 	return "0"
-    return sizeOfType(type)
+    return size_of_type(type)
 
 # error related functions
-def encodeError(i):
+def encode_error(i):
     return comp.uniqueId << 16 | 0x8000 | 100 << 8 | i
 
-def isPeriodic():
+def is_periodic():
     for t in comp.tasksMap():
 	if t.data().period > 0:
 	    return True
     return False
 
-def serviceDescString(s):
+def service_description_string(s):
     if s.type == ServiceType.Exec:
 	# if reentrant return "(nE)"
 	return "(E)"
@@ -301,7 +301,7 @@ def serviceDescString(s):
 	return "(I)"
     return ""
 
-def findServiceWithSameOutput(service, inputName):
+def find_service_with_same_output(service, inputName):
     """ Find other services with an output corresponding to the service's input """
     l = []
     for name, ss in servicesDict.iteritems():
@@ -320,14 +320,14 @@ def codel_signature(codel, service=None):
 
   for type in codel.inTypes:
     idstype = typeFromIdsName(type);
-    proto += pointerTo(idstype) + " in_" + type + ", ";
+    proto += pointer_to(idstype) + " in_" + type + ", ";
   for type in codel.outTypes:
     idstype = typeFromIdsName(type);
-    proto += pointerTo(idstype) + " out_" + type + ", ";
+    proto += pointer_to(idstype) + " out_" + type + ", ";
   proto +=  "int *report)"
   return proto
 
-def codelSignatureFull(codel, service):
+def codel_full_signature(codel, service):
     """ Creates the full signature of the internal function corresponding to a codel. """
     if service.type != ServiceType.Exec or codel.key() == "control":
 	return "STATUS " + codel_signature(codel.data(), service)
@@ -344,9 +344,9 @@ def real_codel_call(codel, service=None):
 	inputPrefix = serviceInfo.inputName + "->"
     for i in service.inputs():
 	if inputPrefix:
-	    proto += addressOf(inputType(i), "in_" + inputPrefix + i.identifier) + ", "
+	    proto += address_of(input_type(i), "in_" + inputPrefix + i.identifier) + ", "
 	else:
-	    proto += "in_" + idsMemberForInput(i, service) + ", "
+	    proto += "in_" + ids_member_for_input(i, service) + ", "
     if service.output.identifier:
 	proto += " out_" + service.output.identifier + ", "
 
@@ -356,20 +356,20 @@ def real_codel_call(codel, service=None):
     proto += "out_" + type + ", ";
   for p in codel.outPorts:
     port = comp.port(p)
-    if isDynamic(port.idlType):
+    if is_dynamic(port.idlType):
       proto += "&SDI_F->" + p + "_outport, "
     else:
       proto +=  p + "_outport, "
   for p in codel.inPorts:
     port = comp.port(p)
-    if isDynamic(port.idlType):
+    if is_dynamic(port.idlType):
       proto += "&SDI_F->" + p + "_inport, "
     else:
       proto +=  p + "_inport, "
   proto = codel.name + "(" + proto[:-2] + ")"
   return proto
 
-def nbExecService():
+def nb_exec_service():
     """ Computes the number of exec services in the component """
     count = 0
     for name, service in servicesDict.iteritems():
@@ -377,34 +377,34 @@ def nbExecService():
 	    count += 1
     return count
 
-def maxServiceNameLength():
+def max_service_name_length():
     maxLen = 0
     for name, service in servicesDict.iteritems():
 	maxLen = max(maxLen, len(name))
     return maxLen
 
-def typeSize(t):
+def type_size(t):
     """ Returns the size of the type (or rather an estimation of it).
     This is used to compute the max resquest arg and output size (in posterLib.h)."""
     if t.kind() == IdlKind.Named:
-	return typeSize(t.asNamedType().type())
+	return type_size(t.asNamedType().type())
     if t.kind() == IdlKind.Struct:
 	s = t.asStructType()
 	res = 0
 	for m in s.members():
-	    res += typeSize(m.data)
+	    res += type_size(m.data)
 	return res
     elif t.kind() == IdlKind.Typedef:
-	return typeSize(t.asTypedefType().type())
+	return type_size(t.asTypedefType().type())
     elif t.kind() == IdlKind.Array:
 	a = t.asArrayType()
 	res = 1
 	for x in a.bounds():
 	  res *= x
-	return res * typeSize(a.type())
+	return res * type_size(a.type())
     elif t.kind() == IdlKind.Sequence:
 	s = t.asSequenceType()
-	return s.bound() * typeSize(s.seqType())
+	return s.bound() * type_size(s.seqType())
     elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
         return 4
     elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.Enum:
@@ -421,32 +421,32 @@ def typeSize(t):
 	  return s.bound()
     return 0
 
-def maxArgsSize():
+def max_args_size():
     """ compute the max request size """
     res = 8
     for name, service in servicesDict.iteritems():
       serviceInfo = services_info_dict[name]
       if serviceInfo.inputFlag:
-	res = max(res, typeSize(serviceInfo.inputType))
+	res = max(res, type_size(serviceInfo.inputType))
     return res
 
-def maxOutputSize():
+def max_output_size():
     """ compute the max result size """
     res = 8
     for name, service in servicesDict.iteritems():
       serviceInfo = services_info_dict[name]
       if serviceInfo.outputFlag:
-	res = max(res, typeSize(serviceInfo.outputType))
+	res = max(res, type_size(serviceInfo.outputType))
     return res
 
-def computeTotalSize(t, name, addStructSize = True):
+def compute_total_size(t, name, addStructSize = True):
   """ Prints the string used to compute the total size of the static elements of a type. This is used
   when allocating sequences."""
   if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    return computeTotalSize(t.unalias(), name, addStructSize)
+    return compute_total_size(t.unalias(), name, addStructSize)
   elif t.kind() == IdlKind.Sequence:
     s = t.asSequenceType()
-    res = computeTotalSize(s.seqType(), name + ".data")
+    res = compute_total_size(s.seqType(), name + ".data")
 
     if addStructSize:
       structSize = "sizeof(int) + sizeof(" + MapTypeToC(s.seqType(), True) + "*) + "
@@ -454,9 +454,9 @@ def computeTotalSize(t, name, addStructSize = True):
       structSize = ""
 
     if res:
-      return structSize + lengthVar(name) + " * ( " + res + ")" 
+      return structSize + length_var(name) + " * ( " + res + ")" 
     else:
-      return structSize + lengthVar(name) + "* (sizeof(" + MapTypeToC(s.seqType(), True) + "))" 
+      return structSize + length_var(name) + "* (sizeof(" + MapTypeToC(s.seqType(), True) + "))" 
 
   elif t.kind() == IdlKind.Struct:
     s = t.asStructType()
@@ -465,31 +465,31 @@ def computeTotalSize(t, name, addStructSize = True):
     else:
       str = "0"
     for m in s.members():
-      res = computeTotalSize(m.data, name + "." + m.key, False)
+      res = compute_total_size(m.data, name + "." + m.key, False)
       if res:
 	str += " + " + res
     return str
   else :
     return ""
 
-def copyType(t, dest, src, allocateMemory=True):
+def copy_type(t, dest, src, allocateMemory=True):
     """ Updates the IDS copy of a sequence type from the value stored in shared memory.
     If allocateMemory is True (for InPorts), memory will be allocated to store sequences."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
-      if isDynamic(s.seqType()):
+      if is_dynamic(s.seqType()):
 	if allocateMemory:
 	  print dest + ".data = malloc(" + src + ".length * sizeof(" + seqType + "));"
 	  print dest + ".length = " + src + ".length;"
 
-	print seqType + "* " + toIdentifier(src) + "_name = (" + seqType + "*) (start + currentOffset);"
+	print seqType + "* " + to_identifier(src) + "_name = (" + seqType + "*) (start + currentOffset);"
 	print "currentOffset += " + src + ".length * sizeof(" + seqType + ");"
 
-	counter = counterName(dest)
+	counter = counter_name(dest)
 	print "int " + counter + " = 0;"
 	print "for(; " + counter + "<" + src + ".length; ++" + counter + ") {"
-	copyType(s.seqType(), dest + ".data[" + counter + "]", toIdentifier(src) + "_name[" + counter + "]", allocateMemory)
+	copy_type(s.seqType(), dest + ".data[" + counter + "]", to_identifier(src) + "_name[" + counter + "]", allocateMemory)
 	print "}"
 
       else:
@@ -501,15 +501,15 @@ def copyType(t, dest, src, allocateMemory=True):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyType(m.data, dest + "." + m.key, src + "." + m.key, allocateMemory)
+	copy_type(m.data, dest + "." + m.key, src + "." + m.key, allocateMemory)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      copyType(t.unalias(), dest, src, allocateMemory)
+      copy_type(t.unalias(), dest, src, allocateMemory)
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
-      counter = counterName(dest)
+      counter = counter_name(dest)
       print "int " + counter + " = 0;"
       print "for(; " + counter + "<" + str(s.bounds()[0]) + "; ++" + counter + ") {"
-      copyType(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", allocateMemory)
+      copy_type(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", allocateMemory)
       print "}"
     elif t.kind() == IdlKind.String:
       s = t.asStringType()
@@ -517,23 +517,23 @@ def copyType(t, dest, src, allocateMemory=True):
     else:
       print dest + " = " + src + ";"
 
-def copyTypeReverse(t, dest, src):
+def copy_type_reverse(t, dest, src):
     """ Updates the shared memory contents after a codel call. """
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
-      if isDynamic(s.seqType()):
-	counter = counterName(dest)
+      if is_dynamic(s.seqType()):
+	counter = counter_name(dest)
 	print "int " + counter + " = 0;"
 	print "for(; " + counter + "<" + src + ".length; ++" + counter + ") {"
-	copyTypeReverse(s.seqType(), dest + ".data[" + counter + "]", src + ".data[" + counter + "]")
+	copy_type_reverse(s.seqType(), dest + ".data[" + counter + "]", src + ".data[" + counter + "]")
 	print "}"
 
     elif t.kind() == IdlKind.Array:
       s = t.asArrayType()
-      counter = counterName(dest)
+      counter = counter_name(dest)
       print "int " + counter + " = 0;"
       print "for(; " + counter + "<"  + str(s.bounds()[0]) + "; ++" + counter + ") {"
-      copyTypeReverse(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
+      copy_type_reverse(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
       print "}"
     elif t.kind() == IdlKind.String:
       s = t.asStringType()
@@ -541,46 +541,46 @@ def copyTypeReverse(t, dest, src):
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	copyTypeReverse(m.data, dest + "." + m.key, src + "." + m.key)
+	copy_type_reverse(m.data, dest + "." + m.key, src + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      copyTypeReverse(t.unalias(), dest, src)
+      copy_type_reverse(t.unalias(), dest, src)
     else:
       print dest + " = " + src + ";"
 
-def allocateMemory(t, dest, idsDest, scopedName):
+def allocate_memory(t, dest, idsDest, scopedName):
     """ Allocate the memory requested by the user after the size codel has been called."""
     if t.kind() == IdlKind.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
       print dest + ".data = (" + seqType + "*) (start + currentOffset);"
-      print dest + ".length = " + lengthVar(scopedName) + ";"
-      print "currentOffset += " + lengthVar(scopedName) + " * sizeof(" + seqType + ");"
+      print dest + ".length = " + length_var(scopedName) + ";"
+      print "currentOffset += " + length_var(scopedName) + " * sizeof(" + seqType + ");"
       print ""
 
-      if isDynamic(s.seqType()):
-	print idsDest + ".data = malloc(" + lengthVar(scopedName) + " * sizeof(" + seqType + "));"
+      if is_dynamic(s.seqType()):
+	print idsDest + ".data = malloc(" + length_var(scopedName) + " * sizeof(" + seqType + "));"
       else:
 	print idsDest + ".data = " + dest + ".data;"
-	print "memset(" + idsDest + ".data , 0, " + lengthVar(scopedName) + " * sizeof(" + seqType + "));"
+	print "memset(" + idsDest + ".data , 0, " + length_var(scopedName) + " * sizeof(" + seqType + "));"
 
-      print idsDest + ".length = " + lengthVar(scopedName) + ";"
+      print idsDest + ".length = " + length_var(scopedName) + ";"
       print ""
 
-      if isDynamic(s.seqType()):
-	counter = counterName(dest)
+      if is_dynamic(s.seqType()):
+	counter = counter_name(dest)
 	print "int " + counter + " = 0;"
 	print "for(; " + counter + "<" + dest + ".length; ++" + counter + ") {"
-	allocateMemory(s.seqType(), dest + ".data[" + counter + "]", idsDest + ".data[" + counter + "]", scopedName + ".data")
+	allocate_memory(s.seqType(), dest + ".data[" + counter + "]", idsDest + ".data[" + counter + "]", scopedName + ".data")
 	print "}"
 
     elif t.kind() == IdlKind.Struct:
       s = t.asStructType()
       for m in s.members():
-	allocateMemory(m.data, dest + "." + m.key, idsDest + "." + m.key, scopedName + "." + m.key)
+	allocate_memory(m.data, dest + "." + m.key, idsDest + "." + m.key, scopedName + "." + m.key)
     elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-      allocateMemory(t.unalias(), dest, idsDest, scopedName)
+      allocate_memory(t.unalias(), dest, idsDest, scopedName)
 
-def codelLock(codel, service = None):
+def codel_lock(codel, service = None):
   """ Prepare the execution of a user codel. Finds posters pointers, initialize dynamic ports if 
   necessary, etc."""
   for port in codel.outPorts:
@@ -589,7 +589,7 @@ def codelLock(codel, service = None):
     posterAddr = port + "_outport"
     posterType = MapTypeToC(p.idlType, True);
 
-    if not isDynamic(p.idlType):
+    if not is_dynamic(p.idlType):
       print "/* find a pointer to <!port!> poster*/"
       print posterType + "* " + posterAddr + " = posterAddr(" + posterId + ");"
       print "if ("+posterAddr+" == NULL) {"
@@ -598,17 +598,17 @@ def codelLock(codel, service = None):
       print "}"
       continue
 
-    #seqs = dynamicMembers(p.idlType, posterAddr)
+    #seqs = dynamic_members(p.idlType, posterAddr)
     #for x in seqs:  
-      #print "  char " + isEmptyVar(x[1]) + " = SDI_F->" + x[1] + ".length == 0;"
+      #print "  char " + is_empty_var(x[1]) + " = SDI_F->" + x[1] + ".length == 0;"
 
     print "if(" + posterId + " != NULL) {"
     print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_WRITE);"
     print "} else {"
     sizeCodelArgs = ""
-    for x in dynamicMembers(p.idlType, posterAddr, True):
-      print "int " + lengthVar(x[1]) + " = 0;"
-      sizeCodelArgs += "&" + lengthVar(x[1]) + ", "
+    for x in dynamic_members(p.idlType, posterAddr, True):
+      print "int " + length_var(x[1]) + " = 0;"
+      sizeCodelArgs += "&" + length_var(x[1]) + ", "
 
     for s in p.sizeCodel.inTypes:
       sizeCodelArgs += "&SDI_F->" + s + ", "
@@ -623,7 +623,7 @@ def codelLock(codel, service = None):
     print "if(res >= 0) {"
 
     # compute the total size of the poster
-    print "int totalSize = " + computeTotalSize(p.idlType, "(*" + posterAddr + ")") + ";"
+    print "int totalSize = " + compute_total_size(p.idlType, "(*" + posterAddr + ")") + ";"
 
     # allocate the space in shared memory
     print "if(posterCreate(" + upper(comp.name()) + "_" + upper(p.name) + "_POSTER_NAME, totalSize, &("+posterId+")) != OK) {"
@@ -638,7 +638,7 @@ def codelLock(codel, service = None):
     print "char *start = (char*) " + posterAddr + ";"
 
     # allocate the memory
-    allocateMemory(p.idlType, "(*" + posterAddr + ")", "SDI_F->" + p.name + "_outport", posterAddr)
+    allocate_memory(p.idlType, "(*" + posterAddr + ")", "SDI_F->" + p.name + "_outport", posterAddr)
  
     print "}"
     print "}"
@@ -656,7 +656,7 @@ def codelLock(codel, service = None):
     print "  return ETHER;"
     print "}"
 
-    if not isDynamic(p.idlType):
+    if not is_dynamic(p.idlType):
       continue
 
     print "posterTake(" + posterId + ", POSTER_READ);"
@@ -664,15 +664,15 @@ def codelLock(codel, service = None):
     print "int currentOffset = sizeof(" + posterType + ");"
     print "char *start = (char*) " + posterAddr + ";"
 
-    copyType(p.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")", False)
+    copy_type(p.idlType,  "SDI_F->" + posterAddr,  "(*" + posterAddr + ")", False)
 
-def codelRelease(codel, service=None):
+def codel_release(codel, service=None):
   """  Cleanup after a codel has been called. Updates posters in shared memory if necessary. """
   for port in codel.outPorts:
     p = comp.port(port)
     posterId = upper(comp.name()) + "_" + upper(port) + "_POSTER_ID"
 
-    if not isDynamicPort(p): 
+    if not is_dynamic_port(p): 
       print "posterGive(" + posterId + ");"
       continue
     
@@ -681,7 +681,7 @@ def codelRelease(codel, service=None):
 
     print "if(" + posterId + " != NULL) {"
     print posterType + "* " + posterAddr + " = posterAddr(" + posterId + ");"
-    copyTypeReverse(p.idlType, "(*" + posterAddr + ")", "SDI_F->" + p.name + "_outport")  
+    copy_type_reverse(p.idlType, "(*" + posterAddr + ")", "SDI_F->" + p.name + "_outport")  
     print "posterGive(" + posterId + ");\n\n"
     print "}"
 
@@ -691,7 +691,7 @@ def codelRelease(codel, service=None):
 
 
 # try to find an init service
-def findInitService():
+def find_init_service():
   i=-1
   for name,service in servicesDict.iteritems():
     i += 1
@@ -699,13 +699,13 @@ def findInitService():
       return service, i
   return 0,-1
 
-initService,initServiceNb = findInitService()
+initService,initServiceNb = find_init_service()
 
 # other vars
 nbServices = len(servicesDict)
 abortRequestNum = nbServices;
 internalDataType = MapTypeToC(IDSType,True)
-periodicFlag = isPeriodic()
+periodicFlag = is_periodic()
 
 shouldGenerateOpenPRS = "#" # do not generate openrps related code
 shouldGenerateTcl = ""

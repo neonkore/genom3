@@ -36,7 +36,7 @@ funHeader = "void endianswap_%s(%s *x, int nDim, int *dims)\n{\n"
 
 <?
 for t in comp.typesVect():
-    prefix = typeProtoPrefix(t)
+    prefix = type_proto_prefix(t)
     if not prefix:
       continue
     ?>
@@ -54,18 +54,18 @@ void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
 		  dims += str(n) + ", "
 		?>  
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      endianswap_<!typeProtoPrefix(a.type())!>((<!MapTypeToC(a.type(), True)!> *)((x+elt)-><!m.key!>), 1, dims); }
+      endianswap_<!type_proto_prefix(a.type())!>((<!MapTypeToC(a.type(), True)!> *)((x+elt)-><!m.key!>), 1, dims); }
 <?
 	  elif m.data.kind() == IdlKind.Sequence:
 		seq = m.data.asSequenceType()
 		?>
     { int dims[1] = {<!seq.bound()!>};
-      endianswap_<!typeProtoPrefix(seq.seqType())!>((<!MapTypeToC(seq.seqType(), True)!> *)((x+elt)-><!m.key!>.data), 1, dims); }
+      endianswap_<!type_proto_prefix(seq.seqType())!>((<!MapTypeToC(seq.seqType(), True)!> *)((x+elt)-><!m.key!>.data), 1, dims); }
       endianswap_int(&((x+elt)-><!m.key!>.length), 0, NULL);
       endianswap_int(&((x+elt)-><!m.key!>.size), 0, NULL);
 <?
 	  else:
-	    print "   endianswap_" + typeProtoPrefix(m.data) + "(&((x+elt)->" + m.key + "), 0, NULL);"
+	    print "   endianswap_" + type_proto_prefix(m.data) + "(&((x+elt)->" + m.key + "), 0, NULL);"
     elif t.kind() == IdlKind.Enum:
 	print "    endianswap_int((int *)x+elt, 0, NULL);"
     ?>
@@ -83,22 +83,22 @@ typeName = "%s_STR" % (upper(comp.name()))
 void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
-     endianswap_<!typeProtoPrefix(comp.IDSType)!>(&(*(x+elt)), 0, NULL);
+     endianswap_<!type_proto_prefix(comp.IDSType)!>(&(*(x+elt)), 0, NULL);
   } END_FOR
 }
 
 <?
 for p in outports:
     typeName = "%s_%s_POSTER_STR" % (upper(comp.name()), upper(p.name))
-    if isDynamicPort(port):
-      t = dynamicPortType(port)
+    if is_dynamic_port(port):
+      t = dynamic_port_type(port)
     else:
       t = port.idlType
     ?>
 void endianswap_<!typeName!>(<!typeName!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
-     endianswap_<!typeProtoPrefix(t)!>(&(*(x+elt)), 0, NULL);
+     endianswap_<!type_proto_prefix(t)!>(&(*(x+elt)), 0, NULL);
   } END_FOR
 }
 

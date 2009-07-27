@@ -10,7 +10,7 @@ void throwError(int e)
 {
   switch(e) {
 <?
-errorSet = createErrorList()
+errorSet = create_error_list()
 for e in errorSet:
     print "    case ERROR_" + e + ": throw " + e + "();"
 ?>
@@ -48,13 +48,13 @@ for s in servicesMap:
 {
 <?
     if service.hasCodel("control"):
-	copyCodelArgs(service.codel("control"), service)
-	codelLock(service.codel("control"), service)
+	copy_codel_args(service.codel("control"), service)
+	codel_lock(service.codel("control"), service)
 	?>
   int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
 <?
-	codelRelease(service.codel("control"), service)
-	copyCodelArgsReverse(service.codel("control"), service)
+	codel_release(service.codel("control"), service)
+	copy_codel_args_reverse(service.codel("control"), service)
 	?>
   if(res < 0) //error
       throwError(res);
@@ -73,16 +73,16 @@ for s in servicesMap:
 	?>
   m_data->idsMutex.acquire_write();
 <?
-	copyTypeFromCorba(inputType(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
+	copyTypeFromCorba(input_type(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
 	?> 
   m_data->idsMutex.release();
 <?
     if service.output.identifier:
-      outputType = inputType(service.output)
+      outputType = input_type(service.output)
       output = MapTypeToCorbaCpp(outputType, True)
     
-      if needsConversion(outputType):
-	if isCorbaDynamic(outputType):
+      if needs_conversion(outputType):
+	if is_corba_dynamic(outputType):
 	  outputName = "(*out)"
 	  print "  " + output + " *out = new " + output + ";"
 	else:
@@ -105,7 +105,7 @@ for s in comp.servicesMap():
   if service.type != ServiceType.Control:
     args = ", m_serviceCount++ "
     for i in service.inputs():
-      if needsConversion(inputType(i)):
+      if needs_conversion(input_type(i)):
 	args += ", " + i.identifier
       else:
 	args += ", in_" + i.identifier
@@ -114,14 +114,14 @@ for s in comp.servicesMap():
 {
   static long m_serviceCount = 0;
 <?
-    copyCodelArgs(service.codel("control"), service)
+    copy_codel_args(service.codel("control"), service)
     if service.hasCodel("control"):
-	codelLock(service.codel("control"), service)
+	codel_lock(service.codel("control"), service)
 	?>
   int res = <!real_codel_call(service.codel("control"), "m_data->", service)!>;
 <?
-	codelRelease(service.codel("control"), service)
-	copyCodelArgsReverse(service.codel("control"), service)
+	codel_release(service.codel("control"), service)
+	copy_codel_args_reverse(service.codel("control"), service)
 	?>
   if(res < 0) // error
       throwError(res);
@@ -141,7 +141,7 @@ for s in comp.servicesMap():
 	?>
   m_data->idsMutex.acquire_write();
 <?
-	copyTypeFromCorba(inputType(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
+	copyTypeFromCorba(input_type(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
 	?> 
   m_data->idsMutex.release();
 <?

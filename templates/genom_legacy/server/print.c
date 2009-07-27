@@ -40,7 +40,7 @@
 
 <?
 for t in typesVect:
-    prefix = typeProtoPrefix(t)
+    prefix = type_proto_prefix(t)
     if not prefix:
       continue
     ?>
@@ -66,14 +66,14 @@ void print_<!prefix!>( FILE *out,
 		?>
     fprintf(out, "%s<!m.key!><!a.printBounds()!>:\n", indstr);
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      print_<!typeProtoPrefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
+      print_<!type_proto_prefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
 <?
 	    elif m.data.kind() == IdlKind.Sequence:
 		seq = m.data.asSequenceType()
 		?>
     fprintf(out, "%s<!m.key!>[<!seq.bound()!>]:\n", indstr);
     { int dims[1] = {<!seq.bound()!>};
-      print_<!typeProtoPrefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key!>.data), indent, 1, dims, in); }
+      print_<!type_proto_prefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key!>.data), indent, 1, dims, in); }
     print_int(out, &((x+elt)-><!m.key!>.length), indent, 0, NULL, in);
     print_int(out, &((x+elt)-><!m.key!>.size), indent, 0, NULL, in);
 <?
@@ -87,7 +87,7 @@ void print_<!prefix!>( FILE *out,
 	    else:
 		?>
     fprintf(out, "%s<!m.key!>:\n", indstr);
-    print_<!typeProtoPrefix(m.data)!>(out, &((x+elt)-><!m.key!>), indent, 0, NULL, in);
+    print_<!type_proto_prefix(m.data)!>(out, &((x+elt)-><!m.key!>), indent, 0, NULL, in);
 <? 
     elif t.kind() == IdlKind.Enum:
 	e = t.asEnumType()

@@ -3,7 +3,7 @@
 
 <?
 for port in outports:
-  if isDynamicPort(port):
+  if is_dynamic_port(port):
     ty = port.idlType.asNamedType()
     print MapTypeToC(ty.type()) + ";\n"
 #for t in comp.typesVect():

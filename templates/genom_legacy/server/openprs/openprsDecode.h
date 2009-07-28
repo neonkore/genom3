@@ -32,13 +32,30 @@
  *   Automatically generated: do not edit by hand.
  *----------------------------------------------------------------------*/
 
-#ifndef $MODULE$_OPENPRS_DECODE_H
-#define $MODULE$_OPENPRS_DECODE_H
+#ifndef <!upper(comp.name())!>_OPENPRS_DECODE_H
+#define <!upper(comp.name())!>_OPENPRS_DECODE_H
 
 /* Structures definies par d'autres modules */
-$externOpenprsDecodeLibs$
+<? #$externOpenprsDecodeLibs$
+for i in comp.importedComponents(): ?>
+#include "server/openprs/<!i!>DecodeOpenprs.h"
+<?
+?>
 
 /* Structures du module */
-#include "server/$module$PosterLib.h"
+#include "server/<!comp.name()!>PosterLib.h"
 
 /* Prototypes */
+<?
+for t in typesVect:
+  if t.identifier() == IDSType.identifier():
+    continue
+
+  ctype = MapTypeToC(t, True)
+  ?>
+extern Term *pu_decode_genom_<!type_proto_prefix(t)!>(char *name, <!ctype!> *str, int tabsize);
+<?
+  if t.identifier(): ?>
+extern Term *pu_decode_genom_<!t.identifier()!>(char *name, <!ctype!> *str, int tabsize);
+<?
+?>

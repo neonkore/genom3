@@ -12,6 +12,7 @@ main:
 /*  "local.mk.in"  */
   "server/Makefile.in"
 /*  "codels/Makefile.in" */
+
 /* autoconf/ dir */
   "autoconf/codels.mk"
   "autoconf/config.mk.in"
@@ -30,6 +31,7 @@ main:
   "autoconf/ltconfig"   
   "autoconf/mkinstalldirs"  
   "autoconf/module.pc.in" -> "autoconf/$$.pc.in"
+
 /* server/ dir */
   "struct.h" -> "$$UserStruct.h" 
   "server/modules.h" -> "server/$$Modules.h"
@@ -63,9 +65,22 @@ main:
   "server/printXML.c" -> "server/$$PrintXML.c"
   "server/scan.h" -> "server/$$Scan.h"
   "server/scan.c" -> "server/$$Scan.c"
+
 /* server/tcl/ stuff*/
   "server/tcl/tcl.c" -> "server/tcl/$$Tcl.c"
   "server/tcl/tclClient.tcl" -> "server/tcl/$$Client.tcl"
+
+/* server openprs/ */
+  "server/openprs/openprs.c" -> "server/openrps/$$RequestsOpenprs.c"
+  "server/openprs/openprsProto.h" -> "server/openrps/$$RequestsOpenprs.h"
+  "server/openprs/openprsDecode.h" -> "server/openrps/$$DecodeOpenprs.h"
+  "server/openprs/openprsDecode.c" -> "server/openrps/$$DecodeOpenprs.c"
+  "server/openprs/openprsEncode.h" -> "server/openrps/$$EncodeOpenprs.h"
+  "server/openprs/openprsEncode.c" -> "server/openrps/$$EncodeOpenprs.c"
+  "server/openprs/openprsRqst.op" -> "server/openrps/$$Openprs.opf"
+  "server/openprs/openprs.sym" -> "server/openrps/$$Openprs.sym"
+  "server/openprs/openprs.inc" -> "server/openrps/$$Openprs.inc"
+
 /* codels/ dir */
   "codels/cntrlTaskCodels.c" -> "codels/$$CntrlTaskCodels.c"
 /*  "codels/userCntrlTaskCodels.c" -> "codels/$$UserCntrlTaskCodels.c" */

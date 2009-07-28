@@ -53,8 +53,73 @@
 #include <pu-enum_f.h>
 #include <pu-genom_f.h>
 
-#include "$module$Type.h"
+#include "<!comp.name()!>Type.h"
 
-#include "$module$PosterLib.h"
+#include "<!comp.name()!>PosterLib.h"
 
-#include "$module$DecodeOpenprs.h"
+#include "<!comp.name()!>DecodeOpenprs.h"
+
+<?
+for t in typesVect:
+  if t.identifier() is None or t.identifier() == IDSType.identifier():
+    continue
+
+  ctype = MapTypeToC(t, True)
+  ?>
+Term *pu_decode_genom_<!type_proto_prefix(t)!>(char *name, <!ctype!> *str, int tabsize)
+{
+  Pred_Func_Rec *fr = find_or_create_pred_func(declare_atom((name?name:"<!t.identifier()!>")));
+  TermList tl = sl_make_slist();
+  int elt;
+  for(elt=0;elt<tabsize;elt++) {
+<?
+  if t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    for m in s.members():
+      if m.data.kind() == IdlKind.Array:
+	arraySize = m.data.asArrayType().bounds()[0]
+	arrayType = m.data.asArrayType().type() 
+	?>
+      sl_add_to_tail(tl, pu_decode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", (<!type_proto_prefix(arrayType)!> *) (str+elt)-><!m.key!>, <!arraySize!>));
+<?
+      elif m.data.kind() == IdlKind.String: ?>
+      sl_add_to_tail(tl, pu_decode_genom_string("<!m.key!>", (str+elt)-><!m.key!>, 1, <!m.data.asStringType().bound()!>));
+<?
+      else: ?>
+      sl_add_to_tail(tl, pu_decode_genom_<!type_proto_prefix(m.data)!>("<!m.key!>", &(str+elt)-><!m.key!>, 1));
+<?
+  elif t.kind() == IdlKind.Enum:
+    e = t.asEnumType()
+    elseStr = ""
+    for x in e.enumerators(): 
+      ?>
+      <!elseStr!>if (*(str+elt) == <!x!>) add_to_tail(tl, PUMakeTermAtom("<!x!>"));
+<?
+      elseStr = "else "
+    ?>
+      else {
+        fprintf(stdout, "Not valid value %d for enum <!t.identifier()!>\n", *(str+elt));
+        add_to_tail(tl, PUMakeTermAtom("UNKNOWN_<!t.identifier()!>_ENUM_VALUE"));
+      }
+<?
+  else: ?>
+<?
+  ?>
+  }
+  return build_term_expr(build_expr_pfr_terms(fr, tl));
+}
+<?
+?>
+
+<?
+for t in typesVect:
+  if t.identifier() is None or t.identifier() == IDSType.identifier():
+    continue
+  ctype = MapTypeToC(t, True)
+  ?>
+Term *pu_decode_genom_<!t.identifier()!>(char *name, <!ctype!> *str, int tabsize)
+{
+      return  pu_decode_genom_<!type_proto_prefix(t)!>(name, str, tabsize);
+}
+<?
+?>

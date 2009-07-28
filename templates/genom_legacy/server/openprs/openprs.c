@@ -36,7 +36,7 @@
 
 #include <portLib.h>
 
-#include "$module$MsgLib.h"
+#include "<!comp.name()!>MsgLib.h"
 #undef FREE
 
 #include <macro-pub.h>
@@ -59,10 +59,86 @@
 #include <pu-enum_f.h>
 #include <pu-genom_f.h>
 
-#include "$module$Error.h"
-#include "$module$MsgLib.h"
-#include "$module$PosterLib.h"
+#include "<!comp.name()!>Error.h"
+#include "<!comp.name()!>MsgLib.h"
+#include "<!comp.name()!>PosterLib.h"
 
-#include "$module$DecodeOpenprs.h"
-#include "$module$EncodeOpenprs.h"
+#include "<!comp.name()!>DecodeOpenprs.h"
+#include "<!comp.name()!>EncodeOpenprs.h"
+
+/*----------------------------------------------------------------------*/
+
+/*
+ * Requests declaration
+ */
+void init_<!comp.name()!>_rqst_type_table ()
+{
+<?
+for name,service in servicesDict.iteritems():
+  serviceInfo = services_info_dict[service.name]
+  ?>
+  init_rqst_type("<!upper(comp.name())!>_<!upper(service.name)!>", <!upper(comp.name())!>_<!upper(service.name)!>_RQST,
+<?
+  if serviceInfo.inputFlag: ?>
+               (Encode_Func_Proto)pu_encode_genom_<!type_proto_prefix(serviceInfo.inputType)!>, sizeof(<!MapTypeToC(serviceInfo.inputType)!>),
+<?
+  else:?> 
+               null_decode, 0,
+<?
+  if serviceInfo.outputFlag: ?>
+               (Decode_Func_Proto)pu_decode_genom_<!type_proto_prefix(serviceInfo.outputType)!>, sizeof(<!MapTypeToC(serviceInfo.outputType)!>));
+<?
+  else: ?>
+               null_decode, 0);
+<?
+?>
+  init_rqst_type("<!upper(comp.name())!>_ABORT", <!upper(comp.name())!>_ABORT_RQST,
+               (Encode_Func_Proto)pu_encode_genom_int, sizeof(int),
+               null_decode, 0);
+}
+
+/*
+ * ATOM declaration (reports + enum)
+ */
+void init_<!comp.name()!>_module ()
+{
+  /* Enums */
+<?
+for t in typesVect: 
+  if t.kind() != IdlKind.Enum:
+    continue
+  e = t.asEnumType()
+  for x in e.enumerators(): ?>
+  PU_DECLARE_ENUM_ATOM(<!x!>);
+<?
+?>
+
+  /* Reports */
+<?
+for e in errorList:?>
+  PU_DECLARE_ENUM_ATOM(S_viam_<!e!>);
+<?
+?>
+}
+
+/*
+ * Posters declaration
+ */
+void init_<!comp.name()!>_posters ()
+{
+    void *x;
+<?
+for port in outports: 
+  if is_dynamic_port(port):
+    continue
+  ?>
+   declare_poster_function("|<!comp.name()!><!port.name!>|",
+                 "<!upper(comp.name())!>_<!upper(port.name)!>",
+                 (Decode_Func_Proto)pu_decode_genom_<!type_proto_prefix(port.idlType)!>,
+                 (Encode_Func_Proto)pu_encode_genom_<!type_proto_prefix(port.idlType)!>,
+                 0);
+<?
+?>
+}
+
 

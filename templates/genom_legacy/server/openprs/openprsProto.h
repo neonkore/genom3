@@ -33,7 +33,7 @@
  ** Manual editing not recommended. Changes will be overridden.
  **/
 
-extern void init_$module$_rqst_type_table ( void );
-extern void init_$module$_module ( void );
-extern void init_$module$_posters ( void );
+extern void init_<!comp.name()!>_rqst_type_table ( void );
+extern void init_<!comp.name()!>_module ( void );
+extern void init_<!comp.name()!>_posters ( void );
 

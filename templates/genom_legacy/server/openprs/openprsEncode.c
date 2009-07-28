@@ -51,7 +51,88 @@
 #include <pu-enum_f.h>
 #include <pu-genom_f.h>
 
-#include "$module$Type.h"
-#include "$module$PosterLib.h"
-#include "$module$EncodeOpenprs.h"
+#include "<!comp.name()!>Type.h"
+#include "<!comp.name()!>PosterLib.h"
+#include "<!comp.name()!>EncodeOpenprs.h"
 
+<?
+for t in typesVect:
+  if t.identifier() is None or t.identifier() == IDSType.identifier():
+    continue
+
+  ctype = MapTypeToC(t, True)
+  ?>
+Term *pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
+                 <!ctype!> *str, int tabsize)
+{
+  if (!pu_check_ttc_name(tc, name,"ViamSave"))
+    return FALSE;
+  else {
+    int elt;
+    for(elt=0;elt<tabsize;elt++) {
+<?
+  if t.kind() == IdlKind.Struct:
+    s = t.asStructType()
+    counter = 1
+    for m in s.members():
+      ?>
+      Expression *tc_tmp;
+      if (! PUGetOprsTermCompSpecArg(tc, elt*tabsize+<!counter!>, EXPRESSION, &tc_tmp))
+         return FALSE;
+<?
+      counter += 1
+      if m.data.kind() == IdlKind.Array:
+	arraySize = m.data.asArrayType().bounds()[0]
+	arrayType = m.data.asArrayType().type() 
+	?>
+      if (! pu_encode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", tc_tmp,  (<!type_proto_prefix(arrayType)!> *) (str+elt)-><!m.key!>, <!arraySize!>))
+         return FALSE;
+<?
+      elif m.data.kind() == IdlKind.String:
+	?>
+      if (! pu_encode_genom_string("<!m.key!>", tc_tmp, (str+elt)-><!m.key!>, <!m.data.asStringType().bound()!>))
+         return FALSE;
+<?
+      else: ?>
+      if (! pu_encode_genom_<!type_proto_prefix(m.data)!>("<!m.key!>", tc_tmp, &(str+elt)-><!m.key!>, 1))
+         return FALSE;
+<?
+  elif t.kind() == IdlKind.Enum:
+    ?>
+      Symbol val;
+      if (!PUGetOprsTermCompSpecArg(tc, elt+1, ATOM, &val))
+	   return FALSE;
+<?
+    elseStr = ""
+    for x in t.asEnumType().enumerators(): 
+      ?>
+      <!elseStr!> if (strcmp(val,"<!x!>")==0) *(str+elt) = <!x!>;
+<?
+      elseStr = "else"
+    ?>
+      else {
+        fprintf(stdout, "Not valid value %s for enum <!t.identifier()!>", val);
+        return FALSE;
+      }
+<?
+  ?>
+    }
+  }
+  return TRUE;
+}
+<?
+?>
+
+<?
+for t in typesVect:
+  if t.identifier() is None or t.identifier() == IDSType.identifier():
+    continue
+  ctype = MapTypeToC(t, True)
+  ?>
+Term *pu_encode_genom_<!t.identifier()!>(char *name, Expression *tc,
+                 <!ctype!> *str, int tabsize)
+{
+      return  pu_encode_genom_<!type_proto_prefix(t)!>(name, tc, str, tabsize);
+}
+<?
+?>

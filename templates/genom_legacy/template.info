@@ -71,15 +71,15 @@ main:
   "server/tcl/tclClient.tcl" -> "server/tcl/$$Client.tcl"
 
 /* server openprs/ */
-  "server/openprs/openprs.c" -> "server/openrps/$$RequestsOpenprs.c"
-  "server/openprs/openprsProto.h" -> "server/openrps/$$RequestsOpenprs.h"
-  "server/openprs/openprsDecode.h" -> "server/openrps/$$DecodeOpenprs.h"
-  "server/openprs/openprsDecode.c" -> "server/openrps/$$DecodeOpenprs.c"
-  "server/openprs/openprsEncode.h" -> "server/openrps/$$EncodeOpenprs.h"
-  "server/openprs/openprsEncode.c" -> "server/openrps/$$EncodeOpenprs.c"
-  "server/openprs/openprsRqst.op" -> "server/openrps/$$Openprs.opf"
-  "server/openprs/openprs.sym" -> "server/openrps/$$Openprs.sym"
-  "server/openprs/openprs.inc" -> "server/openrps/$$Openprs.inc"
+  "server/openprs/openprs.c" -> "server/openprs/$$RequestsOpenprs.c"
+  "server/openprs/openprsProto.h" -> "server/openprs/$$RequestsOpenprs.h"
+  "server/openprs/openprsDecode.h" -> "server/openprs/$$DecodeOpenprs.h"
+  "server/openprs/openprsDecode.c" -> "server/openprs/$$DecodeOpenprs.c"
+  "server/openprs/openprsEncode.h" -> "server/openprs/$$EncodeOpenprs.h"
+  "server/openprs/openprsEncode.c" -> "server/openprs/$$EncodeOpenprs.c"
+  "server/openprs/openprsRqst.op" -> "server/openprs/$$Openprs.opf"
+  "server/openprs/openprs.sym" -> "server/openprs/$$Openprs.sym"
+  "server/openprs/openprs.inc" -> "server/openprs/$$Openprs.inc"
 
 /* codels/ dir */
   "codels/cntrlTaskCodels.c" -> "codels/$$CntrlTaskCodels.c"

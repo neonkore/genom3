@@ -707,7 +707,7 @@ abortRequestNum = nbServices;
 internalDataType = MapTypeToC(IDSType,True)
 periodicFlag = is_periodic()
 
-shouldGenerateOpenPRS = "#" # do not generate openrps related code
+shouldGenerateOpenPRS = "" # do not generate openrps related code
 shouldGenerateTcl = ""
 shouldGenerateServer = ""
 pkgname = comp.name()

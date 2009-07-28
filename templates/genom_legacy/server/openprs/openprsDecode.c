@@ -61,7 +61,7 @@
 
 <?
 for t in typesVect:
-  if t.identifier() is None or t.identifier() == IDSType.identifier():
+  if t.identifier() is None or t.identifier() == IDSType.identifier() or is_dynamic(t):
     continue
 
   ctype = MapTypeToC(t, True)
@@ -80,7 +80,7 @@ Term *pu_decode_genom_<!type_proto_prefix(t)!>(char *name, <!ctype!> *str, int t
 	arraySize = m.data.asArrayType().bounds()[0]
 	arrayType = m.data.asArrayType().type() 
 	?>
-      sl_add_to_tail(tl, pu_decode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", (<!type_proto_prefix(arrayType)!> *) (str+elt)-><!m.key!>, <!arraySize!>));
+      sl_add_to_tail(tl, pu_decode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", (<!MapTypeToC(arrayType, True)!> *) (str+elt)-><!m.key!>, <!arraySize!>));
 <?
       elif m.data.kind() == IdlKind.String: ?>
       sl_add_to_tail(tl, pu_decode_genom_string("<!m.key!>", (str+elt)-><!m.key!>, 1, <!m.data.asStringType().bound()!>));
@@ -113,7 +113,7 @@ Term *pu_decode_genom_<!type_proto_prefix(t)!>(char *name, <!ctype!> *str, int t
 
 <?
 for t in typesVect:
-  if t.identifier() is None or t.identifier() == IDSType.identifier():
+  if t.identifier() is None or t.identifier() == IDSType.identifier() or is_dynamic(t):
     continue
   ctype = MapTypeToC(t, True)
   ?>

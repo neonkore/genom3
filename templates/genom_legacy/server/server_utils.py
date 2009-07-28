@@ -71,8 +71,10 @@ def type_proto_prefix(t):
         prefix = "int"
     elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
         prefix = "int"
-    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+    elif t.kind() == IdlKind.Double:
         prefix = "double"
+    elif t.kind() == IdlKind.Float:
+	prefix = "float"
     elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
 	prefix = "string"
     return prefix + t.identifier()

@@ -21,7 +21,7 @@ main:
   "autoconf/genom.mk"    
   "autoconf/ltcf-c.sh"  
 /*  "autoconf/ltmain.sh"      PROBLEME D'ENCODAGE AVEC CE FICHIER*/
-  "autoconf/module-oprs.pc.in"  
+  "autoconf/module-oprs.pc.in" -> "autoconf/$$-oprs.pc.in"
   "autoconf/robots.m4"
   "autoconf/config.guess"  
   "autoconf/config.posix.mk"  

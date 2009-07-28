@@ -57,12 +57,12 @@
 
 <?
 for t in typesVect:
-  if t.identifier() is None or t.identifier() == IDSType.identifier():
+  if t.identifier() is None or t.identifier() == IDSType.identifier() or is_dynamic(t):
     continue
 
   ctype = MapTypeToC(t, True)
   ?>
-Term *pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
+PBoolean pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
                  <!ctype!> *str, int tabsize)
 {
   if (!pu_check_ttc_name(tc, name,"ViamSave"))
@@ -72,11 +72,13 @@ Term *pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
     for(elt=0;elt<tabsize;elt++) {
 <?
   if t.kind() == IdlKind.Struct:
+    ?>
+      Expression *tc_tmp;
+<?
     s = t.asStructType()
     counter = 1
     for m in s.members():
       ?>
-      Expression *tc_tmp;
       if (! PUGetOprsTermCompSpecArg(tc, elt*tabsize+<!counter!>, EXPRESSION, &tc_tmp))
          return FALSE;
 <?
@@ -85,12 +87,12 @@ Term *pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
 	arraySize = m.data.asArrayType().bounds()[0]
 	arrayType = m.data.asArrayType().type() 
 	?>
-      if (! pu_encode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", tc_tmp,  (<!type_proto_prefix(arrayType)!> *) (str+elt)-><!m.key!>, <!arraySize!>))
+      if (! pu_encode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", tc_tmp,  (<!MapTypeToC(arrayType, True)!> *) (str+elt)-><!m.key!>, <!arraySize!>))
          return FALSE;
 <?
       elif m.data.kind() == IdlKind.String:
 	?>
-      if (! pu_encode_genom_string("<!m.key!>", tc_tmp, (str+elt)-><!m.key!>, <!m.data.asStringType().bound()!>))
+      if (! pu_encode_genom_string("<!m.key!>", tc_tmp, (str+elt)-><!m.key!>, 1, <!m.data.asStringType().bound()!>))
          return FALSE;
 <?
       else: ?>
@@ -125,11 +127,11 @@ Term *pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
 
 <?
 for t in typesVect:
-  if t.identifier() is None or t.identifier() == IDSType.identifier():
+  if t.identifier() is None or t.identifier() == IDSType.identifier() or is_dynamic(t):
     continue
   ctype = MapTypeToC(t, True)
   ?>
-Term *pu_encode_genom_<!t.identifier()!>(char *name, Expression *tc,
+PBoolean pu_encode_genom_<!t.identifier()!>(char *name, Expression *tc,
                  <!ctype!> *str, int tabsize)
 {
       return  pu_encode_genom_<!type_proto_prefix(t)!>(name, tc, str, tabsize);

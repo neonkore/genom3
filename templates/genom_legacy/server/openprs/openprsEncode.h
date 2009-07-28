@@ -38,7 +38,7 @@
 /* Structures definies par d'autres modules */
 <? #$externOpenprsEncodeLibs$
 for i in comp.importedComponents(): ?>
-#include "server/openprs/<!i!>EncodeOpenprs.h"
+//#include "server/openprs/<!i!>EncodeOpenprs.h"
 <?
 ?>
 
@@ -48,16 +48,18 @@ for i in comp.importedComponents(): ?>
 /* Prototypes */
 <?
 for t in typesVect:
-  if t.identifier() == IDSType.identifier():
+  if t.identifier() == IDSType.identifier() or is_dynamic(t):
     continue
 
   ctype = MapTypeToC(t, True)
   ?>
-extern Term *pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
+extern PBoolean pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
                  <!ctype!> *str, int tabsize);
 <?
   if t.identifier(): ?>
-extern Term *pu_encode_genom_<!t.identifier()!>(char *name, Expression *tc,
+extern PBoolean pu_encode_genom_<!t.identifier()!>(char *name, Expression *tc,
                  <!ctype!> *str, int tabsize);
 <?
 ?>
+
+#endif

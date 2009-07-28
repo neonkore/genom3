@@ -38,7 +38,7 @@
 /* Structures definies par d'autres modules */
 <? #$externOpenprsDecodeLibs$
 for i in comp.importedComponents(): ?>
-#include "server/openprs/<!i!>DecodeOpenprs.h"
+//#include "server/openprs/<!i!>DecodeOpenprs.h"
 <?
 ?>
 
@@ -48,7 +48,7 @@ for i in comp.importedComponents(): ?>
 /* Prototypes */
 <?
 for t in typesVect:
-  if t.identifier() == IDSType.identifier():
+  if t.identifier() == IDSType.identifier() or is_dynamic(t):
     continue
 
   ctype = MapTypeToC(t, True)
@@ -59,3 +59,5 @@ extern Term *pu_decode_genom_<!type_proto_prefix(t)!>(char *name, <!ctype!> *str
 extern Term *pu_decode_genom_<!t.identifier()!>(char *name, <!ctype!> *str, int tabsize);
 <?
 ?>
+
+#endif 

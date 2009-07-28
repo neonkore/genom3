@@ -105,7 +105,7 @@ void init_<!comp.name()!>_module ()
   /* Enums */
 <?
 for t in typesVect: 
-  if t.kind() != IdlKind.Enum:
+  if t.kind() != IdlType.Enum:
     continue
   e = t.asEnumType()
   for x in e.enumerators(): ?>

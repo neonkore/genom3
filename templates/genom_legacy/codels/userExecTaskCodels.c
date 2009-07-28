@@ -35,7 +35,7 @@ currentTask = comp.task(currentTaskName) # currentTaskName is set by genom
 
 <?
 for name, service in servicesDict.iteritems():
-    if service.taskName != currentTaskName or service.type == ServiceType.Control:
+    if service.taskName != currentTaskName or service.type == Service.Control:
 	continue
 
     for c in service.codels():

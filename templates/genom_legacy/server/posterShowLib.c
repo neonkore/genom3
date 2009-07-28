@@ -159,7 +159,7 @@ static void <!comp.name()!>ActivityShow (<!upper(comp.name())!>_CNTRL_STR *sdic)
 write("static char *" + comp.name() + "ExecRqstNameTab[] = {\n");
 service_list = ""
 for name, service in servicesDict.iteritems():
-    if service.type != ServiceType.Control:
+    if service.type != Service.Control:
 	service_list += "\"" + name + "\",\n"
 print service_list[:-2] # remove the last ',' 
 print "};"
@@ -168,7 +168,7 @@ print "static int " + comp.name() + "ExecRqstNumTab[] = {"
 i = 0
 l = ""
 for name, service in servicesDict.iteritems(): 
-    if service.type != ServiceType.Control:
+    if service.type != Service.Control:
 	l +=  str(i) + ", "
     i += 1
 print l[:-2] + "};"

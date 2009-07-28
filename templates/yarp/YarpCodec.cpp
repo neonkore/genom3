@@ -7,21 +7,21 @@ def encode_simple_type(type, name):
 <?
 
 def encode_type(t, name):
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  if t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     encode_type(t.unalias(), name)
-  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
+  elif t.kind() == IdlType.Short or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong:
     encode_simple_type("int", name)
-  elif  t.kind() == IdlKind.ULong:
+  elif  t.kind() == IdlType.ULong:
     encode_simple_type("unsigned int", name)    
-  elif t.kind() == IdlKind.Double:
+  elif t.kind() == IdlType.Double:
     encode_simple_type("double", name)
-  elif t.kind() == IdlKind.Float:
+  elif t.kind() == IdlType.Float:
     encode_simple_type("float", name)
-  elif t.kind() == IdlKind.String:
+  elif t.kind() == IdlType.String:
     encode_simple_type("string", name)
-  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
+  elif t.kind() == IdlType.Octet or t.kind() == IdlType.Char: 
     encode_simple_type("char", name)
-  elif t.kind() == IdlKind.Enum: ?>
+  elif t.kind() == IdlType.Enum: ?>
   {
     int tmp = (int) <!name!>;
     it = YarpCodec<int>::encode(b,tmp);
@@ -29,11 +29,11 @@ def encode_type(t, name):
       return -1;
   }
 <?
-  elif t.kind() == IdlKind.Sequence: 
+  elif t.kind() == IdlType.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType(), True)
     encode_simple_type("int", name + ".length") 
-    if s.seqType().kind() == IdlKind.Char: ?>
+    if s.seqType().kind() == IdlType.Char: ?>
     b->add(new yarp::os::Value((void*) <!name!>.data, <!name!>.length));
     it++;
 <?
@@ -57,21 +57,21 @@ def decode_simple_type(type, name):
 <?
 
 def decode_type(t, name):
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  if t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     decode_type(t.unalias(), name)
-  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
+  elif t.kind() == IdlType.Short or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong: 
     decode_simple_type("int", name)
-  elif  t.kind() == IdlKind.ULong:
+  elif  t.kind() == IdlType.ULong:
     decode_simple_type("unsigned int", name)    
-  elif t.kind() == IdlKind.Double:
+  elif t.kind() == IdlType.Double:
     decode_simple_type("double", name)
-  elif t.kind() == IdlKind.Float:
+  elif t.kind() == IdlType.Float:
     decode_simple_type("float", name)
-  elif t.kind() == IdlKind.String: 
+  elif t.kind() == IdlType.String: 
     decode_simple_type("string", name)
-  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char:
+  elif t.kind() == IdlType.Octet or t.kind() == IdlType.Char:
     decode_simple_type("char", name)
-  elif t.kind() == IdlKind.Enum: 
+  elif t.kind() == IdlType.Enum: 
     e = t.asEnumType()
     ?>
   {
@@ -96,11 +96,11 @@ def decode_type(t, name):
       return -1;
   }
 <?
-  elif t.kind() == IdlKind.Sequence: 
+  elif t.kind() == IdlType.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType())
     decode_simple_type("int", name + ".length")
-    if s.seqType().kind() == IdlKind.Char: ?>
+    if s.seqType().kind() == IdlType.Char: ?>
     <!name!>.data = new char[<!name!>.length];
     memcpy(<!name!>.data, b->get(it).asBlob(), <!name!>.length);
     it++;
@@ -119,21 +119,21 @@ def print_simple_type(type, name):
 <?
 
 def print_type(t, name):
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  if t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     print_type(t.unalias(), name)
-  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
+  elif t.kind() == IdlType.Short or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong: 
     print_simple_type("int", name)
-  elif  t.kind() == IdlKind.ULong:
+  elif  t.kind() == IdlType.ULong:
     print_simple_type("unsigned int", name)    
-  elif t.kind() == IdlKind.Double:
+  elif t.kind() == IdlType.Double:
     print_simple_type("double", name)
-  elif t.kind() == IdlKind.Float:
+  elif t.kind() == IdlType.Float:
     print_simple_type("float", name)
-  elif t.kind() == IdlKind.String:
+  elif t.kind() == IdlType.String:
     print_simple_type("string", name)
-  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
+  elif t.kind() == IdlType.Octet or t.kind() == IdlType.Char: 
     print_simple_type("char", name)
-  elif t.kind() == IdlKind.Enum: 
+  elif t.kind() == IdlType.Enum: 
     e = t.asEnumType()
     ?>
       std::cout << "<!name!> =";
@@ -146,7 +146,7 @@ def print_type(t, name):
       }
       std::cout << std::endl;
 <?
-  elif t.kind() == IdlKind.Sequence: 
+  elif t.kind() == IdlType.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCpp(s.seqType(), True)
     print_simple_type("int", name + ".length")
@@ -158,7 +158,7 @@ def print_type(t, name):
 
 def free_type(t, name):
   s = t.asSequenceType()
-  if t.kind() == IdlKind.Sequence:
+  if t.kind() == IdlType.Sequence:
     seqType = MapTypeToCpp(s.seqType())
     ?>
       delete[] &<!name!>;

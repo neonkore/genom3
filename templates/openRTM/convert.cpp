@@ -2,9 +2,9 @@
 
 <?
 def copy_type_from_corba(t, src, out, reverse):
-  if t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
+  if t.kind() == IdlType.Typedef or t.kind() == IdlType.Named:
     copy_type_from_corba(t.unalias(), src, out, reverse)
-  elif t.kind() == IdlKind.Enum:
+  elif t.kind() == IdlType.Enum:
     e = t.asEnumType()
     ?>
   switch(<!src!>) {
@@ -19,14 +19,14 @@ def copy_type_from_corba(t, src, out, reverse):
     ?>
   }
 <?
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     s = t.asStructType()
     if reverse:
       convertFun = "convertFromCorbaReverse"
     else:
       convertFun = "convertFromCorba"
     for m in s.members(): 
-      if m.data.kind() == IdlKind.Array: 
+      if m.data.kind() == IdlType.Array: 
 	a = m.data.asArrayType()
 	?>
   for(int i=0; i < <!a.bounds()[0]!>; ++i)
@@ -37,7 +37,7 @@ def copy_type_from_corba(t, src, out, reverse):
 	else: ?>
     <!out!>.<!m.key!>[i] = <!src!>.<!m.key!>[i];
 <?
-      elif m.data.kind() == IdlKind.String: 
+      elif m.data.kind() == IdlType.String: 
 	s = m.data.asStringType()
 	if reverse: ?>
     <!out!>.<!m.key!> = CORBA::string_dup(<!src!>.<!m.key!>);
@@ -51,7 +51,7 @@ def copy_type_from_corba(t, src, out, reverse):
       else: ?>
   <!out!>.<!m.key!> = <!src!>.<!m.key!>;
 <?
-  elif t.kind() == IdlKind.String:
+  elif t.kind() == IdlType.String:
     s = t.asStringType()
     if reverse: ?>
     <!out!> = CORBA::string_dup(<!src!>);

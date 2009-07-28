@@ -76,7 +76,16 @@ void export_ast()
 	.def_readonly("period", &Task::period)
 	.def("errorMessages", &Task::errorMessages, return_value_policy<reference_existing_object>());
 
-	class_<Service, Service::Ptr>("Service", init<const std::string &>())
+  {
+	class_<Service, Service::Ptr> Service_exposer = class_<Service, Service::Ptr>("Service", init<const std::string &>());
+	scope Service_scope(Service_exposer);
+	enum_<Service::Type>("ServiceType")
+	.value("Init", Service::Init)
+	.value("Control", Service::Control)
+	.value("Exec", Service::Exec)
+	.export_values();
+
+	Service_exposer
 	.def("debug", &Service::debug)
 	.def_readonly("name", &Service::name)
 	.def_readonly("doc", &Service::doc)
@@ -92,22 +101,22 @@ void export_ast()
 	.def("inputs", &Service::inputs, return_value_policy<reference_existing_object>())
 	.def("errorMessages", &Service::errorMessages, return_value_policy<reference_existing_object>())
 	.def("incompatibleServices", &Service::incompatibleServices, return_value_policy<reference_existing_object>());
+  }
+  {
+	class_<ServiceInput> ServiceInput_exposer = class_<ServiceInput>("ServiceInput");
+	scope ServiceInput_scope(ServiceInput_exposer);
+	enum_<ServiceInput::Kind>("ServiceInputKind")
+	.value("IDSMember", ServiceInput::IDSMember)
+	.value("Type", ServiceInput::Type)
+	.export_values();
 
-	enum_<Service::Type>("ServiceType")
-	.value("Init", Service::Init)
-	.value("Control", Service::Control)
-	.value("Exec", Service::Exec);
-
-	class_<ServiceInput>("ServiceInput")
+	ServiceInput_exposer
 	.def_readwrite("kind", &ServiceInput::kind)
 	.def_readwrite("identifier", &ServiceInput::identifier)
 	.def_readwrite("type", &ServiceInput::type)
 	.def_readwrite("doc", &ServiceInput::doc)
 	.def_readwrite("defaultValue", &ServiceInput::defaultValue);
-
-	enum_<ServiceInput::Kind>("ServiceInputKind")
-	.value("IDSMember", ServiceInput::IDSMember)
-	.value("Type", ServiceInput::Type);
+  }
 
 	class_<Codel, Codel::Ptr>("Codel", init<const std::string &>())
 	.def_readonly("name", &Codel::name)
@@ -119,50 +128,66 @@ void export_ast()
 	.def("addOutPort", &Codel::addOutPort)
 	.def("addInType", &Codel::addInType)
 	.def("addOutType", &Codel::addOutType);
+  {
+	class_<Port, Port::Ptr> Port_exposer = class_<Port, Port::Ptr>("Port");
+	scope Port_scope(Port_exposer);
+	enum_<Port::Type>("PortType")
+	.value("Incoming", Port::Incoming)
+	.value("Outgoing", Port::Outgoing)
+	.export_values();
 
-	class_<Port, Port::Ptr>("Port")
+	Port_exposer
 	.def_readonly("name", &Port::name)
 	.def_readonly("idlType", &Port::idlType)
 	.def_readonly("sizeCodel", &Port::sizeCodel)
 	.def_readonly("type", &Port::type);
-
-	enum_<Port::Type>("PortType")
-	.value("Incoming", Port::Incoming)
-	.value("Outgoing", Port::Outgoing);
-
+  }
+  {
+	class_<Event, Event::Ptr, boost::noncopyable> Event_exposer = class_<Event, Event::Ptr, boost::noncopyable>("Event", no_init);
+	scope Event_scope(Event_exposer);
 	enum_<Event::Kind>("EventKind")
 	.value("NamedEv", Event::NamedEv)
 	.value("ServiceEv", Event::ServiceEv)
-	.value("PortEv", Event::PortEv);
+	.value("PortEv", Event::PortEv)
+	.export_values();
 
-	class_<Event, Event::Ptr, boost::noncopyable>("Event", no_init)
+	Event_exposer
 	.def("identifier", &Event::identifier)
 	.def("kind", &Event::kind)
 	.def("asPortEvent", &Event::asPortEvent, return_value_policy<reference_existing_object>())
 	.def("asNamedEvent", &Event::asNamedEvent, return_value_policy<reference_existing_object>())
 	.def("asServiceEvent", &Event::asServiceEvent, return_value_policy<reference_existing_object>());
-
+  }
 	class_<NamedEvent, bases<Event> >("NamedEvent", init<const std::string &, Event::Ptr>())
 	.def("aliasEvent", &NamedEvent::aliasEvent);
-
+  {
+	class_<PortEvent, bases<Event> > PortEvent_exposer = class_<PortEvent, bases<Event> >("PortEvent", init<const std::string &, PortEvent::Kind>());
+	scope PortEvent_scope(PortEvent_exposer);
 	enum_<PortEvent::Kind>("PortEventKind")
 	.value("OnUpdate", PortEvent::OnUpdate)
 	.value("OnRead", PortEvent::OnRead)
 	.value("OnWrite", PortEvent::OnWrite)
-	.value("OnInitialize", PortEvent::OnInitialize);
+	.value("OnInitialize", PortEvent::OnInitialize)
+	.export_values();
 
-	class_<PortEvent, bases<Event> >("PortEvent", init<const std::string &, PortEvent::Kind>())
+	PortEvent_exposer
 	.def("portName", &PortEvent::portName)
 	.def("kindAsString", &PortEvent::kindAsString);
-
+  }
+  {
+	class_<ServiceEvent, bases<Event> > ServiceEvent_exposer 
+	  = class_<ServiceEvent, bases<Event> >("ServiceEvent", init<const std::string &, ServiceEvent::Kind>());
+	scope ServiceEvent_scope(ServiceEvent_exposer);
 	enum_<ServiceEvent::Kind>("ServiceEventKind")
 	.value("OnCalled", ServiceEvent::OnCalled)
 	.value("OnStart", ServiceEvent::OnStart)
 	.value("OnEnd", ServiceEvent::OnEnd)
 	.value("OnInter", ServiceEvent::OnInter)
-	.value("OnCodel", ServiceEvent::OnCodel);
+	.value("OnCodel", ServiceEvent::OnCodel)
+	.export_values();
 
-	class_<ServiceEvent, bases<Event> >("ServiceEvent", init<const std::string &, ServiceEvent::Kind>())
+	ServiceEvent_exposer
 	.def("serviceName", &ServiceEvent::serviceName)
 	.def("kindAsString", &ServiceEvent::kindAsString);
+  }
 }

@@ -111,7 +111,7 @@ extern "C" {
 <?
 # $listUserFuncProto$
 for name, service in servicesDict.iteritems():
-#    if service.type == ServiceType.Init:
+#    if service.type == Service.Init:
 #	continue
     for codel in service.codels():
 	print "extern " + codel_full_signature(codel, service) + ";"

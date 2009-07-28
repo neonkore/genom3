@@ -107,7 +107,7 @@ def start_state_for_service(service):
 
 def allocate_memory(t, dest, scopedName):
     """ Allocate the memory as requested by the size codel."""
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
       print dest + ".data = new " + seqType + "[" + length_var(scopedName) + "];"
@@ -123,11 +123,11 @@ def allocate_memory(t, dest, scopedName):
       else:
 	print "memset(&" + dest + " , 0, " + length_var(scopedName) + " * sizeof(" + seqType + "));"
 
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	allocate_memory(m.data, dest + "." + m.key, scopedName + "." + m.key)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       allocate_memory(t.unalias(), dest, scopedName)
 
 def codel_needs_lock(codel, service):
@@ -135,13 +135,13 @@ def codel_needs_lock(codel, service):
   1 means lock for read and 2 read for write. """
   if codel.outTypes:
     return 2
-  elif service.output.identifier and service.output.kind == ServiceInputKind.IDSMember:
+  elif service.output.identifier and service.output.kind == ServiceInput.IDSMember:
     return 2
   elif codel.inTypes:
     return 1
   else:
     for i in service.inputs():
-      if i.kind == ServiceInputKind.IDSMember:
+      if i.kind == ServiceInput.IDSMember:
 	return 1
     return 0
 
@@ -212,7 +212,7 @@ def codel_to_event_name(name):
 def full_port_name(p):
   """ Returns the name of the port in internal data structure."""
   port = comp.port(pev.portName())
-  if port.type == PortType.Incoming:
+  if port.type == Port.Incoming:
     return p + "_inport"
   else:
     return p + "_outport"

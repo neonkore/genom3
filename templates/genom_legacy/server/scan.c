@@ -55,10 +55,10 @@ int scan_<!prefix!>( FILE *in, FILE *out,
       fprintf(out, "%s%s", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
 
 <?
-    if t.kind() == IdlKind.Struct:
+    if t.kind() == IdlType.Struct:
 	s = t.asStructType()
 	for m in s.members():
-	    if m.data.kind() == IdlKind.Array:
+	    if m.data.kind() == IdlType.Array:
 		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
@@ -71,7 +71,7 @@ int scan_<!prefix!>( FILE *in, FILE *out,
       free (indstr);
       return ABORT; } }
 <?
-	    elif m.data.kind() == IdlKind.Sequence:
+	    elif m.data.kind() == IdlType.Sequence:
 		seq = m.data.asSequenceType()
 		?>
     fprintf(out, "%s<!m.key!>[<!seq.bound()!>]:\n", indstr);
@@ -94,7 +94,7 @@ int scan_<!prefix!>( FILE *in, FILE *out,
     }
 
 <?
-	    elif m.data.kind() == IdlKind.String:
+	    elif m.data.kind() == IdlType.String:
 		s = m.data.asStringType()
 		length = s.bound()
 		if length == 0:
@@ -115,7 +115,7 @@ int scan_<!prefix!>( FILE *in, FILE *out,
        return ABORT;
     }
 <?
-    elif t.kind() == IdlKind.Enum:
+    elif t.kind() == IdlType.Enum:
 	e = t.asEnumType()
 	eqStr = ""
 	?>

@@ -36,21 +36,21 @@ def print_simple_type(type, name):
 <?
 
 def print_type(t, name):
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  if t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     print_type(t.unalias(), name)
-  elif t.kind() == IdlKind.Short or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong: 
+  elif t.kind() == IdlType.Short or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong: 
     print_simple_type("int", name)
-  elif  t.kind() == IdlKind.ULong:
+  elif  t.kind() == IdlType.ULong:
     print_simple_type("unsigned int", name)    
-  elif t.kind() == IdlKind.Double:
+  elif t.kind() == IdlType.Double:
     print_simple_type("double", name)
-  elif t.kind() == IdlKind.Float:
+  elif t.kind() == IdlType.Float:
     print_simple_type("float", name)
-  elif t.kind() == IdlKind.String:
+  elif t.kind() == IdlType.String:
     print_simple_type("string", name)
-  elif t.kind() == IdlKind.Octet or t.kind() == IdlKind.Char: 
+  elif t.kind() == IdlType.Octet or t.kind() == IdlType.Char: 
     print_simple_type("char", name)
-  elif t.kind() == IdlKind.Enum: 
+  elif t.kind() == IdlType.Enum: 
     e = t.asEnumType()
     ?>
       std::cout << "<!name!> =";
@@ -63,7 +63,7 @@ def print_type(t, name):
       }
       std::cout << std::endl;
 <?
-  elif t.kind() == IdlKind.Sequence: 
+  elif t.kind() == IdlType.Sequence: 
     s = t.asSequenceType()
     seqType = MapTypeToCorbaCpp(s.seqType(), True)
     print_simple_type("int", name + ".length()")

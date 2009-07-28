@@ -97,8 +97,39 @@ void export_idl()
 
 	class_<ConstValue>("ConstValue")
 	.def("identifier", &ConstValue::identifier);
+  {
+	class_<IdlType, IdlType::Ptr> IdlType_exposer = class_<IdlType, IdlType::Ptr>("IdlType", init<>());
+	scope IdlType_scope(IdlType_exposer);
+	enum_< G3nom::Idl::IdlType::Kind>("IdlKind")
+	.value("Null", G3nom::Idl::IdlType::Null)
+	.value("Void", G3nom::Idl::IdlType::Void)
+	.value("Short", G3nom::Idl::IdlType::Short)
+	.value("Long", G3nom::Idl::IdlType::Long)
+	.value("LongLong", G3nom::Idl::IdlType::LongLong)
+	.value("UShort", G3nom::Idl::IdlType::UShort)
+	.value("ULong", G3nom::Idl::IdlType::ULong)
+	.value("ULongLong", G3nom::Idl::IdlType::ULongLong)
+	.value("Float", G3nom::Idl::IdlType::Float)
+	.value("Double", G3nom::Idl::IdlType::Double)
+	.value("LongDouble", G3nom::Idl::IdlType::LongDouble)
+	.value("Fixed", G3nom::Idl::IdlType::Fixed)
+	.value("Boolean", G3nom::Idl::IdlType::Boolean)
+	.value("Char", G3nom::Idl::IdlType::Char)
+	.value("WChar", G3nom::Idl::IdlType::WChar)
+	.value("Octet", G3nom::Idl::IdlType::Octet)
+	.value("String", G3nom::Idl::IdlType::String)
+	.value("WString", G3nom::Idl::IdlType::WString)
+	.value("Any", G3nom::Idl::IdlType::Any)
+	.value("Struct", G3nom::Idl::IdlType::Struct)
+	.value("Union", G3nom::Idl::IdlType::Union)
+	.value("Enum", G3nom::Idl::IdlType::Enum)
+	.value("Sequence", G3nom::Idl::IdlType::Sequence)
+	.value("Typedef", G3nom::Idl::IdlType::Typedef)
+	.value("Array", G3nom::Idl::IdlType::Array)
+	.value("Named", G3nom::Idl::IdlType::Named)
+	.export_values();
 
-	class_<IdlType, IdlType::Ptr>("IdlType")
+	IdlType_exposer
 	.def("asStructType", &IdlType::asType<StructType>, return_value_policy<reference_existing_object>())
 	.def("asEnumType", &IdlType::asType<EnumType>, return_value_policy<reference_existing_object>())
 	.def("asNamedType", &IdlType::asType<NamedType>, return_value_policy<reference_existing_object>())
@@ -110,18 +141,32 @@ void export_idl()
 	.def("identifier", &IdlType::identifier)
 	.def("isNative", &IdlType::isNative)
 	.def("kind", &IdlType::kind);
+	implicitly_convertible< G3nom::Idl::IdlType::Kind, G3nom::Idl::IdlType >();
+  }
 
-	object baseTypeClass = class_<BaseType, bases<IdlType> >("BaseType", init<IdlType::Kind>());
-	baseTypeClass.attr("voidType") = &BaseType::voidType;
-	baseTypeClass.attr("longType") = &BaseType::longType;
-	baseTypeClass.attr("charType") = &BaseType::charType;
+	class_<BaseType, bases<IdlType> > BaseType_exposer = class_<BaseType, bases<IdlType> >("BaseType", init<IdlType::Kind>());
+	BaseType_exposer.def_readwrite( "anyType", G3nom::Idl::BaseType::anyType );
+	BaseType_exposer.def_readwrite( "booleanType", G3nom::Idl::BaseType::booleanType );
+	BaseType_exposer.def_readwrite( "charType", G3nom::Idl::BaseType::charType );
+	BaseType_exposer.def_readwrite( "doubleType", G3nom::Idl::BaseType::doubleType );
+	BaseType_exposer.def_readwrite( "floatType", G3nom::Idl::BaseType::floatType );
+	BaseType_exposer.def_readwrite( "longType", G3nom::Idl::BaseType::longType );
+	BaseType_exposer.def_readwrite( "longdoubleType", G3nom::Idl::BaseType::longdoubleType );
+	BaseType_exposer.def_readwrite( "longlongType", G3nom::Idl::BaseType::longlongType );
+	BaseType_exposer.def_readwrite( "nullType", G3nom::Idl::BaseType::nullType );
+	BaseType_exposer.def_readwrite( "octetType", G3nom::Idl::BaseType::octetType );
+	BaseType_exposer.def_readwrite( "shortType", G3nom::Idl::BaseType::shortType );
+	BaseType_exposer.def_readwrite( "ulongType", G3nom::Idl::BaseType::ulongType );
+	BaseType_exposer.def_readwrite( "ulonglongType", G3nom::Idl::BaseType::ulonglongType );
+	BaseType_exposer.def_readwrite( "ushortType", G3nom::Idl::BaseType::ushortType );
+	BaseType_exposer.def_readwrite( "voidType", G3nom::Idl::BaseType::voidType );
+	BaseType_exposer.def_readwrite( "wcharType", G3nom::Idl::BaseType::wcharType );
+
+	class_<StringType, bases<IdlType> >("StringType", init<int>())
+	.def("bound", &StringType::bound)
+	.def_readwrite("unboundedStringType", StringType::unboundedStringType);
 
 	void (StructType::*AddMemberStr)(IdlType::Ptr,const std::string &) = &StructType::addMember;
-	object stringTypeClass = class_<StringType, bases<IdlType> >("StringType", init<int>())
-	.def("bound", &StringType::bound);
-	stringTypeClass.attr("unboundedStringType") = &StringType::unboundedStringType;
-// 	.add_static_property("unboundedStringType", &StringType::unboundedStringType);
-
 	class_<StructType, bases<IdlType> >("StructType")
 	.def("member", &StructType::member)
 	.def("addMember", AddMemberStr)
@@ -146,30 +191,4 @@ void export_idl()
 	.def("seqType", &SequenceType::seqType)
 	.def("bound", &SequenceType::bound);
 
-	enum_<IdlType::Kind>("IdlKind")
-	.value("Null", IdlType::Null)
-	.value("Void", IdlType::Void)
-	.value("Short", IdlType::Short)
-	.value("Long", IdlType::Long)
-	.value("LongLong", IdlType::LongLong)
-	.value("UShort", IdlType::UShort)
-	.value("ULong", IdlType::ULong)
-	.value("ULongLong", IdlType::ULongLong)
-	.value("Float", IdlType::Float)
-	.value("Double", IdlType::Double)
-	.value("Fixed", IdlType::Fixed)
-	.value("Boolean", IdlType::Boolean)
-	.value("Char", IdlType::Char)
-	.value("WChar", IdlType::WChar)
-	.value("Octet", IdlType::Octet)
-	.value("String", IdlType::String)
-	.value("WString", IdlType::WString)
-	.value("Any", IdlType::Any)
-	.value("Struct", IdlType::Struct)
-	.value("Union", IdlType::Union)
-	.value("Enum", IdlType::Enum)
-	.value("Sequence", IdlType::Sequence)
-	.value("Typedef", IdlType::Typedef)
-	.value("Named", IdlType::Named)
-	.value("Array", IdlType::Array);
 }

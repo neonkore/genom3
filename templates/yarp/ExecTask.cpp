@@ -16,7 +16,7 @@ extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Control or service.taskName != currentTaskName:
+  if service.type == Service.Control or service.taskName != currentTaskName:
     continue
   if service.hasCodel("control"):
     print real_codel_signature(service.codel("control"), service) + ";"
@@ -75,7 +75,7 @@ void <!comp.name()!><!currentTaskName!>::run()
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type == ServiceType.Control or service.taskName != currentTaskName:
+  if service.type == Service.Control or service.taskName != currentTaskName:
     continue
   serviceInfo = services_info_dict[service.name]
   ?>
@@ -116,7 +116,7 @@ void <!comp.name()!><!currentTaskName!>::onRead(yarp::os::Bottle& command)
 first = True
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Control or service.taskName != currentTaskName:
+  if service.type == Service.Control or service.taskName != currentTaskName:
     continue
   if first:
     first = False
@@ -140,7 +140,7 @@ for s in servicesMap:
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Control or service.taskName != currentTaskName:
+  if service.type == Service.Control or service.taskName != currentTaskName:
     continue
   serviceInfo = services_info_dict[service.name]
   args = ""
@@ -154,7 +154,7 @@ for s in servicesMap:
 bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &clientName, int rqst_id, const Bottle &command)
 {
 <?
-  if service.type == ServiceType.Init: ?>
+  if service.type == Service.Init: ?>
   m_data->init_service_ran = true;
 <?
   else:?>
@@ -196,10 +196,10 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
 
   if len(service.inputs()) > 1:
     for i in service.inputs():
-      if i.type == ServiceInputKind.IDSMember:
+      if i.type == ServiceInput.IDSMember:
 	print "  m_data->" + i.identifier + " = input." + i.identifier + ";" 
   elif serviceInfo.inputFlag:
-    if service.inputs()[0].kind == ServiceInputKind.IDSMember:
+    if service.inputs()[0].kind == ServiceInput.IDSMember:
       print "  m_data->" + serviceInfo.inputName + " = in_" + serviceInfo.inputName + ";" 
   ?>
 

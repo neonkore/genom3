@@ -31,7 +31,7 @@ struct <!comp.name()!>ControlData {
   void killAllServices();
 <?
 for s in servicesMap:
-  if s.data().type == ServiceType.Exec:
+  if s.data().type == Service.Exec:
     print "  void kill" + s.data().name + "Services();"
 ?>
   
@@ -41,7 +41,7 @@ for s in servicesMap:
   // members of the ids
 <?
 t = comp.IDSType.unalias()
-if t.kind() == IdlKind.Struct:
+if t.kind() == IdlType.Struct:
   s = t.asStructType()
   for m in s.members():
      print "  " + MapTypeToCpp(m.data) + " " + m.key + ";"
@@ -69,7 +69,7 @@ for port in outports:
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     ?>
    <!service.name!>Service::List <!service.name!>Services;
 <?
@@ -96,7 +96,7 @@ class <!comp.name()!>Module : public yarp::os::Module, public yarp::os::TypedRea
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     continue
   ?>
       bool run<!service.name!>(const std::string &clientName, int rqst_id,

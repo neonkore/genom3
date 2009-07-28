@@ -8,7 +8,7 @@ extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     for c in service.codels():
       if c.key() != "control":
 	print real_codel_signature(c.data(), service) + ";"
@@ -22,7 +22,7 @@ for port in outports:
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type == ServiceType.Control:
+  if service.type == Service.Control:
     continue
 
   inputStr = ", int id"
@@ -64,7 +64,7 @@ for s in comp.servicesMap():
 <?
   if service.output.identifier:
     outputMember = "out_" + service.output.identifier
-    copyTypeFromCorba(input_type(service.output), outputMember, "s.data", True)
+    copy_type_from_corba(input_type(service.output), outputMember, "s.data", True)
   ?>
 	}
     }

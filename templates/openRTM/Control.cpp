@@ -43,14 +43,14 @@ void <!capCompName!>ControlData::killAllServices()
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Exec:
+  if service.type == Service.Exec:
     print "  kill" + service.name + "Services();"
 ?>}
 
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Exec:
+  if service.type == Service.Exec:
     ?>
 void <!capCompName!>ControlData::kill<!service.name!>Services()
 {

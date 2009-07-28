@@ -44,7 +44,7 @@ for e in errorSet:
 
 codelCount = 1000
 for name, service in servicesDict.iteritems():
-    if service.type == ServiceType.Control:
+    if service.type == Service.Control:
 	continue
 
     # print targets for this service

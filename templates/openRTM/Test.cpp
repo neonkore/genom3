@@ -1,13 +1,13 @@
 <?
 def parse_input(type, name):
-  if type.kind() == IdlKind.Enum:?>
+  if type.kind() == IdlType.Enum:?>
   {
       int tmp;
       cin >> tmp;
       <!name!> = (<!MapTypeToCorbaCpp(type, True)!>) tmp;
   }
 <?
-  elif type.kind() == IdlKind.String: 
+  elif type.kind() == IdlType.String: 
     s = type.asStringType()
     ?>
   {
@@ -212,7 +212,7 @@ void <!capCompName!>Test::run<!service.name!>()
 <?
     parse_input(x[0], x[1]);
 
-  if service.type == ServiceType.Control:
+  if service.type == Service.Control:
     if service.output.identifier:
       outputType = MapTypeToCorbaCpp(input_type(service.output), True)    
       if is_corba_dynamic(input_type(service.output)):

@@ -1,14 +1,14 @@
 <?
 def declare_type(t):
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  if t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     return declare_type(t.unalias())
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     l = [t.identifier()]
     for m in t.asStructType().members():
       l.append(m.key)
       l.extend(declare_type(m.data))
     return l
-  elif t.kind() == IdlKind.Array:
+  elif t.kind() == IdlType.Array:
     a = t.asArrayType()
     flat = flat_struct(a.type(), "")
 

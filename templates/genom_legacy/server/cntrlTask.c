@@ -1139,7 +1139,7 @@ for name, service in servicesDict.iteritems():
 		out += "1"
     tabCompatibilityDeclare += out + "};"
 
-    if service.type == ServiceType.Control: 
+    if service.type == Service.Control: 
 	?>
 /*****************************************************************************
  *
@@ -1290,7 +1290,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
    * Control init done and exec tasks status 
    */
 <?
-	if service.type == ServiceType.Exec:?>
+	if service.type == Service.Exec:?>
   if (!controlExecTaskStatusAndInitRqst(servId, rqstId))
     return;  
 <?

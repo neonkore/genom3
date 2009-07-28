@@ -3,11 +3,11 @@
 
 def is_dynamic(t):
   """ Checks whether the type t is dynamic (ie contains a sequence type)"""
-  if t.kind() == IdlKind.Sequence:
+  if t.kind() == IdlType.Sequence:
     return True
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     return is_dynamic(t.unalias())
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     s = t.asStructType()
     for m in s.members():
       if is_dynamic(m.data):
@@ -25,7 +25,7 @@ def dynamic_members(t, name, recursive = False):
   pairs containing the type and the full identifier of the member.
   The recursive parameter indicates whether to include nested sequences or not.
   name is the name of the type instance."""
-  if t.kind() == IdlKind.Sequence:
+  if t.kind() == IdlType.Sequence:
     if recursive:
       s = t.asSequenceType()
       l = [(t, name)]
@@ -33,9 +33,9 @@ def dynamic_members(t, name, recursive = False):
       return l
     else:
       return [(t, name)]
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     return dynamic_members(t.unalias(), name, recursive)
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     s = t.asStructType()
     l = []
     for m in s.members():
@@ -72,7 +72,7 @@ def find_init_service():
   i=-1
   for s in comp.servicesMap():
     i += 1
-    if s.data().type == ServiceType.Init:
+    if s.data().type == Service.Init:
       return s.data(), i
   return 0,-1
 
@@ -81,10 +81,10 @@ initService,initServiceNb = find_init_service()
 def flat_struct(t, name, separator = "_", defValue = None):
     """ Creates a flat list of the structure of a type. The list is composed
     of pairs containing the member type and identifier."""
-    if t.kind() == IdlKind.Named:
+    if t.kind() == IdlType.Named:
 	n = t.asNamedType()
 	return flat_struct(n.type(), name, separator, defValue)
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
 	s = t.asStructType()
 	l = []
 	if defValue is None:
@@ -106,7 +106,7 @@ def input_list(service):
 
 def input_type(i):
   """ Returns the idl type of a ServiceInput. """
-  if i.kind == ServiceInputKind.IDSMember:
+  if i.kind == ServiceInput.IDSMember:
     return comp.typeFromIdsName(i.identifier)
   else:
     return i.type
@@ -115,14 +115,14 @@ def input_type(i):
 def pointer_to(t):
   """ Pointer to an IdlType. """
   s = MapTypeToC(t,True)
-  if t.kind() == IdlKind.String:
+  if t.kind() == IdlType.String:
     return s
   else:
     return s+"*"
 
 def address_of(t, s):
  """ Address of an IdlType. """
- if t.kind() == IdlKind.String:
+ if t.kind() == IdlType.String:
    return s
  else:
     return "&" + s
@@ -186,7 +186,7 @@ def size_codel_signature(port):
 outports = []
 inports = []
 for p in comp.portsMap():
-    if p.data().type == PortType.Outgoing:
+    if p.data().type == Port.Outgoing:
 	outports.append(p.data())
     else:
 	inports.append(p.data())

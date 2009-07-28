@@ -11,7 +11,7 @@ class <!capCompName!>ControlData;
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type == ServiceType.Control:
+  if service.type == Service.Control:
     continue
 
   statusStr = ""

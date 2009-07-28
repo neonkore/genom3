@@ -27,14 +27,14 @@ class <!capCompName!>ControlImpl
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Control:
+  if service.type == Service.Control:
     print "   " + service_cpp_signature(service) + ";"
 
 for t in comp.tasksMap():
     task = t.data()
     for s in comp.servicesMap():
       service = s.data()
-      if service.type != ServiceType.Control and service.taskName == task.name:
+      if service.type != Service.Control and service.taskName == task.name:
 	  print "   " + service_cpp_signature(service) + ";"
 ?>
   private:

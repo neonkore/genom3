@@ -13,7 +13,7 @@ extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     for c in service.codels():
       if c.key() != "control":
 	print real_codel_signature(c.data(), service) + ";"
@@ -27,7 +27,7 @@ for port in outports:
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type == ServiceType.Control:
+  if service.type == Service.Control:
     continue
 
   serviceInfo = services_info_dict[service.name]
@@ -57,17 +57,17 @@ for s in comp.servicesMap():
   for e in service.events():
     ev = e.key()
     codel = e.data().replace(".", "_")
-    if ev.kind() == EventKind.PortEv:
+    if ev.kind() == Event.PortEv:
       pev = ev.asPortEvent()
       port = comp.port(pev.portName())
 
-      if port.type == PortType.Outgoing:
+      if port.type == Port.Outgoing:
 	portName = port.name + "_outport"
       else:
 	portName = port.name + "_inport"
       print "  m_data->" + portName + ".registerReceiver(\"" + pev.kindAsString() + "\", this);"
 
-    elif ev.kind() == EventKind.NamedEv:
+    elif ev.kind() == Event.NamedEv:
       print "  m_data->events_inport.registerReceiver(\"" + ev.identifier() + "\", this);"
 
   if eventsList:?>
@@ -88,16 +88,16 @@ for s in comp.servicesMap():
   for e in service.events():
     ev = e.key()
     codel = e.data().replace(".", "_")
-    if ev.kind() == EventKind.PortEv:
+    if ev.kind() == Event.PortEv:
       pev = ev.asPortEvent()
       port = comp.port(pev.portName())
 
-      if port.type == PortType.Outgoing:
+      if port.type == Port.Outgoing:
 	portName = port.name + "_outport"
       else:
 	portName = port.name + "_inport"
       print "  m_data->" + portName + ".unregisterReceiver(\"" + pev.kindAsString() + "\", this);"
-    elif ev.kind() == EventKind.NamedEv:
+    elif ev.kind() == Event.NamedEv:
       print "  m_data->events_inport.unregisterReceiver(\"" + ev.identifier() + "\", this);"
   ?>
 

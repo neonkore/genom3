@@ -35,7 +35,7 @@
 for name, service in servicesDict.iteritems():
     for c in service.codels():
 	codel = c.data()
-	if service.type != ServiceType.Control and c.key() != "control" :
+	if service.type != Service.Control and c.key() != "control" :
 	    continue
 	?>
 /*------------------------------------------------------------------------

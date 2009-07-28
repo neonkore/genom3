@@ -1,40 +1,40 @@
 <?
 def parseInput(inputType, name):
-  if inputType.kind() == IdlKind.Short: ?>
+  if inputType.kind() == IdlType.Short: ?>
   {
     int tmpInt;
     ret = Tcl_GetIntFromObj(interp, objv[++curObjc], &tmpInt);
     <!name!> = (short)tmpInt;
   }
 <?
-  elif inputType.kind() == IdlKind.Long: ?>
+  elif inputType.kind() == IdlType.Long: ?>
     ret = Tcl_GetLongFromObj(interp, objv[++curObjc], &<!name!>);
 <?
-  elif inputType.kind() == IdlKind.LongLong: ?>
+  elif inputType.kind() == IdlType.LongLong: ?>
     ret = Tcl_GetWideIntFromObj(interp, objv[++curObjc], &<!name!>);
 <?
-  elif inputType.kind() == IdlKind.Char: ?>
+  elif inputType.kind() == IdlType.Char: ?>
   {
     int tmpInt;
     ret = Tcl_GetIntFromObj(interp, objv[++curObjc], &tmpInt);
     <!name!> = (char)tmpInt;
   }
 <?
-  elif inputType.kind() == IdlKind.String: ?>
+  elif inputType.kind() == IdlType.String: ?>
     strncpy(<!name!>, Tcl_GetStringFromObj(objv[++curObjc], NULL), <!inputType.asStringType().bound()!>);
     ret = TCL_OK;
 <?
-  elif inputType.kind() == IdlKind.Float: ?>
+  elif inputType.kind() == IdlType.Float: ?>
   {
     double tmpDouble;
     ret = Tcl_GetDoubleFromObj(interp, objv[++curObjc], &tmpDouble);
     <!name!> = (float)tmpDouble;
   }
 <?
-  elif inputType.kind() == IdlKind.Double: ?>
+  elif inputType.kind() == IdlType.Double: ?>
     ret = Tcl_GetDoubleFromObj(interp, objv[++curObjc], &<!name!>);
 <?
-  elif inputType.kind() == IdlKind.Enum: 
+  elif inputType.kind() == IdlType.Enum: 
       e = inputType.asEnumType()
       enumList = ""
       i = 0
@@ -50,7 +50,7 @@ def parseInput(inputType, name):
 
 
 def processOutput(type, name, allocFlag = False):
-  if type.kind() == IdlKind.Array: 
+  if type.kind() == IdlType.Array: 
     a = type.asArrayType()
     ?>
    {
@@ -66,7 +66,7 @@ def processOutput(type, name, allocFlag = False):
 <?
     return
 
-  if type.kind() == IdlKind.Sequence: 
+  if type.kind() == IdlType.Sequence: 
     a = type.asSequenceType()
     ?>
    {
@@ -84,22 +84,22 @@ def processOutput(type, name, allocFlag = False):
   ?>
 
     ret = Tcl_ListObjAppendElement(interp, my_own_private_unique_result, <?
-  if type.kind() == IdlKind.Short or type.kind() == IdlKind.Long or type.kind() == IdlKind.Char: ?>
+  if type.kind() == IdlType.Short or type.kind() == IdlType.Long or type.kind() == IdlType.Char: ?>
 		Tcl_NewIntObj(<!name!>));
 <?
-  elif type.kind() == IdlKind.UShort or type.kind() == IdlKind.ULong or type.kind() == IdlKind.Char: ?>
+  elif type.kind() == IdlType.UShort or type.kind() == IdlType.ULong or type.kind() == IdlType.Char: ?>
 		Tcl_NewIntObj(<!name!>));
 <?
-  elif type.kind() == IdlKind.LongLong or type.kind() == IdlKind.ULongLong: ?>
+  elif type.kind() == IdlType.LongLong or type.kind() == IdlType.ULongLong: ?>
 		Tcl_NewWideIntObj(<!name!>));
 <?
-  elif type.kind() == IdlKind.String: ?>
+  elif type.kind() == IdlType.String: ?>
 		Tcl_NewStringObj(<!name!>, -1));
 <?
-  elif type.kind() == IdlKind.Double or type.kind() == IdlKind.Float: ?>
+  elif type.kind() == IdlType.Double or type.kind() == IdlType.Float: ?>
 		Tcl_NewDoubleObj(<!name!>));
 <?
-  elif type.kind() == IdlKind.Enum: 
+  elif type.kind() == IdlType.Enum: 
       e = type.asEnumType()
       enumList = ""
       i = 0

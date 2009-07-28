@@ -53,7 +53,7 @@ errorSet = create_error_list()
 for e in errorSet:
     print "    case ERROR_" + e + ": return ETHER;"
 for name, service in servicesDict.iteritems():
-    if service.taskName != currentTaskName or service.type == ServiceType.Control:
+    if service.taskName != currentTaskName or service.type == Service.Control:
 	continue
 
     # print targets for this service
@@ -74,7 +74,7 @@ extern int returnCodeToReport(int res);
 <?
 alreadyDefinedCodels = []
 for name, service in servicesDict.iteritems():
-    if service.taskName != currentTaskName or service.type == ServiceType.Control:
+    if service.taskName != currentTaskName or service.type == Service.Control:
 	continue
     for c in service.codels():
 	if c.key() == "control":

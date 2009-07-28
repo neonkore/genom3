@@ -24,7 +24,7 @@ def typeFromIdsName(name):
     return comp.typeFromIdsName(name)
 
 def input_type(i):
-  if i.kind == ServiceInputKind.IDSMember:
+  if i.kind == ServiceInput.IDSMember:
     return typeFromIdsName(i.identifier)
   else:
     return i.type
@@ -37,12 +37,12 @@ ids_members = []
 def ids_member_for_input(i, service):
   """ Find the correct IDS member to use to store the input i
   belonging to this service."""
-  if i.kind == ServiceInputKind.IDSMember:
+  if i.kind == ServiceInput.IDSMember:
     return i.identifier
   else:
     # control service can share their input
     # (when they just have one input)
-    if service.type == ServiceType.Control:
+    if service.type == Service.Control:
       name = ids_name_for_type(i.type)
       if name not in ids_members: # create a new ids member for this type
 	IDSType.addMember(i.type, name)
@@ -56,35 +56,35 @@ def ids_member_for_input(i, service):
 def type_proto_prefix(t):
     """ Returns the prefix corresponding to this type to use for print, scan, etc. functions."""
     prefix = ""
-    if t.kind() == IdlKind.Named:
+    if t.kind() == IdlType.Named:
 	n = t.asNamedType()
 	return type_proto_prefix(n.type())
-    if t.kind() == IdlKind.Struct:
+    if t.kind() == IdlType.Struct:
 	prefix = "struct_"
-    elif t.kind() == IdlKind.Enum:
+    elif t.kind() == IdlType.Enum:
 	prefix = "enum_"
-    elif t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Typedef:
 	return ""
-    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
+    elif t.kind() == IdlType.Char or t.kind() == IdlType.Octet or t.kind() == IdlType.Boolean:
         prefix = "char"
-    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
+    elif t.kind() == IdlType.Short or t.kind() == IdlType.WChar or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong:
         prefix = "int"
-    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+    elif t.kind() == IdlType.UShort or t.kind() == IdlType.ULong or t.kind() == IdlType.ULongLong:
         prefix = "int"
-    elif t.kind() == IdlKind.Double:
+    elif t.kind() == IdlType.Double:
         prefix = "double"
-    elif t.kind() == IdlKind.Float:
+    elif t.kind() == IdlType.Float:
 	prefix = "float"
-    elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
+    elif t.kind() == IdlType.String or t.kind() == IdlType.WString:
 	prefix = "string"
     return prefix + t.identifier()
 
 def dynamic_port_type(port):
-   if port.idlType.kind == IdlKind.Sequence:
+   if port.idlType.kind == IdlType.Sequence:
      return port.idlType.asSequenceType().seqType()
    else:
      t = port.idlType.unalias()
-     if t is not None and t.kind() == IdlKind.Sequence:
+     if t is not None and t.kind() == IdlType.Sequence:
        return t.asSequenceType().seqType()
      else:
 	return BaseType.charType
@@ -104,11 +104,11 @@ if inports:
 for port in inports:
   name = "connect" + port.name
   s = Service(name)
-  s.type = ServiceType.Control
+  s.type = Service.Control
 
   i = ServiceInput()
   i.identifier = connectIDSMember
-  i.kind = ServiceInputKind.IDSMember
+  i.kind = ServiceInput.IDSMember
   s.addInput(i)
   c = Codel(name + "Exec")
   s.addCodel("control", c)
@@ -160,7 +160,7 @@ class ServiceInfo:
       self.inputTypeProto = type_proto_prefix(self.inputType)
 
       self.inputSize = "sizeof(" + MapTypeToC(self.inputType, True) + ")"
-      if self.inputFlag and self.inputType.kind() == IdlKind.String:
+      if self.inputFlag and self.inputType.kind() == IdlType.String:
 	self.inputSize = str(self.inputType.asStringType().bound())
 	if self.inputSize == "0":
 	  self.inputSize = "0"
@@ -168,14 +168,14 @@ class ServiceInfo:
       self.inputNamePtr = address_of(self.inputType, self.inputName)
       self.inputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.inputName + ")" 
  
-      if self.inputType.kind() == IdlKind.Struct or self.inputType.kind() == IdlKind.Typedef \
-      or self.inputType.kind() == IdlKind.Array or self.inputType.kind() == IdlKind.Named:
+      if self.inputType.kind() == IdlType.Struct or self.inputType.kind() == IdlType.Typedef \
+      or self.inputType.kind() == IdlType.Array or self.inputType.kind() == IdlType.Named:
 	  self.inputNewline = "1"
       else:
 	  self.inputNewline = "0"
 
       self.inputFlatList = flat_struct(self.inputType, self.inputName, ".") 
-      if self.inputType.kind() == IdlKind.String:
+      if self.inputType.kind() == IdlType.String:
 	  st = self.inputType.asStringType()
 	  self.inputVarDecl = "char " + self.inputName + "[" + str(st.bound()) + "]"
       else:
@@ -210,20 +210,20 @@ class ServiceInfo:
 
       self.outputSize = "sizeof(" + MapTypeToC(self.outputType, True) + ")"
 
-      if(self.outputType.kind() == IdlKind.String):
+      if(self.outputType.kind() == IdlType.String):
 	  self.outputNamePtr = self.outputName
       else:
 	  self.outputNamePtr = "&" + self.outputName
       self.outputRefPtr = "&((*" + comp.name() + "DataStrId)." + self.outputName + ")" 
 
-      if self.outputType.kind() == IdlKind.Struct or self.outputType.kind() == IdlKind.Typedef \
-      or self.outputType.kind() == IdlKind.Array or self.outputType.kind() == IdlKind.Named:
+      if self.outputType.kind() == IdlType.Struct or self.outputType.kind() == IdlType.Typedef \
+      or self.outputType.kind() == IdlType.Array or self.outputType.kind() == IdlType.Named:
 	self.outputNewline = "1"
       else:
 	self.outputNewline = "0"
 
       self.outputFlatList = flat_struct(self.outputType, self.outputName, ".")
-      if self.outputType.kind() == IdlKind.String:
+      if self.outputType.kind() == IdlType.String:
 	  st = self.outputType.asStringType()
 	  self.outputVarDecl = "char " + self.outputName + "[" + str(st.bound()) + "]"
       else:
@@ -245,34 +245,34 @@ for name, service in servicesDict.iteritems():
 
 def convert_fun(t):
     """ returns the function to use to convert from a const char* to type t."""
-    if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
+    if t.kind() == IdlType.Char or t.kind() == IdlType.Octet or t.kind() == IdlType.Boolean:
         return ""
-    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
+    elif t.kind() == IdlType.Short or t.kind() == IdlType.WChar or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong:
         return "atoi"
-    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+    elif t.kind() == IdlType.UShort or t.kind() == IdlType.ULong or t.kind() == IdlType.ULongLong:
         return "atoi"
-    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+    elif t.kind() == IdlType.Float or t.kind() == IdlType.Double:
         return "atof"
     return ""
 
 def format_string_for_type(t):
    """ Returns the printf format string corresponding to the type t."""
-   if t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
+   if t.kind() == IdlType.Char or t.kind() == IdlType.Octet or t.kind() == IdlType.Boolean:
        return "%c";
-   elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong:
+   elif t.kind() == IdlType.Short or t.kind() == IdlType.WChar or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong:
        return "%d"
-   elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+   elif t.kind() == IdlType.UShort or t.kind() == IdlType.ULong or t.kind() == IdlType.ULongLong:
        return "%u" 
-   elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+   elif t.kind() == IdlType.Float or t.kind() == IdlType.Double:
        return "%f"
-   elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
+   elif t.kind() == IdlType.String or t.kind() == IdlType.WString:
        return "%s"
    else:
        return ""
 
 def size_of_type(t):
     """ Returns a string to compute the size of type t."""
-    if t.kind() == IdlKind.String:
+    if t.kind() == IdlType.String:
 	s = t.asStringType()
 	return str(s.bound())
     else:
@@ -296,10 +296,10 @@ def is_periodic():
     return False
 
 def service_description_string(s):
-    if s.type == ServiceType.Exec:
+    if s.type == Service.Exec:
 	# if reentrant return "(nE)"
 	return "(E)"
-    elif s.type == ServiceType.Init:
+    elif s.type == Service.Init:
 	return "(I)"
     return ""
 
@@ -331,7 +331,7 @@ def codel_signature(codel, service=None):
 
 def codel_full_signature(codel, service):
     """ Creates the full signature of the internal function corresponding to a codel. """
-    if service.type != ServiceType.Exec or codel.key() == "control":
+    if service.type != Service.Exec or codel.key() == "control":
 	return "STATUS " + codel_signature(codel.data(), service)
     else:
 	return "ACTIVITY_EVENT " + codel_signature(codel.data(), service)
@@ -375,7 +375,7 @@ def nb_exec_service():
     """ Computes the number of exec services in the component """
     count = 0
     for name, service in servicesDict.iteritems():
-	if service.type != ServiceType.Control:
+	if service.type != Service.Control:
 	    count += 1
     return count
 
@@ -388,34 +388,34 @@ def max_service_name_length():
 def type_size(t):
     """ Returns the size of the type (or rather an estimation of it).
     This is used to compute the max resquest arg and output size (in posterLib.h)."""
-    if t.kind() == IdlKind.Named:
+    if t.kind() == IdlType.Named:
 	return type_size(t.asNamedType().type())
-    if t.kind() == IdlKind.Struct:
+    if t.kind() == IdlType.Struct:
 	s = t.asStructType()
 	res = 0
 	for m in s.members():
 	    res += type_size(m.data)
 	return res
-    elif t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Typedef:
 	return type_size(t.asTypedefType().type())
-    elif t.kind() == IdlKind.Array:
+    elif t.kind() == IdlType.Array:
 	a = t.asArrayType()
 	res = 1
 	for x in a.bounds():
 	  res *= x
 	return res * type_size(a.type())
-    elif t.kind() == IdlKind.Sequence:
+    elif t.kind() == IdlType.Sequence:
 	s = t.asSequenceType()
 	return s.bound() * type_size(s.seqType())
-    elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet or t.kind() == IdlKind.Boolean:
+    elif t.kind() == IdlType.Char or t.kind() == IdlType.Octet or t.kind() == IdlType.Boolean:
         return 4
-    elif t.kind() == IdlKind.Short or t.kind() == IdlKind.WChar or t.kind() == IdlKind.Long or t.kind() == IdlKind.LongLong or t.kind() == IdlKind.Enum:
+    elif t.kind() == IdlType.Short or t.kind() == IdlType.WChar or t.kind() == IdlType.Long or t.kind() == IdlType.LongLong or t.kind() == IdlType.Enum:
 	return 8
-    elif t.kind() == IdlKind.UShort or t.kind() == IdlKind.ULong or t.kind() == IdlKind.ULongLong:
+    elif t.kind() == IdlType.UShort or t.kind() == IdlType.ULong or t.kind() == IdlType.ULongLong:
         return 8
-    elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+    elif t.kind() == IdlType.Float or t.kind() == IdlType.Double:
         return 16
-    elif t.kind() == IdlKind.String or t.kind() == IdlKind.WString:
+    elif t.kind() == IdlType.String or t.kind() == IdlType.WString:
 	s = t.asStringType()
 	if s is None:
 	  return 1024
@@ -444,9 +444,9 @@ def max_output_size():
 def compute_total_size(t, name, addStructSize = True):
   """ Prints the string used to compute the total size of the static elements of a type. This is used
   when allocating sequences."""
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  if t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     return compute_total_size(t.unalias(), name, addStructSize)
-  elif t.kind() == IdlKind.Sequence:
+  elif t.kind() == IdlType.Sequence:
     s = t.asSequenceType()
     res = compute_total_size(s.seqType(), name + ".data")
 
@@ -460,7 +460,7 @@ def compute_total_size(t, name, addStructSize = True):
     else:
       return structSize + length_var(name) + "* (sizeof(" + MapTypeToC(s.seqType(), True) + "))" 
 
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     s = t.asStructType()
     if addStructSize:
       str = "sizeof(" + MapTypeToC(t, True) + ")"
@@ -477,7 +477,7 @@ def compute_total_size(t, name, addStructSize = True):
 def copy_type(t, dest, src, allocateMemory=True):
     """ Updates the IDS copy of a sequence type from the value stored in shared memory.
     If allocateMemory is True (for InPorts), memory will be allocated to store sequences."""
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
       if is_dynamic(s.seqType()):
@@ -500,20 +500,20 @@ def copy_type(t, dest, src, allocateMemory=True):
 	  print dest + ".length = " + src + ".length;"
 	print "currentOffset += " + src + ".length * sizeof(" + seqType + ");"
 
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	copy_type(m.data, dest + "." + m.key, src + "." + m.key, allocateMemory)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       copy_type(t.unalias(), dest, src, allocateMemory)
-    elif t.kind() == IdlKind.Array:
+    elif t.kind() == IdlType.Array:
       s = t.asArrayType()
       counter = counter_name(dest)
       print "int " + counter + " = 0;"
       print "for(; " + counter + "<" + str(s.bounds()[0]) + "; ++" + counter + ") {"
       copy_type(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", allocateMemory)
       print "}"
-    elif t.kind() == IdlKind.String:
+    elif t.kind() == IdlType.String:
       s = t.asStringType()
       print "strncpy(" + dest + ", " + src + ", " + str(s.bound()) + ");"
     else:
@@ -521,7 +521,7 @@ def copy_type(t, dest, src, allocateMemory=True):
 
 def copy_type_reverse(t, dest, src):
     """ Updates the shared memory contents after a codel call. """
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       if is_dynamic(s.seqType()):
 	counter = counter_name(dest)
@@ -530,28 +530,28 @@ def copy_type_reverse(t, dest, src):
 	copy_type_reverse(s.seqType(), dest + ".data[" + counter + "]", src + ".data[" + counter + "]")
 	print "}"
 
-    elif t.kind() == IdlKind.Array:
+    elif t.kind() == IdlType.Array:
       s = t.asArrayType()
       counter = counter_name(dest)
       print "int " + counter + " = 0;"
       print "for(; " + counter + "<"  + str(s.bounds()[0]) + "; ++" + counter + ") {"
       copy_type_reverse(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
       print "}"
-    elif t.kind() == IdlKind.String:
+    elif t.kind() == IdlType.String:
       s = t.asStringType()
       print "strncpy(" + dest + ", " + src + ", " + str(s.bound()) + ");"
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	copy_type_reverse(m.data, dest + "." + m.key, src + "." + m.key)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       copy_type_reverse(t.unalias(), dest, src)
     else:
       print dest + " = " + src + ";"
 
 def allocate_memory(t, dest, idsDest, scopedName):
     """ Allocate the memory requested by the user after the size codel has been called."""
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToC(s.seqType(), True)
       print dest + ".data = (" + seqType + "*) (start + currentOffset);"
@@ -575,11 +575,11 @@ def allocate_memory(t, dest, idsDest, scopedName):
 	allocate_memory(s.seqType(), dest + ".data[" + counter + "]", idsDest + ".data[" + counter + "]", scopedName + ".data")
 	print "}"
 
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	allocate_memory(m.data, dest + "." + m.key, idsDest + "." + m.key, scopedName + "." + m.key)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       allocate_memory(t.unalias(), dest, idsDest, scopedName)
 
 def codel_lock(codel, service = None):
@@ -697,7 +697,7 @@ def find_init_service():
   i=-1
   for name,service in servicesDict.iteritems():
     i += 1
-    if service.type == ServiceType.Init:
+    if service.type == Service.Init:
       return service, i
   return 0,-1
 

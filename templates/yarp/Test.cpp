@@ -1,6 +1,6 @@
 <?
 def parse_input(type, name):
-  if type.kind() == IdlKind.Enum:?>
+  if type.kind() == IdlType.Enum:?>
   {
       int tmp;
       cin >> tmp;
@@ -43,7 +43,7 @@ class <!task.name!>ReplyReader : public TypedReaderCallback<Bottle>
 <?
   for s in servicesMap:
     service = s.data()
-    if service.type == ServiceType.Control or service.taskName != task.name:
+    if service.type == Service.Control or service.taskName != task.name:
       continue
     serviceInfo = services_info_dict[service.name]
     if not serviceInfo.outputFlag:
@@ -181,7 +181,7 @@ void run<!service.name!>()
   else: ?>
     <!serviceInfo.inputTypeCpp!> <!serviceInfo.inputName!>;
 <?
-  if service.output.identifier and service.type == ServiceType.Control: ?>
+  if service.output.identifier and service.type == Service.Control: ?>
     <!serviceInfo.outputTypeCpp!> <!serviceInfo.outputName!>;
 <?
   for i in service.inputs():
@@ -200,7 +200,7 @@ void run<!service.name!>()
 <?
     parse_input(x[0], x[1]);
 
-  if service.type == ServiceType.Control:
+  if service.type == Service.Control:
     ?>
       RqstWriter<<!serviceInfo.requestType!>>::send(Control_req_port, "/<!comp.name()!>/Test", rqst_id++, "<!service.name!>", <!serviceArgs!>);
       while(!Control_reply_port.getInputCount()) // wait for the connection to be made

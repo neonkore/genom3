@@ -11,13 +11,13 @@ def needs_conversion(t):
   used by codels """
   if t.isNative():
     return True
-  if t.kind() == IdlKind.Long:
+  if t.kind() == IdlType.Long:
     return True
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     return True
-  elif t.kind() == IdlKind.Enum:
+  elif t.kind() == IdlType.Enum:
     return True
-  elif t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
+  elif t.kind() == IdlType.Typedef or t.kind() == IdlType.Named:
     return needs_conversion(t.unalias())
   else:
     return False
@@ -25,11 +25,11 @@ def needs_conversion(t):
 def needs_conversion_fun(t):
   """ Returns whether it is necessary to used a generated function to convert
   from CORBA to codel type. True for structured types"""
-  if t.kind() == IdlKind.Struct:
+  if t.kind() == IdlType.Struct:
     return True
-  elif t.kind() == IdlKind.Enum:
+  elif t.kind() == IdlType.Enum:
     return True
-  elif t.kind() == IdlKind.Typedef or t.kind() == IdlKind.Named:
+  elif t.kind() == IdlType.Typedef or t.kind() == IdlType.Named:
     return needs_conversion_fun(t.unalias())
   else: 
     return False
@@ -37,7 +37,7 @@ def needs_conversion_fun(t):
 def service_idl_signature(service):
     """ Returns the idl function corresponding to a service."""
     # find the service output type
-    if service.type != ServiceType.Control:
+    if service.type != Service.Control:
       outputType = BaseType.longType
     elif service.output.identifier:
       outputType = input_type(service.output)
@@ -60,14 +60,14 @@ def service_idl_signature(service):
 
 def cpp_arg(t,name):
   cppType = MapTypeToCorbaCpp(t)
-  if t.kind() == IdlKind.Struct:  
+  if t.kind() == IdlType.Struct:  
     return "const " + cppType + " &" + name
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
-    if t.unalias().kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
+    if t.unalias().kind() == IdlType.Struct:
       return "const " + cppType + " &" + name
     else:
       return cppType + " " + name
-  elif t.kind() == IdlKind.String:
+  elif t.kind() == IdlType.String:
     return "const " + cppType + " " + name
   else:
     return cppType + " " + name
@@ -83,7 +83,7 @@ def service_cpp_args(service, className=""):
 def service_cpp_signature(service, className=""):
     """ Create the full prototype for a (control) service function."""
     # find the service output type
-    if service.type != ServiceType.Control:
+    if service.type != Service.Control:
       outputType = BaseType.longType
     elif service.output.identifier:
       outputType = input_type(service.output)
@@ -174,7 +174,7 @@ def output_ports_map():
   m = {}
   for s in servicesMap:
     service = s.data()
-    if service.type == ServiceType.Control:
+    if service.type == Service.Control:
       continue
     if not service.output.identifier:
       typeName = ""
@@ -190,25 +190,25 @@ def codel_needs_lock(codel, service=None):
   1 means lock for read and 2 read for write. """
   if codel.outTypes:
     return 2
-  elif not service is None and service.output.identifier and service.output.kind == ServiceInputKind.IDSMember:
+  elif not service is None and service.output.identifier and service.output.kind == ServiceInput.IDSMember:
     return 2
   elif codel.inTypes:
     return 1
   else:
     if not service is None:
       for i in service.inputs():
-	if i.kind == ServiceInputKind.IDSMember:
+	if i.kind == ServiceInput.IDSMember:
 	  return 1
     return 0
 
 def is_corba_dynamic(t):
   """ returns whether the type t is dynamic from CORBA point of view
   (ie contains a string). These types have to be allocated dynamically."""
-  if t.kind() == IdlKind.String:
+  if t.kind() == IdlType.String:
     return True
-  elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     return is_corba_dynamic(t.unalias())
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     s = t.asStructType()
     for m in s.members():
       if is_corba_dynamic(m.data):
@@ -219,7 +219,7 @@ def is_corba_dynamic(t):
 
 def copy_type(t, dest, src):
     """ Copy the CORBA data into the var created for use in the codels.""" 
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       if is_dynamic(s.seqType()):
 	print dest + ".data = new " + MapTypeToCpp(s.seqType(), True) + "[" + src + ".length()];"
@@ -233,20 +233,20 @@ def copy_type(t, dest, src):
 	print dest + ".length = " + src + ".length();"
 	print dest + ".data = (" + MapTypeToCpp(s.seqType())  + "*) " + src + ".get_buffer();"
 
-    elif t.kind() == IdlKind.Array:
+    elif t.kind() == IdlType.Array:
       s = t.asArrayType()
       counter = counter_name(dest)
       print "for(int " + counter + "=0; " + counter + " < " + str(s.bounds()[0])  + "; ++" + counter + ") {"
       copy_type(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]")
       print "}"
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	copy_type(m.data, dest + "." + m.key, src + "." + m.key)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       copy_type(t.unalias(), dest, src)
     else:
-      copyTypeFromCorba(t, src, dest, False)
+      copy_type_from_corba(t, src, dest, False)
       #if needs_conversion_fun(t):
 	#print "convertFromCorba_" + t.identifier() + "(&" + src + ", &" + dest + ");"
       #else:
@@ -254,7 +254,7 @@ def copy_type(t, dest, src):
 
 def copy_type_reverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False):
     """ Copy data back to the CORBA data structures."""
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       if not parentIsEmpty or useIsEmptyVar:
 	if is_dynamic(s.seqType()):
@@ -264,20 +264,20 @@ def copy_type_reverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False)
 	  print "}"
 	  print "delete[] " + src + ".data;"
 
-    elif t.kind() == IdlKind.Array:
+    elif t.kind() == IdlType.Array:
       s = t.asArrayType()
       counter = counter_name(src)
       print "for(int " + counter + "=0; " + counter + "<" + str(s.bounds()[0]) + "; ++" + counter + ") {"
       copy_type_reverse(s.type(), dest + "[" + counter + "]", src + "[" + counter + "]", useIsEmptyVar, parentIsEmpty)
       print "}"
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	copy_type_reverse(m.data, dest + "." + m.key, src + "." + m.key, useIsEmptyVar, parentIsEmpty)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       copy_type_reverse(t.unalias(), dest, src, useIsEmptyVar, parentIsEmpty)
     else:
-      copyTypeFromCorba(t, src, dest, True)
+      copy_type_from_corba(t, src, dest, True)
       #if needs_conversion_fun(t):
 	#print "convertFromCorbaReverse_" + t.identifier() + "(&" + src + ", &" + dest + ");"
       #else:
@@ -285,7 +285,7 @@ def copy_type_reverse(t, dest, src, useIsEmptyVar = True, parentIsEmpty = False)
 
 def free_memory(t, src):
     """ free the memory allocated dynamically in codelLock taht won't be needed anymore. """
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       if is_dynamic(s.seqType()):
 	counter = counter_name(src)
@@ -294,17 +294,17 @@ def free_memory(t, src):
 	print "}"
 	print "delete[] " + src + ".data;"
 
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	free_memory(m.data, src + "." + m.key)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       free_memory(t.unalias(), src)
 
 
 def allocate_memory(t, dest, scopedName):
     """ Allocate memory (on CORBA side) after the size codel has been called. """
-    if t.kind() == IdlKind.Sequence:
+    if t.kind() == IdlType.Sequence:
       s = t.asSequenceType()
       seqType = MapTypeToCorbaCpp(s.seqType(), True)
 
@@ -320,11 +320,11 @@ def allocate_memory(t, dest, scopedName):
       else:
 	print "memset(" + dest + ".get_buffer() , 0, " + length_var(scopedName) + " * sizeof(" + seqType + "));"
 
-    elif t.kind() == IdlKind.Struct:
+    elif t.kind() == IdlType.Struct:
       s = t.asStructType()
       for m in s.members():
 	allocate_memory(m.data, dest + "." + m.key, scopedName + "." + m.key)
-    elif t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+    elif t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
       allocate_memory(t.unalias(), dest, scopedName)
 
 def call_size_codel(port):

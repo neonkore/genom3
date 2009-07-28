@@ -199,7 +199,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
 {
 <? # $inputDeclarations$ 
     if serviceInfo.inputFlag:
-	if serviceInfo.inputType.kind() == IdlKind.String:
+	if serviceInfo.inputType.kind() == IdlType.String:
 	  print "int inputDims[1] = {" + str(serviceInfo.inputType.asStringType().bound()) + "};"
 	  inputNbDimensions = 1
 	else:
@@ -209,7 +209,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
     if serviceInfo.outputFlag:
 	print  "int *outputDims = NULL;"
 
-    if service.type != ServiceType.Control:
+    if service.type != Service.Control:
 	?>
   /* Saisie données */
   if (!TEST_ACTIVITY_ON(testId, acti)) {
@@ -253,7 +253,7 @@ static BOOL <!comp.name()!>Test<!service.name!> (TEST_STR *testId, int rqstNum,
   printf ("-- Enter <!serviceInfo.inputTypePtr!> <!serviceInfo.inputName!>:");
   scan_<!serviceInfo.inputTypeProto!>(stdin, stdout, (<!serviceInfo.inputTypePtr!>)TEST_RQST_INPUT(testId,rqstNum), <!serviceInfo.inputNewline!>, <!inputNbDimensions!>, inputDims);
 <?
-    if service.type != ServiceType.Control:
+    if service.type != Service.Control:
 	?>
   }
 

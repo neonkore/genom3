@@ -3,25 +3,25 @@ def inputFormat(type, name, value, serviceInput = None):
   str = "    lappend format [list "
 
   defValue = ""
-  if type.kind() == IdlKind.Short or type.kind() == IdlKind.Char:
+  if type.kind() == IdlType.Short or type.kind() == IdlType.Char:
       str += "short"
       defValue = "0"
-  elif type.kind() == IdlKind.Long:
+  elif type.kind() == IdlType.Long:
       str += "int"
       defValue = "0"
-  elif type.kind() == IdlKind.LongLong:
+  elif type.kind() == IdlType.LongLong:
       str += "wide"
       defValue = "0"
-  elif type.kind() == IdlKind.String: 
+  elif type.kind() == IdlType.String: 
       str += "string"
       defValue = "\"\""
-  elif type.kind() == IdlKind.Float: 
+  elif type.kind() == IdlType.Float: 
       str += "float"
       defValue = "0.0"
-  elif type.kind() == IdlKind.Double: 
+  elif type.kind() == IdlType.Double: 
       str += "double"
       defValue = "0.0"
-  elif type.kind() == IdlKind.Enum: 
+  elif type.kind() == IdlType.Enum: 
       defValue = "\"\""
       str += "{"
       for en in type.asEnumType().enumerators():
@@ -46,12 +46,12 @@ def inputFormat(type, name, value, serviceInput = None):
 def outputFormat(type, name):
   if type is None:
     return ""
-  if type.kind() == IdlKind.String:
+  if type.kind() == IdlType.String:
     str = "{1} " # dimension
   else:
     str = "{} "
 
-  if type.kind() == IdlKind.Struct:
+  if type.kind() == IdlType.Struct:
     str += "{ " + name + " "
     for m in type.asStructType().members():
       str += outputFormat(m.data, m.key) + " "

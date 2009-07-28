@@ -34,14 +34,14 @@ struct <!capCompName!>ControlData {
   void killAllServices();
 <?
 for s in servicesMap:
-  if s.data().type == ServiceType.Exec:
+  if s.data().type == Service.Exec:
     print "  void kill" + s.data().name + "Services();"
 ?>
   
   // members of the ids
 <?
 t = comp.IDSType.unalias()
-if t.kind() == IdlKind.Struct:
+if t.kind() == IdlType.Struct:
   s = t.asStructType()
   for m in s.members():
      print "  " + MapTypeToCpp(m.data) + " " + m.key + ";"
@@ -78,7 +78,7 @@ for name,typeName in output_ports_map.iteritems():
 <?
 for s in comp.servicesMap():
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     ?>
    <!service.name!>Service::List <!service.name!>Services;
 <?

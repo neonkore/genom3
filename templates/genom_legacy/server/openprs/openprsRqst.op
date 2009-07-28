@@ -2,13 +2,13 @@
 var_counter = -1
 
 def type_to_openprs(t):
-  if t.kind() == IdlKind.Long or t.kind() == IdlKind.Short or t.kind() == IdlKind.LongLong:
+  if t.kind() == IdlType.Long or t.kind() == IdlType.Short or t.kind() == IdlType.LongLong:
     return "INTEGER"
-  elif t.kind() == IdlKind.Char or t.kind() == IdlKind.Octet:
+  elif t.kind() == IdlType.Char or t.kind() == IdlType.Octet:
     return "STRING"
-  elif t.kind() == IdlKind.Float or t.kind() == IdlKind.Double:
+  elif t.kind() == IdlType.Float or t.kind() == IdlType.Double:
     return "FLOAT"
-  elif t.kind() == IdlKind.String:
+  elif t.kind() == IdlType.String:
     return "string" + str(t.asStringType().bound())
   else: 
     return "TERM_COMP";
@@ -17,10 +17,10 @@ def oprs_flatten_type(t, identifier = None):
   global var_counter
   var_counter +=1
 
-  if t.kind() == IdlKind.Named or t.kind() == IdlKind.Typedef:
+  if t.kind() == IdlType.Named or t.kind() == IdlType.Typedef:
     return oprs_flatten_type(t.unalias(), identifier)
 
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     var_counter -= 1
     s = t.asStructType()
     if identifier is None:
@@ -34,14 +34,14 @@ def oprs_flatten_type(t, identifier = None):
       res += "\n" + oprs_flatten_type(m.data, m.key)
     return res + ")"
 
-  elif t.kind() == IdlKind.Enum:
+  elif t.kind() == IdlType.Enum:
     if identifier is None:
       name = t.identifier()
     else:
       name = identifier
     return "(" + name + " $ATOM-" + str(var_counter) + ")"
 
-  elif t.kind() == IdlKind.Array:
+  elif t.kind() == IdlType.Array:
     var_counter -= 1
     a = t.asArrayType()
     l = flat_struct(a.type(), "")
@@ -84,7 +84,7 @@ def service_doc_string(service):
 
   for i in service.inputs():
     t = input_type(i).unalias()
-    if not t is None and t.kind() == IdlKind.Enum:
+    if not t is None and t.kind() == IdlType.Enum:
       enumStr = ""
       for x in t.asEnumType().enumerators():
 	enumStr += x + " "

@@ -18,16 +18,16 @@ for t in comp.typesVect():
 def copyTypeCpp(t):
   if not is_dynamic(t):
     return t
-  elif t.kind() == IdlKind.Named:
+  elif t.kind() == IdlType.Named:
     n = t.asNamedType()
     return NamedType(n.identifier() + "Cpp", copyTypeCpp(n.type()))
-  elif t.kind() == IdlKind.Typedef:
+  elif t.kind() == IdlType.Typedef:
     ty = t.asTypedefType()
     return TypedefType(copyTypeCpp(ty.aliasType()), t.identifier() + "Cpp")
-  elif t.kind() == IdlKind.Sequence:
+  elif t.kind() == IdlType.Sequence:
     s = t.asSequenceType()
     return SequenceType(copyTypeCpp(s.seqType()), s.bound())
-  elif t.kind() == IdlKind.Struct:
+  elif t.kind() == IdlType.Struct:
     s = t.asStructType()
     res = StructType()
     res.setIdentifier(s.identifier() + "Cpp")

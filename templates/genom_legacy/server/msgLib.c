@@ -225,7 +225,7 @@ for name, service in servicesDict.iteritems():
 	outputName = "NULL"
 	output = ""
 
-    if service.type == ServiceType.Control:
+    if service.type == Service.Control:
 	?>
 /*=========================================================================
  *

@@ -32,7 +32,7 @@ if currentTask.hasCodel("end"): ?>
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Control or service.taskName != currentTaskName:
+  if service.type == Service.Control or service.taskName != currentTaskName:
     continue
   ?>
       bool run<!service.name!>(const std::string &clientName, int rqst_id,

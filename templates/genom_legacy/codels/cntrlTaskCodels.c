@@ -64,7 +64,7 @@ for e in errorSet:
 for name, service in servicesDict.iteritems():
     for c in service.codels():
 	codel = c.data()
-	if service.type != ServiceType.Control and c.key() != "control" :
+	if service.type != Service.Control and c.key() != "control" :
 	    continue
 	# check for a special 'connect inport' service
 	if len(service.inputs()) == 1 and service.inputs()[0].identifier == connectIDSMember:

@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 	PythonInterpreter *i = PythonInterpreter::getInstance();
 	d.component().setName("BlaBla");
 	i->start(&(d.component()));
-	i->eval("3");
+	cout << i->interpret("print PortEvent.OnUpdate");
 // 	cout << i->interpret("m = comp.tasksMap()\nfor x in m:\n  print \"task:\"+x.key()+\", priority:\"\n  print x.data().priority");
 // 	i->interpret("");
 // 	cout << i->printString("Essai no 1") << endl;

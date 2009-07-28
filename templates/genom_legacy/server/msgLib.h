@@ -132,7 +132,7 @@ for name, service in servicesDict.iteritems():
     else:
 	output = ""
 
-    if service.type == ServiceType.Control:
+    if service.type == Service.Control:
 	?>
 extern STATUS <!comp.name()!><!service.name!>RqstSend (CLIENT_ID clientId, 
 					 int *pRqstId,

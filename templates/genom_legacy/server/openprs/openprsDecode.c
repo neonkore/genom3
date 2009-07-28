@@ -73,22 +73,22 @@ Term *pu_decode_genom_<!type_proto_prefix(t)!>(char *name, <!ctype!> *str, int t
   int elt;
   for(elt=0;elt<tabsize;elt++) {
 <?
-  if t.kind() == IdlKind.Struct:
+  if t.kind() == IdlType.Struct:
     s = t.asStructType()
     for m in s.members():
-      if m.data.kind() == IdlKind.Array:
+      if m.data.kind() == IdlType.Array:
 	arraySize = m.data.asArrayType().bounds()[0]
 	arrayType = m.data.asArrayType().type() 
 	?>
       sl_add_to_tail(tl, pu_decode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", (<!MapTypeToC(arrayType, True)!> *) (str+elt)-><!m.key!>, <!arraySize!>));
 <?
-      elif m.data.kind() == IdlKind.String: ?>
+      elif m.data.kind() == IdlType.String: ?>
       sl_add_to_tail(tl, pu_decode_genom_string("<!m.key!>", (str+elt)-><!m.key!>, 1, <!m.data.asStringType().bound()!>));
 <?
       else: ?>
       sl_add_to_tail(tl, pu_decode_genom_<!type_proto_prefix(m.data)!>("<!m.key!>", &(str+elt)-><!m.key!>, 1));
 <?
-  elif t.kind() == IdlKind.Enum:
+  elif t.kind() == IdlType.Enum:
     e = t.asEnumType()
     elseStr = ""
     for x in e.enumerators(): 

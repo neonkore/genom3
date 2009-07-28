@@ -200,7 +200,7 @@ if requestFlag:
   /* Instanciation de la structure parametre de la requete */
 <?
     for x in flatList:
-	if x[0].kind() == IdlKind.String:
+	if x[0].kind() == IdlType.String:
 	  s = x[0].asStringType()
 	  print "   strncpy(" + x[1].replace("_", ".") + ", " + x[1] + ", strlen(" + x[1] + " + 1));"
 	else:

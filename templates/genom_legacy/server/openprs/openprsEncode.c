@@ -71,7 +71,7 @@ PBoolean pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
     int elt;
     for(elt=0;elt<tabsize;elt++) {
 <?
-  if t.kind() == IdlKind.Struct:
+  if t.kind() == IdlType.Struct:
     ?>
       Expression *tc_tmp;
 <?
@@ -83,14 +83,14 @@ PBoolean pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
          return FALSE;
 <?
       counter += 1
-      if m.data.kind() == IdlKind.Array:
+      if m.data.kind() == IdlType.Array:
 	arraySize = m.data.asArrayType().bounds()[0]
 	arrayType = m.data.asArrayType().type() 
 	?>
       if (! pu_encode_genom_<!type_proto_prefix(arrayType)!>("<!m.key!>", tc_tmp,  (<!MapTypeToC(arrayType, True)!> *) (str+elt)-><!m.key!>, <!arraySize!>))
          return FALSE;
 <?
-      elif m.data.kind() == IdlKind.String:
+      elif m.data.kind() == IdlType.String:
 	?>
       if (! pu_encode_genom_string("<!m.key!>", tc_tmp, (str+elt)-><!m.key!>, 1, <!m.data.asStringType().bound()!>))
          return FALSE;
@@ -99,7 +99,7 @@ PBoolean pu_encode_genom_<!type_proto_prefix(t)!>(char *name, Expression *tc,
       if (! pu_encode_genom_<!type_proto_prefix(m.data)!>("<!m.key!>", tc_tmp, &(str+elt)-><!m.key!>, 1))
          return FALSE;
 <?
-  elif t.kind() == IdlKind.Enum:
+  elif t.kind() == IdlType.Enum:
     ?>
       Symbol val;
       if (!PUGetOprsTermCompSpecArg(tc, elt+1, ATOM, &val))

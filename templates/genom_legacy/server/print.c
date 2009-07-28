@@ -55,10 +55,10 @@ void print_<!prefix!>( FILE *out,
       fprintf(out, "%s%s", indentStr(indent-2), getIndexesStr(nDim, dims, elt));
 
 <?
-    if t.kind() == IdlKind.Struct:
+    if t.kind() == IdlType.Struct:
 	s = t.asStructType()
 	for m in s.members(): 
-	    if m.data.kind() == IdlKind.Array:
+	    if m.data.kind() == IdlType.Array:
 		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
@@ -68,7 +68,7 @@ void print_<!prefix!>( FILE *out,
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
       print_<!type_proto_prefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
 <?
-	    elif m.data.kind() == IdlKind.Sequence:
+	    elif m.data.kind() == IdlType.Sequence:
 		seq = m.data.asSequenceType()
 		?>
     fprintf(out, "%s<!m.key!>[<!seq.bound()!>]:\n", indstr);
@@ -77,7 +77,7 @@ void print_<!prefix!>( FILE *out,
     print_int(out, &((x+elt)-><!m.key!>.length), indent, 0, NULL, in);
     print_int(out, &((x+elt)-><!m.key!>.size), indent, 0, NULL, in);
 <?
-	    elif m.data.kind() == IdlKind.String: 
+	    elif m.data.kind() == IdlType.String: 
 	      s = m.data.asStringType()
 	      ?>
     fprintf(out, "%s<!m.key!>:\n", indstr);
@@ -89,7 +89,7 @@ void print_<!prefix!>( FILE *out,
     fprintf(out, "%s<!m.key!>:\n", indstr);
     print_<!type_proto_prefix(m.data)!>(out, &((x+elt)-><!m.key!>), indent, 0, NULL, in);
 <? 
-    elif t.kind() == IdlKind.Enum:
+    elif t.kind() == IdlType.Enum:
 	e = t.asEnumType()
 	?>
     /* Affiche l'ancienne valeur */ 

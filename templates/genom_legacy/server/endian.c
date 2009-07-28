@@ -44,10 +44,10 @@ void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
 {
   FOR_EACH_elt(nDim,dims) {
 <?
-    if t.kind() == IdlKind.Struct:
+    if t.kind() == IdlType.Struct:
 	s = t.asStructType()
 	for m in s.members():
-	  if m.data.kind() == IdlKind.Array:
+	  if m.data.kind() == IdlType.Array:
 		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
@@ -56,7 +56,7 @@ void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
       endianswap_<!type_proto_prefix(a.type())!>((<!MapTypeToC(a.type(), True)!> *)((x+elt)-><!m.key!>), 1, dims); }
 <?
-	  elif m.data.kind() == IdlKind.Sequence:
+	  elif m.data.kind() == IdlType.Sequence:
 		seq = m.data.asSequenceType()
 		?>
     { int dims[1] = {<!seq.bound()!>};
@@ -66,7 +66,7 @@ void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
 <?
 	  else:
 	    print "   endianswap_" + type_proto_prefix(m.data) + "(&((x+elt)->" + m.key + "), 0, NULL);"
-    elif t.kind() == IdlKind.Enum:
+    elif t.kind() == IdlType.Enum:
 	print "    endianswap_int((int *)x+elt, 0, NULL);"
     ?>
   } END_FOR

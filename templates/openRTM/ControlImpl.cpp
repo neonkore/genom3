@@ -42,7 +42,7 @@ for s in servicesMap:
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Control:
+  if service.type == Service.Control:
     ?>
 <!service_cpp_signature(service, capCompName + "ControlImpl")!>
 {
@@ -69,11 +69,11 @@ for s in servicesMap:
 	  print "  m_data->kill" + incomp + "Services();" 
 
     if service.inputs():
-      if service.inputs()[0].kind == ServiceInputKind.IDSMember: 
+      if service.inputs()[0].kind == ServiceInput.IDSMember: 
 	?>
   m_data->idsMutex.acquire_write();
 <?
-	copyTypeFromCorba(input_type(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
+	copy_type_from_corba(input_type(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
 	?> 
   m_data->idsMutex.release();
 <?
@@ -88,7 +88,7 @@ for s in servicesMap:
 	else:
 	  outputName = "out"
 	  print "  " + output + " out;"
-	copyTypeFromCorba(outputType, "m_data->" + service.output.identifier, outputName, True)
+	copy_type_from_corba(outputType, "m_data->" + service.output.identifier, outputName, True)
 	?>
   return out;
 <?
@@ -102,7 +102,7 @@ for s in servicesMap:
 prefix = capCompName + "ControlImpl"
 for s in comp.servicesMap():
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     args = ", m_serviceCount++ "
     for i in service.inputs():
       if needs_conversion(input_type(i)):
@@ -137,11 +137,11 @@ for s in comp.servicesMap():
 	  print "  m_data->kill" + incomp + "Services();" 
 
     if service.inputs():
-      if service.inputs()[0].kind == ServiceInputKind.IDSMember: 
+      if service.inputs()[0].kind == ServiceInput.IDSMember: 
 	?>
   m_data->idsMutex.acquire_write();
 <?
-	copyTypeFromCorba(input_type(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
+	copy_type_from_corba(input_type(service.inputs()[0]), "in_" + service.inputs()[0].identifier, "m_data->" + service.inputs()[0].identifier, False)
 	?> 
   m_data->idsMutex.release();
 <?

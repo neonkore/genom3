@@ -54,10 +54,10 @@ void printXML_<!prefix!>( FILE *out, char *name,
     fprintfBuf(out, "%s<%s%s>\n", indstr, name, getIndexesStr2(nDim, dims, elt));
 
 <?
-    if t.kind() == IdlKind.Struct:
+    if t.kind() == IdlType.Struct:
 	s = t.asStructType()
 	for m in s.members():
-	    if m.data.kind() == IdlKind.Array:
+	    if m.data.kind() == IdlType.Array:
 		a = m.data.asArrayType()
 		dims = ""
 		for n in a.bounds():
@@ -66,7 +66,7 @@ void printXML_<!prefix!>( FILE *out, char *name,
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
       printXML_<!type_proto_prefix(a.type())!>(out, "<!m.key!>", (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
 <?
-	    elif m.data.kind() == IdlKind.Sequence:
+	    elif m.data.kind() == IdlType.Sequence:
 		seq = m.data.asSequenceType()
 		?>
     { int dims[1] = {<!seq.bound()!>};
@@ -79,7 +79,7 @@ void printXML_<!prefix!>( FILE *out, char *name,
 		?> 
     printXML_<!type_proto_prefix(m.data)!>(out, "<!m.key!>" ,&((x+elt)-><!m.key!>), indent, 0, NULL, in);
 <? 
-    elif t.kind() == IdlKind.Enum:
+    elif t.kind() == IdlType.Enum:
 	e = t.asEnumType()
 	?>
     /* Affiche l'ancienne valeur */ 

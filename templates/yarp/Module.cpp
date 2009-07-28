@@ -18,7 +18,7 @@ extern "C" {
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     continue
   if service.hasCodel("control"):
     print real_codel_signature(service.codel("control"), service) + ";"
@@ -53,14 +53,14 @@ void <!comp.name()!>ControlData::killAllServices()
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Exec:
+  if service.type == Service.Exec:
     print "  kill" + service.name + "Services();"
 ?>}
 
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type == ServiceType.Exec:
+  if service.type == Service.Exec:
     ?>
 void <!comp.name()!>ControlData::kill<!service.name!>Services()
 {
@@ -119,7 +119,7 @@ for e in comp.eventsMap():
   ?>
     m_data->events_outport.addAlias("<!ev.asNamedEvent().aliasEvent().identifier()!>", "<!e.key()!>");
 <?
-  if aliasEv.kind() == EventKind.PortEv:
+  if aliasEv.kind() == Event.PortEv:
     pev = aliasEv.asPortEvent()
     portName = full_port_name(pev.portName())
     ?>
@@ -193,7 +193,7 @@ void <!comp.name()!>Module::onRead(Bottle& command)
 first = True
 for s in servicesMap:
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     continue
   if first:
     first = False
@@ -216,7 +216,7 @@ for s in servicesMap:
 <?
 for s in servicesMap:
   service = s.data()
-  if service.type != ServiceType.Control:
+  if service.type != Service.Control:
     continue
   serviceInfo = services_info_dict[service.name]
   ?>
@@ -257,14 +257,14 @@ bool <!comp.name()!>Module::run<!service.name!>(const std::string &clientName, i
   m_data->idsMutex.acquire_write();
 <?
     for i in service.inputs():
-      if i.type == ServiceInputKind.IDSMember: ?>
+      if i.type == ServiceInput.IDSMember: ?>
   m_data-><!i.identifier!> = input.<!i.identifier!>; 
 <?
     ?>
   m_data->idsMutex.release();
 <?
   elif serviceInfo.inputFlag:
-    if service.inputs()[0].kind == ServiceInputKind.IDSMember: ?>
+    if service.inputs()[0].kind == ServiceInput.IDSMember: ?>
   m_data->idsMutex.acquire_write();
   m_data-><!serviceInfo.inputName!> = in_<!serviceInfo.inputName!>; 
   m_data->idsMutex.release();

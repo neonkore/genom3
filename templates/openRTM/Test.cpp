@@ -197,10 +197,10 @@ void <!capCompName!>Test::run<!service.name!>()
     print "      " + input + " " + i.identifier + ";";
 
   for i in service.inputs():
-    flat = flat_struct(input_type(i), i.identifier)
-    if i.defaultValue.isEmpty():
+    flat = flat_struct(input_type(i), i.identifier, ".")
+    if i.defaultValue.isEmpty() or i.defaultValue.kind() == Literal.Struct:
       defValue = ""
-    else:
+    else :
       defValue = "(default : \" << " + i.defaultValue.toString() + " << \")"
     ?>
      cout << "Enter <!i.identifier!> (<!i.doc!>) <!defValue!> :" << endl;

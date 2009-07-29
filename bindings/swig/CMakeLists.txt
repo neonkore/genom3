@@ -14,7 +14,7 @@ MACRO(SWIG_TARGET Name Input)
   SET(SWIG_OUTPUTS ${InputPath}/${InputBaseName}_wrap.cxx)
   ADD_CUSTOM_COMMAND(OUTPUT ${SWIG_OUTPUTS}
     COMMAND ${SWIG_EXECUTABLE} ${SWIG_FLAGS} -tcl8 ${Input}
-    DEPENDS ${Input}
+    DEPENDS ${Input} ${ARGN} 
     COMMENT "[SWIG] Generating wrappers from ${Input}"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
@@ -22,14 +22,15 @@ MACRO(SWIG_TARGET Name Input)
   SET(SWIG_${Name}_INPUT ${Input})
 ENDMACRO(SWIG_TARGET)
 
-SWIG_TARGET(GENOM_TCL ${PROJECT_SOURCE_DIR}/bindings/swig/genom.i)
+set(SWIG_HEADER_DEPENDS ${PROJECT_SOURCE_DIR}/utils/idltype.h ${PROJECT_SOURCE_DIR}/utils/ast.h ${PROJECT_SOURCE_DIR}/utils/idlvalues.h)
+SWIG_TARGET(GENOM_TCL ${PROJECT_SOURCE_DIR}/bindings/swig/genom.i ${SWIG_HEADER_DEPENDS})
+
+set_source_files_properties(tclwrappers.cpp OBJECT_DEPENDS ${SWIG_GENOM_TCL_OUTPUTS})
 
 set(genom_tcl_binding_SRCS
   tclinterpreter.cpp
   tclwrappers.cpp
 )
-
-set_source_files_properties(tclwrappers.cpp OBJECT_DEPENDS ${SWIG_GENOM_TCL_OUTPUTS})
 
 add_library(genom_tcl_binding ${genom_tcl_binding_SRCS})
 target_link_libraries(genom_tcl_binding ${TCL_LIBRARY} genutils)

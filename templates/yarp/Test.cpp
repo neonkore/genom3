@@ -190,7 +190,7 @@ void run<!service.name!>()
     prefix = ""
 
   for i in service.inputs():
-    flat = flat_struct(input_type(i), prefix + i.identifier, ".")
+    flat = flat_struct(input_type(i), prefix + i.identifier, ".", i.defaultValue)
     if i.defaultValue.isEmpty() or i.defaultValue.kind() == Literal.Struct:
       defValue = ""
     else:
@@ -200,8 +200,13 @@ void run<!service.name!>()
 <?
     for x in flat:
       t = MapTypeToCpp(x[0], True)
-      if len(flat) > 1: ?>
-      cout << "Enter <!t!> <!x[1]!>:  " << endl;
+      if len(flat) > 1: 
+	if x[2] is None or x[2].isEmpty():
+	  value = ""
+	else:
+	  value = "(default : \" << " + x[2].toString() + " << \")"
+	?>
+      cout << "Enter <!t!> <!x[1]!> <!value!>:  " << endl;
 <?
     parse_input(x[0], x[1]);
 

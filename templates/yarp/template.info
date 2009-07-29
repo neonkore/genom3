@@ -14,7 +14,7 @@ main:
   "ExecServices.hpp" -> "ExecServices.hpp"
 /*  "CMakeLists.txt" */
   "FindYARP.cmake"
-  "Struct.hpp" -> "$$Struct.h" 
+/*  "Struct.hpp" -> "$$Struct.h" */
   "lib/DataServer.hpp" -> "lib/DataServer.hpp"
   "lib/OutPort.hpp" -> "lib/OutPort.hpp"
   "lib/RepliesWriter.hpp" -> "lib/RepliesWriter.hpp"

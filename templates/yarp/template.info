@@ -12,7 +12,7 @@ main:
   "Test.cpp" -> "$$Test.cpp"
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
-  "CMakeLists.txt" 
+/*  "CMakeLists.txt" */
   "FindYARP.cmake"
   "Struct.hpp" -> "$$Struct.h" 
   "lib/DataServer.hpp" -> "lib/DataServer.hpp"

@@ -184,9 +184,14 @@ void run<!service.name!>()
   if service.output.identifier and service.type == Service.Control: ?>
     <!serviceInfo.outputTypeCpp!> <!serviceInfo.outputName!>;
 <?
+  if len(service.inputs()) > 1:
+    prefix = serviceInfo.inputName + "."
+  else:
+    prefix = ""
+
   for i in service.inputs():
-    flat = flat_struct(input_type(i), i.identifier)
-    if i.defaultValue.isEmpty():
+    flat = flat_struct(input_type(i), prefix + i.identifier, ".")
+    if i.defaultValue.isEmpty() or i.defaultValue.kind() == Literal.Struct:
       defValue = ""
     else:
       defValue = "(default : \" << " + i.defaultValue.toString() + " << \")"

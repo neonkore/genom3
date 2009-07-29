@@ -41,7 +41,7 @@ std::string DumpType::dumpType(IdlType::Ptr t)
 	std::string s;
 	ostringstream oss(s);
 	DumpType visitor(oss);
-	t->accept(visitor);
+	t->accept(&visitor);
 	return oss.str();
 }
 
@@ -50,7 +50,7 @@ std::string DumpType::dumpConstValue(ConstValue &v)
 	std::string s;
 	ostringstream oss(s);
 	DumpType visitor(oss);
-	v.accept(visitor);
+	v.accept(&visitor);
 	return oss.str();
 }
 
@@ -78,7 +78,7 @@ void DumpType::visitWStringType(WStringType *ws)
 void DumpType::visitSequenceType(SequenceType *seq)
 {
 	m_out << "sequence<";
-	seq->seqType()->accept(*this);
+	seq->seqType()->accept(this);
 	if (seq->bound() == 0)
 		m_out << "> ";
 	else
@@ -117,7 +117,7 @@ void DumpType::visitStructType(StructType *s)
 	IdlType::OrderedMap::const_iterator it;
 	for (it = s->members().begin(); it != s->members().end(); ++it) {
 		m_out << "\n\t";
-		it->second->accept(*this);
+		it->second->accept(this);
 		m_out << " " << it->first << ";";
 	}
 	m_out << "\n}";
@@ -126,7 +126,7 @@ void DumpType::visitStructType(StructType *s)
 void DumpType::visitTypedefType(TypedefType *t)
 {
 	m_out << "Typedef ";
-	t->aliasType()->accept(*this);
+	t->aliasType()->accept(this);
 	m_out << " ";
 	printDeclaratorVectString(m_out, t->declarators());
 }
@@ -151,7 +151,7 @@ void DumpType::visitEnumType(EnumType *e)
 void DumpType::visitArrayType(ArrayType *a)
 {
 	m_out << "array" << a->printBounds() << " of " ;
-	a->type()->accept(*this);
+	a->type()->accept(this);
 }
 
 void DumpType::visitNamedType(NamedType *n)

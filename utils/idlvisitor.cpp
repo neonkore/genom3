@@ -44,7 +44,7 @@ std::string IdlVisitor::mapTypeToIdl(IdlType::Ptr t)
 	std::string s;
 	ostringstream oss(s);
 	IdlVisitor visitor(oss);
-	t->accept(visitor);
+	t->accept(&visitor);
 	return oss.str();
 }
 
@@ -72,7 +72,7 @@ void IdlVisitor::visitWStringType(WStringType *ws)
 void IdlVisitor::visitSequenceType(SequenceType *seq)
 {
 	m_out << "sequence<";
-	seq->seqType()->accept(*this);
+	seq->seqType()->accept(this);
 	if (seq->bound() == 0)
 		m_out << "> ";
 	else
@@ -113,10 +113,10 @@ void IdlVisitor::visitStructType(StructType *s)
 		m_out << "\n\t";
 		if(it->second->kind() == IdlType::Array) {
 			ArrayType *a = it->second->asType<ArrayType>();
-			a->type()->accept(*this);
+			a->type()->accept(this);
 			m_out << " " << it->first << a->printBounds() << ";";
 		} else {
-			it->second->accept(*this);
+			it->second->accept(this);
 			m_out << " " << it->first << ";";
 		}
 	}
@@ -126,7 +126,7 @@ void IdlVisitor::visitStructType(StructType *s)
 void IdlVisitor::visitTypedefType(TypedefType *t)
 {
 	m_out << "typedef ";
-	t->aliasType()->accept(*this);
+	t->aliasType()->accept(this);
 	m_out << " ";
 	printDeclaratorVectString(m_out, t->declarators());
 }

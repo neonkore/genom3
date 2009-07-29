@@ -50,7 +50,7 @@ std::string CVisitor::mapTypeToC(IdlType::Ptr t, bool declOnly)
 	std::string s;
 	ostringstream oss(s);
 	CVisitor visitor(oss, declOnly);
-	t->accept(visitor);
+	t->accept(&visitor);
 	return oss.str();
 }
 
@@ -59,7 +59,7 @@ std::string CVisitor::mapValueToC(ConstValue *v)
 	std::string s;
 	ostringstream oss(s);
 	CVisitor visitor(oss, true);
-	v->accept(visitor);
+	v->accept(&visitor);
 	return oss.str();
 }
 
@@ -117,7 +117,7 @@ void CVisitor::visitSequenceType(SequenceType *seq)
 
 	m_out << m_indent << "int length;" << endl;
 	m_out << m_indent;
-	seq->seqType()->accept(*this);
+	seq->seqType()->accept(this);
 	m_out << " *data;" << endl;
 
 	m_indent = oldIndent;
@@ -151,7 +151,7 @@ void CVisitor::visitStructType(StructType *s)
 			continue;
 		} 
 
-		it->second->accept(*this); // no need to set declOnly because of NamedType
+		it->second->accept(this); // no need to set declOnly because of NamedType
 		m_out << " " << it->first;
 		//print array if existing
 		if(it->second->kind() == IdlType::Array)
@@ -171,7 +171,7 @@ void CVisitor::visitTypedefType(TypedefType *t)
 		return;
 	}
 	m_out << "typedef ";
-	t->aliasType()->accept(*this);
+	t->aliasType()->accept(this);
 	m_out << " " << id;
 }
 
@@ -199,14 +199,14 @@ void CVisitor::visitEnumType(EnumType *e)
 
 void CVisitor::visitArrayType(ArrayType *a)
 {
-	a->type()->accept(*this);
+	a->type()->accept(this);
 }
 
 void CVisitor::visitNamedType(NamedType *n)
 {
 	bool savedDeclOnly = m_declOnly;
 	m_declOnly = true;
-	n->type()->accept(*this);
+	n->type()->accept(this);
 	m_declOnly = savedDeclOnly;
 }
 

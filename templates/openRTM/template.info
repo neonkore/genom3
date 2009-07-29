@@ -1,6 +1,7 @@
 language: Python;
 requires: 
   "../utils.py"
+  "corbavisitor.py"
   "utils.py";
 
 main:

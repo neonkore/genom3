@@ -50,7 +50,7 @@ std::string CppVisitor::mapTypeToCpp(IdlType::Ptr t, bool declOnly)
 	std::string s;
 	ostringstream oss(s);
 	CppVisitor visitor(oss, declOnly);
-	t->accept(visitor);
+	t->accept(&visitor);
 	return oss.str();
 }
 
@@ -59,7 +59,7 @@ std::string CppVisitor::mapValueToCpp(ConstValue *v)
 	std::string s;
 	ostringstream oss(s);
 	CppVisitor visitor(oss, true);
-	v->accept(visitor);
+	v->accept(&visitor);
 	return oss.str();
 }
 
@@ -76,7 +76,7 @@ std::string CppVisitor::mapValueToCpp(ConstValue *v)
 void CppVisitor::visitConstValue(ConstValue *v) 
 {
 	m_out << "const ";
-	v->type()->accept(*this);
+	v->type()->accept(this);
 	m_out << " " << v->identifier() << " = " << v->value().print() << ";" << endl;
 }
 

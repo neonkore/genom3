@@ -723,3 +723,10 @@ if shouldGenerateTcl == "":
   genTcl = "yes"
 else:
   genTcl = "no"
+
+def test_visitor():
+  visitor = PythonSimpleVisitor()
+  comp.IDSType.accept(visitor)
+
+test_visitor()
+

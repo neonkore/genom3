@@ -45,7 +45,7 @@ std::string CorbaCppVisitor::mapTypeToCpp(IdlType::Ptr t, bool declOnly, bool is
 	std::string s;
 	ostringstream oss(s);
 	CorbaCppVisitor visitor(oss, declOnly, isOutType);
-	t->accept(visitor);
+	t->accept(&visitor);
 	return oss.str();
 }
 
@@ -54,7 +54,7 @@ std::string CorbaCppVisitor::mapValueToCpp(ConstValue *v)
 	std::string s;
 	ostringstream oss(s);
 	CorbaCppVisitor visitor(oss, true, false);
-	v->accept(visitor);
+	v->accept(&visitor);
 	return oss.str();
 }
 
@@ -137,7 +137,7 @@ void CorbaCppVisitor::visitStructType(StructType *s)
 				m_out << "char " << it->first << "[" << st->bound() <<  "];" << endl;
 			continue;
 		}
-		it->second->accept(*this); // no need to set declOnly because of NamedType
+		it->second->accept(this); // no need to set declOnly because of NamedType
 		m_out << " " << it->first;
 
 		//print array if existing
@@ -157,7 +157,7 @@ void CorbaCppVisitor::visitTypedefType(TypedefType *t)
 		return;
 	}
 	m_out << "typedef ";
-	t->aliasType()->accept(*this);
+	t->aliasType()->accept(this);
 	m_out << " " << id << CORBA_SUFFIX;
 }
 
@@ -195,7 +195,7 @@ void CorbaCppVisitor::visitNamedType(NamedType *n)
 {
 	bool savedDeclOnly = m_declOnly;
 	m_declOnly = true;
-	n->type()->accept(*this);
+	n->type()->accept(this);
 	m_declOnly = savedDeclOnly;
 }
 

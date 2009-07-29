@@ -2964,7 +2964,7 @@ fail:
 SWIGINTERN int
 _wrap_ConstValue_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::ConstValue *arg1 = (G3nom::Idl::ConstValue *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -2976,15 +2976,12 @@ _wrap_ConstValue_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, in
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConstValue_accept" "', argument " "1"" of type '" "G3nom::Idl::ConstValue *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::ConstValue * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ConstValue_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ConstValue_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ConstValue_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -3221,7 +3218,7 @@ fail:
 SWIGINTERN int
 _wrap_IdlType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::IdlType *arg1 = (G3nom::Idl::IdlType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -3233,15 +3230,12 @@ _wrap_IdlType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int o
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IdlType_accept" "', argument " "1"" of type '" "G3nom::Idl::IdlType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::IdlType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IdlType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IdlType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IdlType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -3513,7 +3507,7 @@ fail:
 SWIGINTERN int
 _wrap_BaseType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::BaseType *arg1 = (G3nom::Idl::BaseType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -3525,15 +3519,12 @@ _wrap_BaseType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BaseType_accept" "', argument " "1"" of type '" "G3nom::Idl::BaseType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::BaseType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "BaseType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "BaseType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "BaseType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -4228,7 +4219,7 @@ fail:
 SWIGINTERN int
 _wrap_StringType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::StringType *arg1 = (G3nom::Idl::StringType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -4240,15 +4231,12 @@ _wrap_StringType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, in
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringType_accept" "', argument " "1"" of type '" "G3nom::Idl::StringType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::StringType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StringType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StringType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -4374,7 +4362,7 @@ fail:
 SWIGINTERN int
 _wrap_WStringType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::WStringType *arg1 = (G3nom::Idl::WStringType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -4386,15 +4374,12 @@ _wrap_WStringType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, i
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WStringType_accept" "', argument " "1"" of type '" "G3nom::Idl::WStringType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::WStringType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "WStringType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "WStringType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "WStringType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -4555,7 +4540,7 @@ fail:
 SWIGINTERN int
 _wrap_SequenceType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::SequenceType *arg1 = (G3nom::Idl::SequenceType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -4567,15 +4552,12 @@ _wrap_SequenceType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SequenceType_accept" "', argument " "1"" of type '" "G3nom::Idl::SequenceType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::SequenceType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SequenceType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SequenceType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SequenceType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -4693,7 +4675,7 @@ fail:
 SWIGINTERN int
 _wrap_FixedType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::FixedType *arg1 = (G3nom::Idl::FixedType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -4705,15 +4687,12 @@ _wrap_FixedType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "FixedType_accept" "', argument " "1"" of type '" "G3nom::Idl::FixedType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::FixedType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "FixedType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "FixedType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "FixedType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -5037,7 +5016,7 @@ fail:
 SWIGINTERN int
 _wrap_TypedefType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::TypedefType *arg1 = (G3nom::Idl::TypedefType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -5049,15 +5028,12 @@ _wrap_TypedefType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, i
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TypedefType_accept" "', argument " "1"" of type '" "G3nom::Idl::TypedefType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::TypedefType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TypedefType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "TypedefType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TypedefType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -5443,7 +5419,7 @@ fail:
 SWIGINTERN int
 _wrap_StructType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::StructType *arg1 = (G3nom::Idl::StructType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -5455,15 +5431,12 @@ _wrap_StructType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, in
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StructType_accept" "', argument " "1"" of type '" "G3nom::Idl::StructType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::StructType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StructType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StructType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StructType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -5665,7 +5638,7 @@ fail:
 SWIGINTERN int
 _wrap_EnumType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::EnumType *arg1 = (G3nom::Idl::EnumType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -5677,15 +5650,12 @@ _wrap_EnumType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "EnumType_accept" "', argument " "1"" of type '" "G3nom::Idl::EnumType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::EnumType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "EnumType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "EnumType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "EnumType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -5909,7 +5879,7 @@ fail:
 SWIGINTERN int
 _wrap_ArrayType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::ArrayType *arg1 = (G3nom::Idl::ArrayType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -5921,15 +5891,12 @@ _wrap_ArrayType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ArrayType_accept" "', argument " "1"" of type '" "G3nom::Idl::ArrayType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::ArrayType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ArrayType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ArrayType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ArrayType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -6121,7 +6088,7 @@ fail:
 SWIGINTERN int
 _wrap_NamedType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::Idl::NamedType *arg1 = (G3nom::Idl::NamedType *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -6133,15 +6100,12 @@ _wrap_NamedType_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "NamedType_accept" "', argument " "1"" of type '" "G3nom::Idl::NamedType *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::Idl::NamedType * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "NamedType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "NamedType_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "NamedType_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (arg1)->accept(*arg2);
+  (arg1)->accept(arg2);
   
   return TCL_OK;
 fail:
@@ -11268,7 +11232,7 @@ fail:
 SWIGINTERN int
 _wrap_IdlTypePtr_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   boost::shared_ptr< G3nom::Idl::IdlType > *arg1 = (boost::shared_ptr< G3nom::Idl::IdlType > *) 0 ;
-  TypeVisitor *arg2 = 0 ;
+  TypeVisitor *arg2 = (TypeVisitor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -11280,15 +11244,12 @@ _wrap_IdlTypePtr_accept(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, in
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IdlTypePtr_accept" "', argument " "1"" of type '" "boost::shared_ptr< G3nom::Idl::IdlType > *""'"); 
   }
   arg1 = reinterpret_cast< boost::shared_ptr< G3nom::Idl::IdlType > * >(argp1);
-  res2 = SWIG_ConvertPtr(objv[2], &argp2, SWIGTYPE_p_TypeVisitor,  0 );
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_TypeVisitor, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IdlTypePtr_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IdlTypePtr_accept" "', argument " "2"" of type '" "TypeVisitor &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IdlTypePtr_accept" "', argument " "2"" of type '" "TypeVisitor *""'"); 
   }
   arg2 = reinterpret_cast< TypeVisitor * >(argp2);
-  (*arg1)->accept(*arg2);
+  (*arg1)->accept(arg2);
   
   return TCL_OK;
 fail:

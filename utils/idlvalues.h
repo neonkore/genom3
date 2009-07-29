@@ -104,8 +104,8 @@ class ConstValue {
 		const Literal& value() const { return m_value; }
 		IdlType::Ptr type() const { return m_type; }
 
-		void accept(TypeVisitor& visitor) {
-			visitor.visitConstValue(this);
+		void accept(TypeVisitor* visitor) {
+			visitor->visitConstValue(this);
 		}
 
 	private:

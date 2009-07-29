@@ -50,10 +50,10 @@ std::string MapTypeToCpp(IdlType::Ptr t, bool declOnly = false)
 	return CppVisitor::mapTypeToCpp(t, declOnly);
 }
 
-std::string MapTypeToCorbaCpp(IdlType::Ptr t, bool declOnly = false, bool isOutType = false)
-{
-	return CorbaCppVisitor::mapTypeToCpp(t, declOnly, isOutType);
-}
+// std::string MapTypeToCorbaCpp(IdlType::Ptr t, bool declOnly = false, bool isOutType = false)
+// {
+// 	return CorbaCppVisitor::mapTypeToCpp(t, declOnly, isOutType);
+// }
 
 std::string MapTypeToIdl(IdlType::Ptr t)
 {
@@ -77,7 +77,7 @@ std::string MapValueToCorbaCpp(ConstValue *v)
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1, 2)
-BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCorbaCppOverloads, MapTypeToCorbaCpp, 1, 3)
+// BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCorbaCppOverloads, MapTypeToCorbaCpp, 1, 3)
 
 struct TypeVisitor_wrapper : G3nom::Idl::TypeVisitor, wrapper<G3nom::Idl::TypeVisitor> {
 	TypeVisitor_wrapper(G3nom::Idl::TypeVisitor const & arg)
@@ -215,9 +215,9 @@ void export_idl()
 	def("MapTypeToC", &MapTypeToC, MapTypeToCOverloads());
 	def("MapTypeToCpp", &MapTypeToCpp, MapTypeToCppOverloads());
 	def("MapValueToC", &MapValueToC);
-	def("MapTypeToCorbaCpp", &MapTypeToCorbaCpp, MapTypeToCorbaCppOverloads());
+// 	def("MapTypeToCorbaCpp", &MapTypeToCorbaCpp, MapTypeToCorbaCppOverloads());
 	def("MapValueToCpp", &MapValueToCpp);
-	def("MapValueToCorbaCpp", &MapValueToCorbaCpp);
+// 	def("MapValueToCorbaCpp", &MapValueToCorbaCpp);
 	def("MapTypeToIdl", &MapTypeToIdl);
 	{
 		class_<Literal> Literal_exposer = class_<Literal>("Literal");
@@ -248,7 +248,8 @@ void export_idl()
 		.def("toString", &Literal::print)
 		.def("kind", &Literal::kind)
 		.def("members", &Literal::members, return_value_policy<reference_existing_object>())
-		.def("isEmpty", &Literal::isEmpty);
+		.def("isEmpty", &Literal::isEmpty)
+		.def("toString", &Literal::print);
 	}
 
 	class_<ConstValue>("ConstValue")
@@ -302,6 +303,7 @@ void export_idl()
 		implicitly_convertible< G3nom::Idl::IdlType::Kind, G3nom::Idl::IdlType >();
 	}
 
+  {
 	class_<BaseType, bases<IdlType> > BaseType_exposer = class_<BaseType, bases<IdlType> >("BaseType", init<IdlType::Kind>());
 	BaseType_exposer.def_readwrite("anyType", G3nom::Idl::BaseType::anyType);
 	BaseType_exposer.def_readwrite("booleanType", G3nom::Idl::BaseType::booleanType);
@@ -319,6 +321,7 @@ void export_idl()
 	BaseType_exposer.def_readwrite("ushortType", G3nom::Idl::BaseType::ushortType);
 	BaseType_exposer.def_readwrite("voidType", G3nom::Idl::BaseType::voidType);
 	BaseType_exposer.def_readwrite("wcharType", G3nom::Idl::BaseType::wcharType);
+  }
 
 	class_<StringType, bases<IdlType> >("StringType", init<int>())
 	.def("bound", &StringType::bound)

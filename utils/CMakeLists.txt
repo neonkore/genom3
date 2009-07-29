@@ -8,7 +8,7 @@ set(genutils_SRCS
   idlvisitor.cpp
   cvisitor.cpp
   cppvisitor.cpp
-  corbacppvisitor.cpp
+#   corbacppvisitor.cpp
 )
 
 add_library(genutils ${genutils_SRCS})

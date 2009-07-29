@@ -94,7 +94,7 @@ class IdlType
 		/** This function is used to implement the Visitor pattern together with
 		* the TypeVisitor class.
 		*/
-		virtual void accept(TypeVisitor& visitor) {}
+		virtual void accept(TypeVisitor* visitor) {}
 
 // 		virtual std::vector<std::string> identifiers() {
 // 			return std::vector<std::string>();
@@ -164,8 +164,8 @@ class BaseType : public IdlType
 		BaseType(Kind k) : IdlType(k) {}
 		virtual ~BaseType() {}
 
-		void accept(TypeVisitor& visitor) {
-			visitor.visitBaseType(this);
+		void accept(TypeVisitor* visitor) {
+			visitor->visitBaseType(this);
 		}
 
 		// Static base type singletons
@@ -198,8 +198,8 @@ class StringType : public IdlType
 			return m_bound;
 		}
 
-		void accept(TypeVisitor& visitor) {
-			visitor.visitStringType(this);
+		void accept(TypeVisitor* visitor) {
+			visitor->visitStringType(this);
 		}
 
 		static StringType::Ptr unboundedStringType;
@@ -219,8 +219,8 @@ class WStringType : public IdlType
 			return m_bound;
 		}
 
-		void accept(TypeVisitor& visitor) {
-			visitor.visitWStringType(this);
+		void accept(TypeVisitor* visitor) {
+			visitor->visitWStringType(this);
 		}
 
 		static WStringType::Ptr unboundedWStringType;
@@ -243,8 +243,8 @@ class SequenceType : public IdlType
 			return m_bound;
 		}
 
-		void accept(TypeVisitor& visitor) {
-			visitor.visitSequenceType(this);
+		void accept(TypeVisitor* visitor) {
+			visitor->visitSequenceType(this);
 		}
 
 	private:
@@ -267,8 +267,8 @@ class FixedType : public IdlType
 			return m_scale;
 		}
 
-		void accept(TypeVisitor& visitor) {
-			visitor.visitFixedType(this);
+		void accept(TypeVisitor* visitor) {
+			visitor->visitFixedType(this);
 		}
 
 	private:
@@ -301,8 +301,8 @@ class TypedefType : public IdlType
 		bool hasIdentifier(const std::string &name);
 		virtual std::string identifier() const;
 
-		virtual void accept(TypeVisitor& visitor) {
-			visitor.visitTypedefType(this);
+		virtual void accept(TypeVisitor* visitor) {
+			visitor->visitTypedefType(this);
 		}
 
 	private:
@@ -344,8 +344,8 @@ class StructType : public IdlType
 			m_isRecursive = true;
 		}
 
-		virtual void accept(TypeVisitor& visitor) {
-			visitor.visitStructType(this);
+		virtual void accept(TypeVisitor* visitor) {
+			visitor->visitStructType(this);
 		}
 
 	private:
@@ -380,8 +380,8 @@ class EnumType : public IdlType
 			return m_enum;
 		}
 
-		void accept(TypeVisitor& visitor) {
-			visitor.visitEnumType(this);
+		void accept(TypeVisitor* visitor) {
+			visitor->visitEnumType(this);
 		}
 
 	private:
@@ -405,8 +405,8 @@ class ArrayType : public IdlType {
 
 		IdlType::Ptr type() const { return m_type; }
 
-		virtual void accept(TypeVisitor& visitor) {
-			visitor.visitArrayType(this);
+		virtual void accept(TypeVisitor* visitor) {
+			visitor->visitArrayType(this);
 		}
 
 	private:
@@ -448,8 +448,8 @@ class NamedType : public IdlType {
 			return m_identifier;
 		}
 
-		virtual void accept(TypeVisitor& visitor) {
-			visitor.visitNamedType(this);
+		virtual void accept(TypeVisitor* visitor) {
+			visitor->visitNamedType(this);
 		}
 
 	private:

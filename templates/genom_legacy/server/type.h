@@ -53,9 +53,6 @@
 #define <!comp.name()!>_TYPE1_H
 
 #include "<!comp.name()!>Struct.h"
-#include "<!comp.name()!>UserStruct.h"
-
-typedef int return_t;
 
 <?
 # print the types created for inputs

@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <yarp/os/all.h>
 
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 #include "lib/Events.hpp"
 
 class <!comp.name()!>ControlData;

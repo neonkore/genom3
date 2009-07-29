@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 
 <?
 def class_declaration(typeName): 

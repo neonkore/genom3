@@ -33,7 +33,7 @@
 #ifndef <!comp.name()!>_USER_CODELS_H
 #define <!comp.name()!>_USER_CODELS_H
 
-#include "<!comp.name()!>Struct.h"
+#include "<!comp.name()!>UserStruct.h"
 
 #define USER_OK 0
 #define SERVICE_ABORTED (-1)
@@ -45,7 +45,8 @@ for e in errorSet:
     i += 1
 
 codelCount = 1000
-for name, service in servicesDict.iteritems():
+for s in servicesMap:
+    service = s.data()
     if service.type == Service.Control:
 	continue
 

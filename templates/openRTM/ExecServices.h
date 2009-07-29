@@ -4,7 +4,7 @@
 
 #include <list>
 #include <boost/shared_ptr.hpp>
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 
 class <!capCompName!>ControlData;
 

@@ -1,7 +1,7 @@
 #ifndef URUS_YARPCODEC_HPP
 #define URUS_YARPCODEC_HPP
 
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 #include "lib/YarpCodec.hpp"
 
 namespace GenomYarp {

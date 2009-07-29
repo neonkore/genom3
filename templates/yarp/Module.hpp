@@ -3,7 +3,7 @@
 
 #include <yarp/os/all.h>
 
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 #include "lib/Struct.hpp"
 #include "lib/OutPort.hpp"
 #include "lib/DataServer.hpp"

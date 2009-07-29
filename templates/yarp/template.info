@@ -13,8 +13,8 @@ main:
   "ExecServices.cpp" -> "ExecServices.cpp"
   "ExecServices.hpp" -> "ExecServices.hpp"
   "CMakeLists.txt" 
-  "Struct.hpp" -> "$$Struct.hpp" 
-  "UserStruct.hpp" -> "$$UserStruct.hpp"
+  "FindYARP.cmake"
+  "Struct.hpp" -> "$$Struct.h" 
   "lib/DataServer.hpp" -> "lib/DataServer.hpp"
   "lib/OutPort.hpp" -> "lib/OutPort.hpp"
   "lib/RepliesWriter.hpp" -> "lib/RepliesWriter.hpp"
@@ -29,6 +29,8 @@ main:
   "lib/Events.hpp" -> "lib/Events.hpp"
   "lib/Events.cpp" -> "lib/Events.cpp"
   "userCodels.h" -> "userCodels.h"
+  "../common/logger.c" -> "lib/logger.c"
+  "../common/logger.h" -> "lib/logger.h"
 ;
 
 task:

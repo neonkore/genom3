@@ -116,7 +116,7 @@ for t in typesVect:
   /* Reports */
 <?
 for e in errorList:?>
-  PU_DECLARE_ENUM_ATOM(S_viam_<!e!>);
+  PU_DECLARE_ENUM_ATOM(S_<!comp.name()!>_<!e!>);
 <?
 ?>
 }

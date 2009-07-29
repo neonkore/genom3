@@ -36,16 +36,16 @@
 #include "<!comp.name()!>Struct.h"
 
 #define USER_OK 0
-#define SERVICE_ABORTED (-1)
 <?
 errorSet = create_error_list()
-i = 2
+i = 1
 for e in errorSet:
     print "#define ERROR_" + e + " (-" + str(i) + ")"
     i += 1
 
 codelCount = 1000
-for name, service in servicesDict.iteritems():
+for s in servicesMap:
+    service = s.data()
     if service.type == Service.Control:
 	continue
 
@@ -57,6 +57,8 @@ for name, service in servicesDict.iteritems():
 	codelCount += 1
     # add the 'Ether' target
     print "#define " + upper(service.name) + "_ETHER  " + str(codelCount)
+    codelCount += 1
+    print "#define " + upper(service.name) + "_SLEEP  " + str(codelCount)
     codelCount += 1
 ?>
 

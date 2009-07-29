@@ -7,11 +7,11 @@ main:
 /*build related files*/
   "Makefile.in"
   "autogen"
-/*  "acinclude.user.m4" */
-/*  "configure.ac.user" */
-/*  "local.mk.in"  */
+  "acinclude.user.m4" 
+  "configure.ac.user" 
+  "local.mk.in"  
   "server/Makefile.in"
-/*  "codels/Makefile.in" */
+  "codels/Makefile.in" 
 
 /* autoconf/ dir */
   "autoconf/codels.mk"
@@ -33,7 +33,7 @@ main:
   "autoconf/module.pc.in" -> "autoconf/$$.pc.in"
 
 /* server/ dir */
-  "struct.h" -> "$$UserStruct.h" 
+  "struct.h" -> "$$Struct.h" 
   "server/modules.h" -> "server/$$Modules.h"
   "server/cntrlTask.c" -> "server/$$CntrlTask.c"
   "server/connectLib.c" -> "server/$$ConnectLib.c"
@@ -65,6 +65,8 @@ main:
   "server/printXML.c" -> "server/$$PrintXML.c"
   "server/scan.h" -> "server/$$Scan.h"
   "server/scan.c" -> "server/$$Scan.c"
+  "../common/logger.c" -> "server/logger.c"
+  "../common/logger.h" -> "server/logger.h"
 
 /* server/tcl/ stuff*/
   "server/tcl/tcl.c" -> "server/tcl/$$Tcl.c"

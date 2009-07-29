@@ -10,7 +10,7 @@
 #include <rtm/DataOutPort.h>
 #include <ace/RW_Mutex.h>
 
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 // Service implementation headers
 #include "<!comp.name()!>ControlImpl.h"
 
@@ -18,8 +18,6 @@
 #include "logger.h"
 
 using namespace RTC;
-
-typedef int return_t;
 
 <?
 for t in comp.tasksMap(): 

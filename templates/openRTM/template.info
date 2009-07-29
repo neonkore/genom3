@@ -5,6 +5,7 @@ requires:
   "utils.py";
 
 main:
+  "userCodels.h"
   "convert.cpp" -> "$$Convert.cpp" 
   "printer.h" -> "$$Printer.h"
   "printer.cpp" -> "$$Printer.cpp"
@@ -19,11 +20,13 @@ main:
   "ControlTask.idl"
   "ExecServices.h"
   "ExecServices.cpp"
-/*  "CMakeLists.txt" */
+  "CMakeLists.txt"
   "FindOpenRTM.cmake"
   "rtc.conf"
-  "struct.h" -> "$$Struct.hpp" 
-/*  "userStruct.h" -> "$$UserStruct.h" */
+  "struct.h" -> "$$Struct.h" 
+  "userStruct.h" -> "$$UserStruct.h" 
+  "../common/logger.c" -> "logger.c"
+  "../common/logger.h" -> "logger.h"
 ;
 
 task:

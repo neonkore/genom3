@@ -41,7 +41,6 @@ def codelNameToValue(n):
 
 #include "server/<!comp.name()!>Header.h"
 #include "userCodels.h"
-#include "../<!comp.name()!>UserStruct.h"
 
 extern STATUS returnCodeToStatus(int res);
 

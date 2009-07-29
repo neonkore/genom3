@@ -1,4 +1,4 @@
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 
 <?
 def copy_type_from_corba(t, src, out, reverse):

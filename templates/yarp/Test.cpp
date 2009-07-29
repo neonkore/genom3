@@ -13,7 +13,7 @@ def parse_input(type, name):
 ?>
 #include <iostream>
 #include <yarp/os/all.h>
-#include "<!comp.name()!>Struct.hpp"
+#include "<!comp.name()!>Struct.h"
 #include "lib/RepliesReader.hpp"
 #include "lib/RqstWriter.hpp"
 #include "lib/DataServer.hpp"

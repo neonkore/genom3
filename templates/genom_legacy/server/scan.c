@@ -87,12 +87,6 @@ int scan_<!prefix!>( FILE *in, FILE *out,
        return ABORT;
     }
 
-    fprintf(out, "%s<!m.key!>.size:\n", indstr);
-    if(scan_int(in, out, &((x+elt)-><!m.key!>.size), indent, 0, NULL) == ABORT) {
-       free (indstr);
-       return ABORT;
-    }
-
 <?
 	    elif m.data.kind() == IdlType.String:
 		s = m.data.asStringType()

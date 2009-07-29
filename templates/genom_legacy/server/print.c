@@ -75,7 +75,6 @@ void print_<!prefix!>( FILE *out,
     { int dims[1] = {<!seq.bound()!>};
       print_<!type_proto_prefix(seq.seqType())!>(out, (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key!>.data), indent, 1, dims, in); }
     print_int(out, &((x+elt)-><!m.key!>.length), indent, 0, NULL, in);
-    print_int(out, &((x+elt)-><!m.key!>.size), indent, 0, NULL, in);
 <?
 	    elif m.data.kind() == IdlType.String: 
 	      s = m.data.asStringType()

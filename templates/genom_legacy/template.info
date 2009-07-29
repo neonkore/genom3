@@ -8,10 +8,10 @@ main:
   "Makefile.in"
   "autogen"
   "acinclude.user.m4" 
-  "configure.ac.user" 
-  "local.mk.in"  
+/*  "configure.ac.user" 
+  "local.mk.in"  */
   "server/Makefile.in"
-  "codels/Makefile.in" 
+/*  "codels/Makefile.in" */
 
 /* autoconf/ dir */
   "autoconf/codels.mk"

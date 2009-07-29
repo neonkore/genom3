@@ -72,7 +72,6 @@ void printXML_<!prefix!>( FILE *out, char *name,
     { int dims[1] = {<!seq.bound()!>};
       printXML_<!type_proto_prefix(seq.seqType())!>(out, "<!m.key!>", (<!MapTypeToC(seq.seqType(), True)!>*)((x+elt)-><!m.key!>.data), indent, 1, dims, in); }
     printXML_int(out, "<!m.key!>.length" ,&((x+elt)-><!m.key!>.length), indent, 0, NULL, in);
-    printXML_int(out, "<!m.key!>.size" ,&((x+elt)-><!m.key!>.size), indent, 0, NULL, in);
 
 <?
 	    else:

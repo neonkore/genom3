@@ -331,7 +331,7 @@ def call_size_codel(port):
   """ Create the string to call the size codel."""
   sizeCodelArgs = ""
   for x in dynamic_members(port.idlType, port.name + "_outport", True):
-    print "int " + length_var(x[1]) + " = 0;"
+    print "size_t " + length_var(x[1]) + " = 0;"
     sizeCodelArgs += "&" + length_var(x[1]) + ", "
 
   for s in port.sizeCodel.inTypes:

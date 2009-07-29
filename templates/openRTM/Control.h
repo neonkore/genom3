@@ -19,6 +19,8 @@
 
 using namespace RTC;
 
+typedef int return_t;
+
 <?
 for t in comp.tasksMap(): 
   task = t.data()

@@ -9,7 +9,7 @@ class CorbaCppVisitor(TypeVisitor):
   indent = ""
 
   def __init__(self, declOnly, isOutType):
-    TypeVisitor.__init__(self)
+    TypeVisitor.__init__(self) # do not forget to call this
     self.out = ""
     self.declOnly = declOnly
     self.isOutType = isOutType

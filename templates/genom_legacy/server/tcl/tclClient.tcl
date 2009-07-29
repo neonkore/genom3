@@ -35,7 +35,7 @@ def inputFormat(type, name, value, serviceInput = None):
     doc = name
   else:
 #    defValue = serviceInput.defaultValue.toString()
-    doc = serviceInput.doc
+    doc = serviceInput.doc.doc
 
   if not defValue.startswith("\""):
     defValue = "\"" + defValue + "\"" 

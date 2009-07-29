@@ -1642,55 +1642,57 @@ SWIG_Tcl_GetArgs(Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[], const char
 #define SWIGTYPE_p_G3nom__Idl__TypeVisitor swig_types[15]
 #define SWIGTYPE_p_G3nom__Idl__TypedefType swig_types[16]
 #define SWIGTYPE_p_G3nom__Idl__WStringType swig_types[17]
-#define SWIGTYPE_p_G3nom__NamedEvent swig_types[18]
-#define SWIGTYPE_p_G3nom__Port swig_types[19]
-#define SWIGTYPE_p_G3nom__PortEvent swig_types[20]
-#define SWIGTYPE_p_G3nom__Service swig_types[21]
-#define SWIGTYPE_p_G3nom__ServiceEvent swig_types[22]
-#define SWIGTYPE_p_G3nom__ServiceInput swig_types[23]
-#define SWIGTYPE_p_G3nom__Task swig_types[24]
-#define SWIGTYPE_p_IdlTypePtr swig_types[25]
-#define SWIGTYPE_p_IdlType__Ptr swig_types[26]
-#define SWIGTYPE_p_Map swig_types[27]
-#define SWIGTYPE_p_OrderedMap swig_types[28]
-#define SWIGTYPE_p_Ptr swig_types[29]
-#define SWIGTYPE_p_RevMap swig_types[30]
-#define SWIGTYPE_p_TypeVisitor swig_types[31]
-#define SWIGTYPE_p_Vect swig_types[32]
-#define SWIGTYPE_p_VectPtr swig_types[33]
-#define SWIGTYPE_p_Vector swig_types[34]
-#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Codel_t swig_types[35]
-#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Event_t swig_types[36]
-#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Idl__IdlType_t swig_types[37]
-#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Port_t swig_types[38]
-#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Service_t swig_types[39]
-#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Task_t swig_types[40]
-#define SWIGTYPE_p_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t swig_types[41]
-#define SWIGTYPE_p_char swig_types[42]
-#define SWIGTYPE_p_p_std__vectorT_G3nom__ServiceInput_t swig_types[43]
-#define SWIGTYPE_p_p_std__vectorT_IdlTypePtr_t swig_types[44]
-#define SWIGTYPE_p_std__mapT_boost__shared_ptrT_G3nom__Event_t_std__string_t swig_types[45]
-#define SWIGTYPE_p_std__mapT_std__string_G3nom__Idl__ConstValue_t swig_types[46]
-#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Codel_t_t swig_types[47]
-#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Event_t_t swig_types[48]
-#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Idl__IdlType_t_t swig_types[49]
-#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Port_t_t swig_types[50]
-#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Service_t_t swig_types[51]
-#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Task_t_t swig_types[52]
-#define SWIGTYPE_p_std__out_of_range swig_types[53]
-#define SWIGTYPE_p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t swig_types[54]
-#define SWIGTYPE_p_std__vectorT_G3nom__Idl__Literal_t swig_types[55]
-#define SWIGTYPE_p_std__vectorT_G3nom__ServiceInput_t swig_types[56]
-#define SWIGTYPE_p_std__vectorT_IdlTypePtr_t swig_types[57]
-#define SWIGTYPE_p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t swig_types[58]
-#define SWIGTYPE_p_std__vectorT_int_t swig_types[59]
-#define SWIGTYPE_p_std__vectorT_std__pairT_boost__shared_ptrT_G3nom__Event_t_std__string_t_t swig_types[60]
-#define SWIGTYPE_p_std__vectorT_std__pairT_std__string_boost__shared_ptrT_G3nom__Idl__IdlType_t_t_t swig_types[61]
-#define SWIGTYPE_p_std__vectorT_std__string_t swig_types[62]
-#define SWIGTYPE_std__ptrdiff_t swig_types[63]
-#define SWIGTYPE_std__size_t swig_types[64]
-static swig_type_info *swig_types[66];
-static swig_module_info swig_module = {swig_types, 65, 0, 0, 0, 0};
+#define SWIGTYPE_p_G3nom__InputDoc swig_types[18]
+#define SWIGTYPE_p_G3nom__NamedEvent swig_types[19]
+#define SWIGTYPE_p_G3nom__Port swig_types[20]
+#define SWIGTYPE_p_G3nom__PortEvent swig_types[21]
+#define SWIGTYPE_p_G3nom__Service swig_types[22]
+#define SWIGTYPE_p_G3nom__ServiceEvent swig_types[23]
+#define SWIGTYPE_p_G3nom__ServiceInput swig_types[24]
+#define SWIGTYPE_p_G3nom__Task swig_types[25]
+#define SWIGTYPE_p_IdlTypePtr swig_types[26]
+#define SWIGTYPE_p_IdlType__Ptr swig_types[27]
+#define SWIGTYPE_p_Map swig_types[28]
+#define SWIGTYPE_p_OrderedMap swig_types[29]
+#define SWIGTYPE_p_Ptr swig_types[30]
+#define SWIGTYPE_p_RevMap swig_types[31]
+#define SWIGTYPE_p_TypeVisitor swig_types[32]
+#define SWIGTYPE_p_Vect swig_types[33]
+#define SWIGTYPE_p_VectPtr swig_types[34]
+#define SWIGTYPE_p_Vector swig_types[35]
+#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Codel_t swig_types[36]
+#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Event_t swig_types[37]
+#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Idl__IdlType_t swig_types[38]
+#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Port_t swig_types[39]
+#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Service_t swig_types[40]
+#define SWIGTYPE_p_boost__shared_ptrT_G3nom__Task_t swig_types[41]
+#define SWIGTYPE_p_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t swig_types[42]
+#define SWIGTYPE_p_char swig_types[43]
+#define SWIGTYPE_p_p_std__vectorT_G3nom__ServiceInput_t swig_types[44]
+#define SWIGTYPE_p_p_std__vectorT_IdlTypePtr_t swig_types[45]
+#define SWIGTYPE_p_std__mapT_boost__shared_ptrT_G3nom__Event_t_std__string_t swig_types[46]
+#define SWIGTYPE_p_std__mapT_std__string_G3nom__Idl__ConstValue_t swig_types[47]
+#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Codel_t_t swig_types[48]
+#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Event_t_t swig_types[49]
+#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Idl__IdlType_t_t swig_types[50]
+#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Port_t_t swig_types[51]
+#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Service_t_t swig_types[52]
+#define SWIGTYPE_p_std__mapT_std__string_boost__shared_ptrT_G3nom__Task_t_t swig_types[53]
+#define SWIGTYPE_p_std__out_of_range swig_types[54]
+#define SWIGTYPE_p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t swig_types[55]
+#define SWIGTYPE_p_std__vectorT_G3nom__Idl__Literal_t swig_types[56]
+#define SWIGTYPE_p_std__vectorT_G3nom__InputDoc_t swig_types[57]
+#define SWIGTYPE_p_std__vectorT_G3nom__ServiceInput_t swig_types[58]
+#define SWIGTYPE_p_std__vectorT_IdlTypePtr_t swig_types[59]
+#define SWIGTYPE_p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t swig_types[60]
+#define SWIGTYPE_p_std__vectorT_int_t swig_types[61]
+#define SWIGTYPE_p_std__vectorT_std__pairT_boost__shared_ptrT_G3nom__Event_t_std__string_t_t swig_types[62]
+#define SWIGTYPE_p_std__vectorT_std__pairT_std__string_boost__shared_ptrT_G3nom__Idl__IdlType_t_t_t swig_types[63]
+#define SWIGTYPE_p_std__vectorT_std__string_t swig_types[64]
+#define SWIGTYPE_std__ptrdiff_t swig_types[65]
+#define SWIGTYPE_std__size_t swig_types[66]
+static swig_type_info *swig_types[68];
+static swig_module_info swig_module = {swig_types, 67, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -8294,6 +8296,206 @@ static swig_class *swig_G3nom_Task_bases[] = {0};
 static const char * swig_G3nom_Task_base_names[] = {0};
 static swig_class _wrap_class_G3nom_Task = { "Task", &SWIGTYPE_p_G3nom__Task,_wrap_new_Task, swig_delete_Task, swig_G3nom_Task_methods, swig_G3nom_Task_attributes, swig_G3nom_Task_bases,swig_G3nom_Task_base_names, &swig_module };
 SWIGINTERN int
+_wrap_new_InputDoc__SWIG_0(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::InputDoc *result = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,":new_InputDoc ") == TCL_ERROR) SWIG_fail;
+  result = (G3nom::InputDoc *)new G3nom::InputDoc();
+  Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_p_G3nom__InputDoc,0));
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_new_InputDoc__SWIG_1(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  std::string arg1 ;
+  G3nom::InputDoc *result = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"o:new_InputDoc s ",(void *)0) == TCL_ERROR) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string SWIG_TCL_CALL_ARGS_2(objv[1], &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_InputDoc" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  result = (G3nom::InputDoc *)new G3nom::InputDoc(arg1);
+  Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_p_G3nom__InputDoc,0));
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_new_InputDoc(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  Tcl_Obj *CONST *argv = objv+1;
+  int argc = objc-1;
+  if (argc == 0) {
+    return _wrap_new_InputDoc__SWIG_0(clientData, interp, objc, argv - 1);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_AsPtr_std_string SWIG_TCL_CALL_ARGS_2(argv[0], (std::string**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_InputDoc__SWIG_1(clientData, interp, objc, argv - 1);
+    }
+  }
+  
+  Tcl_SetResult(interp,(char *) "No matching function for overloaded 'new_InputDoc'", TCL_STATIC);
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_InputDoc_doc_set(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::InputDoc *arg1 = (G3nom::InputDoc *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"oo:InputDoc_doc_set self doc ",(void *)0,(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__InputDoc, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InputDoc_doc_set" "', argument " "1"" of type '" "G3nom::InputDoc *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::InputDoc * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string SWIG_TCL_CALL_ARGS_2(objv[2], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "InputDoc_doc_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "InputDoc_doc_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  if (arg1) (arg1)->doc = *arg2;
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_OK;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_InputDoc_doc_get(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::InputDoc *arg1 = (G3nom::InputDoc *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::string *result = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"o:InputDoc_doc_get self ",(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__InputDoc, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InputDoc_doc_get" "', argument " "1"" of type '" "G3nom::InputDoc *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::InputDoc * >(argp1);
+  {
+    std::string const &_result_ref =  ((arg1)->doc);
+    result = (std::string *) &_result_ref;
+  }
+  Tcl_SetObjResult(interp,SWIG_From_std_string(static_cast< std::string >(*result)));
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_InputDoc_members_set(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::InputDoc *arg1 = (G3nom::InputDoc *) 0 ;
+  G3nom::InputDoc::Vector *arg2 = (G3nom::InputDoc::Vector *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"oo:InputDoc_members_set self members ",(void *)0,(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__InputDoc, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InputDoc_members_set" "', argument " "1"" of type '" "G3nom::InputDoc *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::InputDoc * >(argp1);
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_std__vectorT_G3nom__InputDoc_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "InputDoc_members_set" "', argument " "2"" of type '" "G3nom::InputDoc::Vector *""'"); 
+  }
+  arg2 = reinterpret_cast< G3nom::InputDoc::Vector * >(argp2);
+  if (arg1) (arg1)->members = *arg2;
+  
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_InputDoc_members_get(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::InputDoc *arg1 = (G3nom::InputDoc *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  G3nom::InputDoc::Vector *result = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"o:InputDoc_members_get self ",(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__InputDoc, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "InputDoc_members_get" "', argument " "1"" of type '" "G3nom::InputDoc *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::InputDoc * >(argp1);
+  result = (G3nom::InputDoc::Vector *)& ((arg1)->members);
+  Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_G3nom__InputDoc_t,0));
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_delete_InputDoc(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::InputDoc *arg1 = (G3nom::InputDoc *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"o:delete_InputDoc self ",(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__InputDoc, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_InputDoc" "', argument " "1"" of type '" "G3nom::InputDoc *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::InputDoc * >(argp1);
+  delete arg1;
+  
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN void swig_delete_InputDoc(void *obj) {
+G3nom::InputDoc *arg1 = (G3nom::InputDoc *) obj;
+delete arg1;
+}
+static swig_method swig_G3nom_InputDoc_methods[] = {
+    {0,0}
+};
+static swig_attribute swig_G3nom_InputDoc_attributes[] = {
+    { "-doc",_wrap_InputDoc_doc_get, _wrap_InputDoc_doc_set},
+    { "-members",_wrap_InputDoc_members_get, _wrap_InputDoc_members_set},
+    {0,0,0}
+};
+static swig_class *swig_G3nom_InputDoc_bases[] = {0};
+static const char * swig_G3nom_InputDoc_base_names[] = {0};
+static swig_class _wrap_class_G3nom_InputDoc = { "InputDoc", &SWIGTYPE_p_G3nom__InputDoc,_wrap_new_InputDoc, swig_delete_InputDoc, swig_G3nom_InputDoc_methods, swig_G3nom_InputDoc_attributes, swig_G3nom_InputDoc_bases,swig_G3nom_InputDoc_base_names, &swig_module };
+SWIGINTERN int
 _wrap_new_ServiceInput(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::ServiceInput *result = 0 ;
   
@@ -8515,10 +8717,11 @@ fail:
 SWIGINTERN int
 _wrap_ServiceInput_doc_set(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
   G3nom::ServiceInput *arg1 = (G3nom::ServiceInput *) 0 ;
-  std::string *arg2 = 0 ;
+  G3nom::InputDoc *arg2 = (G3nom::InputDoc *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
   
   if (SWIG_GetArgs(interp, objc, objv,"oo:ServiceInput_doc_set self doc ",(void *)0,(void *)0) == TCL_ERROR) SWIG_fail;
   res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__ServiceInput, 0 |  0 );
@@ -8526,23 +8729,15 @@ _wrap_ServiceInput_doc_set(ClientData clientData SWIGUNUSED, Tcl_Interp *interp,
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ServiceInput_doc_set" "', argument " "1"" of type '" "G3nom::ServiceInput *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::ServiceInput * >(argp1);
-  {
-    std::string *ptr = (std::string *)0;
-    res2 = SWIG_AsPtr_std_string SWIG_TCL_CALL_ARGS_2(objv[2], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ServiceInput_doc_set" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ServiceInput_doc_set" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    arg2 = ptr;
+  res2 = SWIG_ConvertPtr(objv[2], &argp2,SWIGTYPE_p_G3nom__InputDoc, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ServiceInput_doc_set" "', argument " "2"" of type '" "G3nom::InputDoc *""'"); 
   }
+  arg2 = reinterpret_cast< G3nom::InputDoc * >(argp2);
   if (arg1) (arg1)->doc = *arg2;
   
-  if (SWIG_IsNewObj(res2)) delete arg2;
   return TCL_OK;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
   return TCL_ERROR;
 }
 
@@ -8552,7 +8747,7 @@ _wrap_ServiceInput_doc_get(ClientData clientData SWIGUNUSED, Tcl_Interp *interp,
   G3nom::ServiceInput *arg1 = (G3nom::ServiceInput *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::string *result = 0 ;
+  G3nom::InputDoc *result = 0 ;
   
   if (SWIG_GetArgs(interp, objc, objv,"o:ServiceInput_doc_get self ",(void *)0) == TCL_ERROR) SWIG_fail;
   res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__ServiceInput, 0 |  0 );
@@ -8560,11 +8755,8 @@ _wrap_ServiceInput_doc_get(ClientData clientData SWIGUNUSED, Tcl_Interp *interp,
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ServiceInput_doc_get" "', argument " "1"" of type '" "G3nom::ServiceInput *""'"); 
   }
   arg1 = reinterpret_cast< G3nom::ServiceInput * >(argp1);
-  {
-    std::string const &_result_ref =  ((arg1)->doc);
-    result = (std::string *) &_result_ref;
-  }
-  Tcl_SetObjResult(interp,SWIG_From_std_string(static_cast< std::string >(*result)));
+  result = (G3nom::InputDoc *)& ((arg1)->doc);
+  Tcl_SetObjResult(interp, SWIG_NewInstanceObj( SWIG_as_voidptr(result), SWIGTYPE_p_G3nom__InputDoc,0));
   return TCL_OK;
 fail:
   return TCL_ERROR;
@@ -17513,6 +17705,13 @@ static swig_command_info swig_commands[] = {
     { SWIG_prefix "Task_stackSize_get", (swig_wrapper_func) _wrap_Task_stackSize_get, NULL},
     { SWIG_prefix "delete_Task", (swig_wrapper_func) _wrap_delete_Task, NULL},
     { SWIG_prefix "Task", (swig_wrapper_func) SWIG_ObjectConstructor, (ClientData)&_wrap_class_G3nom_Task},
+    { SWIG_prefix "new_InputDoc", (swig_wrapper_func) _wrap_new_InputDoc, NULL},
+    { SWIG_prefix "InputDoc_doc_set", (swig_wrapper_func) _wrap_InputDoc_doc_set, NULL},
+    { SWIG_prefix "InputDoc_doc_get", (swig_wrapper_func) _wrap_InputDoc_doc_get, NULL},
+    { SWIG_prefix "InputDoc_members_set", (swig_wrapper_func) _wrap_InputDoc_members_set, NULL},
+    { SWIG_prefix "InputDoc_members_get", (swig_wrapper_func) _wrap_InputDoc_members_get, NULL},
+    { SWIG_prefix "delete_InputDoc", (swig_wrapper_func) _wrap_delete_InputDoc, NULL},
+    { SWIG_prefix "InputDoc", (swig_wrapper_func) SWIG_ObjectConstructor, (ClientData)&_wrap_class_G3nom_InputDoc},
     { SWIG_prefix "new_ServiceInput", (swig_wrapper_func) _wrap_new_ServiceInput, NULL},
     { SWIG_prefix "ServiceInput_kind_set", (swig_wrapper_func) _wrap_ServiceInput_kind_set, NULL},
     { SWIG_prefix "ServiceInput_kind_get", (swig_wrapper_func) _wrap_ServiceInput_kind_get, NULL},
@@ -17892,6 +18091,7 @@ static swig_type_info _swigt__p_G3nom__Idl__StructType = {"_p_G3nom__Idl__Struct
 static swig_type_info _swigt__p_G3nom__Idl__TypeVisitor = {"_p_G3nom__Idl__TypeVisitor", "G3nom::Idl::TypeVisitor *", 0, 0, (void*)&_wrap_class_G3nom_Idl_TypeVisitor, 0};
 static swig_type_info _swigt__p_G3nom__Idl__TypedefType = {"_p_G3nom__Idl__TypedefType", "G3nom::Idl::TypedefType *", 0, 0, (void*)&_wrap_class_G3nom_Idl_TypedefType, 0};
 static swig_type_info _swigt__p_G3nom__Idl__WStringType = {"_p_G3nom__Idl__WStringType", "G3nom::Idl::WStringType *", 0, 0, (void*)&_wrap_class_G3nom_Idl_WStringType, 0};
+static swig_type_info _swigt__p_G3nom__InputDoc = {"_p_G3nom__InputDoc", "G3nom::InputDoc *", 0, 0, (void*)&_wrap_class_G3nom_InputDoc, 0};
 static swig_type_info _swigt__p_G3nom__NamedEvent = {"_p_G3nom__NamedEvent", "G3nom::NamedEvent *", 0, 0, (void*)&_wrap_class_G3nom_NamedEvent, 0};
 static swig_type_info _swigt__p_G3nom__Port = {"_p_G3nom__Port", "G3nom::Port *", 0, 0, (void*)&_wrap_class_G3nom_Port, 0};
 static swig_type_info _swigt__p_G3nom__PortEvent = {"_p_G3nom__PortEvent", "G3nom::PortEvent *", 0, 0, (void*)&_wrap_class_G3nom_PortEvent, 0};
@@ -17930,6 +18130,7 @@ static swig_type_info _swigt__p_std__mapT_std__string_boost__shared_ptrT_G3nom__
 static swig_type_info _swigt__p_std__out_of_range = {"_p_std__out_of_range", "std::out_of_range *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t = {"_p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t", "std::pair< boost::shared_ptr< G3nom::Idl::IdlType >,boost::shared_ptr< std::vector< boost::shared_ptr< G3nom::Idl::Declarator > > > > *|G3nom::Idl::TypeDeclarator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_G3nom__Idl__Literal_t = {"_p_std__vectorT_G3nom__Idl__Literal_t", "std::vector< G3nom::Idl::Literal > *|G3nom::Idl::Literal::Vector *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_G3nom__InputDoc_t = {"_p_std__vectorT_G3nom__InputDoc_t", "std::vector< G3nom::InputDoc > *|G3nom::InputDoc::Vector *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_G3nom__ServiceInput_t = {"_p_std__vectorT_G3nom__ServiceInput_t", "std::vector< G3nom::ServiceInput > *|G3nom::ServiceInput::Vect *", 0, 0, (void*)&_wrap_class_std_vector_Sl_G3nom_ServiceInput_Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_IdlTypePtr_t = {"_p_std__vectorT_IdlTypePtr_t", "std::vector< IdlTypePtr > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IdlTypePtr_Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t = {"_p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t", "std::vector< boost::shared_ptr< G3nom::Idl::IdlType > > *|G3nom::Idl::IdlType::Vector *", 0, 0, (void*)0, 0};
@@ -17959,6 +18160,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_G3nom__Idl__TypeVisitor,
   &_swigt__p_G3nom__Idl__TypedefType,
   &_swigt__p_G3nom__Idl__WStringType,
+  &_swigt__p_G3nom__InputDoc,
   &_swigt__p_G3nom__NamedEvent,
   &_swigt__p_G3nom__Port,
   &_swigt__p_G3nom__PortEvent,
@@ -17997,6 +18199,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__out_of_range,
   &_swigt__p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t,
   &_swigt__p_std__vectorT_G3nom__Idl__Literal_t,
+  &_swigt__p_std__vectorT_G3nom__InputDoc_t,
   &_swigt__p_std__vectorT_G3nom__ServiceInput_t,
   &_swigt__p_std__vectorT_IdlTypePtr_t,
   &_swigt__p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t,
@@ -18026,6 +18229,7 @@ static swig_cast_info _swigc__p_G3nom__Idl__StructType[] = {  {&_swigt__p_G3nom_
 static swig_cast_info _swigc__p_G3nom__Idl__TypeVisitor[] = {  {&_swigt__p_G3nom__Idl__TypeVisitor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_G3nom__Idl__TypedefType[] = {  {&_swigt__p_G3nom__Idl__TypedefType, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_G3nom__Idl__WStringType[] = {  {&_swigt__p_G3nom__Idl__WStringType, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_G3nom__InputDoc[] = {  {&_swigt__p_G3nom__InputDoc, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_G3nom__NamedEvent[] = {  {&_swigt__p_G3nom__NamedEvent, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_G3nom__Port[] = {  {&_swigt__p_G3nom__Port, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_G3nom__PortEvent[] = {  {&_swigt__p_G3nom__PortEvent, 0, 0, 0},{0, 0, 0, 0}};
@@ -18064,6 +18268,7 @@ static swig_cast_info _swigc__p_std__mapT_std__string_boost__shared_ptrT_G3nom__
 static swig_cast_info _swigc__p_std__out_of_range[] = {  {&_swigt__p_std__out_of_range, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t[] = {  {&_swigt__p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_G3nom__Idl__Literal_t[] = {  {&_swigt__p_std__vectorT_G3nom__Idl__Literal_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_G3nom__InputDoc_t[] = {  {&_swigt__p_std__vectorT_G3nom__InputDoc_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_G3nom__ServiceInput_t[] = {  {&_swigt__p_std__vectorT_G3nom__ServiceInput_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_IdlTypePtr_t[] = {  {&_swigt__p_std__vectorT_IdlTypePtr_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t[] = {  {&_swigt__p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -18093,6 +18298,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_G3nom__Idl__TypeVisitor,
   _swigc__p_G3nom__Idl__TypedefType,
   _swigc__p_G3nom__Idl__WStringType,
+  _swigc__p_G3nom__InputDoc,
   _swigc__p_G3nom__NamedEvent,
   _swigc__p_G3nom__Port,
   _swigc__p_G3nom__PortEvent,
@@ -18131,6 +18337,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__out_of_range,
   _swigc__p_std__pairT_boost__shared_ptrT_G3nom__Idl__IdlType_t_boost__shared_ptrT_std__vectorT_boost__shared_ptrT_G3nom__Idl__Declarator_t_t_t_t,
   _swigc__p_std__vectorT_G3nom__Idl__Literal_t,
+  _swigc__p_std__vectorT_G3nom__InputDoc_t,
   _swigc__p_std__vectorT_G3nom__ServiceInput_t,
   _swigc__p_std__vectorT_IdlTypePtr_t,
   _swigc__p_std__vectorT_boost__shared_ptrT_G3nom__Idl__IdlType_t_t,

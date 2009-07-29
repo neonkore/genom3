@@ -118,6 +118,10 @@ void export_ast()
 	.def_readwrite("defaultValue", &ServiceInput::defaultValue);
   }
 
+	class_<InputDoc>("InputDoc")
+	.def_readonly("doc", &InputDoc::doc)
+	.def_readonly("members", &InputDoc::members);
+
 	class_<Codel, Codel::Ptr>("Codel", init<const std::string &>())
 	.def_readonly("name", &Codel::name)
 	.def_readonly("inTypes", &Codel::inTypes)

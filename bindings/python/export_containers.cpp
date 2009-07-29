@@ -52,6 +52,8 @@ void export_containers()
 	.def(vector_indexing_suite<ServiceInput::Vect>());
 	class_<Literal::Vector>("LiteralVec")
 	.def(vector_indexing_suite<Literal::Vector>());
+	class_<InputDoc::Vector>("InputDocVec")
+	.def(vector_indexing_suite<InputDoc::Vector>());
 
 	class_<std::pair<std::string, IdlType::Ptr> >("StringIdlTypePtrPair")
 	.def_readonly("first", &std::pair<std::string, IdlType::Ptr>::first)

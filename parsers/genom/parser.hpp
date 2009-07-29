@@ -61,6 +61,7 @@ struct variant_type {
     G3nom::Idl::Declarator::Ptr		declaratorVal;
     G3nom::Idl::Literal		literalVal;
     G3nom::ServiceInput		serviceInputVal;
+    G3nom::InputDoc		inputDocVal;
 };
 #define YYSTYPE variant_type
 
@@ -68,7 +69,7 @@ struct variant_type {
 
 
 /* Line 35 of lalr1.cc  */
-#line 72 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 73 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
 
 #include <string>
@@ -82,7 +83,7 @@ struct variant_type {
 namespace G3nom {
 
 /* Line 35 of lalr1.cc  */
-#line 86 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 87 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
   class position;
   class location;
 
@@ -92,7 +93,7 @@ namespace G3nom {
 } // G3nom
 
 /* Line 35 of lalr1.cc  */
-#line 96 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 97 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
 #include "location.hh"
 
@@ -140,7 +141,7 @@ do {							\
 namespace G3nom {
 
 /* Line 35 of lalr1.cc  */
-#line 144 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 145 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
   /// A Bison parser.
   class Parser
@@ -327,7 +328,7 @@ namespace G3nom {
     static const short int yytable_[];
     static const signed char yytable_ninf_;
 
-    static const unsigned short int yycheck_[];
+    static const short int yycheck_[];
 
     /// For a state, its accessing symbol.
     static const unsigned char yystos_[];
@@ -407,7 +408,7 @@ namespace G3nom {
 } // G3nom
 
 /* Line 35 of lalr1.cc  */
-#line 411 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
+#line 412 "/home/ccpasteur/work/git/g3nom/parsers/genom/parser.hpp"
 
 
 

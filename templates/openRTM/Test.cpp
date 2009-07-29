@@ -197,13 +197,13 @@ void <!capCompName!>Test::run<!service.name!>()
     print "      " + input + " " + i.identifier + ";";
 
   for i in service.inputs():
-    flat = flat_struct(input_type(i), i.identifier, ".", i.defaultValue)
+    flat = flat_struct(input_type(i), i.identifier, ".", i.defaultValue, i.doc)
     if i.defaultValue.isEmpty() or i.defaultValue.kind() == Literal.Struct:
       defValue = ""
     else :
       defValue = "(default : \" << " + i.defaultValue.toString() + " << \")"
     ?>
-     cout << "Enter <!i.identifier!> (<!i.doc!>) <!defValue!> :" << endl;
+     cout << "Enter <!i.identifier!> (<!i.doc.doc!>) <!defValue!> :" << endl;
 <?
     for x in flat:
       t = MapTypeToCpp(x[0], True)
@@ -212,8 +212,13 @@ void <!capCompName!>Test::run<!service.name!>()
 	  value = ""
 	else:
 	  value = "(default : \" << " + x[2].toString() + " << \")"
+
+	if not x[3] is None:
+	  docStr = ": " + x[3].doc
+	else:
+	  docStr = ""
 	?>
-      cout << "Enter <!t!> <!x[1]!> <!value!>:  " << endl;
+      cout << "Enter <!t!> <!x[1]!> <!docStr!> <!value!>:  " << endl;
 <?
     parse_input(x[0], x[1]);
 

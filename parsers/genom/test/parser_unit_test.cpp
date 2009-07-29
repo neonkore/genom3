@@ -141,25 +141,25 @@ BOOST_AUTO_TEST_CASE(testServiceInputs)
 	BOOST_CHECK_EQUAL(s->inputs()[0].type, Idl::BaseType::longType);
 	BOOST_CHECK_EQUAL(s->inputs()[0].identifier, "a");
 	BOOST_CHECK_EQUAL(s->inputs()[0].defaultValue.asInt(), 1);
-	BOOST_CHECK_EQUAL(s->inputs()[0].doc, "First arg");
+	BOOST_CHECK_EQUAL(s->inputs()[0].doc.doc, "First arg");
 
 	BOOST_CHECK_EQUAL(s->inputs()[1].kind, ServiceInput::Type);
 	BOOST_CHECK_EQUAL(s->inputs()[1].type, Idl::BaseType::doubleType);
 	BOOST_CHECK_EQUAL(s->inputs()[1].identifier, "x");
 	BOOST_CHECK_EQUAL(s->inputs()[1].defaultValue.asDouble(), 2.3);
-	BOOST_CHECK_EQUAL(s->inputs()[1].doc, "Second arg");
+	BOOST_CHECK_EQUAL(s->inputs()[1].doc.doc, "Second arg");
 
 	BOOST_CHECK_EQUAL(s->inputs()[2].kind, ServiceInput::Type);
 	BOOST_CHECK_EQUAL(s->inputs()[2].type, Idl::StringType::unboundedStringType);
 	BOOST_CHECK_EQUAL(s->inputs()[2].identifier, "z");
 	BOOST_CHECK_EQUAL(s->inputs()[2].defaultValue.asString(), "\"bla\"");
-	BOOST_CHECK(s->inputs()[2].doc.empty());
+	BOOST_CHECK(s->inputs()[2].doc.doc.empty());
 
 	BOOST_CHECK_EQUAL(s->inputs()[3].kind, ServiceInput::Type);
 	BOOST_CHECK_EQUAL(s->inputs()[3].type, Idl::StringType::unboundedStringType);
 	BOOST_CHECK_EQUAL(s->inputs()[3].identifier, "y");
 	BOOST_CHECK(s->inputs()[3].defaultValue.isEmpty());
-	BOOST_CHECK_EQUAL(s->inputs()[3].doc, "Last arg");
+	BOOST_CHECK_EQUAL(s->inputs()[3].doc.doc, "Last arg");
 }
 
 BOOST_AUTO_TEST_CASE(testServiceCodel)

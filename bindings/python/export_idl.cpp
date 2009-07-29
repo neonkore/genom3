@@ -70,10 +70,10 @@ std::string MapValueToCpp(ConstValue *v)
 	return CppVisitor::mapValueToCpp(v);
 }
 
-std::string MapValueToCorbaCpp(ConstValue *v)
-{
-	return CorbaCppVisitor::mapValueToCpp(v);
-}
+// std::string MapValueToCorbaCpp(ConstValue *v)
+// {
+// 	return CorbaCppVisitor::mapValueToCpp(v);
+// }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCOverloads, MapTypeToC, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(MapTypeToCppOverloads, MapTypeToCpp, 1, 2)

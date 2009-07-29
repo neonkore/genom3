@@ -62,6 +62,7 @@ struct variant_type {
     G3nom::Idl::Declarator::Ptr		declaratorVal;
     G3nom::Idl::Literal		literalVal;
     G3nom::ServiceInput		serviceInputVal;
+    G3nom::InputDoc		inputDocVal;
 };
 #define YYSTYPE variant_type
 
@@ -154,6 +155,8 @@ struct variant_type {
 %type <literalVal>		composed_literal;
 
 %type <serviceInputVal>		input_type;
+%type <inputDocVal>		input_doc;
+%type <inputDocVal>		input_doc_list;
 
 %type <stringVal>		identifiers
 %type <codelVal>		codel_prototype
@@ -509,18 +512,18 @@ inputs:
 {};
 
 input:
-  input_type COLON STRINGLIT 
+  input_type COLON input_doc 
 {
     $1.doc = $3;
     driver.currentService()->addInput($1);
 }
-| input_type EQUAL literal COLON STRINGLIT 
+| input_type EQUAL literal COLON input_doc 
 {
     $1.defaultValue = $3;
     $1.doc = $5;
     driver.currentService()->addInput($1);
 }
-| input_type COLON STRINGLIT EQUAL literal 
+| input_type COLON input_doc EQUAL literal 
 {
     $1.defaultValue = $5;
     $1.doc = $3;
@@ -535,6 +538,30 @@ input:
 {
     driver.currentService()->addInput($1);
 };
+
+input_doc:
+  STRINGLIT
+{
+  InputDoc d($1);
+  $$ = d;
+}
+| LBRACE input_doc_list RBRACE
+{
+  $$ = $2;
+};
+
+input_doc_list:
+  input_doc
+{
+  InputDoc d;
+  d.members.push_back($1);
+  $$ = d;
+}
+| input_doc_list COMMA input_doc
+{
+  $1.members.push_back($3);
+  $$ = $1;
+}
 
 input_type:
   IDS DOT IDENTIFIER

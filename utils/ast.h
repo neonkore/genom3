@@ -239,6 +239,18 @@ class Task
 		//std::string connectedPort;
 };
 
+class InputDoc {
+	public:
+		typedef std::vector<InputDoc> Vector;
+		InputDoc() {}
+		InputDoc(std::string s) : doc(s) {}
+
+		bool operator==(const InputDoc& rhs) { return doc == rhs.doc; }
+
+		std::string doc;
+		Vector members;
+};
+
 /** 
 * It can either be an IDS member (eg IDS:speedRef) in which case #type is null, or 
 * defined by its type (eg double d). In both cases, it can have a default value.
@@ -259,7 +271,7 @@ struct ServiceInput {
 	std::string identifier;
 	Idl::IdlType::Ptr type;
 	Idl::Literal defaultValue;
-	std::string doc;
+	InputDoc doc;
 };
 
 /** \short A service*/

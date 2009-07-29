@@ -78,24 +78,32 @@ def find_init_service():
 
 initService,initServiceNb = find_init_service()
 
-def flat_struct(t, name, separator = "_", defValue = None):
+def flat_struct(t, name, separator = "_", defValue = None, docStruct = None):
     """ Creates a flat list of the structure of a type. The list is composed
     of pairs containing the member type and identifier."""
     if t.kind() == IdlType.Named:
 	n = t.asNamedType()
-	return flat_struct(n.type(), name, separator, defValue)
+	return flat_struct(n.type(), name, separator, defValue, docStruct)
     elif t.kind() == IdlType.Struct:
 	s = t.asStructType()
 	l = []
-	if defValue is None:
-	  for m in s.members():
-	    l.extend(flat_struct(m.data, name + separator + m.key, separator))
+	if defValue is None: 
+	  if docStruct is None:
+	    for m in s.members():
+	      l.extend(flat_struct(m.data, name + separator + m.key, separator, None, None))
+	  else:
+	      for (m, d) in map(None, s.members(), docStruct.members):
+		l.extend(flat_struct(m.data, name + separator + m.key, separator, None, d))
 	else:
-	  for (m, value) in map(None, s.members(), defValue.members()):
-	    l.extend(flat_struct(m.data, name + separator + m.key, separator, value))
+	  if docStruct is None:
+	    for (m, value) in map(None, s.members(), defValue.members()):
+	      l.extend(flat_struct(m.data, name + separator + m.key, separator, value, None))
+	  else:
+	    for (m, value, d) in map(None, s.members(), defValue.members(), docStruct.members):
+	      l.extend(flat_struct(m.data, name + separator + m.key, separator, value, d))
 	return l
     else:
-	return [(t, name, defValue)]  
+	return [(t, name, defValue, docStruct)]  
 
 def input_list(service):
   """ Creates a flat list of all the service inputs."""

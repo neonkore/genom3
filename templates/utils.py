@@ -204,3 +204,16 @@ def create_error_list():
   return set(l)
 errorList = create_error_list();
 
+class PythonSimpleVisitor(TypeVisitor):
+  def visitTypedefType(self, t):
+    t.aliasType().accept(self)
+
+  def visitNamedType(self, n):
+    n.type().accept(self)
+
+  def visitStructType(self, s):
+    for m in s.members():
+      m.data.accept(self)
+
+  def visitArrayType(self, a):
+    a.type().accept(self)

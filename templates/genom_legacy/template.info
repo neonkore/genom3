@@ -74,7 +74,7 @@ main:
 
 /* server openprs/ */
   "server/openprs/openprs.c" -> "server/openprs/$$RequestsOpenprs.c"
-  "server/openprs/openprsProto.h" -> "server/openprs/$$RequestsOpenprs.h"
+  "server/openprs/openprsProto.h" -> "server/openprs/$$RequestsOpenprsProto.h"
   "server/openprs/openprsDecode.h" -> "server/openprs/$$DecodeOpenprs.h"
   "server/openprs/openprsDecode.c" -> "server/openprs/$$DecodeOpenprs.c"
   "server/openprs/openprsEncode.h" -> "server/openprs/$$EncodeOpenprs.h"

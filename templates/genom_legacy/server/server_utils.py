@@ -598,6 +598,8 @@ def codel_lock(codel, service = None):
       print "  *report = errnoGet();"
       print "  return ETHER;"
       print "}"
+
+      print "posterTake(" + upper(comp.name()) + "_" + upper(port) + "_POSTER_ID, POSTER_WRITE);"
       continue
 
     #seqs = dynamic_members(p.idlType, posterAddr)

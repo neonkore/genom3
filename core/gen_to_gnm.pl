@@ -42,9 +42,9 @@ for(my $i = 0; $i < scalar(@lines); $i++) {
 #   print "Examining: $line";
   $line = $lines[$i];
 
-  if($line =~ /^[\s\t]*([a-zA-Z_]*)\s([a-zA-Z\d_]*)\s*{/) {
+  if($line =~ /^([\s\t]*)([a-zA-Z_]*)\s([a-zA-Z\d_]*)\s*{/) {
 #     print "Matched tag $1";
-    if($1 eq "poster") {
+    if($2 eq "poster") {
       print OUT "// syntax: Outport Type Name;\n";
       while(not $line =~ /.*}[\s\t]*;/) {
 	print OUT "// $line";
@@ -52,32 +52,32 @@ for(my $i = 0; $i < scalar(@lines); $i++) {
 	$line = $lines[$i];
       }
       print OUT "// $line"
-    } elsif($tags{$1} eq "") {
+    } elsif($tags{$2} eq "") {
       print OUT $line;
     } else {
-      print OUT "$tags{$1} $2 {\n";
+      print OUT "$1$tags{$2} $3 {\n";
     }
-  } elsif($line =~ /^[\s\t]*codel_([a-zA-Z_]*)[\s\t]*:[\s\t]*([a-zA-Z\d_]*);/) {
+  } elsif($line =~ /^([\s\t]*)codel_([a-zA-Z_]*)[\s\t]*:[\s\t]*([a-zA-Z\d_]*);/) {
 #     print "Found codel declaration: $1";
-    print OUT "codel $1: $2();\n";
-  } elsif($line =~ /^[\s\t]*(c_init_func|codel_task_start)[\s\t]*:[\s\t]*([a-zA-Z\d_]*);/) {
+    print OUT "$1codel $2: $3();\n";
+  } elsif($line =~ /^([\s\t]*)(c_init_func|codel_task_start)[\s\t]*:[\s\t]*([a-zA-Z\d_]*);/) {
 #     print "Found task codel declaration: $1";
-    if($codels{$1} eq "") {
+    if($codels{$2} eq "") {
       print OUT $line;
     } else {
-      print OUT "codel $codels{$1}: $2();\n";
+      print OUT "$1codel $codels{$2}: $3();\n";
     }
-  } elsif($line =~ /^[\s\t]*(input|output)[\s\t]*:[\s\t]*([a-zA-Z\d_]*)::([a-zA-Z\d_]*)[\s\t]*;/) {
+  } elsif($line =~ /^([\s\t]*)(input|output)[\s\t]*:[\s\t]*([a-zA-Z\d_]*)::([a-zA-Z\d_]*)[\s\t]*;/) {
 #     print "Found $1";
-    print OUT "$1: IDS.$2;\n";
-  } elsif($line =~ /^[\s\t]*([a-zA-Z_]*)[\s\t]*:(.*)/) {
+    print OUT "$1$2: IDS.$3;\n";
+  } elsif($line =~ /^([\s\t]*)([a-zA-Z_]*)[\s\t]*:(.*)/) {
 #     print "Matched field $1";
-    if(grep { $_ eq $1 } @unused) {
+    if(grep { $_ eq $2 } @unused) {
       print OUT "// unsupported $line"
-    } elsif($fields{$1} eq "") {
+    } elsif($fields{$2} eq "") {
       print OUT $line;
     } else {
-      print OUT "$fields{$1}: $2\n";
+      print OUT "$1$fields{$2}: $3\n";
     }
   } else {
 #     print "No match";

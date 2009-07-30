@@ -63,6 +63,15 @@ with
   as the .gnm file
   -s Do not generate anything, only check the .gnm syntax.
 
+* Porting script (core/gen_to_gnm.pl)
+  This small script helps the transition from genom2 to g3nom. It outputs a description file suitable for g3nom from a genom2 .gen file.
+ The new file has the same name as the input file, but with a '.gnm' extension. It replaces old keywords with new ones and tries to adapt
+ to the new syntax when possible. Beware that this tool is incomplete (eg types are completely ignored) and that the generated
+ file should be reviewed by hand. 
+
+Usage:
+  gen_to_gnm.pl gen_file
+
 * Test app (build/core/test_gen)
   Interpret one file from a template (.gnm file path is hardcoded). Can be useful when creating a new template.
 

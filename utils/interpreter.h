@@ -49,8 +49,9 @@ class Interpreter
 
 		/** Initialize the interpreter with the Component \a c . For instance, 
 		* assign the value of a global var to a pointer to this component.
+		* \a args is a space-separated list of arguments to the template.
 		*/
-		virtual void start(Component *c) = 0;
+		virtual void start(Component *c, std::string args = std::string()) = 0;
 
 		/** Interpret \a s .
 		* \return the output of the code (for instance the text that was written to stdout)

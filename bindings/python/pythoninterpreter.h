@@ -47,7 +47,7 @@ class PythonInterpreter : public Interpreter
 		PythonInterpreter();
 		~PythonInterpreter();
 
-		virtual void start(Component *c);
+		virtual void start(Component *c, std::string args = std::string());
 		virtual std::string interpret(const std::string &s);
 		virtual std::string eval(const std::string &s);
 		virtual void exportVar(const std::string &name, const std::string &value);

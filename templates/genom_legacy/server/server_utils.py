@@ -733,9 +733,19 @@ nbServices = len(servicesDict)
 abortRequestNum = nbServices;
 internalDataType = MapTypeToC(IDSType,True)
 periodicFlag = is_periodic()
+  
+if "openprs" in argv:
+  shouldGenerateOpenPRS = "" #
+  sys.stderr.write("Generating the OpenPRS code in server/openprs\n")
+else:
+  shouldGenerateOpenPRS = "#"  # do not generate openrps related code
 
-shouldGenerateOpenPRS = "" # do not generate openrps related code
-shouldGenerateTcl = ""
+if "tcl" in argv:
+  shouldGenerateTcl = ""
+  sys.stderr.write("Generating the tcl client code in server/tcl\n")
+else:
+  shouldGenerateTcl = "#"
+
 shouldGenerateServer = ""
 pkgname = comp.name()
 

@@ -100,10 +100,11 @@ TclInterpreter* TclInterpreter::getInstance()
 	return m_instance;
 }
 
-void TclInterpreter::start(G3nom::Component* c)
+void TclInterpreter::start(G3nom::Component* c, std::string args)
 {
 	m_component = c;
 	interpret("set comp [getCurrentComponent]");
+	interpret("set argv {" + args + "}");
 
 	// create list of tasks
 //     object o("set taskList");

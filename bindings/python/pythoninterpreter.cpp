@@ -133,10 +133,11 @@ PythonInterpreter* PythonInterpreter::getInstance()
 	return m_instance;
 }
 
-void PythonInterpreter::start(G3nom::Component* c)
+void PythonInterpreter::start(Component* c, string args)
 {
 	m_component = c;
 	interpret("comp = getComponent()\n");
+	interpret("argv = \"" + args + "\"; argv = argv.split(' ')\n");
 }
 
 std::string PythonInterpreter::interpret(const std::string& s)

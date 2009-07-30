@@ -55,7 +55,7 @@ class TemplateInterpreter
 	public:
 		enum State { Other, InsideMain, InsideTask, InsideService, InsideLanguage, InsideRequires };
 
-		TemplateInterpreter();
+		TemplateInterpreter(std::string args = std::string());
 
 		void setInterpreter(Interpreter *i);
 
@@ -105,6 +105,7 @@ class TemplateInterpreter
 		void interpretFileInternal(const std::string &infile, const std::string &outfile);
 
 	private:
+		std::string m_args;
 		Interpreter *m_interpreter;
 		std::string m_language;
 		Component *m_component;

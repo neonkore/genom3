@@ -284,6 +284,8 @@ component_field:
 	driver.component().pluginLanguage = $3;
     } else if($1 == "version") {
 	driver.component().version = $3;
+    } else if($1 == "email") {
+	driver.component().email = $3;
     } else {
       error(yyloc, std::string("Unknown component field: ") + $1);
       YYERROR;

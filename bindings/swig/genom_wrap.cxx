@@ -11018,6 +11018,65 @@ fail:
 }
 
 
+SWIGINTERN int
+_wrap_Component_email_set(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::Component *arg1 = (G3nom::Component *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"oo:Component_email_set self email ",(void *)0,(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__Component, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Component_email_set" "', argument " "1"" of type '" "G3nom::Component *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::Component * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string SWIG_TCL_CALL_ARGS_2(objv[2], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Component_email_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Component_email_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  if (arg1) (arg1)->email = *arg2;
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_OK;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return TCL_ERROR;
+}
+
+
+SWIGINTERN int
+_wrap_Component_email_get(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+  G3nom::Component *arg1 = (G3nom::Component *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::string *result = 0 ;
+  
+  if (SWIG_GetArgs(interp, objc, objv,"o:Component_email_get self ",(void *)0) == TCL_ERROR) SWIG_fail;
+  res1 = SWIG_ConvertPtr(objv[1], &argp1,SWIGTYPE_p_G3nom__Component, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Component_email_get" "', argument " "1"" of type '" "G3nom::Component *""'"); 
+  }
+  arg1 = reinterpret_cast< G3nom::Component * >(argp1);
+  {
+    std::string const &_result_ref =  ((arg1)->email);
+    result = (std::string *) &_result_ref;
+  }
+  Tcl_SetObjResult(interp,SWIG_From_std_string(static_cast< std::string >(*result)));
+  return TCL_OK;
+fail:
+  return TCL_ERROR;
+}
+
+
 SWIGINTERN void swig_delete_Component(void *obj) {
 G3nom::Component *arg1 = (G3nom::Component *) obj;
 delete arg1;
@@ -11061,6 +11120,7 @@ static swig_attribute swig_G3nom_Component_attributes[] = {
     { "-version",_wrap_Component_version_get, _wrap_Component_version_set},
     { "-IDSType",_wrap_Component_IDSType_get, _wrap_Component_IDSType_set},
     { "-uniqueId",_wrap_Component_uniqueId_get, _wrap_Component_uniqueId_set},
+    { "-email",_wrap_Component_email_get, _wrap_Component_email_set},
     {0,0,0}
 };
 static swig_class *swig_G3nom_Component_bases[] = {0,0};
@@ -18360,6 +18420,8 @@ static swig_command_info swig_commands[] = {
     { SWIG_prefix "Component_IDSType_get", (swig_wrapper_func) _wrap_Component_IDSType_get, NULL},
     { SWIG_prefix "Component_uniqueId_set", (swig_wrapper_func) _wrap_Component_uniqueId_set, NULL},
     { SWIG_prefix "Component_uniqueId_get", (swig_wrapper_func) _wrap_Component_uniqueId_get, NULL},
+    { SWIG_prefix "Component_email_set", (swig_wrapper_func) _wrap_Component_email_set, NULL},
+    { SWIG_prefix "Component_email_get", (swig_wrapper_func) _wrap_Component_email_get, NULL},
     { SWIG_prefix "Component", (swig_wrapper_func) SWIG_ObjectConstructor, (ClientData)&_wrap_class_G3nom_Component},
     { SWIG_prefix "new_TypeVisitor", (swig_wrapper_func) _wrap_new_TypeVisitor, NULL},
     { SWIG_prefix "delete_TypeVisitor", (swig_wrapper_func) _wrap_delete_TypeVisitor, NULL},

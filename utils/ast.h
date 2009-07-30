@@ -397,6 +397,7 @@ class Component : public IObjectProperties
 		std::string version;
 		Idl::IdlType::Ptr IDSType;
 		int uniqueId;
+		std::string email;
 
 	private:
 		std::string m_name;

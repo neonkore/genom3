@@ -291,8 +291,8 @@ BOOST_AUTO_TEST_CASE(testPorts)
 	Driver d;
 	string s = "struct Integer { long s; };"
 	           "inport Integer IntIn;\n"
-	           "outport Integer IntOut;\n"
-	           "outport double DoubleOut;\n";
+	           "outport Integer IntOut {property buffer_size: 10; };\n"
+	           "outport double DoubleOut { property buffer_size: 10; property buffer_type: \"ring\"; };\n";
 
 	if (!d.parseString(s)) {
 		BOOST_ERROR("Parsing failed.");
@@ -328,6 +328,7 @@ BOOST_AUTO_TEST_CASE(testPorts)
 	}
 	BOOST_CHECK_EQUAL(intout->idlType->identifier(), "Integer");
 	BOOST_CHECK_EQUAL(intout->sizeCodel, Codel::Ptr());
+	BOOST_CHECK_EQUAL(intout->property("buffer_size").asInt(), 10);
 
 	Port::Ptr dbl = d.component().port("DoubleOut");
 	if (!dbl) {
@@ -342,6 +343,8 @@ BOOST_AUTO_TEST_CASE(testPorts)
 	}
 	BOOST_CHECK_EQUAL(dbl->idlType, Idl::BaseType::doubleType);
 	BOOST_CHECK_EQUAL(dbl->sizeCodel, Codel::Ptr());
+	BOOST_CHECK_EQUAL(dbl->property("buffer_size").asInt(), 10);
+	BOOST_CHECK_EQUAL(dbl->property("buffer_type").asString(), "\"ring\"");
 }
 
 BOOST_AUTO_TEST_CASE(testDynamicPorts)

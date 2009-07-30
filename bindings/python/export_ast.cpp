@@ -40,8 +40,11 @@ using namespace boost::python;
 
 void export_ast()
 {
+	class_<IObjectProperties>("IObjectProperties")
+	.def("property", &IObjectProperties::property, return_value_policy<reference_existing_object>())
+	.def("addProperty", &IObjectProperties::addProperty);
 
-	class_<Component>("Component")
+	class_<Component, bases<IObjectProperties> >("Component")
 	.def("name", &Component::name)
 	.def_readonly("IDSType", &Component::IDSType)
 	.def_readonly("uniqueId", &Component::uniqueId)
@@ -65,7 +68,7 @@ void export_ast()
 	.def("eventsForService", &Component::eventsForService)
 	.def("typeFromIdsName", &Component::typeFromIdsName);
 
-	class_<Task, Task::Ptr>("Task")
+	class_<Task, Task::Ptr, bases<IObjectProperties> >("Task")
 	.def("debug", &Task::debug)
 	.def("codel", &Task::codel)
 	.def("hasCodel", &Task::hasCodel)
@@ -77,7 +80,8 @@ void export_ast()
 	.def("errorMessages", &Task::errorMessages, return_value_policy<reference_existing_object>());
 
   {
-	class_<Service, Service::Ptr> Service_exposer = class_<Service, Service::Ptr>("Service", init<const std::string &>());
+	class_<Service, Service::Ptr, bases<IObjectProperties> > Service_exposer 
+		= class_<Service, Service::Ptr, bases<IObjectProperties> >("Service", init<const std::string &>());
 	scope Service_scope(Service_exposer);
 	enum_<Service::Type>("ServiceType")
 	.value("Init", Service::Init)
@@ -133,7 +137,7 @@ void export_ast()
 	.def("addInType", &Codel::addInType)
 	.def("addOutType", &Codel::addOutType);
   {
-	class_<Port, Port::Ptr> Port_exposer = class_<Port, Port::Ptr>("Port");
+	class_<Port, Port::Ptr, bases<IObjectProperties> > Port_exposer = class_<Port, Port::Ptr, bases<IObjectProperties> >("Port");
 	scope Port_scope(Port_exposer);
 	enum_<Port::Type>("PortType")
 	.value("Incoming", Port::Incoming)

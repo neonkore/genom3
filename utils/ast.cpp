@@ -120,6 +120,8 @@ void Component::debug()
 		cout << DumpType::dumpConstValue(it->second);
 		cout << endl;
 	}
+
+	debugProperties();
 }
 
 void Component::addTask(Task::Ptr task)
@@ -367,6 +369,7 @@ void Port::debug()
 	}
 
 	cout << "type: " << DumpType::dumpType(idlType) << endl;
+	debugProperties();
 }
 
 /******** Task ***************/
@@ -387,6 +390,8 @@ void Task::debug()
 		it->second->debug();
 		cout << endl;
 	}
+
+	debugProperties();
 }
 
 void Task::addCodel(const std::string& name, G3nom::Codel::Ptr c)
@@ -471,6 +476,8 @@ void Service::debug()
 	for (it3 = m_events.begin(); it3 != m_events.end(); ++it3) {
 		cout << "\t" << it3->first->identifier() << " -> " << it3->second << endl;
 	}
+
+	debugProperties();
 }
 
 // void Service::addInput(const std::string &s, Idl::IdlType::Ptr t, const Idl::Literal &defaultValue)
@@ -661,5 +668,24 @@ std::string ServiceEvent::identifier() const
 		return m_service + "." + kindAsString(); 
 }
 
+/******** IObjectProperties ***************/
+
+void IObjectProperties::addProperty(const std::string &name, const Idl::Literal &value)
+{
+	m_properties[name] = value;
+}
+
+void IObjectProperties::debugProperties() const
+{
+	cout << "Properties :" << endl;
+	Literal::Map::const_iterator it = m_properties.begin();
+	for(; it != m_properties.end(); ++it)
+		cout << "\t* " << it->first << " : " <<it->second.print() << endl;
+}
+
+Idl::Literal& IObjectProperties::property(std::string s)
+{
+	return m_properties[s];
+}
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

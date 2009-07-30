@@ -130,7 +130,7 @@ struct variant_type {
 
 %token LBRACE RBRACE SEMICOLON COLON LESS_THAN GREATER_THAN COMMA LPAREN RPAREN EQUAL DOT LARROW
 
-%token IN OUT INPORT OUTPORT
+%token IN OUT INPORT OUTPORT PROPERTY
 // type tokens
 %token TRUE FALSE
 %token SHORT LONG FLOAT DOUBLE FIXED CHAR WCHAR STRING WSTRING BOOLEAN OCTET ANY VOID NATIVE
@@ -150,6 +150,7 @@ struct variant_type {
 %token <stringVal> 	IDENTIFIER	"identifier"
 
 %type <literalVal>		literal;
+%type <literalVal>		basic_literal;
 %type <literalVal>		literals;
 %type <literalVal>		boolean_literal;
 %type <literalVal>		composed_literal;
@@ -325,7 +326,12 @@ component_field:
 	YYERROR;
       }
     }
-};
+}
+| PROPERTY IDENTIFIER COLON basic_literal
+{
+    driver.component().addProperty($2, $4);
+}
+;
 
 /*** Inport or outport declaration ***/
 
@@ -335,21 +341,57 @@ port_decl:
     Port::Ptr p(new Port($3, $2, true));
     driver.component().addPort(p);
 }
+| INPORT type_spec IDENTIFIER 
+{
+    Port::Ptr p(new Port($3, $2, true));
+    driver.setCurrentPort(p);
+}
+LBRACE inport_fields RBRACE
+{
+    driver.component().addPort(driver.currentPort());
+}
 | OUTPORT type_spec IDENTIFIER
 {
     Port::Ptr p(new Port($3, $2, false));
     driver.component().addPort(p);
 }
-| OUTPORT type_spec IDENTIFIER LBRACE CODEL IDENTIFIER COLON codel_prototype SEMICOLON RBRACE
+| OUTPORT type_spec IDENTIFIER
 {
     Port::Ptr p(new Port($3, $2, false));
-    if($6 == "size")
-      p->sizeCodel = $8;
-    else {
-	error(yyloc, std::string("Unknown codel for an outport : ") + $6);
-	YYERROR;
-    }
-    driver.component().addPort(p);
+    driver.setCurrentPort(p);
+} 
+ LBRACE outport_fields RBRACE
+{
+    driver.component().addPort(driver.currentPort());
+}
+;
+  
+inport_fields:
+  port_field SEMICOLON
+  | inport_fields port_field SEMICOLON
+{};
+
+outport_fields:
+  outport_field SEMICOLON
+  | outport_fields outport_field SEMICOLON
+{};
+
+outport_field:
+  port_field
+| CODEL IDENTIFIER COLON codel_prototype
+{
+  if($2 == "size")
+    driver.currentPort()->sizeCodel = $4;
+  else {
+      error(yyloc, std::string("Unknown codel for an outport : ") + $2);
+      YYERROR;
+  }
+};
+
+port_field:
+ PROPERTY IDENTIFIER COLON basic_literal
+{
+    driver.currentPort()->addProperty($2, $4);
 };
 
 /*** Task declaration ***/
@@ -368,7 +410,7 @@ LBRACE task_fields RBRACE
 task_fields:
   task_field SEMICOLON
   | task_fields task_field SEMICOLON
-{}
+{};
 
 task_field:
   CODEL IDENTIFIER COLON codel_prototype
@@ -404,6 +446,10 @@ task_field:
     std::vector<std::string>::const_iterator it = ids.begin();
     for(; it != ids.end(); ++it)
       driver.currentTask()->addErrorMessage(*it);
+}
+| PROPERTY IDENTIFIER COLON basic_literal
+{
+    driver.currentTask()->addProperty($2, $4);
 };
 
 /*** Service Declaration ***/
@@ -493,7 +539,12 @@ service_field:
       error(yyloc, std::string("Unknown service field: ") + $1);
       YYERROR;
     }
-};
+}
+| PROPERTY IDENTIFIER COLON basic_literal
+{
+    driver.currentService()->addProperty($2, $4);
+}
+;
 
 identifiers:
  IDENTIFIER 
@@ -770,7 +821,7 @@ const_type:
 
 /*** IDL Literal Declaration ***/
 
-literal:
+basic_literal:
   INTEGERLIT
 {
     $$ = Literal($1);
@@ -795,6 +846,12 @@ literal:
 {
     /*enum value*/
     $$ = Literal($1);
+}
+
+literal:
+  basic_literal
+{
+    $$= $1;
 }
 | LBRACE literals RBRACE
 {

@@ -178,6 +178,19 @@ class ServiceEvent : public Event
 		Kind m_serviceKind;
 };
 
+/** \short Interface representing objects with properties */
+class IObjectProperties {
+	public:
+		const Idl::Literal::Map &properties() const { return m_properties; }
+		void addProperty(const std::string &name, const Idl::Literal &value);
+		Idl::Literal& property(std::string s);
+
+		void debugProperties() const;
+
+	protected:
+		Idl::Literal::Map m_properties;
+};
+
 /**
 *  The #sizeCodel is a regular codel (ie it can have tha same arguments as a regular codel). It will
 * be called before a dynamic port (ie a port containing a sequence) is initialized. A int* parameter
@@ -185,7 +198,7 @@ class ServiceEvent : public Event
 * the corresponding sequence.
 * \short A data port
 */
-class Port
+class Port : public IObjectProperties
 {
 	public:
 		enum Type { Incoming, Outgoing};
@@ -207,7 +220,7 @@ class Port
 /** \short An execution task
 * 
 */
-class Task
+class Task : public IObjectProperties
 {
 	public:
 		typedef boost::shared_ptr<Task> Ptr;
@@ -275,7 +288,7 @@ struct ServiceInput {
 };
 
 /** \short A service*/
-class Service
+class Service : public IObjectProperties
 {
 	public:
 		typedef boost::shared_ptr<Service> Ptr;
@@ -324,7 +337,7 @@ class Service
 /** \short A component
 * 
 */
-class Component
+class Component : public IObjectProperties
 {
 	public:
 		Component();

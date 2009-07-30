@@ -139,6 +139,7 @@ chartext				([^\'])|(\\.)
 "object"		{ return token::OBJECT; }
 "any"			{ return token::ANY; }
 "void"			{ return token::VOID; }
+"property"		{ return token::PROPERTY; }
 
 "const"			{ return token::CONST; }
 "native"		{ return token::NATIVE; }

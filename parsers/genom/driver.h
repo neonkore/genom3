@@ -96,6 +96,13 @@ class Driver
 			m_currentCodel = c;
 		}
 
+		Port::Ptr currentPort() const {
+			return m_currentPort;
+		}
+		void setCurrentPort(Port::Ptr c) {
+			m_currentPort = c;
+		}
+
 		Idl::IdlType::Ptr currentType() const {
 			return m_currentType;
 		}
@@ -120,6 +127,7 @@ class Driver
 		Task::Ptr m_currentTask;
 		Service::Ptr m_currentService;
 		Codel::Ptr m_currentCodel;
+		Port::Ptr m_currentPort;
 		Idl::IdlType::Ptr m_currentType;
 };
 

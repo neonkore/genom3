@@ -77,3 +77,14 @@ with target: testComponent, testTask, testPorts, testTypes, testConst, testFile
 
 Use testFile for the most common test (it parses a hardcoded file and prints it)
   
+* Genom Parser unit test app: (build/parsers/genom/test/parser_unittest)
+  Unit test for the parser. Run this every time you modify the parser or the lexer to check regressions.
+  It should output:
+Running 14 test cases...
+
+*** No errors detected
+
+(number of tests can be different)
+
+Usage:
+  parser_unittest

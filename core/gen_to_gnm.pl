@@ -27,7 +27,13 @@ my %codels= ("c_init_func", "init",
 	  "codel_task_end", "end"
 	  );
 
-my $input = "/home/ccpasteur/work/tuto/demo.gen";
+if($#ARGV == 1) {
+  print "Usage: gen_to_gnm.pl path/to/gen_file.gen.\n";
+  exit(0);
+}
+
+my $input = $ARGV[0];
+print "Reading from file: $input\n";
 open(IN, $input);
 my @lines = <IN>;
 

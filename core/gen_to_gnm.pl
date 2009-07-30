@@ -38,12 +38,21 @@ print "Writing to $output\n";
 open(OUT, ">$output");
 
 my $line = "";
-foreach $line (@lines) {
+for(my $i = 0; $i < scalar(@lines); $i++) {
 #   print "Examining: $line";
+  $line = $lines[$i];
 
   if($line =~ /^[\s\t]*([a-zA-Z_]*)\s([a-zA-Z\d_]*)\s*{/) {
 #     print "Matched tag $1";
-    if($tags{$1} eq "") {
+    if($1 eq "poster") {
+      print OUT "// syntax: Outport Type Name;\n";
+      while(not $line =~ /.*}[\s\t]*;/) {
+	print OUT "// $line";
+	$i++;
+	$line = $lines[$i];
+      }
+      print OUT "// $line"
+    } elsif($tags{$1} eq "") {
       print OUT $line;
     } else {
       print OUT "$tags{$1} $2 {\n";

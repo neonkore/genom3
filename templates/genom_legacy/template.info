@@ -1,3 +1,11 @@
+name: "Genom Legacy";
+doc: 
+" Generates components using Pocolibs, the middleware used by former GenoM versions.
+  Options:
+    * tcl: Generates the TCl client code in server/tcl
+    * openprs: Generates the OpenPRS client code in server/openprs
+";
+
 language: Python;
 requires:
   "../utils.py"

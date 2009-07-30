@@ -49,7 +49,7 @@
 using namespace G3nom;
 
 /* Line 311 of lalr1.cc  */
-#line 93 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 94 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
 
 
 #include "templateinterpreter.h"
@@ -445,28 +445,28 @@ namespace G3nom {
 	  case 2:
 
 /* Line 678 of lalr1.cc  */
-#line 110 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 111 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {}
     break;
 
   case 3:
 
 /* Line 678 of lalr1.cc  */
-#line 114 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 115 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {}
     break;
 
   case 4:
 
 /* Line 678 of lalr1.cc  */
-#line 116 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 117 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {}
     break;
 
   case 5:
 
 /* Line 678 of lalr1.cc  */
-#line 120 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 121 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {
     if((yysemantic_stack_[(2) - (1)]) == "service")
       driver.setState(TemplateInterpreter::InsideService);
@@ -488,14 +488,32 @@ namespace G3nom {
   case 6:
 
 /* Line 678 of lalr1.cc  */
-#line 135 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 136 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {}
     break;
 
   case 7:
 
 /* Line 678 of lalr1.cc  */
-#line 140 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 138 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+    {
+    driver.setTemplateName((yysemantic_stack_[(3) - (3)]));
+}
+    break;
+
+  case 8:
+
+/* Line 678 of lalr1.cc  */
+#line 142 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+    {
+    driver.setTemplateDoc((yysemantic_stack_[(3) - (3)]));
+}
+    break;
+
+  case 9:
+
+/* Line 678 of lalr1.cc  */
+#line 149 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {
     if(driver.state() != TemplateInterpreter::InsideLanguage) {
       error(yyloc, std::string("Expected string instead of identifier "));
@@ -505,24 +523,24 @@ namespace G3nom {
 }
     break;
 
-  case 8:
-
-/* Line 678 of lalr1.cc  */
-#line 148 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
-    {}
-    break;
-
-  case 9:
-
-/* Line 678 of lalr1.cc  */
-#line 150 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
-    {}
-    break;
-
   case 10:
 
 /* Line 678 of lalr1.cc  */
-#line 154 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 157 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+    {}
+    break;
+
+  case 11:
+
+/* Line 678 of lalr1.cc  */
+#line 159 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+    {}
+    break;
+
+  case 12:
+
+/* Line 678 of lalr1.cc  */
+#line 163 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {
     if(driver.state() == TemplateInterpreter::InsideRequires)
 	driver.executeFile((yysemantic_stack_[(1) - (1)]));
@@ -535,10 +553,10 @@ namespace G3nom {
 }
     break;
 
-  case 11:
+  case 13:
 
 /* Line 678 of lalr1.cc  */
-#line 165 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 174 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
     {
     switch(driver.state()) {
       case TemplateInterpreter::InsideMain: {
@@ -565,7 +583,7 @@ namespace G3nom {
 
 
 /* Line 678 of lalr1.cc  */
-#line 569 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.cpp"
+#line 587 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.cpp"
 	default:
           break;
       }
@@ -774,8 +792,9 @@ namespace G3nom {
   const signed char
   TemplateInfoParser::yypact_[] =
   {
-         1,    -1,     6,     0,     2,    -5,    -5,    -5,     3,    -5,
-      -2,    -5,    -5,     4,     5,    -5,     7,    -5,    -5
+        -2,    -4,     5,     6,    13,     0,     9,    -5,     2,    11,
+      -5,    -5,    12,    -5,     1,    -5,    -5,    -5,    -5,     8,
+      14,    -5,    15,    -5,    -5
   };
 
   /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -784,22 +803,23 @@ namespace G3nom {
   const unsigned char
   TemplateInfoParser::yydefact_[] =
   {
-         0,     0,     0,     0,     0,     5,     1,     2,     0,     3,
-       0,     4,     7,    10,     6,     8,     0,     9,    11
+         0,     0,     0,     0,     0,     0,     0,     5,     0,     0,
+       1,     2,     0,     3,     0,     7,     8,     4,     9,    12,
+       6,    10,     0,    11,    13
   };
 
   /* YYPGOTO[NTERM-NUM].  */
   const signed char
   TemplateInfoParser::yypgoto_[] =
   {
-        -5,    -5,    -5,    10,    -5,    -5,    -4
+        -5,    -5,    -5,    16,    -5,    -5,     3
   };
 
   /* YYDEFGOTO[NTERM-NUM].  */
   const signed char
   TemplateInfoParser::yydefgoto_[] =
   {
-        -1,     2,     3,     4,    10,    14,    15
+        -1,     4,     5,     6,    14,    20,    21
   };
 
   /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -809,16 +829,18 @@ namespace G3nom {
   const unsigned char
   TemplateInfoParser::yytable_[] =
   {
-         7,    12,    13,     1,     1,     5,     6,     9,    11,    13,
-      17,    18,    16,     8
+        11,     1,     7,     1,    18,    19,    15,     2,     3,     2,
+       3,     8,     9,    10,    13,    16,    22,    17,    19,    24,
+       0,    12,     0,    23
   };
 
   /* YYCHECK.  */
-  const unsigned char
+  const signed char
   TemplateInfoParser::yycheck_[] =
   {
-         0,     3,     4,     3,     3,     6,     0,     5,     5,     4,
-      14,     4,     8,     3
+         0,     3,     6,     3,     3,     4,     4,     9,    10,     9,
+      10,     6,     6,     0,     5,     4,     8,     5,     4,     4,
+      -1,     5,    -1,    20
   };
 
   /* STOS_[STATE-NUM] -- The (internal number of the) accessing
@@ -826,8 +848,9 @@ namespace G3nom {
   const unsigned char
   TemplateInfoParser::yystos_[] =
   {
-         0,     3,    10,    11,    12,     6,     0,     0,    12,     5,
-      13,     5,     3,     4,    14,    15,     8,    15,     4
+         0,     3,     9,    10,    12,    13,    14,     6,     6,     6,
+       0,     0,    14,     5,    15,     4,     4,     5,     3,     4,
+      16,    17,     8,    17,     4
   };
 
 #if YYDEBUG
@@ -836,7 +859,8 @@ namespace G3nom {
   const unsigned short int
   TemplateInfoParser::yytoken_number_[] =
   {
-         0,   256,   257,   258,   259,   260,   261,   262,   263
+         0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265
   };
 #endif
 
@@ -844,16 +868,16 @@ namespace G3nom {
   const unsigned char
   TemplateInfoParser::yyr1_[] =
   {
-         0,     9,    10,    11,    11,    13,    12,    14,    14,    14,
-      15,    15
+         0,    11,    12,    13,    13,    15,    14,    14,    14,    16,
+      16,    16,    17,    17
   };
 
   /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
   const unsigned char
   TemplateInfoParser::yyr2_[] =
   {
-         0,     2,     2,     2,     3,     0,     4,     1,     1,     2,
-       1,     3
+         0,     2,     2,     2,     3,     0,     4,     3,     3,     1,
+       1,     2,     1,     3
   };
 
 #if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
@@ -863,8 +887,8 @@ namespace G3nom {
   const TemplateInfoParser::yytname_[] =
   {
     "\"end of file\"", "error", "$undefined", "IDENTIFIER", "STRINGLIT",
-  "SEMICOLON", "COLON", "EQUAL", "RARROW", "$accept", "start", "rules",
-  "rule", "$@1", "fields", "field", 0
+  "SEMICOLON", "COLON", "EQUAL", "RARROW", "NAME", "DOC", "$accept",
+  "start", "rules", "rule", "$@1", "fields", "field", 0
   };
 #endif
 
@@ -873,10 +897,10 @@ namespace G3nom {
   const TemplateInfoParser::rhs_number_type
   TemplateInfoParser::yyrhs_[] =
   {
-        10,     0,    -1,    11,     0,    -1,    12,     5,    -1,    11,
-      12,     5,    -1,    -1,     3,     6,    13,    14,    -1,     3,
-      -1,    15,    -1,    14,    15,    -1,     4,    -1,     4,     8,
-       4,    -1
+        12,     0,    -1,    13,     0,    -1,    14,     5,    -1,    13,
+      14,     5,    -1,    -1,     3,     6,    15,    16,    -1,     9,
+       6,     4,    -1,    10,     6,     4,    -1,     3,    -1,    17,
+      -1,    16,    17,    -1,     4,    -1,     4,     8,     4,    -1
   };
 
   /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
@@ -884,16 +908,16 @@ namespace G3nom {
   const unsigned char
   TemplateInfoParser::yyprhs_[] =
   {
-         0,     0,     3,     6,     9,    13,    14,    19,    21,    23,
-      26,    28
+         0,     0,     3,     6,     9,    13,    14,    19,    23,    27,
+      29,    31,    34,    36
   };
 
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
   const unsigned char
   TemplateInfoParser::yyrline_[] =
   {
-         0,   109,   109,   113,   115,   120,   119,   139,   147,   149,
-     153,   164
+         0,   110,   110,   114,   116,   121,   120,   137,   141,   148,
+     156,   158,   162,   173
   };
 
   // Print the state stack on the debug stream.
@@ -959,7 +983,7 @@ namespace G3nom {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8
+       5,     6,     7,     8,     9,    10
     };
     if ((unsigned int) t <= yyuser_token_number_max_)
       return translate_table[t];
@@ -968,15 +992,15 @@ namespace G3nom {
   }
 
   const int TemplateInfoParser::yyeof_ = 0;
-  const int TemplateInfoParser::yylast_ = 13;
+  const int TemplateInfoParser::yylast_ = 23;
   const int TemplateInfoParser::yynnts_ = 7;
   const int TemplateInfoParser::yyempty_ = -2;
-  const int TemplateInfoParser::yyfinal_ = 6;
+  const int TemplateInfoParser::yyfinal_ = 10;
   const int TemplateInfoParser::yyterror_ = 1;
   const int TemplateInfoParser::yyerrcode_ = 256;
-  const int TemplateInfoParser::yyntokens_ = 9;
+  const int TemplateInfoParser::yyntokens_ = 11;
 
-  const unsigned int TemplateInfoParser::yyuser_token_number_max_ = 263;
+  const unsigned int TemplateInfoParser::yyuser_token_number_max_ = 265;
   const TemplateInfoParser::token_number_type TemplateInfoParser::yyundef_token_ = 2;
 
 
@@ -986,11 +1010,11 @@ namespace G3nom {
 } // G3nom
 
 /* Line 1054 of lalr1.cc  */
-#line 990 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.cpp"
+#line 1014 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.cpp"
 
 
 /* Line 1056 of lalr1.cc  */
-#line 187 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
+#line 196 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.yy"
  /*** Additional Code ***/
 
 void G3nom::TemplateInfoParser::error(const TemplateInfoParser::location_type& l,

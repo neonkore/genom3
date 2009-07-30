@@ -87,6 +87,7 @@ using namespace G3nom;
 %token IDENTIFIER STRINGLIT
 
 %token SEMICOLON COLON EQUAL RARROW
+%token NAME DOC
 
  /*** END EXAMPLE - Change the example grammar's tokens above ***/
 
@@ -133,6 +134,14 @@ rule:
       YYERROR;
     }
 } fields {}
+| NAME COLON STRINGLIT
+{
+    driver.setTemplateName($3);
+}
+| DOC COLON STRINGLIT
+{
+    driver.setTemplateDoc($3);
+}
 ;
 
 fields:

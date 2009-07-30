@@ -87,6 +87,8 @@ stringtext				([^\"])|(\\.)
 ":"			{ return token::COLON; }
 "="			{ return token::EQUAL; }
 "->"			{ return token::RARROW; }
+"name"			{ return token::NAME; }
+"doc"			{ return token::DOC; }
 
  /* string literals */
 "\""{stringtext}*"\"" {

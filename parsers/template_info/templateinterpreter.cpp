@@ -80,8 +80,9 @@ int create_file_dir(std::string filename)
 	return safe_mkdir(dir);
 }
 
-TemplateInterpreter::TemplateInterpreter(std::string args)
-: m_args(args), m_interpreter(0), m_component(0), m_verboseLexing(false), m_verboseParsing(false)
+TemplateInterpreter::TemplateInterpreter(string args, bool parseOnly)
+: m_args(args), m_interpreter(0), m_component(0), m_verboseLexing(false)
+, m_verboseParsing(false), m_parseOnly(parseOnly)
 {}
 
 bool TemplateInterpreter::parseInfoStream(std::istream& in, const std::string& sname)
@@ -145,6 +146,9 @@ string readFile(const std::string &inFile)
 
 void TemplateInterpreter::executeFile(const std::string& infile)
 {
+	if(m_parseOnly || !m_interpreter)
+		return;
+  
 	string s;
 	if(infile.at(0) == '/')
 		s = readFile(infile);
@@ -156,6 +160,9 @@ void TemplateInterpreter::executeFile(const std::string& infile)
 
 void TemplateInterpreter::interpretFileInternal(const std::string &infile, const std::string &outfile)
 {
+	if(m_parseOnly)
+		return;
+  
 	string s;
 	// create subdir if necessary
 	create_file_dir(outfile);
@@ -211,6 +218,9 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
 
 void TemplateInterpreter::interpretFile(const std::string &infile, std::string outfile)
 {
+	if(!m_component || m_parseOnly)
+		return;
+  
 	if(outfile.empty())
 		outfile = infile;
 
@@ -225,7 +235,7 @@ void TemplateInterpreter::interpretFile(const std::string &infile, std::string o
 
 void TemplateInterpreter::interpretServiceFile(const std::string &infile, std::string outfile)
 {
-	if(!m_component)
+	if(!m_component || m_parseOnly)
 		return;
 
 	// find the $$ to be replaced with task name
@@ -245,7 +255,7 @@ void TemplateInterpreter::interpretServiceFile(const std::string &infile, std::s
 
 void TemplateInterpreter::interpretTaskFile(const std::string &infile, std::string outfile)
 {
-	if(!m_component)
+	if(!m_component || m_parseOnly)
 		return;
 
 	string o = outfile;

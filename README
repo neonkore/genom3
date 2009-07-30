@@ -56,6 +56,7 @@ Usage:
   genom3 [-t template] [-o out_dir] gnm_file
 with
   -h Display this help message
+  -ht template Display help message regarding a specific template (including options for this template)
   -t Set the template to use (this will be appended to the template base dir which
   is currently hardcoded in the app) (Supported templates: genom_legacy (default), yarp, openRTM)
   -o Sets the directory where to output files. By default, files will be put in the same directory 

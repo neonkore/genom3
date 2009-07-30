@@ -44,6 +44,7 @@ int main(int argc, char* argv[])
 		"  genom3 [-t template] [-o out_dir] file\n"
 		"with\n"
 		"  -h Display this help message\n"
+		"  -ht template Display help message regarding a specific template (including options for this template)"
 		"  -d Display debug information\n"
 		"  -s Do not generate anything, only check the .gnm syntax");
 
@@ -52,6 +53,7 @@ int main(int argc, char* argv[])
 
 	string outputDir, args;
 	bool checkSyntaxMode = false;
+	bool templateHelpMode = false;
 
 	int idx = 1;
 	while ((idx < argc) && (argv[idx][0]=='-')) {
@@ -62,6 +64,17 @@ int main(int argc, char* argv[])
 			templ = argv[++idx];
 		} else if(sw == "-s") {
 			checkSyntaxMode = true;
+		} else if(sw == "-ht") {
+			templateHelpMode = true;
+			templ = argv[++idx];
+			
+			TemplateInterpreter ti("", true);
+			string sourceDir = templatesDir + templ + "/";
+			ti.parseInfoFile(sourceDir + "template.info");
+
+			cout << "Name: " << ti.templateName() << endl;
+			cout << "Doc: " << endl << ti.templateDoc() << endl;
+			exit(0);
 		} else if(sw == "-u" || sw == "--help" || sw == "-h") {
 			cout << usage_str << endl;
 			exit(0);
@@ -86,6 +99,7 @@ int main(int argc, char* argv[])
 		cout << "Error parsing .gnm file: " << argv[idx] << endl;
 		exit(1);
 	}
+
 	if(checkSyntaxMode) {
 		cout << "File syntax is correct." << endl;
 		exit(0);
@@ -98,7 +112,7 @@ int main(int argc, char* argv[])
 
 	ti.setSourceDirectory(sourceDir);
 	ti.setOutputDirectory(outputDir);
-	
+
 	ti.parseInfoFile(sourceDir + "template.info");
 	return 0;
 }

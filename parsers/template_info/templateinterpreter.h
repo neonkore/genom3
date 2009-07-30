@@ -55,9 +55,7 @@ class TemplateInterpreter
 	public:
 		enum State { Other, InsideMain, InsideTask, InsideService, InsideLanguage, InsideRequires };
 
-		TemplateInterpreter(std::string args = std::string());
-
-		void setInterpreter(Interpreter *i);
+		TemplateInterpreter(std::string args = std::string(), bool parseOnly = false);
 
 		bool parseInfoFile(const std::string &filename);
 
@@ -76,12 +74,25 @@ class TemplateInterpreter
 			return m_lexer;
 		}
 
+		void setInterpreter(Interpreter *i);
+		void setLanguage(const std::string &lang);
+		void setComponent(Component *c);
+
 		void setState(State s) {
 			m_state = s;
 		}
 		State state() {
 			return m_state;
 		}
+
+		void setTemplateName(std::string name) {
+			m_templateName = name;
+		}
+		std::string templateName() const { return m_templateName; }
+		void setTemplateDoc(std::string doc) {
+			m_templateDoc = doc;
+		}
+		std::string templateDoc() const { return m_templateDoc; }
 
 		void setSourceDirectory(const std::string &dir) {
 			m_source_dir = dir;
@@ -96,9 +107,6 @@ class TemplateInterpreter
 		/* Pass the file to the interpreter before parsing any other file*/
 		void executeFile(const std::string& infile);
 
-		void setLanguage(const std::string &lang);
-		void setComponent(Component *c);
-
 	protected:
 		bool parseInfoStream(std::istream& in, const std::string& sname);
 
@@ -110,6 +118,7 @@ class TemplateInterpreter
 		std::string m_language;
 		Component *m_component;
 		std::string m_out_dir, m_source_dir;
+		std::string m_templateName, m_templateDoc;
 
 		/// memebers related to parsing info files
 		TemplateInfoLexer* m_lexer;
@@ -120,6 +129,7 @@ class TemplateInterpreter
 		/// enable debug output in the bison parser
 		bool m_verboseParsing;
 		bool m_printGeneratedFile;
+		bool m_parseOnly;
 		State m_state;
 };
 

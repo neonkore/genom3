@@ -1,3 +1,9 @@
+name: "Yarp";
+doc:
+" Uses the Yarp middleware http://eris.liralab.it/yarp/.
+ This template support events.
+ Options: none.";
+
 language: Python;
 requires: 
   "../utils.py"

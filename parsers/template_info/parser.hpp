@@ -144,7 +144,9 @@ namespace G3nom {
      SEMICOLON = 260,
      COLON = 261,
      EQUAL = 262,
-     RARROW = 263
+     RARROW = 263,
+     NAME = 264,
+     DOC = 265
    };
 
     };
@@ -241,7 +243,7 @@ namespace G3nom {
     static const unsigned char yytable_[];
     static const signed char yytable_ninf_;
 
-    static const unsigned char yycheck_[];
+    static const signed char yycheck_[];
 
     /// For a state, its accessing symbol.
     static const unsigned char yystos_[];
@@ -321,7 +323,7 @@ namespace G3nom {
 } // G3nom
 
 /* Line 35 of lalr1.cc  */
-#line 325 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.hpp"
+#line 327 "/home/ccpasteur/work/git/g3nom/parsers/template_info/parser.hpp"
 
 
 

@@ -1,3 +1,9 @@
+name: "OpenRTM";
+doc: 
+" Uses the OpenRTM middleware http://www.is.aist.go.jp/rt/OpenRTM-aist/html-en/index.html.
+ Options: none.
+"
+
 language: Python;
 requires: 
   "../utils.py"

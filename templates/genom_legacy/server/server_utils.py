@@ -230,6 +230,11 @@ class ServiceInfo:
 	  self.outputVarDecl = MapTypeToC(self.outputType,True) + " " + self.outputName
 
     # other attributes
+    self.isReentrant = service.type != Service.Control and not service.name in service.incompatibleServices()
+    if self.isReentrant:
+      self.reentrantFlag = 1
+    else:
+      self.reentrantFlag = 0
     self.controlFuncFlag = service.hasCodel("control")
     self.controlFuncParams = ""
     if self.controlFuncFlag:
@@ -241,7 +246,25 @@ class ServiceInfo:
 # create serviceInfo objects
 services_info_dict = dict()
 for name, service in servicesDict.iteritems():
-    services_info_dict[name] = ServiceInfo(service)    
+    services_info_dict[name] = ServiceInfo(service)
+
+# add a member in the IDS for the input and output of 
+# a reentrant service (exec service that can be execeuted
+# several times in parallel)
+for name, service in servicesDict.iteritems():
+  serviceInfo = services_info_dict[name]
+  if not serviceInfo.isReentrant:
+    continue
+
+  if serviceInfo.inputFlag:
+    a = ArrayType(serviceInfo.inputType, 20)
+    IDSType.addMember(a, service.name + "Input")
+    sys.stderr.write("Adding IDS member for input of reentrant service " + name + "\n")
+
+  if serviceInfo.outputFlag:
+    a = ArrayType(serviceInfo.outputType, 20)
+    IDSType.addMember(a, service.name + "Output")
+    sys.stderr.write("Adding IDS member for output of reentrant service " + name + "\n")
 
 def convert_fun(t):
     """ returns the function to use to convert from a const char* to type t."""
@@ -725,10 +748,3 @@ if shouldGenerateTcl == "":
   genTcl = "yes"
 else:
   genTcl = "no"
-
-def test_visitor():
-  visitor = PythonSimpleVisitor()
-  comp.IDSType.accept(visitor)
-
-test_visitor()
-

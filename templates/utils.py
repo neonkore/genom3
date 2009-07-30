@@ -226,6 +226,3 @@ class PythonSimpleVisitor(TypeVisitor):
   def visitArrayType(self, a):
     a.type().accept(self)
 
-  def visitBaseType(self, t):
-    sys.stderr.write("jhkhjkhjkhhjhjkh\n")
-

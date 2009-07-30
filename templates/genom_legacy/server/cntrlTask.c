@@ -1301,7 +1301,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   /*--------------------------------------------------------------
    * Activity allocation
    */
-  activity = allocActivity(rqstId, <!serviceNum!>, <!comp.taskIndex(service.taskName)!>, <!"0"!>, servId);
+  activity = allocActivity(rqstId, <!serviceNum!>, <!comp.taskIndex(service.taskName)!>, <!serviceInfo.reentrantFlag!>, servId);
   if (activity == -1) return;
 
 <?
@@ -1355,7 +1355,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
 	    ?>
   /* Get inputs address */
 <?
-	    if False: #reentrant flag 
+	    if serviceInfo.isReentrant: #reentrant flag 
 		?>
   ACTIVITY_INPUT_ID(activity) = &(<!comp.name()!>DataStrId-><!service.name!>Input)[activity];
 <?
@@ -1385,7 +1385,7 @@ static void <!comp.name()!>Cntrl<!service.name!> (SERV_ID servId, int rqstId)
   */
 <?
 	if serviceInfo.outputFlag: 
-	    if False: # reentrant flag 
+	    if serviceInfo.isReentrant: # reentrant flag 
 		?>
   ACTIVITY_OUTPUT_ID(activity) = 
     &(<!comp.name()!>DataStrId-><!service.name!>Output)[activity];

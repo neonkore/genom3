@@ -157,7 +157,7 @@ bool <!comp.name()!><!currentTaskName!>::run<!service.name!>(const std::string &
   if service.type == Service.Init: ?>
   m_data->init_service_ran = true;
 <?
-  else:?>
+  elif initServiceNb >= 0:?>
   if(!m_data->init_service_ran) { // init service not ran, abort
     string r = "<!service.name!> : Init Service not yet started." ;
     genom_log(r.c_str());

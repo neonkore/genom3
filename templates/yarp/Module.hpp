@@ -73,7 +73,7 @@ for s in comp.servicesMap():
     ?>
    <!service.name!>Service::List <!service.name!>Services;
 <?
-if initService >= 0: ?>
+if initServiceNb >= 0: ?>
   bool init_service_ran;
 <?
 ?>

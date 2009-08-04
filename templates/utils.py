@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # This file groups some functions used by multiple templates
 
+comp = Config.getInstance().component()
+
 def is_dynamic(t):
   """ Checks whether the type t is dynamic (ie contains a sequence type)"""
   if t.kind() == IdlType.Sequence:

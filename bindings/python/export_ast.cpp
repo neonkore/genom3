@@ -44,6 +44,14 @@ void export_ast()
 	.def("property", &IObjectProperties::property, return_value_policy<reference_existing_object>())
 	.def("addProperty", &IObjectProperties::addProperty);
 
+	class_<Config>("Config")
+	.def("getInstance", &Config::getInstance, return_value_policy<reference_existing_object>())
+	.staticmethod("getInstance")
+	.def("component", &Config::component, return_value_policy<reference_existing_object>())
+	.def("templateDir", &Config::templateDir)
+	.def("outputDir", &Config::outputDir)
+	.def("cmdLineArgs", &Config::cmdLineArgs, return_value_policy<reference_existing_object>());
+
 	class_<Component, bases<IObjectProperties> >("Component")
 	.def("name", &Component::name)
 	.def_readonly("IDSType", &Component::IDSType)

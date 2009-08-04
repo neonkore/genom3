@@ -111,16 +111,16 @@ TclInterpreter* TclInterpreter::getInstance()
 	return m_instance;
 }
 
-void TclInterpreter::start(G3nom::Component* c)
-{
-	m_component = c;
-	interpret("set comp [getComponent]");
-
-	// create list of tasks
-//     object o("set taskList");
-//     o.append(d->interpreter, tasksList(d->interpreter, c));
-//     d->interpreter.eval(o);
-}
+// void TclInterpreter::start(G3nom::Component* c)
+// {
+// 	m_component = c;
+// 	interpret("set comp [getComponent]");
+// 
+// 	// create list of tasks
+// //     object o("set taskList");
+// //     o.append(d->interpreter, tasksList(d->interpreter, c));
+// //     d->interpreter.eval(o);
+// }
 
 std::string TclInterpreter::interpret(const std::string& s)
 {

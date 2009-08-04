@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from string import upper
 
+comp = Config.getInstance().component()
+
 IDSType = comp.IDSType
 servicesMap = comp.servicesMap()
 capCompName = comp.name().capitalize()

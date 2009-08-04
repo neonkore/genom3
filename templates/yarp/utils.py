@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from string import upper
 
+comp = Config.getInstance().component()
+
 IDSType = comp.IDSType.unalias()
 servicesMap = comp.servicesMap()
 tasksMap = comp.tasksMap()

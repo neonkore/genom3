@@ -179,7 +179,8 @@ class ServiceEvent : public Event
 };
 
 /** \short Interface representing objects with properties */
-class IObjectProperties {
+class IObjectProperties 
+{
 	public:
 		const Idl::Literal::Map &properties() const { return m_properties; }
 		void addProperty(const std::string &name, const Idl::Literal &value);
@@ -252,7 +253,8 @@ class Task : public IObjectProperties
 		//std::string connectedPort;
 };
 
-class InputDoc {
+class InputDoc 
+{
 	public:
 		typedef std::vector<InputDoc> Vector;
 		InputDoc() {}
@@ -269,7 +271,8 @@ class InputDoc {
 * defined by its type (eg double d). In both cases, it can have a default value.
 * \short A service's input or output parameter
 */
-struct ServiceInput {
+struct ServiceInput 
+{
 	typedef std::vector<ServiceInput> Vect;
 	enum Kind { IDSMember, Type};
 	
@@ -410,6 +413,34 @@ class Component : public IObjectProperties
 		std::vector<std::string> m_typesIncludes;
 		Idl::ConstValue::Map m_constValues;
 		std::vector<std::string> m_importedComponents;
+};
+
+/** \brief Config exported to the templates
+
+* This a simple singleton that contains all the objetcs we want
+* to export to the templates.
+*/
+class Config 
+{
+	public:
+		static Config* getInstance();
+
+		Component *component() const { return m_component; }
+		std::string templateDir() const { return m_templateDir; }
+		std::string outputDir() const { return m_outDir; }
+		std::vector<std::string>& cmdLineArgs() { return m_args; }
+
+		void setComponent(Component *c) { m_component = c; }
+		void setTemplateDir(std::string dir) { m_templateDir = dir; }
+		void setOutputDir(std::string dir) { m_outDir = dir; }
+		void setCmdLineArgs(std::vector<std::string> v) { m_args = v; }
+
+	private:
+		static Config* m_instance;
+		std::string m_outDir;
+		std::string m_templateDir;
+		Component *m_component;
+		std::vector<std::string> m_args;
 };
 
 }

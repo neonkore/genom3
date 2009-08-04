@@ -38,11 +38,11 @@ using namespace Idl;
 
 void replaceAll(string &str, const string &find_what, const string &replace_with)
 {
-	string::size_type pos=0;
-	while((pos=str.find(find_what, pos))!=string::npos) {
+	string::size_type pos = 0;
+	while ((pos = str.find(find_what, pos)) != string::npos) {
 		str.erase(pos, find_what.length());
 		str.insert(pos, replace_with);
-		pos+=replace_with.length();
+		pos += replace_with.length();
 	}
 }
 
@@ -67,15 +67,15 @@ void Component::debug()
 
 	cout << endl << "Services: " << services.size() << endl;
 	for (Service::Map::const_iterator it = services.begin();
-			it != services.end(); ++it) {
+	        it != services.end(); ++it) {
 		cout << "\t" << it->first << " : " << endl;
 		it->second->debug();
 		cout << endl;
 	}
 
 	cout << endl << "Tasks: " << tasks.size() << endl;
-	for (Task::Map::const_iterator it = tasks.begin(); 
-			it != tasks.end(); ++it) {
+	for (Task::Map::const_iterator it = tasks.begin();
+	        it != tasks.end(); ++it) {
 		cout << "\t-- " << it->first << " : " << endl;
 		it->second->debug();
 		cout << endl;
@@ -83,7 +83,7 @@ void Component::debug()
 
 	cout << endl << "Ports: " << ports.size() << endl;
 	for (Port::Map::const_iterator it = ports.begin();
-			it != ports.end(); ++it) {
+	        it != ports.end(); ++it) {
 		cout << "\t* " << it->first << " : ";
 		it->second->debug();
 		cout << endl;
@@ -91,17 +91,17 @@ void Component::debug()
 
 	cout << endl << "Events: " << events.size() << endl;
 	for (Event::Map::const_iterator it = events.begin();
-			it != events.end(); ++it) {
+	        it != events.end(); ++it) {
 		cout << "\t* " << it->first;
 		Event::Ptr e = it->second->asNamedEvent()->aliasEvent();
-		if(e)
+		if (e)
 			cout << " : " << e->identifier();
 		cout << endl;
 	}
 
 	cout << endl << "Types: " << m_types.size() << endl;
 	for (IdlType::Vector::const_iterator it = m_types.begin();
-			it != m_types.end(); ++it) {
+	        it != m_types.end(); ++it) {
 		cout << "* ";
 		cout << DumpType::dumpType(*it);
 		cout << endl;
@@ -109,13 +109,13 @@ void Component::debug()
 
 	cout << endl << "Types Includes: " << m_typesIncludes.size() << " : ";
 	for (std::vector<std::string>::const_iterator it = m_typesIncludes.begin();
-			it != m_typesIncludes.end(); ++it) {
-			cout << *it << ", ";
+	        it != m_typesIncludes.end(); ++it) {
+		cout << *it << ", ";
 	}
 
 	cout << endl << "Const Values: " << m_constValues.size() << endl;
 	for (ConstValue::Map::iterator it = m_constValues.begin();
-			it != m_constValues.end(); ++it) {
+	        it != m_constValues.end(); ++it) {
 		cout << "* ";
 		cout << DumpType::dumpConstValue(it->second);
 		cout << endl;
@@ -196,9 +196,9 @@ int Component::taskIndex(const std::string &name) const
 {
 	int i = 0;
 	Task::Map::const_iterator it = tasks.begin();
-	for(; it != tasks.end(); ++it, ++i) {
-		  if(it->first == name)
-			  return i;
+	for (; it != tasks.end(); ++it, ++i) {
+		if (it->first == name)
+			return i;
 	}
 	return -1;
 }
@@ -215,9 +215,9 @@ int Component::serviceIndex(const std::string &name) const
 {
 	int i = 0;
 	Service::Map::const_iterator it = services.begin();
-	for(; it != services.end(); ++it, ++i) {
-		  if(it->first == name)
-			  return i;
+	for (; it != services.end(); ++it, ++i) {
+		if (it->first == name)
+			return i;
 	}
 	return -1;
 }
@@ -234,9 +234,9 @@ int Component::portIndex(const std::string &name) const
 {
 	int i = 0;
 	Port::Map::const_iterator it = ports.begin();
-	for(; it != ports.end(); ++it, ++i) {
-		  if(it->first == name)
-			  return i;
+	for (; it != ports.end(); ++it, ++i) {
+		if (it->first == name)
+			return i;
 	}
 	return -1;
 }
@@ -262,9 +262,9 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 				}
 			case IdlType::Enum: {
 					EnumType *e = (*it4)->asType<EnumType>();
-					if(e->identifier() == name)
+					if (e->identifier() == name)
 						res = *it4;
-						break;
+					break;
 				}
 			default:
 				break;
@@ -272,7 +272,7 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 	}
 
 	// create a new named refering to the found type
-	if(res) {
+	if (res) {
 		IdlType::Ptr p(new NamedType(name, res));
 		return p;
 	} else
@@ -281,18 +281,18 @@ IdlType::Ptr Component::typeFromName(const std::string &name)
 
 IdlType::Ptr Component::typeFromIdsName(const std::string &name)
 {
-	if(!IDSType) {
+	if (!IDSType) {
 		cout << "Warning: Trying to access an IDS type but there is no IDS type defined yet" << endl;
 		return IdlType::Ptr();
 	}
-  
+
 	IdlType::Ptr ids = IDSType->unalias();
-	switch(ids->kind()) {
-		case IdlType::Struct:{
-			StructType *s = ids->asType<StructType>();
-			if(s)
-				return s->member(name);
-		}
+	switch (ids->kind()) {
+		case IdlType::Struct: {
+				StructType *s = ids->asType<StructType>();
+				if (s)
+					return s->member(name);
+			}
 		default:
 			cerr << "Error: there is no " << name << " member in the ids" << endl;
 			return IdlType::Ptr();
@@ -321,12 +321,12 @@ std::vector<std::string> Component::eventsForPort(const std::string &name)
 {
 	std::vector<std::string> v;
 	Service::Map::const_iterator it = services.begin();
-	for(; it != services.end(); ++it) {
+	for (; it != services.end(); ++it) {
 		Event::RevMap::const_iterator it2 = it->second->events().begin();
-		for(; it2 != it->second->events().end(); ++it2) {
-			if(it2->first->kind() == Event::PortEv) {
+		for (; it2 != it->second->events().end(); ++it2) {
+			if (it2->first->kind() == Event::PortEv) {
 				PortEvent *pev = it2->first->asPortEvent();
-				if(pev->portName() == name)
+				if (pev->portName() == name)
 					v.push_back(pev->kindAsString());
 			}
 		}
@@ -339,13 +339,13 @@ std::vector<std::string> Component::eventsForService(const std::string &name)
 {
 	std::vector<std::string> v;
 	Event::Map::const_iterator it = events.begin();
-	for(; it != events.end(); ++it) {
+	for (; it != events.end(); ++it) {
 		NamedEvent *nev = it->second->asNamedEvent();
-		if(!nev || !nev->aliasEvent())
+		if (!nev || !nev->aliasEvent())
 			continue;
 
-		if(nev->aliasEvent()->kind() == Event::ServiceEv) {
-			if(nev->aliasEvent()->asServiceEvent()->serviceName() == name)
+		if (nev->aliasEvent()->kind() == Event::ServiceEv) {
+			if (nev->aliasEvent()->asServiceEvent()->serviceName() == name)
 				v.push_back(nev->aliasEvent()->asServiceEvent()->kindAsString());
 		}
 	}
@@ -361,7 +361,7 @@ void Port::debug()
 		cout << "Inport; ";
 	else {
 		cout << "Outport; ";
-		if(sizeCodel) {
+		if (sizeCodel) {
 			cout << endl << "Size codel: ";
 			sizeCodel->debug();
 			cout << endl;
@@ -379,7 +379,7 @@ void Task::debug()
 	cout << "priority: " << priority << ", stackSize: " << stackSize << ", period: " << period << ", delay: " << delay << endl;
 	cout << "Error messages: ";
 	vector<string>::const_iterator it2 = m_errorMessages.begin();
-	for(; it2 != m_errorMessages.end(); ++it2)
+	for (; it2 != m_errorMessages.end(); ++it2)
 		cout << *it2 << " ";
 	cout << endl;
 
@@ -396,13 +396,13 @@ void Task::debug()
 
 void Task::addCodel(const std::string& name, G3nom::Codel::Ptr c)
 {
-	m_codels.insert(make_pair(name,c));
+	m_codels.insert(make_pair(name, c));
 }
 
 Codel::Ptr Task::codel(const std::string &name)
 {
 	Codel::Map::const_iterator it = m_codels.find(name);
-	if(it == m_codels.end())
+	if (it == m_codels.end())
 		return Codel::Ptr();
 	return it->second;
 }
@@ -431,34 +431,34 @@ void Service::debug()
 	cout << "Parent task: " << taskName << endl;
 
 	cout << "Inputs: ";
-	for(ServiceInput::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
-		if(it->kind == ServiceInput::IDSMember)
+	for (ServiceInput::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
+		if (it->kind == ServiceInput::IDSMember)
 			cout << "IDS:" << it->identifier;
 		else
 			cout << DumpType::dumpType(it->type) << " " << it->identifier;
-		if(!it->defaultValue.isEmpty())
+		if (!it->defaultValue.isEmpty())
 			cout << " = " << it->defaultValue.print() << ", ";
 	}
 
 	cout << endl << "Output: ";
-	if(output.identifier.empty())
+	if (output.identifier.empty())
 		cout << "None" << endl;
-	else if(output.kind == ServiceInput::IDSMember)
+	else if (output.kind == ServiceInput::IDSMember)
 		cout << "IDS:" << output.identifier << endl;
 	else
 		cout << DumpType::dumpType(output.type) << " " << output.identifier << endl;
 
 	cout << "Error messages: ";
-	for(vector<string>::const_iterator it2 = m_errorMessages.begin(); it2 != m_errorMessages.end(); ++it2)
+	for (vector<string>::const_iterator it2 = m_errorMessages.begin(); it2 != m_errorMessages.end(); ++it2)
 		cout << *it2 << " ";
 	cout << endl;
 
 	cout << "Incompatible services: " ;
-	if(m_incompatibleServices.empty())
+	if (m_incompatibleServices.empty())
 		cout << "none" << endl;
 	else {
 		vector<string>::const_iterator it2 = m_incompatibleServices.begin();
-		for(; it2 != m_incompatibleServices.end(); ++it2)
+		for (; it2 != m_incompatibleServices.end(); ++it2)
 			cout << *it2 << " ";
 		cout << endl;
 	}
@@ -489,7 +489,7 @@ void Service::debug()
 // 		i.kind = Input::Type;
 // 		i.type = t;
 // 	}
-// 
+//
 // 	i.identifier = s;
 // 	i.defaultValue = defaultValue;
 // 	m_inputs.push_back(i);
@@ -502,8 +502,8 @@ void Service::addInput(const ServiceInput &i)
 
 Idl::Literal Service::inputDefaultArg(const std::string &n)
 {
-	for(ServiceInput::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
-		if(it->identifier == n)
+	for (ServiceInput::Vect::const_iterator it = m_inputs.begin(); it != m_inputs.end(); ++it) {
+		if (it->identifier == n)
 			return it->defaultValue;
 	}
 	return Literal();
@@ -514,13 +514,13 @@ void Service::addCodel(const std::string &name, Codel::Ptr c)
 	string fixedName = name;
 	// make sure the name doesn't contain '.' (for events codels)
 	replaceAll(fixedName, ".", "_");
-	m_codels.insert(make_pair(fixedName,c));
+	m_codels.insert(make_pair(fixedName, c));
 }
 
 Codel::Ptr Service::codel(const std::string &name)
 {
 	Codel::Map::const_iterator it = m_codels.find(name);
-	if(it == m_codels.end())
+	if (it == m_codels.end())
 		return Codel::Ptr();
 	return it->second;
 }
@@ -553,31 +553,31 @@ void Codel::debug()
 {
 	cout << "(" << m_name;
 
-	if(!inPorts.empty()) {
+	if (!inPorts.empty()) {
 		cout << "inports: ";
 		for (vector<string>::const_iterator it = inPorts.begin(); it != inPorts.end(); ++it)
 			cout << *it << ", ";
 	}
 
-	if(!outPorts.empty()) {
+	if (!outPorts.empty()) {
 		cout << "; outports: ";
 		for (vector<string>::const_iterator it = outPorts.begin(); it != outPorts.end(); ++it)
 			cout << *it << ", ";
 	}
 
-	if(!inTypes.empty()) {
+	if (!inTypes.empty()) {
 		cout << "; intType: ";
 		for (vector<string>::const_iterator it = inTypes.begin(); it != inTypes.end(); ++it)
 			cout << *it << ", ";
 	}
 
-	if(!outTypes.empty()) {
+	if (!outTypes.empty()) {
 		cout << "; outTypes: ";
 		for (vector<string>::const_iterator it = outTypes.begin(); it != outTypes.end(); ++it)
 			cout << *it << ", ";
 	}
 
-	if(!nextCodels.empty()) {
+	if (!nextCodels.empty()) {
 		cout << "; Next codels: ";
 		for (vector<string>::const_iterator it = nextCodels.begin(); it != nextCodels.end(); ++it)
 			cout << *it << ", ";
@@ -627,7 +627,7 @@ ServiceEvent* Event::asServiceEvent()
 
 std::string PortEvent::kindAsString() const
 {
-	switch(m_portKind) {
+	switch (m_portKind) {
 		case OnRead:
 			return "onRead";
 		case OnWrite:
@@ -645,7 +645,7 @@ std::string PortEvent::kindAsString() const
 
 std::string ServiceEvent::kindAsString() const
 {
-	switch(m_serviceKind) {
+	switch (m_serviceKind) {
 		case OnCalled:
 			return "control";
 		case OnStart:
@@ -660,12 +660,12 @@ std::string ServiceEvent::kindAsString() const
 	return "";
 }
 
-std::string ServiceEvent::identifier() const 
+std::string ServiceEvent::identifier() const
 {
-	if(m_service.empty())
+	if (m_service.empty())
 		return kindAsString();
 	else
-		return m_service + "." + kindAsString(); 
+		return m_service + "." + kindAsString();
 }
 
 /******** IObjectProperties ***************/
@@ -679,8 +679,8 @@ void IObjectProperties::debugProperties() const
 {
 	cout << "Properties :" << endl;
 	Literal::Map::const_iterator it = m_properties.begin();
-	for(; it != m_properties.end(); ++it)
-		cout << "\t* " << it->first << " : " <<it->second.print() << endl;
+	for (; it != m_properties.end(); ++it)
+		cout << "\t* " << it->first << " : " << it->second.print() << endl;
 }
 
 Idl::Literal& IObjectProperties::property(std::string s)
@@ -688,4 +688,15 @@ Idl::Literal& IObjectProperties::property(std::string s)
 	return m_properties[s];
 }
 
-// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;
+/******** Config ***************/
+
+Config * Config::m_instance = 0;
+
+Config* Config::getInstance()
+{
+	if(!m_instance)
+		m_instance = new Config();
+	return m_instance;
+}
+
+// kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;  replace-tabs off;

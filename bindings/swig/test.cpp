@@ -32,6 +32,7 @@
 
 #include "tclinterpreter.h"
 #include "driver.h"
+#include "utils/ast.h"
 
 using namespace std;
 using namespace G3nom;
@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
 //       d.component().debug();
 
 	TclInterpreter *i = TclInterpreter::getInstance();
-	i->start(&(d.component()));
+	Config::getInstance()->setComponent(&d.component());
 //       i->interpret("set comp2 [Component];");
 //       i->interpret("debugComp $comp");
 //       i->interpret("debugComp $comp2");

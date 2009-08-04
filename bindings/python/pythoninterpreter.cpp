@@ -60,21 +60,12 @@ BOOST_PYTHON_MODULE_INIT(Logger)
 
 /********************** Python module definition ********/
 
-Component* pygetCurrentComponent()
-{
-	PythonInterpreter *i = PythonInterpreter::getInstance();
-	return i->component();
-}
-
-
 void export_idl();
 void export_ast();
 void export_containers();
 
 BOOST_PYTHON_MODULE_INIT(G3nom)
 {
-	def("getComponent", &pygetCurrentComponent, return_value_policy<reference_existing_object>());
-
 	export_ast();
 	export_idl();
 	export_containers();
@@ -131,13 +122,6 @@ PythonInterpreter* PythonInterpreter::getInstance()
 	if (!m_instance)
 		m_instance = new PythonInterpreter();
 	return m_instance;
-}
-
-void PythonInterpreter::start(Component* c, string args)
-{
-	m_component = c;
-	interpret("comp = getComponent()\n");
-	interpret("argv = \"" + args + "\"; argv = argv.split(' ')\n");
 }
 
 std::string PythonInterpreter::interpret(const std::string& s)

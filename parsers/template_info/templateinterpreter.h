@@ -55,7 +55,7 @@ class TemplateInterpreter
 	public:
 		enum State { Other, InsideMain, InsideTask, InsideService, InsideLanguage, InsideRequires };
 
-		TemplateInterpreter(std::string args = std::string(), bool parseOnly = false);
+		TemplateInterpreter(bool parseOnly = false);
 
 		bool parseInfoFile(const std::string &filename);
 
@@ -94,12 +94,9 @@ class TemplateInterpreter
 		}
 		std::string templateDoc() const { return m_templateDoc; }
 
-		void setSourceDirectory(const std::string &dir) {
-			m_source_dir = dir;
-		}
-		void setOutputDirectory(const std::string &dir) {
-			m_out_dir = dir;
-		}
+		void setSourceDirectory(const std::string &dir);
+		void setOutputDirectory(const std::string &dir);
+
 		void interpretTaskFile(const std::string& infile, std::string outfile);
 		void interpretServiceFile(const std::string& infile, std::string outfile);
 		void interpretFile(const std::string& infile, std::string outfile = std::string());
@@ -113,7 +110,6 @@ class TemplateInterpreter
 		void interpretFileInternal(const std::string &infile, const std::string &outfile);
 
 	private:
-		std::string m_args;
 		Interpreter *m_interpreter;
 		std::string m_language;
 		Component *m_component;

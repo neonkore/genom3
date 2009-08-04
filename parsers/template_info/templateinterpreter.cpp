@@ -80,8 +80,8 @@ int create_file_dir(std::string filename)
 	return safe_mkdir(dir);
 }
 
-TemplateInterpreter::TemplateInterpreter(string args, bool parseOnly)
-: m_args(args), m_interpreter(0), m_component(0), m_verboseLexing(false)
+TemplateInterpreter::TemplateInterpreter(bool parseOnly)
+: m_interpreter(0), m_component(0), m_verboseLexing(false)
 , m_verboseParsing(false), m_parseOnly(parseOnly)
 {}
 
@@ -288,16 +288,25 @@ void TemplateInterpreter::setLanguage(const std::string &lang)
 
 void TemplateInterpreter::setInterpreter(G3nom::Interpreter* i)
 {
-	if(!m_interpreter) // first time we set the interpreter, register component
-		i->start(m_component, m_args);
 	m_interpreter = i;
 }
 
 void TemplateInterpreter::setComponent(Component *c) 
 {
 	m_component = c;
-	if(m_interpreter)
-		m_interpreter->start(c, m_args);
+	Config::getInstance()->setComponent(c);
+}
+
+void TemplateInterpreter::setSourceDirectory(const std::string &dir) 
+{
+	m_source_dir = dir;
+	Config::getInstance()->setTemplateDir(dir);
+}
+
+void TemplateInterpreter::setOutputDirectory(const std::string &dir) 
+{
+	m_out_dir = dir;
+	Config::getInstance()->setOutputDir(dir);
 }
 
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

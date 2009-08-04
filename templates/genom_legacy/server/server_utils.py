@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from string import upper
 
+comp = Config.getInstance().component()
+
 # copy some elements to not modify the ast
 #servicesMap = comp.servicesMap()
 servicesDict = dict()
@@ -734,13 +736,13 @@ abortRequestNum = nbServices;
 internalDataType = MapTypeToC(IDSType,True)
 periodicFlag = is_periodic()
   
-if "openprs" in argv:
+if "openprs" in Config.getInstance().cmdLineArgs():
   shouldGenerateOpenPRS = "" #
   sys.stderr.write("Generating the OpenPRS code in server/openprs\n")
 else:
   shouldGenerateOpenPRS = "#"  # do not generate openrps related code
 
-if "tcl" in argv:
+if "tcl" in Config.getInstance().cmdLineArgs():
   shouldGenerateTcl = ""
   sys.stderr.write("Generating the tcl client code in server/tcl\n")
 else:

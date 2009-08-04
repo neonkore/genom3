@@ -51,9 +51,8 @@ int main(int argc, char* argv[])
 	string templatesDir("/home/ccpasteur/work/git/g3nom/templates/");
 	string templ("genom_legacy");
 
-	string outputDir, args;
+	string outputDir;
 	bool checkSyntaxMode = false;
-	bool templateHelpMode = false;
 
 	int idx = 1;
 	while ((idx < argc) && (argv[idx][0]=='-')) {
@@ -65,10 +64,9 @@ int main(int argc, char* argv[])
 		} else if(sw == "-s") {
 			checkSyntaxMode = true;
 		} else if(sw == "-ht") {
-			templateHelpMode = true;
 			templ = argv[++idx];
 			
-			TemplateInterpreter ti("", true);
+			TemplateInterpreter ti(true);
 			string sourceDir = templatesDir + templ + "/";
 			ti.parseInfoFile(sourceDir + "template.info");
 
@@ -78,9 +76,9 @@ int main(int argc, char* argv[])
 		} else if(sw == "-u" || sw == "--help" || sw == "-h") {
 			cout << usage_str << endl;
 			exit(0);
-		} else {
-			args.append(" ").append(sw.substr(1));
-		}
+		} else 
+			Config::getInstance()->cmdLineArgs().push_back(sw.substr(1));
+
 		idx++;
 	}
 
@@ -90,7 +88,7 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	TemplateInterpreter ti(args);
+	TemplateInterpreter ti;
 	ti.setPrintGeneratedFile(false);
 	string sourceDir = templatesDir + templ + "/";
 

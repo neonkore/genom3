@@ -102,3 +102,7 @@ task:
   "codels/execTaskCodels.c" -> "codels/$component$$task$Codels.c"
 /*  "codels/userExecTaskCodels.c" -> "codels/$component$User$task$Codels.c" */
 ;
+
+requires:
+  "post_install.py"
+;

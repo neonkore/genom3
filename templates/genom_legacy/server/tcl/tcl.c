@@ -1,5 +1,47 @@
 <?
 def parseInput(inputType, name):
+  if inputType.kind() == IdlType.Array: 
+    a = inputType.asArrayType()
+    loopName = counter_name(name)
+    ?>
+   {
+      int <!loopName!>[<!len(a.bounds())!>];
+<?
+    loopSubscript = ""
+    for i in range(len(a.bounds())): 
+      loopSubscript += "[" + loopName + "[" + str(i) +"]]"
+      ?>
+      for(<!loopName!>[<!i!>]=0; <!loopName!>[<!i!>] < <!a.bounds()[i]!>; <!loopName!>[<!i!>]++) {
+<?
+    flatListArray = flat_struct(a.type(), name + loopSubscript, ".")
+    for x in flatListArray:
+      parseInput(x[0], x[1])
+    ?>
+<?
+    for i in range(len(a.bounds())): ?>
+      }
+<?
+    ?>
+   }
+<?
+    return
+
+  if inputType.kind() == IdlType.Sequence: 
+    a = inputType.asSequenceType()
+    ?>
+   {
+      int loop1[1];
+      for(loop1[0]=0; loop1[0] < <!a.bound()!>; loop1[0]++) {
+<?
+    flatListArray = flat_struct(a.seqType(), name + ".data[loop1[0]]", ".")
+    for x in flatListArray:
+      parseInput(x[0], x[1])
+    ?>
+      }
+   }
+<?
+    return
+
   if inputType.kind() == IdlType.Short: ?>
   {
     int tmpInt;
@@ -52,16 +94,26 @@ def parseInput(inputType, name):
 def processOutput(type, name, allocFlag = False):
   if type.kind() == IdlType.Array: 
     a = type.asArrayType()
+    loopName = counter_name(name)
     ?>
    {
-      int loop1[<!len(a.bounds())!>];
-      for(loop1[0]=0; loop1[0] < <!a.bounds()[0]!>; loop1[0]++) {
+      int <!loopName!>[<!len(a.bounds())!>];
 <?
-    flatListArray = flat_struct(a.type(), name + "[loop1[0]]", ".")
+    loopSubscript = ""
+    for i in range(len(a.bounds())): 
+      loopSubscript += "[" + loopName + "[" + str(i) +"]]"
+      ?>
+      for(<!loopName!>[<!i!>]=0; <!loopName!>[<!i!>] < <!a.bounds()[i]!>; <!loopName!>[<!i!>]++) {
+<?
+    flatListArray = flat_struct(a.type(), name + loopSubscript, ".")
     for x in flatListArray:
       processOutput(x[0], x[1], allocFlag)
     ?>
+<?
+    for i in range(len(a.bounds())): ?>
       }
+<?
+    ?>
    }
 <?
     return

@@ -67,7 +67,7 @@ int scan_<!prefix!>( FILE *in, FILE *out,
     fprintf(out, "%s<!m.key!><!a.printBounds()!>:\n", indstr);
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
       if (scan_<!type_proto_prefix(a.type())!>(in, out, (<!MapTypeToC(a.type(), True)!> *)(x+elt)-><!m.key!>, 
-                     indent, 1, dims) == ABORT) {
+                     indent, <!len(a.bounds())!>, dims) == ABORT) {
       free (indstr);
       return ABORT; } }
 <?

@@ -66,7 +66,7 @@ void print_<!prefix!>( FILE *out,
 		?>
     fprintf(out, "%s<!m.key!><!a.printBounds()!>:\n", indstr);
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      print_<!type_proto_prefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
+      print_<!type_proto_prefix(a.type())!>(out, (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, <!len(a.bounds())!>, dims, in); }
 <?
 	    elif m.data.kind() == IdlType.Sequence:
 		seq = m.data.asSequenceType()

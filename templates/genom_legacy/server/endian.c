@@ -54,7 +54,7 @@ void endianswap_<!prefix!>(<!MapTypeToC(t,True)!> *x, int nDim, int *dims)
 		  dims += str(n) + ", "
 		?>  
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      endianswap_<!type_proto_prefix(a.type())!>((<!MapTypeToC(a.type(), True)!> *)((x+elt)-><!m.key!>), 1, dims); }
+      endianswap_<!type_proto_prefix(a.type())!>((<!MapTypeToC(a.type(), True)!> *)((x+elt)-><!m.key!>), <!len(a.bounds())!>, dims); }
 <?
 	  elif m.data.kind() == IdlType.Sequence:
 		seq = m.data.asSequenceType()

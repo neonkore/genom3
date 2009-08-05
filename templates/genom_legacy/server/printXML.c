@@ -64,7 +64,7 @@ void printXML_<!prefix!>( FILE *out, char *name,
 		  dims += str(n) + ", "
 		?>
     { int dims[<!len(a.bounds())!>] = {<!dims[:-2]!>};
-      printXML_<!type_proto_prefix(a.type())!>(out, "<!m.key!>", (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, 1, dims, in); }
+      printXML_<!type_proto_prefix(a.type())!>(out, "<!m.key!>", (<!MapTypeToC(a.type(), True)!>*)((x+elt)-><!m.key!>), indent, <!len(a.bounds())!>, dims, in); }
 <?
 	    elif m.data.kind() == IdlType.Sequence:
 		seq = m.data.asSequenceType()

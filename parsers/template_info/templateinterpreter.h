@@ -109,6 +109,9 @@ class TemplateInterpreter
 
 		void interpretFileInternal(const std::string &infile, const std::string &outfile);
 
+		std::string tmpFile(std::string outfile, std::string suffix = std::string());
+		bool needsMerge(std::string outfile);
+
 	private:
 		Interpreter *m_interpreter;
 		std::string m_language;

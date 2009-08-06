@@ -46,6 +46,9 @@
 #include "parsers/template_info/parser.hpp"
 #include "bindings/python/pythoninterpreter.h"
 #include "bindings/tcl/tclinterpreter.h"
+#include "../genom/pstream.h"
+
+#define GENOM_DIR ".g3nom"
 
 using namespace G3nom;
 using namespace std;
@@ -164,9 +167,6 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
 		return;
   
 	string s;
-	// create subdir if necessary
-	create_file_dir(outfile);
-
 	ofstream out(outfile.c_str());
 
 	if (!out.is_open()) {
@@ -216,6 +216,23 @@ void TemplateInterpreter::interpretFileInternal(const std::string &infile, const
  	out << m_interpreter->interpret(s);
 }
 
+std::string TemplateInterpreter::tmpFile(std::string outfile, std::string suffix)
+{
+	return GENOM_DIR + string("/") + outfile + suffix;
+}
+
+bool TemplateInterpreter::needsMerge(std::string outfile)
+{
+	struct stat outstat, tmpstat;
+	string tmp = m_out_dir + tmpFile(outfile);
+	outfile = m_out_dir + outfile;
+
+	if(stat(outfile.c_str(), &outstat) == -1 || stat(tmp.c_str(), &tmpstat) == -1)
+		return false;
+
+	return outstat.st_mtim.tv_sec > tmpstat.st_mtim.tv_sec;
+}
+
 void TemplateInterpreter::interpretFile(const std::string &infile, std::string outfile)
 {
 	if(!m_component || m_parseOnly)
@@ -229,8 +246,41 @@ void TemplateInterpreter::interpretFile(const std::string &infile, std::string o
 	if(idx != string::npos)
 		o = o.replace(idx, 2, m_component->name());
 
+	bool merge = needsMerge(o);
+	string newFile = m_out_dir + tmpFile(o);
+	string oldFile = m_out_dir + tmpFile(o, ".old");
+	o = m_out_dir + o;
+
+	// create subdir if necessary
+	create_file_dir(o);
+	create_file_dir(newFile);
+
+	// backup the old generated file
+	if(merge) {
+		string cmd = "mv " + newFile + " " + oldFile; 
+		system(cmd.c_str());
+	}
+
+	// generate the new file in a tmp dir
 	cout << "Interpreting file from " << m_source_dir << infile << " to " << m_out_dir << o << endl;
-	interpretFileInternal(m_source_dir + infile, m_out_dir + o);
+	interpretFileInternal(m_source_dir + infile, newFile);
+
+	// copy the new file to the correct dir, merging if necessary
+	if(merge) {
+		cout << "File " << o << " was modified. Trying to merge changes." << endl;
+		string cmd = "git merge-file " + o + " " + oldFile + " " + newFile;
+		system(cmd.c_str());
+		cmd = "rm " + oldFile;
+		system(cmd.c_str());
+		cmd = "touch " + newFile;
+		system(cmd.c_str());
+	} else {
+		string cmd = "cp " + newFile + " " + o;
+		system(cmd.c_str());
+	}
+
+	string cmd = "touch " + newFile;
+	system(cmd.c_str()); // make sure that tmp file is newer than generated file
 }
 
 void TemplateInterpreter::interpretServiceFile(const std::string &infile, std::string outfile)

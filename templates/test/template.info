@@ -1,0 +1,12 @@
+name: "Test template";
+doc: 
+" Test
+Test
+";
+
+language: Python;
+
+main:
+  "file1"
+  "dir1/file1"
+;

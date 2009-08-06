@@ -1,0 +1,12 @@
+ 
+Static part
+
+<?
+for i in range(3):
+  ?>
+int mydynamic<!i!>()
+{
+
+}
+<?
+?>

@@ -45,7 +45,7 @@
 #include "parsers/template_info/lexer.h"
 #include "parsers/template_info/parser.hpp"
 #include "bindings/python/pythoninterpreter.h"
-#include "bindings/tcl/tclinterpreter.h"
+#include "bindings/swig/tclinterpreter.h"
 #include "../genom/pstream.h"
 
 #define GENOM_DIR ".g3nom"

@@ -46,6 +46,11 @@ int main(int argc, char* argv[])
 		"  -h Display this help message\n"
 		"  -ht template Display help message regarding a specific template (including options for this template)"
 		"  -d Display debug information\n"
+		"  -t Set the template to use. This can be either a path ato a directory containing a template.info file\n"
+		" or an installed template name (this will be appended to the template base dir which\n"
+		" is currently hardcoded in the app) (Supported templates: genom_legacy (default), yarp, openRTM)"
+		"  -o Sets the directory where to output files. By default, files will be put in the same directory "
+		"as the .gnm file"
 		"  -s Do not generate anything, only check the .gnm syntax");
 
 	string templatesDir("/home/ccpasteur/work/git/g3nom/templates/");
@@ -69,10 +74,13 @@ int main(int argc, char* argv[])
 			checkSyntaxMode = true;
 		} else if(sw == "-ht") {
 			templ = argv[++idx];
+			if(templ.find('/') == string::npos)
+				sourceDir = templatesDir + templ + "/";
+			else 
+				sourceDir = templ;
 			
 			TemplateInterpreter ti(true);
-			string sourceDir = templatesDir + templ + "/";
-			ti.parseInfoFile(sourceDir + "template.info");
+			ti.parseInfoFile(sourceDir + "/template.info");
 
 			cout << "Name: " << ti.templateName() << endl;
 			cout << "Doc: " << endl << ti.templateDoc() << endl;

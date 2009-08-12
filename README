@@ -15,7 +15,7 @@ Python binding:
 
 Tcl binding:
 * Tcl8 libs
-* SWIG (>= 1.3)  (Tcl binding)
+* SWIG (>= 1.3.39)  (Tcl binding)
 
 INSTALL
 

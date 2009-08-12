@@ -32,7 +32,7 @@
 // #include <libgen.h>
 
 #include "parsers/template_info/templateinterpreter.h"
-#include "bindings/tcl/tclinterpreter.h"
+#include "bindings/swig/tclinterpreter.h"
 #include "bindings/python/pythoninterpreter.h"
 #include "parsers/genom/driver.h"
 

@@ -80,7 +80,10 @@ int main(int argc, char* argv[])
 				sourceDir = templ;
 			
 			TemplateInterpreter ti(true);
-			ti.parseInfoFile(sourceDir + "/template.info");
+			if(!ti.parseInfoFile(sourceDir + "/template.info")) {
+				cout << "Error parsing template at " << sourceDir << endl;
+				exit(1);
+			}
 
 			cout << "Name: " << ti.templateName() << endl;
 			cout << "Doc: " << endl << ti.templateDoc() << endl;
@@ -122,7 +125,10 @@ int main(int argc, char* argv[])
 	ti.setSourceDirectory(sourceDir);
 	ti.setOutputDirectory(outputDir);
 
-	ti.parseInfoFile(sourceDir + "/template.info");
+	if(!ti.parseInfoFile(sourceDir + "/template.info")) {
+		cout << "Error parsing template at " << sourceDir << endl;
+		exit(1);
+	}
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

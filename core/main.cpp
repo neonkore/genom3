@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 	string templatesDir("/home/ccpasteur/work/git/g3nom/templates/");
 	string templ("genom_legacy");
 
-	string outputDir;
+	string sourceDir, outputDir;
 	bool checkSyntaxMode = false;
 
 	int idx = 1;
@@ -61,6 +61,10 @@ int main(int argc, char* argv[])
 			outputDir = argv[++idx];
 		} else if(sw == "-t") {
 			templ = argv[++idx];
+			if(templ.find('/') == string::npos)
+				sourceDir = templatesDir + templ + "/";
+			else 
+				sourceDir = templ;
 		} else if(sw == "-s") {
 			checkSyntaxMode = true;
 		} else if(sw == "-ht") {
@@ -90,7 +94,6 @@ int main(int argc, char* argv[])
 
 	TemplateInterpreter ti;
 	ti.setPrintGeneratedFile(false);
-	string sourceDir = templatesDir + templ + "/";
 
 	Driver d;
 	if (!d.parseFile(argv[idx])) {
@@ -111,7 +114,7 @@ int main(int argc, char* argv[])
 	ti.setSourceDirectory(sourceDir);
 	ti.setOutputDirectory(outputDir);
 
-	ti.parseInfoFile(sourceDir + "template.info");
+	ti.parseInfoFile(sourceDir + "/template.info");
 	return 0;
 }
 // kate: indent-mode cstyle; replace-tabs off; tab-width 4;  replace-tabs off;

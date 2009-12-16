@@ -1,0 +1,13 @@
+#
+# GenoM pkg-config file
+#
+Name: genom3
+Description: Generator of robotic Modules
+Version: @VERSION@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+GENOM_TOOL=${exec_prefix}/@GENOM_TOOL@

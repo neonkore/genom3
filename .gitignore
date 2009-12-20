@@ -1,6 +1,7 @@
 Makefile.in
 Makefile
 aclocal.m4
+acgenom.h.in
 autom4te.cache
 build*
 config.guess
@@ -10,4 +11,5 @@ depcomp
 install-sh
 ltmain.sh
 missing
+ylwrap
 *~

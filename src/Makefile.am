@@ -21,4 +21,9 @@ bin_PROGRAMS=\
 	genom3
 
 genom3_SOURCES=\
-	main.c
+	main.c		\
+	cpp.c		\
+	dotgen.y	\
+	dotgen.l
+
+genom3_YFLAGS= -d

@@ -37,6 +37,9 @@ extern struct runopt_s {
   int cppdotgen;	/** cpp accepts .gen file extension */
 } runopt;
 
+/** hash tables */
+typedef struct hash_s *hash_s;
+typedef struct hentry_s *hentry_s;
 
 void	xwarnx(const char *fmt, ...);
 
@@ -45,5 +48,15 @@ int	cpp_optrm(int index);
 int	cpp_invoke(const char *in, int out);
 int	cpp_wait(void);
 
+hash_s	hash_create(const char *name, int entries);
+void	hash_destroy(hash_s h);
+int	hash_insert(hash_s h, const char *key, void *value,
+		void (*release)(void *));
+int	hash_remove(hash_s h, const char *key);
+void *	hash_find(hash_s h, const char *key);
+void	hash_pstat(hash_s h);
+
+char *	string(const char *s);
+void	string_usage(void);
 
 #endif /* H_GENOM */

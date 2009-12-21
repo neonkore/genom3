@@ -23,6 +23,16 @@
  */
 %{
 #include "acgenom.h"
+
+#define YYLTYPE	dotgenloc
+
+#define YYLLOC_DEFAULT(c, rhs, n)		\
+  do {						\
+    (c).file = YYRHSLOC(rhs, (n)?1:0).file;	\
+    (c).line = YYRHSLOC(rhs, (n)?1:0).line;	\
+    (c).col = YYRHSLOC(rhs, (n)?1:0).col;	\
+  } while (0)
+
 %}
 
 %name-prefix "dotgen"
@@ -30,19 +40,72 @@
 %locations
 
 %code provides {
+  typedef struct dotgenloc {
+    char *file;
+    int line, col;
+  } dotgenloc;
+
+  extern YYLTYPE curloc;
+
   extern int dotgenlex(YYSTYPE *lvalp, YYLTYPE *llocp);
   extern void dotgenerror(const char *msg);
 }
+
+%union {
+  int	i;
+  char *s;
+}
+
+%token <i>	PRAGMA
+%token <i>	INTEGER_LIT
+%token <s>	STRING_LIT IDENTIFIER
+
+%type <i>	spec statement cpphash
 
 %start spec
 
 %%
 
-spec: error
-{
-  YYABORT;
-};
+spec: statement | spec statement;
 
+statement:
+  cpphash
+  | error
+  {
+    YYABORT;
+  }
+;
+
+
+/* --- # directives from cpp ----------------------------------------------- */
+
+cpphash:
+  '#' INTEGER_LIT STRING_LIT '\n'
+  {
+    curloc.file = $3;
+    curloc.line = $2;
+    curloc.col = 1;
+  }
+  | '#' INTEGER_LIT STRING_LIT INTEGER_LIT '\n'
+  {
+    curloc.file = $3;
+    curloc.line = $2;
+    curloc.col = 1;
+  }
+  | '#' PRAGMA IDENTIFIER error '\n'
+  {
+    /* idlerParseError(spec, &$<noval>1.p, IDLER_E_WARNING, */
+    /* 		    "ignoring pragma: %s", $3.v); */
+    /* idlerObjectUnref(spec, $3.v); */
+    yyerrok;
+  }
+  | '#' error '\n'
+  {
+    /* idlerParseError(spec, &$<noval>1.p, IDLER_E_WARNING, */
+    /* 		    "unknown # directive"); */
+    yyerrok;
+  }
+;
 
 %%
 

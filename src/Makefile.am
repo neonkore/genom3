@@ -23,6 +23,8 @@ bin_PROGRAMS=\
 genom3_SOURCES=\
 	main.c		\
 	cpp.c		\
+	hash.c		\
+	string.c	\
 	dotgen.y	\
 	dotgen.l
 

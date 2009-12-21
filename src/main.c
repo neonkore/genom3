@@ -162,8 +162,10 @@ main(int argc, char *argv[])
     if (!status) status = s;
   }
 
-  /* clean up */
 done:
+  if (runopt.verbose) string_usage();
+
+  /* clean up */
   rmrfdir(runopt.tmpdir);
   return status;
 }

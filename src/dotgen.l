@@ -32,8 +32,15 @@
 
 #include <string.h>
 
+#include "genom.h"
+
+#define YYLTYPE	dotgenloc
+
 #include "genom3-dotgen.h"
 
+   YYLTYPE curloc = { .file = NULL, .line = 1, .col = 1 };
+
+#define YY_USER_ACTION  curloc.col += yyleng;
 %}
 
 intsuffix	([uU][lL]?)|([lL][uU]?)
@@ -44,8 +51,52 @@ floatsuffix	[fFlL]
 stringtext	([^\"])|(\\.)
 chartext	([^\'])|(\\.)
 
+%s HASH
+
 %%
 
-"."		return yytext[0];
+%{
+  *yylloc_param = curloc;
+%}
+
+ /* ignore whitespace, as in any decent language. */
+<INITIAL>"\n"	{ curloc.line++; curloc.col = 1; }
+[\t\f\v\r ]+	{ *yylloc_param = curloc;  }
+
+ /* C preprocessor output */
+"#"		{ BEGIN(HASH); return '#'; }
+<HASH>"\n"	{ BEGIN(INITIAL); curloc.line++; curloc.col = 1; return '\n'; }
+<HASH>"pragma"	{ return PRAGMA; }
+
+ /* integers literals */
+"0"[xX][0-9a-fA-F]+{intsuffix}? {
+  char *end;
+  yylval->i = strtol(yytext, &end, 0);
+  return INTEGER_LIT;
+}
+"0"[0-7]+{intsuffix}? {
+  char *end;
+  yylval->i = strtol(yytext, &end, 0);
+  return INTEGER_LIT;
+}
+[0-9]+{intsuffix}? {
+  char *end;
+  yylval->i = strtol(yytext, &end, 0);
+  return INTEGER_LIT;
+}
+
+ /* string literals */
+"\""{stringtext}*"\"" {
+  /* remove quotes */
+  yytext[yyleng-1] = '\0';
+  yylval->s = string(yytext + 1);
+  return STRING_LIT;
+}
+
+ /* identifiers */
+[A-Za-z_][A-Za-z0-9_]* {
+  yylval->s = string(yytext);
+  return IDENTIFIER;
+}
 
 %%

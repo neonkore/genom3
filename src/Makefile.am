@@ -24,6 +24,8 @@ genom3_SOURCES=\
 	main.c		\
 	cpp.c		\
 	hash.c		\
+	scope.c		\
+	idltype.c	\
 	string.c	\
 	dotgen.y	\
 	dotgen.l

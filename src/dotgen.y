@@ -24,7 +24,11 @@
 %{
 #include "acgenom.h"
 
-#define YYLTYPE	dotgenloc
+#include <assert.h>
+
+#include "genom.h"
+
+#define YYLTYPE	tloc
 
 #define YYLLOC_DEFAULT(c, rhs, n)		\
   do {						\
@@ -40,11 +44,6 @@
 %locations
 
 %code provides {
-  typedef struct dotgenloc {
-    char *file;
-    int line, col;
-  } dotgenloc;
-
   extern YYLTYPE curloc;
 
   extern int dotgenlex(YYSTYPE *lvalp, YYLTYPE *llocp);
@@ -56,10 +55,12 @@
   double	d;
   char		c;
   char *	s;
+  scope_s	scope;
 }
 
 %token <i>	PRAGMA
 %token <i>	COLONCOLON SL SR
+%token <i>	MODULE
 %token <i>	UNSIGNED SHORT LONG FIXED FLOAT DOUBLE CHAR WCHAR STRING
 %token <i>	WSTRING BOOLEAN OCTET OBJECT ANY VOID PROPERTY
 %token <i>	CONST NATIVE ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
@@ -72,7 +73,9 @@
 %token <s>	STRING_LIT IDENTIFIER
 
 %type <i>	spec statement
-%type <s>	type_dcl constr_type_spec constr_type enum_type enumerator_list enumerator
+%type <i>	module type_dcl
+%type <s>	constr_type_spec constr_type enum_type enumerator_list enumerator
+%type <scope>	scope_push_module
 %type <i>	cpphash
 
 %start spec
@@ -82,10 +85,64 @@
 spec: statement | spec statement;
 
 statement:
-  cpphash
+    module ';'
+  | cpphash
   | error
   {
-    YYABORT;
+    parserror(@1, "raah");
+  }
+;
+
+/* --- modules ------------------------------------------------------------- */
+
+/** modules are IDL namespaces */
+
+module:
+   MODULE scope_push_module '{' spec '}'
+   {
+     scope_s s = scope_pop();
+
+     assert(s == $2);
+     if (scope_name(s)[0] == '&') {
+       /* there was an error during the creation of the scope. We just
+	* delete it here with no warning, since the error has already
+	* been reported. */
+       scope_destroy(s);
+     }
+   }
+   | MODULE scope_push_module '{' '}'
+   {
+     scope_s s = scope_pop();
+
+     assert(s == $2);
+     if (scope_name(s)[0] == '&') {
+       /* there was an error during the creation of the scope. We just
+	* delete it here with no warning, since the error has already
+	* been reported. */
+       scope_destroy(s);
+     } else
+       parsewarning(@1, "empty module '%s'", scope_name(s));
+   }
+;
+
+
+/* --- scopes -------------------------------------------------------------- */
+
+/* scopes are created as a side effect of certain declarations (modules,
+ * interfaces, ...) or types (structures, unions, ...) */
+
+scope_push_module: IDENTIFIER
+  {
+    $$ = scope_push(@1, $1);
+    if (!$$) {
+      /* on error, still create a scope to continue the parsing
+       * but with a special name -- it will be deleted afterwards */
+      $$ = scope_push(@1, strings("&", $1, NULL));
+      if (!$$) {
+	/* still failed, just resign */
+	YYABORT;
+      }
+    }
   }
 ;
 

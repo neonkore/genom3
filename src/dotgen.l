@@ -46,11 +46,11 @@
      }									\
    } while(result < 0)
 
-#define YYLTYPE	dotgenloc
+#define YYLTYPE	tloc
 
 #include "genom3-dotgen.h"
 
-   YYLTYPE curloc = { .file = NULL, .line = 1, .col = 1 };
+   YYLTYPE curloc = { .file = NULL, .line = 1, .col = 0 };
 
 #define YY_USER_ACTION  curloc.col += yyleng;
 %}
@@ -72,7 +72,7 @@ chartext	([^\'])|(\\.)
 %}
 
  /* ignore whitespace, as in any decent language. */
-<INITIAL>"\n"	{ curloc.line++; curloc.col = 1; }
+<INITIAL>"\n"	{ curloc.line++; curloc.col = 0; *yylloc_param = curloc; }
 [\t\f\v\r ]+	{ *yylloc_param = curloc;  }
 
  /* special characters */
@@ -92,10 +92,12 @@ chartext	([^\'])|(\\.)
 
  /* C preprocessor output */
 "#"		{ BEGIN(HASH); return '#'; }
-<HASH>"\n"	{ BEGIN(INITIAL); curloc.line++; curloc.col = 1; return '\n'; }
+<HASH>"\n"	{ BEGIN(INITIAL); curloc.line++; curloc.col = 0; return '\n'; }
 <HASH>"pragma"	{ return PRAGMA; }
 
  /* IDL related keywords */
+"module"	{ return MODULE; }
+
 "unsigned"	{ return UNSIGNED; }
 "short"		{ return SHORT; }
 "long"		{ return LONG; }
@@ -193,9 +195,9 @@ chartext	([^\'])|(\\.)
 
  /* errors */
 . {
-   warnx("%s:%d:%d: unexpected character `%c'",
-	 curloc.file, curloc.line, curloc.col, yytext[0]);
-   *yylloc_param = curloc;
+  parserror(curloc, "unexpected character `%c', column %d",
+	    yytext[0], curloc.col);
+  *yylloc_param = curloc;
 }
 
 %%

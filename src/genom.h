@@ -37,11 +37,6 @@ extern struct runopt_s {
   int cppdotgen;	/** cpp accepts .gen file extension */
 } runopt;
 
-/** hash tables */
-typedef struct hash_s *hash_s;
-typedef struct hentry_s *hentry_s;
-
-int	dotgenparse(void);
 void	xwarnx(const char *fmt, ...);
 
 int	cpp_optappend(const char *opt, int index);
@@ -49,15 +44,65 @@ int	cpp_optrm(int index);
 int	cpp_invoke(const char *in, int out);
 int	cpp_wait(void);
 
+
+/* --- parers -------------------------------------------------------------- */
+
+typedef struct tloc {
+  char *file;
+  int line, col;
+} tloc;
+
+int	dotgenparse(void);
+void	parserror(tloc l, const char *fmt, ...);
+void	parsenoerror(tloc l, const char *fmt, ...);
+void	parsewarning(tloc l, const char *fmt, ...);
+
+
+/* --- hash tables --------------------------------------------------------- */
+
+typedef struct hash_s *hash_s;
+typedef struct hentry_s *hentry_s;
+typedef struct hiter {
+  hentry_s current;
+  const char *key;
+  void *value;
+} hiter;
+
 hash_s	hash_create(const char *name, int entries);
 void	hash_destroy(hash_s h);
 int	hash_insert(hash_s h, const char *key, void *value,
 		void (*release)(void *));
 int	hash_remove(hash_s h, const char *key);
 void *	hash_find(hash_s h, const char *key);
+int	hash_first(hash_s h, hiter *i);
+int	hash_next(hiter *i);
 void	hash_pstat(hash_s h);
 
+
+/* --- scopes -------------------------------------------------------------- */
+
+typedef struct scope_s *scope_s;
+
+const char *	scope_name(scope_s s);
+scope_s		scope_current(void);
+scope_s		scope_push(tloc l, const char *name);
+scope_s		scope_pop(void);
+int		scope_pushglobal(void);
+void		scope_destroy(scope_s s);
+
+
+/* --- IDL types ----------------------------------------------------------- */
+
+typedef struct idltype_s *idltype_s;
+
+tloc		type_loc(idltype_s t);
+const char *	type_name(idltype_s t);
+
+
+/* --- strings ------------------------------------------------------------- */
+
 char *	string(const char *s);
+char *	strings(const char *src, ...);
 void	string_usage(void);
 
 #endif /* H_GENOM */

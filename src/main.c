@@ -182,13 +182,13 @@ main(int argc, char *argv[])
 
   cpp_invoke(runopt.input, pipefd[1]);
 
-  /* fcntl(dotgenfd, F_SETFL, O_NONBLOCK); */
-  s = dotgenparse();
+  s = scope_pushglobal();
+  if (!s) s = dotgenparse();
 
   status = cpp_wait();
-  if (s) {
-    warnx("there were parse errors");
-    if (!status) status = s;
+  if (s || nerrors) {
+    warnx(s?"fatal errors":"%d errors", nerrors);
+    if (!status) status = s?s:nerrors;
   }
 
 done:
@@ -224,16 +224,23 @@ xwarnx(const char *fmt, ...)
  */
 
 static void
-parsemsg(tloc l, const char *pfix, const char *fmt, ...)
+parsemsg(tloc l, const char *pfix, const char *fmt, va_list va)
 {
   char *f = basename(l.file);
+
+  fprintf(stderr, "%s:%d:%s%s ", f, l.line, pfix?pfix:"", pfix?":":"");
+  vfprintf(stderr, fmt, va);
+  fprintf(stderr, "\n");
+}
+
+void
+parsenoerror(tloc l, const char *fmt, ...)
+{
   va_list va;
 
-  fprintf(stderr, "%s:%d:%s%s", f, l.line, pfix?pfix:"", pfix?":":"");
   va_start(va, fmt);
-  vfprintf(stderr, fmt, va);
+  parsemsg(l, NULL, fmt, va);
   va_end(va);
-  fprintf(stderr, "\n");
 }
 
 void

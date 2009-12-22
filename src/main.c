@@ -48,6 +48,9 @@ static int	rmrfdir(const char *path);
 /** runtime options */
 struct runopt_s runopt;
 
+/** dotgen file descriptor */
+int dotgenfd;
+
 
 /* --- main ---------------------------------------------------------------- */
 
@@ -64,8 +67,6 @@ main(int argc, char *argv[])
     { NULL,		0,			NULL,			0 }
   };
 
-  extern int dotgenparse(void);
-  extern FILE *dotgenin;
   extern char *optarg;
   extern int optind;
   char *argv0 = argv[0];
@@ -74,6 +75,8 @@ main(int argc, char *argv[])
   int c, s;
 
   /* set default options */
+  runopt.input[0] = '\0';
+
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
 
@@ -85,11 +88,30 @@ main(int argc, char *argv[])
 #else
   runopt.cppdotgen = 0;
 #endif
+  s = cpp_optappend("-D__GENOM__=" PACKAGE_VERSION, -1);
+  if (s < 0) {
+    warnx("cannot set default cpp options");
+    exit(2);
+  }
 
   /* parse command line options */
-  while ((c = getopt_long(argc, argv, "EvT:rh", opts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "ID:EvT:rh", opts, NULL)) != -1)
     switch (c) {
       case 0: break;
+
+      case 'I':
+      case 'D': {
+	char opt[PATH_MAX];
+
+	opt[0] = '-'; opt[1] = c; opt[2] = 0;
+	strlcat(opt, optarg, sizeof(opt));
+	s = cpp_optappend(opt, -1);
+	if (s < 0) {
+	  warnx("cannot set cpp option `%s'", opt);
+	  exit(2);
+	}
+	break;
+      }
 
       case 'T':
 	strlcpy(runopt.tmpdir, optarg, sizeof(runopt.tmpdir));
@@ -153,9 +175,13 @@ main(int argc, char *argv[])
     warn("cannot create a pipe to cpp:");
     status = 2; goto done;
   }
-  dotgenin = fdopen(pipefd[0], "r");
+  dotgenfd = pipefd[0];
+
   cpp_invoke(runopt.input, pipefd[1]);
+
+  /* fcntl(dotgenfd, F_SETFL, O_NONBLOCK); */
   s = dotgenparse();
+
   status = cpp_wait();
   if (s) {
     warnx("there were parse errors");
@@ -202,10 +228,12 @@ usage(FILE *channel, char *argv0)
 {
   fprintf(
     channel,
-    "Usage: %s [options] template [template options] file\n"
+    "Usage: %s [options] template [template options] [file]\n"
     "Parses a GenoM component and invokes template for code generation.\n"
     "\n"
     "General options:\n"
+    "  -Idir\t\t\tadd dir to the list of directories searched for headers\n"
+    "  -Dmacro[=value]\tpredefine macro, with given value or 1 by default\n"
     "  -E\t\t\tstop after preprocessing stage\n"
     "  -T,--tmpdir=dir\tuse dir as the directory for temporary files\n"
     "  -r,--rename\t\talways invoke cpp with a .c file linked to input file\n"

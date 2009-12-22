@@ -32,7 +32,7 @@
 
 /* --- local data ---------------------------------------------------------- */
 
-static hash_s strings;
+static hash_s strings = NULL;
 
 
 /* --- string -------------------------------------------------------------- */
@@ -74,5 +74,5 @@ string(const char *src)
 void
 string_usage()
 {
-  hash_pstat(strings);
+  if (strings) hash_pstat(strings);
 }

@@ -41,6 +41,7 @@ extern struct runopt_s {
 typedef struct hash_s *hash_s;
 typedef struct hentry_s *hentry_s;
 
+int	dotgenparse(void);
 void	xwarnx(const char *fmt, ...);
 
 int	cpp_optappend(const char *opt, int index);

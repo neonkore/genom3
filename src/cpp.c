@@ -163,8 +163,17 @@ cpp_invoke(const char *in, int out)
       warnx("cannot link input file to `%s'", file); warn(NULL);
       errno = EIO; goto err;
     }
-
     s = cpp_optappend(file, -1);
+
+    /* add a default -I to the original directory of input */
+    file[0] = '-'; file[1] = 'I'; file[2] = 0;
+    strlcat(file, dirname((char *)in), sizeof(file));
+    s = cpp_optappend(file, noptexec);
+    if (s) {
+      warnx("cannot add search path to input file directory");
+      errno = ENOMEM; goto err;
+    }
+    noptexec++;
   } else
     s = cpp_optappend(in, -1);
   if (s) {
@@ -186,16 +195,21 @@ cpp_invoke(const char *in, int out)
       errno = EAGAIN; goto err;
 
     case 0: /* child */
-      if (dup2(out, fileno(stdout)) < 0) {
-	warnx("unable to set cpp stdout"); warn(NULL);
-	_exit(2);
+      if (out != fileno(stdout)) {
+	if (dup2(out, fileno(stdout)) < 0) {
+	  warnx("unable to set cpp stdout"); warn(NULL);
+	  _exit(2);
+	}
+	close(out);
       }
 
       s = execvp(cppopts[0], cppopts);
       if (s) { warnx("unable to exec '%s'", cppopts[0]); warn(NULL); }
       _exit(127);
 
-    default: /* parent */ break;
+    default: /* parent */
+      if (out != fileno(stdout)) close(out);
+      break;
   }
 
   /* clean up */

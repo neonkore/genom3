@@ -23,7 +23,9 @@
  */
 #include "acgenom.h"
 
+#include <assert.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <err.h>
 
@@ -32,7 +34,7 @@
 
 /* --- local data ---------------------------------------------------------- */
 
-static hash_s strings = NULL;
+static hash_s hstrings = NULL;
 
 
 /* --- string -------------------------------------------------------------- */
@@ -43,15 +45,17 @@ string(const char *src)
   char *v;
   int s;
 
-  if (!strings) {
-    strings = hash_create("strings", 256);
-    if (!strings) {
+  assert(src);
+
+  if (!hstrings) {
+    hstrings = hash_create("strings", 256);
+    if (!hstrings) {
       warnx("memory exhausted, cannot store any string");
       return NULL;
     }
   }
 
-  v = hash_find(strings, src);
+  v = hash_find(hstrings, src);
   if (v) return v;
 
   v = strdup(src);
@@ -59,10 +63,49 @@ string(const char *src)
     warnx("memory exhausted, cannot store a string");
     return NULL;
   }
-  s = hash_insert(strings, src, v, free);
+  s = hash_insert(hstrings, src, v, free);
   if (s) return NULL;
 
   return v;
+}
+
+
+/* --- strings ------------------------------------------------------------- */
+
+/** Concatenate all strings and return the result
+ */
+
+char *
+strings(const char *src, ...)
+{
+  va_list va;
+  const char *p;
+  char *s, *n;
+  int l;
+
+  assert(src);
+  l = strlen(src);
+  s = strdup(src);
+  if (!s) {
+    warnx("memory exhausted, cannot create string");
+    return NULL;
+  }
+  va_start(va, src);
+  while((p = va_arg(va, const char *))) {
+    l += strlen(p);
+    n = realloc(s, l+1);
+    if (!n) {
+      free(s);
+      warnx("memory exhausted, cannot create string");
+      return NULL;
+    }
+    strcat(s = n, p);
+  }
+  va_end(va);
+
+  n = string(s);
+  free(s);
+  return n;
 }
 
 
@@ -74,5 +117,5 @@ string(const char *src)
 void
 string_usage()
 {
-  if (strings) hash_pstat(strings);
+  if (hstrings) hash_pstat(hstrings);
 }

@@ -35,20 +35,26 @@
 
 /** hash table entries */
 struct hentry_s {
-  const char *key;
-  void *value;
-  void (*release)(void *);
+  const char *key;		/**< hash key */
+  void *value;			/**< user data */
+  void (*release)(void *);	/**< function to release user data */
 
-  struct hentry_s *next;
+  struct hentry_s *succ;	/**< next entry in order of insertion */
+  struct hentry_s *pred;	/**< previous entry in order of insertion */
+
+  struct hentry_s *next;	/**< next entry in a bucket */
 };
 
 /** hash table */
 struct hash_s {
-  const char *name;	/** a name, for verbose messages */
-  unsigned int n;	/** number of entries */
+  const char *name;	/**< a name, for verbose messages */
+  unsigned int n;	/**< number of entries */
 
-  unsigned int buckets;	/** number of buckets */
-  hentry_s *bucket;	/** buckets, array of entries */
+  hentry_s first;	/**< first entry in order of insertion */
+  hentry_s last;	/**< last entry in order of insertion */
+
+  unsigned int buckets;	/**< number of buckets */
+  hentry_s *bucket;	/**< buckets, array of entries */
 };
 
 /** expand hash table beyond this number of entries per bucket on average */
@@ -74,6 +80,9 @@ hash_create(const char *name, int entries)
 
   h->name = name;
   h->n = 0;
+  h->first = NULL;
+  h->last = NULL;
+
   h->buckets = entries/hash_maxload + 1;
   if (h->buckets < 1) h->buckets = 1;
   if (h->buckets > 1024) h->buckets = 1024;
@@ -87,7 +96,7 @@ hash_create(const char *name, int entries)
 
 /* --- hash_destroy -------------------------------------------------------- */
 
-/** Delete a hash table and its entries
+/** Delete a hash table and all its entries
  */
 
 void
@@ -126,6 +135,7 @@ hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
 
   if (!h || !key) return EINVAL;
 
+  /* prevent duplicates */
   index = hstring(key) % h->buckets;
   for(e = h->bucket[index]; e; e = e->next)
     if (!strcmp(e->key, key)) {
@@ -133,6 +143,7 @@ hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
       return EEXIST;
     }
 
+  /* create entry */
   e = malloc(sizeof(*e));
   if (!e) return ENOMEM;
   e->key = strdup(key);
@@ -144,6 +155,13 @@ hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
     return ENOMEM;
   }
 
+  /* preserve insertion order information */
+  e->pred = h->last;
+  e->succ = NULL;
+  if (!h->first) h->first = e;
+  if (!h->last) h->last = e; else { h->last->succ = e; h->last = e; }
+
+  /* insert into proper bucket, resizing the hash if needed */
   if (h->n > h->buckets*hash_maxload) {
     hash_expand(h);
     index = hstring(key) % h->buckets;
@@ -170,28 +188,35 @@ hash_remove(hash_s h, const char *key)
 
   if (!h || !key) return EINVAL;
 
+  /* look for entry */
   index = hstring(key) % h->buckets;
+  e = NULL;
   if (!strcmp(h->bucket[index]->key, key)) {
+    /* entry is in first bucket */
     e = h->bucket[index];
     h->bucket[index] = e->next;
-    free((char *)e->key);
-    if (e->release) e->release(e->value);
-    free(e);
-    h->n--;
-    return 0;
   } else
     for(n = h->bucket[index]; n->next; n = n->next)
       if (!strcmp(n->next->key, key)) {
+	/* entry is in random bucket */
 	e = n->next;
 	n->next = e->next;
-	free((char *)e->key);
-	if (e->release) e->release(e->value);
-	free(e);
-	h->n--;
-	return 0;
       }
+  if (!e) return ENOENT;
 
-  return ENOENT;
+  /* preserve insertion order */
+  if (h->first == e) h->first = e->succ;
+  if (h->last == e) h->last = e->pred;
+  if (e->pred) e->pred->succ = e->succ;
+  if (e->succ) e->succ->pred = e->pred;
+
+  /* release entry */
+  free((char *)e->key);
+  if (e->release) e->release(e->value);
+  free(e);
+  h->n--;
+
+  return 0;
 }
 
 

@@ -23,6 +23,7 @@
  */
 #include "acgenom.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -133,7 +134,7 @@ hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
   unsigned long index;
   hentry_s e;
 
-  if (!h || !key) return EINVAL;
+  assert(h); assert(key);
 
   /* prevent duplicates */
   index = hstring(key) % h->buckets;
@@ -186,7 +187,7 @@ hash_remove(hash_s h, const char *key)
   unsigned long index;
   hentry_s e, n;
 
-  if (!h || !key) return EINVAL;
+  assert(h); assert(key);
 
   /* look for entry */
   index = hstring(key) % h->buckets;
@@ -231,7 +232,7 @@ hash_find(hash_s h, const char *key)
   unsigned long index;
   hentry_s e;
 
-  if (!h || !key) return NULL;
+  assert(h); assert(key);
 
   index = hstring(key) % h->buckets;
   for(e = h->bucket[index]; e; e = e->next)
@@ -239,6 +240,36 @@ hash_find(hash_s h, const char *key)
       return e->value;
 
   return NULL;
+}
+
+
+/* --- hash_first/next ----------------------------------------------------- */
+
+/** Return the first/next entry in hash table
+ */
+
+int
+hash_first(hash_s h, hiter *i)
+{
+  assert(h); assert(i);
+
+  i->current = h->first;
+  i->key = h->first?h->first->key:NULL;
+  i->value = h->first?h->first->value:NULL;
+
+  return h->first?0:ENOENT;
+}
+
+int
+hash_next(hiter *i)
+{
+  assert(i);
+
+  i->current = i->current?i->current->succ:NULL;
+  i->key = i->current?i->current->key:NULL;
+  i->value = i->current?i->current->value:NULL;
+
+  return i->current?0:ENOENT;
 }
 
 

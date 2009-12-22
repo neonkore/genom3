@@ -1,0 +1,7 @@
+/* C preprocessor test */
+#ifndef PREPROCESS_TEST
+# define PREPROCESS_TEST	hello
+# include "preprocess.gen"
+#else
+PREPROCESS_TEST  __GENOM__ CMDLINE_MACRO
+#endif

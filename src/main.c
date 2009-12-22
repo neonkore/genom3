@@ -51,6 +51,9 @@ struct runopt_s runopt;
 /** dotgen file descriptor */
 int dotgenfd;
 
+/** number of errors and warnings */
+static int nerrors, nwarnings;
+
 
 /* --- main ---------------------------------------------------------------- */
 
@@ -212,6 +215,47 @@ xwarnx(const char *fmt, ...)
   va_start(va, fmt);
   vwarnx(fmt, va);
   va_end(va);
+}
+
+
+/* --- parserror ----------------------------------------------------------- */
+
+/** Print a parsing error or warning
+ */
+
+static void
+parsemsg(tloc l, const char *pfix, const char *fmt, ...)
+{
+  char *f = basename(l.file);
+  va_list va;
+
+  fprintf(stderr, "%s:%d:%s%s", f, l.line, pfix?pfix:"", pfix?":":"");
+  va_start(va, fmt);
+  vfprintf(stderr, fmt, va);
+  va_end(va);
+  fprintf(stderr, "\n");
+}
+
+void
+parserror(tloc l, const char *fmt, ...)
+{
+  va_list va;
+
+  va_start(va, fmt);
+  parsemsg(l, NULL, fmt, va);
+  va_end(va);
+  nerrors++;
+}
+
+void
+parsewarning(tloc l, const char *fmt, ...)
+{
+  va_list va;
+
+  va_start(va, fmt);
+  parsemsg(l, "warning", fmt, va);
+  va_end(va);
+  nwarnings++;
 }
 
 

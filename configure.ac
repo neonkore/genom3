@@ -55,5 +55,6 @@ AC_CONFIG_FILES([
 	genom3.pc
 	Makefile
 	src/Makefile
+	regress/Makefile
 ])
 AC_OUTPUT

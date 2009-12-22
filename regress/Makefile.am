@@ -14,9 +14,35 @@
 # OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
 # PERFORMANCE OF THIS SOFTWARE.
 #
-#                                             Anthony Mallet on Wed Dec 16 2009
+#                                            Anthony Mallet on Mon Dec 21 2009
 #
 
-SUBDIRS=\
-	src	\
-	regress
+check_PROGRAMS=\
+	preprocess	\
+	datatypes
+
+TESTS=		$(check_PROGRAMS)
+
+
+# check cpp - both with and without -r (for default include path)
+preprocess: Makefile
+	@exec >$@;						\
+	${ECHO} '#!${SHELL}';					\
+	${ECHO} ${top_builddir}/src/genom3 -r			\
+			-D CMDLINE_MACRO=world	 		\
+			-E regress ${srcdir}/$@.gen "|"		\
+		grep "'hello ${PACKAGE_VERSION} world'";	\
+	${ECHO} ${top_builddir}/src/genom3			\
+			-DCMDLINE_MACRO=me	 		\
+			-E regress ${srcdir}/$@.gen "|"		\
+		grep "'hello ${PACKAGE_VERSION} me'"
+	@chmod u+x $@
+
+
+# check data types parsing
+datatypes: Makefile
+	@exec >$@;						\
+	${ECHO} '#!${SHELL}';					\
+	${ECHO} ${top_builddir}/src/genom3 			\
+			regress ${srcdir}/$@.gen
+	@chmod u+x $@

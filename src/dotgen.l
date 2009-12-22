@@ -31,8 +31,20 @@
 #include "acgenom.h"
 
 #include <string.h>
+#include <err.h>
+#include <sys/wait.h>
 
 #include "genom.h"
+
+#define YY_INPUT(buf, result, max)					\
+   do {									\
+     extern int dotgenfd;						\
+     result = read(dotgenfd, buf, max);					\
+     if (result < 0 && errno != EAGAIN) {				\
+       warnx("input failed");						\
+       result = 0;							\
+     }									\
+   } while(result < 0)
 
 #define YYLTYPE	dotgenloc
 
@@ -63,10 +75,71 @@ chartext	([^\'])|(\\.)
 <INITIAL>"\n"	{ curloc.line++; curloc.col = 1; }
 [\t\f\v\r ]+	{ *yylloc_param = curloc;  }
 
+ /* special characters */
+[\{\}\[\]\(\)\;\:\?\.\+\-\*\/\%\^\&\|\~\!\=\<\>\,] { return yytext[0]; }
+"<%"		{ return '{'; }
+"%>"		{ return '}'; }
+"<:"		{ return '['; }
+":>"		{ return ']'; }
+"::"		{ return COLONCOLON; }
+"xor"		{ return '^'; }
+"bitand"	{ return '&'; }
+"bitor"		{ return '|'; }
+"compl"		{ return '~'; }
+"not"		{ return '!'; }
+"<<"		{ return SL; }
+">>"		{ return SR; }
+
  /* C preprocessor output */
 "#"		{ BEGIN(HASH); return '#'; }
 <HASH>"\n"	{ BEGIN(INITIAL); curloc.line++; curloc.col = 1; return '\n'; }
 <HASH>"pragma"	{ return PRAGMA; }
+
+ /* IDL related keywords */
+"unsigned"	{ return UNSIGNED; }
+"short"		{ return SHORT; }
+"long"		{ return LONG; }
+"fixed"		{ return FIXED; }
+"float"		{ return FLOAT; }
+"double"	{ return DOUBLE; }
+"char"		{ return CHAR; }
+"wchar"		{ return WCHAR; }
+"string"	{ return STRING; }
+"wstring"	{ return WSTRING; }
+"boolean"	{ return BOOLEAN; }
+"octet"		{ return OCTET; }
+"object"	{ return OBJECT; }
+"any"		{ return ANY; }
+"void"		{ return VOID; }
+"property"	{ return PROPERTY; }
+
+"const"		{ return CONST; }
+"native"	{ return NATIVE; }
+"enum"		{ return ENUM; }
+"union"		{ return UNION; }
+"switch"	{ return SWITCH; }
+"case"		{ return CASE; }
+"default"	{ return DEFAULT; }
+"struct"	{ return STRUCT; }
+"sequence"	{ return SEQUENCE; }
+"typedef"	{ return TYPEDEF; }
+
+ /* GenoM keywords */
+"component"	{ return COMPONENT; }
+"task"		{ return TASK; }
+"service"	{ return SERVICE; }
+"codel"		{ return CODEL; }
+"inport"	{ return INPORT; }
+"outport"	{ return OUTPORT; }
+"in"		{ return IN; }
+"out"		{ return OUT; }
+"inout"		{ return INOUT; }
+"ids"		{ return IDS; }
+"input"		{ return INPUT; }
+"output"	{ return OUTPUT; }
+"event"		{ return EVENT; }
+"import"	{ return IMPORT; }
+"from"		{ return FROM; }
 
  /* integers literals */
 "0"[xX][0-9a-fA-F]+{intsuffix}? {
@@ -85,6 +158,25 @@ chartext	([^\'])|(\\.)
   return INTEGER_LIT;
 }
 
+ /* floating point literals */
+{fracconst}{exppart}?{floatsuffix}? {
+  char *end;
+  yylval->d = strtod(yytext, &end);
+  return FLOAT_LIT;
+}
+[0-9]+{exppart}{floatsuffix}? {
+  char *end;
+  yylval->d = strtod(yytext, &end);
+  return FLOAT_LIT;
+}
+
+ /* char literals */
+"'"{chartext}*"'" {
+  /* XXX handle escape sequences */
+  yylval->c = yytext[1];
+  return CHAR_LIT;
+}
+
  /* string literals */
 "\""{stringtext}*"\"" {
   /* remove quotes */
@@ -97,6 +189,13 @@ chartext	([^\'])|(\\.)
 [A-Za-z_][A-Za-z0-9_]* {
   yylval->s = string(yytext);
   return IDENTIFIER;
+}
+
+ /* errors */
+. {
+   warnx("%s:%d:%d: unexpected character `%c'",
+	 curloc.file, curloc.line, curloc.col, yytext[0]);
+   *yylloc_param = curloc;
 }
 
 %%

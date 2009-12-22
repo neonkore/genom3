@@ -52,15 +52,28 @@
 }
 
 %union {
-  int	i;
-  char *s;
+  int		i;
+  double	d;
+  char		c;
+  char *	s;
 }
 
 %token <i>	PRAGMA
+%token <i>	COLONCOLON SL SR
+%token <i>	UNSIGNED SHORT LONG FIXED FLOAT DOUBLE CHAR WCHAR STRING
+%token <i>	WSTRING BOOLEAN OCTET OBJECT ANY VOID PROPERTY
+%token <i>	CONST NATIVE ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
+%token <i>	TYPEDEF
+%token <i>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
+%token <i>	INPUT OUTPUT EVENT IMPORT FROM
 %token <i>	INTEGER_LIT
+%token <d>	FLOAT_LIT
+%token <c>	CHAR_LIT
 %token <s>	STRING_LIT IDENTIFIER
 
-%type <i>	spec statement cpphash
+%type <i>	spec statement
+%type <s>	type_dcl constr_type_spec constr_type enum_type enumerator_list enumerator
+%type <i>	cpphash
 
 %start spec
 

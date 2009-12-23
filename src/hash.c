@@ -38,7 +38,7 @@
 struct hentry_s {
   const char *key;		/**< hash key */
   void *value;			/**< user data */
-  void (*release)(void *);	/**< function to release user data */
+  hrelease_f release;		/**< function to release user data */
 
   struct hentry_s *succ;	/**< next entry in order of insertion */
   struct hentry_s *pred;	/**< previous entry in order of insertion */
@@ -129,7 +129,7 @@ hash_destroy(hash_s h)
  */
 
 int
-hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
+hash_insert(hash_s h, const char *key, void *value, hrelease_f release)
 {
   unsigned long index;
   hentry_s e;
@@ -141,7 +141,7 @@ hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
   for(e = h->bucket[index]; e; e = e->next)
     if (!strcmp(e->key, key)) {
       xwarnx("attempt to reinsert existing `%s' in %s hash", key, h->name);
-      return EEXIST;
+      return errno = EEXIST;
     }
 
   /* create entry */
@@ -153,7 +153,7 @@ hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
   if (!e->key) {
     free(e);
     warnx("memory exhausted, cannot insert `%s' in %s hash", key, h->name);
-    return ENOMEM;
+    return errno = ENOMEM;
   }
 
   /* preserve insertion order information */
@@ -182,7 +182,7 @@ hash_insert(hash_s h, const char *key, void *value, void (*release)(void *))
  */
 
 int
-hash_remove(hash_s h, const char *key)
+hash_remove(hash_s h, const char *key, int release)
 {
   unsigned long index;
   hentry_s e, n;
@@ -192,17 +192,20 @@ hash_remove(hash_s h, const char *key)
   /* look for entry */
   index = hstring(key) % h->buckets;
   e = NULL;
-  if (!strcmp(h->bucket[index]->key, key)) {
-    /* entry is in first bucket */
-    e = h->bucket[index];
-    h->bucket[index] = e->next;
-  } else
-    for(n = h->bucket[index]; n->next; n = n->next)
-      if (!strcmp(n->next->key, key)) {
-	/* entry is in random bucket */
-	e = n->next;
-	n->next = e->next;
-      }
+  if (h->bucket[index]) {
+    if (!strcmp(h->bucket[index]->key, key)) {
+      /* entry is in first bucket */
+      e = h->bucket[index];
+      h->bucket[index] = e->next;
+    } else
+      for(n = h->bucket[index]; n->next; n = n->next)
+	if (!strcmp(n->next->key, key)) {
+	  /* entry is in random bucket */
+	  e = n->next;
+	  n->next = e->next;
+	  break;
+	}
+  }
   if (!e) return ENOENT;
 
   /* preserve insertion order */
@@ -213,7 +216,7 @@ hash_remove(hash_s h, const char *key)
 
   /* release entry */
   free((char *)e->key);
-  if (e->release) e->release(e->value);
+  if (release && e->release) e->release(e->value);
   free(e);
   h->n--;
 

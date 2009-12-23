@@ -1,5 +1,9 @@
 /* Datatypes parsing test */
 
+enum e1 { e1v1, e1v2 };
+
 module m1 {
 
+  module m2 {
+  };
 };

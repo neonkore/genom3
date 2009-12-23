@@ -48,6 +48,8 @@ struct scope_s {
 
 const char *
 scope_name(scope_s s) { assert(s); return s->name; }
+const char *
+scope_fullname(scope_s s) { assert(s); return s->fullname; }
 
 /** the global IDL scope */
 static scope_s global = NULL;
@@ -68,6 +70,76 @@ scope_current()
 {
   assert(current);
   return current;
+}
+
+
+/* --- scope_addtype ------------------------------------------------------- */
+
+/** Register type in the given scope
+ */
+int
+scope_addtype(scope_s s, idltype_s t)
+{
+  scope_s c;
+  idltype_s o;
+  int e;
+  assert(s); assert(t);
+
+  /* check name does not clash with either parent/children scopes or types */
+  if (!strcmp(type_name(t), s->name)) {
+    parserror(type_loc(t),
+	      "declaration of '%s' clashes with name of enclosing module",
+	      type_name(t));
+    parsenoerror(s->loc, "  module '%s' declared here", s->name);
+    return errno = EEXIST;
+  }
+
+  o = hash_find(s->idltypes, type_name(t));
+  if (o) {
+    parserror(type_loc(t),
+	      "declaration of '%s' clashes with existing %s",
+	      type_name(t), type_strkind(type_kind(o)));
+    parsenoerror(type_loc(o), "  %s '%s' declared here",
+		 type_strkind(type_kind(o)), type_name(o));
+    return errno = EEXIST;
+  }
+
+  c = hash_find(s->children, type_name(t));
+  if (c) {
+    parserror(type_loc(t),
+	      "declaration of '%s' clashes with existing module name",
+	      type_name(t));
+    parsenoerror(c->loc, "  module '%s' declared here", c->name);
+    return errno = EEXIST;
+  }
+
+  /* register type (don't pass a 'release' function as we're not owner) */
+  e = hash_insert(s->idltypes, type_name(t), t, NULL);
+  if (e) return errno;
+
+  type_setscope(t, s);
+  xwarnx("registered type %s in %s scope", type_name(t),
+	 s->fullname[0]?s->fullname:"global");
+  return 0;
+}
+
+
+/* --- scope_deltype ------------------------------------------------------- */
+
+/** Delete type from the given scope
+ */
+int
+scope_deltype(scope_s s, idltype_s t)
+{
+  int e;
+
+  if (!t) return 0;
+  e = hash_remove(s->idltypes, type_name(t), 0);
+  type_setscope(t, NULL);
+
+  xwarnx("removed type %s from %s scope", type_name(t),
+	 s->fullname[0]?s->fullname:"global");
+  return e;
 }
 
 
@@ -95,9 +167,10 @@ scope_push(tloc l, const char *name)
 
   t = hash_find(current->idltypes, name);
   if (t) {
-    parserror(l, "declaration of '%s' clashes with existing type name",
-	      name);
-    parsenoerror(type_loc(t), "  type '%s' declared here", type_name(t));
+    parserror(l, "declaration of '%s' clashes with existing %s",
+	      name, type_strkind(type_kind(t)));
+    parsenoerror(type_loc(t), "  %s '%s' declared here",
+		 type_strkind(type_kind(t)), type_name(t));
     return NULL;
   }
 
@@ -112,7 +185,7 @@ scope_push(tloc l, const char *name)
   s = scope_new(l, name, current->fullname);
   if (!s) return NULL;
   s->parent = current;
-  e = hash_insert(current->children, name, s, scope_destroy);
+  e = hash_insert(current->children, name, s, (hrelease_f)scope_destroy);
   if (e) { scope_destroy(s); return NULL; }
 
   xwarnx("pushed %s scope", s->fullname);
@@ -163,17 +236,20 @@ scope_pushglobal()
 void
 scope_destroy(scope_s s)
 {
-  hash_s h;
+  hiter i;
   if (!s) return;
 
-  if (s->parent) {
-    h = s->parent->children;
-    s->parent = NULL;
-    hash_remove(h, s->name);
-    return;
-  }
+  /* remove from parent table */
+  if (s->parent) hash_remove(s->parent->children, s->name, 0);
 
+  /* destroy registered types */
+  for(hash_first(s->idltypes, &i); i.current; hash_next(&i))
+    type_destroy(i.value);
   hash_destroy(s->idltypes);
+
+  /* remove from children */
+  for(hash_first(s->children, &i); i.current; hash_next(&i))
+    ((scope_s)i.value)->parent = NULL;
   hash_destroy(s->children);
 
   xwarnx("destroyed %s scope", s->fullname[0]?s->fullname:"global");

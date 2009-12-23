@@ -55,7 +55,9 @@
   double	d;
   char		c;
   char *	s;
+  hash_s	hash;
   scope_s	scope;
+  idltype_s	type;
 }
 
 %token <i>	PRAGMA
@@ -73,8 +75,9 @@
 %token <s>	STRING_LIT IDENTIFIER
 
 %type <i>	spec statement
-%type <i>	module type_dcl
-%type <s>	constr_type_spec constr_type enum_type enumerator_list enumerator
+%type <i>	module
+%type <type>	type_dcl constr_type enum_type enumerator
+%type <hash>	enumerator_list
 %type <scope>	scope_push_module
 %type <i>	cpphash
 
@@ -86,6 +89,8 @@ spec: statement | spec statement;
 
 statement:
     module ';'
+  | type_dcl ';'
+  { }
   | cpphash
   | error
   {
@@ -123,6 +128,58 @@ module:
      } else
        parsewarning(@1, "empty module '%s'", scope_name(s));
    }
+;
+
+
+/* --- IDL type definitions ------------------------------------------------ */
+
+/* These rules cover the `typedef' token, but also `struct', `enum' and
+ * `union'. */
+
+type_dcl:
+   /* TYPEDEF alias_type_list */
+   /* { */
+   /* } */
+/*   | */ constr_type
+;
+
+constr_type: /* struct_type | union_type | */ enum_type;
+
+enum_type: ENUM IDENTIFIER '{' enumerator_list '}'
+  {
+    $$ = type_newenum(@2, $2, $4);
+    if (!$$) {
+      hiter i;
+      for(hash_first($4, &i); i.current; hash_next(&i))
+	type_destroy(i.value);
+      hash_destroy($4);
+    }
+  }
+;
+
+enumerator_list:
+  enumerator
+  {
+    $$ = hash_create("enumerator list", 3);
+    if (!$$) break;
+
+    if (!$1) break;
+    if (hash_insert($$, type_name($1), $1, NULL))
+      type_destroy($1);
+  }
+  | enumerator_list ',' enumerator
+  {
+    $$ = $1;
+    if (!$3) break;
+    if (hash_insert($$, type_name($3), $3, NULL))
+      type_destroy($3);
+  }
+;
+
+enumerator: IDENTIFIER
+  {
+    $$ = type_newenumerator(@1, $1);
+  }
 ;
 
 

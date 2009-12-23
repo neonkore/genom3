@@ -62,6 +62,7 @@ void	parsewarning(tloc l, const char *fmt, ...);
 
 typedef struct hash_s *hash_s;
 typedef struct hentry_s *hentry_s;
+typedef void (*hrelease_f)(void *);
 typedef struct hiter {
   hentry_s current;
   const char *key;
@@ -71,8 +72,9 @@ typedef struct hiter {
 hash_s	hash_create(const char *name, int entries);
 void	hash_destroy(hash_s h);
 int	hash_insert(hash_s h, const char *key, void *value,
-		void (*release)(void *));
-int	hash_remove(hash_s h, const char *key);
+		hrelease_f release);
+
+int	hash_remove(hash_s h, const char *key, int release);
 void *	hash_find(hash_s h, const char *key);
 int	hash_first(hash_s h, hiter *i);
 int	hash_next(hiter *i);
@@ -82,21 +84,39 @@ void	hash_pstat(hash_s h);
 /* --- scopes -------------------------------------------------------------- */
 
 typedef struct scope_s *scope_s;
+typedef struct idltype_s *idltype_s;
 
 const char *	scope_name(scope_s s);
+const char *	scope_fullname(scope_s s);
 scope_s		scope_current(void);
+
+int		scope_addtype(scope_s s, idltype_s t);
+int		scope_deltype(scope_s s, idltype_s t);
+
 scope_s		scope_push(tloc l, const char *name);
 scope_s		scope_pop(void);
 int		scope_pushglobal(void);
+
 void		scope_destroy(scope_s s);
 
 
 /* --- IDL types ----------------------------------------------------------- */
 
-typedef struct idltype_s *idltype_s;
+typedef enum idlkind {
+  IDL_ENUM,		/**< enumerated type */
+  IDL_ENUMERATOR,	/**< constant in an enumerated type */
+} idlkind;
 
 tloc		type_loc(idltype_s t);
 const char *	type_name(idltype_s t);
+idlkind		type_kind(idltype_s t);
+void		type_setscope(idltype_s t, scope_s s);
+
+idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
+idltype_s	type_newenumerator(tloc l, const char *name);
+void		type_destroy(idltype_s t);
+
+const char *	type_strkind(idlkind k);
 
 
 /* --- strings ------------------------------------------------------------- */

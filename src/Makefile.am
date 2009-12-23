@@ -30,4 +30,4 @@ genom3_SOURCES=\
 	dotgen.y	\
 	dotgen.l
 
-genom3_YFLAGS= -d
+genom3_YFLAGS= -v -d

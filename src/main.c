@@ -260,7 +260,7 @@ parsewarning(tloc l, const char *fmt, ...)
   va_list va;
 
   va_start(va, fmt);
-  parsemsg(l, "warning", fmt, va);
+  parsemsg(l, " warning", fmt, va);
   va_end(va);
   nwarnings++;
 }

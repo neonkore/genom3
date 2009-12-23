@@ -50,6 +50,8 @@ const char *
 scope_name(scope_s s) { assert(s); return s->name; }
 const char *
 scope_fullname(scope_s s) { assert(s); return s->fullname; }
+scope_s
+scope_parent(scope_s s) { assert(s); return s->parent; }
 
 /** the global IDL scope */
 static scope_s global = NULL;
@@ -70,6 +72,13 @@ scope_current()
 {
   assert(current);
   return current;
+}
+
+scope_s
+scope_global()
+{
+  assert(global);
+  return global;
 }
 
 

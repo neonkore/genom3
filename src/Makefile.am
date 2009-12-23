@@ -24,6 +24,7 @@ genom3_SOURCES=\
 	main.c		\
 	cpp.c		\
 	hash.c		\
+	const.c		\
 	scope.c		\
 	idltype.c	\
 	string.c	\

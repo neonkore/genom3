@@ -98,6 +98,9 @@ chartext	([^\'])|(\\.)
  /* IDL related keywords */
 "module"	{ return MODULE; }
 
+"FALSE"		{ return FALSE; }
+"TRUE"		{ return TRUE; }
+
 "unsigned"	{ return UNSIGNED; }
 "short"		{ return SHORT; }
 "long"		{ return LONG; }
@@ -158,6 +161,14 @@ chartext	([^\'])|(\\.)
   char *end;
   yylval->i = strtol(yytext, &end, 0);
   return INTEGER_LIT;
+}
+
+ /* fixed point literal */
+{fracconst}{exppart}?{fixedsuffix} {
+  return FIXED_LIT;
+}
+[0-9]+{exppart}{fixedsuffix} {
+  return FIXED_LIT;
 }
 
  /* floating point literals */

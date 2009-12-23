@@ -88,7 +88,9 @@ typedef struct idltype_s *idltype_s;
 
 const char *	scope_name(scope_s s);
 const char *	scope_fullname(scope_s s);
+scope_s		scope_parent(scope_s s);
 scope_s		scope_current(void);
+scope_s		scope_global(void);
 
 int		scope_addtype(scope_s s, idltype_s t);
 int		scope_deltype(scope_s s, idltype_s t);
@@ -100,21 +102,80 @@ int		scope_pushglobal(void);
 void		scope_destroy(scope_s s);
 
 
+/* --- constants ----------------------------------------------------------- */
+
+typedef enum cvalkind {
+  CST_BOOL,		/**< boolean */
+  CST_UINT,		/**< unsigned integer */
+  CST_INT,		/**< signed integer */
+  CST_FLOAT,		/**< floating point */
+  CST_CHAR,		/**< character */
+  CST_STRING,		/**< string */
+  CST_ENUM,		/**< enumerator from enum */
+} cvalkind;
+
+typedef struct cval {
+  cvalkind k;
+  union {
+    unsigned char b;
+    unsigned long u;
+    signed long i;
+    double f;
+    char c;
+    const char *s;
+    idltype_s e;
+  };
+} cval;
+
+int	const_unaryop(cval *value, char op);
+int	const_binaryop(cval *value, char op, cval arg);
+int	const_convert(cval *value, cvalkind k);
+int	const_cast(cval *value, idltype_s t);
+
+
 /* --- IDL types ----------------------------------------------------------- */
 
 typedef enum idlkind {
+  IDL_BOOL,		/**< boolean */
+  IDL_USHORT,		/**< unsigned short */
+  IDL_SHORT,		/**< short */
+  IDL_ULONG,		/**< unsigned long */
+  IDL_LONG,		/**< long */
+  IDL_FLOAT,		/**< float */
+  IDL_DOUBLE,		/**< double */
+  IDL_CHAR,		/**< char */
+  IDL_OCTET,		/**< octet */
+  IDL_STRING,		/**< string */
+  IDL_ANY,		/**< any */
+
+  IDL_CONST,		/**< constant */
   IDL_ENUM,		/**< enumerated type */
   IDL_ENUMERATOR,	/**< constant in an enumerated type */
+  IDL_ARRAY,		/**< array */
+  IDL_SEQUENCE,		/**< sequence */
+  IDL_STRUCT,		/**< struct */
+  IDL_UNION,		/**< union */
+
+  IDL_TYPEDEF		/**< typedef */
 } idlkind;
 
 tloc		type_loc(idltype_s t);
 const char *	type_name(idltype_s t);
 idlkind		type_kind(idltype_s t);
+cval		type_constvalue(idltype_s t);
+idltype_s	type_enumeratorenum(idltype_s t);
 void		type_setscope(idltype_s t, scope_s s);
 
+idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
+idltype_s	type_newstring(tloc l, const char *name, unsigned long len);
+idltype_s	type_newconst(tloc l, const char *name, idltype_s t, cval v);
 idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
 idltype_s	type_newenumerator(tloc l, const char *name);
 void		type_destroy(idltype_s t);
+
+int		type_equal(idltype_s a, idltype_s b);
+idltype_s	type_find(const char *name);
+idltype_s	type_final(idltype_s t);
 
 const char *	type_strkind(idlkind k);
 

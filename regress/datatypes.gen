@@ -1,9 +1,14 @@
 /* Datatypes parsing test */
 
-enum e1 { e1v1, e1v2 };
 
 module m1 {
+  enum e1 { e1v1, e1v2 };
+};
 
-  module m2 {
-  };
+const boolean c1 = TRUE;
+const long c2 = 3;
+const float c3 = 3.14;
+const m1::e1 c4 = m1::e1v2;
+
+module m2 {
 };

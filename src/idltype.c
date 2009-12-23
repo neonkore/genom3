@@ -25,6 +25,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <err.h>
 
@@ -41,8 +42,14 @@ struct idltype_s {
 
   scope_s scope;
   union {
-    hash_s members;
+    unsigned long length;	/**< string */
+    hash_s members;		/**< enum */
+    struct idltype_s *parent;	/**< enumerator */
     struct idltype_s *alias;
+    struct {
+      struct idltype_s *type;
+      cval value;
+    };				/**< const */
   };
 };
 
@@ -65,7 +72,7 @@ static idltype_s	type_new(tloc l, idlkind k, const char *name);
 
 /* --- type_new ------------------------------------------------------------ */
 
-/** Create a new type in the current scope
+/** Create a new type and register in the current scope if name is not null
  */
 static idltype_s
 type_new(tloc l, idlkind k, const char *name)
@@ -93,10 +100,15 @@ type_new(tloc l, idlkind k, const char *name)
 
   t->loc = l;
   t->kind = k;
-  t->name = string(name);
-  t->fullname = strings(scope_fullname(s), "::", name, NULL);
+  t->name = name ? string(name) : NULL;
+  t->fullname = name ? strings(scope_fullname(s), "::", name, NULL) : NULL;
   t->members = NULL;
+  t->parent = NULL;
   t->alias = NULL;
+  t->value = (cval){ 0 };
+
+  /* don't register anything for anon types */
+  if (!name) return t;
 
   e = scope_addtype(s, t);
   if (e) { free(t); return NULL; }
@@ -115,19 +127,80 @@ type_new(tloc l, idlkind k, const char *name)
 }
 
 idltype_s
+type_newbasic(tloc l, const char *name, idlkind k)
+{
+  return type_new(l, k, name);
+}
+
+idltype_s
+type_newstring(tloc l, const char *name, unsigned long len)
+{
+  idltype_s t = type_new(l, IDL_STRING, name);
+  if (!t) return NULL;
+
+  t->length = len;
+  return t;
+}
+
+idltype_s
+type_newconst(tloc l, const char *name, idltype_s t, cval v)
+{
+  idltype_s c;
+  int s;
+  assert(t);
+
+  s = const_cast(&v, t);
+  switch(s) {
+    case EINVAL:
+      parserror(l, "%s%s%s is not a valid constant type",
+		type_strkind(type_kind(t)),
+		type_name(t)?" ":"", type_name(t)?type_name(t):"");
+      parsenoerror(type_loc(t), "  %s%s%s declared here",
+		   type_strkind(type_kind(t)),
+		   type_name(t)?" ":"", type_name(t)?type_name(t):"");
+      break;
+
+    case EDOM:
+      parserror(l, "cannot convert constant expression to %s%s%s",
+		type_strkind(type_kind(t)),
+		type_name(t)?" ":"", type_name(t)?type_name(t):"");
+      break;
+  }
+  if (s) return NULL;
+
+  c = type_new(l, IDL_CONST, name);
+  if (!c) return NULL;
+
+  c->type = t;
+  c->value = v;
+  return c;
+}
+
+idltype_s
 type_newenum(tloc l, const char *name, hash_s enumerators)
 {
   idltype_s t = type_new(l, IDL_ENUM, name);
+  hiter i;
   if (!t) return NULL;
 
-  t->members = enumerators;
+  if ((t->members = enumerators))
+    for(hash_first(t->members, &i); i.current; hash_next(&i)) {
+      assert(((idltype_s)i.value)->kind == IDL_ENUMERATOR);
+      assert(((idltype_s)i.value)->parent == NULL);
+      ((idltype_s)i.value)->parent = t;
+    }
+
   return t;
 }
 
 idltype_s
 type_newenumerator(tloc l, const char *name)
 {
-  return type_new(l, IDL_ENUMERATOR, name);
+  idltype_s t = type_new(l, IDL_ENUMERATOR, name);
+  if (!t) return NULL;
+
+  t->parent = NULL;
+  return t;
 }
 
 
@@ -140,11 +213,135 @@ type_destroy(idltype_s t)
 {
   if (!t) return;
 
-  hash_remove(htypes, t->fullname, 0);
-  (void)scope_deltype(t->scope, t);
+  if (t->name) {
+    hash_remove(htypes, t->fullname, 0);
+    (void)scope_deltype(t->scope, t);
 
-  xwarnx("destroyed %s type %s", type_strkind(t->kind), t->fullname);
+    xwarnx("destroyed %s type %s", type_strkind(t->kind), t->fullname);
+  }
   free(t);
+}
+
+
+/* --- type_equal ---------------------------------------------------------- */
+
+/** Return true if types represent the same final type
+ */
+int
+type_equal(idltype_s a, idltype_s b)
+{
+  assert(a && b);
+  a = type_final(a);
+  b = type_final(b);
+  if (type_kind(a) != type_kind(b)) return 0;
+
+  switch(type_kind(a)) {
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
+    case IDL_OCTET: case IDL_ANY:
+      return 1;
+
+    case IDL_STRING:
+      return a->length == b->length;
+
+    case IDL_ENUMERATOR:
+    case IDL_ENUM:
+      if (!a->fullname || !b->fullname) return 0;
+      return strcmp(a->fullname, b->fullname)?0:1;
+
+    case IDL_ARRAY: case IDL_SEQUENCE:
+    case IDL_STRUCT: case IDL_UNION:
+
+    case IDL_CONST:
+    case IDL_TYPEDEF:
+      /* not a valid return from type_final() */
+      break;
+  }
+
+  assert(0);
+  return 0;
+}
+
+
+/* --- type_find ----------------------------------------------------------- */
+
+/** Return IDL object associated to name (may be a qualified name)
+ */
+idltype_s
+type_find(const char *name)
+{
+  char *c;
+  scope_s s;
+  idltype_s t;
+  assert(name);
+
+  if (!htypes) return NULL;
+
+  /* if the name starts with ::, direct look */
+  if (!strncmp(name, "::", 2))
+    return hash_find(htypes, name);
+
+  /* otherwise, look in the current hierarchy */
+  for(s = scope_current(); s; s = scope_parent(s)) {
+    c = strings(scope_fullname(s), "::", name, NULL);
+    t = hash_find(htypes, c);
+    if (t) return t;
+  }
+
+  errno = ENOENT;
+  return NULL;
+}
+
+
+/* --- type_final ---------------------------------------------------------- */
+
+/** Return the actual basic type of a type (resolve typedefs and consts)
+ */
+idltype_s
+type_final(idltype_s t)
+{
+  assert(t);
+  switch(type_kind(t)) {
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
+    case IDL_OCTET: case IDL_STRING: case IDL_ANY: case IDL_ENUM:
+    case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
+    case IDL_STRUCT: case IDL_UNION:
+      return t;
+
+    case IDL_CONST:
+      return type_final(t->type);
+
+    case IDL_TYPEDEF:
+      return type_final(t->alias);
+  }
+
+  assert(0);
+  return 0;
+}
+
+
+/* --- type_constvalue ----------------------------------------------------- */
+
+/** For consts, return the value
+ */
+cval
+type_constvalue(idltype_s t)
+{
+  assert(t && t->kind == IDL_CONST);
+  return t->value;
+}
+
+
+/* --- type_type_enumeratorenum -------------------------------------------- */
+
+/** For enumerators, return the enum parent type
+ */
+idltype_s
+type_enumeratorenum(idltype_s t)
+{
+  assert(t && t->kind == IDL_ENUMERATOR);
+  return t->parent;
 }
 
 
@@ -157,8 +354,27 @@ const char *
 type_strkind(idlkind k)
 {
   switch(k) {
+    case IDL_BOOL:		return "boolean";
+    case IDL_USHORT:		return "unsigned short";
+    case IDL_SHORT:		return "short";
+    case IDL_ULONG:		return "unsigned long";
+    case IDL_LONG:		return "long";
+    case IDL_FLOAT:		return "float";
+    case IDL_DOUBLE:		return "double";
+    case IDL_CHAR:		return "char";
+    case IDL_OCTET:		return "octect";
+    case IDL_STRING:		return "string";
+    case IDL_ANY:		return "any";
+
+    case IDL_CONST:		return "const";
     case IDL_ENUM:		return "enum";
     case IDL_ENUMERATOR:	return "enumerator";
+    case IDL_ARRAY:		return "array";
+    case IDL_SEQUENCE:		return "sequence";
+    case IDL_STRUCT:		return "struct";
+    case IDL_UNION:		return "union";
+
+    case IDL_TYPEDEF:		return "typedef";
   }
 
   assert(0);

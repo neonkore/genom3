@@ -92,11 +92,15 @@ scope_s		scope_parent(scope_s s);
 scope_s		scope_current(void);
 scope_s		scope_global(void);
 
+idltype_s	scope_findtype(scope_s s, const char *name);
 int		scope_addtype(scope_s s, idltype_s t);
 int		scope_deltype(scope_s s, idltype_s t);
+int		scope_firstype(scope_s s, hiter *i);
+int		scope_nextype(hiter *i);
 
 scope_s		scope_push(tloc l, const char *name);
 scope_s		scope_pop(void);
+scope_s		scope_detach(scope_s s);
 int		scope_pushglobal(void);
 
 void		scope_destroy(scope_s s);
@@ -105,6 +109,7 @@ void		scope_destroy(scope_s s);
 /* --- constants ----------------------------------------------------------- */
 
 typedef enum cvalkind {
+  CST_VOID,		/**< no value (used for default case labels) */
   CST_BOOL,		/**< boolean */
   CST_UINT,		/**< unsigned integer */
   CST_INT,		/**< signed integer */
@@ -114,6 +119,7 @@ typedef enum cvalkind {
   CST_ENUM,		/**< enumerator from enum */
 } cvalkind;
 
+typedef struct clist_s *clist_s;
 typedef struct cval {
   cvalkind k;
   union {
@@ -126,11 +132,41 @@ typedef struct cval {
     idltype_s e;
   };
 } cval;
+typedef struct citer {
+  clist_s current;
+  cval *value;
+} citer;
 
+int	const_equal(cval a, cval b);
 int	const_unaryop(cval *value, char op);
 int	const_binaryop(cval *value, char op, cval arg);
 int	const_convert(cval *value, cvalkind k);
-int	const_cast(cval *value, idltype_s t);
+int	const_cast(tloc l, cval *value, idltype_s t);
+
+clist_s	clist_append(clist_s l, cval v);
+void	clist_destroy(clist_s l);
+int	clist_first(clist_s l, citer *i);
+int	clist_next(citer *i);
+
+
+/* --- declarators --------------------------------------------------------- */
+
+typedef struct dcl_s *dcl_s;
+typedef struct dcliter {
+  dcl_s d;
+  unsigned int current;
+  unsigned int value;
+} dcliter;
+
+const char *	dcl_name(dcl_s d);
+int		dcl_isarray(dcl_s d);
+
+dcl_s		dcl_create(tloc l, const char *name);
+dcl_s		dcl_adddim(dcl_s dcl, unsigned long dim);
+void		dcl_destroy(dcl_s d);
+
+int		dcl_inner(dcl_s d, dcliter *i);
+int		dcl_next(dcliter *i);
 
 
 /* --- IDL types ----------------------------------------------------------- */
@@ -154,7 +190,9 @@ typedef enum idlkind {
   IDL_ARRAY,		/**< array */
   IDL_SEQUENCE,		/**< sequence */
   IDL_STRUCT,		/**< struct */
+  IDL_MEMBER,		/**< element of struct */
   IDL_UNION,		/**< union */
+  IDL_CASE,		/**< element of union */
 
   IDL_TYPEDEF		/**< typedef */
 } idlkind;
@@ -168,9 +206,16 @@ void		type_setscope(idltype_s t, scope_s s);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
 idltype_s	type_newstring(tloc l, const char *name, unsigned long len);
+idltype_s	type_newsequence(tloc l, const char *name, idltype_s t,
+			unsigned long len);
 idltype_s	type_newconst(tloc l, const char *name, idltype_s t, cval v);
 idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
 idltype_s	type_newenumerator(tloc l, const char *name);
+idltype_s	type_newarray(tloc l, const char *name, idltype_s t,
+			unsigned long len);
+idltype_s	type_newmember(tloc l, const char *name, idltype_s t);
+idltype_s	type_newunion(tloc l, const char *name, idltype_s t, scope_s s);
+idltype_s	type_newcase(tloc l, const char *name, idltype_s t, clist_s c);
 void		type_destroy(idltype_s t);
 
 int		type_equal(idltype_s a, idltype_s b);

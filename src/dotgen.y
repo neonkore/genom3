@@ -56,8 +56,10 @@
   char		c;
   char *	s;
   cval		v;
+  clist_s	vlist;
   hash_s	hash;
   scope_s	scope;
+  dcl_s		dcl;
   idltype_s	type;
 }
 
@@ -79,15 +81,21 @@
 %type <i>	spec statement
 %type <i>	module
 %type <type>	const_dcl const_type
-%type <type>	type_dcl constr_type enum_type enumerator
-%type <hash>	enumerator_list
-%type <type>	integer_type
-%type <type>	unsigned_int unsigned_short_int unsigned_long_int
+%type <type>	type_dcl constr_type
+%type <dcl>	declarator simple_declarator array_declarator
+%type <type>	type_spec simple_type_spec base_type_spec template_type_spec
+%type <type>	constr_type_spec switch_type_spec
+%type <type>	integer_type unsigned_int unsigned_short_int unsigned_long_int
 %type <type>	signed_int signed_short_int signed_long_int
-%type <type>	floating_pt_type float_type double_type;
+%type <type>	floating_pt_type float_type double_type
 %type <type>	boolean_type char_type octet_type any_type
-%type <type>	string_type
-%type <scope>	scope_push_module
+%type <type>	sequence_type string_type fixed_type named_type
+%type <type>	union_type enum_type enumerator case switch_body
+%type <hash>	enumerator_list
+%type <v>	case_label
+%type <vlist>	case_label_list
+%type <scope>	scope_push
+%type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
 %type <v>	or_expr xor_expr and_expr shift_expr add_expr mult_expr
 %type <v>	literal
@@ -116,29 +124,29 @@ statement:
 /** modules are IDL namespaces */
 
 module:
-   MODULE scope_push_module '{' spec '}'
-   {
-     scope_s s = scope_pop();
+  MODULE scope_push '{' spec '}'
+  {
+    scope_s s = scope_pop();
 
-     assert(s == $2);
-     if (scope_name(s)[0] == '&') {
-       /* there was an error during the creation of the scope. */
-       parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
-       scope_destroy(s);
-     }
-   }
-   | MODULE scope_push_module '{' '}'
-   {
-     scope_s s = scope_pop();
+    assert(s == $2);
+    if (scope_name(s)[0] == '&') {
+      /* there was an error during the creation of the scope. */
+      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
+      scope_destroy(s);
+    }
+  }
+  | MODULE scope_push '{' '}'
+  {
+    scope_s s = scope_pop();
 
-     assert(s == $2);
-     if (scope_name(s)[0] == '&') {
-       /* there was an error during the creation of the scope. */
-       parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
-       scope_destroy(s);
-     } else
-       parsewarning(@1, "empty module '%s'", scope_name(s));
-   }
+    assert(s == $2);
+    if (scope_name(s)[0] == '&') {
+      /* there was an error during the creation of the scope. */
+      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
+      scope_destroy(s);
+    } else
+      parsewarning(@1, "empty module '%s'", scope_name(s));
+  }
 ;
 
 
@@ -161,15 +169,16 @@ const_dcl:
 const_type:
   integer_type | char_type | boolean_type | floating_pt_type | octet_type
   | string_type
-  | scoped_name
+  | named_type
   {
-    $$ = type_find($1);
-    if (!$$) {
-      parserror(@1, "unknown type %s", $1);
-      break;
-    }
+    $$ = $1; if (!$$) break;
 
     switch(type_kind(type_final($$))) {
+      case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+      case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
+      case IDL_OCTET: case IDL_STRING: case IDL_ENUM:
+	break;
+
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY:
       case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
 	parserror(@1, "%s %s is not a valid constant type",
@@ -179,11 +188,9 @@ const_type:
 	$$ = NULL;
 	break;
 
-      case IDL_CONST: case IDL_TYPEDEF:
+      case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
 	/* not a valid return from type_final() */
 	assert(0); break;
-
-      default: break;
     }
   }
 ;
@@ -201,7 +208,49 @@ type_dcl:
 /*   | */ constr_type
 ;
 
-constr_type: /* struct_type | union_type | */ enum_type;
+constr_type: /* struct_type | */ union_type | enum_type;
+
+union_type:
+  UNION scope_push SWITCH '(' switch_type_spec ')' '{' switch_body '}'
+  {
+    scope_s s = scope_detach(scope_pop());
+    assert(s == $2);
+
+    if (scope_name(s)[0] == '&') {
+      /* there was an error during the creation of the scope. */
+      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
+      if ($5 && !type_name($5)) type_destroy($5);
+      scope_destroy(s);
+      break;
+    }
+    if (!$8 || !$5) {
+      parserror(@1, "dropped declaration for '%s'", scope_name(s));
+      if ($5 && !type_name($5)) type_destroy($5);
+      scope_destroy(s);
+      break;
+    }
+
+    $$ = type_newunion(@1, scope_name(s), $5, s);
+    if (!$$) {
+      parserror(@1, "dropped declaration for '%s'", scope_name(s));
+      if ($5 && !type_name($5)) type_destroy($5);
+      scope_destroy(s);
+    }
+  }
+  | UNION scope_push error '}'
+  {
+    scope_s s = scope_detach(scope_pop());
+    assert(s == $2);
+
+    if (scope_name(s)[0] == '&') {
+      /* there was an error during the creation of the scope. */
+      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
+    } else
+      parserror(@1, "dropped declaration for '%s'", scope_name(s));
+
+    scope_destroy(s);
+  }
+;
 
 enum_type: ENUM IDENTIFIER '{' enumerator_list '}'
   {
@@ -219,12 +268,71 @@ enum_type: ENUM IDENTIFIER '{' enumerator_list '}'
 ;
 
 
+/* --- type declarators ---------------------------------------------------- */
+
+declarator: simple_declarator | array_declarator;
+
+simple_declarator: IDENTIFIER
+  {
+    $$ = dcl_create(@1, $1);
+  }
+;
+
+array_declarator:
+  simple_declarator fixed_array_size
+  {
+    assert($2.k == CST_UINT);
+    $$ = $1 ? dcl_adddim($1, $2.u) : NULL;
+  }
+  | array_declarator fixed_array_size
+  {
+    assert($2.k == CST_UINT);
+    $$ = $1 ? dcl_adddim($1, $2.u) : NULL;
+  }
+;
+
+fixed_array_size: '[' positive_int_const ']'
+  {
+    $$ = $2;
+  }
+;
+
+
 /* --- type specification -------------------------------------------------- */
 
-/* all the ways to reference a type definition */
+type_spec: simple_type_spec | constr_type_spec;
+
+simple_type_spec: base_type_spec | template_type_spec | named_type;
+constr_type_spec: constr_type;
+
+named_type: scoped_name
+  {
+    $$ = type_find($1);
+    if (!$$) parserror(@1, "unknown type %s", $1);
+  }
+;
+
+base_type_spec:
+  boolean_type | integer_type | floating_pt_type | char_type | octet_type |
+  any_type;
+template_type_spec: sequence_type | string_type | fixed_type;
 
 integer_type: signed_int | unsigned_int;
 floating_pt_type: float_type | double_type;
+
+signed_int: signed_long_int | signed_short_int;
+unsigned_int: unsigned_long_int | unsigned_short_int;
+
+unsigned_short_int: UNSIGNED SHORT { $$ = type_newbasic(@1, NULL, IDL_USHORT); };
+unsigned_long_int: UNSIGNED LONG   { $$ = type_newbasic(@1, NULL, IDL_ULONG); };
+signed_short_int: SHORT		   { $$ = type_newbasic(@1, NULL, IDL_SHORT); };
+signed_long_int: LONG		   { $$ = type_newbasic(@1, NULL, IDL_LONG); };
+float_type: FLOAT		   { $$ = type_newbasic(@1, NULL, IDL_FLOAT); };
+double_type: DOUBLE		   { $$ = type_newbasic(@1, NULL, IDL_DOUBLE); };
+char_type: CHAR			   { $$ = type_newbasic(@1, NULL, IDL_CHAR); };
+boolean_type: BOOLEAN		   { $$ = type_newbasic(@1, NULL, IDL_BOOL); };
+octet_type: OCTET		   { $$ = type_newbasic(@1, NULL, IDL_OCTET); };
+any_type: ANY			   { $$ = type_newbasic(@1, NULL, IDL_ANY); };
 
 string_type:
   STRING '<' positive_int_const '>'
@@ -235,6 +343,122 @@ string_type:
   | STRING
   {
     $$ = type_newstring(@1, NULL, -1UL);
+  }
+;
+
+sequence_type:
+  SEQUENCE '<' simple_type_spec ',' positive_int_const '>'
+  {
+    assert($5.k == CST_UINT);
+    $$ = $3 ? type_newsequence(@1, NULL, $3, $5.u) : NULL;
+  }
+  | SEQUENCE '<' simple_type_spec '>'
+  {
+    $$ = $3 ? type_newsequence(@1, NULL, $3, -1UL) : NULL;
+  }
+;
+
+fixed_type:
+  FIXED '<' positive_int_const ',' positive_int_const '>'
+  {
+    $$ = NULL;
+    parserror(@1, "fixed point types not implemented");
+  }
+  | FIXED
+  {
+    $$ = NULL;
+    parserror(@1, "fixed point types not implemented");
+  }
+;
+
+switch_type_spec:
+  integer_type | char_type | boolean_type | enum_type
+  | named_type
+  {
+    $$ = $1; if (!$$) break;
+
+    switch(type_kind(type_final($$))) {
+      case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+      case IDL_LONG: case IDL_CHAR: case IDL_ENUM:
+	break;
+
+      case IDL_FLOAT: case IDL_DOUBLE: case IDL_OCTET: case IDL_STRING:
+      case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
+      case IDL_STRUCT: case IDL_UNION:
+	parserror(@1, "%s %s is not a valid type for union switch",
+		  type_strkind(type_kind($$)), $1);
+	parsenoerror(type_loc($$), "  %s %s declared here",
+		     type_strkind(type_kind($$)), $1);
+	$$ = NULL;
+	break;
+
+      case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
+	/* not a valid return from type_final() */
+	assert(0); break;
+    }
+  }
+;
+
+switch_body: case | switch_body case
+  {
+    $$ = $1 ? $1 : $2;
+  }
+;
+
+case: case_label_list type_spec declarator ';'
+  {
+    dcliter i;
+
+    if (!$1 || !$2 || !$3) {
+      $$ = NULL;
+      if ($2 && !type_name($2)) type_destroy($2);
+      if ($3) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+      dcl_destroy($3);
+      break;
+    }
+
+    /* for arrays, create intermediate anon array types */
+    for(dcl_inner($3, &i); i.value != -1UL; dcl_next(&i)) {
+      $2 = type_newarray(@3, NULL, $2, i.value);
+      if (!$2) break;
+    }
+    if (!$2) {
+      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+      dcl_destroy($3);
+      break;
+    }
+
+    $$ = type_newcase(@3, dcl_name($3), $2, $1);
+    if (!$$) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+    dcl_destroy($3);
+  }
+;
+
+case_label_list:
+  case_label
+  {
+    $$ = clist_append(NULL, $1);
+  }
+  | case_label_list case_label
+  {
+    $$ = clist_append($1, $2);
+    if (!$$) {
+      parsewarning(@2, "ignoring duplicate %s label",
+		   $2.k == CST_VOID?"default":"case");
+      $$ = $1;
+    }
+  }
+;
+
+case_label:
+  CASE const_expr ':'
+  {
+    $$ = $2;
+  }
+  | DEFAULT ':'
+  {
+    $$.k = CST_VOID;
+    $$.u = -1UL;
   }
 ;
 
@@ -263,27 +487,13 @@ enumerator: IDENTIFIER
   }
 ;
 
-signed_int: signed_long_int | signed_short_int;
-unsigned_int: unsigned_long_int | unsigned_short_int;
-
-unsigned_short_int: UNSIGNED SHORT { $$ = type_newbasic(@1, NULL, IDL_USHORT); };
-unsigned_long_int: UNSIGNED LONG   { $$ = type_newbasic(@1, NULL, IDL_ULONG); };
-signed_short_int: SHORT		   { $$ = type_newbasic(@1, NULL, IDL_SHORT); };
-signed_long_int: LONG		   { $$ = type_newbasic(@1, NULL, IDL_LONG); };
-float_type: FLOAT		   { $$ = type_newbasic(@1, NULL, IDL_FLOAT); };
-double_type: DOUBLE		   { $$ = type_newbasic(@1, NULL, IDL_DOUBLE); };
-char_type: CHAR			   { $$ = type_newbasic(@1, NULL, IDL_CHAR); };
-boolean_type: BOOLEAN		   { $$ = type_newbasic(@1, NULL, IDL_BOOL); };
-octet_type: OCTET		   { $$ = type_newbasic(@1, NULL, IDL_OCTET); };
-any_type: ANY			   { $$ = type_newbasic(@1, NULL, IDL_ANY); };
-
 
 /* --- scopes -------------------------------------------------------------- */
 
 /* scopes are created as a side effect of certain declarations (modules,
  * interfaces, ...) or types (structures, unions, ...) */
 
-scope_push_module: IDENTIFIER
+scope_push: IDENTIFIER
   {
     $$ = scope_push(@1, $1);
     if (!$$) {
@@ -473,25 +683,19 @@ primary_expr:
   {
     $$ = $2;
   }
-  | scoped_name
+  | named_type
   {
-    idltype_s t = type_find($1);
-    if (!t) {
-      parserror(@1, "unknown type %s", $1);
-      $$.k = CST_UINT;
-      $$.u = 0;
-      break;
-    }
+    if (!$1) { $$.k = CST_UINT; $$.u = 0; break; }
 
-    switch(type_kind(t)) {
-      case IDL_CONST:		$$ = type_constvalue(t);	break;
-      case IDL_ENUMERATOR:	$$.k = CST_ENUM; $$.e = t;	break;
+    switch(type_kind($1)) {
+      case IDL_CONST:		$$ = type_constvalue($1);	break;
+      case IDL_ENUMERATOR:	$$.k = CST_ENUM; $$.e = $1;	break;
 
       default:
 	parserror(@1, "%s %s is not valid in an expression",
-		  type_strkind(type_kind(t)), $1);
-	parsenoerror(type_loc(t), "  %s %s declared here",
-		     type_strkind(type_kind(t)), $1);
+		  type_strkind(type_kind($1)), type_name($1));
+	parsenoerror(type_loc($1), "  %s %s declared here",
+		     type_strkind(type_kind($1)), type_name($1));
 	$$.k = CST_UINT;
 	$$.u = 0;
 	break;
@@ -573,5 +777,5 @@ cpphash:
 void
 dotgenerror(const char *msg)
 {
-  ;
+  parserror(curloc, "%s around column %d", msg, curloc.col);
 }

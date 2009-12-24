@@ -26,6 +26,7 @@ genom3_SOURCES=\
 	hash.c		\
 	const.c		\
 	scope.c		\
+	declarator.c	\
 	idltype.c	\
 	string.c	\
 	dotgen.y	\

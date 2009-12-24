@@ -42,14 +42,17 @@ struct idltype_s {
 
   scope_s scope;
   union {
-    unsigned long length;	/**< string */
-    hash_s members;		/**< enum */
-    struct idltype_s *parent;	/**< enumerator */
-    struct idltype_s *alias;
     struct {
-      struct idltype_s *type;
-      cval value;
-    };				/**< const */
+      idltype_s type;		/**< sequence, const, enumerator, typedef,
+				 * member, case, union */
+      union {
+	unsigned long length;	/**< string, sequence */
+	cval value;		/**< const */
+	clist_s values;		/**< case */
+	scope_s cases;		/**< union */
+      };
+    };
+    hash_s members;		/**< enum */
   };
 };
 
@@ -102,9 +105,9 @@ type_new(tloc l, idlkind k, const char *name)
   t->kind = k;
   t->name = name ? string(name) : NULL;
   t->fullname = name ? strings(scope_fullname(s), "::", name, NULL) : NULL;
+  t->type = NULL;
   t->members = NULL;
-  t->parent = NULL;
-  t->alias = NULL;
+  t->length = 0;
   t->value = (cval){ 0 };
 
   /* don't register anything for anon types */
@@ -143,30 +146,24 @@ type_newstring(tloc l, const char *name, unsigned long len)
 }
 
 idltype_s
+type_newsequence(tloc l, const char *name, idltype_s t, unsigned long len)
+{
+  idltype_s c = type_new(l, IDL_SEQUENCE, name);
+  if (!c) return NULL;
+  assert(t);
+
+  c->type = t;
+  c->length = len;
+  return c;
+}
+
+idltype_s
 type_newconst(tloc l, const char *name, idltype_s t, cval v)
 {
   idltype_s c;
-  int s;
   assert(t);
 
-  s = const_cast(&v, t);
-  switch(s) {
-    case EINVAL:
-      parserror(l, "%s%s%s is not a valid constant type",
-		type_strkind(type_kind(t)),
-		type_name(t)?" ":"", type_name(t)?type_name(t):"");
-      parsenoerror(type_loc(t), "  %s%s%s declared here",
-		   type_strkind(type_kind(t)),
-		   type_name(t)?" ":"", type_name(t)?type_name(t):"");
-      break;
-
-    case EDOM:
-      parserror(l, "cannot convert constant expression to %s%s%s",
-		type_strkind(type_kind(t)),
-		type_name(t)?" ":"", type_name(t)?type_name(t):"");
-      break;
-  }
-  if (s) return NULL;
+  if (const_cast(l, &v, t)) return NULL;
 
   c = type_new(l, IDL_CONST, name);
   if (!c) return NULL;
@@ -186,8 +183,8 @@ type_newenum(tloc l, const char *name, hash_s enumerators)
   if ((t->members = enumerators))
     for(hash_first(t->members, &i); i.current; hash_next(&i)) {
       assert(((idltype_s)i.value)->kind == IDL_ENUMERATOR);
-      assert(((idltype_s)i.value)->parent == NULL);
-      ((idltype_s)i.value)->parent = t;
+      assert(((idltype_s)i.value)->type == NULL);
+      ((idltype_s)i.value)->type = t;
     }
 
   return t;
@@ -199,8 +196,97 @@ type_newenumerator(tloc l, const char *name)
   idltype_s t = type_new(l, IDL_ENUMERATOR, name);
   if (!t) return NULL;
 
-  t->parent = NULL;
+  t->type = NULL;
   return t;
+}
+
+idltype_s
+type_newarray(tloc l, const char *name, idltype_s t, unsigned long len)
+{
+  idltype_s c = type_new(l, IDL_ARRAY, name);
+  if (!c) return NULL;
+  assert(t);
+
+  c->type = t;
+  c->length = len;
+  return c;
+}
+
+idltype_s
+type_newmember(tloc l, const char *name, idltype_s t)
+{
+  idltype_s c = type_new(l, IDL_MEMBER, name);
+  if (!c) return NULL;
+  assert(t);
+
+  c->type = t;
+  return c;
+}
+
+idltype_s
+type_newunion(tloc l, const char *name, idltype_s t, scope_s s)
+{
+  hiter i;
+  citer j;
+  idltype_s c;
+  assert(t && s);
+
+  /* assert that scope contains only IDL_CASE types and check that the case
+   * label matches the switch type */
+  for(scope_firstype(s, &i); i.current; scope_nextype(&i)) {
+    c = i.value;
+    assert(c->kind == IDL_CASE);
+    for(clist_first(c->values, &j); j.value; clist_next(&j))
+      if (j.value->k != CST_VOID && const_cast(type_loc(c), j.value, t)) {
+	parserror(type_loc(c), "case label incompatible with switch");
+	return NULL;
+      }
+  }
+
+  /* switch type must not clash with members */
+  if (type_name(t) && (c = scope_findtype(s, type_name(t)))) {
+    parserror(type_loc(c), "union member %s clashes with switch type %s",
+	      type_name(c), type_name(t));
+    parsenoerror(l, "  %s used here", type_name(t));
+    return NULL;
+  }
+
+  c = type_new(l, IDL_UNION, name);
+  if (!c) return NULL;
+  c->type = t;
+  c->cases = s;
+  return c;
+}
+
+idltype_s
+type_newcase(tloc l, const char *name, idltype_s t, clist_s c)
+{
+  hiter i;
+  citer j, k;
+  idltype_s u;
+  assert(t && c);
+
+  /* check case values unicity in current scope - not a very efficient
+   * algorithm but there won't usually be hundreds of elements in the lists. */
+  for(scope_firstype(scope_current(), &i); i.current; scope_nextype(&i)) {
+    u = i.value; if (u->kind != IDL_CASE) continue;
+    for(clist_first(u->values, &j); j.value; clist_next(&j))
+      for(clist_first(c, &k); k.value; clist_next(&k))
+	if (const_equal(*k.value, *j.value)) {
+	  parserror(l, "duplicate %s label",
+		    k.value->k == CST_VOID?"default":"case");
+	  parsenoerror(type_loc(u), "  %s label already defines %s %s",
+		       k.value->k == CST_VOID?"default":"case",
+		       type_strkind(IDL_CASE), u->name);
+	  return NULL;
+	}
+  }
+
+  u = type_new(l, IDL_CASE, name);
+  if (!u) return NULL;
+  u->type = t;
+  u->values = c;
+  return u;
 }
 
 
@@ -252,8 +338,7 @@ type_equal(idltype_s a, idltype_s b)
     case IDL_ARRAY: case IDL_SEQUENCE:
     case IDL_STRUCT: case IDL_UNION:
 
-    case IDL_CONST:
-    case IDL_TYPEDEF:
+    case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       /* not a valid return from type_final() */
       break;
   }
@@ -309,11 +394,8 @@ type_final(idltype_s t)
     case IDL_STRUCT: case IDL_UNION:
       return t;
 
-    case IDL_CONST:
+    case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       return type_final(t->type);
-
-    case IDL_TYPEDEF:
-      return type_final(t->alias);
   }
 
   assert(0);
@@ -341,7 +423,7 @@ idltype_s
 type_enumeratorenum(idltype_s t)
 {
   assert(t && t->kind == IDL_ENUMERATOR);
-  return t->parent;
+  return t->type;
 }
 
 
@@ -372,7 +454,9 @@ type_strkind(idlkind k)
     case IDL_ARRAY:		return "array";
     case IDL_SEQUENCE:		return "sequence";
     case IDL_STRUCT:		return "struct";
+    case IDL_MEMBER:		return "struct member";
     case IDL_UNION:		return "union";
+    case IDL_CASE:		return "union member";
 
     case IDL_TYPEDEF:		return "typedef";
   }

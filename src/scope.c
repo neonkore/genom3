@@ -82,6 +82,18 @@ scope_global()
 }
 
 
+/* --- scope_findtype ------------------------------------------------------ */
+
+/** Look for type in the given scope
+ */
+idltype_s
+scope_findtype(scope_s s, const char *name)
+{
+  assert(s);
+  return hash_find(s->idltypes, name);
+}
+
+
 /* --- scope_addtype ------------------------------------------------------- */
 
 /** Register type in the given scope
@@ -127,7 +139,7 @@ scope_addtype(scope_s s, idltype_s t)
   if (e) return errno;
 
   type_setscope(t, s);
-  xwarnx("registered type %s in %s scope", type_name(t),
+  xwarnx("registered name %s in %s scope", type_name(t),
 	 s->fullname[0]?s->fullname:"global");
   return 0;
 }
@@ -149,6 +161,24 @@ scope_deltype(scope_s s, idltype_s t)
   xwarnx("removed type %s from %s scope", type_name(t),
 	 s->fullname[0]?s->fullname:"global");
   return e;
+}
+
+
+/* --- scope_firstype/nextype ---------------------------------------------- */
+
+/** Iterate over scope's types
+ */
+int
+scope_firstype(scope_s s, hiter *i)
+{
+  assert(s);
+  return hash_first(s->idltypes, i);
+}
+
+int
+scope_nextype(hiter *i)
+{
+  return hash_next(i);
 }
 
 
@@ -217,6 +247,24 @@ scope_pop()
   s = current;
   current = current->parent;
   xwarnx("popped %s scope", s->fullname);
+  return s;
+}
+
+
+/* --- scope_detach -------------------------------------------------------- */
+
+/** Detach scope from parent
+ */
+
+scope_s
+scope_detach(scope_s s)
+{
+  if (!s || !s->parent) return s;
+
+  /* remove from parent table */
+  hash_remove(s->parent->children, s->name, 0);
+
+  xwarnx("detached %s scope", s->fullname);
   return s;
 }
 

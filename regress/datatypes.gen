@@ -11,4 +11,8 @@ const float c3 = 3.14;
 const m1::e1 c4 = m1::e1v2;
 
 module m2 {
+  union u1 switch(c1) {
+  case TRUE: short a[2];
+  default: long b;
+  };
 };

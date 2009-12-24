@@ -24,9 +24,23 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 #include <errno.h>
+#include <err.h>
 
 #include "genom.h"
+
+/* --- local data ---------------------------------------------------------- */
+
+struct clist_s {
+  cval v;
+  clist_s next;
+};
+
+
+static cvalkind	const_maxkind(cvalkind a, cvalkind b);
+
 
 /* --- const_unaryop ------------------------------------------------------- */
 
@@ -37,7 +51,7 @@ const_unaryop(cval *value, char op)
 {
   assert(value);
   switch(value->k) {
-    case CST_CHAR: case CST_STRING: case CST_ENUM: return EDOM;
+    case CST_VOID: case CST_CHAR: case CST_STRING: case CST_ENUM: return EDOM;
     default: break;
   }
 
@@ -77,45 +91,26 @@ const_binaryop(cval *value, char op, cval arg)
   int s;
   assert(value);
   switch(value->k) {
-    case CST_CHAR: case CST_STRING: case CST_ENUM: return EDOM;
+    case CST_VOID: case CST_CHAR: case CST_STRING: case CST_ENUM: return EDOM;
     default: break;
   }
 
   /* convert arg and value to the largest type, except for << and >> which
    * needs unsigned arg */
-  if (op != '<' && op != '>') {
-    switch(value->k) {
-      case CST_BOOL:	s = const_convert(&arg, value->k); break;
-      case CST_UINT:
-	switch(arg.k) {
-	  case CST_BOOL:s = const_convert(&arg, value->k); break;
-	  default:	s = const_convert(value, arg.k); break;
-	}
-	break;
-      case CST_INT:
-	switch(arg.k) {
-	  case CST_BOOL:
-	  case CST_UINT:s = const_convert(&arg, value->k); break;
-	  default:	s = const_convert(value, arg.k); break;
-	}
-	break;
+  switch(op) {
+    case '<': case '>':
+      s = const_convert(&arg, CST_UINT);
+      if (s) return s;
+      break;
 
-      case CST_FLOAT:
-	switch(arg.k) {
-	  case CST_BOOL:
-	  case CST_UINT:
-	  case CST_INT:	s = const_convert(&arg, value->k); break;
-	  default:	s = const_convert(value, arg.k); break;
-	}
-	break;
-
-      default:		s = const_convert(value, arg.k); break;
+    default: {
+      cvalkind k = const_maxkind(value->k, arg.k);
+      s = const_convert(value, k);
+      if (s) return s;
+      s = const_convert(&arg, k);
+      if (s) return s;
+      assert(value->k == arg.k);
     }
-    if (s) return s;
-    assert(value->k == arg.k);
-  } else {
-    s = const_convert(&arg, CST_UINT);
-    if (s) return s;
   }
 
   /* compute result */
@@ -190,6 +185,35 @@ const_binaryop(cval *value, char op, cval arg)
 }
 
 
+/* --- const_equal --------------------------------------------------------- */
+
+/** Return true if the two const values are equal
+ */
+int
+const_equal(cval a, cval b)
+{
+  cvalkind k = const_maxkind(a.k, b.k);
+
+  if (const_convert(&a, k)) return 0;
+  if (const_convert(&b, k)) return 0;
+  assert(a.k == b.k);
+
+  switch(a.k) {
+    case CST_VOID:	return 1;
+    case CST_BOOL:	return a.b == b.b;
+    case CST_UINT:	return a.u == b.u;
+    case CST_INT:	return a.i == b.i;
+    case CST_FLOAT:	return a.f == b.f;
+    case CST_CHAR:	return a.c == b.c;
+    case CST_STRING:	return strcmp(a.s, b.s)?0:1;
+    case CST_ENUM:	return type_equal(a.e, b.e);
+  }
+
+  assert(0);
+  return 0;
+}
+
+
 /* --- const_convert ------------------------------------------------------- */
 
 /** convert the cval to the given type
@@ -242,6 +266,7 @@ const_convert(cval *value, cvalkind k)
       }
       break;
 
+    case CST_VOID:
     case CST_CHAR:
     case CST_STRING:
     case CST_ENUM:
@@ -254,12 +279,12 @@ const_convert(cval *value, cvalkind k)
 }
 
 
-/* --- const_convert ------------------------------------------------------- */
+/* --- const_cast ---------------------------------------------------------- */
 
 /** convert the cval to the given type
  */
 int
-const_cast(cval *value, idltype_s t)
+const_cast(tloc l, cval *value, idltype_s t)
 {
   int s;
   assert(value && t);
@@ -282,14 +307,129 @@ const_cast(cval *value, idltype_s t)
       } else s = EDOM;
       break;
 
-    case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY:
-    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
+    case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
+    case IDL_STRUCT: case IDL_UNION:
+      parserror(l, "%s%s%s is not a valid constant type",
+		type_strkind(type_kind(t)),
+		type_name(t)?" ":"", type_name(t)?type_name(t):"");
+      parsenoerror(type_loc(t), "  %s%s%s declared here",
+		   type_strkind(type_kind(t)),
+		   type_name(t)?" ":"", type_name(t)?type_name(t):"");
       return EINVAL;
 
-    case IDL_CONST: case IDL_TYPEDEF:
+    case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       /* not a valid return from type_final() */
       assert(0); break;
   }
 
+  if (s)
+    parserror(l, "cannot convert constant expression to %s%s%s",
+	      type_strkind(type_kind(t)),
+	      type_name(t)?" ":"", type_name(t)?type_name(t):"");
   return s;
+}
+
+
+/* --- const_maxkind ------------------------------------------------------- */
+
+/** Return the max kind (that can contain both given kind values)
+ */
+static cvalkind
+const_maxkind(cvalkind a, cvalkind b)
+{
+  switch(a) {
+    case CST_BOOL:		return a;
+    case CST_UINT:
+      switch(b) {
+	case CST_BOOL:		return a;
+	default:		return b;
+      }
+    case CST_INT:
+      switch(b) {
+	case CST_BOOL:
+	case CST_UINT:		return a;
+	default:		return b;
+      }
+
+    case CST_FLOAT:
+      switch(b) {
+	case CST_BOOL:
+	case CST_UINT:
+	case CST_INT:		return a;
+	default:		return b;
+      }
+
+    default:			return b;
+  }
+}
+
+
+/* --- clist_append -------------------------------------------------------- */
+
+/** Create a list element or append to existing
+ */
+
+clist_s
+clist_append(clist_s l, cval v)
+{
+  clist_s i;
+  clist_s e = malloc(sizeof(*e));
+  if (!e) {
+    warnx("memory exhausted, cannot create list");
+    return l;
+  }
+  e->v = v;
+  e->next = NULL;
+  if (!l) return e;
+
+  /* chain to the tail and filter duplicates */
+  for(i = l; i->next; i = i->next)
+    if (const_equal(i->v, v)) { free(e); return NULL; }
+  if (const_equal(i->v, v)) { free(e); return NULL; }
+
+  i->next = e;
+  return l;
+}
+
+
+/* --- clist_destroy ------------------------------------------------------- */
+
+/** Destroy a list
+ */
+
+void
+clist_destroy(clist_s l)
+{
+  clist_s i;
+
+  while(l) {
+    i = l; l = l->next; free(i);
+  }
+}
+
+
+/* --- clist_first/next ---------------------------------------------------- */
+
+/** Iterate over list's elements
+ */
+int
+clist_first(clist_s l, citer *i)
+{
+  assert(i);
+
+  i->current = l;
+  i->value = l?&l->v:NULL;
+
+  return l?0:ENOENT;
+}
+
+int
+clist_next(citer *i)
+{
+  assert(i);
+
+  i->current = i->current?i->current->next:NULL;
+  i->value = i->current?&i->current->v:NULL;
+
+  return i->current?0:ENOENT;
 }

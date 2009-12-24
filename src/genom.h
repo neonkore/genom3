@@ -213,9 +213,11 @@ idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
 idltype_s	type_newenumerator(tloc l, const char *name);
 idltype_s	type_newarray(tloc l, const char *name, idltype_s t,
 			unsigned long len);
+idltype_s	type_newstruct(tloc l, const char *name, scope_s s);
 idltype_s	type_newmember(tloc l, const char *name, idltype_s t);
 idltype_s	type_newunion(tloc l, const char *name, idltype_s t, scope_s s);
 idltype_s	type_newcase(tloc l, const char *name, idltype_s t, clist_s c);
+idltype_s	type_newalias(tloc l, const char *name, idltype_s t);
 void		type_destroy(idltype_s t);
 
 int		type_equal(idltype_s a, idltype_s b);

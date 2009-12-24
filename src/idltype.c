@@ -49,7 +49,7 @@ struct idltype_s {
 	unsigned long length;	/**< string, sequence */
 	cval value;		/**< const */
 	clist_s values;		/**< case */
-	scope_s cases;		/**< union */
+	scope_s elems;		/**< struct, union */
       };
     };
     hash_s members;		/**< enum */
@@ -213,6 +213,17 @@ type_newarray(tloc l, const char *name, idltype_s t, unsigned long len)
 }
 
 idltype_s
+type_newstruct(tloc l, const char *name, scope_s s)
+{
+  idltype_s t = type_new(l, IDL_STRUCT, name);
+  if (!t) return NULL;
+  assert(s);
+
+  t->elems = s;
+  return t;
+}
+
+idltype_s
 type_newmember(tloc l, const char *name, idltype_s t)
 {
   idltype_s c = type_new(l, IDL_MEMBER, name);
@@ -231,11 +242,9 @@ type_newunion(tloc l, const char *name, idltype_s t, scope_s s)
   idltype_s c;
   assert(t && s);
 
-  /* assert that scope contains only IDL_CASE types and check that the case
-   * label matches the switch type */
+  /* check that all case labels match the switch type */
   for(scope_firstype(s, &i); i.current; scope_nextype(&i)) {
-    c = i.value;
-    assert(c->kind == IDL_CASE);
+    c = i.value; if (c->kind != IDL_CASE) continue;
     for(clist_first(c->values, &j); j.value; clist_next(&j))
       if (j.value->k != CST_VOID && const_cast(type_loc(c), j.value, t)) {
 	parserror(type_loc(c), "case label incompatible with switch");
@@ -245,8 +254,8 @@ type_newunion(tloc l, const char *name, idltype_s t, scope_s s)
 
   /* switch type must not clash with members */
   if (type_name(t) && (c = scope_findtype(s, type_name(t)))) {
-    parserror(type_loc(c), "union member %s clashes with switch type %s",
-	      type_name(c), type_name(t));
+    parserror(type_loc(c), "%s %s clashes with switch type %s",
+	      type_strkind(type_kind(c)), type_name(c), type_name(t));
     parsenoerror(l, "  %s used here", type_name(t));
     return NULL;
   }
@@ -254,7 +263,7 @@ type_newunion(tloc l, const char *name, idltype_s t, scope_s s)
   c = type_new(l, IDL_UNION, name);
   if (!c) return NULL;
   c->type = t;
-  c->cases = s;
+  c->elems = s;
   return c;
 }
 
@@ -287,6 +296,17 @@ type_newcase(tloc l, const char *name, idltype_s t, clist_s c)
   u->type = t;
   u->values = c;
   return u;
+}
+
+idltype_s
+type_newalias(tloc l, const char *name, idltype_s t)
+{
+  idltype_s c = type_new(l, IDL_TYPEDEF, name);
+  if (!c) return NULL;
+  assert(t);
+
+  c->type = t;
+  return c;
 }
 
 

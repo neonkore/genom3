@@ -90,7 +90,8 @@
 %type <type>	floating_pt_type float_type double_type
 %type <type>	boolean_type char_type octet_type any_type
 %type <type>	sequence_type string_type fixed_type named_type
-%type <type>	union_type enum_type enumerator case switch_body
+%type <type>	struct_type union_type enum_type enumerator case switch_body
+%type <type>	alias_list member member_list
 %type <hash>	enumerator_list
 %type <v>	case_label
 %type <vlist>	case_label_list
@@ -201,14 +202,42 @@ const_type:
 /* These rules cover the `typedef' token, but also `struct', `enum' and
  * `union'. */
 
-type_dcl:
-   /* TYPEDEF alias_type_list */
-   /* { */
-   /* } */
-/*   | */ constr_type
-;
+type_dcl: constr_type | TYPEDEF alias_list { $$ = $2; };
 
-constr_type: /* struct_type | */ union_type | enum_type;
+constr_type: struct_type | union_type | enum_type;
+
+struct_type: STRUCT scope_push '{' member_list '}'
+  {
+    scope_s s = scope_detach(scope_pop());
+    assert(s == $2);
+
+    if (scope_name(s)[0] == '&') {
+      /* there was an error during the creation of the scope. */
+      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
+      scope_destroy(s);
+      break;
+    }
+
+    $$ = type_newstruct(@1, scope_name(s), s);
+    if (!$$) {
+      parserror(@1, "dropped declaration for '%s'", scope_name(s));
+      scope_destroy(s);
+    }
+  }
+  | STRUCT scope_push error '}'
+  {
+    scope_s s = scope_detach(scope_pop());
+    assert(s == $2);
+
+    if (scope_name(s)[0] == '&') {
+      /* there was an error during the creation of the scope. */
+      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
+    } else
+      parserror(@1, "dropped declaration for '%s'", scope_name(s));
+
+    scope_destroy(s);
+  }
+;
 
 union_type:
   UNION scope_push SWITCH '(' switch_type_spec ')' '{' switch_body '}'
@@ -402,6 +431,118 @@ switch_type_spec:
 switch_body: case | switch_body case
   {
     $$ = $1 ? $1 : $2;
+  }
+;
+
+alias_list:
+  type_spec declarator
+  {
+    dcliter i;
+
+    $$ = $1;
+    if (!$1 || !$2) {
+      if ($2) parserror(@2, "dropped declaration for '%s'", dcl_name($2));
+      dcl_destroy($2);
+      break;
+    }
+
+    /* for arrays, create intermediate anon array types */
+    for(dcl_inner($2, &i); i.value != -1UL; dcl_next(&i)) {
+      $1 = type_newarray(@2, NULL, $1, i.value);
+      if (!$1) break;
+    }
+    if (!$1) {
+      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
+      dcl_destroy($2);
+      break;
+    }
+
+    if (!type_newalias(@2, dcl_name($2), $1))
+      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
+    dcl_destroy($2);
+  }
+  | alias_list ',' declarator
+  {
+    dcliter i;
+
+    $$ = $1;
+    if (!$1 || !$3) {
+      if ($3) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+      dcl_destroy($3);
+      break;
+    }
+
+    /* for arrays, create intermediate anon array types */
+    for(dcl_inner($3, &i); i.value != -1UL; dcl_next(&i)) {
+      $1 = type_newarray(@3, NULL, $1, i.value);
+      if (!$1) break;
+    }
+    if (!$1) {
+      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+      dcl_destroy($3);
+      break;
+    }
+
+    if (!type_newalias(@3, dcl_name($3), $1))
+      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+    dcl_destroy($3);
+  }
+;
+
+member_list: member ';' | member_list member ';';
+
+member:
+  type_spec declarator
+  {
+    dcliter i;
+
+    $$ = $1;
+    if (!$1 || !$2) {
+      if ($2) parserror(@2, "dropped declaration for '%s'", dcl_name($2));
+      dcl_destroy($2);
+      break;
+    }
+
+    /* for arrays, create intermediate anon array types */
+    for(dcl_inner($2, &i); i.value != -1UL; dcl_next(&i)) {
+      $1 = type_newarray(@2, NULL, $1, i.value);
+      if (!$1) break;
+    }
+    if (!$1) {
+      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
+      dcl_destroy($2);
+      break;
+    }
+
+    if (!type_newmember(@2, dcl_name($2), $1))
+      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
+    dcl_destroy($2);
+  }
+  | member ',' declarator
+  {
+    dcliter i;
+
+    $$ = $1;
+    if (!$1 || !$3) {
+      if ($3) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+      dcl_destroy($3);
+      break;
+    }
+
+    /* for arrays, create intermediate anon array types */
+    for(dcl_inner($3, &i); i.value != -1UL; dcl_next(&i)) {
+      $1 = type_newarray(@3, NULL, $1, i.value);
+      if (!$1) break;
+    }
+    if (!$1) {
+      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+      dcl_destroy($3);
+      break;
+    }
+
+    if (!type_newmember(@3, dcl_name($3), $1))
+      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+    dcl_destroy($3);
   }
 ;
 

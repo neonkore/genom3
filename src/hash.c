@@ -59,7 +59,7 @@ struct hash_s {
 };
 
 /** expand hash table beyond this number of entries per bucket on average */
-#define hash_maxload	(3.)
+#define hash_maxload	(2.)
 
 
 static int		hash_expand(hash_s h);
@@ -84,7 +84,7 @@ hash_create(const char *name, int entries)
   h->first = NULL;
   h->last = NULL;
 
-  h->buckets = entries/hash_maxload + 1;
+  h->buckets = (int)(entries/hash_maxload)/2*2;
   if (h->buckets < 1) h->buckets = 1;
   if (h->buckets > 1024) h->buckets = 1024;
 
@@ -315,7 +315,7 @@ hash_expand(hash_s h)
 {
   hentry_s *oldb = h->bucket;
   unsigned int oldn = h->buckets;
-  unsigned int n = h->buckets * 2.7;
+  unsigned int n = h->buckets * 2;
   unsigned int index;
   hentry_s p, e;
   int i;
@@ -335,8 +335,8 @@ hash_expand(hash_s h)
     }
 
   free(oldb);
-  xwarnx("expanded hash %s with %d entries to %d buckets",
-	 h->name, h->n, h->buckets);
+  xwarnx("expanded hash %s with %d entries to %d buckets (was %d)",
+	 h->name, h->n, h->buckets, oldn);
   return 0;
 }
 
@@ -344,16 +344,15 @@ hash_expand(hash_s h)
 /* --- hstring ------------------------------------------------------------- */
 
 /** A supposedly good hash function for strings.
- * Ref. http://fr.wikipedia.org/wiki/Table_de_hachage
  */
 static unsigned long
 hstring(const char *key)
 {
-  unsigned long hash = 5381;
+  unsigned long hash = 0;
   if (!key) return 0;
 
   while(*key) {
-    hash = ((hash << 5) + hash) + (unsigned char)*(key++);
+    hash += (hash << 3) + (unsigned char)*(key++);
   }
   return hash;
 }

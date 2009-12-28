@@ -23,10 +23,25 @@ union u1 switch(m1::e1) {
 };
 
 typedef u1 t1;
+
+struct s3;
+struct s3;
+typedef sequence<s3> ss3;
+
+union u2;
+typedef sequence<u2> su2;
+
 typedef struct s3 {
   t1 a;
   sequence<s1::s2,10> b;
+  ss3 c;
+  su2 d;
 } t2;
+
+typedef union u2 switch(boolean) {
+ case TRUE: char a;
+ case FALSE: char b;
+} t3;
 
 module m2 {
 

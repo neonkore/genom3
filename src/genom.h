@@ -85,6 +85,11 @@ void	hash_pstat(hash_s h);
 
 typedef struct scope_s *scope_s;
 typedef struct idltype_s *idltype_s;
+typedef enum scopekind {
+  SCOPE_MODULE,
+  SCOPE_STRUCT,
+  SCOPE_UNION
+} scopekind;
 
 const char *	scope_name(scope_s s);
 const char *	scope_fullname(scope_s s);
@@ -98,7 +103,7 @@ int		scope_deltype(scope_s s, idltype_s t);
 int		scope_firstype(scope_s s, hiter *i);
 int		scope_nextype(hiter *i);
 
-scope_s		scope_push(tloc l, const char *name);
+scope_s		scope_push(tloc l, const char *name, scopekind k);
 scope_s		scope_pop(void);
 scope_s		scope_detach(scope_s s);
 int		scope_pushglobal(void);
@@ -194,17 +199,22 @@ typedef enum idlkind {
   IDL_UNION,		/**< union */
   IDL_CASE,		/**< element of union */
 
-  IDL_TYPEDEF		/**< typedef */
+  IDL_TYPEDEF,		/**< typedef */
+
+  IDL_FORWARD_STRUCT,	/**< forward struct declaration */
+  IDL_FORWARD_UNION	/**< forward union declaration */
 } idlkind;
 
 tloc		type_loc(idltype_s t);
 const char *	type_name(idltype_s t);
+const char *	type_fullname(idltype_s t);
 idlkind		type_kind(idltype_s t);
 cval		type_constvalue(idltype_s t);
 idltype_s	type_enumeratorenum(idltype_s t);
 void		type_setscope(idltype_s t, scope_s s);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
+idltype_s	type_newforward(tloc l, const char *name, idlkind k);
 idltype_s	type_newstring(tloc l, const char *name, unsigned long len);
 idltype_s	type_newsequence(tloc l, const char *name, idltype_s t,
 			unsigned long len);

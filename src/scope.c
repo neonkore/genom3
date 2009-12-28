@@ -187,7 +187,7 @@ scope_nextype(hiter *i)
 /** Create new scope in the current scope
  */
 scope_s
-scope_push(tloc l, const char *name)
+scope_push(tloc l, const char *name, scopekind k)
 {
   int e;
   scope_s s;
@@ -206,11 +206,15 @@ scope_push(tloc l, const char *name)
 
   t = hash_find(current->idltypes, name);
   if (t) {
-    parserror(l, "declaration of '%s' clashes with existing %s",
-	      name, type_strkind(type_kind(t)));
-    parsenoerror(type_loc(t), "  %s '%s' declared here",
-		 type_strkind(type_kind(t)), type_name(t));
-    return NULL;
+    /* handle forward declarations */
+    if (!((type_kind(t) == IDL_FORWARD_STRUCT && k == SCOPE_STRUCT) ||
+	  (type_kind(t) == IDL_FORWARD_UNION && k == SCOPE_UNION))) {
+      parserror(l, "declaration of '%s' clashes with existing %s",
+		name, type_strkind(type_kind(t)));
+      parsenoerror(type_loc(t), "  %s '%s' declared here",
+		   type_strkind(type_kind(t)), type_name(t));
+      return NULL;
+    }
   }
 
   /* scope might already exist in children */

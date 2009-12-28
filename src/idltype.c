@@ -60,6 +60,8 @@ tloc
 type_loc(idltype_s t) { assert(t); return t->loc; }
 const char *
 type_name(idltype_s t) { assert(t); return t->name; }
+const char *
+type_fullname(idltype_s t) { assert(t); return t->fullname; }
 idlkind
 type_kind(idltype_s t) { assert(t); return t->kind; }
 void
@@ -80,8 +82,9 @@ static idltype_s	type_new(tloc l, idlkind k, const char *name);
 static idltype_s
 type_new(tloc l, idlkind k, const char *name)
 {
-  idltype_s t;
+  idltype_s t, f;
   scope_s s;
+  char *c;
   int e;
 
   if (!htypes) {
@@ -113,10 +116,40 @@ type_new(tloc l, idlkind k, const char *name)
   /* don't register anything for anon types */
   if (!name) return t;
 
+  /* handle forward declarations */
+  c = strings(scope_fullname(s), "::", name, NULL);
+  f = hash_find(htypes, c);
+  if (f &&
+      ((type_kind(f) == IDL_FORWARD_STRUCT && k == IDL_STRUCT) ||
+       (type_kind(f) == IDL_FORWARD_UNION && k == IDL_UNION))) {
+    if (strcmp(f->loc.file, l.file)) {
+      parserror(l, "%s type %s defined in a different source file from"
+		" its forward declaration", type_strkind(k), t->fullname);
+      parsenoerror(f->loc, " %s %s declared here",
+		   type_strkind(type_kind(f)), f->fullname);
+      free(t);
+      return NULL;
+    }
+    f->loc = l;
+    f->kind = k;
+    free(t);
+    xwarnx("finalized %s type %s",
+	   type_strkind(type_kind(f)), f->fullname);
+    return f;
+  }
+  if (f &&
+      ((type_kind(f) == IDL_FORWARD_STRUCT && k == IDL_FORWARD_STRUCT) ||
+       (type_kind(f) == IDL_FORWARD_UNION && k == IDL_FORWARD_UNION))) {
+    free(t);
+    xwarnx("reusing already declared %s type %s",
+	   type_strkind(type_kind(f)), f->fullname);
+    return f;
+  }
+
+  /* register type */
   e = scope_addtype(s, t);
   if (e) { free(t); return NULL; }
 
-  /* register type */
   e = hash_insert(htypes, t->fullname, t, (hrelease_f)type_destroy);
   if (e) {
     scope_deltype(s, t);
@@ -133,6 +166,15 @@ idltype_s
 type_newbasic(tloc l, const char *name, idlkind k)
 {
   return type_new(l, k, name);
+}
+
+idltype_s
+type_newforward(tloc l, const char *name, idlkind k)
+{
+  idltype_s t = type_new(l, k, name);
+  assert(k == IDL_FORWARD_STRUCT || k == IDL_FORWARD_UNION);
+
+  return t;
 }
 
 idltype_s
@@ -215,7 +257,7 @@ type_newarray(tloc l, const char *name, idltype_s t, unsigned long len)
 idltype_s
 type_newstruct(tloc l, const char *name, scope_s s)
 {
-  idltype_s t = type_new(l, IDL_STRUCT, name);
+  idltype_s t = type_new(l, IDL_STRUCT, name);;
   if (!t) return NULL;
   assert(s);
 
@@ -260,8 +302,10 @@ type_newunion(tloc l, const char *name, idltype_s t, scope_s s)
     return NULL;
   }
 
+  /* ok */
   c = type_new(l, IDL_UNION, name);
   if (!c) return NULL;
+
   c->type = t;
   c->elems = s;
   return c;
@@ -350,8 +394,8 @@ type_equal(idltype_s a, idltype_s b)
     case IDL_STRING:
       return a->length == b->length;
 
-    case IDL_ENUMERATOR:
-    case IDL_ENUM:
+    case IDL_ENUMERATOR: case IDL_ENUM:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
       if (!a->fullname || !b->fullname) return 0;
       return strcmp(a->fullname, b->fullname)?0:1;
 
@@ -410,8 +454,8 @@ type_final(idltype_s t)
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
     case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
     case IDL_OCTET: case IDL_STRING: case IDL_ANY: case IDL_ENUM:
-    case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
-    case IDL_STRUCT: case IDL_UNION:
+    case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE: case IDL_STRUCT:
+    case IDL_UNION: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
       return t;
 
     case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
@@ -479,6 +523,9 @@ type_strkind(idlkind k)
     case IDL_CASE:		return "union member";
 
     case IDL_TYPEDEF:		return "typedef";
+
+    case IDL_FORWARD_STRUCT:	return "forward struct";
+    case IDL_FORWARD_UNION:	return "forward union";
   }
 
   assert(0);

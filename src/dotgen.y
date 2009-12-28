@@ -81,7 +81,7 @@
 %type <i>	spec statement
 %type <i>	module
 %type <type>	const_dcl const_type
-%type <type>	type_dcl constr_type
+%type <type>	type_dcl constr_type constr_forward_type
 %type <dcl>	declarator simple_declarator array_declarator
 %type <type>	type_spec simple_type_spec base_type_spec template_type_spec
 %type <type>	constr_type_spec switch_type_spec
@@ -95,7 +95,7 @@
 %type <hash>	enumerator_list
 %type <v>	case_label
 %type <vlist>	case_label_list
-%type <scope>	scope_push
+%type <scope>	scope_push_module scope_push_struct scope_push_union
 %type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
 %type <v>	or_expr xor_expr and_expr shift_expr add_expr mult_expr
@@ -125,7 +125,7 @@ statement:
 /** modules are IDL namespaces */
 
 module:
-  MODULE scope_push '{' spec '}'
+  MODULE scope_push_module '{' spec '}'
   {
     scope_s s = scope_pop();
 
@@ -136,7 +136,7 @@ module:
       scope_destroy(s);
     }
   }
-  | MODULE scope_push '{' '}'
+  | MODULE scope_push_module '{' '}'
   {
     scope_s s = scope_pop();
 
@@ -180,8 +180,9 @@ const_type:
       case IDL_OCTET: case IDL_STRING: case IDL_ENUM:
 	break;
 
-      case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY:
-      case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
+      case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
+      case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
+      case IDL_FORWARD_UNION:
 	parserror(@1, "%s %s is not a valid constant type",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -202,11 +203,11 @@ const_type:
 /* These rules cover the `typedef' token, but also `struct', `enum' and
  * `union'. */
 
-type_dcl: constr_type | TYPEDEF alias_list { $$ = $2; };
+type_dcl: constr_type | TYPEDEF alias_list { $$ = $2; } | constr_forward_type;
 
 constr_type: struct_type | union_type | enum_type;
 
-struct_type: STRUCT scope_push '{' member_list '}'
+struct_type: STRUCT scope_push_struct '{' member_list '}'
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
@@ -224,7 +225,7 @@ struct_type: STRUCT scope_push '{' member_list '}'
       scope_destroy(s);
     }
   }
-  | STRUCT scope_push error '}'
+  | STRUCT scope_push_struct error '}'
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
@@ -240,7 +241,7 @@ struct_type: STRUCT scope_push '{' member_list '}'
 ;
 
 union_type:
-  UNION scope_push SWITCH '(' switch_type_spec ')' '{' switch_body '}'
+  UNION scope_push_union SWITCH '(' switch_type_spec ')' '{' switch_body '}'
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
@@ -266,7 +267,7 @@ union_type:
       scope_destroy(s);
     }
   }
-  | UNION scope_push error '}'
+  | UNION scope_push_union error '}'
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
@@ -293,6 +294,17 @@ enum_type: ENUM IDENTIFIER '{' enumerator_list '}'
       }
       parserror(@1, "dropped declaration for '%s'", $2);
     }
+  }
+;
+
+constr_forward_type:
+  STRUCT IDENTIFIER
+  {
+    $$ = type_newforward(@1, $2, IDL_FORWARD_STRUCT);
+  }
+  | UNION IDENTIFIER
+  {
+    $$ = type_newforward(@1, $2, IDL_FORWARD_UNION);
   }
 ;
 
@@ -329,7 +341,17 @@ fixed_array_size: '[' positive_int_const ']'
 
 /* --- type specification -------------------------------------------------- */
 
-type_spec: simple_type_spec | constr_type_spec;
+type_spec: simple_type_spec
+  {
+    /* forward declarations are invalid type specification */
+    if ($1) if (type_kind($1) == IDL_FORWARD_STRUCT ||
+		type_kind($1) == IDL_FORWARD_UNION) {
+	parserror(@1, "cannot use %s %s before it is fully defined",
+		  type_strkind(type_kind($1)), type_name($1));
+	$$ = NULL;
+      }
+  }
+  | constr_type_spec;
 
 simple_type_spec: base_type_spec | template_type_spec | named_type;
 constr_type_spec: constr_type;
@@ -413,7 +435,8 @@ switch_type_spec:
 
       case IDL_FLOAT: case IDL_DOUBLE: case IDL_OCTET: case IDL_STRING:
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
-      case IDL_STRUCT: case IDL_UNION:
+      case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
+      case IDL_FORWARD_UNION:
 	parserror(@1, "%s %s is not a valid type for union switch",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -634,17 +657,40 @@ enumerator: IDENTIFIER
 /* scopes are created as a side effect of certain declarations (modules,
  * interfaces, ...) or types (structures, unions, ...) */
 
-scope_push: IDENTIFIER
+scope_push_module: IDENTIFIER
   {
-    $$ = scope_push(@1, $1);
+    $$ = scope_push(@1, $1, SCOPE_MODULE);
     if (!$$) {
       /* on error, still create a scope to continue the parsing
        * but with a special name -- it will be deleted afterwards */
-      $$ = scope_push(@1, strings("&", $1, NULL));
-      if (!$$) {
-	/* still failed, just resign */
-	YYABORT;
+      $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_MODULE);
+      if (!$$) { /* still failed, just resign */ YYABORT;
       }
+    }
+  }
+;
+
+scope_push_struct: IDENTIFIER
+  {
+    $$ = scope_push(@1, $1, SCOPE_STRUCT);
+    if (!$$) {
+      /* on error, still create a scope to continue the parsing
+       * but with a special name -- it will be deleted afterwards */
+      $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_STRUCT);
+      if (!$$) { /* still failed, just resign */ YYABORT;
+      }
+    }
+  }
+;
+
+scope_push_union: IDENTIFIER
+  {
+    $$ = scope_push(@1, $1, SCOPE_UNION);
+    if (!$$) {
+      /* on error, still create a scope to continue the parsing
+       * but with a special name -- it will be deleted afterwards */
+      $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_UNION);
+      if (!$$) { /* still failed, just resign */ YYABORT; }
     }
   }
 ;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -192,7 +192,10 @@ main(int argc, char *argv[])
   }
 
 done:
-  if (runopt.verbose) string_usage();
+  if (runopt.verbose) {
+    string_usage();
+    type_usage();
+  }
 
   /* clean up */
   rmrfdir(runopt.tmpdir);

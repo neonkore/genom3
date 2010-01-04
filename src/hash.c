@@ -296,7 +296,7 @@ hash_next(hiter *i)
 void
 hash_pstat(hash_s h)
 {
-#define hslots (11)
+#define hslots (6)
   int count[hslots] = { 0 };
   hentry_s e;
   int i, c;
@@ -312,7 +312,7 @@ hash_pstat(hash_s h)
   warnx(" %d entries in total, %d buckets (%d empty)",
 	h->n, h->buckets, count[0]);
   for(i=1; i<hslots-1; i++)
-    warnx(" buckets with %d entries: %d", i, count[i]);
+    warnx(" buckets with %d entr%s: %d", i, i>1?"ies":"y", count[i]);
   warnx(" buckets with %d entries or more: %d", hslots-1, count[hslots-1]);
 }
 

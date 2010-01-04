@@ -244,6 +244,8 @@ idltype_s	type_next(hiter *i);
 
 const char *	type_strkind(idlkind k);
 
+void		type_usage(void);
+
 
 /* --- GenoM object properties --------------------------------------------- */
 

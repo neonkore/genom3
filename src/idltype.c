@@ -646,3 +646,15 @@ type_strkind(idlkind k)
   assert(0);
   return NULL;
 }
+
+
+/* --- type_usage ---------------------------------------------------------- */
+
+/** Print information regarding types usage
+ */
+
+void
+type_usage()
+{
+  if (htypes) hash_pstat(htypes);
+}

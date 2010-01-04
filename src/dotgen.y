@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include "genom.h"
 
@@ -1381,12 +1382,26 @@ identifier_list:
 cpphash:
   '#' INTEGER_LIT STRING_LIT '\n'
   {
+    if (!runopt.cppdotgen) {
+      struct stat s, si;
+      if (!stat($3, &s) && !stat(runopt.input, &si))
+	if (si.st_dev == s.st_dev && si.st_ino == s.st_ino)
+	  $3 = string(runopt.input);
+    }
+
     curloc.file = $3;
     curloc.line = $2;
     curloc.col = 1;
   }
   | '#' INTEGER_LIT STRING_LIT INTEGER_LIT '\n'
   {
+    if (!runopt.cppdotgen) {
+      struct stat s, si;
+      if (!stat($3, &s) && !stat(runopt.input, &si))
+	if (si.st_dev == s.st_dev && si.st_ino == s.st_ino)
+	  $3 = string(runopt.input);
+    }
+
     curloc.file = $3;
     curloc.line = $2;
     curloc.col = 1;

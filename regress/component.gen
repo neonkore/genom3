@@ -1,0 +1,69 @@
+/* GenoM objects parsing test */
+
+enum e1 { ee1, ee2, ee3 };
+
+struct ids {
+  long a;
+  struct str {
+    long a;
+    long b;
+    struct sub {
+      long d;
+    } c;
+  } b[3];
+  e1 c;
+};
+
+component c {
+  ids:		ids;
+  version:	"1.0";
+  email:	"null@example.com";
+  lang:		"c";
+
+  require:	"a", "b", "c";
+  build-require:"d", "e";
+};
+
+inport long a;
+outport ids::str b;
+event c;
+
+task t1;
+
+task t2 {
+  period:	5ms;
+  delay:	3ms;
+  priority:	100;
+  stack:	20k;
+
+  codel start, stop:
+   a(inport a, outport b.b::port)
+   yield sleep, stop;
+  codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
+
+  throws:	ERR1, ERR2;
+};
+
+service s1() {
+  doc: "service s1";
+  task: control;
+};
+
+service s2(
+	   in ::p1 = { .a = 2 ::"long doc", {
+	       [2] = { .b = 2, .a = 4, .c = { 2 } }
+	     }, ee1} :: "also doc",
+	   in a = 2 :: "long doc",
+	   out c,
+	   outport b
+	   ) {
+  doc: "service s2";
+  task: t1;
+
+  codel start: a(inport a, outport b.b::port) yield sleep, ether;
+  codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
+
+  throws:	ERR3;
+  interrupts:	all;
+  after:	s1;
+};

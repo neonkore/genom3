@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -44,9 +44,9 @@ struct idltype_s {
   union {
     struct {
       idltype_s type;		/**< sequence, const, enumerator, typedef,
-				 * member, case, union */
+				 * member, case, union, array */
       union {
-	unsigned long length;	/**< string, sequence */
+	unsigned long length;	/**< string, sequence, array */
 	cval value;		/**< const */
 	clist_s values;		/**< case */
 	scope_s elems;		/**< struct, union */
@@ -442,6 +442,106 @@ type_find(const char *name)
 }
 
 
+/* --- type_member --------------------------------------------------------- */
+
+/** Return member name of the given type
+ */
+idltype_s
+type_member(idltype_s t, const char *name)
+{
+  assert(t && name);
+  t = type_final(t);
+  if (!t) return NULL;
+
+  /* only structs, unions and enum have members */
+  switch(type_kind(t)) {
+    case IDL_STRUCT: case IDL_UNION:
+      t = scope_findtype(t->elems, name);
+      if (!t) return NULL;
+      if (type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE) return NULL;
+      break;
+
+    case IDL_ENUM:
+      t = hash_find(t->members, name);
+      if (!t) return NULL;
+      break;
+
+    default: return NULL;
+  }
+
+  return t;
+}
+
+
+/* --- type_first/next ----------------------------------------------------- */
+
+/** Return the first/next member of the given type
+ */
+idltype_s
+type_first(idltype_s t, hiter *i)
+{
+  assert(t && i);
+  t = type_final(t);
+  if (!t) return NULL;
+
+  /* only structs, unions and enum have members */
+  switch(type_kind(t)) {
+    case IDL_STRUCT: case IDL_UNION:
+      do {
+	if (scope_firstype(t->elems, i)) return NULL;
+	t = i->value;
+      } while (type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE);
+      break;
+
+    case IDL_ENUM:
+      if (hash_first(t->members, i)) return NULL;
+      t = i->value;
+      break;
+
+    default: i->current = NULL; return NULL;
+  }
+
+  return t;
+}
+
+idltype_s
+type_after(idltype_s t, idltype_s p, hiter *i)
+{
+  idltype_s l; if (!t) { i->current = NULL; return NULL; }
+
+  for(l = type_first(t, i); l; l = type_next(i))
+    if (l == p) return type_next(i);
+
+  return NULL;
+}
+
+idltype_s
+type_next(hiter *i)
+{
+  idltype_s t;
+  assert(i); if (!i->current) return NULL;
+
+  switch(type_kind(i->value)) {
+    case IDL_MEMBER: case IDL_CASE:
+      do {
+	if (scope_nextype(i)) return NULL;
+	t = i->value;
+      } while (type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE);
+      break;
+
+    case IDL_ENUM:
+      if (hash_next(i)) return NULL;
+      t = i->value;
+      break;
+
+    default: i->current = NULL; return NULL;
+  }
+
+  return t;
+}
+
+
+
 /* --- type_final ---------------------------------------------------------- */
 
 /** Return the actual basic type of a type (resolve typedefs and consts)
@@ -464,6 +564,21 @@ type_final(idltype_s t)
 
   assert(0);
   return 0;
+}
+
+
+/* --- type_elemtype ------------------------------------------------------- */
+
+/** For array, sequences, return the element type
+ */
+idltype_s
+type_elemtype(idltype_s t, unsigned int *len)
+{
+  assert(t);
+  t = type_final(t);
+  assert(t && (t->kind == IDL_ARRAY || t->kind == IDL_SEQUENCE));
+  if (len) *len = t->length;
+  return t->type;
 }
 
 

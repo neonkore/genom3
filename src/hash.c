@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -261,6 +261,18 @@ hash_first(hash_s h, hiter *i)
   i->value = h->first?h->first->value:NULL;
 
   return h->first?0:ENOENT;
+}
+
+int
+hash_after(hash_s h, void *value, hiter *i)
+{
+  assert(i);
+
+  for(hash_first(h, i); i->current; hash_next(i)) {
+    if (i->value == value) return hash_next(i);
+  }
+
+  return ENOENT;
 }
 
 int

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -316,7 +316,7 @@ const_cast(tloc l, cval *value, idltype_s t)
       parsenoerror(type_loc(t), "  %s%s%s declared here",
 		   type_strkind(type_kind(t)),
 		   type_name(t)?" ":"", type_name(t)?type_name(t):"");
-      return EINVAL;
+      return errno = EINVAL;
 
     case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       /* not a valid return from type_final() */
@@ -327,7 +327,7 @@ const_cast(tloc l, cval *value, idltype_s t)
     parserror(l, "cannot convert constant expression to %s%s%s",
 	      type_strkind(type_kind(t)),
 	      type_name(t)?" ":"", type_name(t)?type_name(t):"");
-  return s;
+  return errno = s;
 }
 
 
@@ -371,7 +371,7 @@ const_maxkind(cvalkind a, cvalkind b)
  */
 
 clist_s
-clist_append(clist_s l, cval v)
+clist_append(clist_s l, cval v, int unique)
 {
   clist_s i;
   clist_s e = malloc(sizeof(*e));
@@ -385,8 +385,8 @@ clist_append(clist_s l, cval v)
 
   /* chain to the tail and filter duplicates */
   for(i = l; i->next; i = i->next)
-    if (const_equal(i->v, v)) { free(e); return NULL; }
-  if (const_equal(i->v, v)) { free(e); return NULL; }
+    if (unique && const_equal(i->v, v)) { free(e); return NULL; }
+  if (unique && const_equal(i->v, v)) { free(e); return NULL; }
 
   i->next = e;
   return l;

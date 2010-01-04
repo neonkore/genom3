@@ -14,6 +14,7 @@ struct s1 {
   struct s2 {
     long a;
   } b;
+  s2 c;
 };
 
 union u1 switch(m1::e1) {
@@ -39,10 +40,6 @@ typedef struct s3 {
 } t2;
 
 typedef union u2 switch(boolean) {
- case TRUE: char a;
- case FALSE: char b;
+ case TRUE: ss3 a;
+ case FALSE: su2 b;
 } t3;
-
-module m2 {
-
-};

@@ -40,9 +40,12 @@ struct dcl_s {
 
   unsigned int dims;
   unsigned long dim[0];
+
+  idltype_s type;
 };
 
 const char *	dcl_name(dcl_s d) { assert(d); return d->name; }
+idltype_s	dcl_type(dcl_s d) { assert(d); return d->type; }
 int		dcl_isarray(dcl_s d) { assert(d); return d->dims?1:0; }
 
 
@@ -63,6 +66,7 @@ dcl_create(tloc l, const char *name)
 
   d->name = string(name);
   d->dims = 0;
+  d->type = NULL;
 
   xwarnx("created declarator %s", d->name);
   return d;
@@ -104,6 +108,28 @@ dcl_adddim(dcl_s dcl, unsigned long dim)
 
   xwarnx("declarator %s dimension %d set to %d", d->name, d->dims, dim);
   return d;
+}
+
+
+/* --- dcl_settype --------------------------------------------------------- */
+
+/** define type of declarator
+ */
+idltype_s
+dcl_settype(dcl_s dcl, idltype_s t)
+{
+  dcliter i;
+  assert(dcl && t);
+
+  /* for arrays, create intermediate anon array types */
+  for(dcl_inner(dcl, &i); i.value != -1UL; dcl_next(&i)) {
+    t = type_newarray(dcl->l, NULL, t, i.value);
+    if (!t) break;
+  }
+
+  dcl->type = t;
+  xwarnx("set declarator %s as %s", dcl->name, type_strkind(type_kind(t)));
+  return t;
 }
 
 

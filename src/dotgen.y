@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -25,6 +25,7 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <errno.h>
 
 #include "genom.h"
 
@@ -57,6 +58,11 @@
   char *	s;
   cval		v;
   clist_s	vlist;
+  prop_s	prop;
+  codel_s	codel;
+  port_s	port;
+  param_s	param;
+  initer_s	initer;
   hash_s	hash;
   scope_s	scope;
   dcl_s		dcl;
@@ -70,15 +76,28 @@
 %token <i>	WSTRING BOOLEAN OCTET OBJECT ANY VOID PROPERTY
 %token <i>	CONST NATIVE ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 %token <i>	TYPEDEF
-%token <i>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
-%token <i>	INPUT OUTPUT EVENT IMPORT FROM
 %token <i>	FALSE TRUE
 %token <i>	INTEGER_LIT FIXED_LIT
 %token <d>	FLOAT_LIT
 %token <c>	CHAR_LIT
 %token <s>	STRING_LIT IDENTIFIER
 
-%type <i>	spec statement
+%token <s>	S MS US K M
+%token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
+%token <s>	INPUT OUTPUT EVENT IMPORT FROM VERSION LANG EMAIL REQUIRE
+%token <s>	BUILDREQUIRE PERIOD DELAY PRIORITY STACK YIELD THROWS DOC
+%token <s>	INTERRUPTS BEFORE AFTER
+
+%type <i>	spec idlspec statement idlstatement genomstatement
+
+%type <i>	component port task service
+%type <prop>	attr
+%type <hash>	attr_list named_param_list
+%type <initer>	constr_initializer doc_initializer constr_initializer_list
+%type <codel>	codel
+%type <port>	named_port
+%type <param>	param param_member named_param initialized_param
+
 %type <i>	module
 %type <type>	const_dcl const_type
 %type <type>	type_dcl constr_type constr_forward_type
@@ -96,11 +115,15 @@
 %type <v>	case_label
 %type <vlist>	case_label_list
 %type <scope>	scope_push_module scope_push_struct scope_push_union
+
 %type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
 %type <v>	or_expr xor_expr and_expr shift_expr add_expr mult_expr
-%type <v>	literal
-%type <s>	scoped_name
+%type <v>	literal time_unit size_unit
+%type <s>	scoped_name string_lit identifier
+%type <hash>	identifier_list
+%type <vlist>	string_list
+
 %type <i>	cpphash
 
 %start spec
@@ -109,23 +132,428 @@
 
 spec: statement | spec statement;
 
-statement:
+idlspec: idlstatement | idlspec idlstatement;
+
+statement: idlstatement | genomstatement;
+
+idlstatement:
   module ';'
   | const_dcl ';'	{ }
   | type_dcl ';'	{ }
   | cpphash
+  | error ';'
+  {
+    parserror(@1, "pfff");
+  }
   | error
   {
     parserror(@1, "raah");
   }
 ;
 
-/* --- modules ------------------------------------------------------------- */
+genomstatement:
+  component ';'
+  | port ';'
+  | task ';'
+  | service ';'
+;
+
+
+/* --- GenoM objects ------------------------------------------------------- */
+
+component: COMPONENT identifier '{' attr_list '}'
+  {
+    if (!$2 || !$4) {
+      if ($2) parserror(@1, "dropped '%s' component", $2);
+      if ($4) hash_destroy($4);
+      break;
+    }
+    if (!comp_create(@1, $2, $4)) {
+      parserror(@1, "dropped '%s' component", $2);
+      hash_destroy($4);
+    }
+  }
+;
+
+port:
+  INPORT type_spec identifier
+  {
+    if (!$2 || !$3) { if ($3) parserror(@1, "dropped '%s' port", $3); break; }
+    if (!comp_addport(@1, PORT_IN, $3, $2))
+      parserror(@1, "dropped '%s' port", $3);
+  }
+  | OUTPORT type_spec identifier
+  {
+    if (!$2 || !$3) { if ($3) parserror(@1, "dropped '%s' port", $3); break; }
+    if (!comp_addport(@1, PORT_OUT, $3, $2))
+      parserror(@1, "dropped '%s' port", $3);
+  }
+  | EVENT identifier
+  {
+    if (!$2) break;
+    if (!comp_addport(@1, PORT_EVENT, $2, NULL))
+      parserror(@1, "dropped '%s' port", $2);
+  }
+;
+
+
+task:
+  TASK identifier '{' attr_list '}'
+  {
+    if (!$2 || !$4) {
+      if ($2) parserror(@1, "dropped '%s' task", $2);
+      if ($4) hash_destroy($4);
+      break;
+    }
+    if (!comp_addtask(@1, $2, $4)) {
+      parserror(@1, "dropped '%s' task", $2);
+      hash_destroy($4);
+    }
+  }
+  | TASK identifier
+  {
+    hash_s h = hash_create("property list", 0);
+    if (!$2 || !h) {
+      if ($2) parserror(@1, "dropped '%s' task", $2);
+      if (h) hash_destroy(h);
+      break;
+    }
+    if (!comp_addtask(@1, $2, h)) {
+      parserror(@1, "dropped '%s' task", $2);
+      hash_destroy(h);
+    }
+  }
+;
+
+service:
+  SERVICE identifier '(' named_param_list ')' '{' attr_list '}'
+  {
+    if (!$2 || !$4 || !$7) {
+      if ($2) parserror(@1, "dropped '%s' service", $2);
+      if ($4) hash_destroy($4);
+      if ($7) hash_destroy($7);
+      break;
+    }
+    if (!comp_addservice(@1, $2, $4, $7)) {
+      parserror(@1, "dropped '%s' service", $2);
+      hash_destroy($4);
+      hash_destroy($7);
+    }
+  }
+;
+
+
+/* --- GenoM object attributes --------------------------------------------- */
+
+attr_list:
+  attr ';'
+  {
+    $$ = hash_create("property list", 5);
+    if (!$$ || !$1) break;
+
+    if (hash_insert($$, prop_name($1), $1, (hrelease_f)prop_destroy))
+      prop_destroy($1);
+  }
+  | attr_list attr ';'
+  {
+    $$ = $1;
+    if (!$$ || !$2) break;
+    if (hash_insert($$, prop_name($2), $2, (hrelease_f)prop_destroy))
+      prop_destroy($2);
+  }
+;
+
+attr:
+  DOC ':' string_lit
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_DOC, $3);
+  }
+  | IDS ':' named_type
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newids(@1, $3);
+  }
+  | VERSION ':' string_lit
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_VERSION, $3);
+  }
+  | LANG ':' string_lit
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_LANG, $3);
+  }
+  | EMAIL ':' string_lit
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_EMAIL, $3);
+  }
+  | REQUIRE ':' string_list
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newrequire(@1, PROP_REQUIRE, $3);
+  }
+  | BUILDREQUIRE ':' string_list
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newrequire(@1, PROP_BUILD_REQUIRE, $3);
+  }
+  | PERIOD ':' const_expr time_unit
+  {
+    if (const_binaryop(&$3, '*', $4)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_PERIOD, $3);
+  }
+  | DELAY ':' const_expr time_unit
+  {
+    if (const_binaryop(&$3, '*', $4)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_DELAY, $3);
+  }
+  | PRIORITY ':' positive_int_const
+  {
+    $$ = prop_newvalue(@1, PROP_PRIORITY, $3);
+  }
+  | STACK ':' positive_int_const size_unit
+  {
+    if (const_binaryop(&$3, '*', $4)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_STACK, $3);
+  }
+  | THROWS ':' identifier_list
+  {
+    $$ = $3 ? prop_newhash(@1, PROP_THROWS, $3) : NULL;
+  }
+  | TASK ':' identifier
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newtask(@1, $3);
+  }
+  | INTERRUPTS ':' identifier_list
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_INTERRUPTS, $3);
+  }
+  | BEFORE ':' identifier_list
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_BEFORE, $3);
+  }
+  | AFTER ':' identifier_list
+  {
+    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_AFTER, $3);
+  }
+  | codel
+  {
+    $$ = $1 ? prop_newcodel(@1, $1) : NULL;
+  }
+  | error
+  {
+    $$ = NULL;
+  }
+;
+
+
+/* --- codels -------------------------------------------------------------- */
+
+codel:
+  CODEL identifier_list ':' identifier '(' named_param_list ')'
+  YIELD identifier_list
+  {
+    $$ = codel_create(@1, $4, $2, $9, $6);
+  }
+  | CODEL identifier_list ':' identifier '(' named_param_list ')' error
+  {
+    $$ = NULL;
+    parserror(@1, "missing 'yield' values for codel %s", $4);
+    if ($2) hash_destroy($2);
+    if ($6) hash_destroy($6);
+  }
+;
+
+named_param_list:
+  /* empty */
+  {
+    $$ = hash_create("parameter list", 0);
+  }
+  | initialized_param
+  {
+    $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
+    if (param_name($1)[0] == '\0') {
+      parserror(@1, "unnamed parameter not allowed, use ::name");
+      break;
+    }
+    switch(hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
+      case 0: break;
+      case EEXIST:
+	parserror(@1, "duplicate parameter '%s'", param_name($1));
+	/*FALLTHROUGH*/
+      default: param_destroy($1); break;
+    }
+  }
+  | named_param_list ',' initialized_param
+  {
+    $$ = $1; if (!$3) break;
+    if (param_name($3)[0] == '\0') {
+      parserror(@3, "unnamed parameter not allowed, use ::name");
+      break;
+    }
+    switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
+      case 0: break;
+      case EEXIST:
+	parserror(@3, "duplicate parameter '%s'", param_name($3));
+	/*FALLTHROUGH*/
+      default: param_destroy($3); break;
+    }
+  }
+;
+
+initialized_param:
+  named_param
+  | named_param '=' doc_initializer
+  {
+    $$ = $1; if (!$1 || !$3) break;
+    if (param_setinitv(@3, $1, $3))
+      parserror(@3, "dropping initializer for '%s'", param_name($1));
+  }
+;
+
+named_param: param_member | param_member COLONCOLON identifier
+  {
+    $$ = $1; if (!$$) break;
+    if (param_setname(@3, $$, $3)) { param_destroy($$); $$ = NULL; }
+  }
+;
+
+param_member:
+  param
+  | param_member '.' identifier
+  {
+    $$ = $1; if (!$$) break;
+    if (param_setmember(@3, $$, $3)) { param_destroy($$); $$ = NULL; }
+  }
+  | param_member '[' positive_int_const ']'
+  {
+    assert($3.k == CST_UINT);
+    $$ = $1; if (!$$) break;
+    if (param_setelement(@3, $$, $3.u)) { param_destroy($$); $$ = NULL; }
+  }
+;
+
+param:
+  IN
+  {
+    $$ = param_newids(@1, P_IN, NULL);
+  }
+  | OUT
+  {
+    $$ = param_newids(@1, P_OUT, NULL);
+  }
+  | INOUT
+  {
+    $$ = param_newids(@1, P_INOUT, NULL);
+  }
+  | IN identifier
+  {
+    $$ = param_newids(@1, P_IN, $2);
+  }
+  | OUT identifier
+  {
+    $$ = param_newids(@1, P_OUT, $2);
+  }
+  | INOUT identifier
+  {
+    $$ = param_newids(@1, P_INOUT, $2);
+  }
+  | INPORT named_port
+  {
+    if (!$2) { $$ = NULL; break; }
+    $$ = param_newport(@1, P_INPORT, NULL, $2);
+  }
+  | OUTPORT named_port
+  {
+    if (!$2) { $$ = NULL; break; }
+    $$ = param_newport(@1, P_OUTPORT, NULL, $2);
+  }
+;
+
+named_port: identifier
+  {
+    comp_s c = comp_dotgen();
+    if (!$1 || !c) { $$ = NULL; break; }
+
+    $$ = comp_port(c, $1);
+    if (!$$) parserror(@1, "unknown port '%s'", $1);
+  }
+
+constr_initializer_list:
+  /* empty */
+  {
+    $$ = NULL;
+  }
+  | doc_initializer
+  | constr_initializer_list ',' doc_initializer
+  {
+    $$ = $3 ? initer_append($1, $3) : $1;
+  }
+;
+
+doc_initializer:
+  constr_initializer
+  | constr_initializer COLONCOLON string_lit
+  {
+    $$ = $1; if (!$1 || !$3) break;
+    (void)initer_setdoc($1, $3);
+  }
+;
+
+constr_initializer:
+  const_expr
+  {
+    $$ = initer_create(-1U, NULL, NULL, $1);
+  }
+  | '{' constr_initializer_list '}'
+  {
+    cval v; v.k = CST_VOID; v.u = -1U;
+    $$ = $2 ? initer_create(-1U, NULL, $2, v) : NULL;
+  }
+  | '[' positive_int_const ']' '=' const_expr
+  {
+    assert($2.k == CST_UINT);
+    $$ = initer_create($2.u, NULL, NULL, $5);
+  }
+  | '[' positive_int_const ']' '=' '{' constr_initializer_list '}'
+  {
+    cval v; v.k = CST_VOID; v.u = -1U;
+    assert($2.k == CST_UINT);
+    $$ = initer_create($2.u, NULL, $6, v);
+  }
+  | '.' identifier '=' const_expr
+  {
+    $$ = initer_create(-1U, $2, NULL, $4);
+  }
+  | '.' identifier '=' '{' constr_initializer_list '}'
+  {
+    cval v; v.k = CST_VOID; v.u = -1U;
+    $$ = initer_create(-1U, $2, $5, v);
+  }
+;
+
+
+/* --- IDL modules --------------------------------------------------------- */
 
 /** modules are IDL namespaces */
 
 module:
-  MODULE scope_push_module '{' spec '}'
+  MODULE scope_push_module '{' idlspec '}'
   {
     scope_s s = scope_pop();
 
@@ -156,7 +584,7 @@ module:
 /* these rules handle the `const' keyword. */
 
 const_dcl:
-  CONST const_type IDENTIFIER '=' const_expr
+  CONST const_type identifier '=' const_expr
   {
     assert($3);
     $$ = $2 ? type_newconst(@1, $3, $2, $5) : NULL;
@@ -282,7 +710,7 @@ union_type:
   }
 ;
 
-enum_type: ENUM IDENTIFIER '{' enumerator_list '}'
+enum_type: ENUM identifier '{' enumerator_list '}'
   {
     $$ = $4 ? type_newenum(@2, $2, $4) : NULL;
     if (!$$) {
@@ -298,11 +726,11 @@ enum_type: ENUM IDENTIFIER '{' enumerator_list '}'
 ;
 
 constr_forward_type:
-  STRUCT IDENTIFIER
+  STRUCT identifier
   {
     $$ = type_newforward(@1, $2, IDL_FORWARD_STRUCT);
   }
-  | UNION IDENTIFIER
+  | UNION identifier
   {
     $$ = type_newforward(@1, $2, IDL_FORWARD_UNION);
   }
@@ -313,7 +741,7 @@ constr_forward_type:
 
 declarator: simple_declarator | array_declarator;
 
-simple_declarator: IDENTIFIER
+simple_declarator: identifier
   {
     $$ = dcl_create(@1, $1);
   }
@@ -460,54 +888,22 @@ switch_body: case | switch_body case
 alias_list:
   type_spec declarator
   {
-    dcliter i;
+    $$ = $1; if (!$2) break;
 
-    $$ = $1;
-    if (!$1 || !$2) {
-      if ($2) parserror(@2, "dropped declaration for '%s'", dcl_name($2));
-      dcl_destroy($2);
-      break;
-    }
-
-    /* for arrays, create intermediate anon array types */
-    for(dcl_inner($2, &i); i.value != -1UL; dcl_next(&i)) {
-      $1 = type_newarray(@2, NULL, $1, i.value);
-      if (!$1) break;
-    }
-    if (!$1) {
+    if ($1) $1 = dcl_settype($2, $1);
+    if (!$1 || !type_newalias(@2, dcl_name($2), $1))
       parserror(@2, "dropped declaration for '%s'", dcl_name($2));
-      dcl_destroy($2);
-      break;
-    }
 
-    if (!type_newalias(@2, dcl_name($2), $1))
-      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
     dcl_destroy($2);
   }
   | alias_list ',' declarator
   {
-    dcliter i;
+    $$ = $1; if (!$3) break;
 
-    $$ = $1;
-    if (!$1 || !$3) {
-      if ($3) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
-      dcl_destroy($3);
-      break;
-    }
-
-    /* for arrays, create intermediate anon array types */
-    for(dcl_inner($3, &i); i.value != -1UL; dcl_next(&i)) {
-      $1 = type_newarray(@3, NULL, $1, i.value);
-      if (!$1) break;
-    }
-    if (!$1) {
+    if ($1) $1 = dcl_settype($3, $1);
+    if (!$1 || !type_newalias(@3, dcl_name($3), $1))
       parserror(@3, "dropped declaration for '%s'", dcl_name($3));
-      dcl_destroy($3);
-      break;
-    }
 
-    if (!type_newalias(@3, dcl_name($3), $1))
-      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
     dcl_destroy($3);
   }
 ;
@@ -517,83 +913,40 @@ member_list: member ';' | member_list member ';';
 member:
   type_spec declarator
   {
-    dcliter i;
+    $$ = $1; if (!$2) break;
 
-    $$ = $1;
-    if (!$1 || !$2) {
-      if ($2) parserror(@2, "dropped declaration for '%s'", dcl_name($2));
-      dcl_destroy($2);
-      break;
-    }
-
-    /* for arrays, create intermediate anon array types */
-    for(dcl_inner($2, &i); i.value != -1UL; dcl_next(&i)) {
-      $1 = type_newarray(@2, NULL, $1, i.value);
-      if (!$1) break;
-    }
-    if (!$1) {
+    if ($1) $1 = dcl_settype($2, $1);
+    if (!$1 || !type_newmember(@2, dcl_name($2), $1))
       parserror(@2, "dropped declaration for '%s'", dcl_name($2));
-      dcl_destroy($2);
-      break;
-    }
 
-    if (!type_newmember(@2, dcl_name($2), $1))
-      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
     dcl_destroy($2);
   }
   | member ',' declarator
   {
-    dcliter i;
+    $$ = $1; if (!$3) break;
 
-    $$ = $1;
-    if (!$1 || !$3) {
-      if ($3) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
-      dcl_destroy($3);
-      break;
-    }
-
-    /* for arrays, create intermediate anon array types */
-    for(dcl_inner($3, &i); i.value != -1UL; dcl_next(&i)) {
-      $1 = type_newarray(@3, NULL, $1, i.value);
-      if (!$1) break;
-    }
-    if (!$1) {
+    if ($1) $1 = dcl_settype($3, $1);
+    if (!$1 || !type_newmember(@3, dcl_name($3), $1))
       parserror(@3, "dropped declaration for '%s'", dcl_name($3));
-      dcl_destroy($3);
-      break;
-    }
 
-    if (!type_newmember(@3, dcl_name($3), $1))
-      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
     dcl_destroy($3);
   }
 ;
 
 case: case_label_list type_spec declarator ';'
   {
-    dcliter i;
-
+    $$ = NULL;
     if (!$1 || !$2 || !$3) {
-      $$ = NULL;
       if ($2 && !type_name($2)) type_destroy($2);
       if ($3) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
       dcl_destroy($3);
       break;
     }
 
-    /* for arrays, create intermediate anon array types */
-    for(dcl_inner($3, &i); i.value != -1UL; dcl_next(&i)) {
-      $2 = type_newarray(@3, NULL, $2, i.value);
-      if (!$2) break;
-    }
-    if (!$2) {
+    $2 = dcl_settype($3, $2);
+    if ($2) $$ = type_newcase(@3, dcl_name($3), $2, $1);
+    if (!$2 || !$$)
       parserror(@3, "dropped declaration for '%s'", dcl_name($3));
-      dcl_destroy($3);
-      break;
-    }
-
-    $$ = type_newcase(@3, dcl_name($3), $2, $1);
-    if (!$$) parserror(@3, "dropped declaration for '%s'", dcl_name($3));
     dcl_destroy($3);
   }
 ;
@@ -601,11 +954,11 @@ case: case_label_list type_spec declarator ';'
 case_label_list:
   case_label
   {
-    $$ = clist_append(NULL, $1);
+    $$ = clist_append(NULL, $1, 1/*unique*/);
   }
   | case_label_list case_label
   {
-    $$ = clist_append($1, $2);
+    $$ = clist_append($1, $2, 1/*unique*/);
     if (!$$) {
       parsewarning(@2, "ignoring duplicate %s label",
 		   $2.k == CST_VOID?"default":"case");
@@ -645,7 +998,7 @@ enumerator_list:
   }
 ;
 
-enumerator: IDENTIFIER
+enumerator: identifier
   {
     $$ = type_newenumerator(@1, $1);
   }
@@ -657,7 +1010,7 @@ enumerator: IDENTIFIER
 /* scopes are created as a side effect of certain declarations (modules,
  * interfaces, ...) or types (structures, unions, ...) */
 
-scope_push_module: IDENTIFIER
+scope_push_module: identifier
   {
     $$ = scope_push(@1, $1, SCOPE_MODULE);
     if (!$$) {
@@ -670,7 +1023,7 @@ scope_push_module: IDENTIFIER
   }
 ;
 
-scope_push_struct: IDENTIFIER
+scope_push_struct: identifier
   {
     $$ = scope_push(@1, $1, SCOPE_STRUCT);
     if (!$$) {
@@ -683,7 +1036,7 @@ scope_push_struct: IDENTIFIER
   }
 ;
 
-scope_push_union: IDENTIFIER
+scope_push_union: identifier
   {
     $$ = scope_push(@1, $1, SCOPE_UNION);
     if (!$$) {
@@ -696,12 +1049,12 @@ scope_push_union: IDENTIFIER
 ;
 
 scoped_name:
-  IDENTIFIER
-  | COLONCOLON IDENTIFIER
+  identifier
+  | COLONCOLON identifier
   {
     $$ = strings("::", $2, NULL);
   }
-  | scoped_name COLONCOLON IDENTIFIER
+  | scoped_name COLONCOLON identifier
   {
     $$ = strings($1, "::", $3, NULL);
   }
@@ -922,10 +1275,103 @@ literal:
     $$.k = CST_CHAR;
     $$.c = $1;
   }
-  | STRING_LIT
+  | string_lit
   {
     $$.k = CST_STRING;
     $$.s = $1;
+  }
+;
+
+string_lit: STRING_LIT | string_lit STRING_LIT
+  {
+    if ($1)
+      $$ = strings($1, $2, NULL);
+    else
+      $$ = $2;
+  }
+;
+
+string_list:
+  string_lit
+  {
+    cval c;
+    if (!$1) { $$ = NULL; break; }
+    c.k = CST_STRING;
+    c.s = string($1);
+    $$ = clist_append(NULL, c, 1/*unique*/);
+  }
+  | string_list ',' string_lit
+  {
+    cval c;
+    if (!$3) { $$ = $1; break; }
+    c.k = CST_STRING;
+    c.s = string($3);
+    $$ = clist_append($1, c, 1/*unique*/);
+    if (!$$) {
+      $$ = $1;
+      parsewarning(@3, "ignoring duplicate '%s' string in list", $3);
+    }
+  }
+;
+
+time_unit:
+  {
+    $$.k = CST_FLOAT; $$.f = 1.;
+  }
+  | S
+  {
+    $$.k = CST_FLOAT; $$.f = 1.;
+  }
+  | MS
+  {
+    $$.k = CST_FLOAT; $$.f = 1e-3;
+  }
+  | US
+  {
+    $$.k = CST_FLOAT; $$.f = 1e-6;
+  }
+;
+
+size_unit:
+  {
+    $$.k = CST_UINT; $$.u = 1;
+  }
+  | K
+  {
+    $$.k = CST_UINT; $$.u = 1024;
+  }
+  | M
+  {
+    $$.k = CST_UINT; $$.u = 1024*1024;
+  }
+;
+
+
+/* --- identifiers --------------------------------------------------------- */
+
+/* when the context allows it, identifiers can be GenoM special keywords */
+
+identifier:
+  IDENTIFIER | S | MS | US | K | M
+  | COMPONENT | IDS | VERSION | LANG | EMAIL | REQUIRE | BUILDREQUIRE
+  | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL | YIELD | THROWS | DOC
+  | INTERRUPTS | BEFORE | AFTER
+  | INPORT | OUTPORT | IN | OUT | INOUT;
+
+identifier_list:
+  identifier
+  {
+    $$ = hash_create("identifier list", 3); if (!$$ || !$1) break;
+    switch(hash_insert($$, $1, $1, NULL)) {
+      case EEXIST: parserror(@1, "duplicate identifier '%s'", $1); break;
+    }
+  }
+  | identifier_list ',' identifier
+  {
+    $$ = $1; if (!$3) break;
+    switch(hash_insert($$, $3, $3, NULL)) {
+      case EEXIST: parserror(@3, "duplicate identifier '%s'", $3); break;
+    }
   }
 ;
 

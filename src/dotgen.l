@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -129,22 +129,41 @@ chartext	([^\'])|(\\.)
 "sequence"	{ return SEQUENCE; }
 "typedef"	{ return TYPEDEF; }
 
- /* GenoM keywords */
-"component"	{ return COMPONENT; }
-"task"		{ return TASK; }
-"service"	{ return SERVICE; }
-"codel"		{ return CODEL; }
-"inport"	{ return INPORT; }
-"outport"	{ return OUTPORT; }
-"in"		{ return IN; }
-"out"		{ return OUT; }
-"inout"		{ return INOUT; }
-"ids"		{ return IDS; }
-"input"		{ return INPUT; }
-"output"	{ return OUTPUT; }
-"event"		{ return EVENT; }
-"import"	{ return IMPORT; }
-"from"		{ return FROM; }
+ /* GenoM keywords (can be identifiers as well depending on the context) */
+"component"	{ yylval->s = string(yytext); return COMPONENT; }
+"task"		{ yylval->s = string(yytext); return TASK; }
+"service"	{ yylval->s = string(yytext); return SERVICE; }
+"codel"		{ yylval->s = string(yytext); return CODEL; }
+
+"doc"		{ yylval->s = string(yytext); return DOC; }
+"ids"		{ yylval->s = string(yytext); return IDS; }
+"version"	{ yylval->s = string(yytext); return VERSION; }
+"lang"		{ yylval->s = string(yytext); return LANG; }
+"email"		{ yylval->s = string(yytext); return EMAIL; }
+"require"	{ yylval->s = string(yytext); return REQUIRE; }
+"build-require"	{ yylval->s = string(yytext); return BUILDREQUIRE; }
+"period"	{ yylval->s = string(yytext); return PERIOD; }
+"delay"		{ yylval->s = string(yytext); return DELAY; }
+"priority"	{ yylval->s = string(yytext); return PRIORITY; }
+"stack"		{ yylval->s = string(yytext); return STACK; }
+"event"		{ yylval->s = string(yytext); return EVENT; }
+"yield"		{ yylval->s = string(yytext); return YIELD; }
+"throws"	{ yylval->s = string(yytext); return THROWS; }
+"interrupts"	{ yylval->s = string(yytext); return INTERRUPTS; }
+"before"	{ yylval->s = string(yytext); return BEFORE; }
+"after"		{ yylval->s = string(yytext); return AFTER; }
+
+"inport"	{ yylval->s = string(yytext); return INPORT; }
+"outport"	{ yylval->s = string(yytext); return OUTPORT; }
+"in"		{ yylval->s = string(yytext); return IN; }
+"out"		{ yylval->s = string(yytext); return OUT; }
+"inout"		{ yylval->s = string(yytext); return INOUT; }
+
+"s"		{ yylval->s = string(yytext); return S; }
+"ms"		{ yylval->s = string(yytext); return MS; }
+"us"		{ yylval->s = string(yytext); return US; }
+"k"		{ yylval->s = string(yytext); return K; }
+"M"		{ yylval->s = string(yytext); return M; }
 
  /* integers literals */
 "0"[xX][0-9a-fA-F]+{intsuffix}? {

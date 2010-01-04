@@ -24,6 +24,9 @@ genom3_SOURCES=\
 	main.c		\
 	cpp.c		\
 	hash.c		\
+	property.c	\
+	component.c	\
+	codel.c		\
 	const.c		\
 	scope.c		\
 	declarator.c	\

@@ -19,7 +19,8 @@
 
 check_PROGRAMS=\
 	preprocess	\
-	datatypes
+	datatypes	\
+	component
 
 TESTS=		$(check_PROGRAMS)
 
@@ -39,8 +40,11 @@ preprocess: Makefile
 	@chmod u+x $@
 
 
-# check data types parsing
+# check data types and genom objects parsing
+component: Makefile
 datatypes: Makefile
+
+component datatypes:
 	@exec >$@;						\
 	${ECHO} '#!${SHELL}';					\
 	${ECHO} ${top_builddir}/src/genom3 			\

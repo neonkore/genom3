@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 LAAS/CNRS
+# Copyright (c) 2009-2010 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -36,3 +36,4 @@ genom3_SOURCES=\
 	dotgen.l
 
 genom3_YFLAGS= -v -d
+genom3_LDADD = $(LIBOBJS)

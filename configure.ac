@@ -5,7 +5,7 @@
 #
 AC_PREREQ(2.59)
 AC_INIT([genom],[3.0],[openrobots@laas.fr])
-AM_INIT_AUTOMAKE([foreign no-define])
+AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
 AC_CONFIG_HEADERS([acgenom.h])
 
 AC_SUBST(GENOM_TOOL, [genom3])
@@ -13,11 +13,17 @@ AC_SUBST(GENOM_TOOL, [genom3])
 
 # compilers et al.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_LEX
 AC_PROG_YACC
+
+
+# C library
+AC_CONFIG_LIBOBJ_DIR([compat])
+AC_REPLACE_FUNCS([strlcpy strlcat])
 
 
 # test that cpp accepts .gen files, maybe with -xc

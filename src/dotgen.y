@@ -25,6 +25,7 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <stddef.h>
 #include <errno.h>
 #include <sys/stat.h>
 

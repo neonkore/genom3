@@ -24,6 +24,7 @@
 #ifndef H_GENOM
 #define H_GENOM
 
+#include <stdio.h>
 #include <limits.h>
 
 /** runtime options */
@@ -32,7 +33,10 @@ extern struct runopt_s {
   char tmpl[PATH_MAX];	/** name of template file */
 
   int verbose;		/** be verbose */
+  int debug;		/** activate some debugging options */
   int preproc;		/** preprocess file only */
+  char engine[PATH_MAX];/** generator engine */
+  char interp[PATH_MAX];/** template interpreter */
   char tmpdir[PATH_MAX];/** temporary directory */
   int cppdotgen;	/** cpp accepts .gen file extension */
 } runopt;
@@ -368,6 +372,21 @@ initer_s	initer_create(unsigned int a, const char *m, initer_s s,
 int		initer_setdoc(initer_s i, const char *d);
 initer_s	initer_append(initer_s l, initer_s m);
 void		initer_destroy(initer_s l);
+
+
+/* --- engine -------------------------------------------------------------- */
+
+#define TMPL_SPECIAL_FILE		"template."
+
+typedef struct engdescr {
+  const char *name;
+  const char *interp;
+
+  int (*gendotgen)(comp_s c, FILE *out);
+} engdescr;
+
+int	eng_seteng(const char *tmpl);
+int	eng_invoke(void);
 
 
 /* --- strings ------------------------------------------------------------- */

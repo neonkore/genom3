@@ -3,12 +3,18 @@
 #
 # GenoM autoconf file
 #
-AC_PREREQ(2.59)
+AC_PREREQ(2.62)
 AC_INIT([genom],[3.0],[openrobots@laas.fr])
 AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
 AC_CONFIG_HEADERS([acgenom.h])
 
 AC_SUBST(GENOM_TOOL, [genom3])
+
+# engines
+AC_ARG_ENABLE(tcl,
+	AS_HELP_STRING([--disable-tcl], [don't compile support for Tcl engine]),
+	[use_tcl=$enableval],[use_tcl=yes])
+AC_ARG_VAR(TCLSH, [Default tclsh interpreter])
 
 
 # compilers et al.
@@ -51,6 +57,18 @@ if test x"${ac_cv_genom_cpp_gen}" = "xwith -xc"; then
 fi
 
 AC_DEFINE_UNQUOTED([CPP],["$gencpp"],[Configured CPP program])
+
+
+# look for a default tclsh interpreter - try to find >=8.5
+if test x"$use_tcl" = xyes; then
+  if test x"$TCLSH" != x; then ac_cv_path_TCLSH=$TCLSH; fi
+  AC_PATH_PROGS_FEATURE_CHECK(TCLSH, [tclsh8.5 tclsh],
+    [[v=`echo 'puts [expr $tcl_version >= 8.5]' | $ac_path_TCLSH`
+      test "$v" = "1" && ac_cv_path_TCLSH=$ac_path_TCLSH ac_path_TCLSH_found=:]],
+    [ac_cv_path_TCLSH=tclsh]
+  )
+  AC_DEFINE_UNQUOTED([TCLSH],["$ac_cv_path_TCLSH"],[Default tclsh interpreter])
+fi
 
 
 # define a temporary directory

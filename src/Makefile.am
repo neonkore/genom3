@@ -33,7 +33,10 @@ genom3_SOURCES=\
 	idltype.c	\
 	string.c	\
 	dotgen.y	\
-	dotgen.l
+	dotgen.l	\
+			\
+	engine.c	\
+	engine-tcl.c
 
 genom3_YFLAGS= -v -d
 genom3_LDADD = $(LIBOBJS)

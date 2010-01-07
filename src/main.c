@@ -66,6 +66,8 @@ main(int argc, char *argv[])
     { "tmpdir",		required_argument,	NULL,			'T' },
     { "rename",		no_argument,		NULL,			'r' },
     { "no-rename",	no_argument,		&runopt.cppdotgen,	1 },
+    { "engine",		required_argument,	NULL,			'e' },
+    { "debug",		no_argument,		NULL,			'd' },
     { "help",		no_argument,		NULL,			'h' },
     { NULL,		0,			NULL,			0 }
   };
@@ -79,11 +81,15 @@ main(int argc, char *argv[])
 
   /* set default options */
   runopt.input[0] = '\0';
+  runopt.tmpl[0] = '\0';
+  runopt.interp[0] = '\0';
+  runopt.engine[0] = '\0';
 
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
 
   runopt.verbose = 0;
+  runopt.debug = 0;
   runopt.preproc = 0;
 
 #ifdef CPP_DOTGEN
@@ -98,7 +104,7 @@ main(int argc, char *argv[])
   }
 
   /* parse command line options */
-  while ((c = getopt_long(argc, argv, "ID:EvT:rh", opts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "ID:EvT:re:dh", opts, NULL)) != -1)
     switch (c) {
       case 0: break;
 
@@ -120,9 +126,14 @@ main(int argc, char *argv[])
 	strlcpy(runopt.tmpdir, optarg, sizeof(runopt.tmpdir));
 	break;
 
+      case 'e':
+	strlcpy(runopt.interp, optarg, sizeof(runopt.interp));
+	break;
+
       case 'r': runopt.cppdotgen = 0; break;
       case 'v': runopt.verbose = 1; break;
       case 'E': runopt.preproc = 1; break;
+      case 'd': runopt.debug = 1; break;
 
       case 'h':
 	usage(stdout, argv0);
@@ -190,6 +201,14 @@ main(int argc, char *argv[])
     warnx(s?"fatal errors":"%d errors", nerrors);
     if (!status) status = s?s:nerrors;
   }
+  if (status) { warnx("giving up"); goto done; }
+
+  /* invoke template */
+  s = eng_seteng(runopt.tmpl);
+  if (!s) s = eng_invoke();
+  if (s) {
+    status = s; warnx("giving up"); goto done;
+  }
 
 done:
   if (runopt.verbose) {
@@ -198,7 +217,10 @@ done:
   }
 
   /* clean up */
-  rmrfdir(runopt.tmpdir);
+  if (runopt.debug)
+    warnx("left out temporary files in %s", runopt.tmpdir);
+  else
+    rmrfdir(runopt.tmpdir);
   return status;
 }
 
@@ -292,10 +314,13 @@ usage(FILE *channel, char *argv0)
     "  -T,--tmpdir=dir\tuse dir as the directory for temporary files\n"
     "  -r,--rename\t\talways invoke cpp with a .c file linked to input file\n"
     "     --no-rename\tpass input file directly to cpp (opposite of -r)\n"
+    "  -e\t\t\tset interpreter program for generator engine\n"
+    "  -v\t\t\tproduce verbose output\n"
+    "  -d\t\t\tactivate debugging options\n"
     "\n"
     "Environment variables:\n"
-    "  CPP\t\tC preprocessor program\n"
-    "  TMPDIR\tdirectory for temporary files\n",
+    "  CPP\t\t\tC preprocessor program\n"
+    "  TMPDIR\t\tdirectory for temporary files\n",
 	  basename(argv0));
 }
 

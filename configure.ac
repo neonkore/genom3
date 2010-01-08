@@ -15,6 +15,7 @@ AC_ARG_ENABLE(tcl,
 	AS_HELP_STRING([--disable-tcl], [don't compile support for Tcl engine]),
 	[use_tcl=$enableval],[use_tcl=yes])
 AC_ARG_VAR(TCLSH, [Default tclsh interpreter])
+AM_CONDITIONAL([WITH_TCL], [test "$use_tcl" = yes])
 
 
 # compilers et al.
@@ -68,17 +69,33 @@ if test x"$use_tcl" = xyes; then
     [ac_cv_path_TCLSH=tclsh]
   )
   AC_DEFINE_UNQUOTED([TCLSH],["$ac_cv_path_TCLSH"],[Default tclsh interpreter])
+  AC_SUBST(TCLSH, [$ac_cv_path_TCLSH])
 fi
 
 
 # define a temporary directory
 AC_DEFINE([TMPDIR],["/tmp"],[Default temporary directory])
 
+
+# define templates directory
+eval tmpldir="\"$datadir/${PACKAGE_NAME}/templates\""
+eval tmpldir="\"$tmpldir\""
+AC_DEFINE_UNQUOTED([TMPLDIR],["${tmpldir}"],[Default templates directory])
+AC_SUBST(tmpldir)
+
+# define sys directory
+eval sysdir="\"$datadir/${PACKAGE_NAME}/sys/${PACKAGE_VERSION}\""
+eval sysdir="\"$sysdir\""
+AC_DEFINE_UNQUOTED([SYSDIR],["${sysdir}"],[System files directory])
+AC_SUBST(sysdir)
+
+
 # output
 AC_CONFIG_FILES([
 	genom3.pc
 	Makefile
 	src/Makefile
+	sys/tcl/Makefile
 	regress/Makefile
 ])
 AC_OUTPUT

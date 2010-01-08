@@ -1428,3 +1428,21 @@ dotgenerror(const char *msg)
 {
   parserror(curloc, "%s around column %d", msg, curloc.col);
 }
+
+
+/* --- dotgen_consolidate -------------------------------------------------- */
+
+/** perform sanity checks on parsed file
+ */
+int
+dotgen_consolidate()
+{
+  comp_s c = comp_dotgen();
+
+  if (!c) {
+    parserror(curloc, "missing component declaration");
+    return EINVAL;
+  }
+
+  return 0;
+}

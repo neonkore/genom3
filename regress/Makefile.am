@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 LAAS/CNRS
+# Copyright (c) 2009-2010 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -20,12 +20,15 @@
 check_PROGRAMS=\
 	preprocess	\
 	datatypes	\
-	component
+	component	\
+	generate
 
 TESTS=		$(check_PROGRAMS)
 
 
 # check cpp - both with and without -r (for default include path)
+preprocess_SOURCES=
+
 preprocess: Makefile
 	@exec >$@;						\
 	${ECHO} '#!${SHELL}';					\
@@ -35,18 +38,33 @@ preprocess: Makefile
 		grep "'hello ${PACKAGE_VERSION} world'";	\
 	${ECHO} ${top_builddir}/src/genom3			\
 			-DCMDLINE_MACRO=me	 		\
-			-E regress ${srcdir}/$@.gen "|"		\
+			-E void ${srcdir}/$@.gen "|"		\
 		grep "'hello ${PACKAGE_VERSION} me'"
 	@chmod u+x $@
 
 
 # check data types and genom objects parsing
+component_SOURCES=
+datatypes_SOURCES=
+
 component: Makefile
 datatypes: Makefile
 
 component datatypes:
 	@exec >$@;						\
 	${ECHO} '#!${SHELL}';					\
-	${ECHO} ${top_builddir}/src/genom3 			\
-			regress ${srcdir}/$@.gen
+	${ECHO} ${top_builddir}/src/genom3 -n 			\
+			void ${srcdir}/$@.gen
+	@chmod u+x $@
+
+
+# check component generation
+generate_SOURCES=
+
+generate: Makefile
+	@exec >$@;						\
+	${ECHO} '#!${SHELL}';					\
+	${ECHO} ${top_builddir}/src/genom3 -d -v 			\
+			-t ${srcdir} -s ${top_builddir}/sys	\
+			template ${srcdir}/$@.gen
 	@chmod u+x $@

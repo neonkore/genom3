@@ -54,10 +54,14 @@ gendotgen(comp_s c, FILE *out)
   /* header information */
   gettimeofday(&t, NULL);
   fprintf(out,
-	  "# %s - " PACKAGE_STRING "\n" "# generated from %s\n" "# %s",
+	  "# %s - " PACKAGE_STRING "\n# generated from %s\n# %s#\n",
 	  comp_name(c), runopt.input, ctime(&t.tv_sec));
-  fprintf(out, "package require Tcl 8.5\n");
+  fprintf(out, "lappend auto_path {%s}\n", runopt.sysdir);
+  fprintf(out, "if [catch {package require -exact " PACKAGE_NAME "-sys "
+	  PACKAGE_VERSION "} s] {puts stderr $s; exit 2}\n");
 
+  fprintf(out, "if [catch {source [file join {%s} {" TMPL_SPECIAL_FILE "%s}]} s] "
+	  "{puts stderr $s; exit 2}\n", runopt.tmpl, eng_tcl.name);
   return 0;
 }
 

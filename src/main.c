@@ -63,10 +63,13 @@ main(int argc, char *argv[])
   /* options descriptor */
   static struct option opts[] = {
     { "verbose",	no_argument,		NULL,			'v' },
+    { "parse-only",	no_argument,		NULL,			'n' },
     { "tmpdir",		required_argument,	NULL,			'T' },
     { "rename",		no_argument,		NULL,			'r' },
     { "no-rename",	no_argument,		&runopt.cppdotgen,	1 },
     { "engine",		required_argument,	NULL,			'e' },
+    { "tmpldir",	required_argument,	NULL,			't' },
+    { "sysdir",		required_argument,	NULL,			's' },
     { "debug",		no_argument,		NULL,			'd' },
     { "help",		no_argument,		NULL,			'h' },
     { NULL,		0,			NULL,			0 }
@@ -84,6 +87,8 @@ main(int argc, char *argv[])
   runopt.tmpl[0] = '\0';
   runopt.interp[0] = '\0';
   runopt.engine[0] = '\0';
+  strlcpy(runopt.tmpldir, TMPLDIR, sizeof(runopt.tmpldir));
+  strlcpy(runopt.sysdir, SYSDIR, sizeof(runopt.sysdir));
 
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
@@ -91,6 +96,7 @@ main(int argc, char *argv[])
   runopt.verbose = 0;
   runopt.debug = 0;
   runopt.preproc = 0;
+  runopt.parse = 0;
 
 #ifdef CPP_DOTGEN
   runopt.cppdotgen = getenv("CPP")?0:1;
@@ -104,7 +110,7 @@ main(int argc, char *argv[])
   }
 
   /* parse command line options */
-  while ((c = getopt_long(argc, argv, "ID:EvT:re:dh", opts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "ID:EvnT:re:t:s:dh", opts, NULL)) != -1)
     switch (c) {
       case 0: break;
 
@@ -130,6 +136,15 @@ main(int argc, char *argv[])
 	strlcpy(runopt.interp, optarg, sizeof(runopt.interp));
 	break;
 
+      case 't':
+	strlcpy(runopt.tmpldir, optarg, sizeof(runopt.tmpldir));
+	break;
+
+      case 's':
+	strlcpy(runopt.sysdir, optarg, sizeof(runopt.sysdir));
+	break;
+
+      case 'n': runopt.parse = 1; break;
       case 'r': runopt.cppdotgen = 0; break;
       case 'v': runopt.verbose = 1; break;
       case 'E': runopt.preproc = 1; break;
@@ -155,7 +170,18 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  strlcpy(runopt.tmpl, argv[0], sizeof(runopt.tmpl));
+  runopt.tmpl[0] = '\0';
+  if (argv[0][0] != '/') {
+    if (runopt.tmpldir[0] != '/') {
+      getcwd(runopt.tmpl, sizeof(runopt.tmpl));
+      strlcat(runopt.tmpl, "/", sizeof(runopt.tmpl));
+    }
+    strlcat(runopt.tmpl, runopt.tmpldir, sizeof(runopt.tmpl));
+    strlcat(runopt.tmpl, "/", sizeof(runopt.tmpl));
+  }
+  strlcat(runopt.tmpl, argv[0], sizeof(runopt.tmpl));
+  xwarnx("template path `%s'", runopt.tmpl);
+
 
   /* parse input files */
   s = open(argv[1], O_RDONLY, 0);
@@ -201,7 +227,10 @@ main(int argc, char *argv[])
     warnx(s?"fatal errors":"%d errors", nerrors);
     if (!status) status = s?s:nerrors;
   }
+
+  if (!status) status = dotgen_consolidate();
   if (status) { warnx("giving up"); goto done; }
+  if (runopt.parse) goto done;
 
   /* invoke template */
   s = eng_seteng(runopt.tmpl);
@@ -311,17 +340,24 @@ usage(FILE *channel, char *argv0)
     "  -Idir\t\t\tadd dir to the list of directories searched for headers\n"
     "  -Dmacro[=value]\tpredefine macro, with given value or 1 by default\n"
     "  -E\t\t\tstop after preprocessing stage\n"
+    "  -n,--parse-only\tstop after parsing stage (check syntax only)\n"
+    "  -e,--engine=program\tset interpreter program for generator engine\n"
+    "  -t,--tmpldir=dir\tuse dir as the directory for templates\n"
+    "  -s,--sysdir=dir\tuse dir as the directory for generator system files\n"
     "  -T,--tmpdir=dir\tuse dir as the directory for temporary files\n"
     "  -r,--rename\t\talways invoke cpp with a .c file linked to input file\n"
     "     --no-rename\tpass input file directly to cpp (opposite of -r)\n"
-    "  -e\t\t\tset interpreter program for generator engine\n"
     "  -v\t\t\tproduce verbose output\n"
     "  -d\t\t\tactivate debugging options\n"
+    "  -h,--help\t\tprint usage summary (this text)\n"
+    "\n"
+    "Template options:\n"
+    "  -h,--help\t\tprint options specific to template\n"
     "\n"
     "Environment variables:\n"
     "  CPP\t\t\tC preprocessor program\n"
     "  TMPDIR\t\tdirectory for temporary files\n",
-	  basename(argv0));
+    basename(argv0));
 }
 
 
@@ -360,6 +396,7 @@ rmrfdir(const char *path)
 
   fchdir(cwd);
   close(cwd);
+  closedir(d);
 
   rmdir(path);
   xwarnx("removed path `%s'", path);

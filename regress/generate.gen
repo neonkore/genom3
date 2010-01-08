@@ -1,0 +1,11 @@
+/* GenoM component generation test */
+
+struct t3 {
+  long a;
+};
+
+component c {
+  ids:		t3;
+  version:	"1.0";
+  lang:		"c";
+};

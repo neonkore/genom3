@@ -43,3 +43,9 @@ typedef union u2 switch(boolean) {
  case TRUE: ss3 a;
  case FALSE: su2 b;
 } t3;
+
+component c {
+  ids:		t3;
+  version:	"1.0";
+  lang:		"c";
+};

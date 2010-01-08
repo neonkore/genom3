@@ -35,8 +35,11 @@ extern struct runopt_s {
   int verbose;		/** be verbose */
   int debug;		/** activate some debugging options */
   int preproc;		/** preprocess file only */
+  int parse;		/** parse file only */
   char engine[PATH_MAX];/** generator engine */
   char interp[PATH_MAX];/** template interpreter */
+  char tmpldir[PATH_MAX];/** templates directory */
+  char sysdir[PATH_MAX];/** system files directory */
   char tmpdir[PATH_MAX];/** temporary directory */
   int cppdotgen;	/** cpp accepts .gen file extension */
 } runopt;
@@ -57,6 +60,7 @@ typedef struct tloc {
 } tloc;
 
 int	dotgenparse(void);
+int	dotgen_consolidate(void);
 void	parserror(tloc l, const char *fmt, ...);
 void	parsenoerror(tloc l, const char *fmt, ...);
 void	parsewarning(tloc l, const char *fmt, ...);

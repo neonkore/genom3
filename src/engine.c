@@ -27,8 +27,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
+#include <libgen.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <sys/wait.h>
 #include <errno.h>
 #include <err.h>
 
@@ -45,6 +48,9 @@ extern const engdescr eng_tcl;
 /* default engine */
 static const engdescr *engine = NULL;
 
+/* interpreter pid */
+static pid_t engpid;
+
 
 /* --- eng_seteng ---------------------------------------------------------- */
 
@@ -53,42 +59,47 @@ static const engdescr *engine = NULL;
 int
 eng_seteng(const char *tmpl)
 {
-  engdescr engs[] = {
+  engdescr *engs[] = {
 #ifdef TCLSH
-    eng_tcl,
+    &eng_tcl,
 #endif
-    { .name = "" }
+    NULL
   };
   engdescr *e;
   char *name;
-#if 0
+
   struct dirent *de;
   DIR *d;
-  int s;
 
   /* look for template.xxx entry */
   d = opendir(tmpl);
-  if (!d) { warnx("cannot open directory %s", tmpl); return errno; }
+  if (!d) {
+    warnx("cannot open directory %s", tmpl);
+    warn(NULL);
+    return errno;
+  }
 
   name = NULL;
   while((de = readdir(d))) {
-    if (strncmp(de->d_name, TMPL_SPECIAL_FILE)) continue;
-    if (e->d_type == DT_DIR) continue;
+    if (strncmp(de->d_name, TMPL_SPECIAL_FILE, strlen(TMPL_SPECIAL_FILE)))
+      continue;
+    if (de->d_type == DT_DIR) {
+      warnx("template entry '%s' should not be a directory", de->d_name);
+      break;
+    }
 
-    xwarnx("found template entry '%s'", e->d_name);
+    xwarnx("found template entry '%s'", de->d_name);
     name = de->d_name + strlen(TMPL_SPECIAL_FILE);
+    break;
   }
   closedir(d);
   if (!name) {
-    warnx("cannot find template entry '" TMPL_SPECIAL_FILE "'");
+    warnx("cannot find template entry '" TMPL_SPECIAL_FILE "<engine>'");
     return ENOENT;
   }
-#else
-  name = "tcl";
-#endif
 
   /* select engine based on file extension */
-  for(e = &engs[0]; e->name[0]; e++)
+  for(e = engs[0]; e; e++)
     if (!strncmp(e->name, name, strlen(name))) {
       engine = e;
       break;
@@ -120,13 +131,18 @@ eng_seteng(const char *tmpl)
 int
 eng_invoke()
 {
+  char output[1024];
   char gen[PATH_MAX];
-  FILE *g;
-  int pipefd[2];
+  char interp[PATH_MAX];
+
+  int stdfd[4], m;
+  FILE *g, *out, *err;
+  fd_set fdset;
+
   int s;
 
   comp_s c = comp_dotgen();
-  if (!c) return errno = ENOENT;
+  assert(c);
   if (!engine) { warnx("no generator engine"); return EINVAL; }
 
   /* create output for processed dotgen data */
@@ -145,10 +161,79 @@ eng_invoke()
   if (s) return errno;
 
   /* invoke interpreter */
-  if (pipe(pipefd) < 0) {
-    warn("cannot create a pipe to template interpreter:");
+  if (pipe(&stdfd[0]) < 0 || pipe(&stdfd[2]) < 0) {
+    warn("cannot create a pipe for template interpreter:");
     return errno;
   }
+
+  xwarnx("spawning '%s %s'", runopt.interp, gen);
+  strlcpy(interp, runopt.interp, sizeof(interp));
+  strlcpy(interp, basename(interp), sizeof(interp));
+
+  switch((engpid = fork())) {
+    case -1:
+      warnx("unable to fork"); warn(NULL);
+      return errno = EAGAIN;
+
+    case 0: { /* child */
+      char *args[] = { interp, gen, NULL };
+
+      if (dup2(stdfd[1], fileno(stdout)) < 0 ||
+	  dup2(stdfd[3], fileno(stderr)) < 0) {
+	warnx("unable to set interpreter stdout"); warn(NULL);
+	_exit(2);
+      }
+      close(stdfd[0]); close(stdfd[1]);
+      close(stdfd[2]); close(stdfd[3]);
+
+      s = execvp(runopt.interp, args);
+      if (s) { warnx("unable to exec '%s'", runopt.interp); warn(NULL); }
+      _exit(127);
+    }
+
+    default: /* parent */
+      close(stdfd[1]);
+      close(stdfd[3]);
+      break;
+  }
+
+  /* wait for interpreter */
+  out = fdopen(stdfd[0], "r"); assert(out);
+  err = fdopen(stdfd[2], "r"); assert(err);
+
+  m = stdfd[0]>stdfd[2] ? stdfd[0] : stdfd[2];
+  FD_ZERO(&fdset);
+  FD_SET(stdfd[0], &fdset);
+  FD_SET(stdfd[2], &fdset);
+  do {
+    s = select(1 + m, &fdset, NULL, NULL, NULL);
+    if (s > 0) {
+      if (FD_ISSET(stdfd[0], &fdset)) {
+	if (fgets(output, sizeof(output), out)) {
+	  if (runopt.verbose) printf("%s: %s", interp, output);
+	} else FD_CLR(stdfd[0], &fdset);
+      } else FD_SET(stdfd[0], &fdset);
+
+      if (FD_ISSET(stdfd[2], &fdset)) {
+	if (fgets(output, sizeof(output), err)) {
+	  fprintf(stderr, "%s: %s", interp, output);
+	} else FD_CLR(stdfd[2], &fdset);
+      } else FD_SET(stdfd[2], &fdset);
+    }
+
+    if (feof(out) && feof(err)) break;
+  } while(s >= 0 || errno == EINTR);
+  if (s < 0) warnx("unable to read interpreter output");
+
+  fclose(out); fclose(err);
+
+  waitpid(engpid, &s, 0);
+  if ((!WIFEXITED(s) || WEXITSTATUS(s))) {
+    warnx("generator engine exited with code %d", WEXITSTATUS(s));
+    return WEXITSTATUS(s);
+  }
+
+  xwarnx("generator engine exited with code %d", WEXITSTATUS(s));
 
   return 0;
 }

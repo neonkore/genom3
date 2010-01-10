@@ -23,9 +23,7 @@
 #
 
 template options {
-    -h - --help {
-	template message {
-	    xxx
-	}
-    }
+    -h - --help { template message [info level] }
 }
+
+template::getopt

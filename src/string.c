@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
 #include <err.h>
 
 #include "genom.h"
@@ -118,4 +119,51 @@ void
 string_usage()
 {
   if (hstrings) hash_pstat(hstrings);
+}
+
+
+/* --- opt_append ---------------------------------------------------------- */
+
+int
+opt_append(char ***odb, int *nodb, const char *opt, int index)
+{
+  char *s;
+  char **a;
+
+  a = realloc(*odb, (*nodb+2)*sizeof(**odb));
+  if (!a) return errno = ENOMEM;
+  *odb = a;
+
+  s = string(opt);
+  if (!s) return errno = ENOMEM;
+
+  if (index < 0 || index >= *nodb) {
+    (*odb)[*nodb] = s;
+    (*odb)[*nodb+1] = NULL;
+  } else {
+    /* rotate all options */
+    memmove(*odb+index+1, *odb+index, (*nodb-index+1)*sizeof(**odb));
+    (*odb)[index] = s;
+  }
+
+  (*nodb)++;
+  return 0;
+}
+
+
+/* --- opt_rm -------------------------------------------------------------- */
+
+int
+opt_rm(char ***odb, int *nodb, int index)
+{
+  char **a;
+
+  if (index >= 0 && index < *nodb)
+    memmove(*odb+index, *odb+index+1, (*nodb-index)*sizeof(**odb));
+  (*nodb)--;
+
+  a = realloc(*odb, (*nodb+1)*sizeof(**odb));
+  if (a) *odb = a;
+
+  return 0;
 }

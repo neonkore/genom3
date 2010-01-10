@@ -60,8 +60,11 @@ gendotgen(comp_s c, FILE *out)
   fprintf(out, "if [catch {package require -exact " PACKAGE_NAME "-sys "
 	  PACKAGE_VERSION "} s] {puts stderr $s; exit 2}\n");
 
-  fprintf(out, "if [catch {source [file join {%s} {" TMPL_SPECIAL_FILE "%s}]} s] "
-	  "{puts stderr $s; exit 2}\n", runopt.tmpl, eng_tcl.name);
+  fprintf(out,
+	  "if [catch {source [file join {%s} {" TMPL_SPECIAL_FILE "%s}]} s] "
+	  "{ puts %s; exit 2}\n",
+	  runopt.tmpl, eng_tcl.name,
+	  runopt.verbose ? "$::errorInfo" : "stderr $s");
   return 0;
 }
 

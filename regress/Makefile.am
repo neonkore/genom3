@@ -64,7 +64,7 @@ generate_SOURCES=
 generate: Makefile
 	@exec >$@;						\
 	${ECHO} '#!${SHELL}';					\
-	${ECHO} ${top_builddir}/src/genom3 -d -v 			\
+	${ECHO} ${top_builddir}/src/genom3 -v 			\
 			-t ${srcdir} -s ${top_builddir}/sys	\
 			template ${srcdir}/$@.gen
 	@chmod u+x $@

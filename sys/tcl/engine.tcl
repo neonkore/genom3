@@ -27,6 +27,5 @@ namespace eval template {
 
     variable dotgen [dict create]
 
-
     namespace ensemble create
 }

@@ -20,7 +20,7 @@
 systcldir=$(sysdir)/tcl
 
 dist_systcl_DATA=	\
-	options.tcl	\
+	template.tcl	\
 	engine.tcl
 
 nodist_systcl_DATA=	\

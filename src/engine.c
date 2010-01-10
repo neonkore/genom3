@@ -51,6 +51,12 @@ static const engdescr *engine = NULL;
 /* interpreter pid */
 static pid_t engpid;
 
+/** template options */
+static char **engopts = NULL;
+
+/** number of template options */
+static int nengopts;
+
 
 /* --- eng_seteng ---------------------------------------------------------- */
 
@@ -59,13 +65,13 @@ static pid_t engpid;
 int
 eng_seteng(const char *tmpl)
 {
-  engdescr *engs[] = {
+  const engdescr *engs[] = {
 #ifdef TCLSH
     &eng_tcl,
 #endif
     NULL
   };
-  engdescr *e;
+  const engdescr *e;
   char *name;
 
   struct dirent *de;
@@ -123,6 +129,31 @@ eng_seteng(const char *tmpl)
 }
 
 
+/* --- eng_optappend ------------------------------------------------------- */
+
+int
+eng_optappend(const char *opt, int index)
+{
+  int s = opt_append(&engopts, &nengopts, opt, index);
+  if (s) {
+    warnx("failed to add template option `%s'", opt);
+    return s;
+  }
+
+  xwarnx("added template option `%s'", opt);
+  return 0;
+}
+
+
+/* --- eng_optrm ----------------------------------------------------------- */
+
+int
+eng_optrm(int index)
+{
+  return opt_rm(&engopts, &nengopts, index);
+}
+
+
 /* --- eng_invoke ---------------------------------------------------------- */
 
 /** generate a description of the dotgen file in the engine language and invoke
@@ -134,6 +165,7 @@ eng_invoke()
   char output[1024];
   char gen[PATH_MAX];
   char interp[PATH_MAX];
+  char tmpl[PATH_MAX];
 
   int stdfd[4], m;
   FILE *g, *out, *err;
@@ -161,14 +193,25 @@ eng_invoke()
   if (s) return errno;
 
   /* invoke interpreter */
+  strlcpy(interp, runopt.interp, sizeof(interp));
+  strlcpy(interp, basename(interp), sizeof(interp));
+  strlcpy(tmpl, runopt.tmpl, sizeof(tmpl));
+  strlcpy(tmpl, basename(tmpl), sizeof(tmpl));
+
   if (pipe(&stdfd[0]) < 0 || pipe(&stdfd[2]) < 0) {
     warn("cannot create a pipe for template interpreter:");
     return errno;
   }
 
-  xwarnx("spawning '%s %s'", runopt.interp, gen);
-  strlcpy(interp, runopt.interp, sizeof(interp));
-  strlcpy(interp, basename(interp), sizeof(interp));
+  s = eng_optappend(interp, 0);
+  if (!s) s = eng_optappend(gen, 1);
+  if (s) return s;
+
+  if (runopt.verbose) {
+    char **o;
+    xwarnx("spawning engine with the following arguments:");
+    for(o = engopts; *o; o++) xwarnx("  + %s", *o);
+  }
 
   switch((engpid = fork())) {
     case -1:
@@ -176,8 +219,6 @@ eng_invoke()
       return errno = EAGAIN;
 
     case 0: { /* child */
-      char *args[] = { interp, gen, NULL };
-
       if (dup2(stdfd[1], fileno(stdout)) < 0 ||
 	  dup2(stdfd[3], fileno(stderr)) < 0) {
 	warnx("unable to set interpreter stdout"); warn(NULL);
@@ -186,7 +227,7 @@ eng_invoke()
       close(stdfd[0]); close(stdfd[1]);
       close(stdfd[2]); close(stdfd[3]);
 
-      s = execvp(runopt.interp, args);
+      s = execvp(runopt.interp, engopts);
       if (s) { warnx("unable to exec '%s'", runopt.interp); warn(NULL); }
       _exit(127);
     }
@@ -194,6 +235,8 @@ eng_invoke()
     default: /* parent */
       close(stdfd[1]);
       close(stdfd[3]);
+      eng_optrm(0);
+      eng_optrm(0);
       break;
   }
 
@@ -210,13 +253,13 @@ eng_invoke()
     if (s > 0) {
       if (FD_ISSET(stdfd[0], &fdset)) {
 	if (fgets(output, sizeof(output), out)) {
-	  if (runopt.verbose) printf("%s: %s", interp, output);
+	  if (runopt.verbose) printf("%s: %s", tmpl, output);
 	} else FD_CLR(stdfd[0], &fdset);
       } else FD_SET(stdfd[0], &fdset);
 
       if (FD_ISSET(stdfd[2], &fdset)) {
 	if (fgets(output, sizeof(output), err)) {
-	  fprintf(stderr, "%s: %s", interp, output);
+	  fprintf(stderr, "%s: %s", tmpl, output);
 	} else FD_CLR(stdfd[2], &fdset);
       } else FD_SET(stdfd[2], &fdset);
     }

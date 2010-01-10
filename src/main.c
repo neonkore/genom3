@@ -110,7 +110,7 @@ main(int argc, char *argv[])
   }
 
   /* parse command line options */
-  while ((c = getopt_long(argc, argv, "ID:EvnT:re:t:s:dh", opts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "+ID:EvnT:re:t:s:dh", opts, NULL)) != -1)
     switch (c) {
       case 0: break;
 
@@ -164,7 +164,7 @@ main(int argc, char *argv[])
   argc -= optind;
   argv += optind;
 
-  /* parse template arguments */
+  /* configure template arguments */
   if (argc < 2) {
     usage(stderr, argv0);
     exit(1);
@@ -181,23 +181,42 @@ main(int argc, char *argv[])
   }
   strlcat(runopt.tmpl, argv[0], sizeof(runopt.tmpl));
   xwarnx("template path `%s'", runopt.tmpl);
+  argc--;
+  argv++;
 
+  if (!runopt.parse && !runopt.preproc) {
+    status = eng_seteng(runopt.tmpl);
+    if (status) goto done;
+  }
 
-  /* parse input files */
-  s = open(argv[1], O_RDONLY, 0);
+  while(argc > 1)
+    if (argv[0][0] == '-' && strcmp(argv[0], "--")) {
+      eng_optappend(argv[0], -1);
+      argc--;
+      argv++;
+    }
+  if (!strcmp(argv[0], "--")) { argc--; argv++; }
+
+  /* configure input files */
+  if (argc != 1) {
+    usage(stderr, argv0);
+    exit(1);
+  }
+  s = open(argv[0], O_RDONLY, 0);
   if (s < 0) {
-    warnx("cannot open input file `%s'", argv[1]); warn(NULL);
+    warnx("cannot open input file `%s'", argv[0]); warn(NULL);
     exit(2);
   }
   close(s);
 
-  if (argv[1][0] != '/') {
+  if (argv[0][0] != '/') {
     getcwd(runopt.input, sizeof(runopt.input));
     strlcat(runopt.input, "/", sizeof(runopt.input));
-    strlcat(runopt.input, argv[1], sizeof(runopt.input));
+    strlcat(runopt.input, argv[0], sizeof(runopt.input));
     xwarnx("absolute path to input file `%s'", runopt.input);
   } else
-    strlcpy(runopt.input, argv[1], sizeof(runopt.input));
+    strlcpy(runopt.input, argv[0], sizeof(runopt.input));
+
 
   /* create a temporary directory */
   strlcat(runopt.tmpdir, "/genomXXXXXX", sizeof(runopt.tmpdir));
@@ -233,11 +252,8 @@ main(int argc, char *argv[])
   if (runopt.parse) goto done;
 
   /* invoke template */
-  s = eng_seteng(runopt.tmpl);
-  if (!s) s = eng_invoke();
-  if (s) {
-    status = s; warnx("giving up"); goto done;
-  }
+  status = eng_invoke();
+  if (status) { warnx("giving up"); goto done; }
 
 done:
   if (runopt.verbose) {

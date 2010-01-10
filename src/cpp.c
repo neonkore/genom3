@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -56,33 +56,14 @@ static pid_t cpppid = -1;
 int
 cpp_optappend(const char *opt, int index)
 {
-  char *s;
-  char **a;
-
-  a = realloc(cppopts, (ncppopts+2)*sizeof(*cppopts));
-  if (!a) goto enomem;
-  cppopts = a;
-
-  s = strdup(opt);
-  if (!s) goto enomem;
-
-  if (index < 0 || index >= ncppopts) {
-    cppopts[ncppopts] = s;
-    cppopts[ncppopts+1] = NULL;
-  } else {
-    /* rotate all options */
-    memmove(cppopts+index+1, cppopts+index,
-	    (ncppopts-index+1)*sizeof(*cppopts));
-    cppopts[index] = s;
+  int s = opt_append(&cppopts, &ncppopts, opt, index);
+  if (s) {
+    warnx("failed to add cpp option `%s'", opt);
+    return s;
   }
 
-  ncppopts++;
-  xwarnx("added cpp option `%s'", s);
+  xwarnx("added cpp option `%s'", opt);
   return 0;
-
-enomem:
-  warnx("memory exhausted, ignoring cpp option `%s'", opt);
-  return ENOMEM;
 }
 
 
@@ -91,23 +72,7 @@ enomem:
 int
 cpp_optrm(int index)
 {
-  char **a;
-
-  if (index >= 0 && index < ncppopts) {
-    xwarnx("removed cpp option `%s'", cppopts[index]);
-    free(cppopts[index]);
-    memmove(cppopts+index, cppopts+index+1,
-	    (ncppopts-index)*sizeof(*cppopts));
-  } else {
-    xwarnx("removed cpp option `%s'", cppopts[ncppopts-1]);
-    free(cppopts[ncppopts-1]);
-  }
-  ncppopts--;
-
-  a = realloc(cppopts, (ncppopts+1)*sizeof(*cppopts));
-  if (a) cppopts = a;
-
-  return 0;
+  return opt_rm(&cppopts, &ncppopts, index);
 }
 
 

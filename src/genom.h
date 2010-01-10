@@ -390,6 +390,8 @@ typedef struct engdescr {
 } engdescr;
 
 int	eng_seteng(const char *tmpl);
+int	eng_optappend(const char *opt, int index);
+int	eng_optrm(int index);
 int	eng_invoke(void);
 
 
@@ -398,6 +400,9 @@ int	eng_invoke(void);
 char *	string(const char *s);
 char *	strings(const char *src, ...);
 void	string_usage(void);
+
+int	opt_append(char ***odb, int *nodb, const char *opt, int index);
+int	opt_rm(char ***odb, int *nodb, int index);
 
 
 /* --- compat -------------------------------------------------------------- */

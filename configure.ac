@@ -31,6 +31,7 @@ AC_PROG_YACC
 # C library
 AC_CONFIG_LIBOBJ_DIR([compat])
 AC_REPLACE_FUNCS([strlcpy strlcat])
+AC_CHECK_FUNCS([asprintf vasprintf])
 
 
 # test that cpp accepts .gen files, maybe with -xc

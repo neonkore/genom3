@@ -365,6 +365,56 @@ const_maxkind(cvalkind a, cvalkind b)
 }
 
 
+/* --- const_strkind ------------------------------------------------------- */
+
+/** Return a const kind as a string
+ */
+
+const char *
+const_strkind(cvalkind k)
+{
+  switch(k) {
+    case CST_VOID:	return "void";
+    case CST_BOOL:	return "bool";
+    case CST_UINT:	return "uint";
+    case CST_INT:	return "int";
+    case CST_FLOAT:	return "float";
+    case CST_CHAR:	return "char";
+    case CST_STRING:	return "string";
+    case CST_ENUM:	return "enum";
+  }
+
+  assert(0);
+  return NULL;
+}
+
+
+/* --- const_strval -------------------------------------------------------- */
+
+/** Return a const value as a string. Returned string will be overriden by
+ * subsequent calls.
+ */
+
+const char *
+const_strval(cval v)
+{
+  static char buf[32];
+
+  switch(v.k) {
+    case CST_VOID:	buf[0] = '\0'; break;
+    case CST_BOOL:	snprintf(buf, sizeof(buf), "%d", v.b); break;
+    case CST_UINT:	snprintf(buf, sizeof(buf), "%lu", v.u); break;
+    case CST_INT:	snprintf(buf, sizeof(buf), "%ld", v.i); break;
+    case CST_FLOAT:	snprintf(buf, sizeof(buf), "%g", v.f); break;
+    case CST_CHAR:	snprintf(buf, sizeof(buf), "%c", v.c); break;
+    case CST_STRING:	return v.s;
+    case CST_ENUM:	return type_fullname(v.e);
+  }
+
+  return buf;
+}
+
+
 /* --- clist_append -------------------------------------------------------- */
 
 /** Create a list element or append to existing

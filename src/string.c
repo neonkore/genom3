@@ -24,8 +24,9 @@
 #include "acgenom.h"
 
 #include <assert.h>
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <err.h>
@@ -119,6 +120,65 @@ void
 string_usage()
 {
   if (hstrings) hash_pstat(hstrings);
+}
+
+
+/* --- bufcat -------------------------------------------------------------- */
+
+/** Append string with format
+ */
+void
+bufcat(char **buf, const char *fmt, ...)
+{
+  va_list ap;
+  int s;
+#if defined(HAVE_ASPRINTF) && defined(HAVE_VASPRINTF)
+  char *r = NULL;
+
+  va_start(ap, fmt);
+  s = vasprintf(&r, fmt, ap);
+  va_end(ap);
+  if (s == -1) {
+    warnx("memory exhausted");
+    _exit(2);
+  }
+  if (*buf) {
+    s = asprintf(buf, "%s%s", *buf, r);
+    if (s == -1) {
+      warnx("memory exhausted");
+      _exit(2);
+    }
+    free(r);
+  } else {
+    *buf = r;
+  }
+#else
+  char buf1[1];
+  size_t l;
+  va_start(ap, fmt);
+  s = vsnprintf(buf1, sizeof(buf1), fmt, ap);
+  va_end(ap);
+  if (s < 0) {
+    warnx("memory exhausted");
+    _exit(2);
+  }
+  l = *buf ? strlen(*buf) : 0;
+  s += l+1;
+
+  *buf = realloc(*buf, s);
+  if (!*buf) {
+    warnx("memory exhausted");
+    _exit(2);
+  }
+
+  va_start(ap, fmt);
+  s = vsnprintf(*buf + l, s - l, fmt, ap);
+  va_end(ap);
+  if (s < 0) {
+    warnx("memory exhausted");
+    _exit(2);
+  }
+#endif /* ASPRINTF && VASPRINTF */
 }
 
 

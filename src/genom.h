@@ -157,6 +157,9 @@ int	const_binaryop(cval *value, char op, cval arg);
 int	const_convert(cval *value, cvalkind k);
 int	const_cast(tloc l, cval *value, idltype_s t);
 
+const char *	const_strkind(cvalkind k);
+const char *	const_strval(cval v);
+
 clist_s	clist_append(clist_s l, cval v, int unique);
 void	clist_destroy(clist_s l);
 int	clist_first(clist_s l, citer *i);
@@ -216,12 +219,17 @@ typedef enum idlkind {
   IDL_FORWARD_UNION	/**< forward union declaration */
 } idlkind;
 
+hash_s		type_all(void);
+
 tloc		type_loc(idltype_s t);
 const char *	type_name(idltype_s t);
 const char *	type_fullname(idltype_s t);
 idlkind		type_kind(idltype_s t);
 cval		type_constvalue(idltype_s t);
 idltype_s	type_enumeratorenum(idltype_s t);
+unsigned long	type_length(idltype_s t);
+idltype_s	type_discriminator(idltype_s t);
+clist_s		type_casevalues(idltype_s t);
 idltype_s	type_elemtype(idltype_s t, unsigned int *len);
 void		type_setscope(idltype_s t, scope_s s);
 
@@ -399,6 +407,7 @@ int	eng_invoke(void);
 
 char *	string(const char *s);
 char *	strings(const char *src, ...);
+void	bufcat(char **buf, const char *fmt, ...);
 void	string_usage(void);
 
 int	opt_append(char ***odb, int *nodb, const char *opt, int index);

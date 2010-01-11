@@ -70,7 +70,8 @@ type_setscope(idltype_s t, scope_s s) { assert(t); t->scope = s; }
 
 /** hash of all declared types */
 static hash_s htypes;
-
+hash_s
+type_all() { return htypes; }
 
 static idltype_s	type_new(tloc l, idlkind k, const char *name);
 
@@ -529,7 +530,7 @@ type_next(hiter *i)
       } while (type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE);
       break;
 
-    case IDL_ENUM:
+    case IDL_ENUMERATOR:
       if (hash_next(i)) return NULL;
       t = i->value;
       break;
@@ -567,6 +568,36 @@ type_final(idltype_s t)
 }
 
 
+/* --- type_length --------------------------------------------------------- */
+
+/** For strings, array, sequences, return the length (-1U if no length)
+ */
+unsigned long
+type_length(idltype_s t)
+{
+  assert(t);
+  t = type_final(t);
+  assert(t && (t->kind == IDL_STRING ||
+	       t->kind == IDL_ARRAY ||
+	       t->kind == IDL_SEQUENCE));
+  return t->length;
+}
+
+
+/* --- type_discriminator -------------------------------------------------- */
+
+/** For unions, return the discriminator
+ */
+idltype_s
+type_discriminator(idltype_s t)
+{
+  assert(t);
+  t = type_final(t);
+  assert(t && t->kind == IDL_UNION);
+  return t->type;
+}
+
+
 /* --- type_elemtype ------------------------------------------------------- */
 
 /** For array, sequences, return the element type
@@ -591,6 +622,18 @@ type_constvalue(idltype_s t)
 {
   assert(t && t->kind == IDL_CONST);
   return t->value;
+}
+
+
+/* --- type_casevalue ------------------------------------------------------ */
+
+/** For cases, return the values
+ */
+clist_s
+type_casevalues(idltype_s t)
+{
+  assert(t && t->kind == IDL_CASE);
+  return t->values;
 }
 
 

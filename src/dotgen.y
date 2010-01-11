@@ -1437,11 +1437,28 @@ dotgenerror(const char *msg)
 int
 dotgen_consolidate()
 {
+  hash_s types = type_all();
   comp_s c = comp_dotgen();
+  hiter i;
 
+  /* a component must exist */
   if (!c) {
     parserror(curloc, "missing component declaration");
     return EINVAL;
+  }
+
+  /* all types */
+  for(hash_first(types, &i); i.current; hash_next(&i)) {
+    assert(type_fullname(i.value));
+    switch(type_kind(i.value)) {
+      case IDL_FORWARD_STRUCT:
+      case IDL_FORWARD_UNION:
+	parserror(type_loc(i.value), "%s %s was never defined",
+		  type_strkind(type_kind(i.value)), type_fullname(i.value));
+	break;
+
+      default: break;
+    }
   }
 
   return 0;

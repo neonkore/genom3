@@ -242,13 +242,13 @@ main(int argc, char *argv[])
   if (!s) s = dotgenparse();
 
   status = cpp_wait();
+  if (!status) status = dotgen_consolidate();
   if (s || nerrors) {
     warnx(s?"fatal errors":"%d errors", nerrors);
     if (!status) status = s?s:nerrors;
   }
 
-  if (!status) status = dotgen_consolidate();
-  if (status) { warnx("giving up"); goto done; }
+  if (status) goto done;
   if (runopt.parse) goto done;
 
   /* invoke template */

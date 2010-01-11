@@ -208,7 +208,7 @@ gentype(idltype_s t)
   }
 
   l = type_loc(t);
-  if (l->file)
+  if (l.file)
     bufcat(&b, " loc [list {%s} {%d} {%d}]", l.file, l.line, l.col);
 
   bufcat(&b, "]");

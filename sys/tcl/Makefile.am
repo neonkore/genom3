@@ -20,7 +20,10 @@
 systcldir=$(sysdir)/tcl
 
 dist_systcl_DATA=	\
+	dotgen.tcl	\
 	template.tcl	\
+	mapping.tcl	\
+	mapping-c.tcl	\
 	engine.tcl
 
 nodist_systcl_DATA=	\

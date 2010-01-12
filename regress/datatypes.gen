@@ -8,6 +8,7 @@ const boolean c1 = TRUE;
 const long c2 = 3;
 const float c3 = 3.14;
 const m1::e1 c4 = m1::e1v2;
+const string c5 = "a string";
 
 struct s1 {
   m1::e1 a;

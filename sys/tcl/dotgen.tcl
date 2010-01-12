@@ -19,40 +19,51 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
 # IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-#                                           Anthony Mallet on Fri Jan  8 2010
+#                                           Anthony Mallet on Mon Jan 11 2010
 #
 package require Tcl 8.5
 
-namespace eval engine {
+namespace eval dotgen {
 
-    # --- open -------------------------------------------------------------
+    # dictionary of types found in the .gen file
+    variable types
 
-    # Open file for writing, return a channel id.
+
+    # --- for-types --------------------------------------------------------
+
+    # Execute script for each type matching the glob pattern. vars must be a
+    # list of two variable names which are bound to the key and value of each
+    # entry.
     #
-    proc open { type file {user ""} } {
-	return [open $file w]
+    proc for-types { vars pattern script } {
+        variable types
+
+	if {[llength $vars] != 2} { error "must have two variable names" }
+        upvar [lindex $vars 0] k
+        upvar [lindex $vars 1] v
+
+        dict for [list k v] $types {
+	    if {[string match $pattern $k]} { uplevel $script }
+	}
     }
-    namespace export open
+    namespace export for-types
 
 
-    # --- puts -------------------------------------------------------------
+    # --- typeref ----------------------------------------------------------
 
-    # Put string into channel.
+    # Return the type referenced in type
     #
-    proc puts { channel string } {
-	return [puts $channel $string]
+    proc typeref { type } {
+        variable types
+
+	while {[dict exists $type ref]} {
+	    set type [dict get $types [dict get $type ref]]
+	}
+
+	return $type
     }
-    namespace export puts
+    namespace export typeref
 
-
-    # --- close ------------------------------------------------------------
-
-    # Close open file.
-    #
-    proc close { channel } {
-	return [close $channel]
-    }
-    namespace export close
 
     namespace ensemble create
 }

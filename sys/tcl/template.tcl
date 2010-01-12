@@ -61,6 +61,18 @@ namespace eval template {
     namespace export options
 
 
+    # --- string -----------------------------------------------------------
+
+    # Put string into file
+    #
+    proc string { src type dst } {
+	set c [engine open $type $dst]
+	engine puts $c $src
+	engine close $c
+    }
+    namespace export string
+
+
     # --- message ----------------------------------------------------------
 
     # Print message so that it is visible to the end-user. The text is sent on

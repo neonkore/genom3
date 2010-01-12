@@ -19,12 +19,26 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
 # IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-#                                           Anthony Mallet on Fri Jan  8 2010
+#                                           Anthony Mallet on Mon Jan 11 2010
 #
 
-template options {
-    -h - --help { template message [info level] }
-}
+namespace eval mapping {
 
-template::getopt
-mapping generate c *
+    # --- generate ---------------------------------------------------------
+
+    # Generate the mapping of types matching the glob pattern, for the given
+    # language.
+    #
+    proc generate { lang pattern } {
+	switch -nocase -- $lang {
+	    c { set g c::gentype }
+	    default { error "unsupported language $lang" }
+	}
+
+	dotgen for-types {k t} $pattern { append m [$g $t] }
+	return $m
+    }
+    namespace export generate
+
+    namespace ensemble create
+}

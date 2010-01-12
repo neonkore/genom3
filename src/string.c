@@ -23,7 +23,10 @@
  */
 #include "acgenom.h"
 
+#define _GNU_SOURCE	/* to have linux headers define {v,}asprintf */
+
 #include <assert.h>
+#include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <unistd.h>

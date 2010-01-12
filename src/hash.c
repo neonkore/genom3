@@ -176,6 +176,50 @@ hash_insert(hash_s h, const char *key, void *value, hrelease_f release)
 }
 
 
+/* --- hash_rename --------------------------------------------------------- */
+
+/** Rename the key of a hash table entry. Don't use remove/insert to preserve
+ * insertion order.
+ */
+int
+hash_rename(hash_s h, const char *key, const char *new)
+{
+  unsigned long index;
+  hentry_s e, n;
+
+  assert(h && key && new);
+
+  /* unlink entry */
+  index = hstring(key) % h->buckets;
+  e = NULL;
+  if (h->bucket[index]) {
+    if (!strcmp(h->bucket[index]->key, key)) {
+      /* entry is in first bucket */
+      e = h->bucket[index];
+      h->bucket[index] = e->next;
+    } else
+      for(n = h->bucket[index]; n->next; n = n->next)
+	if (!strcmp(n->next->key, key)) {
+	  /* entry is in random bucket */
+	  e = n->next;
+	  n->next = e->next;
+	  break;
+	}
+  }
+  if (!e) return ENOENT;
+
+  /* assign new key */
+  free((char *)e->key); e->key = strdup(new);
+
+  /* insert into new bucket */
+  index = hstring(new) % h->buckets;
+  e->next = h->bucket[index];
+  h->bucket[index] = e;
+
+  return 0;
+}
+
+
 /* --- hash_remove --------------------------------------------------------- */
 
 /** Remove an entry from hash table

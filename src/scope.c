@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009-2010 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -157,10 +157,30 @@ scope_deltype(scope_s s, idltype_s t)
   if (!t) return 0;
   e = hash_remove(s->idltypes, type_name(t), 0);
   type_setscope(t, NULL);
+  if (e) return e;
 
   xwarnx("removed type %s from %s scope", type_name(t),
 	 s->fullname[0]?s->fullname:"global");
-  return e;
+  return 0;
+}
+
+
+/* --- scope_renametype ---------------------------------------------------- */
+
+/** Rename type in the given scope
+ */
+int
+scope_renametype(scope_s s, idltype_s t, const char *new)
+{
+  int e;
+
+  if (!t) return 0;
+  e = hash_rename(s->idltypes, type_name(t), new);
+  if (e) return e;
+
+  xwarnx("renamed type %s to %s in %s scope", type_name(t), new,
+	 s->fullname[0]?s->fullname:"global");
+  return 0;
 }
 
 

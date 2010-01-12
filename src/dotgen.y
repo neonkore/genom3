@@ -1453,8 +1453,9 @@ dotgen_consolidate()
     switch(type_kind(i.value)) {
       case IDL_FORWARD_STRUCT:
       case IDL_FORWARD_UNION:
-	parserror(type_loc(i.value), "%s %s was never defined",
-		  type_strkind(type_kind(i.value)), type_fullname(i.value));
+	if (!type_type(i.value))
+	  parserror(type_loc(i.value), "%s %s was never defined",
+		    type_strkind(type_kind(i.value)), type_fullname(i.value));
 	break;
 
       default: break;

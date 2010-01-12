@@ -100,8 +100,7 @@ genalltypes(hash_s all, FILE *out)
   for(hash_first(all, &i); i.current; hash_next(&i)) {
     assert(type_fullname(i.value));
 
-    fprintf(out, "  dict set types {%s} %s\n",
-	    type_fullname(i.value), gentype(i.value));
+    fprintf(out, "  dict set types {%s} %s\n", i.key, gentype(i.value));
   }
 
   fprintf(out,"}\n");
@@ -122,8 +121,10 @@ gentype(idltype_s t)
   assert(t);
 
   bufcat(&b, "[dict create");
+
   if (type_name(t)) bufcat(&b, " name {%s}", type_name(t));
   if (type_fullname(t)) bufcat(&b, " fullname {%s}", type_fullname(t));
+
   bufcat(&b, " kind {%s}", type_strkind(type_kind(t)));
 
   switch(type_kind(t)) {
@@ -146,7 +147,7 @@ gentype(idltype_s t)
 
     case IDL_ARRAY:
     case IDL_SEQUENCE: {
-      char *e = gentyperef(type_elemtype(t, NULL));
+      char *e = gentyperef(type_type(t));
       bufcat(&b, " element %s", e);
       free(e);
       /*FALLTHROUGH*/
@@ -193,18 +194,15 @@ gentype(idltype_s t)
       /*FALLTHROUGH*/
     }
     case IDL_MEMBER:
-    case IDL_TYPEDEF: {
-      char *e = gentyperef(type_final(t));
+    case IDL_TYPEDEF:
+    case IDL_FORWARD_STRUCT:
+    case IDL_FORWARD_UNION: {
+      char *e = gentyperef(type_type(t));
 
       bufcat(&b, " type %s", e);
       free(e);
       break;
     }
-
-    case IDL_FORWARD_STRUCT:
-    case IDL_FORWARD_UNION:
-      /* there should not be any such types */
-      assert(0); break;
   }
 
   l = type_loc(t);

@@ -44,7 +44,7 @@ struct idltype_s {
   union {
     struct {
       idltype_s type;		/**< sequence, const, enumerator, typedef,
-				 * member, case, union, array */
+				 * member, case, union, array, forward dcls */
       union {
 	unsigned long length;	/**< string, sequence, array */
 	cval value;		/**< const */
@@ -123,6 +123,14 @@ type_new(tloc l, idlkind k, const char *name)
   if (f &&
       ((type_kind(f) == IDL_FORWARD_STRUCT && k == IDL_STRUCT) ||
        (type_kind(f) == IDL_FORWARD_UNION && k == IDL_UNION))) {
+    if (f->type) {
+      parserror(l, "%s %s is already defined",
+		type_strkind(type_kind(f)), f->fullname);
+      parsenoerror(f->loc, " %s %s defined here",
+		   type_strkind(type_kind(f->type)), f->type->fullname);
+      free(t);
+      return NULL;
+    }
     if (strcmp(f->loc.file, l.file)) {
       parserror(l, "%s type %s defined in a different source file from"
 		" its forward declaration", type_strkind(k), t->fullname);
@@ -131,12 +139,13 @@ type_new(tloc l, idlkind k, const char *name)
       free(t);
       return NULL;
     }
-    f->loc = l;
-    f->kind = k;
-    free(t);
-    xwarnx("finalized %s type %s",
-	   type_strkind(type_kind(f)), f->fullname);
-    return f;
+    f->type = t;
+
+    /* rename forwarded declaration key */
+    scope_renametype(s, f, strings("&", f->name, NULL));
+    hash_rename(htypes, f->fullname, strings("&", f->fullname, NULL));
+
+    xwarnx("finalized %s type %s", type_strkind(type_kind(f)), f->fullname);
   }
   if (f &&
       ((type_kind(f) == IDL_FORWARD_STRUCT && k == IDL_FORWARD_STRUCT) ||
@@ -556,9 +565,12 @@ type_final(idltype_s t)
     case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
     case IDL_OCTET: case IDL_STRING: case IDL_ANY: case IDL_ENUM:
     case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE: case IDL_STRUCT:
-    case IDL_UNION: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+    case IDL_UNION:
       return t;
 
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      if (!t->type) return t;
+      /*FALLTHROUGH*/
     case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       return type_final(t->type);
   }
@@ -598,21 +610,6 @@ type_discriminator(idltype_s t)
 }
 
 
-/* --- type_elemtype ------------------------------------------------------- */
-
-/** For array, sequences, return the element type
- */
-idltype_s
-type_elemtype(idltype_s t, unsigned int *len)
-{
-  assert(t);
-  t = type_final(t);
-  assert(t && (t->kind == IDL_ARRAY || t->kind == IDL_SEQUENCE));
-  if (len) *len = t->length;
-  return t->type;
-}
-
-
 /* --- type_constvalue ----------------------------------------------------- */
 
 /** For consts, return the value
@@ -637,14 +634,26 @@ type_casevalues(idltype_s t)
 }
 
 
-/* --- type_type_enumeratorenum -------------------------------------------- */
+/* --- type_type ----------------------------------------------------------- */
 
-/** For enumerators, return the enum parent type
+/** For enumerators, return the enum parent type. For sequences, arrays, const,
+ * typedefs, structs and union members and forward declarations, return the
+ * actual type.
  */
 idltype_s
-type_enumeratorenum(idltype_s t)
+type_type(idltype_s t)
 {
-  assert(t && t->kind == IDL_ENUMERATOR);
+  assert(t && (
+	   t->kind == IDL_ENUMERATOR		||
+	   t->kind == IDL_SEQUENCE		||
+	   t->kind == IDL_ARRAY			||
+	   t->kind == IDL_CONST			||
+	   t->kind == IDL_TYPEDEF		||
+	   t->kind == IDL_MEMBER		||
+	   t->kind == IDL_CASE			||
+	   t->kind == IDL_FORWARD_STRUCT	||
+	   t->kind == IDL_FORWARD_UNION
+	   ));
   return t->type;
 }
 
@@ -666,7 +675,7 @@ type_strkind(idlkind k)
     case IDL_FLOAT:		return "float";
     case IDL_DOUBLE:		return "double";
     case IDL_CHAR:		return "char";
-    case IDL_OCTET:		return "octect";
+    case IDL_OCTET:		return "octet";
     case IDL_STRING:		return "string";
     case IDL_ANY:		return "any";
 

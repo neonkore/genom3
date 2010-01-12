@@ -245,7 +245,7 @@ param_setmember(tloc l, param_s p, const char *name)
 int
 param_setelement(tloc l, param_s p, unsigned int e)
 {
-  unsigned int d;
+  unsigned long d;
   idltype_s t;
   cval m;
 
@@ -254,7 +254,8 @@ param_setelement(tloc l, param_s p, unsigned int e)
 
   switch(type_kind(type_final(p->type))) {
     case IDL_ARRAY: case IDL_SEQUENCE:
-      t = type_elemtype(p->type, &d);
+      t = type_type(type_final(p->type));
+      d = type_length(type_final(p->type));
       if (t) break;
     default:
       parserror(l, "%s %s is scalar",
@@ -348,8 +349,10 @@ param_chkinitarray(tloc l, idltype_s t, initer_s i)
   initer_s j;
   unsigned int k;
   int s;
+  assert(t && i);
 
-  e = type_elemtype(t, &d);
+  e = type_type(type_final(t));
+  d = type_length(type_final(t));
 
   /* loop on elements */
   for(k = 0, j = i; j; k++, j = j->next) {
@@ -385,6 +388,7 @@ param_chkinitsub(tloc l, idltype_s t, initer_s i)
   initer_s j;
   hiter k;
   int s;
+  assert(t && i);
 
   /* loop on elements */
   e = type_first(type_final(t), &k);

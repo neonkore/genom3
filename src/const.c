@@ -303,7 +303,7 @@ const_cast(tloc l, cval *value, idltype_s t)
     case IDL_ENUM:
       if (value->k == CST_ENUM) {
 	assert(value->e && type_kind(value->e) == IDL_ENUMERATOR);
-	s = type_equal(type_enumeratorenum(value->e), t) ? 0 : EDOM;
+	s = type_equal(type_type(value->e), t) ? 0 : EDOM;
       } else s = EDOM;
       break;
 

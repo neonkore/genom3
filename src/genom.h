@@ -81,6 +81,7 @@ hash_s	hash_create(const char *name, int entries);
 void	hash_destroy(hash_s h);
 int	hash_insert(hash_s h, const char *key, void *value,
 		hrelease_f release);
+int	hash_rename(hash_s h, const char *key, const char *new);
 
 int	hash_remove(hash_s h, const char *key, int release);
 void *	hash_find(hash_s h, const char *key);
@@ -109,6 +110,7 @@ scope_s		scope_global(void);
 idltype_s	scope_findtype(scope_s s, const char *name);
 int		scope_addtype(scope_s s, idltype_s t);
 int		scope_deltype(scope_s s, idltype_s t);
+int		scope_renametype(scope_s s, idltype_s t, const char *new);
 int		scope_firstype(scope_s s, hiter *i);
 int		scope_nextype(hiter *i);
 
@@ -226,11 +228,10 @@ const char *	type_name(idltype_s t);
 const char *	type_fullname(idltype_s t);
 idlkind		type_kind(idltype_s t);
 cval		type_constvalue(idltype_s t);
-idltype_s	type_enumeratorenum(idltype_s t);
+idltype_s	type_type(idltype_s t);
 unsigned long	type_length(idltype_s t);
 idltype_s	type_discriminator(idltype_s t);
 clist_s		type_casevalues(idltype_s t);
-idltype_s	type_elemtype(idltype_s t, unsigned int *len);
 void		type_setscope(idltype_s t, scope_s s);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);

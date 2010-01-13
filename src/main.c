@@ -189,19 +189,25 @@ main(int argc, char *argv[])
     if (status) goto done;
   }
 
-  while(argc > 1)
-    if (argv[0][0] == '-' && strcmp(argv[0], "--")) {
-      eng_optappend(argv[0], -1);
-      argc--;
-      argv++;
+  while(argc > 1) {
+    if (!strcmp(argv[0], "--")) break;
+    if (argv[0][0] != '-' && argv[1][0] != '-') {
+      /* treat any argument preceeding something that looks like an option as
+       * an option itself */
+      struct stat sb;
+      s = stat(argv[0], &sb);
+      if (!s && S_ISREG(sb.st_mode)) break;
+      /* treat any argument that is not an existing file as an option */
     }
+
+    eng_optappend(argv[0], -1);
+    argc--; argv++;
+  }
   if (!strcmp(argv[0], "--")) { argc--; argv++; }
 
   /* configure input files */
-  if (argc != 1) {
-    usage(stderr, argv0);
-    exit(1);
-  }
+  if (argc != 1) errx(2, "wrong number of arguments near '%s'", argv[0]);
+
   s = open(argv[0], O_RDONLY, 0);
   if (s < 0) {
     warnx("cannot open input file `%s'", argv[0]); warn(NULL);

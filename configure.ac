@@ -97,6 +97,7 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	sys/tcl/Makefile
+	templates/mappings/Makefile
 	regress/Makefile
 ])
 AC_OUTPUT

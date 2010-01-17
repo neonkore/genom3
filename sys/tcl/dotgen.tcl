@@ -25,28 +25,101 @@ package require Tcl 8.5
 
 namespace eval dotgen {
 
+    # path to the .gen file
+    variable input
+
+    # this template directory
+    variable template
+
+    # path to the temporary directory
+    variable tmpdir
+
     # dictionary of types found in the .gen file
     variable types
 
 
-    # --- for-types --------------------------------------------------------
+    # --- genom ------------------------------------------------------------
+
+    # Return the genom version
+    #
+    proc genom { } {
+	return $::genom
+    }
+    namespace export genom
+
+
+    # --- srcdir -----------------------------------------------------------
+
+    # Return the directory where the input .gen file resides
+    #
+    proc srcdir { } {
+	variable input
+
+	return [file dirname $input]
+    }
+    namespace export srcdir
+
+
+    # --- input ------------------------------------------------------------
+
+    # Return the .gen file
+    #
+    proc input { } {
+	variable input
+
+	return $input
+    }
+    namespace export input
+
+
+    # --- template ---------------------------------------------------------
+
+    # Return the template directory
+    #
+    proc template { } {
+	variable template
+
+	return $template
+    }
+    namespace export template
+
+
+    # --- tmpdir -----------------------------------------------------------
+
+    # Return the temporary directory
+    #
+    proc tmpdir { } {
+	variable tmpdir
+
+	return $tmpdir
+    }
+    namespace export tmpdir
+
+
+    # --- foreach ----------------------------------------------------------
 
     # Execute script for each type matching the glob pattern. vars must be a
     # list of two variable names which are bound to the key and value of each
-    # entry.
+    # entry. 'data' must be either 'components' or 'types'.
     #
-    proc for-types { vars pattern script } {
-        variable types
+    proc foreach { data vars pattern script } {
+	if {[lsearch -exact {components types} $data] < 0} {
+	    ::template fatal "unknown data '$data': must be components or types"
+	}
+	if {[llength $vars] != 2} {
+	    ::template fatal "invalid key '$vars': must be a list of two" \
+		"variable names"
+	}
+        variable $data
 
-	if {[llength $vars] != 2} { error "must have two variable names" }
         upvar [lindex $vars 0] k
         upvar [lindex $vars 1] v
 
-        dict for [list k v] $types {
+        dict for [list k v] [set $data] {
 	    if {[string match $pattern $k]} { uplevel $script }
 	}
     }
-    namespace export for-types
+    namespace export foreach
 
 
     # --- typeref ----------------------------------------------------------
@@ -63,7 +136,6 @@ namespace eval dotgen {
 	return $type
     }
     namespace export typeref
-
 
     namespace ensemble create
 }

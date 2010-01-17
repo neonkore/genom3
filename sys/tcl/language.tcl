@@ -19,26 +19,42 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
 # IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-#                                           Anthony Mallet on Mon Jan 11 2010
+#                                           Anthony Mallet on Fri Jan 15 2010
 #
 
-namespace eval mapping {
+namespace eval language {
 
-    # --- generate ---------------------------------------------------------
+    # --- fileext ----------------------------------------------------------
 
-    # Generate the mapping of types matching the glob pattern, for the given
-    # language.
+    # Return the cannonical file extension for the given language.
     #
-    proc generate { lang pattern } {
+
+    proc fileext { lang {kind source}} {
 	switch -nocase -- $lang {
-	    c { set g c::gentype }
-	    default { error "unsupported language $lang" }
+	    c { if {$kind == "header"} { return ".h" } else { return ".c" } }
 	}
 
-	dotgen foreach types {k t} $pattern { append m [$g $t] }
-	return $m
+	template fatal "unsupported language $lang"
     }
-    namespace export generate
+    namespace export fileext
+
+
+    # --- comment ----------------------------------------------------------
+
+    # Return the comment text for the given language.
+    #
+    proc comment { lang text } {
+	switch -nocase -- $lang {
+	    c {
+		regsub -all "\n(?=.)" "/*\n${text}" "\n * " text
+		set text "${text} */"
+	    }
+	    default { template fatal "unsupported language $lang" }
+	}
+
+	return $text
+    }
+    namespace export comment
 
     namespace ensemble create
 }

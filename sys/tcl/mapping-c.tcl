@@ -134,7 +134,7 @@ namespace eval mapping::c {
 
 	append m [genloc $type]
 	append m "\n# define $n ((const $t)($v))"
-	return [guard $m $n nodefine]
+	return [guard $m $n]
     }
 
 
@@ -257,13 +257,12 @@ namespace eval mapping::c {
 
     # Protect a string with guards
     #
-    proc guard { string name {nodefine ""}} {
+    proc guard { string name } {
 	append m "\n#ifndef _${name}_type"
-	if { "$nodefine" != "nodefine" }  {
-	    append m "\n# define _${name}_type"
-	}
+	append m "\n# define _${name}_type"
 	append m $string
 	append m "\n#endif /* _${name}_type */"
+	append m "\n"
 	return $m
     }
 

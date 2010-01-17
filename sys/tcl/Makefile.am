@@ -20,8 +20,9 @@
 systcldir=$(sysdir)/tcl
 
 dist_systcl_DATA=	\
-	dotgen.tcl	\
 	template.tcl	\
+	dotgen.tcl	\
+	language.tcl	\
 	mapping.tcl	\
 	mapping-c.tcl	\
 	engine.tcl
@@ -35,6 +36,8 @@ BUILT_SOURCES=version.tcl pkgIndex.tcl
 version.tcl: Makefile
 	exec >$@;						\
 	$(ECHO) '# $(PACKAGE_STRING) system files';		\
+	$(ECHO) 'set ::genom'					\
+		"{$(PACKAGE_NAME) $(PACKAGE_VERSION)}";		\
 	$(ECHO) 'package provide'				\
 		'$(PACKAGE_NAME)-sys $(PACKAGE_VERSION)';
 

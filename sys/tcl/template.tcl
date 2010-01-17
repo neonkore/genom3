@@ -38,6 +38,38 @@ namespace eval template {
     variable gotopt	0
 
 
+    # --- parse ------------------------------------------------------------
+
+    # Main template function to parse template source and instanciate it.
+    # Invoke with 'parse file|string src ... file|string dst'. There can be
+    # multiple 'file|string src' argument pairs.
+    #
+    proc parse { args } {
+	if {[llength $args] < 4 || [llength $args] % 2} {
+	    template fatal "wrong # args"
+	}
+
+	# process options, if not done already
+	getopt
+
+	# produce output
+	lassign [lrange $args end-1 end] dtype dst
+	set out [engine::open $dtype $dst write]
+
+	foreach { stype src } [lrange $args 0 end-2] {
+	    set in [engine::open $stype $src read]
+	    if {[catch {engine::process $in $out} m]} {
+		template fatal "$src:$m"
+	    }
+	    engine::close $in
+	}
+
+	engine::close $out
+	return
+    }
+    namespace export parse
+
+
     # --- options ----------------------------------------------------------
 
     # Define the list of supported options for the template. ospec is a
@@ -50,27 +82,51 @@ namespace eval template {
 
 	if {$gotopt} {
 	    fatal "options specification must be set before any"	\
-		"'generate' commands"
+		"'template parse' command"
 	}
 
 	if {[llength $ospec] % 2} { fatal "invalid options specification" }
 	lappend ospec -h - --help { template fatal "help not implemented" }
 
 	set options $ospec
+
+	# process options, if not done already
+	getopt
     }
     namespace export options
 
 
-    # --- string -----------------------------------------------------------
+    # --- arg --------------------------------------------------------------
 
-    # Put string into file
+    # Return next argument, raise an error is none left
     #
-    proc string { src type dst } {
-	set c [engine open $type $dst]
-	engine puts $c $src
-	engine close $c
+    proc arg { } {
+	global argc argv
+
+	set optarg [lindex $argv 1]
+	if {$optarg == ""} {
+	    template fatal "missing argument to [lindex $argv 0]"
+	}
+
+	set argv [lreplace $argv 1 1]
+	incr argc -1
+	return $optarg
     }
-    namespace export string
+    namespace export arg
+
+
+    # --- usage ------------------------------------------------------------
+
+    # Define the usage message
+    #
+    proc usage { args } {
+	variable usage
+
+	if {[llength $args] == 0} { return $usage }
+	set usage [join $args {}]
+	return
+    }
+    namespace export usage
 
 
     # --- message ----------------------------------------------------------
@@ -112,22 +168,28 @@ namespace eval template {
     # Parse options according to the template specification.
     #
     proc getopt { } {
-	global argc argv
-	variable usage
-	variable options
 	variable gotopt
 	if {$gotopt} { return } else { set gotopt 1 }
 
+	global argc argv
+	variable usage
+	variable options
+
 	# process options
 	while {$argc > 0} {
+	    incr argc -1
 	    set arg [lindex $argv 0]
+	    if {[regexp -- {(--?.+)=(.+)} $arg m o a]} {
+		set arg $o
+		set argv [linsert $argv 1 $a]
+	    }
+
 	    uplevel #0 switch -glob -- $arg [concat $options * "{
 		template message \"unknown option $arg\"
 		template fatal $usage
 	    }"]
 
-	    incr argc -1
-	    set argv [lreplace $argv 0 0]
+	    set argv [lrange $argv 1 end]
 	}
 
 	# process extraneous arguments

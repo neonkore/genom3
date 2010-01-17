@@ -19,7 +19,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- *                                           CÃ©dric Pasteur on Thu May 14 2009
+ *                                           Cédric Pasteur on Thu May 14 2009
  */
 #include "acgenom.h"
 
@@ -259,7 +259,7 @@ main(int argc, char *argv[])
 
   /* invoke template */
   status = eng_invoke();
-  if (status) { warnx("giving up"); goto done; }
+  if (status) { goto done; }
 
 done:
   if (runopt.verbose) {

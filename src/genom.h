@@ -269,6 +269,7 @@ void		type_usage(void);
 #define CNTRL_TASK_NAME		"control"
 #define ALL_SERVICE_NAME	"all"
 
+typedef struct task_s *task_s;
 typedef struct codel_s *codel_s;
 
 typedef struct prop_s *prop_s;
@@ -309,7 +310,12 @@ prop_s		prop_newtask(tloc l, const char *name);
 void		prop_destroy(prop_s p);
 
 idltype_s	prop_type(prop_s p);
+const char *	prop_text(prop_s p);
+clist_s		prop_list(prop_s p);
 cval *		prop_value(prop_s p);
+task_s		prop_task(prop_s p);
+codel_s		prop_codel(prop_s p);
+hash_s		prop_identifiers(prop_s p);
 
 const char *	prop_strkind(propkind k);
 
@@ -317,7 +323,6 @@ const char *	prop_strkind(propkind k);
 /* --- component ----------------------------------------------------------- */
 
 typedef struct comp_s *comp_s;
-typedef struct task_s *task_s;
 typedef struct port_s *port_s;
 typedef struct service_s *service_s;
 typedef enum portkind {
@@ -326,8 +331,10 @@ typedef enum portkind {
   PORT_EVENT
 } portkind;
 
+tloc		comp_loc(comp_s c);
 const char *	comp_name(comp_s c);
 idltype_s	comp_ids(comp_s c);
+hash_s		comp_props(comp_s c);
 port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
 comp_s		comp_dotgen(void);

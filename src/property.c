@@ -41,7 +41,7 @@ struct prop_s {
 
   union {
     idltype_s type;	/**< IDS */
-    const char *text;	/**< version, e-mail */
+    const char *text;	/**< doc, version, e-mail, lang */
     clist_s clist;	/**< require, build-require */
     cval value;		/**< period, delay, priority, stack */
     codel_s codel;	/**< codel */
@@ -194,9 +194,31 @@ idltype_s
 prop_type(prop_s p)
 {
   assert(p);
-  assert(
-    p->kind == PROP_IDS);
+  assert(p->kind == PROP_IDS);
   return p->type;
+}
+
+
+/* --- prop_text ----------------------------------------------------------- */
+
+const char *
+prop_text(prop_s p)
+{
+  assert(p);
+  assert(p->kind == PROP_DOC || p->kind == PROP_VERSION ||
+	 p->kind == PROP_EMAIL || p->kind == PROP_LANG);
+  return p->text;
+}
+
+
+/* --- prop_list ----------------------------------------------------------- */
+
+clist_s
+prop_list(prop_s p)
+{
+  assert(p);
+  assert(p->kind == PROP_REQUIRE || p->kind == PROP_BUILD_REQUIRE);
+  return p->clist;
 }
 
 
@@ -210,6 +232,40 @@ prop_value(prop_s p)
     p->kind == PROP_PERIOD || p->kind == PROP_DELAY ||
     p->kind == PROP_PRIORITY || p->kind == PROP_STACK);
   return &p->value;
+}
+
+
+/* --- prop_task ----------------------------------------------------------- */
+
+task_s
+prop_task(prop_s p)
+{
+  assert(p);
+  assert(p->kind == PROP_TASK);
+  return p->task;
+}
+
+
+/* --- prop_codel ---------------------------------------------------------- */
+
+codel_s
+prop_codel(prop_s p)
+{
+  assert(p);
+  assert(p->kind == PROP_CODEL);
+  return p->codel;
+}
+
+
+/* --- prop_identifiers ---------------------------------------------------- */
+
+hash_s
+prop_identifiers(prop_s p)
+{
+  assert(p);
+  assert(p->kind == PROP_THROWS || p->kind == PROP_INTERRUPTS ||
+	 p->kind == PROP_BEFORE || p->kind == PROP_AFTER);
+  return p->hash;
 }
 
 

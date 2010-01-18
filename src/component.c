@@ -47,6 +47,8 @@ struct comp_s {
 tloc		comp_loc(comp_s c) { assert(c); return c->loc; }
 const char *	comp_name(comp_s c) { assert(c); return c->name; }
 hash_s		comp_props(comp_s c) { assert(c); return c->props; }
+hash_s		comp_tasks(comp_s c) { assert(c); return c->tasks; }
+hash_s		comp_services(comp_s c) { assert(c); return c->services; }
 
 struct task_s {
   tloc loc;
@@ -56,6 +58,7 @@ struct task_s {
 };
 
 const char *	task_name(task_s t) { assert(t); return t->name; }
+hash_s		task_props(task_s t) { assert(t); return t->props; }
 
 struct port_s {
   tloc loc;

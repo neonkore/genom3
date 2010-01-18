@@ -335,10 +335,13 @@ tloc		comp_loc(comp_s c);
 const char *	comp_name(comp_s c);
 idltype_s	comp_ids(comp_s c);
 hash_s		comp_props(comp_s c);
+hash_s		comp_tasks(comp_s c);
+hash_s		comp_services(comp_s c);
 port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
 comp_s		comp_dotgen(void);
 const char *	task_name(task_s c);
+hash_s		task_props(task_s t);
 tloc		port_loc(port_s p);
 const char *	port_name(port_s p);
 portkind	port_kind(port_s p);
@@ -369,7 +372,9 @@ typedef enum pdir {
   P_OUTPORT
 } pdir;
 
+tloc		codel_loc(codel_s c);
 const char *	codel_name(codel_s c);
+hash_s		codel_params(codel_s c);
 hash_s		codel_triggers(codel_s c);
 const char *	param_name(param_s p);
 

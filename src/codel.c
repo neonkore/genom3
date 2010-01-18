@@ -43,7 +43,9 @@ struct codel_s {
   hash_s triggers;	/**< start conditions */
 };
 
+tloc		codel_loc(codel_s c) { assert(c); return c->loc; }
 const char *	codel_name(codel_s c) { assert(c); return c->name; }
+hash_s		codel_params(codel_s c) { assert(c); return c->params; }
 hash_s		codel_triggers(codel_s c) { assert(c); return c->triggers; }
 
 

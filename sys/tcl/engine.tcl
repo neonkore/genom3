@@ -123,7 +123,7 @@ namespace eval engine {
 		return [chan create write [namespace code [list strchan $dst]]]
 	    }
 	    file|read {
-		set dst [file join [dotgen template] $dst]
+		set dst [file join [dotgen template dir] $dst]
 		puts "reading $dst"
 		return [::open $dst r]
 	    }
@@ -326,7 +326,7 @@ namespace eval engine {
 	for { set r 1 } { 1 } { incr r } {
 	    # 4 digits from pid, plus 4 random
 	    set f [format %04d%04d [pid] [incr seed]]
-	    set f [file join [dotgen tmpdir] "template$f"]
+	    set f [file join [dotgen template tmpdir] "template$f"]
 
 	    if { ![file exists $f] } { break; }
 	}

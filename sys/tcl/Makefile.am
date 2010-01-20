@@ -21,7 +21,6 @@ systcldir=$(sysdir)/tcl
 
 dist_systcl_DATA=	\
 	template.tcl	\
-	dotgen.tcl	\
 	language.tcl	\
 	mapping.tcl	\
 	mapping-c.tcl	\
@@ -31,24 +30,25 @@ nodist_systcl_DATA=	\
 	version.tcl	\
 	pkgIndex.tcl
 
+systcl_LTLIBRARIES=	engine.la
+engine_la_CPPFLAGS=	-I$(top_srcdir)/src $(TCL_INCLUDE_SPEC)
+engine_la_LIBADD=	$(TCL_LIB_SPEC)
+engine_la_LDFLAGS=	-module -release $(PACKAGE_VERSION)
+
 BUILT_SOURCES=version.tcl pkgIndex.tcl
 
 version.tcl: Makefile
 	exec >$@;						\
 	$(ECHO) '# $(PACKAGE_STRING) system files';		\
-	$(ECHO) 'set ::genom'					\
-		"{$(PACKAGE_NAME) $(PACKAGE_VERSION)}";		\
 	$(ECHO) 'package provide'				\
-		'$(PACKAGE_NAME)-sys $(PACKAGE_VERSION)';
+		'$(PACKAGE_NAME)-engine $(PACKAGE_VERSION)';
 
 pkgIndex.tcl: Makefile
-	exec >$@; l=;						\
+	l='[list source [file join $$dir version.tcl]]';	\
 	for s in $(dist_systcl_DATA); do			\
-		 l="$$l -source $$s";				\
-		test -f $$s || $(LN_S) $(srcdir)/$$s $$s;	\
+	  test -f $$s || $(LN_S) $(srcdir)/$$s $$s;		\
+	  l="$$l"'\n[list source [file join $$dir '"$$s"']]';	\
 	done;							\
-	$(ECHO) puts [pkg::create -name $(PACKAGE_NAME)-sys	\
-		-version $(PACKAGE_VERSION)			\
-		-source version.tcl				\
-		$$l]						\
-	| $(TCLSH)
+	test -f engine.so || $(LN_S) .libs/engine.so;		\
+	$(ECHO) "package ifneeded $(PACKAGE_NAME)-engine"	\
+		"$(PACKAGE_VERSION) $$l" >$@;

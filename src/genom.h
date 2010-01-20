@@ -37,7 +37,6 @@ extern struct runopt_s {
   int preproc;		/** preprocess file only */
   int parse;		/** parse file only */
   char engine[PATH_MAX];/** generator engine */
-  char interp[PATH_MAX];/** template interpreter */
   char tmpldir[PATH_MAX];/** templates directory */
   char sysdir[PATH_MAX];/** system files directory */
   char tmpdir[PATH_MAX];/** temporary directory */
@@ -103,6 +102,7 @@ typedef enum scopekind {
 
 const char *	scope_name(scope_s s);
 const char *	scope_fullname(scope_s s);
+hash_s		scope_types(scope_s s);
 scope_s		scope_parent(scope_s s);
 scope_s		scope_current(void);
 scope_s		scope_global(void);
@@ -232,6 +232,7 @@ idltype_s	type_type(idltype_s t);
 unsigned long	type_length(idltype_s t);
 idltype_s	type_discriminator(idltype_s t);
 clist_s		type_casevalues(idltype_s t);
+hash_s		type_members(idltype_s t);
 void		type_setscope(idltype_s t, scope_s s);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
@@ -405,14 +406,13 @@ void		initer_destroy(initer_s l);
 
 typedef struct engdescr {
   const char *name;
-  const char *interp;
-
-  int (*gendotgen)(comp_s c, FILE *out);
+  int (*invoke)(const char *tmpl, int argc, const char * const *argv);
 } engdescr;
 
 int	eng_seteng(const char *tmpl);
 int	eng_optappend(const char *opt, int index);
 int	eng_optrm(int index);
+
 int	eng_invoke(void);
 
 

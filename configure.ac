@@ -1,12 +1,15 @@
 #
-# Copyright(C) 2009 LAAS/CNRS
+# Copyright (c) 2009-2010 LAAS/CNRS
 #
 # GenoM autoconf file
 #
 AC_PREREQ(2.62)
 AC_INIT([genom],[3.0],[openrobots@laas.fr])
+
+AC_CONFIG_AUX_DIR([autoconf])
+AC_CONFIG_MACRO_DIR([autoconf])
+AC_CONFIG_HEADERS([autoconf/acgenom.h])
 AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
-AC_CONFIG_HEADERS([acgenom.h])
 
 AC_SUBST(GENOM_TOOL, [genom3])
 
@@ -32,6 +35,7 @@ AC_PROG_YACC
 AC_CONFIG_LIBOBJ_DIR([compat])
 AC_REPLACE_FUNCS([strlcpy strlcat])
 AC_CHECK_FUNCS([asprintf vasprintf])
+AC_SEARCH_LIBS([dlopen], [dl])
 
 
 # test that cpp accepts .gen files, maybe with -xc
@@ -60,17 +64,42 @@ fi
 
 AC_DEFINE_UNQUOTED([CPP],["$gencpp"],[Configured CPP program])
 
-
-# look for a default tclsh interpreter - try to find >=8.5
+# tcl configuration
 if test x"$use_tcl" = xyes; then
-  if test x"$TCLSH" != x; then ac_cv_path_TCLSH=$TCLSH; fi
-  AC_PATH_PROGS_FEATURE_CHECK(TCLSH, [tclsh8.5 tclsh],
-    [[v=`echo 'puts [expr $tcl_version >= 8.5]' | $ac_path_TCLSH`
-      test "$v" = "1" && ac_cv_path_TCLSH=$ac_path_TCLSH ac_path_TCLSH_found=:]],
-    [ac_cv_path_TCLSH=tclsh]
-  )
-  AC_DEFINE_UNQUOTED([TCLSH],["$ac_cv_path_TCLSH"],[Default tclsh interpreter])
-  AC_SUBST(TCLSH, [$ac_cv_path_TCLSH])
+  # look for tclConfig.sh
+  SC_PATH_TCLCONFIG
+  SC_LOAD_TCLCONFIG
+
+  # require >=8.5
+  AC_MSG_CHECKING([for tcl version])
+  AC_MSG_RESULT([$TCL_VERSION])
+  case ${TCL_VERSION} in
+       8.[[5-9]]*) ;;
+       *)	 AC_MSG_ERROR([Tcl >= 8.5 is required]);;
+  esac
+  AC_MSG_CHECKING([for threaded tcl])
+  if test "$TCL_THREADS" = 1; then
+    AC_MSG_RESULT([yes])
+    need_pthread=yes;
+  else
+    AC_MSG_RESULT([no])
+  fi
+
+  # add runtime path
+  dir=`echo $TCL_LIB_SPEC | sed -ne 's|.*-L[[ 	]]*\([[^ 	]]*\).*|\1|p'`
+  case "$dir" in
+    "") ;;
+    /usr/lib) ;;
+    *) TCL_LIB_SPEC="-R${dir} ${TCL_LIB_SPEC}" ;;
+  esac
+
+  AC_DEFINE([WITH_TCL],[1],[Enable tcl engine])
+fi
+
+# pthread support - this is required if using a threaded tcl library so that
+# dlopening the tcl genom module works.
+if test "$nedd_pthread" = yes; then
+  AX_PTHREAD(, [AC_MSG_ERROR([pthread support not available])])
 fi
 
 

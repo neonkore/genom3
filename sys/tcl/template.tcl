@@ -149,10 +149,11 @@ namespace eval template {
 	set info [info frame -1]
 	set l ""
 	if {[dict exists $info file]} {
-	    append l "[file tail [dict get $info file]]: "
+	    append l "[file tail [dict get $info file]]:"
 	    if {[dict exists $info line]} {
-		append l "[dict get $info line] "
+		append l "[dict get $info line]:"
 	    }
+	    append l " "
 	}
 	if {[dict exists $info proc]} {
 	    append l "in [dict get $info proc]"
@@ -186,7 +187,7 @@ namespace eval template {
 
 	    uplevel #0 switch -glob -- $arg [concat $options * "{
 		template message \"unknown option $arg\"
-		template fatal $usage
+		template fatal {$usage}
 	    }"]
 
 	    set argv [lrange $argv 1 end]

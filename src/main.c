@@ -67,7 +67,6 @@ main(int argc, char *argv[])
     { "tmpdir",		required_argument,	NULL,			'T' },
     { "rename",		no_argument,		NULL,			'r' },
     { "no-rename",	no_argument,		&runopt.cppdotgen,	1 },
-    { "engine",		required_argument,	NULL,			'e' },
     { "tmpldir",	required_argument,	NULL,			't' },
     { "sysdir",		required_argument,	NULL,			's' },
     { "debug",		no_argument,		NULL,			'd' },
@@ -85,7 +84,6 @@ main(int argc, char *argv[])
   /* set default options */
   runopt.input[0] = '\0';
   runopt.tmpl[0] = '\0';
-  runopt.interp[0] = '\0';
   runopt.engine[0] = '\0';
   strlcpy(runopt.tmpldir, TMPLDIR, sizeof(runopt.tmpldir));
   strlcpy(runopt.sysdir, SYSDIR, sizeof(runopt.sysdir));
@@ -110,7 +108,7 @@ main(int argc, char *argv[])
   }
 
   /* parse command line options */
-  while ((c = getopt_long(argc, argv, "+ID:EvnT:re:t:s:dh", opts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "+ID:EvnT:rt:s:dh", opts, NULL)) != -1)
     switch (c) {
       case 0: break;
 
@@ -130,10 +128,6 @@ main(int argc, char *argv[])
 
       case 'T':
 	strlcpy(runopt.tmpdir, optarg, sizeof(runopt.tmpdir));
-	break;
-
-      case 'e':
-	strlcpy(runopt.interp, optarg, sizeof(runopt.interp));
 	break;
 
       case 't':
@@ -163,6 +157,11 @@ main(int argc, char *argv[])
     }
   argc -= optind;
   argv += optind;
+
+  /* create a temporary directory */
+  strlcat(runopt.tmpdir, "/genomXXXXXX", sizeof(runopt.tmpdir));
+  strlcpy(runopt.tmpdir, mkdtemp(runopt.tmpdir), sizeof(runopt.tmpdir));
+  xwarnx("created directory `%s'", runopt.tmpdir);
 
   /* configure template arguments */
   if (argc < 2) {
@@ -223,11 +222,6 @@ main(int argc, char *argv[])
   } else
     strlcpy(runopt.input, argv[0], sizeof(runopt.input));
 
-
-  /* create a temporary directory */
-  strlcat(runopt.tmpdir, "/genomXXXXXX", sizeof(runopt.tmpdir));
-  strlcpy(runopt.tmpdir, mkdtemp(runopt.tmpdir), sizeof(runopt.tmpdir));
-  xwarnx("created directory `%s'", runopt.tmpdir);
 
   /* process input file */
   if (runopt.preproc) {
@@ -363,7 +357,6 @@ usage(FILE *channel, char *argv0)
     "  -Dmacro[=value]\tpredefine macro, with given value or 1 by default\n"
     "  -E\t\t\tstop after preprocessing stage\n"
     "  -n,--parse-only\tstop after parsing stage (check syntax only)\n"
-    "  -e,--engine=program\tset interpreter program for generator engine\n"
     "  -t,--tmpldir=dir\tuse dir as the directory for templates\n"
     "  -s,--sysdir=dir\tuse dir as the directory for generator system files\n"
     "  -T,--tmpdir=dir\tuse dir as the directory for temporary files\n"

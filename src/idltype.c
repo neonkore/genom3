@@ -654,7 +654,31 @@ type_type(idltype_s t)
 	   t->kind == IDL_FORWARD_STRUCT	||
 	   t->kind == IDL_FORWARD_UNION
 	   ));
+
   return t->type;
+}
+
+
+/* --- type_members -------------------------------------------------------- */
+
+/** Return hash of member types
+ */
+hash_s
+type_members(idltype_s t)
+{
+  assert(t);
+
+  switch(type_kind(t)) {
+    case IDL_STRUCT: case IDL_UNION:
+      return scope_types(t->elems);
+
+    case IDL_ENUM:
+      return t->members;
+
+    default: assert(0);
+  }
+
+  return NULL;
 }
 
 

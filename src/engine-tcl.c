@@ -22,353 +22,68 @@
  *                                           Anthony Mallet on Thu Jan  7 2010
  */
 #include "acgenom.h"
-#ifdef TCLSH
+#ifdef WITH_TCL
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <dlfcn.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #include "genom.h"
 
 
 /* --- local data ---------------------------------------------------------- */
 
-static int	gendotgen(comp_s c, FILE *out);
+static int	tcl_invoke(const char *tmpl, int argc, const char * const *argv);
 
 const engdescr eng_tcl = {
   .name =	"tcl",
-  .interp =	TCLSH,
-  .gendotgen =	gendotgen
+  .invoke =	tcl_invoke
 };
 
 
-static int	gengeneral(FILE *out);
-static int	genalltypes(hash_s all, FILE *out);
-static int	gencomp(comp_s c, FILE *out);
-static char *	gentype(idltype_s t);
-static char *	gentyperef(idltype_s t);
-static char *	genprop(prop_s p);
+/* --- setup --------------------------------------------------------------- */
 
-
-/* --- gendotgen ----------------------------------------------------------- */
-
-/** generate a description of the dotgen file
+/** Setup Tcl engine
  */
 static int
-gendotgen(comp_s c, FILE *out)
+tcl_invoke(const char *tmpl, int argc, const char * const *argv)
 {
-  struct timeval t;
+  char module[PATH_MAX];
+  int (*invoke)(const char *, int, const char * const *);
+  void *e;
   int s;
 
-  /* header information */
-  gettimeofday(&t, NULL);
-  fprintf(out,
-	  "# %s - " PACKAGE_STRING "\n# generated from %s\n# %s#\n",
-	  comp_name(c), runopt.input, ctime(&t.tv_sec));
-  fprintf(out, "lappend auto_path {%s}\n", runopt.sysdir);
-  fprintf(out, "if [catch {package require -exact " PACKAGE_NAME "-sys "
-	  PACKAGE_VERSION "} s] {puts stderr $s; exit 2}\n");
-
-  /* generate general information */
-  fprintf(out, "\n# general\n");
-  s = gengeneral(out);
-  if (s) return s;
-
-  /* generate type dictionary */
-  fprintf(out, "\n# data types\n");
-  s = genalltypes(type_all(), out);
-  if (s) return s;
-
-  /* generate compoent dictionary */
-  fprintf(out, "\n# component %s\n", comp_name(c));
-  s = gencomp(c, out);
-  if (s) return s;
-
-  /* execute template */
-  fprintf(out,
-	  "\n# invoke template code\n"
-	  "if [catch {source [file join {%s} {" TMPL_SPECIAL_FILE "%s}]} s] "
-	  "{ puts %s; exit 2}\n",
-	  runopt.tmpl, eng_tcl.name,
-	  runopt.verbose ? "$::errorInfo" : "stderr $s");
-  return 0;
-}
-
-
-/* --- gengeneral ---------------------------------------------------------- */
-
-/** Generate Tcl representation for general .gen information.
- */
-static int
-gengeneral(FILE *out)
-{
-  fprintf(out,
-	  "namespace eval dotgen {\n"
-	  "  variable input {%s}\n"
-	  "  variable template {%s}\n"
-	  "  variable tmpdir {%s}\n"
-	  "  variable components [dict create]\n"
-	  "}\n",
-	  runopt.input, runopt.tmpl, runopt.tmpdir
-    );
-
-  return 0;
-}
-
-
-/* --- genalltypes --------------------------------------------------------- */
-
-/** Generate Tcl representation for all types.
- */
-static int
-genalltypes(hash_s all, FILE *out)
-{
-  hiter i;
-
-  fprintf(out,
-	  "namespace eval dotgen {\n"
-	  "  variable types [dict create]\n");
-
-  for(hash_first(all, &i); i.current; hash_next(&i)) {
-    assert(type_fullname(i.value));
-
-    fprintf(out, "  dict set types {%s} %s\n", i.key, gentype(i.value));
+  /* open engine module - it's not statically linked to avoid a hardcoded
+   * dependency on tcl. ltdl should probably be used instead dlopen() et al.
+   */
+  strlcpy(module, runopt.sysdir, sizeof(module));
+  strlcat(module, "/engine.so", sizeof(module));
+  printf("loading %s engine from '%s'\n", eng_tcl.name, module);
+  e = dlopen(module, RTLD_LAZY);
+  if (!e) {
+    fprintf(stderr, "cannot load '%s'\n", module);
+    fprintf(stderr, "%s\n", dlerror());
+    return ENOENT;
   }
 
-  fprintf(out,"}\n");
+  /* invoke engine init function */
+  printf("initializing %s engine\n", eng_tcl.name);
+  invoke = dlsym(e, "engine_invoke");
+  if (!invoke) {
+    fprintf(stderr, "cannot execute template\n");
+    fprintf(stderr, "%s\n", dlerror());
+    return EINVAL;
+  }
+
+  s = invoke(tmpl, argc, argv);
+  if (s) return s;
+
   return 0;
 }
 
-
-/* --- gencomp ------------------------------------------------------------- */
-
-/** Generate component data
- */
-static int
-gencomp(comp_s c, FILE *out)
-{
-  tloc l;
-  hash_s h;
-  hiter i;
-
-  fprintf(out, "namespace eval dotgen {\n");
-
-  fprintf(out, "  dict set components {%1$s} name {%1$s}\n", comp_name(c));
-
-  h = comp_props(c); assert(h);
-  for(hash_first(h, &i); i.current; hash_next(&i))
-    fprintf(out, "  dict set components {%s} properties {%s} %s\n",
-	    comp_name(c), prop_name(i.value), genprop(i.value));
-
-  l = comp_loc(c);
-  fprintf(out, "  dict set components {%s} loc [list {%s} {%d} {%d}]\n",
-	  comp_name(c), l.file, l.line, l.col);
-
-  fprintf(out,"}\n");
-  return 0;
-}
-
-
-/* --- gentype ------------------------------------------------------------- */
-
-/** Generate Tcl representation of a type. The returned string evaluates into a
- * Tcl dictionary.
- */
-static char *
-gentype(idltype_s t)
-{
-  char *b = NULL;
-  tloc l;
-  assert(t);
-
-  bufcat(&b, "[dict create");
-
-  if (type_name(t)) bufcat(&b, " name {%s}", type_name(t));
-  if (type_fullname(t)) bufcat(&b, " fullname {%s}", type_fullname(t));
-
-  bufcat(&b, " kind {%s}", type_strkind(type_kind(t)));
-
-  switch(type_kind(t)) {
-    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-    case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
-    case IDL_OCTET: case IDL_ANY: case IDL_ENUMERATOR:
-      /* builtins */
-      break;
-
-    case IDL_CONST: {
-      cval c = type_constvalue(t);
-      char *e = gentyperef(type_final(t));
-
-      bufcat(&b, " type %s", e);
-      free(e);
-      bufcat(&b, " value [dict create kind {%s} value {%s}]",
-	     const_strkind(c.k), const_strval(c));
-      break;
-    }
-
-    case IDL_ARRAY:
-    case IDL_SEQUENCE: {
-      char *e = gentyperef(type_type(t));
-      bufcat(&b, " element %s", e);
-      free(e);
-      /*FALLTHROUGH*/
-    }
-    case IDL_STRING: {
-      unsigned long l = type_length(t);
-      if (l != -1U) bufcat(&b, " length {%lu}", l);
-      break;
-    }
-
-
-    case IDL_UNION: {
-      char *d = gentyperef(type_discriminator(t));
-      bufcat(&b, " discriminator %s", d);
-      free(d);
-      /*FALLTHROUGH*/
-    }
-    case IDL_STRUCT:
-    case IDL_ENUM: {
-      idltype_s m;
-      char *r;
-      hiter i;
-
-      bufcat(&b, " members [list");
-      for(m = type_first(t, &i); m; m = type_next(&i)) {
-	r = gentyperef(m);
-	bufcat(&b, " %s", r);
-	free(r);
-      }
-      bufcat(&b, " ]");
-      break;
-    }
-
-    case IDL_CASE: {
-      citer i;
-      clist_s l = type_casevalues(t);
-
-      bufcat(&b, " cases [list");
-      for(clist_first(l, &i); i.current; clist_next(&i)) {
-	bufcat(&b, " [dict create kind {%s} value {%s}]",
-	       const_strkind(i.value->k), const_strval(*i.value));
-      }
-      bufcat(&b, " ]");
-      /*FALLTHROUGH*/
-    }
-    case IDL_MEMBER:
-    case IDL_TYPEDEF:
-    case IDL_FORWARD_STRUCT:
-    case IDL_FORWARD_UNION: {
-      char *e = gentyperef(type_type(t));
-
-      bufcat(&b, " type %s", e);
-      free(e);
-      break;
-    }
-  }
-
-  l = type_loc(t);
-  if (l.file)
-    bufcat(&b, " loc [list {%s} {%d} {%d}]", l.file, l.line, l.col);
-
-  bufcat(&b, "]");
-
-  if (type_fullname(t))
-    xwarnx("generated %s %s", type_strkind(type_kind(t)), type_fullname(t));
-  return b;
-}
-
-
-/* --- gentyperef ---------------------------------------------------------- */
-
-/** Generate Tcl representation of a reference to a type. The returned string
- * evaluates into a Tcl dictionary.
- */
-static char *
-gentyperef(idltype_s t)
-{
-  char *b = NULL;
-  assert(t);
-
-  if (type_fullname(t))
-    bufcat(&b, "[dict create ref {%s}]", type_fullname(t));
-  else
-    b = gentype(t);
-
-  return b;
-}
-
-
-/* --- genprop ------------------------------------------------------------- */
-
-/** Generate Tcl representation of a property. The returned string evaluates
- * into a Tcl dictionary.
- */
-static char *
-genprop(prop_s p)
-{
-  tloc l;
-  char *b = NULL;
-  assert(p);
-
-  bufcat(&b, "[dict create");
-  bufcat(&b, " name {%s}", prop_name(p));
-  bufcat(&b, " kind {%s}", prop_strkind(prop_kind(p)));
-  bufcat(&b, " value");
-  switch(prop_kind(p)) {
-    case PROP_IDS:
-      bufcat(&b, " %s", gentyperef(prop_type(p)));
-      break;
-
-    case PROP_DOC: case PROP_VERSION: case PROP_EMAIL: case PROP_LANG:
-      bufcat(&b, " {%s}", prop_text(p));
-      break;
-
-    case PROP_REQUIRE: case PROP_BUILD_REQUIRE: {
-      clist_s l = prop_list(p);
-      citer i;
-
-      bufcat(&b, " [list");
-      for(clist_first(l, &i); i.current; clist_next(&i)) {
-	assert(i.value->k == CST_STRING);
-	bufcat(&b, " {%s}", const_strval(*i.value));
-      }
-      bufcat(&b, " ]");
-      break;
-    }
-
-    case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-      bufcat(&b, " {%s}", const_strval(*prop_value(p)));
-      break;
-
-    case PROP_TASK:
-      bufcat(&b, " {%s}", task_name(prop_task(p)));
-      break;
-
-    case PROP_CODEL:
-      bufcat(&b, " {%s}", codel_name(prop_codel(p)));
-      break;
-
-    case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:{
-      hash_s id = prop_identifiers(p);
-      hiter i;
-
-      bufcat(&b, " [list");
-      for(hash_first(id, &i); i.current; hash_next(&i)) {
-	bufcat(&b, " {%s}", i.value);
-      }
-      bufcat(&b, " ]");
-      break;
-    }
-  }
-
-  l = prop_loc(p);
-  if (l.file)
-    bufcat(&b, " loc [list {%s} {%d} {%d}]", l.file, l.line, l.col);
-
-  bufcat(&b, "]");
-  return b;
-}
-
-#endif /* TCLSH */
+#endif /* WITH_TCL */

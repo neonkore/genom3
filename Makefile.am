@@ -16,6 +16,7 @@
 #
 #                                             Anthony Mallet on Wed Dec 16 2009
 #
+ACLOCAL_AMFLAGS = -I autoconf
 
 if WITH_TCL
   TCLDIR=\

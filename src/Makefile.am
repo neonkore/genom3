@@ -39,4 +39,6 @@ genom3_SOURCES=\
 	engine-tcl.c
 
 genom3_YFLAGS= -v -d
-genom3_LDADD = $(LIBOBJS)
+genom3_CFLAGS = $(PTHREAD_CFLAGS)
+genom3_LDADD = $(PTHREAD_LIBS) $(LIBOBJS)
+genom3_LDFLAGS=	-export-dynamic

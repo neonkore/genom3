@@ -52,6 +52,8 @@ const char *
 scope_fullname(scope_s s) { assert(s); return s->fullname; }
 scope_s
 scope_parent(scope_s s) { assert(s); return s->parent; }
+hash_s
+scope_types(scope_s s) { assert(s); return s->idltypes; }
 
 /** the global IDL scope */
 static scope_s global = NULL;

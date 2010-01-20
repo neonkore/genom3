@@ -29,13 +29,13 @@ namespace eval mapping {
     # Generate the mapping of types matching the glob pattern, for the given
     # language.
     #
-    proc generate { lang pattern } {
+    proc generate { lang {pattern *} } {
 	switch -nocase -- $lang {
 	    c { set g c::gentype }
-	    default { error "unsupported language $lang" }
+	    default { template fatal "unsupported language $lang" }
 	}
 
-	dotgen foreach types {k t} $pattern { append m [$g $t] }
+	foreach t [dotgen types $pattern] { append m [$g $t] }
 	return $m
     }
     namespace export generate

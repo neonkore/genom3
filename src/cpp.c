@@ -153,7 +153,7 @@ cpp_invoke(const char *in, int out)
     for(o = cppopts; *o; o++) xwarnx("  + %s", *o);
   }
 
-  switch((cpppid = fork())) {
+  switch((cpppid = vfork())) {
     case -1:
       warnx("unable to fork cpp"); warn(NULL);
       cpp_optrm(-1);

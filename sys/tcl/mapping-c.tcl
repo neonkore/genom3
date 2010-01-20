@@ -30,7 +30,7 @@ namespace eval mapping::c {
     # Return the C mapping of type.
     #
     proc gentype { type } {
-	switch -- [dict get $type kind] {
+	switch -- [$type kind] {
 	    {const}		{ return [genconst $type] }
 	    {enum}		{ return [genenum $type] }
 	    {struct}		{ return [genstruct $type] }
@@ -45,10 +45,8 @@ namespace eval mapping::c {
 	    {union member}	{ return "" }
 	}
 
-	template fatal {*}{
-	    "internal error:"
-	    "unhandled type '[dict get $type kind]' at top-level"
-	}
+	template fatal \
+	    "internal error: unhandled type '[$type kind]' at top-level"
     }
 
 
@@ -57,7 +55,7 @@ namespace eval mapping::c {
     # Return the C mapping of type reference.
     #
     proc gentyperef { type } {
-	switch -- [dict get $type kind] {
+	switch -- [$type kind] {
 	    {boolean}		{ return "unsigned int" }
 	    {unsigned short}	{ return "unsigned short" }
 	    {short}		{ return "short" }
@@ -75,35 +73,29 @@ namespace eval mapping::c {
 	    {enumerator}	-
 	    {struct}		-
 	    {union}		-
-	    {typedef}		{ return [cname [dict get $type fullname]] }
+	    {typedef}		{ return [cname [$type fullname]] }
 
 	    {struct member}	-
 	    {union member}	{
-		set e [dotgen typeref [dict get $type type]]
-		return [cdecl [gentyperef $e] [cname [dict get $type name]]]
+		return [cdecl [gentyperef [$type type]] [cname [$type name]]]
 	    }
 
+	    {forward struct}	-
+	    {forward union}	{ return [gentyperef [$type type]] }
+
 	    {array}		{
-		set e [dotgen typeref [dict get $type element]]
-		if {[dict exists $type length]} {
-		    set l [dict get $type length]
-		} else {
-		    set l {}
-		}
-		return "[gentyperef $e]\[$l\]"
+		if {[catch { $type length } l]} { set l {} }
+		return "[gentyperef [$type type]]\[$l\]"
 	    }
 
 	    {sequence}		{
-		set e [dotgen typeref [dict get $type element]]
 		append m "struct { unsigned long _maximum, _length;"
-		append m " [gentyperef $e] *_buffer; }"
+		append m " [gentyperef [$type type]] *_buffer; }"
 		return $m
 	    }
 	}
 
-	template fatal {*}{
-	    "internal error: unhandled type '[dict get $type kind]'"
-	}
+	template fatal "internal error: unhandled type '[$type kind]'"
     }
 
 
@@ -112,11 +104,11 @@ namespace eval mapping::c {
     # Return the C mapping of a const
     #
     proc genconst { type } {
-	set n [cname [dict get $type fullname]]
-	set t [gentyperef [dotgen typeref [dict get $type type]]]
+	set n [cname [$type fullname]]
+	set t [gentyperef [$type type]]
 
-	set v [dict get $type value value]
-	switch [dict get $type value kind] {
+	set v [$type value]
+	switch [$type valuekind] {
 	    bool	{
 		append m "\n#ifndef FALSE"
 		append m "\n# define FALSE	(0)"
@@ -143,17 +135,14 @@ namespace eval mapping::c {
     # Return the C mapping of an enum.
     #
     proc genenum { type } {
-	set n [cname [dict get $type fullname]]
-	set elems [dict get $type members]
+	set n [cname [$type fullname]]
 
 	append m [genloc $type]
 	append m "\ntypedef unsigned long $n;"
 	set v 0
-	foreach e $elems {
-	    set et [dotgen typeref $e]
-	    set en [cname [dict get $et fullname]]
-	    append m [genloc $et]
-	    append m "\n# define $en\t([incr v])"
+	foreach e [$type members] {
+	    append m [genloc $e]
+	    append m "\n# define [cname [$e fullname]]\t([incr v])"
 	}
 	return [guard $m $n]
     }
@@ -165,18 +154,15 @@ namespace eval mapping::c {
     # recursive structures with anonymous sequences.
     #
     proc genstruct { type } {
-	set n [cname [dict get $type fullname]]
-	set elems [dict get $type members]
+	set n [cname [$type fullname]]
 
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
 
 	append s "\nstruct $n {"
-	foreach e $elems {
-	    set et [dotgen typeref $e]
-	    set en [cname [dict get $et fullname]]
-	    append s [genloc $et]
-	    append s "\n [gentyperef $et];"
+	foreach e [$type members] {
+	    append s [genloc $e]
+	    append s "\n [gentyperef $e];"
 	}
 	append s "\n};"
 	return [guard $m $n][guard $s "${n}_definition"]
@@ -189,9 +175,8 @@ namespace eval mapping::c {
     # recursive and forward decls.
     #
     proc genunion { type } {
-	set n [cname [dict get $type fullname]]
-	set discr [dotgen typeref [dict get $type discriminator]]
-	set elems [dict get $type members]
+	set n [cname [$type fullname]]
+	set discr [$type discriminator]
 
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
@@ -200,11 +185,9 @@ namespace eval mapping::c {
 	append s [genloc $discr]
 	append s "\n [gentyperef $discr] _d;"
 	append s "\n union {"
-	foreach e $elems {
-	    set et [dotgen typeref $e]
-	    set en [cname [dict get $et fullname]]
-	    append s [genloc $et]
-	    append s "\n  [gentyperef $et];"
+	foreach e [$type members] {
+	    append s [genloc $e]
+	    append s "\n  [gentyperef $e];"
 	}
 	append s "\n } _u;"
 	append s "\n};"
@@ -217,7 +200,7 @@ namespace eval mapping::c {
     # Return the C mapping of forward declaration.
     #
     proc genforward { type } {
-	set n [cname [dict get $type fullname]]
+	set n [cname [$type fullname]]
 
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
@@ -230,11 +213,10 @@ namespace eval mapping::c {
     # Return the C mapping of a typedef.
     #
     proc gentypedef { type } {
-	set n [cname [dict get $type fullname]]
-	set t [dotgen typeref [dict get $type type]]
+	set n [cname [$type fullname]]
 
 	append m [genloc $type]
-	append m "\ntypedef [cdecl [gentyperef $t] $n];"
+	append m "\ntypedef [cdecl [gentyperef [$type type]] $n];"
 	return [guard $m $n]
     }
 
@@ -244,9 +226,8 @@ namespace eval mapping::c {
     # Return the C mapping of a source location
     #
     proc genloc { type } {
-	if {![dict exists $type loc]} return ""
+	if {[catch {$type loc} tloc]} { return "" }
 
-	set tloc [dict get $type loc]
 	set f [lindex $tloc 0]
 	set l [lindex $tloc 1]
 	return "\n#line $l \"[string map {\" \\\"} $f]\""

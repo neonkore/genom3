@@ -41,15 +41,12 @@
 /* --- local data ---------------------------------------------------------- */
 
 /* engines */
-#ifdef TCLSH
+#ifdef WITH_TCL
 extern const engdescr eng_tcl;
 #endif
 
 /* default engine */
 static const engdescr *engine = NULL;
-
-/* interpreter pid */
-static pid_t engpid;
 
 /** template options */
 static char **engopts = NULL;
@@ -66,7 +63,7 @@ int
 eng_seteng(const char *tmpl)
 {
   const engdescr *engs[] = {
-#ifdef TCLSH
+#ifdef WITH_TCL
     &eng_tcl,
 #endif
     NULL
@@ -119,12 +116,6 @@ eng_seteng(const char *tmpl)
     return errno = ENOENT;
   }
   xwarnx("using %s generator engine", name);
-
-  /* set interpreter */
-  if (!runopt.interp[0])
-    strlcpy(runopt.interp, engine->interp, sizeof(runopt.interp));
-  xwarnx("using %s interpreter", runopt.interp);
-
   return 0;
 }
 
@@ -156,91 +147,73 @@ eng_optrm(int index)
 
 /* --- eng_invoke ---------------------------------------------------------- */
 
-/** generate a description of the dotgen file in the engine language and invoke
- * interpreter to execute template.
+/** invoke template engine.
  */
 int
 eng_invoke()
 {
   char output[1024];
-  char gen[PATH_MAX];
-  char interp[PATH_MAX];
   char tmpl[PATH_MAX];
 
   int stdfd[4], m;
-  FILE *g, *out, *err;
+  FILE *out, *err;
+  pid_t pid;
   fd_set fdset;
 
   int s;
 
-  comp_s c = comp_dotgen();
-  assert(c);
-  if (!engine) { warnx("no generator engine"); return EINVAL; }
-
-  /* create output for processed dotgen data */
-  strlcpy(gen, runopt.tmpdir, sizeof(gen));
-  strlcat(gen, "/", sizeof(gen));
-  strlcat(gen, comp_name(c), sizeof(gen));
-  g = fopen(gen, "w");
-  if (!g) {
-    warnx("cannot open temporary '%s' file", gen); warn(NULL);
-    return errno;
-  }
-  xwarnx("creating '%s' %s component description", gen, engine->name);
-
-  s = engine->gendotgen(c, g);
-  fclose(g);
-  if (s) return errno;
-
-  /* invoke interpreter */
-  strlcpy(interp, runopt.interp, sizeof(interp));
-  strlcpy(interp, basename(interp), sizeof(interp));
+  if (!engine) { warnx("no template engine"); return EINVAL; }
   strlcpy(tmpl, runopt.tmpl, sizeof(tmpl));
   strlcpy(tmpl, basename(tmpl), sizeof(tmpl));
 
+  /* setup engine's standard output and error descriptors */
   if (pipe(&stdfd[0]) < 0 || pipe(&stdfd[2]) < 0) {
-    warn("cannot create a pipe for template interpreter:");
+    warn("cannot create a pipe to template engine:");
     return errno;
   }
 
-  s = eng_optappend(interp, 0);
-  if (!s) s = eng_optappend(gen, 1);
+  /* invoke engine - in a fork()ed process so that it is easy to redefine
+   * stdout and stderr or implement a totally different engine strategy (than
+   * default Tcl). fork() might also provide more  isolation in case the
+   * template messes up everything.
+   */
+  s = eng_optappend(tmpl, 0);
   if (s) return s;
-
   if (runopt.verbose) {
     char **o;
-    xwarnx("spawning engine with the following arguments:");
+    xwarnx("invoking template engine with the following arguments:");
     for(o = engopts; *o; o++) xwarnx("  + %s", *o);
   }
 
-  switch((engpid = fork())) {
+  switch((pid = fork())) {
     case -1:
       warnx("unable to fork"); warn(NULL);
       return errno = EAGAIN;
 
-    case 0: { /* child */
+    case 0: /* child */
       if (dup2(stdfd[1], fileno(stdout)) < 0 ||
 	  dup2(stdfd[3], fileno(stderr)) < 0) {
-	warnx("unable to set interpreter stdout"); warn(NULL);
+	warnx("unable to set template engine stdout/stderr"); warn(NULL);
 	_exit(2);
       }
       close(stdfd[0]); close(stdfd[1]);
       close(stdfd[2]); close(stdfd[3]);
 
-      s = execvp(runopt.interp, engopts);
-      if (s) { warnx("unable to exec '%s'", runopt.interp); warn(NULL); }
-      _exit(127);
-    }
+      /* make stdout/stderr line buffered */
+      setvbuf(stdout, NULL, _IOLBF, 0);
+      setvbuf(stderr, NULL, _IOLBF, 0);
+
+      s = engine->invoke(runopt.tmpl, nengopts, engopts);
+      _exit(s);
+      break;
 
     default: /* parent */
-      close(stdfd[1]);
-      close(stdfd[3]);
-      eng_optrm(0);
+      close(stdfd[1]); close(stdfd[3]);
       eng_optrm(0);
       break;
   }
 
-  /* wait for interpreter */
+  /* wait for engine */
   out = fdopen(stdfd[0], "r"); assert(out);
   err = fdopen(stdfd[2], "r"); assert(err);
 
@@ -253,7 +226,10 @@ eng_invoke()
     if (s > 0) {
       if (FD_ISSET(stdfd[0], &fdset)) {
 	if (fgets(output, sizeof(output), out)) {
-	  if (runopt.verbose) printf("%s: %s", tmpl, output);
+	  if (runopt.verbose) {
+	    printf("%s: %s", tmpl, output);
+	    continue; /* to print as much as possible of stdout data */
+	  }
 	} else FD_CLR(stdfd[0], &fdset);
       } else FD_SET(stdfd[0], &fdset);
 
@@ -266,17 +242,20 @@ eng_invoke()
 
     if (feof(out) && feof(err)) break;
   } while(s >= 0 || errno == EINTR);
-  if (s < 0) warnx("unable to read interpreter output");
+  if (s < 0) warnx("unable to read template engine output");
 
   fclose(out); fclose(err);
 
-  waitpid(engpid, &s, 0);
+  waitpid(pid, &s, 0);
   if ((!WIFEXITED(s) || WEXITSTATUS(s))) {
+    if (WIFSIGNALED(s)) {
+      warnx("generator engine exited with signal %d", WTERMSIG(s));
+      return 127;
+    }
     warnx("generator engine exited with code %d", WEXITSTATUS(s));
     return WEXITSTATUS(s);
   }
 
-  xwarnx("generator engine exited with code %d", WEXITSTATUS(s));
-
+  xwarnx("template engine exited with code %d", WEXITSTATUS(s));
   return 0;
 }

@@ -47,15 +47,13 @@ template options {
 }
 
 # generate types definition
-dotgen foreach components {k c} * {
-    set l [if {[info exists lang]} { set lang } else {
-	dict get $c properties language value
-    }]
+foreach c [dotgen components] {
+    if {[info exists lang]} { set l lang } else { set l [[$c language]] }
     foreach l $l {
 	template parse file header string header
 	template parse					\
 	    string [language comment $l $header]	\
 	    string [mapping generate $l *]		\
-	    file "[dict get $c name]$suffix[language fileext $l header]"
+	    file "[$c name]$suffix[language fileext $l header]"
     }
 }

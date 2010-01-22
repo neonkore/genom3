@@ -256,7 +256,7 @@ main(int argc, char *argv[])
   if (status) { goto done; }
 
 done:
-  if (runopt.verbose) {
+  if (runopt.debug) {
     string_usage();
     type_usage();
   }

@@ -13,7 +13,7 @@ AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
 
 AC_SUBST(GENOM_TOOL, [genom3])
 
-# engines
+# generator engines - only tcl, but provide an option for documentation purpose.
 AC_ARG_ENABLE(tcl,
 	AS_HELP_STRING([--disable-tcl], [don't compile support for Tcl engine]),
 	[use_tcl=$enableval],[use_tcl=yes])
@@ -93,7 +93,20 @@ if test x"$use_tcl" = xyes; then
     *) TCL_LIB_SPEC="-R${dir} ${TCL_LIB_SPEC}" ;;
   esac
 
+  # check for eltclsh (for the 'interactive' template)
+  AC_ELTCLSH
+  if test x"$have_eltclsh" = xyes; then
+    if test x"$tcl_extrapkg" = x; then
+      tcl_extrapkg="\"$ELTCLSH_DATADIR\""
+    else
+      tcl_extrapkg="$tcl_extrapkg, \"$ELTCLSH_DATADIR\""
+    fi
+  fi
+
+  # C definitions
   AC_DEFINE([WITH_TCL],[1],[Enable tcl engine])
+  AC_DEFINE_UNQUOTED([TCL_EXTRAPKG],
+	[{ $tcl_extrapkg }],[Path to extra tcl packages])
 fi
 
 # pthread support - this is required if using a threaded tcl library so that
@@ -126,7 +139,31 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	sys/tcl/Makefile
+	templates/interactive/Makefile
 	templates/mappings/Makefile
 	regress/Makefile
 ])
 AC_OUTPUT
+
+
+# summary
+summary=["
+----------------------------------------------------------------------------
+Summary of build options:
+
+Cpp program:			$CPP
+    cpp handles .gen extension:	$ac_cv_genom_cpp_gen
+
+Tcl generator engine:		$use_tcl"]
+
+if test x"$use_tcl" = xyes; then
+  summary=["$summary
+    version:			$TCL_VERSION
+    prefix:			$TCL_PREFIX
+    line editing facility:	$have_eltclsh"]
+fi
+
+summary=["$summary
+----------------------------------------------------------------------------"]
+
+AC_MSG_NOTICE([$summary])

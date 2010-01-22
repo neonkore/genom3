@@ -35,6 +35,9 @@
 #include <errno.h>
 #include <err.h>
 
+#include <sys/ioctl.h>
+#include <termios.h>
+
 #include "genom.h"
 
 
@@ -53,6 +56,13 @@ static char **engopts = NULL;
 
 /** number of template options */
 static int nengopts;
+
+/** standard file descriptors of genom and template child */
+int stdfd[4];
+
+static int	engine_printpipe(int fd, FILE *out, const char *bol,
+			int *firstline);
+int		engine_swapfd(int from, int to);
 
 
 /* --- eng_seteng ---------------------------------------------------------- */
@@ -152,19 +162,13 @@ eng_optrm(int index)
 int
 eng_invoke()
 {
-  char output[1024];
   char tmpl[PATH_MAX];
-
-  int stdfd[4], m;
-  FILE *out, *err;
+  int bol[2], m;
   pid_t pid;
   fd_set fdset;
-
   int s;
 
   if (!engine) { warnx("no template engine"); return EINVAL; }
-  strlcpy(tmpl, runopt.tmpl, sizeof(tmpl));
-  strlcpy(tmpl, basename(tmpl), sizeof(tmpl));
 
   /* setup engine's standard output and error descriptors */
   if (pipe(&stdfd[0]) < 0 || pipe(&stdfd[2]) < 0) {
@@ -177,6 +181,8 @@ eng_invoke()
    * default Tcl). fork() might also provide more  isolation in case the
    * template messes up everything.
    */
+  strlcpy(tmpl, runopt.tmpl, sizeof(tmpl));
+  strlcpy(tmpl, basename(tmpl), sizeof(tmpl));
   s = eng_optappend(tmpl, 0);
   if (s) return s;
   if (runopt.verbose) {
@@ -191,17 +197,17 @@ eng_invoke()
       return errno = EAGAIN;
 
     case 0: /* child */
-      if (dup2(stdfd[1], fileno(stdout)) < 0 ||
-	  dup2(stdfd[3], fileno(stderr)) < 0) {
+      close(stdfd[0]); close(stdfd[2]);
+
+      if (engine_swapfd(stdfd[1], fileno(stdout)) < 0 ||
+	  engine_swapfd(stdfd[3], fileno(stderr)) < 0) {
 	warnx("unable to set template engine stdout/stderr"); warn(NULL);
 	_exit(2);
       }
-      close(stdfd[0]); close(stdfd[1]);
-      close(stdfd[2]); close(stdfd[3]);
 
-      /* make stdout/stderr line buffered */
-      setvbuf(stdout, NULL, _IOLBF, 0);
-      setvbuf(stderr, NULL, _IOLBF, 0);
+      /* make stdout/stderr unbuffered */
+      setvbuf(stdout, NULL, _IONBF, 0);
+      setvbuf(stderr, NULL, _IONBF, 0);
 
       s = engine->invoke(runopt.tmpl, nengopts, engopts);
       _exit(s);
@@ -213,10 +219,8 @@ eng_invoke()
       break;
   }
 
-  /* wait for engine */
-  out = fdopen(stdfd[0], "r"); assert(out);
-  err = fdopen(stdfd[2], "r"); assert(err);
-
+  /* wait for engine and print output */
+  bol[0] = bol[1] = 0;
   m = stdfd[0]>stdfd[2] ? stdfd[0] : stdfd[2];
   FD_ZERO(&fdset);
   FD_SET(stdfd[0], &fdset);
@@ -225,26 +229,21 @@ eng_invoke()
     s = select(1 + m, &fdset, NULL, NULL, NULL);
     if (s > 0) {
       if (FD_ISSET(stdfd[0], &fdset)) {
-	if (fgets(output, sizeof(output), out)) {
-	  if (runopt.verbose) {
-	    printf("%s: %s", tmpl, output);
-	    continue; /* to print as much as possible of stdout data */
-	  }
-	} else FD_CLR(stdfd[0], &fdset);
+	if (engine_printpipe(stdfd[0], runopt.verbose?stdout:NULL, tmpl, &bol[0]))
+	  bol[0] = -1;
       } else FD_SET(stdfd[0], &fdset);
 
       if (FD_ISSET(stdfd[2], &fdset)) {
-	if (fgets(output, sizeof(output), err)) {
-	  fprintf(stderr, "%s: %s", tmpl, output);
-	} else FD_CLR(stdfd[2], &fdset);
+	if (engine_printpipe(stdfd[2], stderr, tmpl, &bol[1]))
+	  bol[1] = -1;
       } else FD_SET(stdfd[2], &fdset);
-    }
 
-    if (feof(out) && feof(err)) break;
+      if (bol[0] == -1 && bol[1] == -1) break;
+    }
   } while(s >= 0 || errno == EINTR);
   if (s < 0) warnx("unable to read template engine output");
 
-  fclose(out); fclose(err);
+  close(stdfd[0]); close(stdfd[2]);
 
   waitpid(pid, &s, 0);
   if ((!WIFEXITED(s) || WEXITSTATUS(s))) {
@@ -257,5 +256,73 @@ eng_invoke()
   }
 
   xwarnx("template engine exited with code %d", WEXITSTATUS(s));
+  return 0;
+}
+
+
+/* --- engine_printpipe ---------------------------------------------------- */
+
+/** Read from fd as much data as possible and print data to FILE *, prefixing
+ * every beginning of line with 'bol'.
+ */
+static int
+engine_printpipe(int fd, FILE *out, const char *bol, int *firstline)
+{
+  char buffer[1024];
+  ssize_t s;
+  char *l, *n;
+
+  s = read(fd, buffer, sizeof(buffer)-1);
+  if (s == 0) return 1/*eof*/;
+  if (s < 0 && errno != EINTR) {
+    warn("cannot read generator output");
+    return 0;
+  }
+  buffer[s] = '\0';
+
+  if (!out) return 0;
+  if (!bol) {
+    fputs(buffer, out);
+    return 0;
+  }
+
+  /* handle the prefix for the first line */
+  if (!*firstline) { fprintf(out, "%s: ", bol); *firstline = 1; }
+
+  /* handle subsequent lines */
+  n = buffer;
+  for(l = strsep(&n, "\n"); l; l = strsep(&n, "\n")) {
+    if (n) {
+      if (*n) {
+	fprintf(out, "%s\n%s: ", l, bol);
+	fflush(out);
+      } else {
+	fprintf(out, "%s\n", l);
+	*firstline = 0;
+      }
+    } else {
+      fprintf(out, "%s", l);
+      fflush(out);
+    }
+  }
+
+  return 0;
+}
+
+
+/* --- engine_swapfd ------------------------------------------------------- */
+
+/** Exchange fd 'from' and fd 'to'.
+ */
+int
+engine_swapfd(int from, int to)
+{
+  int t;
+
+  t = dup(from); if (t < 0) return errno;
+  if (dup2(to, from) < 0) return errno;
+  if (dup2(t, to) < 0) return errno;
+  close(t);
+
   return 0;
 }

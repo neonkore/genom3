@@ -27,12 +27,12 @@ namespace eval template {
     # default template options: just -h
     variable options {
 	-h - --help {
-	    template message "no options available for this template"
+	    template fatal "no options available for this template"
 	}
     }
 
     # default usage message
-    variable usage {usage not available}
+    variable usage "Supported options:\n  -h.--help\t\tprint usage summary"
 
     # set to 1 when options have been parsed
     variable gotopt	0
@@ -158,8 +158,7 @@ namespace eval template {
 	if {[dict exists $info proc]} {
 	    append l "in [dict get $info proc]"
 	}
-	puts $l
-	error [join $args " "]
+	error "$l\n[join $args]"
     }
     namespace export fatal
 

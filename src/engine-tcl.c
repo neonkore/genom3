@@ -38,7 +38,7 @@
 
 /* --- local data ---------------------------------------------------------- */
 
-static int	tcl_invoke(const char *tmpl, int argc, const char * const *argv);
+static int	tcl_invoke(const char *tmpl, int argc, char **argv);
 
 const engdescr eng_tcl = {
   .name =	"tcl",
@@ -51,10 +51,10 @@ const engdescr eng_tcl = {
 /** Setup Tcl engine
  */
 static int
-tcl_invoke(const char *tmpl, int argc, const char * const *argv)
+tcl_invoke(const char *tmpl, int argc, char **argv)
 {
   char module[PATH_MAX];
-  int (*invoke)(const char *, int, const char * const *);
+  int (*invoke)(const char *, int, char **);
   void *e;
   int s;
 

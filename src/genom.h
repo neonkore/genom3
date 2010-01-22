@@ -44,6 +44,7 @@ extern struct runopt_s {
 } runopt;
 
 void	xwarnx(const char *fmt, ...);
+void	xmsg(const char *pfix, const char *fmt, ...);
 
 int	cpp_optappend(const char *opt, int index);
 int	cpp_optrm(int index);
@@ -406,7 +407,7 @@ void		initer_destroy(initer_s l);
 
 typedef struct engdescr {
   const char *name;
-  int (*invoke)(const char *tmpl, int argc, const char * const *argv);
+  int (*invoke)(const char *tmpl, int argc, char **argv);
 } engdescr;
 
 int	eng_seteng(const char *tmpl);

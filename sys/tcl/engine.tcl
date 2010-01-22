@@ -25,6 +25,9 @@ package require Tcl 8.5
 
 namespace eval engine {
 
+    # make stdout unfiltered
+    variable verbose		off
+
     # overwrite existing files
     variable overwrite		off
 
@@ -32,7 +35,7 @@ namespace eval engine {
     variable move-if-change	on
 
     # available engine modes
-    variable modes {overwrite move-if-change}
+    variable modes {verbose overwrite move-if-change}
 
     # default output directory
     variable outdir	.
@@ -83,9 +86,12 @@ namespace eval engine {
 	    }
 
 	    variable $m
-	    if {[set $m] != $v} {
+	    if {([set $m] && !$v) || (![set $m] && $v)} {
 		set $m $v
 		puts "$m mode $v"
+	    }
+	    switch -- $m {
+		verbose { dotgen genom stdout [set $m] }
 	    }
 	}
     }
@@ -100,7 +106,7 @@ namespace eval engine {
 	variable outdir
 	if {$outdir != $d} {
 	    set outdir $d
-	    puts "set output directory to '$d'"
+	    template message "set output directory to '$d'"
 	}
     }
     namespace export chdir

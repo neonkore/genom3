@@ -1,0 +1,44 @@
+<'
+#
+# Copyright (c) 2010 LAAS/CNRS
+# All rights reserved.
+#
+# Redistribution  and  use  in  source  and binary  forms,  with  or  without
+# modification, are permitted provided that the following conditions are met:
+#
+#   1. Redistributions of  source  code must retain the  above copyright
+#      notice and this list of conditions.
+#   2. Redistributions in binary form must reproduce the above copyright
+#      notice and  this list of  conditions in the  documentation and/or
+#      other materials provided with the distribution.
+#
+# THE SOFTWARE  IS PROVIDED "AS IS"  AND THE AUTHOR  DISCLAIMS ALL WARRANTIES
+# WITH  REGARD   TO  THIS  SOFTWARE  INCLUDING  ALL   IMPLIED  WARRANTIES  OF
+# MERCHANTABILITY AND  FITNESS.  IN NO EVENT  SHALL THE AUTHOR  BE LIABLE FOR
+# ANY  SPECIAL, DIRECT,  INDIRECT, OR  CONSEQUENTIAL DAMAGES  OR  ANY DAMAGES
+# WHATSOEVER  RESULTING FROM  LOSS OF  USE, DATA  OR PROFITS,  WHETHER  IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
+# IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+#                                           Anthony Mallet on Thu Jan 28 2010
+#
+
+# check arguments
+if {[llength $argv] != 1} { error "expected argument: component" }
+lassign $argv component
+
+# generate copyright notice (if any)
+catch {puts [language comment shell [dotgen input notice]]}
+
+# compute list of source
+set ext [language fileext [$component language]]
+set sources [list]
+foreach t [$component tasks] {
+   lappend sources "[$component name]_[$t name]$ext"
+}
+'>
+
+noinst_LTLIBRARIES = lib<"[$component name]">_codels.la
+
+lib<"[$component name]">_codels_la_SOURCES=\
+	<"[join $sources "\t\\\n\t"]">

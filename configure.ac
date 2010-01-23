@@ -141,6 +141,7 @@ AC_CONFIG_FILES([
 	engine/tcl/Makefile
 	templates/interactive/Makefile
 	templates/mappings/Makefile
+	templates/skeleton/Makefile
 	regress/Makefile
 ])
 AC_OUTPUT

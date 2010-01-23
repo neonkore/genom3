@@ -61,7 +61,15 @@ struct param_s {
   initer_s init;	/**< initial value (or NULL) */
 };
 
+tloc		param_loc(param_s p) { assert(p); return p->loc; }
+pdir		param_dir(param_s p) { assert(p); return p->dir; }
 const char *	param_name(param_s p) { assert(p); return p->name; }
+clist_s		param_member(param_s p) { assert(p); return p->member; }
+idltype_s	param_type(param_s p) { assert(p); return p->type; }
+port_s		param_port(param_s p) {
+  assert(p && (p->dir == P_INPORT || p->dir == P_OUTPORT)); return p->port;
+}
+initer_s	param_initer(param_s p) { assert(p); return p->init; }
 
 
 struct initer_s {
@@ -70,10 +78,17 @@ struct initer_s {
   const char *doc;	/**< documentation string */
 
   cval value;		/**< value */
-  initer_s sub;		/**< nested init */
+  initer_s sub;		/**< compound initer */
 
   initer_s next;
 };
+
+unsigned int	initer_element(initer_s i) { assert(i); return i->element; }
+const char *	initer_member(initer_s i) { assert(i); return i->member; }
+const char *	initer_doc(initer_s i) { assert(i); return i->doc; }
+cval		initer_value(initer_s i) { assert(i); return i->value; }
+initer_s	initer_compound(initer_s i) { assert(i); return i->sub; }
+initer_s	initer_next(initer_s i) { assert(i); return i->next; }
 
 
 static int	param_chkinitscalar(tloc l, idltype_s t, initer_s i);

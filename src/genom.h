@@ -339,16 +339,26 @@ const char *	comp_name(comp_s c);
 idltype_s	comp_ids(comp_s c);
 hash_s		comp_props(comp_s c);
 hash_s		comp_tasks(comp_s c);
+hash_s		comp_ports(comp_s c);
 hash_s		comp_services(comp_s c);
 port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
 comp_s		comp_dotgen(void);
+
+tloc		task_loc(task_s t);
 const char *	task_name(task_s c);
 hash_s		task_props(task_s t);
+
 tloc		port_loc(port_s p);
 const char *	port_name(port_s p);
 portkind	port_kind(port_s p);
 idltype_s	port_type(port_s p);
+const char *	port_strkind(portkind k);
+
+tloc		service_loc(service_s s);
+const char *	service_name(service_s s);
+hash_s		service_props(service_s s);
+hash_s		service_params(service_s s);
 
 comp_s		comp_create(tloc l, const char *name, hash_s props);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
@@ -379,7 +389,21 @@ tloc		codel_loc(codel_s c);
 const char *	codel_name(codel_s c);
 hash_s		codel_params(codel_s c);
 hash_s		codel_triggers(codel_s c);
+
+tloc		param_loc(param_s p);
 const char *	param_name(param_s p);
+pdir		param_dir(param_s p);
+clist_s		param_member(param_s p);
+idltype_s	param_type(param_s p);
+port_s		param_port(param_s p);
+initer_s	param_initer(param_s p);
+
+unsigned int	initer_element(initer_s i);
+const char *	initer_member(initer_s i);
+const char *	initer_doc(initer_s i);
+cval		initer_value(initer_s i);
+initer_s	initer_compound(initer_s i);
+initer_s	initer_next(initer_s i);
 
 codel_s		codel_create(tloc l, const char *name, hash_s triggers,
 			hash_s yields, hash_s params);

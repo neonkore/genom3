@@ -48,6 +48,7 @@ tloc		comp_loc(comp_s c) { assert(c); return c->loc; }
 const char *	comp_name(comp_s c) { assert(c); return c->name; }
 hash_s		comp_props(comp_s c) { assert(c); return c->props; }
 hash_s		comp_tasks(comp_s c) { assert(c); return c->tasks; }
+hash_s		comp_ports(comp_s c) { assert(c); return c->ports; }
 hash_s		comp_services(comp_s c) { assert(c); return c->services; }
 
 struct task_s {
@@ -57,6 +58,7 @@ struct task_s {
   hash_s props;
 };
 
+tloc		task_loc(task_s t) { assert(t); return t->loc; }
 const char *	task_name(task_s t) { assert(t); return t->name; }
 hash_s		task_props(task_s t) { assert(t); return t->props; }
 
@@ -80,6 +82,11 @@ struct service_s {
   hash_s props;
   hash_s params;
 };
+
+tloc		service_loc(service_s s) { assert(s); return s->loc; }
+const char *	service_name(service_s s) { assert(s); return s->name; }
+hash_s		service_props(service_s s) { assert(s); return s->props; }
+hash_s		service_params(service_s s) { assert(s); return s->params; }
 
 
 /** the component of a dotgen file */
@@ -433,6 +440,24 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   xwarnx("created service %s", s->name);
   return s;
+}
+
+
+/* --- port_strkind -------------------------------------------------------- */
+
+/** Return a port kind as a string
+ */
+const char *
+port_strkind(portkind k)
+{
+  switch(k) {
+    case PORT_IN:		return "in";
+    case PORT_OUT:		return "out";
+    case PORT_EVENT:		return "event";
+  }
+
+  assert(0);
+  return NULL;
 }
 
 

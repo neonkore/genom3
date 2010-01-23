@@ -289,7 +289,7 @@ eng_invoke()
     return WEXITSTATUS(s);
   }
 
-  xwarnx("template engine exited with code %d", WEXITSTATUS(s));
+  xwarnx("generator engine exited with code %d", WEXITSTATUS(s));
   return 0;
 }
 

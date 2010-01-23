@@ -36,6 +36,7 @@ extern struct runopt_s {
   int debug;		/** activate some debugging options */
   int preproc;		/** preprocess file only */
   int parse;		/** parse file only */
+  int list;		/** list available templates */
   char engine[PATH_MAX];/** generator engine */
   char tmpldir[PATH_MAX];/** templates directory */
   char sysdir[PATH_MAX];/** system files directory */
@@ -410,6 +411,7 @@ typedef struct engdescr {
   int (*invoke)(const char *tmpl, int argc, char **argv);
 } engdescr;
 
+int	eng_listeng(void);
 int	eng_seteng(const char *tmpl);
 int	eng_optappend(const char *opt, int index);
 int	eng_optrm(int index);

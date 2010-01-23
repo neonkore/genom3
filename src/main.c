@@ -64,6 +64,7 @@ main(int argc, char *argv[])
   static struct option opts[] = {
     { "verbose",	no_argument,		NULL,			'v' },
     { "parse-only",	no_argument,		NULL,			'n' },
+    { "list",		no_argument,		NULL,			'l' },
     { "tmpdir",		required_argument,	NULL,			'T' },
     { "rename",		no_argument,		NULL,			'r' },
     { "no-rename",	no_argument,		&runopt.cppdotgen,	1 },
@@ -95,6 +96,7 @@ main(int argc, char *argv[])
   runopt.debug = 0;
   runopt.preproc = 0;
   runopt.parse = 0;
+  runopt.list = 0;
 
 #ifdef CPP_DOTGEN
   runopt.cppdotgen = getenv("CPP")?0:1;
@@ -108,7 +110,7 @@ main(int argc, char *argv[])
   }
 
   /* parse command line options */
-  while ((c = getopt_long(argc, argv, "+ID:EvnT:rt:s:dh", opts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "+ID:EvnlT:rt:s:dh", opts, NULL)) != -1)
     switch (c) {
       case 0: break;
 
@@ -139,6 +141,7 @@ main(int argc, char *argv[])
 	break;
 
       case 'n': runopt.parse = 1; break;
+      case 'l': runopt.list = 1; break;
       case 'r': runopt.cppdotgen = 0; break;
       case 'v': runopt.verbose = 1; break;
       case 'E': runopt.preproc = 1; break;
@@ -157,6 +160,9 @@ main(int argc, char *argv[])
     }
   argc -= optind;
   argv += optind;
+
+  /* just list templates */
+  if (runopt.list) exit(eng_listeng());
 
   /* create a temporary directory */
   strlcat(runopt.tmpdir, "/genomXXXXXX", sizeof(runopt.tmpdir));
@@ -357,6 +363,7 @@ usage(FILE *channel, char *argv0)
     "  -Dmacro[=value]\tpredefine macro, with given value or 1 by default\n"
     "  -E\t\t\tstop after preprocessing stage\n"
     "  -n,--parse-only\tstop after parsing stage (check syntax only)\n"
+    "  -l,--list\t\tlist available templates\n"
     "  -t,--tmpldir=dir\tuse dir as the directory for templates\n"
     "  -s,--sysdir=dir\tuse dir as the directory for generator system files\n"
     "  -T,--tmpdir=dir\tuse dir as the directory for temporary files\n"

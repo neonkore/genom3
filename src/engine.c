@@ -31,6 +31,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/select.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <err.h>
@@ -60,9 +61,64 @@ static int nengopts;
 /** standard file descriptors of genom and template child */
 int stdfd[4];
 
-static int	engine_printpipe(int fd, FILE *out, const char *bol,
+
+static char *	eng_findtmpl(const char *dir);
+static int	eng_printpipe(int fd, FILE *out, const char *bol,
 			int *firstline);
-int		engine_swapfd(int from, int to);
+int		eng_swapfd(int from, int to);
+
+
+/* --- eng_listeng --------------------------------------------------------- */
+
+/** list available templates
+ */
+int
+eng_listeng()
+{
+  char path[PATH_MAX];
+  struct dirent de, *r;
+  struct stat sb;
+  DIR *d;
+  char *name;
+  int n;
+
+  /* look for template.xxx entries */
+  xwarnx("using template directory '%s'", runopt.tmpldir);
+  d = opendir(runopt.tmpldir);
+  if (!d) {
+    warnx("cannot open directory %s", runopt.tmpldir);
+    warn(NULL);
+    return errno;
+  }
+
+  n = 0;
+  /* must use readdir_r() here because eng_findtmpl() also readdir() */
+  while(!readdir_r(d, &de, &r) && r) {
+    if (!(de.d_type & DT_DIR) && de.d_type != DT_UNKNOWN) continue;
+
+    strlcpy(path, runopt.tmpldir, sizeof(path));
+    strlcat(path, "/", sizeof(path));
+    strlcat(path, de.d_name, sizeof(path));
+    if (stat(path, &sb)) continue;
+    if (!(sb.st_mode & S_IFDIR)) continue;
+
+    xwarnx("looking for template in '%s'", de.d_name);
+    name = eng_findtmpl(path);
+    if (name) {
+      if (de.d_namlen >= 68) {
+	de.d_name[68] = '\0';
+	de.d_name[67] = de.d_name[66] = de.d_name[65] = '.';
+      }
+      name += strlen(TMPL_SPECIAL_FILE);
+      printf("%-70s %s\n", de.d_name, name);
+      n++;
+    }
+  }
+  closedir(d);
+
+  if (!n) { warnx("no template found!"); return ENOENT; }
+  return 0;
+}
 
 
 /* --- eng_seteng ---------------------------------------------------------- */
@@ -81,35 +137,13 @@ eng_seteng(const char *tmpl)
   const engdescr *e;
   char *name;
 
-  struct dirent *de;
-  DIR *d;
-
   /* look for template.xxx entry */
-  d = opendir(tmpl);
-  if (!d) {
-    warnx("cannot open directory %s", tmpl);
-    warn(NULL);
-    return errno;
-  }
-
-  name = NULL;
-  while((de = readdir(d))) {
-    if (strncmp(de->d_name, TMPL_SPECIAL_FILE, strlen(TMPL_SPECIAL_FILE)))
-      continue;
-    if (de->d_type == DT_DIR) {
-      warnx("template entry '%s' should not be a directory", de->d_name);
-      break;
-    }
-
-    xwarnx("found template entry '%s'", de->d_name);
-    name = de->d_name + strlen(TMPL_SPECIAL_FILE);
-    break;
-  }
-  closedir(d);
+  name = eng_findtmpl(tmpl);
   if (!name) {
     warnx("cannot find template entry '" TMPL_SPECIAL_FILE "<engine>'");
     return ENOENT;
   }
+  name += strlen(TMPL_SPECIAL_FILE);
 
   /* select engine based on file extension */
   for(e = engs[0]; e; e++)
@@ -199,8 +233,8 @@ eng_invoke()
     case 0: /* child */
       close(stdfd[0]); close(stdfd[2]);
 
-      if (engine_swapfd(stdfd[1], fileno(stdout)) < 0 ||
-	  engine_swapfd(stdfd[3], fileno(stderr)) < 0) {
+      if (eng_swapfd(stdfd[1], fileno(stdout)) < 0 ||
+	  eng_swapfd(stdfd[3], fileno(stderr)) < 0) {
 	warnx("unable to set template engine stdout/stderr"); warn(NULL);
 	_exit(2);
       }
@@ -229,12 +263,12 @@ eng_invoke()
     s = select(1 + m, &fdset, NULL, NULL, NULL);
     if (s > 0) {
       if (FD_ISSET(stdfd[0], &fdset)) {
-	if (engine_printpipe(stdfd[0], runopt.verbose?stdout:NULL, tmpl, &bol[0]))
+	if (eng_printpipe(stdfd[0], runopt.verbose?stdout:NULL, tmpl, &bol[0]))
 	  bol[0] = -1;
       } else FD_SET(stdfd[0], &fdset);
 
       if (FD_ISSET(stdfd[2], &fdset)) {
-	if (engine_printpipe(stdfd[2], stderr, tmpl, &bol[1]))
+	if (eng_printpipe(stdfd[2], stderr, tmpl, &bol[1]))
 	  bol[1] = -1;
       } else FD_SET(stdfd[2], &fdset);
 
@@ -260,13 +294,51 @@ eng_invoke()
 }
 
 
-/* --- engine_printpipe ---------------------------------------------------- */
+/* --- eng_findtmpl -------------------------------------------------------- */
+
+/** return the name of the first template.xxx file in directory
+ */
+static char *
+eng_findtmpl(const char *dir)
+{
+  struct dirent *de;
+  char *name;
+  DIR *d;
+
+  /* look for template.xxx entry */
+  d = opendir(dir);
+  if (!d) {
+    warnx("cannot open directory %s", dir);
+    warn(NULL);
+    return NULL;
+  }
+
+  name = NULL;
+  while((de = readdir(d))) {
+    if (strncmp(de->d_name, TMPL_SPECIAL_FILE, strlen(TMPL_SPECIAL_FILE)))
+      continue;
+    if (de->d_type & DT_DIR) {
+      warnx("template entry '%s' should not be a directory", de->d_name);
+      continue;
+    }
+
+    xwarnx("found template entry '%s'", de->d_name);
+    name = de->d_name;
+    break;
+  }
+  closedir(d);
+
+  return name;
+}
+
+
+/* --- eng_printpipe ------------------------------------------------------- */
 
 /** Read from fd as much data as possible and print data to FILE *, prefixing
  * every beginning of line with 'bol'.
  */
 static int
-engine_printpipe(int fd, FILE *out, const char *bol, int *firstline)
+eng_printpipe(int fd, FILE *out, const char *bol, int *firstline)
 {
   char buffer[1024];
   ssize_t s;
@@ -310,12 +382,12 @@ engine_printpipe(int fd, FILE *out, const char *bol, int *firstline)
 }
 
 
-/* --- engine_swapfd ------------------------------------------------------- */
+/* --- eng_swapfd ---------------------------------------------------------- */
 
 /** Exchange fd 'from' and fd 'to'.
  */
 int
-engine_swapfd(int from, int to)
+eng_swapfd(int from, int to)
 {
   int t;
 

@@ -31,6 +31,7 @@
 #include <tcl.h>
 
 #include "genom.h"
+#include "engine.h"
 
 
 /* --- local data ---------------------------------------------------------- */
@@ -39,7 +40,13 @@
 #define OBJECT_NS	"object"
 #define TYPE_NS		"type"
 #define COMPONENT_NS	"component"
+#define TASK_NS		"task"
+#define PORT_NS		"port"
+#define SERVICE_NS	"service"
 #define PROPERTY_NS	"property"
+#define CODEL_NS	"codel"
+#define PARAM_NS	"param"
+#define INITER_NS	"initer"
 
 #define GENOM_CMD	"genom"
 #define TEMPLATE_CMD	"template"
@@ -47,49 +54,22 @@
 #define TYPES_CMD	"types"
 #define COMPONENTS_CMD	"components"
 
-
-static int	engine_gentype(Tcl_Interp *interp, idltype_s t);
-static int	engine_gencomponent(Tcl_Interp *interp, comp_s c);
-static int	engine_genproperty(Tcl_Interp *interp, prop_s p);
-
-static int	genom_version(ClientData d, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	template_dir(ClientData d, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	template_tmpdir(ClientData d, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	input_file(ClientData d, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	input_dir(ClientData d, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	types(ClientData d, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	components(ClientData d, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-
-static int	type_cmd(ClientData c, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	comp_cmd(ClientData c, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-static int	prop_cmd(ClientData c, Tcl_Interp *interp, int objc,
-			Tcl_Obj *const objv[]);
-
-static char *	type_genref(idltype_s t);
-static char *	prop_genref(prop_s p);
-static Tcl_Obj *prop_lookup(Tcl_Interp *interp, hash_s h, const char *k);
+/* list of extra package paths */
+static const char *extra[] = TCL_EXTRAPKG;
 
 /* list of commands in the dotgen namespace */
 static const struct dgcmd {
   const char *cmd;
   void *fn;
 } dgcmds[] = {
-  { "::" DOTGEN_NS "::" GENOM_CMD "::version", genom_version },
-  { "::" DOTGEN_NS "::" TEMPLATE_CMD "::dir", template_dir },
-  { "::" DOTGEN_NS "::" TEMPLATE_CMD "::tmpdir", template_tmpdir },
-  { "::" DOTGEN_NS "::" INPUT_CMD "::file", input_file },
-  { "::" DOTGEN_NS "::" INPUT_CMD "::dir", input_dir },
-  { "::" DOTGEN_NS "::" TYPES_CMD, types },
-  { "::" DOTGEN_NS "::" COMPONENTS_CMD, components },
+  { "::" DOTGEN_NS "::" GENOM_CMD "::version", dg_genom_version },
+  { "::" DOTGEN_NS "::" GENOM_CMD "::stdout", dg_genom_stdout },
+  { "::" DOTGEN_NS "::" TEMPLATE_CMD "::dir", dg_template_dir },
+  { "::" DOTGEN_NS "::" TEMPLATE_CMD "::tmpdir", dg_template_tmpdir },
+  { "::" DOTGEN_NS "::" INPUT_CMD "::file", dg_input_file },
+  { "::" DOTGEN_NS "::" INPUT_CMD "::dir", dg_input_dir },
+  { "::" DOTGEN_NS "::" TYPES_CMD, dg_types },
+  { "::" DOTGEN_NS "::" COMPONENTS_CMD, dg_components },
   { NULL, NULL }
 };
 
@@ -101,6 +81,19 @@ static const char *nslist[] = {
   "::" DOTGEN_NS,
   NULL
 };
+
+
+static int	engine_gentype(Tcl_Interp *interp, idltype_s t);
+static int	engine_gencomponent(Tcl_Interp *interp, comp_s c);
+static int	engine_gentask(Tcl_Interp *interp, task_s t);
+static int	engine_genport(Tcl_Interp *interp, port_s p);
+static int	engine_genservice(Tcl_Interp *interp, service_s s);
+static int	engine_genproperty(Tcl_Interp *interp, prop_s p);
+static int	engine_gencodel(Tcl_Interp *interp, codel_s c);
+static int	engine_genparam(Tcl_Interp *interp, param_s p);
+static int	engine_geniniter(Tcl_Interp *interp, initer_s i);
+
+static char *	genref(const char *prefix, void *o);
 
 
 /* --- engine_invoke ------------------------------------------------------- */
@@ -118,7 +111,7 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   Tcl_Obj *obj;
   char *args;
   hiter t;
-  int s;
+  int p, s;
 
   /* create tcl interpreter */
   interp = Tcl_CreateInterp();
@@ -172,13 +165,21 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   Tcl_SetVar(interp, "::" DOTGEN_NS "::ns(component)",
 	     "::" DOTGEN_NS "::" OBJECT_NS "::" COMPONENT_NS, TCL_GLOBAL_ONLY);
 
-  /* require genom-engine package */
+  /* set path to packages */
   obj = Tcl_GetVar2Ex(interp, "auto_path", NULL, TCL_GLOBAL_ONLY);
   s = Tcl_ListObjAppendElement(
     interp, obj, Tcl_NewStringObj(runopt.sysdir, -1));
   if (s != TCL_OK) goto error;
+
+  for(p=0; p<sizeof(extra)/sizeof(extra[0]); p++) {
+    s = Tcl_ListObjAppendElement(interp, obj, Tcl_NewStringObj(extra[p], -1));
+    if (s != TCL_OK) goto error;
+  }
+
   Tcl_SetVar2Ex(interp, "auto_path", NULL, obj, TCL_GLOBAL_ONLY);
 
+
+  /* require genom-engine package */
   if (!Tcl_PkgRequire(interp, PACKAGE_NAME "-engine", PACKAGE_VERSION, 1))
     goto error;
 
@@ -204,9 +205,6 @@ error:
 /* --- engine_gentype ------------------------------------------------------ */
 
 /** Generate Tcl IDL type object.
- *
- * A command is created in the appropriate namespace with ClientData set to the
- * type.
  */
 static int
 engine_gentype(Tcl_Interp *interp, idltype_s t)
@@ -271,27 +269,63 @@ engine_gentype(Tcl_Interp *interp, idltype_s t)
 /* --- engine_gencomponent ------------------------------------------------- */
 
 /** Generate Tcl component object.
- *
- * A command is created in the appropriate namespace with ClientData set to the
- * component. Recursively generates component's properties.
  */
 static int
 engine_gencomponent(Tcl_Interp *interp, comp_s c)
 {
-  const char *name = strings(
-    "::" DOTGEN_NS "::" OBJECT_NS "::" COMPONENT_NS "::", comp_name(c),
-    NULL);
-  hash_s h;
   hiter i;
   int s;
 
-  if (!Tcl_CreateObjCommand(interp, name, comp_cmd, c, NULL))
+  if (!Tcl_CreateObjCommand(interp, comp_genref(c), comp_cmd, c, NULL))
     return EINVAL;
   printf("exported component %s\n", comp_name(c));
 
   /* properties */
+  for(hash_first(comp_props(c), &i); i.current; hash_next(&i)) {
+    s = engine_genproperty(interp, i.value);
+    if (s) return s;
+  }
+
+  /* tasks */
+  for(hash_first(comp_tasks(c), &i); i.current; hash_next(&i)) {
+    s = engine_gentask(interp, i.value);
+    if (s) return s;
+  }
+
+  /* ports */
+  for(hash_first(comp_ports(c), &i); i.current; hash_next(&i)) {
+    s = engine_genport(interp, i.value);
+    if (s) return s;
+  }
+
+  /* services */
+  for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
+    s = engine_genservice(interp, i.value);
+    if (s) return s;
+  }
+
+  return 0;
+}
+
+
+/* --- engine_gentask ------------------------------------------------------ */
+
+/** Generate Tcl task object.
+ */
+static int
+engine_gentask(Tcl_Interp *interp, task_s t)
+{
+  hash_s h;
+  hiter i;
+  int s;
+
+  if (!Tcl_CreateObjCommand(interp, task_genref(t), task_cmd, t, NULL))
+    return EINVAL;
+  printf("exported task %s\n", task_name(t));
+
+  /* properties */
   s = 0;
-  h = comp_props(c); assert(h);
+  h = task_props(t); assert(h);
   for(hash_first(h, &i); i.current; hash_next(&i)) {
     s = engine_genproperty(interp, i.value);
     if (s) break;
@@ -301,486 +335,232 @@ engine_gencomponent(Tcl_Interp *interp, comp_s c)
 }
 
 
-/* --- engine_genproperty -------------------------------------------------- */
+/* --- engine_genport ------------------------------------------------------ */
 
-/** Generate Tcl property object.
- *
- * A command is created in the appropriate namespace with ClientData set to the
- * property.
+/** Generate Tcl port object.
  */
 static int
-engine_genproperty(Tcl_Interp *interp, prop_s p)
+engine_genport(Tcl_Interp *interp, port_s p)
 {
-  if (!Tcl_CreateObjCommand(interp, prop_genref(p), prop_cmd, p, NULL))
+  int s;
+
+  if (!Tcl_CreateObjCommand(interp, port_genref(p), port_cmd, p, NULL))
     return EINVAL;
-  printf("exported property %s\n", prop_name(p));
+  printf("exported port %s\n", port_name(p));
+
+  switch(port_kind(p)) {
+    case PORT_IN: case PORT_OUT:
+      s = engine_gentype(interp, port_type(p));
+      if (s) return s;
+      break;
+
+    case PORT_EVENT: break;
+  }
 
   return 0;
 }
 
 
-/* --- genom --------------------------------------------------------------- */
+/* --- engine_genservice --------------------------------------------------- */
 
-static int
-genom_version(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(PACKAGE_STRING, -1));
-  return TCL_OK;
-}
-
-
-/* --- template ------------------------------------------------------------ */
-
-static int
-template_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.tmpl, -1));
-  return TCL_OK;
-}
-
-static int
-template_tmpdir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.tmpdir, -1));
-  return TCL_OK;
-}
-
-
-/* --- input --------------------------------------------------------------- */
-
-static int
-input_file(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.input, -1));
-  return TCL_OK;
-}
-
-static int
-input_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(dirname(runopt.input), -1));
-  return TCL_OK;
-}
-
-
-/* --- types --------------------------------------------------------------- */
-
-/** Return the list of types
+/** Generate Tcl service object.
  */
 static int
-types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+engine_genservice(Tcl_Interp *interp, service_s s)
 {
-  const char *p;
-  Tcl_Obj *l;
   hiter i;
+  int e;
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 1, objv, "?pattern?");
-    return TCL_ERROR;
-  }
-  if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
+  if (!Tcl_CreateObjCommand(interp, service_genref(s), service_cmd, s, NULL))
+    return EINVAL;
+  printf("exported service %s\n", service_name(s));
 
-  l = Tcl_NewListObj(0, NULL);
-  for(hash_first(type_all(), &i); i.current; hash_next(&i)) {
-    assert(type_fullname(i.value));
-    if (p && !Tcl_StringMatch(type_fullname(i.value), p)) continue;
-
-    Tcl_ListObjAppendElement(
-      interp, l, Tcl_NewStringObj(type_genref(i.value), -1));
+  /* parameters */
+  for(hash_first(service_params(s), &i); i.current; hash_next(&i)) {
+    e = engine_genparam(interp, i.value);
+    if (e) return e;
   }
 
-  Tcl_SetObjResult(interp, l);
-  return TCL_OK;
+  /* properties */
+  for(hash_first(service_props(s), &i); i.current; hash_next(&i)) {
+    e = engine_genproperty(interp, i.value);
+    if (e) return e;
+  }
+
+  return 0;
 }
 
 
-/* --- components ----------------------------------------------------------- */
+/* --- engine_genproperty -------------------------------------------------- */
 
-/** Return the list of components
+/** Generate Tcl property object.
  */
 static int
-components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+engine_genproperty(Tcl_Interp *interp, prop_s p)
 {
-  const char *p;
-
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 1, objv, "?pattern?");
-    return TCL_ERROR;
-  }
-  if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
-
-  if (p && !Tcl_StringMatch(comp_name(comp_dotgen()), p)) {
-    Tcl_ResetResult(interp);
-    return TCL_OK;
-  }
-
-  Tcl_AppendResult(
-    interp, "::" DOTGEN_NS "::" OBJECT_NS "::" COMPONENT_NS "::",
-    comp_name(comp_dotgen()), NULL);
-  return TCL_OK;
-}
-
-
-/* --- type command -------------------------------------------------------- */
-
-/** Implements the command associated to a type object.
- */
-static int
-type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  enum typeidx {
-    typeidx_kind, typeidx_name, typeidx_fullname, typeidx_scope, typeidx_type,
-    typeidx_length, typeidx_value, typeidx_valuekind, typeidx_members,
-    typeidx_discriminator, typeidx_loc
-  };
-  static const char *args[] = {
-    [typeidx_kind] = "kind", [typeidx_name] = "name",
-    [typeidx_fullname] = "fullname", [typeidx_scope] = "scope",
-    [typeidx_type] = "type", [typeidx_length] = "length",
-    [typeidx_value] = "value", [typeidx_valuekind] = "valuekind",
-    [typeidx_members] = "members", [typeidx_discriminator] = "discriminator",
-    [typeidx_loc] = "loc", NULL
-  };
-  idltype_s t = v;
-  Tcl_Obj *r;
   int s;
 
-  int i = typeidx_fullname; /* return full name by default */
+  if (!Tcl_CreateObjCommand(interp, prop_genref(p), prop_cmd, p, NULL))
+    return EINVAL;
+  printf("exported property %s\n", prop_name(p));
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$type subcommand");
-    return TCL_ERROR;
-  }
-  if (objc > 1) {
-    s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
-    if (s != TCL_OK) return s;
-  }
-  switch(i) {
-    case typeidx_kind:
-      r = Tcl_NewStringObj(type_strkind(type_kind(t)), -1);
+  switch(prop_kind(p)) {
+    case PROP_IDS:
+      s = engine_gentype(interp, prop_type(p));
       break;
 
-    case typeidx_name:
-      r = type_name(t) ? Tcl_NewStringObj(type_name(t), -1) : NULL;
+    case PROP_CODEL:
+      s = engine_gencodel(interp, prop_codel(p));
       break;
 
-    case typeidx_fullname:
-      r = type_fullname(t) ? Tcl_NewStringObj(type_fullname(t), -1) : NULL;
-      break;
-
-    case typeidx_scope:
-      r = NULL; /* XXX TBD */
-      break;
-
-    case typeidx_type:
-      switch(type_kind(t)) {
-	case IDL_ENUMERATOR: case IDL_SEQUENCE: case IDL_ARRAY: case IDL_CONST:
-	case IDL_TYPEDEF: case IDL_MEMBER: case IDL_CASE:
-	case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
-	  r = Tcl_NewStringObj(type_genref(type_type(t)), -1);
-	  break;
-
-	default: r = NULL; break;
-      }
-      break;
-
-    case typeidx_length:
-      switch(type_kind(t)) {
-	case IDL_SEQUENCE: case IDL_ARRAY: case IDL_STRING:
-	  if (type_length(t) != -1U) {
-	    r = Tcl_NewIntObj(type_length(t));
-	    break;
-	  }
-
-	default: r = NULL; break;
-      }
-      break;
-
-    case typeidx_value:
-      switch(type_kind(t)) {
-	case IDL_CONST:
-	  r = Tcl_NewStringObj(const_strval(type_constvalue(t)), -1);
-	  break;
-
-	default: r = NULL; break;
-      }
-      break;
-
-    case typeidx_valuekind:
-      switch(type_kind(t)) {
-	case IDL_CONST:
-	  r = Tcl_NewStringObj(const_strkind(type_constvalue(t).k), -1);
-	  break;
-
-	default: r = NULL; break;
-      }
-      break;
-
-    case typeidx_members: {
-      idltype_s e;
-      hiter m;
-      switch(type_kind(t)) {
-	case IDL_STRUCT: case IDL_UNION: case IDL_ENUM:
-	  r = Tcl_NewListObj(0, NULL);
-	  for(e = type_first(t, &m); e; e = type_next(&m)) {
-	    Tcl_ListObjAppendElement(
-	      interp, r, Tcl_NewStringObj(type_genref(e), -1));
-	  }
-	  break;
-
-	default: r = NULL; break;
-      }
-      break;
-
-    case typeidx_discriminator:
-      switch(type_kind(t)) {
-	case IDL_UNION:
-	  r = Tcl_NewStringObj(type_genref(type_discriminator(t)), -1);
-	  break;
-
-	default: r = NULL; break;
-      }
-      break;
-
-    case typeidx_loc:
-      if (!type_loc(t).file) { r = NULL; } else {
-	Tcl_Obj *l[3] = {
-	  Tcl_NewStringObj(type_loc(t).file, -1),
-	  Tcl_NewIntObj(type_loc(t).line),
-	  Tcl_NewIntObj(type_loc(t).col),
-	};
-	r = Tcl_NewListObj(3, l);
-      }
-      break;
-    }
+    default: s = 0; break;
   }
 
-  if (!r) {
-    Tcl_AppendResult(interp, "no such member \"", args[i], "\"", NULL);
-    return TCL_ERROR;
-  }
-
-  Tcl_SetObjResult(interp, r);
-  return TCL_OK;
+  return 0;
 }
 
 
-/* --- component command --------------------------------------------------- */
+/* --- engine_gencodel ----------------------------------------------------- */
 
-/** Implements the command associated to a component object.
+/** Generate Tcl codel object.
  */
 static int
-comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+engine_gencodel(Tcl_Interp *interp, codel_s c)
 {
-  enum compidx {
-    compidx_name, compidx_lang, compidx_loc
-  };
-  static const char *args[] = {
-    [compidx_name] = "name", [compidx_lang] = "language",
-    [compidx_loc] = "loc", NULL
-  };
-  comp_s c = v;
-  Tcl_Obj *r;
+  hiter i;
   int s;
 
-  int i = compidx_name; /* return name by default */
+  if (!Tcl_CreateObjCommand(interp, codel_genref(c), codel_cmd, c, NULL))
+    return EINVAL;
+  printf("exported codel %s\n", codel_name(c));
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$component subcommand");
-    return TCL_ERROR;
-  }
-  if (objc > 1) {
-    s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
-    if (s != TCL_OK) return s;
-  }
-  switch(i) {
-    case compidx_name:
-      r = Tcl_NewStringObj(comp_name(c), -1);
-      break;
-
-    case compidx_lang:
-      r = prop_lookup(interp, comp_props(c), prop_strkind(PROP_LANG));
-      break;
-
-    case compidx_loc: {
-      Tcl_Obj *l[3] = {
-	Tcl_NewStringObj(comp_loc(c).file, -1),
-	Tcl_NewIntObj(comp_loc(c).line),
-	Tcl_NewIntObj(comp_loc(c).col),
-      };
-      r = Tcl_NewListObj(3, l);
-      break;
-    }
+  /* parameters */
+  for(hash_first(codel_params(c), &i); i.current; hash_next(&i)) {
+    s = engine_genparam(interp, i.value);
+    if (s) return s;
   }
 
-  if (!r) {
-    Tcl_AppendResult(
-      interp, "in component \"", comp_name(c), "\"", NULL);
-    return TCL_ERROR;
-  }
-
-  Tcl_SetObjResult(interp, r);
-  return TCL_OK;
+  return 0;
 }
 
 
-/* --- property command ---------------------------------------------------- */
+/* --- engine_genparam ----------------------------------------------------- */
 
-/** Implements the command associated to a property object.
+/** Generate Tcl param object.
  */
 static int
-prop_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+engine_genparam(Tcl_Interp *interp, param_s p)
 {
-  enum propidx {
-    propidx_name, propidx_kind, propidx_value, propidx_loc
-  };
-  static const char *args[] = {
-    [propidx_name] = "name", [propidx_kind] = "kind",
-    [propidx_value] = "value", [propidx_loc] = "loc", NULL
-  };
-  prop_s p = v;
-  Tcl_Obj *r;
+  initer_s i;
   int s;
 
-  int i = propidx_value; /* return value by default */
+  if (!Tcl_CreateObjCommand(interp, param_genref(p), param_cmd, p, NULL))
+    return EINVAL;
+  printf("exported parameter %s\n", param_name(p));
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$property subcommand");
-    return TCL_ERROR;
-  }
-  if (objc > 1) {
-    s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
-    if (s != TCL_OK) return s;
-  }
-  switch(i) {
-    case propidx_name:
-      r = Tcl_NewStringObj(prop_name(p), -1);
-      break;
-
-    case propidx_kind:
-      r = Tcl_NewStringObj(prop_strkind(prop_kind(p)), -1);
-      break;
-
-    case propidx_value:
-      switch(prop_kind(p)) {
-	case PROP_IDS:
-	  /* bufcat(&b, " %s", gentyperef(prop_type(p))); */
-	  break;
-
-	case PROP_DOC: case PROP_VERSION: case PROP_EMAIL: case PROP_LANG:
-	  r = Tcl_NewStringObj(prop_text(p), -1);
-	  break;
-
-	case PROP_REQUIRE: case PROP_BUILD_REQUIRE: {
-	  clist_s l = prop_list(p);
-	  citer i;
-
-	  r = Tcl_NewListObj(0, NULL);
-	  for(clist_first(l, &i); i.current; clist_next(&i)) {
-	    assert(i.value->k == CST_STRING);
-	    Tcl_ListObjAppendElement(
-	      interp, r, Tcl_NewStringObj(const_strval(*i.value), -1));
-	  }
-	  break;
-	}
-
-	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-	  r = Tcl_NewStringObj(const_strval(*prop_value(p)), -1);
-	  break;
-
-	case PROP_TASK:
-	  /* bufcat(&b, " {%s}", task_name(prop_task(p))); */
-	  break;
-
-	case PROP_CODEL:
-	  /* bufcat(&b, " {%s}", codel_name(prop_codel(p))); */
-	  break;
-
-	case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
-	case PROP_AFTER: {
-	  hash_s id = prop_identifiers(p);
-	  hiter i;
-
-	  r = Tcl_NewListObj(0, NULL);
-	  for(hash_first(id, &i); i.current; hash_next(&i)) {
-	    Tcl_ListObjAppendElement(interp, r, Tcl_NewStringObj(i.value, -1));
-	  }
-	  break;
-	}
-      }
-      break;
-
-    case propidx_loc: {
-      Tcl_Obj *l[3] = {
-	Tcl_NewStringObj(prop_loc(p).file, -1),
-	Tcl_NewIntObj(prop_loc(p).line),
-	Tcl_NewIntObj(prop_loc(p).col),
-      };
-      r = Tcl_NewListObj(3, l);
-      break;
-    }
+  /* initializer */
+  i = param_initer(p);
+  if (i) {
+    s = engine_geniniter(interp, i);
+    if (s) return s;
   }
 
-  Tcl_SetObjResult(interp, r);
-  return TCL_OK;
+  return 0;
 }
 
 
-/* --- type_genref --------------------------------------------------------- */
+/* --- engine_geniniter ---------------------------------------------------- */
 
-/** Return a string representing a reference to a type.
+/** Generate Tcl initializer object.
+ */
+static int
+engine_geniniter(Tcl_Interp *interp, initer_s i)
+{
+  int s;
+
+  while(i) {
+    if (initer_compound(i)) {
+      s = engine_geniniter(interp, initer_compound(i));
+      if (s) return s;
+    }
+
+    if (!Tcl_CreateObjCommand(interp, initer_genref(i), initer_cmd, i, NULL))
+      return EINVAL;
+
+    i = initer_next(i);
+  }
+
+  return 0;
+}
+
+
+/* --- genref -------------------------------------------------------------- */
+
+/** Return a string representing a reference to an object.
  *
  * The name is guaranteed to be unique. It is generated from the address
  * of the type, formatted with %p (no conversion is ever done in the other
  * direction...).
  */
 static char *
+genref(const char *prefix, void *o)
+{
+  char lname[32];
+  snprintf(lname, sizeof(lname), "%p", o);
+
+  return strings(prefix, lname, NULL);
+}
+
+char *
 type_genref(idltype_s t)
 {
-  char lname[32];
-  snprintf(lname, sizeof(lname), "%p", t);
-
-  return strings(
-    "::" DOTGEN_NS "::" OBJECT_NS "::" TYPE_NS "::", lname, NULL);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" TYPE_NS "::", t);
 }
 
+char *
+comp_genref(comp_s c)
+{
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" COMPONENT_NS "::", c);
+}
 
-/* --- prop_genref --------------------------------------------------------- */
+char *
+task_genref(task_s t)
+{
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" TASK_NS "::", t);
+}
 
-/** Return a string representing a reference to a property.
- *
- * The name is guaranteed to be unique. It is generated from the address
- * of the property, formatted with %p (no conversion is ever done in the other
- * direction...).
- */
-static char *
+char *
+port_genref(port_s p)
+{
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PORT_NS "::", p);
+}
+
+char *
+service_genref(service_s s)
+{
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" SERVICE_NS "::", s);
+}
+
+char *
 prop_genref(prop_s p)
 {
-  char lname[32];
-  snprintf(lname, sizeof(lname), "%p", p);
-
-  return strings(
-    "::" DOTGEN_NS "::" OBJECT_NS "::" PROPERTY_NS "::", lname, NULL);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PROPERTY_NS "::", p);
 }
 
-
-/* --- prop_lookup --------------------------------------------------------- */
-
-/** Return a Tcl_Obj containing a reference to the property.
- */
-static Tcl_Obj *
-prop_lookup(Tcl_Interp *interp, hash_s h, const char *k)
+char *
+codel_genref(codel_s c)
 {
-  prop_s p;
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" CODEL_NS "::", c);
+}
 
-  p = hash_find(h, k);
-  if (!p) {
-    if (interp) {
-      Tcl_AppendResult(
-	interp, "undefined property \"", k, "\"", NULL);
-    }
-    return NULL;
-  }
+char *
+param_genref(param_s p)
+{
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PARAM_NS "::", p);
+}
 
-  return Tcl_NewStringObj(prop_genref(p), -1);
+char *
+initer_genref(initer_s i)
+{
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" INITER_NS "::", i);
 }

@@ -28,7 +28,6 @@ namespace eval language {
 
     # Return the cannonical file extension for the given language.
     #
-
     proc fileext { lang {kind source}} {
 	switch -nocase -- $lang {
 	    c { if {$kind == "header"} { return ".h" } else { return ".c" } }

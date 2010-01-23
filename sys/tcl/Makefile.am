@@ -31,6 +31,11 @@ nodist_systcl_DATA=	\
 	pkgIndex.tcl
 
 systcl_LTLIBRARIES=	engine.la
+engine_la_SOURCES=	\
+	engine.c	\
+	dotgen.c	\
+	object.c
+
 engine_la_CPPFLAGS=	-I$(top_srcdir)/src $(TCL_INCLUDE_SPEC)
 engine_la_LIBADD=	$(TCL_LIB_SPEC)
 engine_la_LDFLAGS=	-module -release $(PACKAGE_VERSION)

@@ -28,6 +28,9 @@ namespace eval engine {
     # make stdout unfiltered
     variable verbose		off
 
+    # debug mode
+    variable debug		[dotgen genom debug]
+
     # overwrite existing files
     variable overwrite		off
 
@@ -35,7 +38,7 @@ namespace eval engine {
     variable move-if-change	on
 
     # available engine modes
-    variable modes {verbose overwrite move-if-change}
+    variable modes {verbose overwrite move-if-change debug}
 
     # default output directory
     variable outdir	.
@@ -47,16 +50,20 @@ namespace eval engine {
 	full	{<(["'])(.*?)(['"])>}
     }
 
-    # interpreter evaluating templates substitutions. Available commands are
-    # 'dotgen', 'mapping' and 'language' (i.e. not the template command that
-    # are reserved to the toplevel template.tcl file) and puts is redefined to
-    # catch template output for <' '> markups.
+    # interpreter evaluating templates substitutions. Objects from the .gen as
+    # well as the commands 'dotgen', 'mapping' and 'language' are available,
+    # (but not the template command that are reserved to the toplevel
+    # template.tcl file) and puts is redefined to catch template output within
+    # <' '> markups.
     interp create -safe slave
     slave hide puts
     slave alias puts slave invokehidden puts
     slave alias dotgen dotgen
     slave alias language language
     slave alias mapping mapping
+    foreach o [info commands $::dotgen::ns(object)::*] {
+	slave alias $o $o
+    }
 
 
     # --- mode -------------------------------------------------------------
@@ -110,6 +117,25 @@ namespace eval engine {
 	}
     }
     namespace export chdir
+
+
+    # --- args -------------------------------------------------------------
+
+    # Set argc/argv in slave interpreter and return previous value of argv.
+    #
+    proc args { l } {
+	if {[catch {slave eval [list set argv]} prev]} {
+	    set prev [list]
+	}
+	if {[catch {
+	    slave eval [list set argc [llength $l]]
+	    slave eval [list set argv $l]
+	} m options]} {
+	    return -options $options $m
+	}
+
+	return $prev
+    }
 
 
     # --- open -------------------------------------------------------------
@@ -206,12 +232,12 @@ namespace eval engine {
     # produce some output, while <""> is replaced by the result of its
     # evaluation by 'subst'.
     #
-    proc process { in out } {
+    proc process { src in out } {
 	variable markup
 	set linenum	1
 
 	# read source and build program
-	set code ""
+	set code "set ::__source__ \[list {$src} 1\]\n"
 	while { ![eof $in] } {
 	    # read input by chunks of 4k, and avoid stopping on a tag limit
 	    append raw [read $in 4096]
@@ -232,10 +258,10 @@ namespace eval engine {
 		if {[lindex $x 0] > 0} {
 		    set notag [string range $raw 0 [lindex $x 0]-1]
 		    if [regexp $markup(open) $notag] {
-			error "$linenum: missing closing tag"
+			error "$src:$linenum: missing closing tag"
 		    }
 		    if [regexp $markup(close) $notag] {
-			error "$linenum: missing opening tag"
+			error "$src$linenum: missing opening tag"
 		    }
 
 		    append code "puts -nonewline [quote $notag]\n"
@@ -247,13 +273,14 @@ namespace eval engine {
 		    {""} { set s "puts -nonewline \[subst [quote $t]\]" }
 		    default {
 			if {[string equal $o $c]} {
-			    error "$linenum: unknown tag '$o'"
+			    error "$src:$linenum: unknown tag '$o'"
 			} else {
-			    error "$linenum: unbalanced tags '$o' and '$c'"
+			    error "$src:$linenum: unbalanced tags '$o' and '$c'"
 			}
 		    }
 		}
-		append code "set ::__line__ $linenum\n$s\n"
+		append code "set ::__source__ \[list {$src} $linenum\]\n"
+		append code "$s\n"
 
 		# discard processed source text
 		incr linenum [regexp -all "\n" $t]
@@ -261,8 +288,9 @@ namespace eval engine {
 	    }
 
 	    # check for orphaned tags
-	    if [regexp $markup(close) $raw] {
-		error "$linenum: missing opening tag"
+	    if [regexp -indices .*?$markup(close) $raw x] {
+		incr linenum [regexp -all "\n" [string range $raw {*}$x]]
+		error "$src:$linenum: missing opening tag"
 	    }
 
 	    # incomplete opening tag: must read more text
@@ -274,14 +302,33 @@ namespace eval engine {
 	    set raw {}
 	}
 
-	# execute program
+	if {[string length $raw] > 0} {
+	    if {[regexp -indices .*?$markup(open) $raw x]} {
+		set raw [string range $raw {*}$x]
+	    }
+	    incr linenum [regexp -all "\n" $raw ]
+	    error "$src:$linenum: missing closing tag"
+	}
+
+	# dump program in debug mode
+	variable debug
+	if {$debug} {
+	    set t [mktemp]
+	    set c [::open $t w]
+	    puts $c $code
+	    close $c
+	    puts "dumped template code for $src in $t"
+	}
+
+	# execute program in slave
 	slave alias puts [namespace code "slave-output $out"]
 	set s [catch {slave eval $code} m]
 	slave alias puts slave invokehidden puts
 	if {$s} {
-	    if {![catch {set l [slave eval set ::__line__]}]} {
-		set m "$l: $m"
+	    if {![catch { set s [slave eval set ::__source__] }]} {
+		set m "[join $s :]: $m"
 	    }
+	    catch { slave eval [list set ::__source__ $savedsrc] }
 	    error $m
 	}
 	return

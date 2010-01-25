@@ -42,6 +42,13 @@ dg_genom_version(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
 }
 
 int
+dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+  Tcl_SetObjResult(interp, Tcl_NewBooleanObj(runopt.debug));
+  return TCL_OK;
+}
+
+int
 dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   extern int eng_swapfd(int from, int to);
@@ -96,6 +103,19 @@ int
 dg_input_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(dirname(runopt.input), -1));
+  return TCL_OK;
+}
+
+int
+dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[])
+{
+  if (!runopt.notice) {
+    Tcl_SetObjResult(interp, Tcl_NewStringObj("no notice found", -1));
+    return TCL_ERROR;
+  }
+
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.notice, -1));
   return TCL_OK;
 }
 

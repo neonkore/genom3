@@ -56,13 +56,37 @@ namespace eval template {
 	lassign [lrange $args end-1 end] dtype dst
 	set out [engine::open $dtype $dst write]
 
+	set savedargs [engine::args [list]]
 	foreach { stype src } [lrange $args 0 end-2] {
-	    set in [engine::open $stype $src read]
-	    if {[catch {engine::process $in $out} m]} {
-		template fatal "$src:$m"
+	    switch -- $stype {
+		args	{ engine::args $src }
+
+		raw {
+		    set in [engine::open string $src read]
+		    if {[catch {chan copy $in $out} m]} {
+			template fatal "$m"
+		    }
+		    engine::close $in
+		}
+
+		string  -
+		file	{
+		    set in [engine::open $stype $src read]
+		    if {$stype == "string"} { set src "<string>" }
+		    if {[catch {engine::process $src $in $out} m]} {
+			template fatal "$m"
+		    }
+		    engine::close $in
+		}
+
+		default {
+		    engine::close $out
+		    template fatal \
+			"unknown source '$stype': must be args, string or file"
+		}
 	    }
-	    engine::close $in
 	}
+	engine::args $savedargs
 
 	engine::close $out
 	return
@@ -158,7 +182,8 @@ namespace eval template {
 	if {[dict exists $info proc]} {
 	    append l "in [dict get $info proc]"
 	}
-	error "$l\n[join $args]"
+	return -code error -level 2 -errorinfo "[join $args]\n    $l" \
+	    [join $args]
     }
     namespace export fatal
 

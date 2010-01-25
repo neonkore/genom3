@@ -42,6 +42,8 @@ extern struct runopt_s {
   char sysdir[PATH_MAX];/** system files directory */
   char tmpdir[PATH_MAX];/** temporary directory */
   int cppdotgen;	/** cpp accepts .gen file extension */
+
+  const char *notice;	/** special comment put verbatim in generated files */
 } runopt;
 
 void	xwarnx(const char *fmt, ...);
@@ -50,6 +52,7 @@ void	xmsg(const char *pfix, const char *fmt, ...);
 int	cpp_optappend(const char *opt, int index);
 int	cpp_optrm(int index);
 int	cpp_invoke(const char *in, int out);
+char *	cpp_getnotice(const char *in);
 int	cpp_wait(void);
 
 

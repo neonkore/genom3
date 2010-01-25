@@ -20,5 +20,4 @@
 tdir=$(tmpldir)/mappings
 
 dist_t_DATA=		\
-	template.tcl	\
-	header
+	template.tcl

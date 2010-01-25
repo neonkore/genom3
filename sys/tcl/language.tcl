@@ -45,7 +45,7 @@ namespace eval language {
     proc comment { lang text } {
 	switch -nocase -- $lang {
 	    c {
-		regsub -all "\n(?=.)" "/*\n${text}" "\n * " text
+		regsub -all "\n(?=.)" "/*${text}" "\n *" text
 		set text "${text} */"
 	    }
 	    default { template fatal "unsupported language $lang" }

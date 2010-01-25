@@ -187,6 +187,82 @@ err:
 }
 
 
+/* --- cpp_getnotice ------------------------------------------------------- */
+
+/** Read input file and look for the special "copyright notice" token. Return a
+ * string that is the content of the corresponding C comment (or
+ * NULL). #include directive are not processed, and only the first match is
+ * returned. No error is ever reported: the notice is optional.
+ *
+ * Interestingly, the special symbol cannot be put in a slash star comment,
+ * except at the very beginning, so it is described in the comment below ;)
+ */
+/*/ <- here! */
+char *
+cpp_getnotice(const char *in)
+{
+  char *notice = NULL;
+  FILE *f;
+  char *line;
+  size_t l;
+  char *p, *w;
+  int inside;
+
+  f = fopen(in, "r");
+  if (!f) return NULL;
+
+  line = NULL;
+  l = 0;
+  inside = 0;
+  while(1) {
+    /* read one line of input */
+    if (getline(&line, &l, f) == -1) break;
+
+    p = line;
+    switch(inside) {
+      case 0:
+	/* look for the special token */
+	p = strstr(p, "/*/"); if (!p) break;
+	inside = 1;
+
+	/* set text pointer on the end of the token, replacing the last / with
+	 * a space (so that text alignment within the comment is kept) */
+	p += 2; *p = ' ';
+
+	/*FALLTHROUGH*/
+      case 1:
+	/* replace final delimiter with a \0 */
+	w = strstr(p, "*/");
+	if (w) { *w = '\0'; inside = 0; }
+
+	/* transform every \n followed by spaces and any number of stars by a
+	 * simple \n (this tidy multi-line comment with * decorations)
+	 */
+	w = p;
+	while(*p == ' ' || *p == '	') p++;
+	if (*p == '\0') break;
+	if (*p != '*') p = w; else { while(*p == '*') p++; }
+
+	bufcat(&notice, "%s", p);
+	break;
+    }
+
+    /* stop after first block */
+    if (!inside && notice) break;
+  }
+  if (inside) {
+    xwarnx("unterminated special copyright notice comment");
+    free(notice);
+    notice = NULL;
+  }
+  if (line) free(line);
+  fclose(f);
+
+  if (notice) xwarnx("found special copyright notice comment");
+  return notice;
+}
+
+
 /* --- cpp_wait ------------------------------------------------------------ */
 
 /** Wait for cpp process
@@ -199,6 +275,10 @@ cpp_wait()
 
   waitpid(cpppid, &status, 0);
   if ((!WIFEXITED(status) || WEXITSTATUS(status))) {
+    if (WIFSIGNALED(status)) {
+      warnx("cpp process exited with signal %d", WTERMSIG(status));
+      return 127;
+    }
     warnx("cpp process exited with code %d", WEXITSTATUS(status));
     return WEXITSTATUS(status);
   }
@@ -210,6 +290,11 @@ cpp_wait()
 
 /* --- cpp_execpath -------------------------------------------------------- */
 
+/** Return the path to the CPP executable.
+ *
+ * If CPP is defined in the environment, return that. Otherwise, use
+ * compile-time default.
+ */
 static const char *
 cpp_execpath()
 {

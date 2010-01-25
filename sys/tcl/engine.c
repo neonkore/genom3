@@ -38,15 +38,15 @@
 
 #define DOTGEN_NS	"dotgen"
 #define OBJECT_NS	"object"
-#define TYPE_NS		"type"
-#define COMPONENT_NS	"component"
-#define TASK_NS		"task"
-#define PORT_NS		"port"
-#define SERVICE_NS	"service"
-#define PROPERTY_NS	"property"
-#define CODEL_NS	"codel"
-#define PARAM_NS	"param"
-#define INITER_NS	"initer"
+#define TYPE_CMD	"type"
+#define COMPONENT_CMD	"component"
+#define TASK_CMD	"task"
+#define PORT_CMD	"port"
+#define SERVICE_CMD	"service"
+#define PROPERTY_CMD	"property"
+#define CODEL_CMD	"codel"
+#define PARAM_CMD	"param"
+#define INITER_CMD	"initer"
 
 #define GENOM_CMD	"genom"
 #define TEMPLATE_CMD	"template"
@@ -63,11 +63,13 @@ static const struct dgcmd {
   void *fn;
 } dgcmds[] = {
   { "::" DOTGEN_NS "::" GENOM_CMD "::version", dg_genom_version },
+  { "::" DOTGEN_NS "::" GENOM_CMD "::debug", dg_genom_debug },
   { "::" DOTGEN_NS "::" GENOM_CMD "::stdout", dg_genom_stdout },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::dir", dg_template_dir },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::tmpdir", dg_template_tmpdir },
   { "::" DOTGEN_NS "::" INPUT_CMD "::file", dg_input_file },
   { "::" DOTGEN_NS "::" INPUT_CMD "::dir", dg_input_dir },
+  { "::" DOTGEN_NS "::" INPUT_CMD "::notice", dg_input_notice },
   { "::" DOTGEN_NS "::" TYPES_CMD, dg_types },
   { "::" DOTGEN_NS "::" COMPONENTS_CMD, dg_components },
   { NULL, NULL }
@@ -138,32 +140,29 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   if (!Tcl_PkgRequire(interp, "Tcl", "8.5", 0))
     goto error;
 
-  /* create type objects */
+  /* create dotgen objects */
   for(hash_first(type_all(), &t); t.current; hash_next(&t)) {
     assert(type_fullname(t.value));
     if (engine_gentype(interp, t.value)) goto error;
   }
 
-  /* create component objects */
   s = engine_gencomponent(interp, comp_dotgen());
   if (s) goto error;
+
+  Tcl_SetVar(interp, "::" DOTGEN_NS "::ns(object)",
+	     "::" DOTGEN_NS "::" OBJECT_NS, TCL_GLOBAL_ONLY);
 
   /* create dotgen commands */
   for(i = dgcmds; i->cmd; i++)
     if (!Tcl_CreateObjCommand(interp, i->cmd, i->fn, NULL, NULL)) goto error;
 
+  /* create ensembles */
   for(j = nslist; *j; j++) {
     n = Tcl_FindNamespace(interp, *j, NULL, TCL_GLOBAL_ONLY);
     if (!n) goto error;
     if (Tcl_Export(interp, n, "*", 0) != TCL_OK) goto error;
     if (!Tcl_CreateEnsemble(interp, *j, n, TCL_ENSEMBLE_PREFIX)) goto error;
   }
-
-  /* set namespace variables */
-  Tcl_SetVar(interp, "::" DOTGEN_NS "::ns(type)",
-	     "::" DOTGEN_NS "::" OBJECT_NS "::" TYPE_NS, TCL_GLOBAL_ONLY);
-  Tcl_SetVar(interp, "::" DOTGEN_NS "::ns(component)",
-	     "::" DOTGEN_NS "::" OBJECT_NS "::" COMPONENT_NS, TCL_GLOBAL_ONLY);
 
   /* set path to packages */
   obj = Tcl_GetVar2Ex(interp, "auto_path", NULL, TCL_GLOBAL_ONLY);
@@ -506,7 +505,7 @@ static char *
 genref(const char *prefix, void *o)
 {
   char lname[32];
-  snprintf(lname, sizeof(lname), "%p", o);
+  snprintf(lname, sizeof(lname), "@%p", o);
 
   return strings(prefix, lname, NULL);
 }
@@ -514,53 +513,53 @@ genref(const char *prefix, void *o)
 char *
 type_genref(idltype_s t)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" TYPE_NS "::", t);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" TYPE_CMD, t);
 }
 
 char *
 comp_genref(comp_s c)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" COMPONENT_NS "::", c);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" COMPONENT_CMD, c);
 }
 
 char *
 task_genref(task_s t)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" TASK_NS "::", t);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" TASK_CMD, t);
 }
 
 char *
 port_genref(port_s p)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PORT_NS "::", p);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PORT_CMD, p);
 }
 
 char *
 service_genref(service_s s)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" SERVICE_NS "::", s);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" SERVICE_CMD, s);
 }
 
 char *
 prop_genref(prop_s p)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PROPERTY_NS "::", p);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PROPERTY_CMD, p);
 }
 
 char *
 codel_genref(codel_s c)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" CODEL_NS "::", c);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" CODEL_CMD, c);
 }
 
 char *
 param_genref(param_s p)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PARAM_NS "::", p);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PARAM_CMD, p);
 }
 
 char *
 initer_genref(initer_s i)
 {
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" INITER_NS "::", i);
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" INITER_CMD, i);
 }

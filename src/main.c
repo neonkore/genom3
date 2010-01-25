@@ -97,6 +97,7 @@ main(int argc, char *argv[])
   runopt.preproc = 0;
   runopt.parse = 0;
   runopt.list = 0;
+  runopt.notice = NULL;
 
 #ifdef CPP_DOTGEN
   runopt.cppdotgen = getenv("CPP")?0:1;
@@ -229,19 +230,21 @@ main(int argc, char *argv[])
     strlcpy(runopt.input, argv[0], sizeof(runopt.input));
 
 
-  /* process input file */
+  /* just preprocess input file */
   if (runopt.preproc) {
     cpp_invoke(runopt.input, 1);
     status = cpp_wait();
     goto done;
   }
 
+  /* process input file */
   if (pipe(pipefd) < 0) {
     warn("cannot create a pipe to cpp:");
     status = 2; goto done;
   }
   dotgenfd = pipefd[0];
 
+  runopt.notice = cpp_getnotice(runopt.input);
   cpp_invoke(runopt.input, pipefd[1]);
 
   s = scope_pushglobal();

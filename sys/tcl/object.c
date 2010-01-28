@@ -31,11 +31,6 @@
 #include "engine.h"
 
 
-/* --- local data ---------------------------------------------------------- */
-
-static Tcl_Obj *prop_lookup(Tcl_Interp *interp, hash_s h, const char *k);
-
-
 /* --- type command -------------------------------------------------------- */
 
 /** Implements the command associated to a type object.
@@ -44,17 +39,18 @@ int
 type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum typeidx {
-    typeidx_kind, typeidx_name, typeidx_fullname, typeidx_scope, typeidx_type,
-    typeidx_length, typeidx_value, typeidx_valuekind, typeidx_members,
-    typeidx_discriminator, typeidx_loc
+    typeidx_kind, typeidx_name, typeidx_fullname, typeidx_scope, typeidx_final,
+    typeidx_type, typeidx_length, typeidx_value, typeidx_valuekind,
+    typeidx_members, typeidx_discriminator, typeidx_loc, typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
     [typeidx_fullname] = "fullname", [typeidx_scope] = "scope",
-    [typeidx_type] = "type", [typeidx_length] = "length",
-    [typeidx_value] = "value", [typeidx_valuekind] = "valuekind",
-    [typeidx_members] = "members", [typeidx_discriminator] = "discriminator",
-    [typeidx_loc] = "loc", NULL
+    [typeidx_final] = "final", [typeidx_type] = "type",
+    [typeidx_length] = "length", [typeidx_value] = "value",
+    [typeidx_valuekind] = "valuekind", [typeidx_members] = "members",
+    [typeidx_discriminator] = "discriminator", [typeidx_loc] = "loc",
+    [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r;
@@ -85,6 +81,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case typeidx_scope:
       r = NULL; /* XXX TBD */
+      break;
+
+    case typeidx_final:
+      r = Tcl_NewStringObj(type_genref(type_final(t)), -1);
       break;
 
     case typeidx_type:
@@ -168,6 +168,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       }
       break;
     }
+
+    case typeidx_class:
+      r = Tcl_NewStringObj("type", -1);
+      break;
   }
 
   if (!r) {
@@ -190,7 +194,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   enum compidx {
     compidx_name, compidx_doc, compidx_ids, compidx_iev, compidx_version,
     compidx_lang, compidx_email, compidx_require, compidx_brequire,
-    compidx_tasks, compidx_ports, compidx_services, compidx_loc
+    compidx_tasks, compidx_ports, compidx_services, compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
@@ -198,16 +202,17 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [compidx_lang] = "language", [compidx_email] = "email",
     [compidx_require] = "require", [compidx_brequire] = "build-require",
     [compidx_tasks] = "tasks", [compidx_ports] = "ports",
-    [compidx_services] = "services", [compidx_loc] = "loc", NULL
+    [compidx_services] = "services", [compidx_loc] = "loc",
+    [compidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
-    [compidx_doc] = PROP_DOC, [compidx_ids] = PROP_IDS,
-    [compidx_version] = PROP_VERSION, [compidx_lang] = PROP_LANG,
-    [compidx_email] = PROP_EMAIL, [compidx_require] = PROP_REQUIRE,
-    [compidx_brequire] = PROP_BUILD_REQUIRE
+    [compidx_doc] = PROP_DOC, [compidx_version] = PROP_VERSION,
+    [compidx_lang] = PROP_LANG, [compidx_email] = PROP_EMAIL,
+    [compidx_require] = PROP_REQUIRE, [compidx_brequire] = PROP_BUILD_REQUIRE
   };
   comp_s c = v;
-  Tcl_Obj *r;
+  Tcl_Obj *r = NULL;
+  prop_s p;
   int s;
 
   int i = compidx_name; /* return name by default */
@@ -225,14 +230,34 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewStringObj(comp_name(c), -1);
       break;
 
+    case compidx_doc: case compidx_version: case compidx_lang:
+    case compidx_email:
+      p = hash_find(comp_props(c), prop_strkind(argkind[i]));
+      r = p ? Tcl_NewStringObj(prop_text(p), -1) : NULL;
+      break;
+
+    case compidx_ids:
+      p = hash_find(comp_props(c), prop_strkind(PROP_IDS)); assert(p);
+      r = Tcl_NewStringObj(type_genref(prop_type(p)), -1);
+      break;
+
     case compidx_iev:
       r = Tcl_NewStringObj(type_genref(comp_eventtype(c)), -1);
       break;
 
-    case compidx_doc: case compidx_ids: case compidx_version:
-    case compidx_lang: case compidx_email: case compidx_require:
-    case compidx_brequire:
-      r = prop_lookup(interp, comp_props(c), prop_strkind(argkind[i]));
+    case compidx_require: case compidx_brequire:
+      r = Tcl_NewListObj(0, NULL);
+      p = hash_find(comp_props(c), prop_strkind(argkind[i]));
+      if (p) {
+	clist_s l = prop_list(p);
+	citer i;
+
+	for(clist_first(l, &i); i.current; clist_next(&i)) {
+	  assert(i.value->k == CST_STRING);
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(const_strval(*i.value), -1));
+	}
+      }
       break;
 
     case compidx_tasks: {
@@ -277,10 +302,14 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewListObj(3, l);
       break;
     }
+
+    case compidx_class:
+      r = Tcl_NewStringObj("component", -1);
+      break;
   }
 
   if (!r) {
-    Tcl_AppendResult(interp, "in component \"", comp_name(c), "\"", NULL);
+    Tcl_AppendResult(interp, "undefined member \"", args[i], "\"", NULL);
     return TCL_ERROR;
   }
 
@@ -298,22 +327,22 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum taskidx {
     taskidx_name, taskidx_doc, taskidx_period, taskidx_delay, taskidx_priority,
-    taskidx_stack, taskidx_codels, taskidx_throws, taskidx_loc
+    taskidx_stack, taskidx_codels, taskidx_throws, taskidx_loc, taskidx_class
   };
   static const char *args[] = {
     [taskidx_name] = "name", [taskidx_doc] = "doc",
     [taskidx_period] = "period", [taskidx_delay] = "delay",
     [taskidx_priority] = "priority", [taskidx_stack] = "stack",
     [taskidx_codels] = "codels", [taskidx_throws] = "throws",
-    [taskidx_loc] = "loc", NULL
+    [taskidx_loc] = "loc", [taskidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
-    [taskidx_doc] = PROP_DOC, [taskidx_period] = PROP_PERIOD,
-    [taskidx_delay] = PROP_DELAY, [taskidx_priority] = PROP_PRIORITY,
-    [taskidx_stack] = PROP_STACK, [taskidx_throws] = PROP_THROWS
+    [taskidx_period] = PROP_PERIOD, [taskidx_delay] = PROP_DELAY,
+    [taskidx_priority] = PROP_PRIORITY, [taskidx_stack] = PROP_STACK
   };
   task_s t = v;
-  Tcl_Obj *r;
+  Tcl_Obj *r = NULL;
+  prop_s p;
   int s;
 
   int i = taskidx_name; /* return name by default */
@@ -331,10 +360,29 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewStringObj(task_name(t), -1);
       break;
 
-    case taskidx_doc: case taskidx_period: case taskidx_delay:
-    case taskidx_priority: case taskidx_stack: case taskidx_throws:
-      r = prop_lookup(interp, task_props(t), prop_strkind(argkind[i]));
+    case taskidx_doc:
+      p = hash_find(task_props(t), prop_strkind(PROP_DOC));
+      r = p ? Tcl_NewStringObj(prop_text(p), -1) : NULL;
       break;
+
+    case taskidx_period: case taskidx_delay:
+    case taskidx_priority: case taskidx_stack:
+      p = hash_find(task_props(t), prop_strkind(argkind[i]));
+      r = p ? Tcl_NewStringObj(type_genref(prop_value(p)), -1) : NULL;
+      break;
+
+    case taskidx_throws: {
+      prop_s p = hash_find(task_props(t), prop_strkind(PROP_THROWS));
+      hiter i;
+
+      r = Tcl_NewListObj(0, NULL);
+      if (p)
+	for(hash_first(prop_identifiers(p), &i); i.current; hash_next(&i)) {
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+	}
+      break;
+    }
 
     case taskidx_codels: {
       hiter i;
@@ -357,10 +405,14 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewListObj(3, l);
       break;
     }
+
+    case taskidx_class:
+      r = Tcl_NewStringObj("task", -1);
+      break;
   }
 
   if (!r) {
-    Tcl_AppendResult(interp, "in task \"", task_name(t), "\"", NULL);
+    Tcl_AppendResult(interp, "undefined member \"", args[i], "\"", NULL);
     return TCL_ERROR;
   }
 
@@ -377,11 +429,12 @@ int
 port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum portidx {
-    portidx_name, portidx_kind, portidx_type, portidx_loc
+    portidx_name, portidx_kind, portidx_type, portidx_loc, portidx_class
   };
   static const char *args[] = {
     [portidx_name] = "name", [portidx_kind] = "kind",
-    [portidx_type] = "type", [portidx_loc] = "loc", NULL
+    [portidx_type] = "type", [portidx_loc] = "loc", [portidx_class] = "class",
+    NULL
   };
   port_s p = v;
   Tcl_Obj *r;
@@ -425,10 +478,14 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewListObj(3, l);
       break;
     }
+
+    case portidx_class:
+      r = Tcl_NewStringObj("port", -1);
+      break;
   }
 
   if (!r) {
-    Tcl_AppendResult(interp, "no such member \"", args[i], "\"", NULL);
+    Tcl_AppendResult(interp, "undefined member \"", args[i], "\"", NULL);
     return TCL_ERROR;
   }
 
@@ -445,35 +502,37 @@ int
 service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum serviceidx {
-    serviceidx_name, serviceidx_doc, serviceidx_task, serviceidx_codels,
-    serviceidx_params, serviceidx_throws, serviceidx_interrupts,
-    serviceidx_before, serviceidx_after, serviceidx_loc
+    serviceidx_name, serviceidx_doc, serviceidx_task, serviceidx_validate,
+    serviceidx_codels, serviceidx_params, serviceidx_throws,
+    serviceidx_interrupts, serviceidx_before, serviceidx_after,
+    serviceidx_loc, serviceidx_class
   };
   static const char *args[] = {
     [serviceidx_name] = "name", [serviceidx_doc] = "doc",
-    [serviceidx_task] = "task", [serviceidx_codels] = "codels",
-    [serviceidx_params] = "parameters", [serviceidx_throws] = "throws",
-    [serviceidx_interrupts] = "interrupts", [serviceidx_before] = "before",
-    [serviceidx_after] = "after", [serviceidx_loc] = "loc", NULL
+    [serviceidx_task] = "task", [serviceidx_validate] = "validate",
+    [serviceidx_codels] = "codels", [serviceidx_params] = "parameters",
+    [serviceidx_throws] = "throws", [serviceidx_interrupts] = "interrupts",
+    [serviceidx_before] = "before", [serviceidx_after] = "after",
+    [serviceidx_loc] = "loc", [serviceidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
-    [serviceidx_doc] = PROP_DOC, [serviceidx_task] = PROP_TASK,
-    [serviceidx_throws] = PROP_THROWS,
+    [serviceidx_codels] = PROP_CODEL, [serviceidx_validate] = PROP_VALIDATE,
     [serviceidx_interrupts] = PROP_INTERRUPTS,
     [serviceidx_before] = PROP_BEFORE, [serviceidx_after] = PROP_AFTER
   };
   service_s s = v;
-  Tcl_Obj *r;
+  Tcl_Obj *r = NULL;
+  prop_s p;
   int e;
 
-  int i = serviceidx_name; /* return name by default */
+  enum serviceidx i = serviceidx_name; /* return name by default */
 
   if (objc > 2) {
     Tcl_WrongNumArgs(interp, 0, objv, "$service subcommand");
     return TCL_ERROR;
   }
   if (objc > 1) {
-    e = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
+    e = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, (int *)&i);
     if (e != TCL_OK) return e;
   }
   switch(i) {
@@ -481,19 +540,52 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewStringObj(service_name(s), -1);
       break;
 
-    case serviceidx_doc: case serviceidx_task: case serviceidx_throws:
-    case serviceidx_after:
-      r = prop_lookup(interp, service_props(s), prop_strkind(argkind[i]));
+    case serviceidx_doc:
+      p = hash_find(service_props(s), prop_strkind(PROP_DOC));
+      r = p ? Tcl_NewStringObj(prop_text(p), -1) : NULL;
       break;
 
-    case serviceidx_codels: {
+    case serviceidx_before: case serviceidx_after:
+    case serviceidx_interrupts: {
+      hiter j;
+
+      r = Tcl_NewListObj(0, NULL);
+      p = hash_find(service_props(s), prop_strkind(argkind[i]));
+      if (p)
+	for(hash_first(prop_identifiers(p), &j); j.current; hash_next(&j)) {
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(service_genref(j.value), -1));
+	}
+      break;
+    }
+
+    case serviceidx_task:
+      p = hash_find(service_props(s), prop_strkind(PROP_TASK)); assert(p);
+      r = Tcl_NewStringObj(task_genref(prop_task(p)), -1);
+      break;
+
+    case serviceidx_throws: {
       hiter i;
 
       r = Tcl_NewListObj(0, NULL);
-      for(hash_first(service_props(s), &i); i.current; hash_next(&i)) {
-	if (prop_kind(i.value) != PROP_CODEL) continue;
+      p = hash_find(service_props(s), prop_strkind(PROP_THROWS));
+      if (p)
+	for(hash_first(prop_identifiers(p), &i); i.current; hash_next(&i)) {
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+	}
+      break;
+    }
+
+    case serviceidx_validate:
+    case serviceidx_codels: {
+      hiter j;
+
+      r = Tcl_NewListObj(0, NULL);
+      for(hash_first(service_props(s), &j); j.current; hash_next(&j)) {
+	if (prop_kind(j.value) != argkind[i]) continue;
 	Tcl_ListObjAppendElement(
-	  interp, r, Tcl_NewStringObj(codel_genref(prop_codel(i.value)), -1));
+	  interp, r, Tcl_NewStringObj(codel_genref(prop_codel(j.value)), -1));
       }
       break;
     }
@@ -518,113 +610,15 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewListObj(3, l);
       break;
     }
+
+    case serviceidx_class:
+      r = Tcl_NewStringObj("service", -1);
+      break;
   }
 
   if (!r) {
-    Tcl_AppendResult(interp, "in service \"", service_name(s), "\"", NULL);
+    Tcl_AppendResult(interp, "undefined member \"", args[i], "\"", NULL);
     return TCL_ERROR;
-  }
-
-  Tcl_SetObjResult(interp, r);
-  return TCL_OK;
-}
-
-
-/* --- property command ---------------------------------------------------- */
-
-/** Implements the command associated to a property object.
- */
-int
-prop_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  enum propidx {
-    propidx_name, propidx_kind, propidx_value, propidx_loc
-  };
-  static const char *args[] = {
-    [propidx_name] = "name", [propidx_kind] = "kind",
-    [propidx_value] = "value", [propidx_loc] = "loc", NULL
-  };
-  prop_s p = v;
-  Tcl_Obj *r;
-  int s;
-
-  int i = propidx_value; /* return value by default */
-
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$property subcommand");
-    return TCL_ERROR;
-  }
-  if (objc > 1) {
-    s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
-    if (s != TCL_OK) return s;
-  }
-  switch(i) {
-    case propidx_name:
-      r = Tcl_NewStringObj(prop_name(p), -1);
-      break;
-
-    case propidx_kind:
-      r = Tcl_NewStringObj(prop_strkind(prop_kind(p)), -1);
-      break;
-
-    case propidx_value:
-      switch(prop_kind(p)) {
-	case PROP_IDS:
-	  r = Tcl_NewStringObj(type_genref(prop_type(p)), -1);
-	  break;
-
-	case PROP_DOC: case PROP_VERSION: case PROP_EMAIL: case PROP_LANG:
-	  r = Tcl_NewStringObj(prop_text(p), -1);
-	  break;
-
-	case PROP_REQUIRE: case PROP_BUILD_REQUIRE: {
-	  clist_s l = prop_list(p);
-	  citer i;
-
-	  r = Tcl_NewListObj(0, NULL);
-	  for(clist_first(l, &i); i.current; clist_next(&i)) {
-	    assert(i.value->k == CST_STRING);
-	    Tcl_ListObjAppendElement(
-	      interp, r, Tcl_NewStringObj(const_strval(*i.value), -1));
-	  }
-	  break;
-	}
-
-	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-	  r = Tcl_NewStringObj(const_strval(*prop_value(p)), -1);
-	  break;
-
-	case PROP_TASK:
-	  r = Tcl_NewStringObj(task_genref(prop_task(p)), -1);
-	  break;
-
-	case PROP_CODEL:
-	  r = Tcl_NewStringObj(codel_genref(prop_codel(p)), -1);
-	  break;
-
-	case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
-	case PROP_AFTER: {
-	  hash_s id = prop_identifiers(p);
-	  hiter i;
-
-	  r = Tcl_NewListObj(0, NULL);
-	  for(hash_first(id, &i); i.current; hash_next(&i)) {
-	    Tcl_ListObjAppendElement(interp, r, Tcl_NewStringObj(i.value, -1));
-	  }
-	  break;
-	}
-      }
-      break;
-
-    case propidx_loc: {
-      Tcl_Obj *l[3] = {
-	Tcl_NewStringObj(prop_loc(p).file, -1),
-	Tcl_NewIntObj(prop_loc(p).line),
-	Tcl_NewIntObj(prop_loc(p).col),
-      };
-      r = Tcl_NewListObj(3, l);
-      break;
-    }
   }
 
   Tcl_SetObjResult(interp, r);
@@ -640,11 +634,14 @@ int
 codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum codelidx {
-    codelidx_name, codelidx_params, codelidx_loc
+    codelidx_name, codelidx_return, codelidx_params, codelidx_yields,
+    codelidx_triggers, codelidx_loc, codelidx_class
   };
   static const char *args[] = {
-    [codelidx_name] = "name", [codelidx_params] = "parameters",
-    [codelidx_loc] = "loc", NULL
+    [codelidx_name] = "name", [codelidx_return] = "return",
+    [codelidx_params] = "parameters", [codelidx_yields] = "yields",
+    [codelidx_triggers] = "triggers", [codelidx_loc] = "loc",
+    [codelidx_class] = "class", NULL
   };
   codel_s c = v;
   Tcl_Obj *r;
@@ -665,6 +662,10 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewStringObj(codel_name(c), -1);
       break;
 
+    case codelidx_return:
+      r = Tcl_NewStringObj(type_genref(codel_return(c)), -1);
+      break;
+
     case codelidx_params: {
       hiter i;
 
@@ -672,6 +673,28 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       for(hash_first(codel_params(c), &i); i.current; hash_next(&i)) {
 	Tcl_ListObjAppendElement(
 	  interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
+      }
+      break;
+    }
+
+    case codelidx_yields: {
+      hiter i;
+
+      r = Tcl_NewListObj(0, NULL);
+      for(hash_first(codel_yields(c), &i); i.current; hash_next(&i)) {
+	Tcl_ListObjAppendElement(
+	  interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+      }
+      break;
+    }
+
+    case codelidx_triggers: {
+      hiter i;
+
+      r = Tcl_NewListObj(0, NULL);
+      for(hash_first(codel_triggers(c), &i); i.current; hash_next(&i)) {
+	Tcl_ListObjAppendElement(
+	  interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
       }
       break;
     }
@@ -685,10 +708,14 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewListObj(3, l);
       break;
     }
+
+    case codelidx_class:
+      r = Tcl_NewStringObj("codel", -1);
+      break;
   }
 
   if (!r) {
-    Tcl_AppendResult(interp, "no such member \"", args[i], "\"", NULL);
+    Tcl_AppendResult(interp, "undefined member \"", args[i], "\"", NULL);
     return TCL_ERROR;
   }
 
@@ -706,13 +733,13 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum paramidx {
     paramidx_name, paramidx_dir, paramidx_member, paramidx_type, paramidx_port,
-    paramidx_initer, paramidx_loc
+    paramidx_initer, paramidx_loc, paramidx_class
   };
   static const char *args[] = {
     [paramidx_name] = "name", [paramidx_dir] = "direction",
     [paramidx_member] = "member", [paramidx_type] = "type",
     [paramidx_port] = "port", [paramidx_initer] = "initializer",
-    [paramidx_loc] = "loc", NULL
+    [paramidx_loc] = "loc", [paramidx_class] = "class", NULL
   };
   param_s p = v;
   Tcl_Obj *r;
@@ -780,10 +807,14 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewListObj(3, l);
       break;
     }
+
+    case paramidx_class:
+      r = Tcl_NewStringObj("parameter", -1);
+      break;
   }
 
   if (!r) {
-    Tcl_AppendResult(interp, "no such member \"", args[i], "\"", NULL);
+    Tcl_AppendResult(interp, "undefined member \"", args[i], "\"", NULL);
     return TCL_ERROR;
   }
 
@@ -800,12 +831,13 @@ int
 initer_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum initeridx {
-    initeridx_member, initeridx_doc, initeridx_kind, initeridx_value
+    initeridx_member, initeridx_doc, initeridx_kind, initeridx_value,
+    initeridx_class
   };
   static const char *args[] = {
     [initeridx_member] = "member", [initeridx_doc] = "doc",
     [initeridx_kind] = "kind", [initeridx_value] = "value",
-    NULL
+    [initeridx_class] = "class", NULL
   };
   initer_s i = v;
   Tcl_Obj *r = NULL;
@@ -851,35 +883,17 @@ initer_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       } else
 	r = Tcl_NewStringObj(const_strval(initer_value(i)), -1);
       break;
+
+    case initeridx_class:
+      r = Tcl_NewStringObj("initializer", -1);
+      break;
   }
 
   if (!r) {
-    Tcl_AppendResult(interp, "no such member \"", args[c], "\"", NULL);
+    Tcl_AppendResult(interp, "undefined member \"", args[c], "\"", NULL);
     return TCL_ERROR;
   }
 
   Tcl_SetObjResult(interp, r);
   return TCL_OK;
-}
-
-
-/* --- prop_lookup --------------------------------------------------------- */
-
-/** Return a Tcl_Obj containing a reference to the property.
- */
-static Tcl_Obj *
-prop_lookup(Tcl_Interp *interp, hash_s h, const char *k)
-{
-  prop_s p;
-
-  p = hash_find(h, k);
-  if (!p) {
-    if (interp) {
-      Tcl_AppendResult(
-	interp, "undefined property \"", k, "\"", NULL);
-    }
-    return NULL;
-  }
-
-  return Tcl_NewStringObj(prop_genref(p), -1);
 }

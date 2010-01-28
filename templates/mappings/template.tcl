@@ -57,7 +57,7 @@ if {![catch {dotgen input notice} notice]} {
 
 # generate types definitions
 foreach c [dotgen components] {
-    if {[info exists lang]} { set l $lang } else { set l [[$c language]] }
+    if {[info exists lang]} { set l $lang } else { set l [$c language] }
     foreach l $l {
 	template parse					\
 	    raw [language comment $l $header]		\

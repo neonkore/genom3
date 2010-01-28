@@ -1,4 +1,4 @@
-/* $LAAS: engine.h 2010/01/24 19:51:19 tho $ */
+/* $LAAS: engine.h 2010/01/27 23:25:18 tho $ */
 
 /*
  * Copyright (c) 2010 LAAS/CNRS
@@ -69,8 +69,6 @@ int	port_cmd(ClientData c, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	service_cmd(ClientData c, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
-int	prop_cmd(ClientData c, Tcl_Interp *interp, int objc,
-		Tcl_Obj *const objv[]);
 int	codel_cmd(ClientData c, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	param_cmd(ClientData c, Tcl_Interp *interp, int objc,
@@ -83,7 +81,6 @@ char *	comp_genref(comp_s c);
 char *	task_genref(task_s t);
 char *	port_genref(port_s p);
 char *	service_genref(service_s s);
-char *	prop_genref(prop_s p);
 char *	codel_genref(codel_s c);
 char *	param_genref(param_s p);
 char *	initer_genref(initer_s p);

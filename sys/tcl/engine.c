@@ -43,7 +43,6 @@
 #define TASK_CMD	"task"
 #define PORT_CMD	"port"
 #define SERVICE_CMD	"service"
-#define PROPERTY_CMD	"property"
 #define CODEL_CMD	"codel"
 #define PARAM_CMD	"param"
 #define INITER_CMD	"initer"
@@ -90,7 +89,6 @@ static int	engine_gencomponent(Tcl_Interp *interp, comp_s c);
 static int	engine_gentask(Tcl_Interp *interp, task_s t);
 static int	engine_genport(Tcl_Interp *interp, port_s p);
 static int	engine_genservice(Tcl_Interp *interp, service_s s);
-static int	engine_genproperty(Tcl_Interp *interp, prop_s p);
 static int	engine_gencodel(Tcl_Interp *interp, codel_s c);
 static int	engine_genparam(Tcl_Interp *interp, param_s p);
 static int	engine_geniniter(Tcl_Interp *interp, initer_s i);
@@ -287,7 +285,19 @@ engine_gencomponent(Tcl_Interp *interp, comp_s c)
 
   /* properties */
   for(hash_first(comp_props(c), &i); i.current; hash_next(&i)) {
-    s = engine_genproperty(interp, i.value);
+    switch(prop_kind(i.value)) {
+      case PROP_IDS:
+	s = engine_gentype(interp, prop_type(i.value));
+	break;
+
+      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
+      case PROP_VALIDATE: case PROP_CODEL: case PROP_DOC: case PROP_VERSION:
+      case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+      case PROP_BUILD_REQUIRE: case PROP_TASK: case PROP_THROWS:
+      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+	break;
+    }
+
     if (s) return s;
   }
 
@@ -332,7 +342,22 @@ engine_gentask(Tcl_Interp *interp, task_s t)
   s = 0;
   h = task_props(t); assert(h);
   for(hash_first(h, &i); i.current; hash_next(&i)) {
-    s = engine_genproperty(interp, i.value);
+    switch(prop_kind(i.value)) {
+      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
+	s = engine_gentype(interp, prop_value(i.value));
+	break;
+
+      case PROP_VALIDATE: case PROP_CODEL:
+	s = engine_gencodel(interp, prop_codel(i.value));
+	break;
+
+      case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_TASK: case PROP_THROWS:
+      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+	break;
+    }
+
     if (s) break;
   }
 
@@ -388,37 +413,20 @@ engine_genservice(Tcl_Interp *interp, service_s s)
 
   /* properties */
   for(hash_first(service_props(s), &i); i.current; hash_next(&i)) {
-    e = engine_genproperty(interp, i.value);
-    if (e) return e;
-  }
+    switch(prop_kind(i.value)) {
+      case PROP_VALIDATE: case PROP_CODEL:
+	e = engine_gencodel(interp, prop_codel(i.value));
+	break;
 
-  return 0;
-}
+      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
+      case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_TASK: case PROP_THROWS:
+      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+	break;
+    }
 
-
-/* --- engine_genproperty -------------------------------------------------- */
-
-/** Generate Tcl property object.
- */
-static int
-engine_genproperty(Tcl_Interp *interp, prop_s p)
-{
-  int s;
-
-  if (!Tcl_CreateObjCommand(interp, prop_genref(p), prop_cmd, p, NULL))
-    return EINVAL;
-  printf("exported property %s\n", prop_name(p));
-
-  switch(prop_kind(p)) {
-    case PROP_IDS:
-      s = engine_gentype(interp, prop_type(p));
-      break;
-
-    case PROP_CODEL:
-      s = engine_gencodel(interp, prop_codel(p));
-      break;
-
-    default: s = 0; break;
+    if (e) break;
   }
 
   return 0;
@@ -544,12 +552,6 @@ char *
 service_genref(service_s s)
 {
   return genref("::" DOTGEN_NS "::" OBJECT_NS "::" SERVICE_CMD, s);
-}
-
-char *
-prop_genref(prop_s p)
-{
-  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" PROPERTY_CMD, p);
 }
 
 char *

@@ -124,6 +124,14 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
   c->yields = yields ? yields : hash_create("yields list", 0);
   c->triggers = triggers ? triggers : hash_create("triggers list", 0);
 
+  if (!yields) {
+    /* validation codels return OK, or one of the exceptions of the service */
+    if (!hash_insert(c->yields, "ok", "ok", NULL))
+      comp_addievs(l, c->yields);
+    else
+      parserror(l, "failed to create component internal event '%s'", "ok");
+  }
+
   xwarnx("created codel %s", c->name);
   return c;
 }

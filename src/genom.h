@@ -44,6 +44,8 @@ extern struct runopt_s {
   char tmpdir[PATH_MAX];/** temporary directory */
   int cppdotgen;	/** cpp accepts .gen file extension */
 
+  const char *genom;	/** Executable path */
+  const char *cmdline;	/** Relevant options to genom to register */
   const char *notice;	/** special comment put verbatim in generated files */
 } runopt;
 
@@ -278,7 +280,7 @@ void		type_usage(void);
 
 #define COMPONENT_EVENTTYPE_NAME	"event"
 #define COMPONENT_EVENT_STD_NAMES {					\
-    "ether", "start", "stop", "sleep",					\
+    "ok", "ether", "start", "stop", "sleep"				\
       }
 
 #define CNTRL_TASK_NAME			"control"

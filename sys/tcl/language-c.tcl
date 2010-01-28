@@ -19,11 +19,31 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
 # IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-#                                           Anthony Mallet on Mon Jan 11 2010
+#                                           Anthony Mallet on Tue Jan 26 2010
 #
 package require Tcl 8.5
 
-namespace eval mapping::c {
+namespace eval language::c {
+
+    # --- gentype -----------------------------------------------------------
+
+    # Return the C mapping of type.
+    #
+    proc fileext { kind } {
+	if {$kind == "header"} { return ".h" } else { return ".c" }
+    }
+
+
+    # --- comment ----------------------------------------------------------
+
+    # Return the comment text for the given language.
+    #
+    proc comment { text } {
+	regsub -all "\n(?=.)" "/*${text}" "\n *" text
+	set text "${text} */"
+	return $text
+    }
+
 
     # --- gentype -----------------------------------------------------------
 
@@ -50,22 +70,22 @@ namespace eval mapping::c {
     }
 
 
-    # --- gentyperef -------------------------------------------------------
+    # --- declarator -------------------------------------------------------
 
-    # Return the C mapping of type reference.
+    # Return the C mapping of a type declarator.
     #
-    proc gentyperef { type } {
+    proc declarator { type {var {}} } {
 	switch -- [$type kind] {
-	    {boolean}		{ return "unsigned int" }
-	    {unsigned short}	{ return "unsigned short" }
-	    {short}		{ return "short" }
-	    {unsigned long}	{ return "unsigned long" }
-	    {long}		{ return "long" }
-	    {float}		{ return "float" }
-	    {double}		{ return "double" }
-	    {char}		{ return "char" }
-	    {octet}		{ return "unsigned char" }
-	    {string}		{ return "char *" }
+	    {boolean}		{ set d "unsigned int" }
+	    {unsigned short}	{ set d "unsigned short" }
+	    {short}		{ set d "short" }
+	    {unsigned long}	{ set d "unsigned long" }
+	    {long}		{ set d "long" }
+	    {float}		{ set d "float" }
+	    {double}		{ set d "double" }
+	    {char}		{ set d "char" }
+	    {octet}		{ set d "unsigned char" }
+	    {string}		{ set d "char *" }
 	    {any}		{ error "type any not supported yet" }
 
 	    {const}		-
@@ -73,29 +93,49 @@ namespace eval mapping::c {
 	    {enumerator}	-
 	    {struct}		-
 	    {union}		-
-	    {typedef}		{ return [cname [$type fullname]] }
+	    {typedef}		{ set d [cname [$type fullname]] }
 
 	    {struct member}	-
-	    {union member}	{
-		return [cdecl [gentyperef [$type type]] [cname [$type name]]]
-	    }
-
+	    {union member}	-
 	    {forward struct}	-
-	    {forward union}	{ return [gentyperef [$type type]] }
+	    {forward union}	{ set d [declarator [$type type]] }
 
 	    {array}		{
 		if {[catch { $type length } l]} { set l {} }
-		return "[gentyperef [$type type]]\[$l\]"
+		set d "[declarator [$type type]]\[$l\]"
 	    }
 
 	    {sequence}		{
-		append m "struct { unsigned long _maximum, _length;"
-		append m " [gentyperef [$type type]] *_buffer; }"
-		return $m
+		set d "struct { unsigned long _maximum, _length;"
+		append d " [declarator [$type type]] *_buffer; }"
+	    }
+
+	    default		{
+		template fatal "internal error: unhandled type '[$type kind]'"
 	    }
 	}
 
-	template fatal "internal error: unhandled type '[$type kind]'"
+	if {[string length $var] > 0} { set d [cdecl $d $var] }
+	return $d
+    }
+
+
+    # --- signature --------------------------------------------------------
+
+    # Return the C signature of a codel
+    #
+    proc signature { codel {symchar " "}} {
+	set ret [declarator [$codel return]]
+	set sym [cname [$codel name]]
+	foreach p [$codel parameters] {
+	    set a ""
+	    switch -- [$p dir] {
+		"in" - "inport"	{ append a "const " }
+	    }
+	    append a [declarator [$p type] *[$p name]]
+	    lappend arg $a
+	}
+	return [join [list $ret ${sym}([join $arg {, }])] $symchar]
     }
 
 
@@ -105,7 +145,7 @@ namespace eval mapping::c {
     #
     proc genconst { type } {
 	set n [cname [$type fullname]]
-	set t [gentyperef [$type type]]
+	set t [declarator [$type type]]
 
 	set v [$type value]
 	switch [$type valuekind] {
@@ -162,7 +202,7 @@ namespace eval mapping::c {
 	append s "\nstruct $n {"
 	foreach e [$type members] {
 	    append s [genloc $e]
-	    append s "\n [gentyperef $e];"
+	    append s "\n [declarator $e [cname [$e name]]];"
 	}
 	append s "\n};"
 	return [guard $m $n][guard $s "${n}_definition"]
@@ -183,11 +223,11 @@ namespace eval mapping::c {
 
 	append s "\nstruct $n {"
 	append s [genloc $discr]
-	append s "\n [gentyperef $discr] _d;"
+	append s "\n [declarator $discr] _d;"
 	append s "\n union {"
 	foreach e [$type members] {
 	    append s [genloc $e]
-	    append s "\n  [gentyperef $e];"
+	    append s "\n  [declarator $e [cname [$e name]]];"
 	}
 	append s "\n } _u;"
 	append s "\n};"
@@ -216,7 +256,7 @@ namespace eval mapping::c {
 	set n [cname [$type fullname]]
 
 	append m [genloc $type]
-	append m "\ntypedef [cdecl [gentyperef [$type type]] $n];"
+	append m "\ntypedef [declarator [$type type] $n];"
 	return [guard $m $n]
     }
 

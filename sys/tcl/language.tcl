@@ -29,11 +29,7 @@ namespace eval language {
     # Return the cannonical file extension for the given language.
     #
     proc fileext { lang {kind source}} {
-	switch -nocase -- $lang {
-	    c { if {$kind == "header"} { return ".h" } else { return ".c" } }
-	}
-
-	template fatal "unsupported language $lang"
+	return [[support $lang]::fileext $kind]
     }
     namespace export fileext
 
@@ -43,17 +39,70 @@ namespace eval language {
     # Return the comment text for the given language.
     #
     proc comment { lang text } {
-	switch -nocase -- $lang {
-	    c {
-		regsub -all "\n(?=.)" "/*${text}" "\n *" text
-		set text "${text} */"
-	    }
-	    default { template fatal "unsupported language $lang" }
-	}
-
-	return $text
+	return [[support $lang]::comment $text]
     }
     namespace export comment
+
+
+    # --- mapping ----------------------------------------------------------
+
+    # Generate the mapping of types matching the glob pattern, for the given
+    # language.
+    #
+    proc mapping { lang {pattern *} } {
+	set lns [support $lang]
+	foreach t [dotgen types $pattern] {
+	    append m [${lns}::gentype $t]
+	}
+	return $m
+    }
+    namespace export mapping
+
+
+    # --- declarator -------------------------------------------------------
+
+    # Return the abstract declarator of a type or a variable
+    #
+    proc declarator { lang type {var {}} } {
+	return [[support $lang]::declarator $type $var]
+    }
+    namespace export declarator
+
+
+    # --- declarator -------------------------------------------------------
+
+    # Return the signature of a codel
+    #
+    proc signature { lang codel {symchar { }} } {
+	return [[support $lang]::signature $codel $symchar]
+    }
+    namespace export signature
+
+
+    # --- hfill ------------------------------------------------------------
+
+    # Fill text with filler up to column
+    #
+    proc hfill { text { filler - } { column 80 } } {
+	return \
+	    "$text[string repeat - [expr {$column - [string length $text]}]]"
+    }
+    namespace export hfill
+
+
+    # --- support ----------------------------------------------------------
+
+    # Return the namespace for language or raise an error
+    #
+    variable lns [dict create c c]
+    proc support { lang } {
+	variable lns
+
+	if { [catch {dict get $lns $lang} ns] } {
+	    template fatal "unsupported language $lang"
+	}
+	return $ns
+    }
 
     namespace ensemble create
 }

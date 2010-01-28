@@ -22,8 +22,7 @@ systcldir=$(sysdir)/tcl
 dist_systcl_DATA=	\
 	template.tcl	\
 	language.tcl	\
-	mapping.tcl	\
-	mapping-c.tcl	\
+	language-c.tcl	\
 	engine.tcl
 
 nodist_systcl_DATA=	\

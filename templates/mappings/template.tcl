@@ -61,7 +61,7 @@ foreach c [dotgen components] {
     foreach l $l {
 	template parse					\
 	    raw [language comment $l $header]		\
-	    string [mapping generate $l *]		\
+	    string [language mapping $l *]		\
 	    file "[$c name]$suffix[language fileext $l header]"
     }
 }

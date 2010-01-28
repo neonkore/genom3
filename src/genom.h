@@ -304,6 +304,7 @@ typedef enum propkind {
   PROP_STACK,		/**< stack size */
 
   PROP_TASK,		/**< service task */
+  PROP_VALIDATE,	/**< validation codels */
   PROP_CODEL,		/**< codels */
   PROP_THROWS,		/**< errors from codels */
   PROP_INTERRUPTS,	/**< interrupted services */
@@ -320,14 +321,14 @@ prop_s		prop_newstring(tloc l, propkind k, const char *s);
 prop_s		prop_newhash(tloc l, propkind k, hash_s h);
 prop_s		prop_newrequire(tloc l, propkind k, clist_s c);
 prop_s		prop_newvalue(tloc l, propkind k, cval c);
-prop_s		prop_newcodel(tloc l, codel_s c);
+prop_s		prop_newcodel(tloc l, propkind k, codel_s c);
 prop_s		prop_newtask(tloc l, const char *name);
 void		prop_destroy(prop_s p);
 
 idltype_s	prop_type(prop_s p);
 const char *	prop_text(prop_s p);
 clist_s		prop_list(prop_s p);
-cval *		prop_value(prop_s p);
+idltype_s	prop_value(prop_s p);
 task_s		prop_task(prop_s p);
 codel_s		prop_codel(prop_s p);
 hash_s		prop_identifiers(prop_s p);
@@ -356,6 +357,7 @@ hash_s		comp_ports(comp_s c);
 hash_s		comp_services(comp_s c);
 port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
+service_s	comp_service(comp_s c, const char *name);
 comp_s		comp_dotgen(void);
 
 tloc		task_loc(task_s t);
@@ -379,6 +381,8 @@ port_s		comp_addport(tloc l, portkind k, const char *name,
 			idltype_s t);
 service_s	comp_addservice(tloc l, const char *name, hash_s params,
 			hash_s props);
+int		comp_addievs(tloc l, hash_s h);
+int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
 
 void		task_destroy(task_s t);
 void		port_destroy(port_s p);

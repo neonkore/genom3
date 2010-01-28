@@ -43,7 +43,7 @@ struct prop_s {
     idltype_s type;	/**< IDS */
     const char *text;	/**< doc, version, e-mail, lang */
     clist_s clist;	/**< require, build-require */
-    cval value;		/**< period, delay, priority, stack */
+    idltype_s value;	/**< period, delay, priority, stack */
     codel_s codel;	/**< codel */
     hash_s hash;	/**< throws */
     task_s task;	/**< task */
@@ -149,18 +149,46 @@ prop_newrequire(tloc l, propkind k, clist_s c)
 prop_s
 prop_newvalue(tloc l, propkind k, cval c)
 {
-  prop_s p = prop_new(l, k, prop_strkind(k));
+  idltype_s t, v;
+  idlkind tk;
+  prop_s p;
+
+  switch(c.k) {
+    case CST_VOID:
+      parserror(l, "invalid %s value", const_strkind(c.k));
+      return NULL;
+
+    case CST_BOOL:	tk = IDL_BOOL; break;
+    case CST_UINT:	tk = IDL_ULONG; break;
+    case CST_INT:	tk = IDL_LONG; break;
+    case CST_FLOAT:	tk = IDL_DOUBLE; break;
+    case CST_CHAR:	tk = IDL_CHAR; break;
+    case CST_STRING:	tk = IDL_STRING; break;
+    case CST_ENUM:	tk = IDL_ENUM; break;
+  }
+  /* create anon const type */
+  t = type_newbasic(l, NULL, tk);
+  if (!t) return NULL;
+  v = type_newconst(l, NULL, t, c);
+  if (!v) return NULL;
+
+  p = prop_new(l, k, prop_strkind(k));
   if (!p) return NULL;
 
-  p->value = c;
+  p->value = v;
   return p;
 }
 
 prop_s
-prop_newcodel(tloc l, codel_s c)
+prop_newcodel(tloc l, propkind k, codel_s c)
 {
-  prop_s p = prop_new(l, PROP_CODEL, strings(
-			prop_strkind(PROP_CODEL), " ", codel_name(c), NULL));
+  prop_s p;
+  assert(k == PROP_VALIDATE || k == PROP_CODEL);
+
+  /* always build the property name as "codel xxx" even for validation
+   * codels to avoid name clashes */
+  p = prop_new(
+    l, k, strings(prop_strkind(PROP_CODEL), " ", codel_name(c), NULL));
   if (!p) return NULL;
 
   p->codel = c;
@@ -222,14 +250,14 @@ prop_list(prop_s p)
 
 /* --- prop_value ---------------------------------------------------------- */
 
-cval *
+idltype_s
 prop_value(prop_s p)
 {
   assert(p);
   assert(
     p->kind == PROP_PERIOD || p->kind == PROP_DELAY ||
     p->kind == PROP_PRIORITY || p->kind == PROP_STACK);
-  return &p->value;
+  return p->value;
 }
 
 
@@ -250,7 +278,7 @@ codel_s
 prop_codel(prop_s p)
 {
   assert(p);
-  assert(p->kind == PROP_CODEL);
+  assert(p->kind == PROP_VALIDATE || p->kind == PROP_CODEL);
   return p->codel;
 }
 
@@ -302,6 +330,7 @@ prop_strkind(propkind k)
     case PROP_PRIORITY:		return "priority";
     case PROP_STACK:		return "stack";
     case PROP_TASK:		return "task";
+    case PROP_VALIDATE:		return "validate";
     case PROP_CODEL:		return "codel";
     case PROP_THROWS:		return "throws";
     case PROP_INTERRUPTS:	return "interrupts";

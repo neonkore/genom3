@@ -97,7 +97,6 @@ static comp_s dotgen;
 comp_s	comp_dotgen() { return dotgen; }
 
 static idltype_s	comp_ievcreate(tloc l, const char *name);
-static int		comp_addievs(tloc l, comp_s c, hash_s h);
 
 
 /* --- comp_create --------------------------------------------------------- */
@@ -139,8 +138,8 @@ comp_create(tloc l, const char *name, hash_s props)
 	break;
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-      case PROP_CODEL: case PROP_THROWS: case PROP_TASK: case PROP_INTERRUPTS:
-      case PROP_BEFORE: case PROP_AFTER:
+      case PROP_VALIDATE: case PROP_CODEL: case PROP_THROWS: case PROP_TASK:
+      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
 	parserror(prop_loc(i.value),
 		  "property %s is not suitable for components",
 		  prop_strkind(prop_kind(i.value)));
@@ -232,6 +231,18 @@ comp_task(comp_s c, const char *name)
 }
 
 
+/* --- comp_service -------------------------------------------------------- */
+
+/** return component's service
+ */
+service_s
+comp_service(comp_s c, const char *name)
+{
+  assert(c && name);
+  return hash_find(c->services, name);
+}
+
+
 /* --- comp_addtask -------------------------------------------------------- */
 
 /** create a task in component
@@ -254,25 +265,27 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
   /* check consitency of some properties */
   p = hash_find(props, prop_strkind(PROP_PERIOD));
-  if (p && (
-	const_convert(prop_value(p), CST_FLOAT) ||
-	prop_value(p)->f < 0.)) {
-    parserror(prop_loc(p),
-	      "invalid numeric value for %s", prop_strkind(PROP_PERIOD));
-    e = 1;
+  if (p) {
+    cval c = type_constvalue(prop_value(p));
+    if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
+      parserror(prop_loc(p),
+		"invalid numeric value for %s", prop_strkind(PROP_PERIOD));
+      e = 1;
+    }
   }
 
   d = hash_find(props, prop_strkind(PROP_DELAY));
-  if (d && (
-	const_convert(prop_value(d), CST_FLOAT) ||
-	prop_value(d)->f < 0.)) {
-    parserror(prop_loc(d),
-	      "invalid numeric value for %s", prop_strkind(PROP_DELAY));
-    e = 1;
+  if (d) {
+    cval c = type_constvalue(prop_value(p));
+    if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
+      parserror(prop_loc(d),
+		"invalid numeric value for %s", prop_strkind(PROP_DELAY));
+      e = 1;
+    }
   }
 
   if (!e && d && p) {
-    if (prop_value(d)->f >= prop_value(p)->f) {
+    if (type_constvalue(prop_value(d)).f >= type_constvalue(prop_value(p)).f) {
       parserror(prop_loc(d), "delay must be less than period");
       parsenoerror(prop_loc(p), " period declared here");
       e = 1;
@@ -288,29 +301,11 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
       case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
       case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_TASK:
-      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      case PROP_VALIDATE: case PROP_INTERRUPTS: case PROP_BEFORE:
+      case PROP_AFTER:
 	parserror(prop_loc(i.value), "property %s is not suitable for tasks",
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
-    }
-
-  /* register internal events */
-  for(hash_first(props, &i); i.current; hash_next(&i))
-    switch(prop_kind(i.value)) {
-      case PROP_CODEL:
-	if (comp_addievs(prop_loc(i.value),
-			 dotgen, codel_triggers(prop_codel(i.value))) ||
-	    comp_addievs(prop_loc(i.value),
-			 dotgen, codel_yields(prop_codel(i.value))))
-	  e = 1;
-	break;
-
-      case PROP_THROWS:
-	if (comp_addievs(prop_loc(i.value), dotgen, prop_identifiers(i.value)))
-	  e = 1;
-	break;
-
-      default: break;
     }
   if (e) return NULL;
 
@@ -437,8 +432,9 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   /* check unwanted properties */
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
-      case PROP_DOC: case PROP_TASK: case PROP_CODEL: case PROP_THROWS:
-      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      case PROP_DOC: case PROP_TASK: case PROP_VALIDATE: case PROP_CODEL:
+      case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
+      case PROP_AFTER:
 	break;
 
       case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
@@ -447,25 +443,6 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	parserror(prop_loc(i.value), "property %s is not suitable for services",
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
-    }
-
-  /* register internal events */
-  for(hash_first(props, &i); i.current; hash_next(&i))
-    switch(prop_kind(i.value)) {
-      case PROP_CODEL:
-	if (comp_addievs(prop_loc(i.value),
-			 dotgen, codel_triggers(prop_codel(i.value))) ||
-	    comp_addievs(prop_loc(i.value),
-			 dotgen, codel_yields(prop_codel(i.value))))
-	  e = 1;
-	break;
-
-      case PROP_THROWS:
-	if (comp_addievs(prop_loc(i.value), dotgen, prop_identifiers(i.value)))
-	  e = 1;
-	break;
-
-      default: break;
     }
   if (e) return NULL;
 
@@ -613,18 +590,18 @@ error:
 
 /** Add internal event to component
  */
-static int
-comp_addievs(tloc l, comp_s c, hash_s h)
+int
+comp_addievs(tloc l, hash_s h)
 {
   idltype_s iev, e;
   scope_s s, p;
   hiter i;
   int r;
-  assert(c && h);
+  assert(h);
 
-  iev = comp_eventtype(c); assert(iev);
+  iev = comp_eventtype(comp_dotgen()); assert(iev);
 
-  s = scope_push(l, comp_name(c), SCOPE_MODULE);
+  s = scope_push(l, comp_name(comp_dotgen()), SCOPE_MODULE);
   if (!s) return 1;
 
   r = 0;
@@ -646,4 +623,54 @@ comp_addievs(tloc l, comp_s c, hash_s h)
   assert(p == s);
 
   return r;
+}
+
+
+/* --- comp_resolvesvc ----------------------------------------------------- */
+
+/** Rebuild input hash by resolving service names. Number of entries may change
+ * because of the 'all' wildcard.
+ */
+int
+comp_resolvesvc(tloc l, comp_s c, hash_s h)
+{
+  hiter i, j;
+  service_s s;
+  int e;
+  assert(c && h);
+
+  e = 0;
+  for(hash_first(h, &i); i.current; hash_next(&i)) {
+    if (!strcmp(i.value, ALL_SERVICE_NAME)) {
+      /* 'all' wildcard */
+      hash_s all = comp_services(c); assert(all);
+      for(hash_first(all, &j); j.current; hash_next(&j))
+	if (hash_insert(h, service_name(j.value), j.value, NULL)) {
+	  if (errno == EEXIST) {
+	    parserror(l, "service '%s' is already contained in '"
+		      ALL_SERVICE_NAME "'", service_name(j.value));
+	  }
+	  e = 1;
+	}
+      if (hash_remove(h, i.key, 1))
+	e = 1;
+      else
+	xwarnx("expanded services '" ALL_SERVICE_NAME "'");
+      break; /* by definition, all services are there */
+    } else {
+      s = comp_service(c, i.value);
+      if (!s) {
+	parserror(l, "no such service '%s'", i.value);
+	e = 1;
+      } else {
+	if (hash_set(h, i.key, s))
+	  e = 1;
+	else
+	  xwarnx("resolved service name '%s'", i.value);
+      }
+    }
+
+  }
+
+  return e;
 }

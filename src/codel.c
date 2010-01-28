@@ -108,7 +108,7 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
 	     hash_s params)
 {
   codel_s c;
-  assert(name && triggers && yields && params);
+  assert(name && params);
 
   c = malloc(sizeof(*c));
   if (!c) {
@@ -121,8 +121,8 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
   c->rettype = comp_eventtype(comp_dotgen());
 
   c->params = params;
-  c->yields = yields;
-  c->triggers = triggers;
+  c->yields = yields ? yields : hash_create("yields list", 0);
+  c->triggers = triggers ? triggers : hash_create("triggers list", 0);
 
   xwarnx("created codel %s", c->name);
   return c;

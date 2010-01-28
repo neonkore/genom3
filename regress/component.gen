@@ -61,8 +61,7 @@ task t2 {
   stack:	20k;
 
   codel start, stop:
-   a(inport a, outport b.b::port)
-   yield sleep, stop;
+   a(inport a, outport b.b::port) yield sleep, stop;
   codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
 
   throws:	ERR1, ERR2;
@@ -83,6 +82,8 @@ service s2(
 	   ) {
   doc: "service s2";
   task: t1;
+
+  validate: v(in b[0].c::a, out c);
 
   codel start: a(inport a, outport b.b::port) yield sleep, ether;
   codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;

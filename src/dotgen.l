@@ -134,6 +134,9 @@ chartext	([^\'])|(\\.)
 "task"		{ yylval->s = string(yytext); return TASK; }
 "service"	{ yylval->s = string(yytext); return SERVICE; }
 "codel"		{ yylval->s = string(yytext); return CODEL; }
+"inport"	{ yylval->s = string(yytext); return INPORT; }
+"outport"	{ yylval->s = string(yytext); return OUTPORT; }
+"event"		{ yylval->s = string(yytext); return EVENT; }
 
 "doc"		{ yylval->s = string(yytext); return DOC; }
 "ids"		{ yylval->s = string(yytext); return IDS; }
@@ -146,15 +149,13 @@ chartext	([^\'])|(\\.)
 "delay"		{ yylval->s = string(yytext); return DELAY; }
 "priority"	{ yylval->s = string(yytext); return PRIORITY; }
 "stack"		{ yylval->s = string(yytext); return STACK; }
-"event"		{ yylval->s = string(yytext); return EVENT; }
+"validate"	{ yylval->s = string(yytext); return VALIDATE; }
 "yield"		{ yylval->s = string(yytext); return YIELD; }
 "throws"	{ yylval->s = string(yytext); return THROWS; }
 "interrupts"	{ yylval->s = string(yytext); return INTERRUPTS; }
 "before"	{ yylval->s = string(yytext); return BEFORE; }
 "after"		{ yylval->s = string(yytext); return AFTER; }
 
-"inport"	{ yylval->s = string(yytext); return INPORT; }
-"outport"	{ yylval->s = string(yytext); return OUTPORT; }
 "in"		{ yylval->s = string(yytext); return IN; }
 "out"		{ yylval->s = string(yytext); return OUT; }
 "inout"		{ yylval->s = string(yytext); return INOUT; }

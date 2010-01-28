@@ -87,8 +87,8 @@
 %token <s>	S MS US K M
 %token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
 %token <s>	INPUT OUTPUT EVENT IMPORT FROM VERSION LANG EMAIL REQUIRE
-%token <s>	BUILDREQUIRE PERIOD DELAY PRIORITY STACK YIELD THROWS DOC
-%token <s>	INTERRUPTS BEFORE AFTER
+%token <s>	BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD THROWS
+%token <s>	DOC INTERRUPTS BEFORE AFTER
 
 %type <i>	spec idlspec statement idlstatement genomstatement
 
@@ -96,7 +96,7 @@
 %type <prop>	attr
 %type <hash>	attr_list named_param_list
 %type <initer>	constr_initializer doc_initializer constr_initializer_list
-%type <codel>	codel
+%type <codel>	validate codel
 %type <port>	named_port
 %type <param>	param param_member named_param initialized_param
 
@@ -123,7 +123,7 @@
 %type <v>	or_expr xor_expr and_expr shift_expr add_expr mult_expr
 %type <v>	literal time_unit size_unit
 %type <s>	scoped_name string_lit identifier
-%type <hash>	identifier_list
+%type <hash>	event_list identifier_list
 %type <vlist>	string_list
 
 %type <i>	cpphash
@@ -257,8 +257,14 @@ attr_list:
   {
     $$ = $1;
     if (!$$ || !$2) break;
-    if (hash_insert($$, prop_name($2), $2, (hrelease_f)prop_destroy))
+    if (hash_insert($$, prop_name($2), $2, (hrelease_f)prop_destroy)) {
+      if (errno == EEXIST) {
+	prop_s p = hash_find($$, prop_name($2)); assert(p);
+	parserror(@2, "duplicate %s declaration", prop_name($2));
+	parsenoerror(prop_loc(p), " %s declared here", prop_name(p));
+      }
       prop_destroy($2);
+    }
   }
 ;
 
@@ -326,7 +332,7 @@ attr:
     }
     $$ = prop_newvalue(@1, PROP_STACK, $3);
   }
-  | THROWS ':' identifier_list
+  | THROWS ':' event_list
   {
     $$ = $3 ? prop_newhash(@1, PROP_THROWS, $3) : NULL;
   }
@@ -350,9 +356,13 @@ attr:
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_AFTER, $3);
   }
-  | codel
+  | VALIDATE ':' validate
   {
-    $$ = $1 ? prop_newcodel(@1, $1) : NULL;
+    $$ = $3 ? prop_newcodel(@1, PROP_VALIDATE, $3) : NULL;
+  }
+  | CODEL codel
+  {
+    $$ = $2 ? prop_newcodel(@1, PROP_CODEL, $2) : NULL;
   }
   | error
   {
@@ -363,18 +373,32 @@ attr:
 
 /* --- codels -------------------------------------------------------------- */
 
-codel:
-  CODEL identifier_list ':' identifier '(' named_param_list ')'
-  YIELD identifier_list
+validate:
+  identifier '(' named_param_list ')'
   {
-    $$ = codel_create(@1, $4, $2, $9, $6);
+    $$ = codel_create(@1, $1, NULL, NULL, $3);
   }
-  | CODEL identifier_list ':' identifier '(' named_param_list ')' error
+
+codel:
+  event_list ':' identifier '(' named_param_list ')' YIELD event_list
+  {
+    if (!$1 || !$8) {
+      parserror(@1, "dropped codel '%s'", $3); $$ = NULL; break;
+    }
+    $$ = codel_create(@3, $3, $1, $8, $5);
+  }
+  | event_list ':' identifier '(' named_param_list ')' error
   {
     $$ = NULL;
-    parserror(@1, "missing 'yield' values for codel %s", $4);
-    if ($2) hash_destroy($2);
-    if ($6) hash_destroy($6);
+    parserror(@1, "missing 'yield' values for codel %s", $3);
+    if ($1) hash_destroy($1);
+    if ($5) hash_destroy($5);
+  }
+;
+
+event_list: identifier_list
+  {
+    $$ = comp_addievs(@1, $1) ? NULL : $1;
   }
 ;
 
@@ -1353,9 +1377,9 @@ size_unit:
 identifier:
   IDENTIFIER | S | MS | US | K | M
   | COMPONENT | IDS | VERSION | LANG | EMAIL | REQUIRE | BUILDREQUIRE
-  | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL | YIELD | THROWS | DOC
-  | INTERRUPTS | BEFORE | AFTER
-  | EVENT | INPORT | OUTPORT | IN | OUT | INOUT;
+  | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL | VALIDATE | YIELD
+  | THROWS | DOC INTERRUPTS | BEFORE | AFTER | EVENT | INPORT | OUTPORT | IN
+  | OUT | INOUT;
 
 identifier_list:
   identifier
@@ -1436,7 +1460,10 @@ dotgen_consolidate()
 {
   hash_s types = type_all();
   comp_s c = comp_dotgen();
-  hiter i;
+  hash_s services = comp_services(c);
+  prop_s p;
+  hiter i, j;
+  int e;
 
   /* a component must exist */
   if (!c) {
@@ -1456,6 +1483,25 @@ dotgen_consolidate()
 	break;
 
       default: break;
+    }
+  }
+
+  /* resolve service names in interrupts, before and after properties */
+  e = 0;
+  for(hash_first(services, &i); i.current; hash_next(&i)) {
+    for(hash_first(service_props(i.value), &j); j.current; hash_next(&j)) {
+      switch(prop_kind(j.value)) {
+	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
+	case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
+	case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+	case PROP_TASK: case PROP_VALIDATE: case PROP_CODEL: case PROP_THROWS:
+	  break;
+
+	case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+	  e |= comp_resolvesvc(
+	    prop_loc(j.value), c, prop_identifiers(j.value));
+	  break;
+      }
     }
   }
 

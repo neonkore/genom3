@@ -170,10 +170,7 @@ component: COMPONENT identifier '{' attr_list '}'
       if ($4) hash_destroy($4);
       break;
     }
-    if (!comp_create(@1, $2, $4)) {
-      parserror(@1, "dropped '%s' component", $2);
-      hash_destroy($4);
-    }
+    if (!comp_create(@1, $2, $4)) YYABORT;
   }
 ;
 
@@ -1358,7 +1355,7 @@ identifier:
   | COMPONENT | IDS | VERSION | LANG | EMAIL | REQUIRE | BUILDREQUIRE
   | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL | YIELD | THROWS | DOC
   | INTERRUPTS | BEFORE | AFTER
-  | INPORT | OUTPORT | IN | OUT | INOUT;
+  | EVENT | INPORT | OUTPORT | IN | OUT | INOUT;
 
 identifier_list:
   identifier
@@ -1447,7 +1444,7 @@ dotgen_consolidate()
     return EINVAL;
   }
 
-  /* all types */
+  /* look for unresolved forward type declaration */
   for(hash_first(types, &i); i.current; hash_next(&i)) {
     assert(type_fullname(i.value));
     switch(type_kind(i.value)) {

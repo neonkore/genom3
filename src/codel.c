@@ -38,6 +38,7 @@ struct codel_s {
   tloc loc;
   const char *name;
 
+  idltype_s rettype;	/**< return type */
   hash_s params;	/**< parameter list */
   hash_s yields;	/**< transitions */
   hash_s triggers;	/**< start conditions */
@@ -45,8 +46,10 @@ struct codel_s {
 
 tloc		codel_loc(codel_s c) { assert(c); return c->loc; }
 const char *	codel_name(codel_s c) { assert(c); return c->name; }
+idltype_s	codel_return(codel_s c) { assert(c); return c->rettype; }
 hash_s		codel_params(codel_s c) { assert(c); return c->params; }
 hash_s		codel_triggers(codel_s c) { assert(c); return c->triggers; }
+hash_s		codel_yields(codel_s c) { assert(c); return c->yields; }
 
 
 struct param_s {
@@ -114,6 +117,8 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
   }
   c->loc = l;
   c->name = string(name);
+
+  c->rettype = comp_eventtype(comp_dotgen());
 
   c->params = params;
   c->yields = yields;

@@ -233,6 +233,7 @@ tloc		type_loc(idltype_s t);
 const char *	type_name(idltype_s t);
 const char *	type_fullname(idltype_s t);
 idlkind		type_kind(idltype_s t);
+scope_s		type_scope(idltype_s t);
 cval		type_constvalue(idltype_s t);
 idltype_s	type_type(idltype_s t);
 unsigned long	type_length(idltype_s t);
@@ -249,6 +250,7 @@ idltype_s	type_newsequence(tloc l, const char *name, idltype_s t,
 idltype_s	type_newconst(tloc l, const char *name, idltype_s t, cval v);
 idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
 idltype_s	type_newenumerator(tloc l, const char *name);
+idltype_s	type_addenumerator(tloc l, idltype_s e, const char *name);
 idltype_s	type_newarray(tloc l, const char *name, idltype_s t,
 			unsigned long len);
 idltype_s	type_newstruct(tloc l, const char *name, scope_s s);
@@ -273,8 +275,13 @@ void		type_usage(void);
 
 /* --- GenoM object properties --------------------------------------------- */
 
-#define CNTRL_TASK_NAME		"control"
-#define ALL_SERVICE_NAME	"all"
+#define COMPONENT_EVENTTYPE_NAME	"event"
+#define COMPONENT_EVENT_STD_NAMES {					\
+    "ether", "start", "stop", "sleep",					\
+      }
+
+#define CNTRL_TASK_NAME			"control"
+#define ALL_SERVICE_NAME		"all"
 
 typedef struct task_s *task_s;
 typedef struct codel_s *codel_s;
@@ -341,6 +348,7 @@ typedef enum portkind {
 tloc		comp_loc(comp_s c);
 const char *	comp_name(comp_s c);
 idltype_s	comp_ids(comp_s c);
+idltype_s	comp_eventtype(comp_s c);
 hash_s		comp_props(comp_s c);
 hash_s		comp_tasks(comp_s c);
 hash_s		comp_ports(comp_s c);
@@ -391,8 +399,10 @@ typedef enum pdir {
 
 tloc		codel_loc(codel_s c);
 const char *	codel_name(codel_s c);
+idltype_s	codel_return(codel_s c);
 hash_s		codel_params(codel_s c);
 hash_s		codel_triggers(codel_s c);
+hash_s		codel_yields(codel_s c);
 
 tloc		param_loc(param_s p);
 const char *	param_name(param_s p);

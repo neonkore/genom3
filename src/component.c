@@ -37,6 +37,7 @@
 struct comp_s {
   tloc loc;
   const char *name;
+  idltype_s events;
 
   hash_s props;
   hash_s tasks;
@@ -46,6 +47,7 @@ struct comp_s {
 
 tloc		comp_loc(comp_s c) { assert(c); return c->loc; }
 const char *	comp_name(comp_s c) { assert(c); return c->name; }
+idltype_s	comp_eventtype(comp_s c) { assert(c); return c->events; }
 hash_s		comp_props(comp_s c) { assert(c); return c->props; }
 hash_s		comp_tasks(comp_s c) { assert(c); return c->tasks; }
 hash_s		comp_ports(comp_s c) { assert(c); return c->ports; }
@@ -94,6 +96,9 @@ static comp_s dotgen;
 
 comp_s	comp_dotgen() { return dotgen; }
 
+static idltype_s	comp_ievcreate(tloc l, const char *name);
+static int		comp_addievs(tloc l, comp_s c, hash_s h);
+
 
 /* --- comp_create --------------------------------------------------------- */
 
@@ -102,6 +107,7 @@ comp_s	comp_dotgen() { return dotgen; }
 comp_s
 comp_create(tloc l, const char *name, hash_s props)
 {
+  idltype_s iev;
   hiter i;
   int e, k;
   assert(name && props);
@@ -141,6 +147,10 @@ comp_create(tloc l, const char *name, hash_s props)
     }
   if (e) return NULL;
 
+  /* define internal event type */
+  iev = comp_ievcreate(l, name);
+  if (!iev) return NULL;
+
   /* create */
   dotgen = malloc(sizeof(*dotgen));
   if (!dotgen) {
@@ -150,6 +160,7 @@ comp_create(tloc l, const char *name, hash_s props)
 
   dotgen->loc = l;
   dotgen->name = string(name);
+  dotgen->events = iev;
   dotgen->props = props;
   dotgen->tasks = hash_create(strings(name, " tasks", NULL), 2);
   if (!dotgen->tasks) {
@@ -280,7 +291,27 @@ comp_addtask(tloc l, const char *name, hash_s props)
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
     }
+
+  /* register internal events */
+  for(hash_first(props, &i); i.current; hash_next(&i))
+    switch(prop_kind(i.value)) {
+      case PROP_CODEL:
+	if (comp_addievs(prop_loc(i.value),
+			 dotgen, codel_triggers(prop_codel(i.value))) ||
+	    comp_addievs(prop_loc(i.value),
+			 dotgen, codel_yields(prop_codel(i.value))))
+	  e = 1;
+	break;
+
+      case PROP_THROWS:
+	if (comp_addievs(prop_loc(i.value), dotgen, prop_identifiers(i.value)))
+	  e = 1;
+	break;
+
+      default: break;
+    }
   if (e) return NULL;
+
 
   /* create */
   t = malloc(sizeof(*t));
@@ -410,7 +441,27 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
     }
+
+  /* register internal events */
+  for(hash_first(props, &i); i.current; hash_next(&i))
+    switch(prop_kind(i.value)) {
+      case PROP_CODEL:
+	if (comp_addievs(prop_loc(i.value),
+			 dotgen, codel_triggers(prop_codel(i.value))) ||
+	    comp_addievs(prop_loc(i.value),
+			 dotgen, codel_yields(prop_codel(i.value))))
+	  e = 1;
+	break;
+
+      case PROP_THROWS:
+	if (comp_addievs(prop_loc(i.value), dotgen, prop_identifiers(i.value)))
+	  e = 1;
+	break;
+
+      default: break;
+    }
   if (e) return NULL;
+
 
   /* create */
   s = malloc(sizeof(*s));
@@ -498,4 +549,93 @@ service_destroy(service_s s)
     hash_destroy(s->params);
     free(s);
   }
+}
+
+
+/* --- comp_ievcreate ------------------------------------------------------ */
+
+/** Create component internal event type
+ */
+static idltype_s
+comp_ievcreate(tloc l, const char *name)
+{
+  const char *stdev[] = COMPONENT_EVENT_STD_NAMES;
+  scope_s s, p;
+  idltype_s t, e;
+  hash_s h;
+  int i;
+
+  assert(scope_current() == scope_global());
+  s = scope_push(l, name, SCOPE_MODULE);
+  if (!s) {
+    parserror(l, "the scope '::%1$s' is reserved for component '%1$s'", name);
+    return NULL;
+  }
+
+  /* create standard events */
+  h = hash_create("enumerator list", 5);
+  if (!h) goto error;
+
+  for(i=0; i<sizeof(stdev)/sizeof(stdev[0]); i++) {
+    e = type_newenumerator(l, stdev[i]);
+    if (!e) goto error;
+    if (hash_insert(h, type_name(e), e, NULL)) goto error;
+    xwarnx("created component standard event %s", stdev[i]);
+  }
+
+  /* create enum */
+  t = type_newenum(l, COMPONENT_EVENTTYPE_NAME, h);
+  if (!t) goto error;
+
+  p = scope_pop();
+  assert(p == s);
+
+  xwarnx("created component internal event type %s %s",
+	 type_strkind(type_kind(t)), type_fullname(t));
+  return t;
+
+error:
+  scope_pop();
+  parserror(l, "failed to create component internal event type '%s'",
+	    strings(name, "::" COMPONENT_EVENTTYPE_NAME, NULL));
+  return NULL;
+}
+
+
+/* --- comp_addiev --------------------------------------------------------- */
+
+/** Add internal event to component
+ */
+static int
+comp_addievs(tloc l, comp_s c, hash_s h)
+{
+  idltype_s iev, e;
+  scope_s s, p;
+  hiter i;
+  int r;
+  assert(c && h);
+
+  iev = comp_eventtype(c); assert(iev);
+
+  s = scope_push(l, comp_name(c), SCOPE_MODULE);
+  if (!s) return 1;
+
+  r = 0;
+  for(hash_first(h, &i); i.current; hash_next(&i)) {
+    e = scope_findtype(s, i.value);
+    if (!e || type_kind(e) != IDL_ENUMERATOR) {
+      e = type_addenumerator(l, iev, i.value);
+      if (e)
+	xwarnx("added component internal event %s", type_name(e));
+      else {
+	parserror(l, "failed to create component internal event '%s'", i.value);
+	r = 1;
+      }
+    }
+  }
+
+  p = scope_pop();
+  assert(p == s);
+
+  return r;
 }

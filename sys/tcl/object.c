@@ -188,17 +188,17 @@ int
 comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum compidx {
-    compidx_name, compidx_doc, compidx_ids, compidx_version, compidx_lang,
-    compidx_email, compidx_require, compidx_brequire, compidx_tasks,
-    compidx_ports, compidx_services, compidx_loc
+    compidx_name, compidx_doc, compidx_ids, compidx_iev, compidx_version,
+    compidx_lang, compidx_email, compidx_require, compidx_brequire,
+    compidx_tasks, compidx_ports, compidx_services, compidx_loc
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
-    [compidx_version] = "version", [compidx_lang] = "language",
-    [compidx_email] = "email", [compidx_require] = "require",
-    [compidx_brequire] = "build-require", [compidx_tasks] = "tasks",
-    [compidx_ports] = "ports", [compidx_services] = "services",
-    [compidx_loc] = "loc", NULL
+    [compidx_iev] = "event-type", [compidx_version] = "version",
+    [compidx_lang] = "language", [compidx_email] = "email",
+    [compidx_require] = "require", [compidx_brequire] = "build-require",
+    [compidx_tasks] = "tasks", [compidx_ports] = "ports",
+    [compidx_services] = "services", [compidx_loc] = "loc", NULL
   };
   static const propkind argkind[] = {
     [compidx_doc] = PROP_DOC, [compidx_ids] = PROP_IDS,
@@ -223,6 +223,10 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch(i) {
     case compidx_name:
       r = Tcl_NewStringObj(comp_name(c), -1);
+      break;
+
+    case compidx_iev:
+      r = Tcl_NewStringObj(type_genref(comp_eventtype(c)), -1);
       break;
 
     case compidx_doc: case compidx_ids: case compidx_version:

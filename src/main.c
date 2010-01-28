@@ -251,6 +251,7 @@ main(int argc, char *argv[])
   if (!s) s = dotgenparse();
 
   status = cpp_wait();
+  if (!status) status = s;
   if (!status) status = dotgen_consolidate();
   if (s || nerrors) {
     warnx(s?"fatal errors":"%d errors", nerrors);

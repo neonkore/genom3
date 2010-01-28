@@ -272,12 +272,18 @@ engine_gentype(Tcl_Interp *interp, idltype_s t)
 static int
 engine_gencomponent(Tcl_Interp *interp, comp_s c)
 {
+  idltype_s iev;
   hiter i;
   int s;
 
   if (!Tcl_CreateObjCommand(interp, comp_genref(c), comp_cmd, c, NULL))
     return EINVAL;
   printf("exported component %s\n", comp_name(c));
+
+  /* internal event type */
+  iev = comp_eventtype(c);
+  s = engine_gentype(interp, iev);
+  if (s) return s;
 
   /* properties */
   for(hash_first(comp_props(c), &i); i.current; hash_next(&i)) {

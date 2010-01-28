@@ -64,6 +64,8 @@ const char *
 type_fullname(idltype_s t) { assert(t); return t->fullname; }
 idlkind
 type_kind(idltype_s t) { assert(t); return t->kind; }
+scope_s
+type_scope(idltype_s t) { assert(t); return t->scope; }
 void
 type_setscope(idltype_s t, scope_s s) { assert(t); t->scope = s; }
 
@@ -250,6 +252,28 @@ type_newenumerator(tloc l, const char *name)
 
   t->type = NULL;
   return t;
+}
+
+idltype_s
+type_addenumerator(tloc l, idltype_s e, const char *name)
+{
+  idltype_s t;
+  assert(e && scope_current() == e->scope);
+
+  t = type_newenumerator(l, name);
+  if (!t) return NULL;
+
+  if (!e->members) {
+    e->members = hash_create("enumerator list", 3);
+    if (!e->members) goto error;
+  }
+  if (hash_insert(e->members, type_name(t), t, NULL)) goto error;
+
+  t->type = e;
+  return t;
+error:
+  type_destroy(t);
+  return NULL;
 }
 
 idltype_s

@@ -282,8 +282,17 @@ namespace eval engine {
 		append code "set ::__source__ \[list {$src} $linenum\]\n"
 		append code "$s\n"
 
-		# discard processed source text
+		# discard processed source text - if the character immediately
+		# preceeding the opening <' tag or following the closing '> tag
+		# is a \n, it is discarded. This is the intuitive expectation
+		# of the template writer.
 		incr linenum [regexp -all "\n" $t]
+		if {$o == "'" && [string index $raw [lindex $x 0]-1] == "\n"} {
+		    lset x 0 [expr [lindex $x 0] - 1]
+		}
+		if {$c == "'" && [string index $raw [lindex $x 1]+1] == "\n"} {
+		    lset x 1 [expr [lindex $x 1] + 1]
+		}
 		set raw [string replace $raw 0 [lindex $x 1]]
 	    }
 
@@ -360,10 +369,15 @@ namespace eval engine {
 
     # --- quote ------------------------------------------------------------
 
-    # Return a self quoting string
+    # Return a self quoting string. The result is s enclosed in braces if s
+    # contains no \, { or }. If s contains such characters, they are escaped
+    # with a leading backlash and the result is an expression that performs the
+    # opposite substitution.
     #
     proc quote { s } {
-	regsub -all {([\\{}])} $s {\\\1} s
+	if {[regsub -all {([\\{}])} $s {\\\1} s] == 0} {
+	    return [format "{%s}" $s]
+	}
 	return [format {[regsub -all {\\([\\{}])} {%s} {\1}]} $s]
     }
 

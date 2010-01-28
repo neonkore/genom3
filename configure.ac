@@ -33,7 +33,7 @@ AC_PROG_YACC
 
 # C library
 AC_CONFIG_LIBOBJ_DIR([compat])
-AC_REPLACE_FUNCS([strlcpy strlcat])
+AC_REPLACE_FUNCS([strlcpy strlcat getline])
 AC_CHECK_FUNCS([asprintf vasprintf])
 AC_SEARCH_LIBS([dlopen], [dl])
 

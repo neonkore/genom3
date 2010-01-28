@@ -25,6 +25,7 @@
 #define H_GENOM
 
 #include <stdio.h>
+#include <unistd.h>
 #include <limits.h>
 
 /** runtime options */
@@ -465,6 +466,11 @@ size_t	strlcpy(char *dst, const char *src, size_t siz);
 
 #ifndef HAVE_STRLCAT
 size_t	strlcat(char *dst, const char *src, size_t siz);
+#endif
+
+#ifndef HAVE_GETLINE
+ssize_t	getline(char **__restrict buf, size_t *__restrict buflen,
+		FILE *__restrict fp);
 #endif
 
 #endif /* H_GENOM */

@@ -105,7 +105,7 @@ eng_listeng()
     xwarnx("looking for template in '%s'", de.d_name);
     name = eng_findtmpl(path);
     if (name) {
-      if (de.d_namlen >= 68) {
+      if (strlen(de.d_name) >= 68) {
 	de.d_name[68] = '\0';
 	de.d_name[67] = de.d_name[66] = de.d_name[65] = '.';
       }

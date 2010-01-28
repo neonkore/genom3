@@ -173,13 +173,11 @@ prop_newtask(tloc l, const char *name)
   task_s t;
   prop_s p;
 
-  if (strcmp(name, CNTRL_TASK_NAME)) {
-    t = comp_task(comp_dotgen(), name);
-    if (!t) {
-      parserror(l, "unknown task '%s'", name);
-      return NULL;
-    }
-  } else t = NULL;
+  t = comp_task(comp_dotgen(), name);
+  if (!t) {
+    parserror(l, "unknown task '%s'", name);
+    return NULL;
+  }
 
   p = prop_new(l, PROP_TASK, prop_strkind(PROP_TASK));
   if (!p) return NULL;

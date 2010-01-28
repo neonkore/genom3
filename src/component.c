@@ -108,6 +108,7 @@ comp_s
 comp_create(tloc l, const char *name, hash_s props)
 {
   idltype_s iev;
+  hash_s h;
   hiter i;
   int e, k;
   assert(name && props);
@@ -182,6 +183,13 @@ comp_create(tloc l, const char *name, hash_s props)
   }
 
   xwarnx("created component %s", dotgen->name);
+
+  /* create control task */
+  h = hash_create("property list", 0);
+  if (!h) return NULL;
+  if (!comp_addtask(l, CNTRL_TASK_NAME, h))
+    return NULL;
+
   return dotgen;
 }
 
@@ -236,12 +244,6 @@ comp_addtask(tloc l, const char *name, hash_s props)
   prop_s p, d;
   int e;
   assert(name && props);
-
-  /* control task is a reserved name */
-  if (!strcmp(name, CNTRL_TASK_NAME)) {
-    parserror(l, "'%s' is a reserved task name", name);
-    return NULL;
-  }
 
   /* a component must exist */
   if (!dotgen) {
@@ -329,9 +331,14 @@ comp_addtask(tloc l, const char *name, hash_s props)
     case 0: break;
 
     case EEXIST:
-      parserror(l, "duplicate task %s", t->name);
-      task_s u = hash_find(dotgen->tasks, name);
-      if (u) parserror(u->loc, " task %s declared here", u->name);
+      /* control task is a reserved name */
+      if (!strcmp(name, CNTRL_TASK_NAME))
+	parserror(l, "'%s' is a reserved task name", name);
+      else {
+	parserror(l, "duplicate task %s", t->name);
+	task_s u = hash_find(dotgen->tasks, name);
+	if (u) parserror(u->loc, " task %s declared here", u->name);
+      }
       /*FALLTHROUGH*/
     default:
       free(t);
@@ -632,6 +639,7 @@ comp_addievs(tloc l, comp_s c, hash_s h)
 	r = 1;
       }
     }
+    hash_set(h, i.key, e);
   }
 
   p = scope_pop();

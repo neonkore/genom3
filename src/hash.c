@@ -176,6 +176,29 @@ hash_insert(hash_s h, const char *key, void *value, hrelease_f release)
 }
 
 
+/* --- hash_set ------------------------------------------------------------ */
+
+/** Update the value of an entry in hash table
+ */
+int
+hash_set(hash_s h, const char *key, void *value)
+{
+  unsigned long index;
+  hentry_s e;
+
+  assert(h); assert(key);
+
+  index = hstring(key) % h->buckets;
+  for(e = h->bucket[index]; e; e = e->next)
+    if (!strcmp(e->key, key)) {
+      e->value = value;
+      return 0;
+    }
+
+  return ENOENT;
+}
+
+
 /* --- hash_rename --------------------------------------------------------- */
 
 /** Rename the key of a hash table entry. Don't use remove/insert to preserve

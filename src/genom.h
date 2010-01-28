@@ -86,6 +86,7 @@ hash_s	hash_create(const char *name, int entries);
 void	hash_destroy(hash_s h);
 int	hash_insert(hash_s h, const char *key, void *value,
 		hrelease_f release);
+int	hash_set(hash_s h, const char *key, void *value);
 int	hash_rename(hash_s h, const char *key, const char *new);
 
 int	hash_remove(hash_s h, const char *key, int release);

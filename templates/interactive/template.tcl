@@ -24,6 +24,13 @@
 
 # Interactive template
 template usage {*}{
+    "\n"
+    "Interactive Tcl template.\n"
+    "\n"
+    "Objects from the .gen file and template engine procedures are available\n"
+    "as in regular (scripted) templates. This template is mostly useful\n"
+    "for development of new templates or troubleshooting existing ones.\n"
+    "\n"
     "Supported options:\n"
     "  -h.--help\t\tprint usage summary (this text)"
 }
@@ -32,7 +39,7 @@ template usage {*}{
 engine mode -overwrite verbose
 
 template options {
-    -h - --help		{ template message [template usage]; exit 0 }
+    -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
 }
 
 # provide a default 'interactive' function in case eltclsh cannot be loaded

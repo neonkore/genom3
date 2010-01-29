@@ -25,12 +25,23 @@
 # Template for type mappings generation.
 
 template usage {*}{
+    "\n"
+    "Mappings generation template.\n"
+    "\n"
+    "Mappings are the translation of IDL types defined in the .gen file into\n"
+    "native type definitions. By default, this template generates the\n"
+    "mappings for the codels language (defined in the .gen file). This can be\n"
+    "changed with the -l option (several -l options can be given, for\n"
+    "multiple mappings generation). The generated files are named after the\n"
+    "component name, that is suffixed with _types. The suffix can be changed\n"
+    "with the -s option.\n"
+    "\n"
     "Supported options:\n"
-    "  -l,--language=lang\tgenerate mappings for language\n"
-    "  -s,--suffix=string\tset output file name suffix\n"
-    "  -C,--directory=dir\toutput files in dir instead of current directory\n"
-    "  -p,--preserve\tdo not overwrite existing files\n"
-    "  -h.--help\t\tprint usage summary (this text)"
+    "  -l, --language=lang\tgenerate mappings for language\n"
+    "  -s, --suffix=string\tset output file name suffix\n"
+    "  -C, --directory=dir\toutput files in dir instead of current directory\n"
+    "  -p, --preserve\tdo not overwrite existing files\n"
+    "  -h. --help\t\tprint usage summary (this text)"
 }
 
 # defaults
@@ -43,7 +54,7 @@ template options {
     -l - --language	{ lappend lang [template arg] }
     -C - --directory	{ engine chdir [template arg] }
     -p - --preserve	{ engine mode -overwrite }
-    -h - --help		{ template message [template usage]; exit 0 }
+    -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
 }
 
 # generate header

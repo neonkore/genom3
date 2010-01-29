@@ -132,7 +132,8 @@ cpp_invoke(const char *in, int out)
 
     /* add a default -I to the original directory of input */
     file[0] = '-'; file[1] = 'I'; file[2] = 0;
-    strlcat(file, dirname((char *)in), sizeof(file));
+    strlcat(file, in, sizeof(file));
+    strlcpy(&file[2], dirname(&file[2]), sizeof(file)-2);
     s = cpp_optappend(file, noptexec);
     if (s) {
       warnx("cannot add search path to input file directory");

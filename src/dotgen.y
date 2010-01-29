@@ -1461,7 +1461,6 @@ dotgen_consolidate()
   hash_s types = type_all();
   comp_s c = comp_dotgen();
   hash_s services = comp_services(c);
-  prop_s p;
   hiter i, j;
   int e;
 

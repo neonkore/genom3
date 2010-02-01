@@ -19,18 +19,24 @@
 
 systcldir=$(sysdir)/tcl
 
-dist_systcl_DATA=	\
-	template.tcl	\
-	language.tcl	\
-	language-c.tcl	\
+dist_systcl_DATA=\
+	template.tcl		\
+	language.tcl		\
+	language-c.tcl		\
+	buildenv.tcl		\
+	buildenv-autoconf.tcl	\
 	engine.tcl
 
-nodist_systcl_DATA=	\
-	version.tcl	\
+nobase_dist_systcl_DATA=\
+	autoconf/top.configure.ac	\
+	autoconf/top.Makefile.am
+
+nodist_systcl_DATA=\
+	version.tcl		\
 	pkgIndex.tcl
 
 systcl_LTLIBRARIES=	engine.la
-engine_la_SOURCES=	\
+engine_la_SOURCES=\
 	engine.c	\
 	dotgen.c	\
 	object.c
@@ -52,6 +58,10 @@ pkgIndex.tcl: Makefile
 	for s in $(dist_systcl_DATA); do			\
 	  test -f $$s || $(LN_S) $(srcdir)/$$s $$s;		\
 	  l="$$l"'\n[list source [file join $$dir '"$$s"']]';	\
+	done;							\
+	for s in $(nobase_dist_systcl_DATA); do			\
+	  test -f $$s || { $(MKDIR_P) "$${s%/*}" &&		\
+		$(LN_S) $(srcdir)/$$s $$s; };			\
 	done;							\
 	test -f engine.so || $(LN_S) .libs/engine.so;		\
 	$(ECHO) "package ifneeded $(PACKAGE_NAME)-engine"	\

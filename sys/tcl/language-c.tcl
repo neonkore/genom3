@@ -34,17 +34,6 @@ namespace eval language::c {
     }
 
 
-    # --- comment ----------------------------------------------------------
-
-    # Return the comment text for the given language.
-    #
-    proc comment { text } {
-	regsub -all "\n(?=.)" "/*${text}" "\n *" text
-	set text "${text} */"
-	return $text
-    }
-
-
     # --- gentype -----------------------------------------------------------
 
     # Return the C mapping of type.

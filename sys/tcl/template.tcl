@@ -94,6 +94,42 @@ namespace eval template {
     namespace export parse
 
 
+    # --- link -------------------------------------------------------------
+
+    # Link src to dst
+    #
+    proc link { src dst } {
+	set src [file join [dotgen template dir] $src]
+	set dst [file join [engine pwd] $dst]
+	if {[file normalize $src] == [file normalize $dst]} return
+
+	if {[file exists $dst]} {
+	    if {[lsearch [engine mode] move-if-change] >= 0} {
+		set d [file normalize [file link $dst]]
+		set s [file normalize $src]
+		if {$s == $d} {
+		    template message "$dst is up-to-date"
+		    return
+		}
+	    }
+	    if {[lsearch [engine mode] -overwrite] >= 0} {
+		template fatal "file $dst would be overwritten"
+		return
+	    }
+
+	    template message "overwriting $dst"
+	    file delete $dst
+	} else {
+	    template message "creating link $dst"
+	}
+
+	file mkdir [file dirname $dst]
+	file link $dst $src
+	return
+    }
+    namespace export link
+
+
     # --- options ----------------------------------------------------------
 
     # Define the list of supported options for the template. ospec is a
@@ -210,8 +246,7 @@ namespace eval template {
 	    }
 
 	    uplevel #0 switch -glob -- $arg [concat $options * "{
-		template message \"unknown option $arg\"
-		template fatal {$usage}
+		template fatal \"unknown option $arg\"
 	    }"]
 
 	    set argv [lrange $argv 1 end]

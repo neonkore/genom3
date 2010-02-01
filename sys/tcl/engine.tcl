@@ -41,7 +41,7 @@ namespace eval engine {
     variable modes {verbose overwrite move-if-change debug}
 
     # default output directory
-    variable outdir	.
+    variable outdir	{}
 
     # markups
     variable markup
@@ -76,7 +76,7 @@ namespace eval engine {
 	if {[llength $args] == 0} {
 	    foreach m $modes {
 		variable $m
-		if {$m} { lappend r $m } else { lappend r -$m }
+		if {[set $m]} { lappend r $m } else { lappend r -$m }
 	    }
 	    return $r
 	}
@@ -117,6 +117,17 @@ namespace eval engine {
 	}
     }
     namespace export chdir
+
+
+    # --- pwd --------------------------------------------------------------
+
+    # Return the current output directory.
+    #
+    proc pwd { } {
+	variable outdir
+	return $outdir
+    }
+    namespace export pwd
 
 
     # --- args -------------------------------------------------------------

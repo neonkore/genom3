@@ -145,7 +145,10 @@ dg_input_base(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 int
 dg_input_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(dirname(runopt.input), -1));
+  char dir[PATH_MAX];
+
+  strlcpy(dir, runopt.input, sizeof(dir));
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(dirname(dir), -1));
   return TCL_OK;
 }
 

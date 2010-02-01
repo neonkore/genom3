@@ -39,7 +39,20 @@ namespace eval language {
     # Return the comment text for the given language.
     #
     proc comment { lang text } {
-	return [[support $lang]::comment $text]
+	switch -nocase -- $lang {
+	    c {
+		regsub -all "\n(?=.)" "/*${text}" "\n *" text
+		set text "${text} */"
+		return $text
+	    }
+
+	    shell {
+		regsub -all "\n(?=.)" "${text}" "\n#" text
+		return $text
+	    }
+	}
+
+	template fatal "unsupported language $lang"
     }
     namespace export comment
 

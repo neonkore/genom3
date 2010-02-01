@@ -61,12 +61,15 @@ static const struct dgcmd {
   const char *cmd;
   void *fn;
 } dgcmds[] = {
+  { "::" DOTGEN_NS "::" GENOM_CMD "::program", dg_genom_program },
+  { "::" DOTGEN_NS "::" GENOM_CMD "::cmdline", dg_genom_cmdline },
   { "::" DOTGEN_NS "::" GENOM_CMD "::version", dg_genom_version },
   { "::" DOTGEN_NS "::" GENOM_CMD "::debug", dg_genom_debug },
   { "::" DOTGEN_NS "::" GENOM_CMD "::stdout", dg_genom_stdout },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::dir", dg_template_dir },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::tmpdir", dg_template_tmpdir },
   { "::" DOTGEN_NS "::" INPUT_CMD "::file", dg_input_file },
+  { "::" DOTGEN_NS "::" INPUT_CMD "::base", dg_input_base },
   { "::" DOTGEN_NS "::" INPUT_CMD "::dir", dg_input_dir },
   { "::" DOTGEN_NS "::" INPUT_CMD "::notice", dg_input_notice },
   { "::" DOTGEN_NS "::" TYPES_CMD, dg_types },

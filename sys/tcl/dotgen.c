@@ -35,21 +35,43 @@
 /* --- genom --------------------------------------------------------------- */
 
 int
-dg_genom_version(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+dg_genom_program(ClientData d, Tcl_Interp *interp, int objc,
+		 Tcl_Obj *const objv[])
+{
+  Tcl_Obj *path = Tcl_NewStringObj(runopt.genom, -1);
+  Tcl_IncrRefCount(path);
+  Tcl_SetObjResult(interp, Tcl_FSGetNormalizedPath(interp, path));
+  Tcl_DecrRefCount(path);
+  return TCL_OK;
+}
+
+int
+dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
+		 Tcl_Obj *const objv[])
+{
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.cmdline, -1));
+  return TCL_OK;
+}
+
+int
+dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
+		 Tcl_Obj *const objv[])
 {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(PACKAGE_STRING, -1));
   return TCL_OK;
 }
 
 int
-dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc,
+	       Tcl_Obj *const objv[])
 {
   Tcl_SetObjResult(interp, Tcl_NewBooleanObj(runopt.debug));
   return TCL_OK;
 }
 
 int
-dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[])
 {
   extern int eng_swapfd(int from, int to);
   extern int stdfd[4];
@@ -76,14 +98,24 @@ dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[
 /* --- template ------------------------------------------------------------ */
 
 int
-dg_template_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+dg_template_dir(ClientData v, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[])
 {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.tmpl, -1));
   return TCL_OK;
 }
 
 int
-dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+dg_template_sysdir(ClientData v, Tcl_Interp *interp, int objc,
+		   Tcl_Obj *const objv[])
+{
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.sysdir, -1));
+  return TCL_OK;
+}
+
+int
+dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc,
+		   Tcl_Obj *const objv[])
 {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.tmpdir, -1));
   return TCL_OK;
@@ -96,6 +128,17 @@ int
 dg_input_file(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.input, -1));
+  return TCL_OK;
+}
+
+int
+dg_input_base(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+  char base[PATH_MAX];
+
+  strlcpy(base, runopt.input, sizeof(base));
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(basename(base), -1));
+  return TCL_OK;
   return TCL_OK;
 }
 

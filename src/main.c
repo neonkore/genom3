@@ -41,8 +41,9 @@
 
 /* --- local data ---------------------------------------------------------- */
 
-static void	usage(FILE *channel, char *argv0);
-static int	rmrfdir(const char *path);
+static void		usage(FILE *channel, char *argv0);
+static const char *	abspath(const char *path);
+static int		rmrfdir(const char *path);
 
 
 /** runtime options */
@@ -97,6 +98,8 @@ main(int argc, char *argv[])
   runopt.preproc = 0;
   runopt.parse = 0;
   runopt.list = 0;
+  runopt.genom = string(argv[0]);
+  runopt.cmdline = string("");
   runopt.notice = NULL;
 
 #ifdef CPP_DOTGEN
@@ -111,7 +114,7 @@ main(int argc, char *argv[])
   }
 
   /* parse command line options */
-  while ((c = getopt_long(argc, argv, "+ID:EvnlT:rt:s:dh", opts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "+I:D:EvnlT:rt:s:dh", opts, NULL)) != -1)
     switch (c) {
       case 0: break;
 
@@ -126,24 +129,34 @@ main(int argc, char *argv[])
 	  warnx("cannot set cpp option `%s'", opt);
 	  exit(2);
 	}
+
+	if (c == 'I') strlcpy(opt+2, abspath(optarg), sizeof(opt)-2);
+	runopt.cmdline = strings(runopt.cmdline, " ", opt, NULL);
 	break;
       }
 
       case 'T':
 	strlcpy(runopt.tmpdir, optarg, sizeof(runopt.tmpdir));
+	runopt.cmdline = strings(runopt.cmdline, " -T ", abspath(optarg), NULL);
 	break;
 
       case 't':
 	strlcpy(runopt.tmpldir, optarg, sizeof(runopt.tmpldir));
+	runopt.cmdline = strings(runopt.cmdline, " -t ", abspath(optarg), NULL);
 	break;
 
       case 's':
 	strlcpy(runopt.sysdir, optarg, sizeof(runopt.sysdir));
+	runopt.cmdline = strings(runopt.cmdline, " -s ", abspath(optarg), NULL);
+	break;
+
+      case 'r':
+	runopt.cppdotgen = 0;
+	runopt.cmdline = strings(runopt.cmdline, " -r", NULL);
 	break;
 
       case 'n': runopt.parse = 1; break;
       case 'l': runopt.list = 1; break;
-      case 'r': runopt.cppdotgen = 0; break;
       case 'v': runopt.verbose = 1; break;
       case 'E': runopt.preproc = 1; break;
       case 'd': runopt.debug = 1; break;
@@ -221,13 +234,8 @@ main(int argc, char *argv[])
   }
   close(s);
 
-  if (argv[0][0] != '/') {
-    getcwd(runopt.input, sizeof(runopt.input));
-    strlcat(runopt.input, "/", sizeof(runopt.input));
-    strlcat(runopt.input, argv[0], sizeof(runopt.input));
-    xwarnx("absolute path to input file `%s'", runopt.input);
-  } else
-    strlcpy(runopt.input, argv[0], sizeof(runopt.input));
+  strlcpy(runopt.input, abspath(argv[0]), sizeof(runopt.input));
+  xwarnx("absolute path to input file `%s'", runopt.input);
 
 
   /* just preprocess input file */
@@ -384,6 +392,26 @@ usage(FILE *channel, char *argv0)
     "  CPP\t\t\tC preprocessor program\n"
     "  TMPDIR\t\tdirectory for temporary files\n",
     basename(argv0));
+}
+
+
+/* --- abspath ------------------------------------------------------------- */
+
+/** Return absolute path
+ */
+static const char *
+abspath(const char *path)
+{
+  const char *p;
+  char *r;
+  if (path[0] != '/') {
+    r = getcwd(NULL, 0);
+    p = strings(r, "/", path, NULL);
+    free(r);
+  } else
+    p = path;
+
+  return p;
 }
 
 

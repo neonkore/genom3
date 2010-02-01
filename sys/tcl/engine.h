@@ -1,5 +1,3 @@
-/* $LAAS: engine.h 2010/01/27 23:25:18 tho $ */
-
 /*
  * Copyright (c) 2010 LAAS/CNRS
  * All rights reserved.
@@ -38,6 +36,10 @@
 
 #include "genom.h"
 
+int	dg_genom_program(ClientData d, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[]);
+int	dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[]);
 int	dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc,
@@ -49,6 +51,8 @@ int	dg_template_dir(ClientData d, Tcl_Interp *interp, int objc,
 int	dg_template_tmpdir(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_input_file(ClientData d, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[]);
+int	dg_input_base(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_input_dir(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);

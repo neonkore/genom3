@@ -138,7 +138,7 @@ AC_CONFIG_FILES([
 	genom3.pc
 	Makefile
 	src/Makefile
-	sys/tcl/Makefile
+	engine/tcl/Makefile
 	templates/interactive/Makefile
 	templates/mappings/Makefile
 	regress/Makefile

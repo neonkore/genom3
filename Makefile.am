@@ -20,7 +20,7 @@ ACLOCAL_AMFLAGS = -I autoconf
 
 if WITH_TCL
   TCLDIR=\
-	sys/tcl			\
+	engine/tcl		\
 	templates/interactive	\
 	templates/mappings
 endif

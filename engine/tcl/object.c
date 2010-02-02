@@ -53,7 +53,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
-  Tcl_Obj *r;
+  Tcl_Obj *r = NULL;
   int s;
 
   int i = typeidx_fullname; /* return full name by default */
@@ -107,7 +107,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	    break;
 	  }
 
-	default: r = NULL; break;
+	default: break;
       }
       break;
 

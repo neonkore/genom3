@@ -98,6 +98,17 @@ dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
 /* --- template ------------------------------------------------------------ */
 
 int
+dg_template_name(ClientData v, Tcl_Interp *interp, int objc,
+		 Tcl_Obj *const objv[])
+{
+  char name[PATH_MAX];
+
+  strlcpy(name, runopt.tmpl, sizeof(name));
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(basename(name), -1));
+  return TCL_OK;
+}
+
+int
 dg_template_dir(ClientData v, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[])
 {
@@ -138,7 +149,6 @@ dg_input_base(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   strlcpy(base, runopt.input, sizeof(base));
   Tcl_SetObjResult(interp, Tcl_NewStringObj(basename(base), -1));
-  return TCL_OK;
   return TCL_OK;
 }
 

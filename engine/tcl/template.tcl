@@ -37,6 +37,9 @@ namespace eval template {
     # set to 1 when options have been parsed
     variable gotopt	0
 
+    # save template options
+    variable args [set ::argv]
+
 
     # --- parse ------------------------------------------------------------
 

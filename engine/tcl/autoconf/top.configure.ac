@@ -3,7 +3,12 @@
 # Templates autoconf fragment
 #
 
-<'# compute package name, version, e-mail, languages
+<'
+# check arguments
+if {[llength $argv] != 1} { error "expected argument: userdir" }
+lassign $argv userdir
+
+# compute package name, version, e-mail, languages
 set name [list]; set version [list]; set email [list]; set lang [list]
 foreach c [dotgen components] {
    lappend name [$c name]
@@ -14,20 +19,19 @@ foreach c [dotgen components] {
 '>
 
 dnl Autoconf setup
-AC_INIT([<"$name">],[<"$version">],[<"$email">])
+AC_INIT([<"$name">-genom],[<"$version">],[<"$email">])
 AC_PREREQ(2.62)
+AC_CONFIG_HEADERS([autoconf/acheader.h])
 AC_CONFIG_AUX_DIR([autoconf])
 AC_CONFIG_MACRO_DIR([autoconf])
 AM_INIT_AUTOMAKE([foreign no-define no-dist])
 
 dnl Provide backward compatibility with libtool 1.5 by defining LT_INIT if it
-dnl is not defined already.
-dnl [ Note that libtool 1.5 will complain if it does not find a
-dnl   ^A[CM]_PROG_LIBTOOL, so fool it by giving it the string it expect at the
-dnl   beginning of a line. I am so mean :-p ]
+dnl is not defined already. Note that libtool 1.5 will complain if it does not
+dnl find a ^A[CM]_PROG_LIBTOOL, so fool it by giving it the string that it
+dnl expects at the beginning of a line... I am so cruel :-p
 m4_ifdef([LT_INIT], [], [AC_DEFUN([LT_INIT], [
 AC_PROG_LIBTOOL])])
-
 
 dnl GenoM command line
 AC_SUBST([GENOM], ['<"[dotgen genom program][dotgen genom cmdline]">'])
@@ -36,10 +40,10 @@ dnl Top-level makefile
 AC_CONFIG_FILES([Makefile])
 
 dnl Include template additions via the generated subdirs.m4 file
-m4_include([autoconf/subdirs.m4])
+m4_sinclude([autoconf/subdirs.m4])
 
 dnl User extra configuration
-m4_include([<"[lindex $argv 0]">/configure.user.ac])
+m4_include([<"$userdir">/configure.user.ac])
 
 dnl Generate
 AC_SUBST([dotgendir],[<"[dotgen input dir]">])

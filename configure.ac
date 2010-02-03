@@ -111,7 +111,7 @@ fi
 
 # pthread support - this is required if using a threaded tcl library so that
 # dlopening the tcl genom module works.
-if test "$nedd_pthread" = yes; then
+if test "$need_pthread" = yes; then
   AX_PTHREAD(, [AC_MSG_ERROR([pthread support not available])])
 fi
 

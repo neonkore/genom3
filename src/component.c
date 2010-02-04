@@ -252,6 +252,7 @@ comp_addtask(tloc l, const char *name, hash_s props)
 {
   hiter i;
   task_s t;
+  codel_s c;
   prop_s p, d;
   int e;
   assert(name && props);
@@ -340,6 +341,14 @@ comp_addtask(tloc l, const char *name, hash_s props)
       return NULL;
   }
 
+  /* set codel's parent task and (NULL) service */
+  for(hash_first(props, &i); i.current; hash_next(&i))
+    if (prop_kind(i.value) == PROP_CODEL) {
+      c = prop_codel(i.value);
+      *codel_task(c) = t;
+      *codel_service(c) = NULL;
+    }
+
   xwarnx("created task %s", t->name);
   return t;
 }
@@ -402,6 +411,8 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 {
   hiter i;
   service_s s;
+  task_s t;
+  codel_s c;
   int e, k;
   assert(name && params && props);
 
@@ -430,9 +441,14 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
     }
 
   /* check unwanted properties */
+  t = NULL;
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
-      case PROP_DOC: case PROP_TASK: case PROP_VALIDATE: case PROP_CODEL:
+      case PROP_TASK: /* remember task for later use (below) */
+	t = prop_task(i.value);
+	break;
+
+      case PROP_DOC: case PROP_VALIDATE: case PROP_CODEL:
       case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
       case PROP_AFTER:
 	break;
@@ -445,7 +461,6 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	e = 1; break;
     }
   if (e) return NULL;
-
 
   /* create */
   s = malloc(sizeof(*s));
@@ -472,6 +487,27 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
       free(s);
       return NULL;
   }
+
+  /* set codels parent task and service */
+  if (!t) t = comp_task(dotgen, CNTRL_TASK_NAME);
+  assert(t);
+
+  for(hash_first(props, &i); i.current; hash_next(&i))
+    switch (prop_kind(i.value)) {
+      case PROP_CODEL:
+	c = prop_codel(i.value);
+	*codel_task(c) = t;
+	*codel_service(c) = s;
+	break;
+
+      case PROP_VALIDATE:
+	c = prop_codel(i.value);
+	*codel_task(c) = comp_task(dotgen, CNTRL_TASK_NAME);
+	*codel_service(c) = s;
+	break;
+
+      default: break;
+    }
 
   xwarnx("created service %s", s->name);
   return s;

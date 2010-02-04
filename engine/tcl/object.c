@@ -635,16 +635,18 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum codelidx {
     codelidx_name, codelidx_return, codelidx_params, codelidx_yields,
-    codelidx_triggers, codelidx_loc, codelidx_class
+    codelidx_triggers, codelidx_task, codelidx_service, codelidx_loc,
+    codelidx_class
   };
   static const char *args[] = {
     [codelidx_name] = "name", [codelidx_return] = "return",
     [codelidx_params] = "parameters", [codelidx_yields] = "yields",
-    [codelidx_triggers] = "triggers", [codelidx_loc] = "loc",
+    [codelidx_triggers] = "triggers", [codelidx_task] = "task",
+    [codelidx_service] = "service", [codelidx_loc] = "loc",
     [codelidx_class] = "class", NULL
   };
   codel_s c = v;
-  Tcl_Obj *r;
+  Tcl_Obj *r = NULL;
   int s;
 
   int i = codelidx_name; /* return name by default */
@@ -698,6 +700,16 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       }
       break;
     }
+
+    case codelidx_task:
+      if (*codel_task(c))
+	r = Tcl_NewStringObj(task_genref(*codel_task(c)), -1);
+      break;
+
+    case codelidx_service:
+      if (*codel_service(c))
+	r = Tcl_NewStringObj(service_genref(*codel_service(c)), -1);
+      break;
 
     case codelidx_loc: {
       Tcl_Obj *l[3] = {

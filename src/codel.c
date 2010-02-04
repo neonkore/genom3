@@ -42,6 +42,9 @@ struct codel_s {
   hash_s params;	/**< parameter list */
   hash_s yields;	/**< transitions */
   hash_s triggers;	/**< start conditions */
+
+  task_s task;		/**< codel's task */
+  service_s service;	/**< codel's service */
 };
 
 tloc		codel_loc(codel_s c) { assert(c); return c->loc; }
@@ -50,6 +53,8 @@ idltype_s	codel_return(codel_s c) { assert(c); return c->rettype; }
 hash_s		codel_params(codel_s c) { assert(c); return c->params; }
 hash_s		codel_triggers(codel_s c) { assert(c); return c->triggers; }
 hash_s		codel_yields(codel_s c) { assert(c); return c->yields; }
+task_s *	codel_task(codel_s c) { assert(c); return &c->task; }
+service_s *	codel_service(codel_s c) { assert(c); return &c->service; }
 
 
 struct param_s {
@@ -123,6 +128,9 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
   c->params = params;
   c->yields = yields ? yields : hash_create("yields list", 0);
   c->triggers = triggers ? triggers : hash_create("triggers list", 0);
+
+  c->task = NULL;
+  c->service = NULL;
 
   if (!yields) {
     /* validation codels return OK, or one of the exceptions of the service */

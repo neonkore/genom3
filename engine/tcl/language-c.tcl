@@ -115,7 +115,12 @@ namespace eval language::c {
     #
     proc signature { codel {symchar " "}} {
 	set ret [declarator [$codel return]]
-	set sym [cname [$codel name]]
+	if {![catch {$codel service} s]} {
+	    set sym [$s name]
+	} elseif {![catch {$codel task} t]} {
+	    set sym [$t name]
+	}
+	append sym _[cname [$codel name]]
 	foreach p [$codel parameters] {
 	    set a ""
 	    switch -- [$p dir] {

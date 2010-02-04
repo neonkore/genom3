@@ -410,6 +410,8 @@ idltype_s	codel_return(codel_s c);
 hash_s		codel_params(codel_s c);
 hash_s		codel_triggers(codel_s c);
 hash_s		codel_yields(codel_s c);
+task_s *	codel_task(codel_s c);
+service_s *	codel_service(codel_s c);
 
 tloc		param_loc(param_s p);
 const char *	param_name(param_s p);

@@ -26,6 +26,8 @@
 
 enum e1 { ee1, ee2, ee3 };
 
+typedef sequence<string<28>, 10> x;
+
 struct ids {
   long a;
   struct str {
@@ -36,6 +38,11 @@ struct ids {
     } c;
   } b[3];
   e1 c;
+  string d;
+  string<128> e;
+  long f[3];
+  sequence<sequence<long> > g;
+  sequence<long,128> h;
 };
 
 component c {
@@ -63,6 +70,7 @@ task t2 {
   codel start, stop:
    a(inport a, outport b.b::port) yield sleep, stop;
   codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
+  codel stop: c(in d, out e) yield ether;
 
   throws:	ERR1, ERR2;
 };
@@ -77,7 +85,9 @@ service s2(
 	       [2] = { .b = 2, .a = 4, .c = { 2 } }
 	     }, ee1} :: "also doc",
 	   in a = 2 :: "long doc",
-	   out c) {
+	   in d = "test string" :: "a string",
+	   in f, in g,
+	   out e, out c, out f::outf, out h) {
   doc: "service s2";
   task: t1;
 
@@ -85,6 +95,8 @@ service s2(
 
   codel start: a(inport a, outport b.b::port) yield sleep, ether;
   codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
+  codel stop: c(in f, out f::outf) yield ether;
+  codel stop: d(in g, out h) yield ether;
 
   throws:	ERR3;
   interrupts:	all;

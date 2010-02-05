@@ -65,7 +65,7 @@ namespace eval language::c {
     #
     proc declarator { type {var {}} } {
 	switch -- [$type kind] {
-	    {boolean}		{ set d "unsigned int" }
+	    {boolean}		{ set d "unsigned char" }
 	    {unsigned short}	{ set d "unsigned short" }
 	    {short}		{ set d "short" }
 	    {unsigned long}	{ set d "unsigned long" }
@@ -74,7 +74,6 @@ namespace eval language::c {
 	    {double}		{ set d "double" }
 	    {char}		{ set d "char" }
 	    {octet}		{ set d "unsigned char" }
-	    {string}		{ set d "char *" }
 	    {any}		{ error "type any not supported yet" }
 
 	    {const}		-
@@ -89,14 +88,32 @@ namespace eval language::c {
 	    {forward struct}	-
 	    {forward union}	{ set d [declarator [$type type]] }
 
+	    {string}		{
+		if {[catch { $type length } l]} {
+		    set d "char *"
+		} else {
+		    set d "char\[$l\]"
+		}
+	    }
+
 	    {array}		{
 		if {[catch { $type length } l]} { set l {} }
 		set d "[declarator [$type type]]\[$l\]"
 	    }
 
 	    {sequence}		{
-		set d "struct { unsigned long _maximum, _length;"
-		append d " [declarator [$type type]] *_buffer; }"
+		set t [$type type]
+
+		set d "sequence"
+		if {![catch {$type length} l]} { append d $l }
+
+		append d [cname " [$t kind]"]
+		if {![catch {$t length} l]} { append d $l }
+		while {[$t kind] == "sequence"} {
+		    set t [$t type]
+		    append d [cname " [$t kind]"]
+		    if {![catch {$t length} l]} { append d $l }
+		}
 	    }
 
 	    default		{
@@ -106,6 +123,34 @@ namespace eval language::c {
 
 	if {[string length $var] > 0} { set d [cdecl $d $var] }
 	return $d
+    }
+
+    # Return the C mapping of a reference on the type declarator.
+    #
+    proc declarator& { type {var {}} } {
+	switch -- [[$type final] kind] {
+	    string	-
+	    array	{ return [declarator $type $var] }
+
+	    default	{ return [declarator $type *$var] }
+	}
+    }
+
+    # Return the C mapping of a pointer on the type declarator.
+    #
+    proc declarator* { type {var {}} } {
+	switch -- [[$type final] kind] {
+	    {string}	{
+		if {[catch { $type length }]} {
+		    return [declarator $type $var]
+		} else {
+		    return [declarator $type *$var]
+		}
+	    }
+	    {array}	{ return [declarator $type $var] }
+
+	    default	{ return [declarator $type *$var] }
+	}
     }
 
 
@@ -124,9 +169,13 @@ namespace eval language::c {
 	foreach p [$codel parameters] {
 	    set a ""
 	    switch -- [$p dir] {
-		"in" - "inport"	{ append a "const " }
+		"in" - "inport"	{
+		    append a "const [declarator& [$p type] [$p name]]"
+		}
+		default	{
+		    append a [declarator* [$p type] [$p name]]
+		}
 	    }
-	    append a [declarator [$p type] *[$p name]]
 	    lappend arg $a
 	}
 	return [join [list $ret ${sym}([join $arg {, }])] $symchar]
@@ -182,6 +231,32 @@ namespace eval language::c {
     }
 
 
+    # --- gensequence ------------------------------------------------------
+
+    # Return the C mapping of a sequence.
+    #
+    proc gensequence { type } {
+	set n [declarator $type]
+
+	set f ""
+	if {[[$type type] kind] eq "sequence"} {
+	    append f [gensequence [$type type]]
+	}
+	append m [genloc $type]
+	append m "\ntypedef struct $n {"
+	if {[catch {$type length} l]} {
+	    append m "\n  unsigned long _maximum, _length;"
+	    append m "\n  [declarator* [$type type] _buffer];"
+	} else {
+	    append m "\n  const unsigned long _maximum;"
+	    append m "\n  unsigned long _length;"
+	    append m "\n  [declarator [$type type] _buffer\[$l\]];"
+	}
+	append m "\n} $n;"
+	return $f[guard $m $n]
+    }
+
+
     # --- genstruct --------------------------------------------------------
 
     # Return the C mapping of a struct. The typedef is output first to handle
@@ -193,13 +268,17 @@ namespace eval language::c {
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
 
-	append s "\nstruct $n {"
+	set f ""
+	set s "\nstruct $n {"
 	foreach e [$type members] {
 	    append s [genloc $e]
 	    append s "\n [declarator $e [cname [$e name]]];"
+	    if {[[$e type] kind] == "sequence"} {
+		append f [gensequence [$e type]]
+	    }
 	}
 	append s "\n};"
-	return [guard $m $n][guard $s "${n}_definition"]
+	return [guard $m $n]$f[guard $s "${n}_definition"]
     }
 
 
@@ -215,6 +294,7 @@ namespace eval language::c {
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
 
+	set f ""
 	append s "\nstruct $n {"
 	append s [genloc $discr]
 	append s "\n [declarator $discr] _d;"
@@ -222,10 +302,13 @@ namespace eval language::c {
 	foreach e [$type members] {
 	    append s [genloc $e]
 	    append s "\n  [declarator $e [cname [$e name]]];"
+	    if {[[$e type] kind] == "sequence"} {
+		append f [gensequence [$e type]]
+	    }
 	}
 	append s "\n } _u;"
 	append s "\n};"
-	return [guard $m $n][guard $s "${n}_definition"]
+	return [guard $m $n]$f[guard $s "${n}_definition"]
     }
 
 
@@ -249,9 +332,14 @@ namespace eval language::c {
     proc gentypedef { type } {
 	set n [cname [$type fullname]]
 
+	set f ""
+	if {[[$type type] kind] == "sequence"} {
+	    append f [gensequence [$type type]]
+	}
+
 	append m [genloc $type]
 	append m "\ntypedef [declarator [$type type] $n];"
-	return [guard $m $n]
+	return $f[guard $m $n]
     }
 
 
@@ -289,7 +377,12 @@ namespace eval language::c {
     #
     proc cdecl { type name } {
 	set b [string first \[ $type]
-	if { $b < 0 } { return "$type $name" }
+	if { $b < 0 } {
+	    if {[string index $type end] eq "*"} {
+	    return "$type$name"
+	    }
+	    return "$type $name"
+	}
 
 	return "[string range $type 0 $b-1] $name[string range $type $b end]"
     }
@@ -303,6 +396,6 @@ namespace eval language::c {
 	if { [string first :: $name] == 0 } {
 	    set name [string range $name 2 end]
 	}
-	return [string map {:: _} $name]
+	return [string map {:: _ { } _} $name]
     }
 }

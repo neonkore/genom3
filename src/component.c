@@ -460,6 +460,20 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
     }
+
+  /* check parameters */
+  for(hash_first(params, &i); i.current; hash_next(&i)) {
+    switch(param_dir(i.value)) {
+      case P_IN: case P_OUT: case P_INOUT:
+	break;
+      case P_INPORT: case P_OUTPORT:
+	parserror(param_loc(i.value),
+		  "%s parameter %s is not allowed in service %s",
+		  param_strdir(param_dir(i.value)), param_name(i.value),
+		  param_dir(i.value) == P_INPORT ? "input":"output");
+	e = 1; break;
+    }
+  }
   if (e) return NULL;
 
   /* create */

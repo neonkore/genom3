@@ -77,9 +77,7 @@ service s2(
 	       [2] = { .b = 2, .a = 4, .c = { 2 } }
 	     }, ee1} :: "also doc",
 	   in a = 2 :: "long doc",
-	   out c,
-	   outport b
-	   ) {
+	   out c) {
   doc: "service s2";
   task: t1;
 

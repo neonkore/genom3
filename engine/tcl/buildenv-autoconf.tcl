@@ -110,7 +110,7 @@ namespace eval buildenv::autoconf {
 
 	# set input file path. Must use 'file normalize' so that the path is
 	# absolute and does not get prefixed with the current template dir
-	set d [file normalize [file join [dotgen template sysdir] autoconf]]
+	set d [file normalize [file join [dotgen template sysdir] tcl/autoconf]]
 
 	# relative path to user files
 	set userdir [file-relativize [dotgen input dir] [engine pwd]]

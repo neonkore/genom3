@@ -62,7 +62,7 @@ tcl_invoke(const char *tmpl, int argc, char **argv)
    * dependency on tcl. ltdl should probably be used instead dlopen() et al.
    */
   strlcpy(module, runopt.sysdir, sizeof(module));
-  strlcat(module, "/engine.so", sizeof(module));
+  strlcat(module, "/tcl/engine.so", sizeof(module));
   printf("loading %s engine from '%s'\n", eng_tcl.name, module);
   e = dlopen(module, RTLD_LAZY);
   if (!e) {

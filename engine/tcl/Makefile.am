@@ -16,6 +16,7 @@
 #
 #                                            Anthony Mallet on Fri Jan  8 2010
 #
+ECHO=	echo
 
 systcldir=$(sysdir)/tcl
 

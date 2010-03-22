@@ -16,6 +16,7 @@
 #
 #                                            Anthony Mallet on Mon Dec 21 2009
 #
+ECHO=	echo
 
 check_PROGRAMS=\
 	preprocess	\
@@ -65,6 +66,6 @@ generate: Makefile
 	@exec >$@;						\
 	${ECHO} '#!${SHELL}';					\
 	${ECHO} ${top_builddir}/src/genom3 -v 			\
-			-t ${srcdir} -s ${top_builddir}/sys	\
+			-t ${srcdir} -s ${top_builddir}/engine	\
 			template ${srcdir}/$@.gen
 	@chmod u+x $@

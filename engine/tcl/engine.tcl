@@ -234,21 +234,26 @@ namespace eval engine {
 
     # --- process ----------------------------------------------------------
 
-    # Read template source from in channel and write instanciation to out
-    # channel. Build a temporary program and then evaluates it in the slave
-    # interpreter.
-    # text between markers is replaced by a program printing the text and
-    # <''> and <""> are replaced by the appropriate code. <''> always produce
-    # an empty string, but code inside is evaluated and might invoke 'puts' to
-    # produce some output, while <""> is replaced by the result of its
-    # evaluation by 'subst'.
+    # Read template source file from 'in' channel and write parsing result to
+    # 'out' channel.
+    #
+    # Text outside markers is replaced by a TCL program printing the text and
+    # <''> and <""> are replaced by the appropriate TCL code (verbatim for <''>
+    # and [subst] for <"">. A temporary program is built in a string and then
+    # evaluated in the 'slave' interpreter.
+    #
+    # <''> always produce an empty string, but code inside is evaluated and
+    # might invoke 'puts' to produce some output, while <""> is replaced by the
+    # result of its evaluation by 'subst'.
     #
     proc process { src in out } {
 	variable markup
+
+	# initalize template program source code
 	set linenum	1
+	set code {}
 
 	# read source and build program
-	set code "set ::__source__ \[list {$src} 1\]\n"
 	while { ![eof $in] } {
 	    # read input by chunks of 4k, and avoid stopping on a tag limit
 	    append raw [read $in 4096]
@@ -257,26 +262,38 @@ namespace eval engine {
 		append raw [read $in 1]
 	    }
 
-	    # look for complete tags
+	    # look for complete tags - x is the full match including markers, o
+	    # and c are the opening and closing markers and t the enclosed
+	    # text
 	    while {[regexp $markup(full) $raw x o t c]} {
 
-		# compute match indices and line number
+		# get match indices (x is overwritten)
 		regexp -indices $markup(full) $raw x io it ic
-		set l [regexp -all "\n" [string range $raw 0 [lindex $x 0]]]
-		incr linenum $l
 
-		# flush raw data before tag, if any
+		# flush raw data before opening tag, if any
 		if {[lindex $x 0] > 0} {
 		    set notag [string range $raw 0 [lindex $x 0]-1]
-		    if [regexp $markup(open) $notag] {
+		    if [regexp -indices $markup(open) $notag l] {
+			incr linenum [linecount $notag 0 [lindex $l 0]]
 			error "$src:$linenum: missing closing tag"
 		    }
-		    if [regexp $markup(close) $notag] {
-			error "$src$linenum: missing opening tag"
+		    if [regexp -indices $markup(close) $notag l] {
+			incr linenum [linecount $notag 0 [lindex $l 0]]
+			error "$src:$linenum: missing opening tag"
 		    }
 
+		    # output raw data
 		    append code "puts -nonewline [quote $notag]\n"
+
+		    # update current line number in the template file
+		    incr linenum [linecount $notag]
 		}
+
+		# generate code to track source line number
+		append code						\
+		    "set ::__source__ \[list {$src} \[expr { "		\
+		    " $linenum - \[dict get \[info frame -1\] line\] "	\
+		    "} \]\]; "
 
 		# generate tag program
 		switch -- $o$c {
@@ -290,44 +307,52 @@ namespace eval engine {
 			}
 		    }
 		}
-		append code "set ::__source__ \[list {$src} $linenum\]\n"
 		append code "$s\n"
+
+		# update current line number in the template file
+		incr linenum [linecount $t]
 
 		# discard processed source text - if the character immediately
 		# preceeding the opening <' tag or following the closing '> tag
 		# is a \n, it is discarded. This is the intuitive expectation
 		# of the template writer.
-		incr linenum [regexp -all "\n" $t]
 		if {$o == "'" && [string index $raw [lindex $x 0]-1] == "\n"} {
 		    lset x 0 [expr [lindex $x 0] - 1]
 		}
 		if {$c == "'" && [string index $raw [lindex $x 1]+1] == "\n"} {
 		    lset x 1 [expr [lindex $x 1] + 1]
+		    incr linenum
 		}
 		set raw [string replace $raw 0 [lindex $x 1]]
 	    }
 
-	    # check for orphaned tags
-	    if [regexp -indices .*?$markup(close) $raw x] {
-		incr linenum [regexp -all "\n" [string range $raw {*}$x]]
+	    # finished processing all tags in the current buffer, now check for
+	    # orphaned closing tag (error)
+	    if [regexp -indices $markup(close) $raw l] {
+		incr linenum [linecount $raw 0 [lindex $l 0]]
 		error "$src:$linenum: missing opening tag"
 	    }
 
 	    # incomplete opening tag: must read more text
 	    if [regexp $markup(open) $raw] { continue }
 
-	    # concatenate output
+	    # concatenate remaining raw output
 	    append code "puts -nonewline [quote $raw]\n"
-	    incr linenum [regexp -all "\n" $raw]
+	    incr linenum [linecount $raw]
 	    set raw {}
 	}
 
+	# finished processing all tags in the file, now check for orphaned tags
+	# (error)
 	if {[string length $raw] > 0} {
-	    if {[regexp -indices .*?$markup(open) $raw x]} {
-		set raw [string range $raw {*}$x]
+	    if [regexp -indices $markup(open) $raw l] {
+		incr linenum [linecount $raw 0 [lindex $l 0]]
+		error "$src:$linenum: missing closing tag"
 	    }
-	    incr linenum [regexp -all "\n" $raw ]
-	    error "$src:$linenum: missing closing tag"
+	    if [regexp -indices $markup(close) $raw l] {
+		incr linenum [linecount $raw 0 [lindex $l 0]]
+		error "$src:$linenum: missing opening tag"
+	    }
 	}
 
 	# dump program in debug mode
@@ -340,15 +365,19 @@ namespace eval engine {
 	    puts "dumped template code for $src in $t"
 	}
 
-	# execute program in slave
+	# execute template program in slave interpreter
 	slave alias puts [namespace code "slave-output $out"]
-	set s [catch {slave eval $code} m]
+	set s [slave eval catch [list $code] m ctx]
 	slave alias puts slave invokehidden puts
 	if {$s} {
 	    if {![catch { set s [slave eval set ::__source__] }]} {
-		set m "[join $s :]: $m"
+		set line [lindex $s 1]
+		catch {incr line [slave eval {dict get $ctx -errorline}]}
+		lset s 1 $line
+
+		variable verbose
+		set m "[join $s :]: [slave eval {set m}]"
 	    }
-	    catch { slave eval [list set ::__source__ $savedsrc] }
 	    error $m
 	}
 	return
@@ -390,6 +419,16 @@ namespace eval engine {
 	    return [format "{%s}" $s]
 	}
 	return [format {[regsub -all {\\([\\{}])} {%s} {\1}]} $s]
+    }
+
+
+    # --- linecount --------------------------------------------------------
+
+    # Count the number of lines (\n) in the string, optinally starting from
+    # index 'start' and stopping at index 'end'.
+    #
+    proc linecount { s { start 0 } { end end } } {
+	return [regexp -all "\n" [string range $s $start $end]]
     }
 
 

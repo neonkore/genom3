@@ -58,7 +58,7 @@ pkgIndex.tcl: Makefile
 	l='[list source [file join $$dir version.tcl]]';	\
 	for s in $(dist_systcl_DATA); do			\
 	  test -f $$s || $(LN_S) $(srcdir)/$$s $$s;		\
-	  l="$$l"'\n[list source [file join $$dir '"$$s"']]';	\
+	  l="$$l"'|[list source [file join $$dir '"$$s"']]';	\
 	done;							\
 	for s in $(nobase_dist_systcl_DATA); do			\
 	  test -f $$s || { $(MKDIR_P) "$${s%/*}" &&		\
@@ -66,4 +66,5 @@ pkgIndex.tcl: Makefile
 	done;							\
 	test -f engine.so || $(LN_S) .libs/engine.so;		\
 	$(ECHO) "package ifneeded $(PACKAGE_NAME)-engine"	\
-		"$(PACKAGE_VERSION) $$l" >$@;
+		"$(PACKAGE_VERSION) $$l" |			\
+	$(SED) 's/|/\\n/g' >$@

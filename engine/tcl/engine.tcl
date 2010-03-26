@@ -292,7 +292,7 @@ namespace eval engine {
 		# generate code to track source line number
 		append code						\
 		    "set ::__source__ \[list {$src} \[expr { "		\
-		    " $linenum - \[dict get \[info frame -1\] line\] "	\
+		    " $linenum - \[dict get \[info frame 0\] line\] "	\
 		    "} \]\]; "
 
 		# generate tag program

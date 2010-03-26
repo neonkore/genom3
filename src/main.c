@@ -368,7 +368,8 @@ usage(FILE *channel, char *argv0)
   fprintf(
     channel,
     "Usage: %s [options] template [template options] [file]\n"
-    "Parses a GenoM component and invokes template for code generation.\n"
+    "\n"
+    "Parse a GenoM component and invoke a template for code generation.\n"
     "\n"
     "General options:\n"
     "  -Idir\t\t\tadd dir to the list of directories searched for headers\n"

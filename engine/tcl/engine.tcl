@@ -125,7 +125,7 @@ namespace eval engine {
     #
     proc pwd { } {
 	variable outdir
-	return $outdir
+	if {$outdir eq ""} { return . } else { return $outdir }
     }
     namespace export pwd
 

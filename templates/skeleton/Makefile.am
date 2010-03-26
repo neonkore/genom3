@@ -20,4 +20,7 @@
 skeldir=$(tmpldir)/skeleton
 
 dist_skel_DATA=		\
+	codels.Makefile.user.am		\
+	codels.codel.c			\
+	top.configure.user.ac		\
 	template.tcl

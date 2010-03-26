@@ -41,8 +41,8 @@ template usage {*}{
     "  -s, --suffix=string\tset output file name suffix\n"
     "  -C, --directory=dir\toutput files in dir instead of current directory\n"
     "  -p, --preserve\tdo not overwrite existing files\n"
-    "  -m, --modify\toverwrite files even if they did not change\n"
-    "  -h. --help\t\tprint usage summary (this text)"
+    "  -m, --modify\t\toverwrite files even if they did not change\n"
+    "  -h, --help\t\tprint usage summary (this text)"
 }
 
 # defaults

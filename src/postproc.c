@@ -160,6 +160,7 @@ dotgen_clkratedefault(comp_s c)
   prop_s tp;
   cval trate;
   int r, a, b;
+  int periodic = 0;
 
   /* the clock-rate must be a divisor of one second */
   unsigned int p = 1000000;
@@ -168,6 +169,7 @@ dotgen_clkratedefault(comp_s c)
   for(hash_first(comp_tasks(c), &i); i.current; hash_next(&i)) {
     tp = hash_find(task_props(i.value), prop_strkind(PROP_PERIOD));
     if (tp) {
+      periodic = 1;
       trate = type_constvalue(prop_value(tp));
       if (const_convert(&trate, CST_FLOAT)) assert(0);
 
@@ -179,6 +181,11 @@ dotgen_clkratedefault(comp_s c)
 	a = b;	b = r;
       }
     }
+  }
+
+  if (!periodic) {
+    xwarnx("no default clock-rate");
+    return 0;
   }
 
   if (p < 1) {

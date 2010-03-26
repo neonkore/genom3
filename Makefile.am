@@ -22,6 +22,7 @@ if WITH_TCL
   TCLDIR=\
 	engine/tcl		\
 	templates/interactive	\
+	templates/libcodels	\
 	templates/mappings	\
 	templates/skeleton
 endif

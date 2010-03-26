@@ -35,7 +35,7 @@ template usage {*}{
     "Supported options:\n"
     "  -C, --directory=dir\toutput files in dir instead of source directory\n"
     "  -f, --force\t\toverwrite existing files (use with caution)\n"
-    "  -h. --help\t\tprint usage summary (this text)"
+    "  -h, --help\t\tprint usage summary (this text)"
 }
 
 # defaults

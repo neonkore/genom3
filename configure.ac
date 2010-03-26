@@ -4,14 +4,30 @@
 # GenoM autoconf file
 #
 AC_PREREQ(2.62)
-AC_INIT([genom],[3.0],[openrobots@laas.fr])
+AC_INIT([genom],[2.99.0],[openrobots@laas.fr])
 
 AC_CONFIG_AUX_DIR([autoconf])
 AC_CONFIG_MACRO_DIR([autoconf])
 AC_CONFIG_HEADERS([autoconf/acgenom.h])
 AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
 
-AC_SUBST(GENOM_TOOL, [genom3])
+# define the genom executable name
+AC_SUBST(GENOM_TOOL, [genom${PACKAGE_VERSION}])
+
+# define a temporary directory
+AC_DEFINE([TMPDIR],["/tmp"],[Default temporary directory])
+
+# define templates directory
+eval tmpldir="\"$datadir/${PACKAGE_NAME}/${PACKAGE_VERSION}/templates\""
+eval tmpldir="\"$tmpldir\""
+AC_DEFINE_UNQUOTED([TMPLDIR],["${tmpldir}"],[Default templates directory])
+AC_SUBST(tmpldir)
+
+# define sys directory
+eval sysdir="\"$datadir/${PACKAGE_NAME}/${PACKAGE_VERSION}/engines\""
+eval sysdir="\"$sysdir\""
+AC_DEFINE_UNQUOTED([SYSDIR],["${sysdir}"],[System files directory])
+AC_SUBST(sysdir)
 
 # generator engines - only tcl, but provide an option for documentation purpose.
 AC_ARG_ENABLE(tcl,
@@ -116,23 +132,6 @@ if test "$need_pthread" = yes; then
 fi
 
 
-# define a temporary directory
-AC_DEFINE([TMPDIR],["/tmp"],[Default temporary directory])
-
-
-# define templates directory
-eval tmpldir="\"$datadir/${PACKAGE_NAME}/templates\""
-eval tmpldir="\"$tmpldir\""
-AC_DEFINE_UNQUOTED([TMPLDIR],["${tmpldir}"],[Default templates directory])
-AC_SUBST(tmpldir)
-
-# define sys directory
-eval sysdir="\"$datadir/${PACKAGE_NAME}/sys/${PACKAGE_VERSION}\""
-eval sysdir="\"$sysdir\""
-AC_DEFINE_UNQUOTED([SYSDIR],["${sysdir}"],[System files directory])
-AC_SUBST(sysdir)
-
-
 # output
 AC_CONFIG_FILES([
 	genom3.pc
@@ -140,6 +139,7 @@ AC_CONFIG_FILES([
 	src/Makefile
 	engine/tcl/Makefile
 	templates/interactive/Makefile
+	templates/libcodels/Makefile
 	templates/mappings/Makefile
 	templates/skeleton/Makefile
 	regress/Makefile
@@ -162,6 +162,10 @@ if test x"$use_tcl" = xyes; then
     version:			$TCL_VERSION
     prefix:			$TCL_PREFIX
     line editing facility:	$have_eltclsh"]
+  if test x"$have_eltclsh" = xyes; then
+    summary=["$summary
+	(in $ELTCLSH_DATADIR)"]
+  fi
 fi
 
 summary=["$summary

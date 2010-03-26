@@ -31,6 +31,7 @@ genom3_SOURCES=\
 	scope.c		\
 	declarator.c	\
 	idltype.c	\
+	postproc.c	\
 	string.c	\
 	dotgen.y	\
 	dotgen.l	\

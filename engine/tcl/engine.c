@@ -295,6 +295,10 @@ engine_gencomponent(Tcl_Interp *interp, comp_s c)
 	s = engine_gentype(interp, prop_type(i.value));
 	break;
 
+      case PROP_CLOCKRATE:
+	s = engine_gentype(interp, prop_value(i.value));
+	break;
+
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
       case PROP_VALIDATE: case PROP_CODEL: case PROP_DOC: case PROP_VERSION:
       case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
@@ -358,7 +362,7 @@ engine_gentask(Tcl_Interp *interp, task_s t)
 
       case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
       case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
-      case PROP_TASK: case PROP_THROWS:
+      case PROP_CLOCKRATE: case PROP_TASK: case PROP_THROWS:
       case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
 	break;
     }
@@ -426,7 +430,7 @@ engine_genservice(Tcl_Interp *interp, service_s s)
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
       case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
       case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
-      case PROP_TASK: case PROP_THROWS:
+      case PROP_CLOCKRATE: case PROP_TASK: case PROP_THROWS:
       case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
 	break;
     }

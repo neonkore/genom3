@@ -107,6 +107,7 @@ comp_s
 comp_create(tloc l, const char *name, hash_s props)
 {
   idltype_s iev;
+  prop_s p;
   hash_s h;
   hiter i;
   int e, k;
@@ -130,11 +131,23 @@ comp_create(tloc l, const char *name, hash_s props)
       e = 1;
     }
 
+  /* check consitency of some properties */
+  p = hash_find(props, prop_strkind(PROP_CLOCKRATE));
+  if (p) {
+    cval c = type_constvalue(prop_value(p));
+    if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
+      parserror(prop_loc(p),
+		"invalid numeric value for %s", prop_strkind(PROP_CLOCKRATE));
+      e = 1;
+    }
+  }
+
   /* check unwanted properties */
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
       case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
       case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_CLOCKRATE:
 	break;
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
@@ -301,9 +314,9 @@ comp_addtask(tloc l, const char *name, hash_s props)
 	break;
 
       case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-      case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_TASK:
-      case PROP_VALIDATE: case PROP_INTERRUPTS: case PROP_BEFORE:
-      case PROP_AFTER:
+      case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
+      case PROP_TASK: case PROP_VALIDATE: case PROP_INTERRUPTS:
+      case PROP_BEFORE: case PROP_AFTER:
 	parserror(prop_loc(i.value), "property %s is not suitable for tasks",
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
@@ -454,8 +467,8 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	break;
 
       case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-      case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_PERIOD:
-      case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
+      case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
+      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
 	parserror(prop_loc(i.value), "property %s is not suitable for services",
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;

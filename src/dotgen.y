@@ -88,7 +88,7 @@
 %token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
 %token <s>	INPUT OUTPUT EVENT IMPORT FROM VERSION LANG EMAIL REQUIRE
 %token <s>	BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD THROWS
-%token <s>	DOC INTERRUPTS BEFORE AFTER
+%token <s>	DOC INTERRUPTS BEFORE AFTER CLOCKRATE
 
 %type <i>	spec idlspec statement idlstatement genomstatement
 
@@ -303,6 +303,14 @@ attr:
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newrequire(@1, PROP_BUILD_REQUIRE, $3);
+  }
+  | CLOCKRATE ':' const_expr time_unit
+  {
+    if (const_binaryop(&$3, '*', $4)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_CLOCKRATE, $3);
   }
   | PERIOD ':' const_expr time_unit
   {
@@ -1377,9 +1385,9 @@ size_unit:
 identifier:
   IDENTIFIER | S | MS | US | K | M
   | COMPONENT | IDS | VERSION | LANG | EMAIL | REQUIRE | BUILDREQUIRE
-  | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL | VALIDATE | YIELD
-  | THROWS | DOC INTERRUPTS | BEFORE | AFTER | EVENT | INPORT | OUTPORT | IN
-  | OUT | INOUT;
+  | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL | VALIDATE
+  | YIELD | THROWS | DOC INTERRUPTS | BEFORE | AFTER | EVENT | INPORT | OUTPORT
+  | IN | OUT | INOUT;
 
 identifier_list:
   identifier
@@ -1448,61 +1456,4 @@ void
 dotgenerror(const char *msg)
 {
   parserror(curloc, "%s around column %d", msg, curloc.col);
-}
-
-
-/* --- dotgen_consolidate -------------------------------------------------- */
-
-/** perform sanity checks on parsed file
- */
-int
-dotgen_consolidate()
-{
-  hash_s types = type_all();
-  comp_s c = comp_dotgen();
-  hash_s services = comp_services(c);
-  hiter i, j;
-  int e;
-
-  /* a component must exist */
-  if (!c) {
-    parserror(curloc, "missing component declaration");
-    return EINVAL;
-  }
-
-  /* look for unresolved forward type declaration */
-  for(hash_first(types, &i); i.current; hash_next(&i)) {
-    assert(type_fullname(i.value));
-    switch(type_kind(i.value)) {
-      case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION:
-	if (!type_type(i.value))
-	  parserror(type_loc(i.value), "%s %s was never defined",
-		    type_strkind(type_kind(i.value)), type_fullname(i.value));
-	break;
-
-      default: break;
-    }
-  }
-
-  /* resolve service names in interrupts, before and after properties */
-  e = 0;
-  for(hash_first(services, &i); i.current; hash_next(&i)) {
-    for(hash_first(service_props(i.value), &j); j.current; hash_next(&j)) {
-      switch(prop_kind(j.value)) {
-	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-	case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
-	case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
-	case PROP_TASK: case PROP_VALIDATE: case PROP_CODEL: case PROP_THROWS:
-	  break;
-
-	case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
-	  e |= comp_resolvesvc(
-	    prop_loc(j.value), c, prop_identifiers(j.value));
-	  break;
-      }
-    }
-  }
-
-  return 0;
 }

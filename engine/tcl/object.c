@@ -194,21 +194,23 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   enum compidx {
     compidx_name, compidx_doc, compidx_ids, compidx_iev, compidx_version,
     compidx_lang, compidx_email, compidx_require, compidx_brequire,
-    compidx_tasks, compidx_ports, compidx_services, compidx_loc, compidx_class
+    compidx_clockrate, compidx_tasks, compidx_ports, compidx_services,
+    compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
     [compidx_iev] = "event-type", [compidx_version] = "version",
     [compidx_lang] = "language", [compidx_email] = "email",
     [compidx_require] = "require", [compidx_brequire] = "build-require",
-    [compidx_tasks] = "tasks", [compidx_ports] = "ports",
-    [compidx_services] = "services", [compidx_loc] = "loc",
-    [compidx_class] = "class", NULL
+    [compidx_clockrate] = "clock-rate", [compidx_tasks] = "tasks",
+    [compidx_ports] = "ports", [compidx_services] = "services",
+    [compidx_loc] = "loc", [compidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [compidx_doc] = PROP_DOC, [compidx_version] = PROP_VERSION,
     [compidx_lang] = PROP_LANG, [compidx_email] = PROP_EMAIL,
-    [compidx_require] = PROP_REQUIRE, [compidx_brequire] = PROP_BUILD_REQUIRE
+    [compidx_require] = PROP_REQUIRE, [compidx_brequire] = PROP_BUILD_REQUIRE,
+    [compidx_clockrate] = PROP_CLOCKRATE
   };
   comp_s c = v;
   Tcl_Obj *r = NULL;
@@ -234,6 +236,11 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     case compidx_email:
       p = hash_find(comp_props(c), prop_strkind(argkind[i]));
       r = p ? Tcl_NewStringObj(prop_text(p), -1) : NULL;
+      break;
+
+    case compidx_clockrate:
+      p = hash_find(comp_props(c), prop_strkind(argkind[i]));
+      r = p ? Tcl_NewStringObj(type_genref(prop_value(p)), -1) : NULL;
       break;
 
     case compidx_ids:

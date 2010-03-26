@@ -300,6 +300,7 @@ typedef enum propkind {
   PROP_REQUIRE,		/**< run-time requirements */
   PROP_BUILD_REQUIRE,	/**< build requirements */
 
+  PROP_CLOCKRATE,	/**< clock rate */
   PROP_PERIOD,		/**< period */
   PROP_DELAY,		/**< delay */
   PROP_PRIORITY,	/**< priority */

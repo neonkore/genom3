@@ -43,7 +43,7 @@ struct prop_s {
     idltype_s type;	/**< IDS */
     const char *text;	/**< doc, version, e-mail, lang */
     clist_s clist;	/**< require, build-require */
-    idltype_s value;	/**< period, delay, priority, stack */
+    idltype_s value;	/**< clock-rate, period, delay, priority, stack */
     codel_s codel;	/**< codel */
     hash_s hash;	/**< throws */
     task_s task;	/**< task */
@@ -255,8 +255,9 @@ prop_value(prop_s p)
 {
   assert(p);
   assert(
-    p->kind == PROP_PERIOD || p->kind == PROP_DELAY ||
-    p->kind == PROP_PRIORITY || p->kind == PROP_STACK);
+    p->kind == PROP_CLOCKRATE || p->kind == PROP_PERIOD ||
+    p->kind == PROP_DELAY || p->kind == PROP_PRIORITY ||
+    p->kind == PROP_STACK);
   return p->value;
 }
 
@@ -325,6 +326,7 @@ prop_strkind(propkind k)
     case PROP_EMAIL:		return "e-mail";
     case PROP_REQUIRE:		return "require";
     case PROP_BUILD_REQUIRE:	return "build-require";
+    case PROP_CLOCKRATE:	return "clock-rate";
     case PROP_PERIOD:		return "period";
     case PROP_DELAY:		return "delay";
     case PROP_PRIORITY:		return "priority";

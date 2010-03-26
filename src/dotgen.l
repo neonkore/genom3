@@ -36,6 +36,7 @@
 
 #include "genom.h"
 
+#define YY_NO_INPUT
 #define YY_INPUT(buf, result, max)					\
    do {									\
      extern int dotgenfd;						\
@@ -145,6 +146,7 @@ chartext	([^\'])|(\\.)
 "email"		{ yylval->s = string(yytext); return EMAIL; }
 "require"	{ yylval->s = string(yytext); return REQUIRE; }
 "build-require"	{ yylval->s = string(yytext); return BUILDREQUIRE; }
+"clock-rate"	{ yylval->s = string(yytext); return CLOCKRATE; }
 "period"	{ yylval->s = string(yytext); return PERIOD; }
 "delay"		{ yylval->s = string(yytext); return DELAY; }
 "priority"	{ yylval->s = string(yytext); return PRIORITY; }

@@ -43,3 +43,9 @@ genom3_YFLAGS= -v -d
 genom3_CFLAGS = $(PTHREAD_CFLAGS)
 genom3_LDADD = $(PTHREAD_LIBS) $(LIBOBJS)
 genom3_LDFLAGS=	-export-dynamic
+
+# install a versionned copy of genom3
+install-exec-hook:
+	cd $(DESTDIR)$(bindir) &&				\
+	mv -f genom3$(EXEEXT) $(GENOM_TOOL)$(EXEEXT) &&		\
+	$(LN_S) $(GENOM_TOOL)$(EXEEXT) genom3$(EXEEXT)

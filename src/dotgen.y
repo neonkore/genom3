@@ -145,11 +145,13 @@ idlstatement:
   | cpphash
   | error ';'
   {
-    parserror(@1, "pfff");
+    parserror(@1, "syntax error");
+    YYABORT;
   }
   | error
   {
-    parserror(@1, "raah");
+    parserror(@1, "maybe a missing ';'");
+    YYABORT;
   }
 ;
 
@@ -1455,5 +1457,5 @@ cpphash:
 void
 dotgenerror(const char *msg)
 {
-  parserror(curloc, "%s around column %d", msg, curloc.col);
+  parserror(curloc, "%s before or at column %d", msg, curloc.col);
 }

@@ -110,37 +110,44 @@ dotgen_consolidate()
 
 /* --- dotgen_clkratechk --------------------------------------------------- */
 
-/** Check clock-rate is compatible with all tasks periods
+/** Check clock-rate is compatible with all tasks periods and delays.
  *
  */
 static int
-dotgen_clkratechk(comp_s c, prop_s p)
+dotgen_clkratechk(comp_s c, prop_s prop)
 {
+  static const propkind props[] = { PROP_PERIOD, PROP_DELAY };
+
+  int p;
   hiter i;
   prop_s tp;
   cval rate, trate;
   double ticks;
 
   /* get clock rate */
-  rate = type_constvalue(prop_value(p));
+  rate = type_constvalue(prop_value(prop));
   if (const_convert(&rate, CST_FLOAT)) assert(0);
 
   /* check consistency with all tasks */
   for(hash_first(comp_tasks(c), &i); i.current; hash_next(&i)) {
-    tp = hash_find(task_props(i.value), prop_strkind(PROP_PERIOD));
-    if (tp) {
+    for(p = 0; p < sizeof(props)/sizeof(props[0]); p++) {
+      tp = hash_find(task_props(i.value), prop_strkind(props[p]));
+      if (!tp) break;
+
       trate = type_constvalue(prop_value(tp));
       if (const_convert(&trate, CST_FLOAT)) assert(0);
 
       ticks = trate.f/rate.f;
       if (fabs(ticks - (int)ticks) > 1e-6) {
 	parserror(prop_loc(tp),
-		  "task %s period is not a multiple of %s",
-		  task_name(i.value), prop_strkind(PROP_CLOCKRATE));
-	parsenoerror(prop_loc(p), "%s declared here",
+		  "task %s %s is not a multiple of %s",
+		  task_name(i.value), prop_strkind(props[p]),
+		  prop_strkind(PROP_CLOCKRATE));
+	parsenoerror(prop_loc(prop), "%s declared here",
 		     prop_strkind(PROP_CLOCKRATE));
       } else
-	xwarnx("task %s period is %d ticks", task_name(i.value), (int)ticks);
+	xwarnx("task %s %s is %d ticks",
+	       task_name(i.value), prop_strkind(props[p]), (int)ticks);
     }
   }
 
@@ -150,12 +157,15 @@ dotgen_clkratechk(comp_s c, prop_s p)
 
 /* --- dotgen_clkratedefault ----------------------------------------------- */
 
-/** Compute default clock-rate as the GCD of all tasks period.
+/** Compute default clock-rate as the GCD of all tasks period and delay.
  *
  */
 static int
 dotgen_clkratedefault(comp_s c)
 {
+  static const propkind props[] = { PROP_PERIOD, PROP_DELAY };
+
+  int p;
   hiter i;
   prop_s tp;
   cval trate;
@@ -163,20 +173,22 @@ dotgen_clkratedefault(comp_s c)
   int periodic = 0;
 
   /* the clock-rate must be a divisor of one second */
-  unsigned int p = 1000000;
+  unsigned int period = 1000000;
 
   /* compute the micro-seconds GCD of all tasks period  */
   for(hash_first(comp_tasks(c), &i); i.current; hash_next(&i)) {
-    tp = hash_find(task_props(i.value), prop_strkind(PROP_PERIOD));
-    if (tp) {
+    for(p = 0; p < sizeof(props)/sizeof(props[0]); p++) {
+      tp = hash_find(task_props(i.value), prop_strkind(props[p]));
+      if (!tp) break;
+
       periodic = 1;
       trate = type_constvalue(prop_value(tp));
       if (const_convert(&trate, CST_FLOAT)) assert(0);
 
-      a = p;	b = trate.f * 1e6;
+      a = period;	b = trate.f * 1e6;
       while(1) {
 	r = a % b;
-	if (r == 0) { p = b; break; }
+	if (r == 0) { period = b; break; }
 
 	a = b;	b = r;
       }
@@ -188,19 +200,19 @@ dotgen_clkratedefault(comp_s c)
     return 0;
   }
 
-  if (p < 1) {
+  if (period < 1) {
     parserror(comp_loc(c), "unable to compute a default clock-rate");
     return 0;
   }
 
-  if (p < 1000)
-    xwarnx("default clock-rate set to %d microseconds", p);
+  if (period < 1000)
+    xwarnx("default clock-rate set to %d microseconds", period);
   else
-    xwarnx("default clock-rate set to %g miliseconds", p/1000.);
+    xwarnx("default clock-rate set to %g miliseconds", period/1000.);
 
   /* add the property in the component */
   trate.k = CST_FLOAT;
-  trate.f = p/1.e6;
+  trate.f = period/1.e6;
   tp = prop_newvalue(comp_loc(c), PROP_CLOCKRATE, trate);
 
   if (hash_insert(comp_props(c), prop_name(tp), tp, (hrelease_f)prop_destroy)) {

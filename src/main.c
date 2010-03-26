@@ -445,7 +445,7 @@ rmrfdir(const char *path)
       default: unlink(e->d_name); break;
     }
 
-    xwarnx("removed path `%s/%s'", path, e->d_name);
+    xwarnx("removed file `%s/%s'", path, e->d_name);
   }
 
   fchdir(cwd);
@@ -453,6 +453,6 @@ rmrfdir(const char *path)
   closedir(d);
 
   rmdir(path);
-  xwarnx("removed path `%s'", path);
+  xwarnx("removed directory `%s'", path);
   return 0;
 }

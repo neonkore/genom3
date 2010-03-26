@@ -290,7 +290,7 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
   d = hash_find(props, prop_strkind(PROP_DELAY));
   if (d) {
-    cval c = type_constvalue(prop_value(p));
+    cval c = type_constvalue(prop_value(d));
     if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
       parserror(prop_loc(d),
 		"invalid numeric value for %s", prop_strkind(PROP_DELAY));
@@ -304,6 +304,11 @@ comp_addtask(tloc l, const char *name, hash_s props)
       parsenoerror(prop_loc(p), " period declared here");
       e = 1;
     }
+  }
+  if (!e && d && !p) {
+    parsewarning(
+      prop_loc(d), "ignoring delay in task %s with no period", name);
+    hash_remove(props, prop_strkind(PROP_DELAY), 1/*release*/);
   }
 
   /* check unwanted properties */

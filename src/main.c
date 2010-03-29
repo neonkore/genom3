@@ -43,6 +43,7 @@
 
 static void		usage(FILE *channel, char *argv0);
 static const char *	abspath(const char *path);
+static const char *	findexec(const char *prog);
 static int		rmrfdir(const char *path);
 
 
@@ -98,7 +99,7 @@ main(int argc, char *argv[])
   runopt.preproc = 0;
   runopt.parse = 0;
   runopt.list = 0;
-  runopt.genom = string(argv[0]);
+  runopt.genom = string(findexec(argv[0]));
   runopt.cmdline = string("");
   runopt.notice = NULL;
 
@@ -413,6 +414,51 @@ abspath(const char *path)
     p = path;
 
   return p;
+}
+
+
+/* --- findexec ------------------------------------------------------------ */
+
+/** Return absolute path to the program. Search in PATH.
+ */
+static const char *
+findexec(const char *prog)
+{
+  char f[PATH_MAX];
+  struct stat sb;
+  char *p, *t;
+  int len;
+
+  char *path = getenv("PATH");
+  if (!path) path = "/usr/bin:/bin";
+
+  /* create a writable copy of PATH */
+  path = string(path);
+
+  if (!stat(prog, &sb) && S_ISREG(sb.st_mode) && !access(prog, X_OK))
+    return abspath(prog);
+
+  for (p = path; p; ) {
+      /* for each path... */
+      t = p;
+      if ((p = strchr(p, ':')) != NULL) {
+	*p = '\0';
+	if (t == p) t = ".";
+      } else
+	if (strlen(t) == 0) t = ".";
+
+      len = snprintf(f, sizeof(f), "%s/%s", t, prog);
+      if (p) *p++ = ':';
+
+      if (len >= sizeof(f)) continue;
+      if (stat(f, &sb) == -1) continue;
+      if (!S_ISREG(sb.st_mode)) continue;
+      if (access(f, X_OK) == -1) continue;
+
+      return abspath(f);
+  }
+
+  return prog;
 }
 
 

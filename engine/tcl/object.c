@@ -534,13 +534,17 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   enum serviceidx i = serviceidx_name; /* return name by default */
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$service subcommand");
-    return TCL_ERROR;
-  }
   if (objc > 1) {
     e = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, (int *)&i);
     if (e != TCL_OK) return e;
+  }
+  if (i != serviceidx_params) {
+    /* 'parameters' subcommand can have unlimited additional parameters, other
+     * subcommand don't have any. */
+    if (objc > 2) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$service subcommand");
+      return TCL_ERROR;
+    }
   }
   switch(i) {
     case serviceidx_name:
@@ -598,12 +602,33 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case serviceidx_params: {
+      static const char *dirarg[] = {
+	[P_IN] = "in", [P_OUT] = "out", [P_INOUT] = "inout",
+	[P_INPORT] = "inport", [P_OUTPORT] = "outport", NULL
+      };
+      int d = -1, sc;
       hiter i;
 
+      /* initialize output list to the empty list */
       r = Tcl_NewListObj(0, NULL);
+
+      /* build filtered list of parameters */
       for(hash_first(service_params(s), &i); i.current; hash_next(&i)) {
-	Tcl_ListObjAppendElement(
-	  interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
+
+	/* iterate over optional direction filters */
+	if (objc < 3) {
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
+	} else for(sc = 2; sc < objc; sc++) {
+	  e = Tcl_GetIndexFromObj(interp, objv[sc], dirarg, "direction", 0, &d);
+	  if (e != TCL_OK) return e;
+
+	  if (d == param_dir(i.value)) {
+	    Tcl_ListObjAppendElement(
+	      interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
+	    break;
+	  }
+	}
       }
       break;
     }

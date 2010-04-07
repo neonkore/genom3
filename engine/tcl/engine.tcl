@@ -272,7 +272,9 @@ namespace eval engine {
 
 		# flush raw data before opening tag, if any
 		if {[lindex $x 0] > 0} {
+
 		    set notag [string range $raw 0 [lindex $x 0]-1]
+
 		    if [regexp -indices $markup(open) $notag l] {
 			incr linenum [linecount $notag 0 [lindex $l 0]]
 			error "$src:$linenum: missing closing tag"
@@ -282,17 +284,23 @@ namespace eval engine {
 			error "$src:$linenum: missing opening tag"
 		    }
 
-		    # output raw data
-		    append code "puts -nonewline [quote $notag]\n"
-
 		    # update current line number in the template file
 		    incr linenum [linecount $notag]
+
+		    # if the character immediately preceeding the opening <'
+		    # tag  is a \n, it is discarded.
+		    if {$o == "'" && [string index $notag end] == "\n"} {
+			set notag [string range $notag 0 end-1]
+		    }
+
+		    # output raw data
+		    append code "puts -nonewline [quote $notag]\n"
 		}
 
 		# generate code to track source line number
 		append code						\
 		    "set ::__source__ \[list {$src} \[expr { "		\
-		    " $linenum - \[dict get \[info frame 0\] line\] "	\
+		    " $linenum - \[dict get \[info frame 2\] line\] "	\
 		    "} \]\]; "
 
 		# generate tag program
@@ -313,12 +321,7 @@ namespace eval engine {
 		incr linenum [linecount $t]
 
 		# discard processed source text - if the character immediately
-		# preceeding the opening <' tag or following the closing '> tag
-		# is a \n, it is discarded. This is the intuitive expectation
-		# of the template writer.
-		if {$o == "'" && [string index $raw [lindex $x 0]-1] == "\n"} {
-		    lset x 0 [expr [lindex $x 0] - 1]
-		}
+		# following the closing '> tag is a \n, it is discarded.
 		if {$c == "'" && [string index $raw [lindex $x 1]+1] == "\n"} {
 		    lset x 1 [expr [lindex $x 1] + 1]
 		    incr linenum
@@ -367,16 +370,14 @@ namespace eval engine {
 
 	# execute template program in slave interpreter
 	slave alias puts [namespace code "slave-output $out"]
-	set s [slave eval catch [list $code] m ctx]
+	set s [slave eval catch [list $code] __m __ctx]
 	slave alias puts slave invokehidden puts
 	if {$s} {
-	    if {![catch { set s [slave eval set ::__source__] }]} {
+	    if {![catch {slave eval set ::__source__} s]} {
 		set line [lindex $s 1]
-		catch {incr line [slave eval {dict get $ctx -errorline}]}
+		catch {incr line [slave eval {dict get $__ctx -errorline}]}
 		lset s 1 $line
-
-		variable verbose
-		set m "[join $s :]: [slave eval {set m}]"
+		set m "[join $s :]: [slave eval {set __m}]"
 	    }
 	    error $m
 	}

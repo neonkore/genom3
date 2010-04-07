@@ -219,13 +219,17 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   int i = compidx_name; /* return name by default */
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$component subcommand");
-    return TCL_ERROR;
-  }
   if (objc > 1) {
     s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
     if (s != TCL_OK) return s;
+  }
+  if (i != compidx_ports) {
+    /* 'ports' subcommand can have unlimited additional parameters, other
+     * subcommand don't have any. */
+    if (objc > 2) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$component subcommand");
+      return TCL_ERROR;
+    }
   }
   switch(i) {
     case compidx_name:
@@ -279,12 +283,28 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case compidx_ports: {
+      static const char *dirarg[] = {
+	[PORT_IN] = "in", [PORT_OUT] = "out", [PORT_EVENT] = "event",
+	NULL
+      };
+      int d = -1, sc;
       hiter i;
 
       r = Tcl_NewListObj(0, NULL);
       for(hash_first(comp_ports(c), &i); i.current; hash_next(&i)) {
-	Tcl_ListObjAppendElement(
-	  interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
+	if (objc < 3) {
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
+	} else for(sc = 2; sc < objc; sc++) {
+	    s = Tcl_GetIndexFromObj(interp, objv[sc], dirarg, "direction", 0, &d);
+	    if (s != TCL_OK) return s;
+
+	    if (d == port_kind(i.value)) {
+	      Tcl_ListObjAppendElement(
+		interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
+	      break;
+	    }
+	  }
       }
       break;
     }

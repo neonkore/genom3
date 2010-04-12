@@ -93,7 +93,17 @@ namespace eval language {
     namespace export declarator*
 
 
-    # --- declarator -------------------------------------------------------
+    # --- cname ------------------------------------------------------------
+
+    # Return the canonical name of a type name.
+    #
+    proc cname { lang name } {
+	return [[support $lang]::cname $name]
+    }
+    namespace export cname
+
+
+    # --- signature --------------------------------------------------------
 
     # Return the signature of a codel
     #

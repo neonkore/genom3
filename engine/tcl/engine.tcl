@@ -51,16 +51,14 @@ namespace eval engine {
     }
 
     # interpreter evaluating templates substitutions. Objects from the .gen as
-    # well as the commands 'dotgen', 'mapping' and 'language' are available,
-    # (but not the template command that are reserved to the toplevel
-    # template.tcl file) and puts is redefined to catch template output within
-    # <' '> markups.
+    # well as the commands 'dotgen' and 'language' are available, (but not the
+    # template command that are reserved to the toplevel template.tcl file) and
+    # puts is redefined to catch template output within <' '> markups.
     interp create -safe slave
     slave hide puts
     slave alias puts slave invokehidden puts
     slave alias dotgen dotgen
     slave alias language language
-    slave alias mapping mapping
     foreach o [info commands $::dotgen::ns(object)::*] {
 	slave alias $o $o
     }

@@ -375,7 +375,11 @@ namespace eval engine {
 		set line [lindex $s 1]
 		catch {incr line [slave eval {dict get $__ctx -errorline}]}
 		lset s 1 $line
-		set m "[join $s :]: [slave eval {set __m}]"
+		if {[dotgen genom stdout]} {
+		    set m "[join $s :]: [slave eval {dict get $__ctx -errorinfo}]"
+		} else {
+		    set m "[join $s :]: [slave eval {set __m}]"
+		}
 	    }
 	    error $m
 	}

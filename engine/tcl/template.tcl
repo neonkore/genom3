@@ -41,6 +41,24 @@ namespace eval template {
     variable args [set ::argv]
 
 
+    # --- require ----------------------------------------------------------
+
+    # Source template source file in the master and slave interpreters
+    #
+    proc require { src } {
+	set src [file join [dotgen template dir] $src]
+	puts "sourcing $src"
+
+	if {[catch {
+	    source $src
+	    slave invokehidden source $src
+	} m]} {
+	    template fatal "$m"
+	}
+    }
+    namespace export require
+
+
     # --- parse ------------------------------------------------------------
 
     # Main template function to parse template source and instanciate it.
@@ -77,7 +95,9 @@ namespace eval template {
 		    set in [engine::open $stype $src read]
 		    if {$stype == "string"} { set src "<string>" }
 		    if {[catch {engine::process $src $in $out} m]} {
-			template fatal "$m"
+			engine::close $in
+			template message $m
+			exit 2
 		    }
 		    engine::close $in
 		}

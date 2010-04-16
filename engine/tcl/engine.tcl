@@ -268,6 +268,9 @@ namespace eval engine {
 		# get match indices (x is overwritten)
 		regexp -indices $markup(full) $raw x io it ic
 
+		# no \n has been discarded yet
+		set nldiscarded 0
+
 		# flush raw data before opening tag, if any
 		if {[lindex $x 0] > 0} {
 
@@ -289,6 +292,7 @@ namespace eval engine {
 		    # tag  is a \n, it is discarded.
 		    if {$o == "'" && [string index $notag end] == "\n"} {
 			set notag [string range $notag 0 end-1]
+			incr nldiscarded
 		    }
 
 		    # output raw data
@@ -319,8 +323,11 @@ namespace eval engine {
 		incr linenum [linecount $t]
 
 		# discard processed source text - if the character immediately
-		# following the closing '> tag is a \n, it is discarded.
-		if {$c == "'" && [string index $raw [lindex $x 1]+1] == "\n"} {
+		# following the closing '> tag is a \n, it is discarded, except
+		# if a similar \n was discarded before the tag.
+		if {!$nldiscarded && $c == "'" &&
+		    [string index $raw [lindex $x 1]+1] == "\n"} {
+
 		    lset x 1 [expr [lindex $x 1] + 1]
 		    incr linenum
 		}

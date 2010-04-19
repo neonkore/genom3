@@ -247,6 +247,7 @@ namespace eval language::c {
 	if {[catch {$type length} l]} {
 	    append m "\n  unsigned long _maximum, _length;"
 	    append m "\n  [declarator* [$type type] _buffer];"
+	    append m "\n  void (*release)(void *_buffer);"
 	} else {
 	    append m "\n  const unsigned long _maximum;"
 	    append m "\n  unsigned long _length;"

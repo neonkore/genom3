@@ -93,6 +93,26 @@ namespace eval language {
     namespace export declarator*
 
 
+    # --- reference --------------------------------------------------------
+
+    # Return the expression for getting the reference of a variable
+    #
+    proc reference { lang type {var {}} } {
+	return [[support $lang]::reference $type $var]
+    }
+    namespace export reference
+
+
+    # --- dereference ------------------------------------------------------
+
+    # Return the expression for dereferencing a variable
+    #
+    proc dereference { lang type {var {}} } {
+	return [[support $lang]::dereference $type $var]
+    }
+    namespace export dereference
+
+
     # --- cname ------------------------------------------------------------
 
     # Return the canonical name of a type name.

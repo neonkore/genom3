@@ -141,15 +141,55 @@ namespace eval language::c {
     proc declarator* { type {var {}} } {
 	switch -- [[$type final] kind] {
 	    {string}	{
-		if {[catch { $type length }]} {
-		    return [declarator $type $var]
-		} else {
+		if {[catch { [$type final] length }]} {
 		    return [declarator $type *$var]
+		} else {
+		    return [declarator $type $var]
 		}
 	    }
 	    {array}	{ return [declarator $type $var] }
 
 	    default	{ return [declarator $type *$var] }
+	}
+    }
+
+
+    # --- reference --------------------------------------------------------
+
+    # Return the C mapping of a variable reference.
+    #
+    proc reference { type {var {}} } {
+	switch -- [[$type final] kind] {
+	    {string} -
+	    {array} {
+		if {[catch { [$type final] length }]} {
+		    return "&($var)"
+		} else {
+		    return $var
+		}
+	    }
+
+	    default	{ return "&($var)" }
+	}
+    }
+
+
+    # --- dereference ------------------------------------------------------
+
+    # Return the C mapping of a variable dereference.
+    #
+    proc dereference { type {var {}} } {
+	switch -- [[$type final] kind] {
+	    {string} -
+	    {array} {
+		if {[catch { [$type final] length }]} {
+		    return "(*$var)"
+		} else {
+		    return $var
+		}
+	    }
+
+	    default	{ return "(*$var)" }
 	}
     }
 
@@ -247,7 +287,7 @@ namespace eval language::c {
 	if {[catch {$type length} l]} {
 	    append m "\n  unsigned long _maximum, _length;"
 	    append m "\n  [declarator* [$type type] _buffer];"
-	    append m "\n  void (*release)(void *_buffer);"
+	    append m "\n  void (*_release)(void *_buffer);"
 	} else {
 	    append m "\n  const unsigned long _maximum;"
 	    append m "\n  unsigned long _length;"

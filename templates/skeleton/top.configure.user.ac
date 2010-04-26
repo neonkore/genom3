@@ -34,6 +34,7 @@ dnl can be added, depending on the codels requirements.
 dnl Compilers
 dnl
 LT_INIT
+
 <'
 # compute package languages
 set lang [list]

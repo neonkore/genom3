@@ -48,6 +48,7 @@ AC_PROG_YACC
 AC_PATH_PROG(PDFLATEX, [pdflatex], [:])
 AC_PATH_PROG(TTH, [tth], [:])
 AC_PATH_PROG(W3M, [w3m], [:])
+AC_PATH_PROG(Y2L, [y2l], [:])
 
 
 # C library
@@ -56,6 +57,14 @@ AC_REPLACE_FUNCS([strlcpy strlcat getline])
 AC_CHECK_FUNCS([asprintf vasprintf])
 AC_SEARCH_LIBS([dlopen], [dl])
 
+# documentation (re)generation
+AC_ARG_ENABLE(docgen,
+	AS_HELP_STRING([--enable-docgen], [regenerate documentation]),
+	[enable_docgen=$enableval],[enable_docgen=no])
+AM_CONDITIONAL([REGEN_DOC_PDF],[test "$enable_docgen" = "yes" -a "$PDFLATEX" != ":"])
+AM_CONDITIONAL([REGEN_DOC_HTML], [test "$enable_docgen" = "yes" -a "$TTH" != ":"])
+AM_CONDITIONAL([REGEN_DOC_TXT], [test "$enable_docgen" = "yes" -a "$W3M" != ":"])
+AM_CONDITIONAL([REGEN_DOC_YACC], [test "$enable_docgen" = "yes" -a "$Y2L" != ":"])
 
 # test that cpp accepts .gen files, maybe with -xc
 AC_CACHE_CHECK([whether ${CPP} accepts .gen file extension],
@@ -176,21 +185,21 @@ summary=["$summary
 
 Documentation generation:
     pdf:			"]
-if test x"$PDFLATEX" = x:; then
+if test x"$enable_docgen" = xno -o x"$PDFLATEX" = x:; then
   summary=["${summary}no"]
 else
   summary=["${summary}${PDFLATEX}"]
 fi
 summary=["$summary
     html:			"]
-if test x"$TTH" = x:; then
+if test x"$enable_docgen" = xno -o x"$TTH" = x:; then
   summary=["${summary}no"]
 else
   summary=["${summary}${TTH}"]
 fi
 summary=["$summary
     txt:			"]
-if test x"$W3M" = x:; then
+if test x"$enable_docgen" = xno -o x"$W3M" = x:; then
   summary=["${summary}no"]
 else
   summary=["${summary}${W3M}"]

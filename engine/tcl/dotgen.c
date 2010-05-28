@@ -35,6 +35,10 @@
 
 /* --- genom --------------------------------------------------------------- */
 
+/* \doc dotgen genom program
+ *
+ * Return the absolute path to the GenoM executable currently running.
+ */
 int
 dg_genom_program(ClientData d, Tcl_Interp *interp, int objc,
 		 Tcl_Obj *const objv[])
@@ -46,6 +50,10 @@ dg_genom_program(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
+/* \doc dotgen genom cmdline
+ *
+ * Return a string containing the options passed to the GenoM program.
+ */
 int
 dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
 		 Tcl_Obj *const objv[])
@@ -54,6 +62,10 @@ dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
+/* \doc dotgen genom version
+ *
+ * Return the full version string of the GenoM program.
+ */
 int
 dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
 		 Tcl_Obj *const objv[])

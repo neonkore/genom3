@@ -21,6 +21,7 @@ bin_PROGRAMS=\
 	genom3
 
 genom3_SOURCES=\
+	genom.h		\
 	main.c		\
 	cpp.c		\
 	hash.c		\

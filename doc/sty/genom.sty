@@ -1,0 +1,91 @@
+%
+% Copyright (c) 2009-2010 LAAS/CNRS
+% All rights reserved.
+%
+% Permission to use, copy, modify, and distribute this software for any purpose
+% with or without   fee is hereby granted, provided   that the above  copyright
+% notice and this permission notice appear in all copies.
+%
+% THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+% REGARD TO THIS  SOFTWARE INCLUDING ALL  IMPLIED WARRANTIES OF MERCHANTABILITY
+% AND FITNESS. IN NO EVENT SHALL THE AUTHOR  BE LIABLE FOR ANY SPECIAL, DIRECT,
+% INDIRECT, OR CONSEQUENTIAL DAMAGES OR  ANY DAMAGES WHATSOEVER RESULTING  FROM
+% LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+% OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
+% PERFORMANCE OF THIS SOFTWARE.
+%
+%                                             Anthony Mallet on Sat May  8 2010
+%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{genom}[2010/05/08 Genom Manual LaTeX style]
+
+\RequirePackage{color}
+\definecolor{color@link}{rgb}{.4,.02,.01}
+
+\RequirePackage{type1cm}
+\RequirePackage{ifpdf}
+\RequirePackage[pdftex]{hyperref}
+
+\hypersetup{plainpages=false}
+\hypersetup{colorlinks=true,linkcolor=color@link,urlcolor=color@link}
+
+\ifpdf\pdfinfo{
+   /Author (Sara Fleury, Matthieu Herrb, Anthony Mallet)
+   /Title  (Genom Manual)
+   /CreationDate (D:20100508000000)
+   /Subject (Genom)
+   /Keywords (Genom robotic software component code generation)
+}\fi
+
+
+% --- Sections -------------------------------------------------------------
+
+% chapters
+\def\chapter{%
+   \if@openright\newpage{\pagestyle{empty}\cleardoublepage}\else\clearpage\fi%
+   \thispagestyle{empty}%
+   \global\@topnum\z@%
+   \@afterindentfalse%
+   \secdef\@chapter\@schapter%
+}
+
+\def\@makechapterhead#1{%
+   \vrule height 15pt width 0pt\par{%
+      \parindent\z@%
+      \raggedleft\normalfont%
+      \ifnum\c@secnumdepth>\m@ne%
+	 \if@mainmatter%
+            \fontsize{20}{20}\fontfamily{ptm}\bfseries%
+	    \thechapter\par\vrule height 0pt width 0pt\par%
+	 \fi%
+      \fi%
+      \interlinepenalty\@M\fontsize{30}{35}\bfseries%
+      \parbox{\textwidth}{\raggedleft#1}\par%
+      \nobreak\vskip\evensidemargin%
+   }%
+}
+
+\def\@makeschapterhead#1{
+   \vrule height 15pt width 0pt\par{%
+      \parindent\z@
+      \raggedleft\normalfont
+      \interlinepenalty\@M\fontsize{30}{35}\fontfamily{ptm}\bfseries
+      \parbox{\textwidth}{\raggedleft#1}\par
+      \nobreak\vskip\evensidemargin
+   }
+}
+
+
+\newenvironment{engcmd}[1]{
+  \fcolorbox[rgb]{0.4,0.4,0.4}{1.0,1.0,0.9}{\parbox{0.95\linewidth}{\tt #1}}\par
+}{
+  \par
+}
+
+
+% output a coma if not already looking at a punctuation sign
+%
+\def\singlepunct{\@ifnextchar.\relax{\@ifnextchar,\relax{, }}}
+
+\def\xref#1#2{#2, \nameref{#1}\singlepunct}
+\def\doublehline{\\\hline\hline}

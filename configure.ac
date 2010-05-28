@@ -45,6 +45,9 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_LEX
 AC_PROG_YACC
+AC_PATH_PROG(PDFLATEX, [pdflatex], [:])
+AC_PATH_PROG(TTH, [tth], [:])
+AC_PATH_PROG(W3M, [w3m], [:])
 
 
 # C library
@@ -142,6 +145,7 @@ AC_CONFIG_FILES([
 	templates/libcodels/Makefile
 	templates/mappings/Makefile
 	templates/skeleton/Makefile
+	doc/Makefile
 	regress/Makefile
 ])
 AC_OUTPUT
@@ -166,6 +170,30 @@ if test x"$use_tcl" = xyes; then
     summary=["$summary
 	(in $ELTCLSH_DATADIR)"]
   fi
+fi
+
+summary=["$summary
+
+Documentation generation:
+    pdf:			"]
+if test x"$PDFLATEX" = x:; then
+  summary=["${summary}no"]
+else
+  summary=["${summary}${PDFLATEX}"]
+fi
+summary=["$summary
+    html:			"]
+if test x"$TTH" = x:; then
+  summary=["${summary}no"]
+else
+  summary=["${summary}${TTH}"]
+fi
+summary=["$summary
+    txt:			"]
+if test x"$W3M" = x:; then
+  summary=["${summary}no"]
+else
+  summary=["${summary}${W3M}"]
 fi
 
 summary=["$summary

@@ -32,3 +32,8 @@ SUBDIRS=\
 	$(TCLDIR)	\
 	doc		\
 	regress
+
+EXTRA_DIST=\
+	compat/getline.c	\
+	compat/strlcat.c	\
+	compat/strlcpy.c

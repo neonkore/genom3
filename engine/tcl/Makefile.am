@@ -38,6 +38,7 @@ nodist_systcl_DATA=\
 
 systcl_LTLIBRARIES=	engine.la
 engine_la_SOURCES=\
+	engine.h	\
 	engine.c	\
 	dotgen.c	\
 	object.c
@@ -61,8 +62,9 @@ pkgIndex.tcl: Makefile
 	  l="$$l"'|[list source [file join $$dir '"$$s"']]';	\
 	done;							\
 	for s in $(nobase_dist_systcl_DATA); do			\
-	  test -f $$s || { $(MKDIR_P) "$${s%/*}" &&		\
-		$(LN_S) $(srcdir)/$$s $$s; };			\
+	  test -f $$s || ( $(MKDIR_P) "$${s%/*}" &&		\
+		cd $${s%/*} &&					\
+		$(LN_S) ../$(srcdir)/$$s $${s#*/}; );		\
 	done;							\
 	test -f engine.so || $(LN_S) .libs/engine.so;		\
 	$(ECHO) "package ifneeded $(PACKAGE_NAME)-engine"	\

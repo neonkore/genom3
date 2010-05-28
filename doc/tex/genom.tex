@@ -26,6 +26,9 @@
    \usepackage[T1]{fontenc}
    \usepackage{genom}
 \fi
+\usepackage{longtable}
+
+\setcounter{secnumdepth}{2}
 
 \title{\Huge GenoM Manual\\ \vrule height 2pt width \linewidth\\ \hfill\small For GenoM version 3}
 \author{
@@ -50,12 +53,12 @@
 
 \chapter{Input file format}
 \label{chapter:iff}
+\def\n{\string\n{}}
+\input{dotgen-yacc}
 
 \chapter{Templates}
 \label{chapter:tmpl}
-
-\section{Tcl Engine}
 \label{section:tcl}
-\input{engcmd-dotgen}
+\input{tcl-engine}
 
 \end{document} % -----------------------------------------------------------

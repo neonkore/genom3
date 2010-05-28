@@ -19,6 +19,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{genom}[2010/05/08 Genom Manual LaTeX style]
 
+\RequirePackage{framed}
 \RequirePackage{color}
 \definecolor{color@link}{rgb}{.4,.02,.01}
 
@@ -76,12 +77,33 @@
 }
 
 
-\newenvironment{engcmd}[1]{
-  \fcolorbox[rgb]{0.4,0.4,0.4}{1.0,1.0,0.9}{\parbox{0.95\linewidth}{\tt #1}}\par
+\newenvironment{engcmd}[1]{%
+   \setlength{\FrameRule}{0.1pt}
+   \setlength{\fboxsep}{5pt}
+   \def\FrameCommand{\colorbox[rgb]{0.99,0.99,0.97}}
+   \begin{framed}\noindent
+   \setlength{\fboxsep}{3pt}
+   \fcolorbox[rgb]{.6,.6,.6}{1.0,1.0,0.9}{\parbox{0.95\linewidth}{\tt #1}}%
+   \bigbreak%
+   \def\engarg@name{Parameters:}%
+   \setlength{\parindent}{0pt}%
 }{
-  \par
+   \end{framed}
 }
 
+\long\def\engcmdarg#1#2{%
+   \medbreak\noindent{\bf\engarg@name\par}%
+   \def\engarg@name{}%
+   \hspace{0.1\linewidth}\parbox[t]{0.15\linewidth}{\em #1}\hfill%
+   \parbox[t]{0.7\linewidth}{#2}
+   \par
+}
+
+\long\def\engcmdret#1{%
+   \medbreak\noindent{\bf Returns:\medbreak}%
+   \hspace{0.1\linewidth}\parbox{0.85\linewidth}{#1}%
+   \bigbreak
+}
 
 % output a coma if not already looking at a punctuation sign
 %

@@ -18,23 +18,71 @@
 #                                            Anthony Mallet on Sun May  9 2010
 #
 BEGIN {
-    grabbing = 0;
+    NONE = 0;
+    ARG = 1;
+    RET = 2;
+    DOC = 3;
+    SEC = 4;
+    grabbing = NONE;
 }
 
-/\\doc/ {
-    sub(/^.*\\doc[ \t]+/, "");
+/\\proc/ {
+    sub(/^.*\\proc[ \t]+/, "");
     print "\\begin{engcmd}{" $0 "}";
-    grabbing = 1;
+    grabbing = DOC;
     next;
 }
 
-/^[ \t]*[#*]/ && grabbing == 1 {
+/\\section/ {
+    sub(/^.*\\section[ \t]+/, "");
+    print "\\subsection{" $0 "}";
+    grabbing = SEC;
+    next;
+}
+
+/\\arg/ && grabbing != NONE {
+    if (grabbing != DOC) {
+	print "}";
+    }
+    sub(/^.*\\arg[ \t]+/, "");
+    print "\\engcmdarg{" $1 "}{" substr($0, index($0, $2));
+    grabbing = ARG;
+    next;
+}
+
+/\\return/ && grabbing != NONE {
+    if (grabbing != DOC) {
+	print "}";
+    }
+    sub(/^.*\\return[ \t]+/, "");
+    print "\\engcmdret{" $0;
+    grabbing = RET;
+    next;
+}
+
+/^[ \t]*[#*]+[ \t]*$/ && grabbing != NONE && grabbing != SEC{
+    if (grabbing != DOC) {
+	print "}";
+    }
+    print "";
+    grabbing = DOC;
+    next;
+}
+
+/^[ \t]*[#*]/ && grabbing != NONE {
     sub(/^[ \t]*[#*]+[ \t\/]*/, "");
     print $0;
     next;
 }
 
-grabbing == 1 {
+grabbing == SEC {
+    grabbing = NONE;
+}
+
+grabbing != NONE {
+    if (grabbing != DOC) {
+	print "}";
+    }
     print "\\end{engcmd}\n";
-    grabbing = 0;
+    grabbing = NONE;
 }

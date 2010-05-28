@@ -33,9 +33,14 @@ namespace eval buildenv::autoconf {
 
     # --- subdir -----------------------------------------------------------
 
-    # Add subdir to the list of subdirectories to be considered by autoconf.
-    # This procedure _appends_ to the file subdirs.m4 a set of m4_include
-    # command for each .m4 or .ac file found in the $dir/$aux directory.
+    # \proc buildenv autoconf subdir {\em dir}
+    #
+    # Add the subdirectory {\em dir} to the list of directories to be
+    # considered by the autoconf build environment. {\em dir} must be a
+    # subdirectory relative to the current output directory.
+    #
+    # All the .m4 or .ac file found in {\em dir}/autoconf will be read by the
+    # main autoconf program (see buildenv autoconf create).
     #
     proc subdir { dir } {
 	variable aux
@@ -97,7 +102,11 @@ namespace eval buildenv::autoconf {
 
     # --- create -----------------------------------------------------------
 
-    # Create the main autoconf files. Those files are common to all templates
+    # \proc buildenv autoconf create
+    #
+    # Create the main autoconf files, in the current output directory. Those
+    # files are common to all templates, but each template willing to use
+    # autoconf should call this procedure.
     #
     proc create { } {
 	variable subdirs

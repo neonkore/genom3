@@ -26,7 +26,12 @@ namespace eval language {
 
     # --- fileext ----------------------------------------------------------
 
+    # \proc language fileext lang [kind]
+    #
     # Return the cannonical file extension for the given language.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg kind	Must be one of the strings {\tt source} or {\tt header}.
     #
     proc fileext { lang {kind source}} {
 	return [[support $lang]::fileext $kind]
@@ -36,7 +41,12 @@ namespace eval language {
 
     # --- comment ----------------------------------------------------------
 
-    # Return the comment text for the given language.
+    # \proc language comment lang text
+    #
+    # Return a string that is a valid comment in the given language.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg text	The string to be commented.
     #
     proc comment { lang text } {
 	switch -nocase -- $lang {
@@ -59,8 +69,15 @@ namespace eval language {
 
     # --- mapping ----------------------------------------------------------
 
-    # Generate the mapping of types matching the glob pattern, for the given
-    # language.
+    # \proc language mapping lang [pattern]
+    #
+    # Generate and return the mapping of the types matching the glob {\em
+    # pattern} (or all types if no pattern is given), for the given language.
+    # The returned string is a valid source code for the language.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg pattern	A glob pattern to generate the mapping only for those
+    #			type names that match the pattern.
     #
     proc mapping { lang {pattern *} } {
 	set lns [support $lang]
@@ -74,19 +91,46 @@ namespace eval language {
 
     # --- declarator -------------------------------------------------------
 
-    # Return the abstract declarator of a type or a variable. The &
-    # version declares a reference on the type.
+    # \proc language declarator lang {\em type} [{\em var}]
+    #
+    # Return the abstract declarator for {\em type} or for a variable {\em var}
+    # of that type, in the given language.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg type	A type object.
+    # \arg var	A string representing the name of a variable of type {\em
+    #		type}.
     #
     proc declarator { lang type {var {}} } {
 	return [[support $lang]::declarator $type $var]
     }
     namespace export declarator
 
+    # \proc language declarator\& lang {\em type} [{\em var}]
+    #
+    # Return the abstract declarator of a reference to the {\em type} or to a
+    # variable {\em var} of that type, in the given language.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg type	A type object.
+    # \arg var	A string representing the name of a variable of type {\em
+    #		type}.
+    #
     proc declarator& { lang type {var {}} } {
 	return [[support $lang]::declarator& $type $var]
     }
     namespace export declarator&
 
+    # \proc language declarator* lang {\em type} [{\em var}]
+    #
+    # Return the abstract declarator of a pointer to the {\em type} or to a
+    # variable {\em var} of that type, in the given language.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg type	A type object.
+    # \arg var	A string representing the name of a variable of type {\em
+    #		type}.
+    #
     proc declarator* { lang type {var {}} } {
 	return [[support $lang]::declarator* $type $var]
     }
@@ -95,7 +139,14 @@ namespace eval language {
 
     # --- reference --------------------------------------------------------
 
-    # Return the expression for getting the reference of a variable
+    # \proc language reference lang {\em type} [{\em var}]
+    #
+    # Return the expression representing a reference to a variable.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg type	A type object.
+    # \arg var	A string representing the name of a variable of type {\em
+    #		type}.
     #
     proc reference { lang type {var {}} } {
 	return [[support $lang]::reference $type $var]
@@ -105,7 +156,14 @@ namespace eval language {
 
     # --- dereference ------------------------------------------------------
 
-    # Return the expression for dereferencing a variable
+    # \proc language dereference lang {\em type} [{\em var}]
+    #
+    # Return the expression that dereferences a variable.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg type	A type object.
+    # \arg var	A string representing the name of a variable of type {\em
+    #		type}.
     #
     proc dereference { lang type {var {}} } {
 	return [[support $lang]::dereference $type $var]
@@ -115,7 +173,12 @@ namespace eval language {
 
     # --- cname ------------------------------------------------------------
 
-    # Return the canonical name of a type name.
+    # \proc language cname lang {\em name}
+    #
+    # Return the cannonical name of a type name in the given language.
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg name	The name to convert.
     #
     proc cname { lang name } {
 	return [[support $lang]::cname $name]
@@ -125,7 +188,17 @@ namespace eval language {
 
     # --- signature --------------------------------------------------------
 
-    # Return the signature of a codel
+    # \proc language signature codel {\em separator}
+    #
+    # Return the signature of a codel in the given language. If separator is
+    # given, it is a string that is inserted between the return type of the
+    # codel and the codel name (for instance, a \string\n{} in C so that the
+    # symbol name is guaranteed to be on the first column).
+    #
+    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg codel	A codel object.
+    # \arg separator	A string, inserted between the return type and the
+    #			codel symbol name.
     #
     proc signature { lang codel {symchar { }} } {
 	return [[support $lang]::signature $codel $symchar]
@@ -196,7 +269,14 @@ namespace eval language {
 
     # --- hfill ------------------------------------------------------------
 
-    # Fill text with filler up to column
+    # \proc language hfill text [filler] [column]
+    #
+    # Return a string of length {\em column} (by default 80), starting with
+    # {\em text} and filled with the {\em filler} character (by default -).
+    #
+    # \arg text		The text to fill.
+    # \arg filler	The filler character (by default -).
+    # \arg column	The desired length of the returned string.
     #
     proc hfill { text { filler - } { column 80 } } {
 	return \

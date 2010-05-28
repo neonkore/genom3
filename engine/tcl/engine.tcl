@@ -66,7 +66,41 @@ namespace eval engine {
 
     # --- mode -------------------------------------------------------------
 
-    # Set operation mode for files.
+    # \proc engine mode [ [+-]{\em modespec} ... ]
+    #
+    # Set miscellaneous engine operating mode. The command can be invoked
+    # without argument to retrieve the current settings for all supported
+    # modes. For setting one or several mode, the command can be invoked with
+    # one or more mode specification (see modespec argument below).
+    #
+    # The list of supported modes is the following:
+    # \begin{itemize}
+    # \item {\tt verbose}: turns on or off the verbosity of the engine.
+    # \item {\tt overwrite}: when turned on, newly generated files will
+    #	overwrite existing files without warning. When turned off, the engine
+    #   will stop with an error if a newly generated file would overwrite an
+    #   existing file. If the newly generated file has the same content as the
+    #	existing file, it is never considered as being overwritten. {\tt
+    #   overwrite} is by default off.
+    # \item {\tt move-if-change}: when turned on, an existing file with the
+    #	same content as a newly generated file will not be modified (preserving
+    #	the last modification timestamp). When off, files as systematically
+    #	updated. {\tt move-if-change} is on by default.
+    # \item {\tt debug}: when on, this mode preserves temporary files and
+    #	tcl programs generated in the temporary directory. Useful only for
+    #	debugging the template.
+    # \end{itemize}
+    #
+    # \begin{description}
+    # \item[Example:] {\tt engine mode -overwrite +move-if-change}
+    # \end{description}
+    # \arg modespec	A mode specification string. Valid modes are {\tt
+    #		verbose}, {\tt overwrite}, {\tt move-if-change} and {\tt
+    #		debug}. If the {\em mode} string is prefixed with a dash (-),
+    #		it is turned off. If the mode is prefixed with a plus (+) or
+    #		nothing, it is turned on.
+    # \return	When called without arguments, the command returs the current
+    #		configuration of all engine modes.
     #
     proc mode { args } {
 	variable modes
@@ -105,7 +139,14 @@ namespace eval engine {
 
     # --- chdir ------------------------------------------------------------
 
-    # Change default output directory.
+    # \proc engine chdir {\em dir}
+    #
+    # Change the engine output directory. By default, files are generated in
+    # the current directory. This command can be used to generate output in
+    # any other directory.
+    #
+    # \arg dir	The new output directory, absolute or relative to the current
+    #	working directory.
     #
     proc chdir { d } {
 	variable outdir
@@ -119,7 +160,9 @@ namespace eval engine {
 
     # --- pwd --------------------------------------------------------------
 
-    # Return the current output directory.
+    # \proc engine pwd
+    #
+    # Return the current engine output directory.
     #
     proc pwd { } {
 	variable outdir

@@ -39,6 +39,21 @@
 }\fi
 
 
+% --- Misc commands --------------------------------------------------------
+
+% output a coma if not already looking at a punctuation sign
+\def\singlepunct{\@ifnextchar.\relax{\@ifnextchar,\relax{, }}}
+
+% extendef \ref
+\def\xref#1#2{#2, \nameref{#1}\singlepunct}
+
+% double horizontal line (in a table)
+\def\doublehline{\hline\hline}
+
+% GenoM
+\def\GenoM{G\textsuperscript{en}oM}
+
+
 % --- Sections -------------------------------------------------------------
 
 % chapters
@@ -56,13 +71,13 @@
       \raggedleft\normalfont%
       \ifnum\c@secnumdepth>\m@ne%
 	 \if@mainmatter%
-            \fontsize{20}{20}\fontfamily{ptm}\bfseries%
+            \fontsize{25}{25}\fontfamily{ptm}\bfseries%
 	    \thechapter\par\vrule height 0pt width 0pt\par%
 	 \fi%
       \fi%
-      \interlinepenalty\@M\fontsize{30}{35}\bfseries%
+      \interlinepenalty\@M\fontsize{30}{30}\bfseries%
       \parbox{\textwidth}{\raggedleft#1}\par%
-      \nobreak\vskip\evensidemargin%
+      \nobreak\vskip3\evensidemargin%
    }%
 }
 
@@ -72,11 +87,23 @@
       \raggedleft\normalfont
       \interlinepenalty\@M\fontsize{30}{35}\fontfamily{ptm}\bfseries
       \parbox{\textwidth}{\raggedleft#1}\par
-      \nobreak\vskip\evensidemargin
+      \nobreak\vskip3\evensidemargin
    }
 }
 
 
+% --- Custom environments --------------------------------------------------
+
+% grammar rules
+\newenvironment{grammar}[1]{%
+   \topsep=0pt\partopsep=0pt%
+   \fontfamily{lmss}\selectfont\footnotesize%
+   \begin{itemize}\item[(#1)\hspace{20pt}]%
+}{%
+   \end{itemize}%
+}
+
+% engine commands
 \newenvironment{engcmd}[1]{%
    \setlength{\FrameRule}{0.1pt}
    \setlength{\fboxsep}{5pt}
@@ -104,10 +131,3 @@
    \hspace{0.1\linewidth}\parbox{0.85\linewidth}{#1}%
    \bigbreak
 }
-
-% output a coma if not already looking at a punctuation sign
-%
-\def\singlepunct{\@ifnextchar.\relax{\@ifnextchar,\relax{, }}}
-
-\def\xref#1#2{#2, \nameref{#1}\singlepunct}
-\def\doublehline{\\\hline\hline}

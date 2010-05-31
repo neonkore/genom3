@@ -1,0 +1,91 @@
+%
+% Copyright (c) 2009-2010 LAAS/CNRS
+% All rights reserved.
+%
+% Permission to use, copy, modify, and distribute this software for any purpose
+% with or without   fee is hereby granted, provided   that the above  copyright
+% notice and this permission notice appear in all copies.
+%
+% THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+% REGARD TO THIS  SOFTWARE INCLUDING ALL  IMPLIED WARRANTIES OF MERCHANTABILITY
+% AND FITNESS. IN NO EVENT SHALL THE AUTHOR  BE LIABLE FOR ANY SPECIAL, DIRECT,
+% INDIRECT, OR CONSEQUENTIAL DAMAGES OR  ANY DAMAGES WHATSOEVER RESULTING  FROM
+% LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+% OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
+% PERFORMANCE OF THIS SOFTWARE.
+%
+%                                             Anthony Mallet on Mon May 31 2010
+%
+
+This chapter describes the \GenoM{} Input File Format (dotgen) semantics and
+gives the syntax for dotgen grammatical constructs.
+
+\section{Overview}
+
+The  \GenoM{} Input  File  Format (dotgen)  is  the language  used to  formally
+describe a \GenoM{} component in terms  of services and data types it provides.
+A  description written  in  dotgen  completely defines  the  interface and  the
+internals of a component.
+
+A    description    of   the    dotgen    preprocessing    is   presented    in
+\xref{sec:iff:preproc}{section~\ref{sec:iff:preproc}}. The grammar is presented
+in    \xref{sec:iff:preproc}{section~\ref{sec:iff:preproc}}    and   associated
+semantics is described  in the rest of this chapter either  in place or through
+references to other sub sections of this chapter.
+
+A source  file containing a dotgen  component specification must  have a ".gen"
+extension. The description of the dotgen grammar uses a syntax notation that is
+similar        to       Extended        Backus-Naur        Format       (EBNF).
+\xref{table:iff:ebnf}{Table~\ref{table:iff:ebnf}}  lists  the  symbols used  in
+this format and their meaning.
+
+\begin{table}
+\caption{dotgen EBNF symbols}
+\centering
+\begin{tabular}{|cl|}
+\doublehline
+Symbol & Meaning\\
+\hline
+::=                     & Definition.\\
+\verb#|#                & Alternation.\\
+text                    & Nonterminals.\\
+"text"                  & Terminals.\\
+( \ldots )              & Grouping.\\
+\{ \ldots \}            & Repetition: may occur zero or any number of times.\\
+\verb#[#\ldots\verb#]#  & Option: may occur zero or one time.\\
+\hline
+\end{tabular}
+\label{table:iff:ebnf}
+\end{table}
+
+\section{Preprocessing}
+\label{sec:iff:preproc}
+
+A dotgen specification consists of one or more files that are preprocessed. The
+preprocessing performs file inclusion  and macro substitution and is controlled
+by directives introduced by lines having  {\tt \#} as the first character other
+than white space.  The preprocessing is done according  to the specification of
+the  preprocessor   in  ISO/IEC  9899:1999  Standard  for   the  C  Programming
+Language.  The preprocessor  that is  used  is the  one available  on the  host
+system, as configured during the build of \GenoM{}. It is invoked as a separate
+process.
+
+Lines beginning with {\tt \#}  (also called "directives") communicate with this
+preprocessor.  White  space may appear before  the {\tt \#}.   These lines have
+their  own  syntax (the  C  preprocessor  syntax),  independent of  the  dotgen
+language; they may appear anywhere and  have effects that last until the end of
+the translation  unit.  The primary use  of the preprocessing  facilities is to
+include   definitions   (especially  type   definitions)   from  other   dotgen
+specifications.  Text  in files  included with a  {\tt \#include}  directive is
+treated as if it appeared in the including file.
+
+\section{Dotgen grammar}
+
+\input{dotgen-rules}
+
+\section{Dotgen specification}
+
+   \input{dotgen-rule-spec}
+   \input{dotgen-rule-statement}
+   \input{dotgen-rule-idlstatement}
+   \input{dotgen-rule-genomstatement}

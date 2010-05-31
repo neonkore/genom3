@@ -26,11 +26,19 @@
    \usepackage[T1]{fontenc}
    \usepackage{genom}
 \fi
-\usepackage{longtable}
 
+% import useful packages
+\usepackage{a4wide}
+\usepackage{verbatim}
+\usepackage{listings}
+
+% cosmetic definitions
+\overfullrule5pt
 \setcounter{secnumdepth}{2}
 
-\title{\Huge GenoM Manual\\ \vrule height 2pt width \linewidth\\ \hfill\small For GenoM version 3}
+% define what we are talking about
+\title{{\Huge\bf \GenoM{} Manual}\\ \vrule height 2pt width \linewidth\\
+         \hfill\small For \GenoM{} version 3}
 \author{
    Sara Fleury -- {\em sara.fleury@laas.fr}\\
    Matthieu Herrb -- {\em matthieu.herrb@laas.fr}\\
@@ -53,8 +61,7 @@
 
 \chapter{Input file format}
 \label{chapter:iff}
-\def\n{\string\n{}}
-\input{dotgen-yacc}
+\input{dotgen-grammar}
 
 \chapter{Templates}
 \label{chapter:tmpl}

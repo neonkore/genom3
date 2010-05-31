@@ -61,10 +61,17 @@ AC_SEARCH_LIBS([dlopen], [dl])
 AC_ARG_ENABLE(docgen,
 	AS_HELP_STRING([--enable-docgen], [regenerate documentation]),
 	[enable_docgen=$enableval],[enable_docgen=no])
-AM_CONDITIONAL([REGEN_DOC_PDF],[test "$enable_docgen" = "yes" -a "$PDFLATEX" != ":"])
-AM_CONDITIONAL([REGEN_DOC_HTML], [test "$enable_docgen" = "yes" -a "$TTH" != ":"])
-AM_CONDITIONAL([REGEN_DOC_TXT], [test "$enable_docgen" = "yes" -a "$W3M" != ":"])
-AM_CONDITIONAL([REGEN_DOC_YACC], [test "$enable_docgen" = "yes" -a "$Y2L" != ":"])
+
+if test "$enable_docgen" != "yes"; then Y2L=:; fi
+if test "$Y2L" = ":"; then PDFLATEX=:; fi
+if test "$PDFLATEX" = ":"; then TTH=:; fi
+if test "$TTH" = ":"; then W3M=:; fi
+
+AM_CONDITIONAL([REGEN_DOC_YACC], [test "$Y2L" != ":"])
+AM_CONDITIONAL([REGEN_DOC_PDF],[test "$PDFLATEX" != ":"])
+AM_CONDITIONAL([REGEN_DOC_HTML], [test "$TTH" != ":"])
+AM_CONDITIONAL([REGEN_DOC_TXT], [test "$W3M" != ":"])
+
 
 # test that cpp accepts .gen files, maybe with -xc
 AC_CACHE_CHECK([whether ${CPP} accepts .gen file extension],

@@ -136,13 +136,12 @@ spec: statement | spec statement;
 
 idlspec: idlstatement | idlspec idlstatement;
 
-statement: idlstatement | genomstatement;
+statement: idlstatement | genomstatement | cpphash;
 
 idlstatement:
   module ';'
-  | const_dcl ';'	{ }
-  | type_dcl ';'	{ }
-  | cpphash
+  | const_dcl ';'
+  | type_dcl ';'
   | error ';'
   {
     parserror(@1, "syntax error");

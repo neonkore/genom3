@@ -16,15 +16,40 @@
 %
 %                                             Anthony Mallet on Sat May  8 2010
 %
+
+% --- Misc commands --------------------------------------------------------
+
+% styling is done via css: name sections
 \def\frontmatter{\special{html:</div><div id="frontmatter">}}
 \def\mainmatter{\special{html:</div><div id="mainmatter">}}
 
+% tth does not know about some useful things
 \def\addcontentsline{}
 \def\chaptername{}
 \def\today{@date@}
 \def\linewidth{60em}
+
+% extended \ref
+\def\xref#1#2{\special{html:<a href="\##1">}#2\special{html:</a>}}
+
+% double horizontal line (in a table)
+\def\doublehline{\special{html:</td></tr><tr><td id="hline" colspan=0>}\\}
+
+% GenoM
+\def\GenoM{\special{html:G<sup>en</sup>oM}}
+
+% --- Custom environments --------------------------------------------------
+
+% grammar rules
+\newenvironment{grammar}[1]{%
+   \special{html:<div id="grammar">}%
+   \special{html:<table><tr><td id="item">(#1)</td><td id="rule">}%
+}{%
+   \special{html:</td></table></div>}%
+}
+
+
 % Engine commands documentation
-%
 \newenvironment{engcmd}[1]{
   \special{html:<div id="enginecmd"><div id="enginecmdtitle">}
   #1
@@ -45,8 +70,3 @@
   \special{html:<div id="enginerettitle">}Returns:\special{html:</div>}
   \special{html:<div id="engineret">}#1\special{html:</div>}
 }
-
-
-\def\doublehline{\special{html:</td></tr><tr><td id="hline" colspan=0>}\\}
-
-\def\xref#1#2{\special{html:<a href="\##1">}#2\special{html:</a>}}

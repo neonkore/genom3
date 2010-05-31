@@ -94,8 +94,8 @@ namespace eval engine {
     # \begin{description}
     # \item[Example:] {\tt engine mode -overwrite +move-if-change}
     # \end{description}
-    # \arg modespec	A mode specification string. Valid modes are {\tt
-    #		verbose}, {\tt overwrite}, {\tt move-if-change} and {\tt
+    # \arg modespec	A mode specification string. Supported modes are
+    #		{\tt verbose}, {\tt overwrite}, {\tt move-if-change} and {\tt
     #		debug}. If the {\em mode} string is prefixed with a dash (-),
     #		it is turned off. If the mode is prefixed with a plus (+) or
     #		nothing, it is turned on.

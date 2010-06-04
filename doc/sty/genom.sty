@@ -42,7 +42,7 @@
 % --- Misc commands --------------------------------------------------------
 
 % output a coma if not already looking at a punctuation sign
-\def\singlepunct{\@ifnextchar.\relax{\@ifnextchar,\relax{, }}}
+\def\singlepunct{\@ifnextchar.\relax{\@ifnextchar,\relax{\@ifnextchar)\relax{, }}}}
 
 % extendef \ref
 \def\xref#1#2{#2, \nameref{#1}\singlepunct}

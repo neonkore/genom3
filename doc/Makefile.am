@@ -29,6 +29,7 @@ basesrcs=\
 
 pdfsrcs=\
 	$(basesrcs)		\
+	tex/genom.bib		\
 	sty/genom.sty
 
 htmlsrcs=\
@@ -92,6 +93,9 @@ if REGEN_DOC_PDF
 genom.pdf: Makefile $(pdfsrcs) $(generatedsrcs)
 genom.pdf: tex/genom.tex
 	export TEXINPUTS=$(srcdir)/tex:$(srcdir)/sty:$(srcdir)::;	\
+	export BIBINPUTS=$(srcdir)/tex::;				\
+	$(PDFLATEX) $< &&						\
+	bibtex genom &&							\
 	$(PDFLATEX) $< &&						\
 	$(PDFLATEX) $<
 
@@ -120,7 +124,7 @@ if REGEN_DOC_HTML
 # Generate HTML from PDF. CSS style is inlined within the preambule. Also,
 # trailing whitespace is stripped (mostly to appease default git hooks).
 #
-genom.html: Makefile $(htmlsrcs) $(generatedsrcs)
+genom.html: Makefile $(htmlsrcs) $(generatedsrcs) genom.bbl
 genom.html: tex/genom.tex
 	cat < $(srcdir)/sty/genom.header.html > $@
 	$(TTH) -w2 -r -Lgenom -p$(srcdir)/sty:$(srcdir)/tex < $< |	\

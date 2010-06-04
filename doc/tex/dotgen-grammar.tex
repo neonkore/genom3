@@ -29,7 +29,7 @@ internals of a component.
 
 A    description    of   the    dotgen    preprocessing    is   presented    in
 \xref{sec:iff:preproc}{section~\ref{sec:iff:preproc}}. The grammar is presented
-in    \xref{sec:iff:preproc}{section~\ref{sec:iff:preproc}}    and   associated
+in    \xref{sec:iff:grammar}{section~\ref{sec:iff:grammar}}    and   associated
 semantics is described  in the rest of this chapter either  in place or through
 references to other sub sections of this chapter.
 
@@ -64,28 +64,113 @@ text                    & Nonterminals.\\
 A dotgen specification consists of one or more files that are preprocessed. The
 preprocessing performs file inclusion  and macro substitution and is controlled
 by directives introduced by lines having  {\tt \#} as the first character other
-than white space.  The preprocessing is done according  to the specification of
-the  preprocessor   in  ISO/IEC  9899:1999  Standard  for   the  C  Programming
-Language.  The preprocessor  that is  used  is the  one available  on the  host
-system, as configured during the build of \GenoM{}. It is invoked as a separate
-process.
+than white space.  The preprocessing is done by the C preprocessor available on
+the host system and configured during the build of \GenoM{}. It is invoked as a
+separate process.
 
-Lines beginning with {\tt \#}  (also called "directives") communicate with this
-preprocessor.  White  space may appear before  the {\tt \#}.   These lines have
-their  own  syntax (the  C  preprocessor  syntax),  independent of  the  dotgen
-language; they may appear anywhere and  have effects that last until the end of
-the translation  unit.  The primary use  of the preprocessing  facilities is to
-include   definitions   (especially  type   definitions)   from  other   dotgen
-specifications.  Text  in files  included with a  {\tt \#include}  directive is
-treated as if it appeared in the including file.
+Preprocessor directives beginning with {\tt  \#} have their own syntax (namely,
+the  C  preprocessor  syntax),  independent  of the  dotgen  language  and  not
+described   in  this   document.    See  for   instance~\cite{cpp|fsf}  for   a
+documentation.  Directives may  appear anywhere in the source  file but are not
+seen  nor  interpreted by  \GenoM{}.   The  primary  use of  the  preprocessing
+facilities is  to include definitions (especially type  definitions) from other
+dotgen specifications.  Text in files included with a {\tt \#include} directive
+is treated as if it appeared in the including file.
 
 \section{Dotgen grammar}
+\label{sec:iff:grammar}
 
 \input{dotgen-rules}
 
 \section{Dotgen specification}
+\label{sec:iff:dgspec}
 
-   \input{dotgen-rule-spec}
-   \input{dotgen-rule-statement}
-   \input{dotgen-rule-idlstatement}
-   \input{dotgen-rule-genomstatement}
+A  dotgen specification  consists of  one  or more  statements. Statements  are
+either IDL statements,  \GenoM{} statements or cpp line  directives. The syntax
+is:
+
+\smallbreak
+\input{dotgen-rule-spec}
+\input{dotgen-rule-statement}
+\input{dotgen-rule-idlstatement}
+\input{dotgen-rule-genomstatement}
+
+Definitions    are     named    be    the    mean     of    identifiers:    see
+\xref{sec:iff:identifier}{section~\ref{sec:iff:identifier}}.      Cpp      line
+directives are normally issued by the C preprocessor and are used to define the
+current        input       file        name        and       line        number
+(\xref{sec:iff:cpphash}{section~\ref{sec:iff:cpphash}}).
+
+An          IDL          statement          defines         types          (see
+\xref{sec:iff:type}{section~\ref{sec:iff:type}}),         constants        (see
+\xref{sec:iff:const}{section~\ref{sec:iff:const}})  or  IDL modules  containing
+types and  constants (see \xref{sec:iff:module}{section~\ref{sec:iff:module}}).
+The syntax follows  closely the subset the OMG  IDL specification corresponding
+to    type     and    constants    definitions     (see    Part~I,    chapter~7
+of~\cite{omg|corba31}).  Note that this subset  of the dogten grammar is not in
+any manner tied to OMG IDL and may diverge from future OMG specifications.
+
+A  \GenoM{} statement  defines  components, communication  ports, services  and
+execution contexts called tasks.
+
+
+\section{Line directives}
+\label{sec:iff:cpphash}
+
+These directives are normally not used, and are the result of the preprocessing
+of the file (section~\ref{sec:iff:preproc}). They can be used mostly to achieve
+special effects on error reporting or similar.
+
+A line directive starts with the \# sign:
+
+\smallbreak\input{dotgen-rule-cpphash}
+
+The \# sign is followed by the  current line number and file name of the source
+file, optionally  followed by a flag. The  flag is never used  by \GenoM{}. Its
+meaning depends  on the C  preprocessor used: see  for instance chapter  1.8, C
+preprocessor output, of the FSF C preprocessor~\cite{cpp|fsf}.
+
+The file  name and  line number  replace the current  value kept  internally by
+\GenoM{}  and and  used in  error reporting  messages as  well as  a  few other
+places.
+
+
+\section{Identifiers and reserved keywords}
+\label{sec:iff:identifier}
+
+An identifier is  a sequence of ASCII alphabetic,  digit, and underscore ("\_")
+characters.  The first  character must  be an  ASCII alphabetic  character.
+
+\smallbreak\input{dotgen-rule-identifier}
+
+Keywords that are reserved words in the dotgen language are valid identifiers
+where their use is not ambiguous.
+
+
+\section{Module declaration}
+\label{sec:iff:module}
+
+A module definition satisfies the following syntax:
+
+\smallbreak
+\input{dotgen-rule-module}
+\input{dotgen-rule-module_name}
+\input{dotgen-rule-idldef}
+\input{dotgen-rule-idlspec}
+
+A module construct is used to scope IDL identifiers. It is similar to a C++
+or Java namespace; it is considered good practice to enclose your type
+definitions inside a module definition to prevent name clashes between
+components.
+
+
+\section{Type declaration}
+\label{sec:iff:type}
+
+\smallbreak\input{dotgen-rule-type_dcl}
+
+
+\section{Constant declaration}
+\label{sec:iff:const}
+
+\smallbreak\input{dotgen-rule-const_dcl}

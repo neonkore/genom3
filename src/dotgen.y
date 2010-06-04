@@ -79,10 +79,10 @@
 %token <i>	CONST NATIVE ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 %token <i>	TYPEDEF
 %token <i>	FALSE TRUE
-%token <i>	INTEGER_LIT FIXED_LIT
+%token <i>	integer_literal FIXED_LIT
 %token <d>	FLOAT_LIT
 %token <c>	CHAR_LIT
-%token <s>	STRING_LIT IDENTIFIER
+%token <s>	string_literal IDENTIFIER
 
 %token <s>	S MS US K M
 %token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
@@ -90,7 +90,7 @@
 %token <s>	BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD THROWS
 %token <s>	DOC INTERRUPTS BEFORE AFTER CLOCKRATE
 
-%type <i>	spec idlspec statement idlstatement genomstatement
+%type <i>	spec idlspec statement idldef idlstatement genomstatement
 
 %type <i>	component port task service
 %type <prop>	attr
@@ -116,13 +116,13 @@
 %type <hash>	enumerator_list
 %type <v>	case_label
 %type <vlist>	case_label_list
-%type <scope>	scope_push_module scope_push_struct scope_push_union
+%type <scope>	module_name scope_push_struct scope_push_union
 
 %type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
 %type <v>	or_expr xor_expr and_expr shift_expr add_expr mult_expr
 %type <v>	literal time_unit size_unit
-%type <s>	scoped_name string_lit identifier
+%type <s>	scoped_name string_literals identifier
 %type <hash>	event_list identifier_list
 %type <vlist>	string_list
 
@@ -133,8 +133,6 @@
 %%
 
 spec: statement | spec statement;
-
-idlspec: idlstatement | idlspec idlstatement;
 
 statement: idlstatement | genomstatement | cpphash;
 
@@ -270,7 +268,7 @@ attr_list:
 ;
 
 attr:
-  DOC ':' string_lit
+  DOC ':' string_literals
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_DOC, $3);
@@ -280,17 +278,17 @@ attr:
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newids(@1, $3);
   }
-  | VERSION ':' string_lit
+  | VERSION ':' string_literals
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_VERSION, $3);
   }
-  | LANG ':' string_lit
+  | LANG ':' string_literals
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_LANG, $3);
   }
-  | EMAIL ':' string_lit
+  | EMAIL ':' string_literals
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_EMAIL, $3);
@@ -540,7 +538,7 @@ constr_initializer_list:
 
 doc_initializer:
   constr_initializer
-  | constr_initializer COLONCOLON string_lit
+  | constr_initializer COLONCOLON string_literals
   {
     $$ = $1; if (!$1 || !$3) break;
     (void)initer_setdoc($1, $3);
@@ -585,7 +583,7 @@ constr_initializer:
 /** modules are IDL namespaces */
 
 module:
-  MODULE scope_push_module '{' idlspec '}'
+  MODULE module_name '{' idlspec '}'
   {
     scope_s s = scope_pop();
 
@@ -596,19 +594,23 @@ module:
       scope_destroy(s);
     }
   }
-  | MODULE scope_push_module '{' '}'
-  {
-    scope_s s = scope_pop();
+;
 
-    assert(s == $2);
-    if (scope_name(s)[0] == '&') {
-      /* there was an error during the creation of the scope. */
-      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
-      scope_destroy(s);
-    } else
-      parsewarning(@1, "empty module '%s'", scope_name(s));
+module_name: identifier
+  {
+    $$ = scope_push(@1, $1, SCOPE_MODULE);
+    if (!$$) {
+      /* on error, still create a scope to continue the parsing
+       * but with a special name -- it will be deleted afterwards */
+      $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_MODULE);
+      if (!$$) { /* still failed, just resign */ YYABORT;
+      }
+    }
   }
 ;
+
+idldef: /* empty */ | idlstatement | cpphash;
+idlspec: idldef | idlspec idldef;
 
 
 /* --- constant definition ------------------------------------------------- */
@@ -1042,19 +1044,6 @@ enumerator: identifier
 /* scopes are created as a side effect of certain declarations (modules,
  * interfaces, ...) or types (structures, unions, ...) */
 
-scope_push_module: identifier
-  {
-    $$ = scope_push(@1, $1, SCOPE_MODULE);
-    if (!$$) {
-      /* on error, still create a scope to continue the parsing
-       * but with a special name -- it will be deleted afterwards */
-      $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_MODULE);
-      if (!$$) { /* still failed, just resign */ YYABORT;
-      }
-    }
-  }
-;
-
 scope_push_struct: identifier
   {
     $$ = scope_push(@1, $1, SCOPE_STRUCT);
@@ -1286,7 +1275,7 @@ literal:
     $$.k = CST_BOOL;
     $$.b = 0;
   }
-  | INTEGER_LIT
+  | integer_literal
   {
     $$.k = ($1 < 0) ? CST_INT : CST_UINT;
     $$.i = $1;
@@ -1307,14 +1296,14 @@ literal:
     $$.k = CST_CHAR;
     $$.c = $1;
   }
-  | string_lit
+  | string_literals
   {
     $$.k = CST_STRING;
     $$.s = $1;
   }
 ;
 
-string_lit: STRING_LIT | string_lit STRING_LIT
+string_literals: string_literal | string_literals string_literal
   {
     if ($1)
       $$ = strings($1, $2, NULL);
@@ -1324,7 +1313,7 @@ string_lit: STRING_LIT | string_lit STRING_LIT
 ;
 
 string_list:
-  string_lit
+  string_literals
   {
     cval c;
     if (!$1) { $$ = NULL; break; }
@@ -1332,7 +1321,7 @@ string_list:
     c.s = string($1);
     $$ = clist_append(NULL, c, 1/*unique*/);
   }
-  | string_list ',' string_lit
+  | string_list ',' string_literals
   {
     cval c;
     if (!$3) { $$ = $1; break; }
@@ -1412,7 +1401,7 @@ identifier_list:
 /* --- # directives from cpp ----------------------------------------------- */
 
 cpphash:
-  '#' INTEGER_LIT STRING_LIT '\n'
+  '#' integer_literal string_literal '\n'
   {
     if (!runopt.cppdotgen) {
       struct stat s, si;
@@ -1425,7 +1414,7 @@ cpphash:
     curloc.line = $2;
     curloc.col = 1;
   }
-  | '#' INTEGER_LIT STRING_LIT INTEGER_LIT '\n'
+  | '#' integer_literal string_literal integer_literal '\n'
   {
     if (!runopt.cppdotgen) {
       struct stat s, si;

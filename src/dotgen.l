@@ -172,17 +172,17 @@ chartext	([^\'])|(\\.)
 "0"[xX][0-9a-fA-F]+{intsuffix}? {
   char *end;
   yylval->i = strtol(yytext, &end, 0);
-  return INTEGER_LIT;
+  return integer_literal;
 }
 "0"[0-7]+{intsuffix}? {
   char *end;
   yylval->i = strtol(yytext, &end, 0);
-  return INTEGER_LIT;
+  return integer_literal;
 }
 [0-9]+{intsuffix}? {
   char *end;
   yylval->i = strtol(yytext, &end, 0);
-  return INTEGER_LIT;
+  return integer_literal;
 }
 
  /* fixed point literal */
@@ -217,7 +217,7 @@ chartext	([^\'])|(\\.)
   /* remove quotes */
   yytext[yyleng-1] = '\0';
   yylval->s = string(yytext + 1);
-  return STRING_LIT;
+  return string_literal;
 }
 
  /* identifiers */

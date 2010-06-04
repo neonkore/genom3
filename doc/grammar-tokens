@@ -28,7 +28,6 @@ IDS		ids
 IN		in
 INOUT		inout
 INPORT		inport
-INTEGER_LIT	<integer_literal>
 INTERRUPTS	interrupts
 K		k
 LANG		lang
@@ -50,7 +49,6 @@ SL		<<
 SR		>>
 STACK		stack
 STRING		string
-STRING_LIT	<string_literal>
 STRUCT		struct
 SWITCH		switch
 TASK		task

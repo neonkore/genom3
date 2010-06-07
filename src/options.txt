@@ -1,0 +1,209 @@
+#
+# Copyright (c) 2010 LAAS/CNRS
+# All rights reserved.
+#
+# Redistribution  and  use  in  source  and binary  forms,  with  or  without
+# modification, are permitted provided that the following conditions are met:
+#
+#   1. Redistributions of  source  code must retain the  above copyright
+#      notice and this list of conditions.
+#   2. Redistributions in binary form must reproduce the above copyright
+#      notice and  this list of  conditions in the  documentation and/or
+#      other materials provided with the distribution.
+#
+# THE SOFTWARE  IS PROVIDED "AS IS"  AND THE AUTHOR  DISCLAIMS ALL WARRANTIES
+# WITH  REGARD   TO  THIS  SOFTWARE  INCLUDING  ALL   IMPLIED  WARRANTIES  OF
+# MERCHANTABILITY AND  FITNESS.  IN NO EVENT  SHALL THE AUTHOR  BE LIABLE FOR
+# ANY  SPECIAL, DIRECT,  INDIRECT, OR  CONSEQUENTIAL DAMAGES  OR  ANY DAMAGES
+# WHATSOEVER  RESULTING FROM  LOSS OF  USE, DATA  OR PROFITS,  WHETHER  IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
+# IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+#                                           Anthony Mallet on Sat Jun  5 2010
+
+# This file contains the runtime options of the genom program. It is
+# post-processed by the doc/optgen.awk script to generate either C source code
+# compatible with getopt_long(3) or LaTeX(1) and roff(7) documentations.
+#
+\desc
+The \name program is a \em source code generator \rm that is used to generate
+software components from a formal description file.
+
+The input \em file \rm is expected to contain the description of the
+services, input and output ports, data types definitions and execution contexts
+of a software component, written in the \em dotgen \rm language.
+
+The dotgen specification is first processed by a C preprocessor before it is
+parsed by \name and transformed into an abstract syntax tree. The program used
+as a C preprocessor can be changed with the \tt CPP \rm environment variable.
+\name accepts \tt -I \rm and \tt -D \rm options that are passed inchanged to
+the cpp program.
+
+The abstract syntax tree is exported in a format suitable to a
+\em generator engine \rm that is in charge of a \em template \rm execution for
+actual source code generation. The generator engine provides a scripting
+language and a set of procedures for use by templates. The directory where
+source code for the generator engine is searched can be changed with the
+\tt -s \rm option.
+
+Templates are a set of source files that serve as the basis for source code
+generation. Templates source files are interpreted by the generator engine. They
+can contain code written in the scripting language provided by the generator
+engine, that computes generated output, or regular source code that is appended
+directly to the generated code. Intermediate files and scripts are saved in a
+temporary directory before they are copied to the final destination
+directory. The \tt -T \rm option changes the path of the temporary
+directory. The \tt -d \rm option will keep all temporary files instead of
+deleting them once the program terminates. This is useful only for template
+development and debugging.
+
+The choice of a template depends on the kind of source code that is wanted by
+the user. Refer to the documentation of the templates for a description on what
+they do. The names of the available templates can be listed with the \tt -l \rm
+option. The directory in which templates are looked for can be changed with the
+\tt -t \rm option.
+
+The \name program accepts \em general options\rm that affect the general program
+behaviour. \name can also pass \em template options \rm to the template. These
+options will only affect the template behaviour.
+
+# Arguments are split into categories introduced by '\args name desc'.
+# '\arg short long optarg' define a new argument, followed by a one-line
+# description, an empty line and a long description.
+
+\args general	General options
+
+\arg I -		dir
+     add dir to the list of directories searched for headers
+
+     Add the directory \em dir\rm to the list of directories to be searched
+     for included files. The \em dir\rm argument is passed as-is to the \tt
+     cpp\rm program via the same \tt -I\rm option.
+
+     When \tt -r\rm option is in effect (either explicitely passed on the
+     command line, or configured by default during the build process), an
+     implicit \tt -I\rm directive pointing to the directory of the input file
+     is appended to the end of the list of searched directories.
+
+\arg D -      	     	macro[=value]
+     predefine macro, with given value or 1 by default
+
+     Predefine \em macro\rm, with definition \tt 1\rm or \em value\rm if given,
+     in the same way as a \tt #define\rm directive would do it. This option is
+     passed as-is to the \tt cpp\rm program.
+
+     If you are invoking genom from the shell, you may have to use the shell
+     quoting character to protect shell's special characters such as spaces.
+
+     An implicit macro \tt __GENOM__\rm is always defined and contains the
+     version of the genom program. This can be used to divert some lines in
+     source files meant to be included by other tools that genom, and that
+     contain syntax that genom does not understand.
+
+\arg E -
+     stop after preprocessing stage
+
+     Stop after the preprocessing stage, and do not run genom proper. The
+     output of \tt cpp\rm is sent to the standard output. genom exits with a
+     non-zero status if there are any preprocessing errors, such as a
+     non-existent included file.
+
+\arg n parse-only
+     stop after parsing stage (check syntax only)
+
+     Stop after the input file parsing stage, and do not invoke any
+     template. This is useful to check the syntax of the input file. Any errors
+     or warning are reported and genom exits with a non-zero status if there
+     are errors.
+
+\arg l list
+     list available templates
+
+     Print to the standard output the list of available templates. Each line of
+     output contains the name of a template and the genom engine that is uses
+     (currently, only Tcl-based templates are supported).
+
+     By default, the standard templates directory is searched, but any \tt
+     -t\rm option will be taken into account.
+
+\arg t tmpldir		dir
+     use dir as the directory for templates
+
+     Use \em dir\rm as the directory containing templates. This is useful only
+     for templates not installed in the genom standard directory, i.e. \tt
+     share/genom/<version>/templates\rm.
+
+     \em dir\rm is searched for files matching \tt dir/*/template.tcl\rm, where
+     \tt *\rm is the actual template name.
+
+\arg s sysdir	    	dir
+     use dir as the directory for generator system files
+
+     Use \em dir\rm as the directory holding genom engine files. This option
+     is useful if non-standard engines are to be used. The default value is \tt
+     share/genom/<version>/engines\rm.
+
+     \em dir\rm should contain directories named after the engine name.
+
+\arg T tmpdir	        dir
+     use dir as the directory for temporary files
+
+     Use \em dir\rm as the temporary directory holding intermediate files. See
+     also the environment variable \tt TMPDIR\rm.
+
+\arg r rename
+     always invoke cpp with a .c file linked to input file
+
+     Some \tt cpp\rm programs cannot handle correctly files with a \tt .gen\rm
+     extension. This option will make genom call cpp with an input file ending
+     in \tt .c\rm, linked to the real input file.
+
+\arg -'r' no-rename
+     pass input file directly to cpp (opposite of -r)
+
+     This option is the opposite of \tt -r\rm: it forces genom to invoke \tt
+     cpp\rm directly with the \tt .gen\rm input file. This is the default
+     behaviour. If you are using GNU cpp, it might be necessary to pass it the
+     additional \tt -xc\rm option, to force it to handle the file as C source.
+
+\arg v verbose
+     produce verbose output
+
+     Force genom to be more verbose while processing input files.
+
+\arg d debug
+     activate debugging options
+
+     Activate some debugging options. In particular, temporary files are not
+     deleted. Useful for debugging genom itself or generator engines.
+
+\arg h help
+     print usage summary (this text)
+
+     Print usage summary and exit.
+
+# Template specific options
+\args template	Template options
+
+\arg h help
+     print options specific to template
+
+     Templates might define their own specific options. The \tt -h\rm option is
+     always defined, and prints a summary of supported options. See the
+     template manual for a detailed description. Template options should be
+     passed after the template name, and before the input file name.
+
+# Environment variables
+\env CPP
+     C preprocessor program
+
+     Define the C preprocessor program to use. The default depends on the value
+     configured during the genom build process, but it is most often
+     \tt gcc -E -xc\rm on Linux systems.
+
+     The \tt CPP\rmprogram must recognize \tt -I\rm and \tt -D\rm arguments.
+
+\env TMPDIR
+     directory for temporary files
+
+     Path to the directory holding temporary files. Defaults to \tt /tmp\rm.

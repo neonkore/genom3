@@ -23,6 +23,7 @@ bin_PROGRAMS=\
 genom3_SOURCES=\
 	genom.h		\
 	main.c		\
+	options.txt	\
 	cpp.c		\
 	hash.c		\
 	property.c	\
@@ -44,6 +45,14 @@ genom3_YFLAGS= -v -d
 genom3_CFLAGS = $(PTHREAD_CFLAGS)
 genom3_LDADD = $(PTHREAD_LIBS) $(LIBOBJS)
 genom3_LDFLAGS=	-export-dynamic
+
+BUILT_SOURCES=\
+	options.c
+
+# generate options strings and usage doc
+options.c: Makefile $(top_srcdir)/doc/optgen.awk
+options.c: options.txt
+	$(AWK) -f $(top_srcdir)/doc/optgen.awk -- -c $< >$@
 
 # install a versionned copy of genom3
 install-exec-hook:

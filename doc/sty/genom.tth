@@ -22,12 +22,18 @@
 % styling is done via css: name sections
 \def\frontmatter{\special{html:</div><div id="frontmatter">}}
 \def\mainmatter{\special{html:</div><div id="mainmatter">}}
+\def\backmatter{\special{html:</div><div id="backmatter">}}
 
 % tth does not know about some useful things
-\def\addcontentsline{}
 \def\chaptername{}
 \def\today{@date@}
 \def\linewidth{60em}
+
+% dot leaders
+\def\xdotfill{, }
+
+% super
+\def\textsuperscript#1{\special{html:<sup>#1</sup>}}
 
 % extended \ref
 \def\xref#1#2{\special{html:<a href="\##1">}#2\special{html:</a>}}
@@ -38,7 +44,14 @@
 % GenoM
 \def\GenoM{\special{html:G<sup>en</sup>oM}}
 
+% Add to index
+\def\I#1{\index{#1}#1}
+
+
 % --- Custom environments --------------------------------------------------
+
+% index
+\def\indexheading#1{\special{html:<div id="idxhead">#1</div>}}
 
 % grammar rules
 \newenvironment{grammar}[1]{%

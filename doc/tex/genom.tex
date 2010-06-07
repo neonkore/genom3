@@ -30,7 +30,8 @@
 % import useful packages
 \usepackage{a4wide}
 \usepackage{verbatim}
-\usepackage{listings}
+\usepackage{makeidx}
+\makeindex
 
 % cosmetic definitions
 \overfullrule5pt
@@ -38,7 +39,7 @@
 \bibliographystyle{plain}
 
 % define what we are talking about
-\title{{\Huge\bf \GenoM{} Manual}\\ \vrule height 2pt width \linewidth\\
+\title{{\Huge\bfseries \GenoM{} Manual}\\ \vrule height 2pt width \linewidth\\
          \hfill\small For \GenoM{} version 3}
 \author{
    Sara Fleury -- {\em sara.fleury@laas.fr}\\
@@ -47,6 +48,7 @@
    Copyright 2009-2010 \copyright LAAS/CNRS
 }
 \date{\today}
+
 
 \begin{document} % ---------------------------------------------------------
 
@@ -57,8 +59,9 @@
 
 \chapter{Introduction}
 
-\chapter{Command Line Options}
-\label{chapter:clo}
+\chapter{Running \GenoM{}}
+\label{chapter:run}
+\input{running}
 
 \chapter{Input file format}
 \label{chapter:iff}
@@ -69,6 +72,8 @@
 \label{section:tcl}
 \input{tcl-engine}
 
+\backmatter
 \bibliography{genom}
+\printindex
 
 \end{document} % -----------------------------------------------------------

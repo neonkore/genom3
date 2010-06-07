@@ -40,6 +40,21 @@ BEGIN {
     next;
 }
 
+/\\index/ {
+    sub(/^.*\\index[ \t]+/, "");
+    for (j = 1; j <= NF; j++) {
+	printf "\\index{";
+	printf "%s@\\texttt{%s} (template command)", $1, $1;
+	for (i = 2; i <= j; i++) {
+	    printf "!%s@\\texttt{%s}", $i, $i;
+	}
+	print "}";
+    }
+    printf "\\index{template command!%s@\\texttt{%s}", $1, $1;
+    print "}";
+    next;
+}
+
 /\\arg/ && grabbing != NONE {
     if (grabbing != DOC) {
 	print "}";

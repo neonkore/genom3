@@ -44,6 +44,7 @@ namespace eval template {
     # --- require ----------------------------------------------------------
 
     # \proc template require {\em file}
+    # \index template require
     #
     # Source tcl {\em file} and make its content available to the template
     # files. The file name can be absolute or relative. If it is relative, it
@@ -70,6 +71,7 @@ namespace eval template {
     # --- parse ------------------------------------------------------------
 
     # \proc template parse [args {\em list}] [file/string/raw {\em file} ...]
+    # \index template parse
     #
     # This is the main template function that parses a template source file and
     # instanciate it, writing the result into the current template
@@ -180,6 +182,7 @@ namespace eval template {
     # --- link -------------------------------------------------------------
 
     # \proc template link {\em src} {\em dst}
+    # \index template link
     #
     # Link source file {\em src} to destination file {\em dst}. If relative,
     # the source file {\em src} is interpreted as relative to the template
@@ -221,6 +224,7 @@ namespace eval template {
     # --- options ----------------------------------------------------------
 
     # \proc template options \{ pattern body ... \}
+    # \index template options
     #
     # Define the list of supported options for the template. Argument is a
     # Tcl switch-like script that must define all supported options. It
@@ -261,6 +265,7 @@ namespace eval template {
     # --- arg --------------------------------------------------------------
 
     # \proc template arg
+    # \index template arg
     #
     # Return the next argument passed to the template, or raise an error is
     # no argument remains.
@@ -283,6 +288,7 @@ namespace eval template {
     # --- usage ------------------------------------------------------------
 
     # \proc template usage [{\em string}]
+    # \index template usage
     #
     # With a {\em string} argument, this procedure defines the template "usage"
     # message. Unless the template redefines a {\tt -h} option with {\tt
@@ -306,6 +312,7 @@ namespace eval template {
     # --- message ----------------------------------------------------------
 
     # \proc template message [{\em string}]
+    # \index template message
     #
     # Print {\em string} so that it is visible to the end-user. The text is
     # sent on the standard error channel unconditionnaly.
@@ -319,6 +326,7 @@ namespace eval template {
     # --- fatal ------------------------------------------------------------
 
     # \proc template fatal [{\em string}]
+    # \index template fatal
     #
     # Print an error message and stop. In verbose mode, print the source
     # location as reported by [info frame].

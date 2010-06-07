@@ -67,6 +67,7 @@ namespace eval engine {
     # --- mode -------------------------------------------------------------
 
     # \proc engine mode [ [+-]{\em modespec} ... ]
+    # \index engine mode
     #
     # Set miscellaneous engine operating mode. The command can be invoked
     # without argument to retrieve the current settings for all supported
@@ -140,6 +141,7 @@ namespace eval engine {
     # --- chdir ------------------------------------------------------------
 
     # \proc engine chdir {\em dir}
+    # \index engine chdir
     #
     # Change the engine output directory. By default, files are generated in
     # the current directory. This command can be used to generate output in
@@ -161,6 +163,7 @@ namespace eval engine {
     # --- pwd --------------------------------------------------------------
 
     # \proc engine pwd
+    # \index engine pwd
     #
     # Return the current engine output directory.
     #

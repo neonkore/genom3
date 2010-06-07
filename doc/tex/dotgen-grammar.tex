@@ -21,8 +21,9 @@ This chapter describes the \GenoM{} Input File Format (dotgen) semantics and
 gives the syntax for dotgen grammatical constructs.
 
 \section{Overview}
+\index{input!file format}
 
-The  \GenoM{} Input  File  Format (dotgen)  is  the language  used to  formally
+The \GenoM{}  Input File Format (\I{dotgen})  is the language  used to formally
 describe a \GenoM{} component in terms  of services and data types it provides.
 A  description written  in  dotgen  completely defines  the  interface and  the
 internals of a component.
@@ -59,14 +60,14 @@ text                    & Nonterminals.\\
 \end{table}
 
 \section{Preprocessing}
-\label{sec:iff:preproc}
+\label{sec:iff:preproc}\index{input!preprocessing}
 
 A dotgen specification consists of one or more files that are preprocessed. The
-preprocessing performs file inclusion  and macro substitution and is controlled
-by directives introduced by lines having  {\tt \#} as the first character other
-than white space.  The preprocessing is done by the C preprocessor available on
-the host system and configured during the build of \GenoM{}. It is invoked as a
-separate process.
+\I{preprocessing}  performs  file  inclusion  and  macro  substitution  and  is
+controlled  by directives  introduced by  lines having  {\tt \#}  as  the first
+character  other  than  white  space.   The  preprocessing is  done  by  the  C
+preprocessor available  on the host system  and configured during  the build of
+\GenoM{}. It is invoked as a separate process.
 
 Preprocessor directives beginning with {\tt  \#} have their own syntax (namely,
 the  C  preprocessor  syntax),  independent  of the  dotgen  language  and  not
@@ -78,12 +79,12 @@ dotgen specifications.  Text in files included with a {\tt \#include} directive
 is treated as if it appeared in the including file.
 
 \section{Dotgen grammar}
-\label{sec:iff:grammar}
+\label{sec:iff:grammar}\index{dotgen!grammar}
 
 \input{dotgen-rules}
 
 \section{Dotgen specification}
-\label{sec:iff:dgspec}
+\label{sec:iff:dgspec}\index{dotgen!specification}
 
 A  dotgen specification  consists of  one  or more  statements. Statements  are
 either IDL statements,  \GenoM{} statements or cpp line  directives. The syntax
@@ -136,14 +137,14 @@ places.
 
 
 \section{Identifiers and reserved keywords}
-\label{sec:iff:identifier}
+\label{sec:iff:identifier}\index{dotgen!identifier}
 
-An identifier is  a sequence of ASCII alphabetic,  digit, and underscore ("\_")
-characters.  The first  character must  be an  ASCII alphabetic  character.
+An  \I{identifier} is  a sequence  of ASCII  alphabetic, digit,  and underscore
+("\_") characters.  The first character must be an ASCII alphabetic character.
 
 \smallbreak\input{dotgen-rule-identifier}
 
-Keywords that are reserved words in the dotgen language are valid identifiers
+Words that are  reserved keywords in the dotgen  language are valid identifiers
 where their use is not ambiguous.
 
 

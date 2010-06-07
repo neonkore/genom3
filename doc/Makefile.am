@@ -22,14 +22,19 @@ dist_doc_DATA=\
 	genom.html		\
 	genom.txt
 
+dist_man_MANS=\
+	genom3.1
+
 basesrcs=\
 	tex/genom.tex		\
+	tex/running.tex		\
 	tex/dotgen-grammar.tex	\
 	tex/tcl-engine.tex
 
 pdfsrcs=\
 	$(basesrcs)		\
 	tex/genom.bib		\
+	sty/genom.mst		\
 	sty/genom.sty
 
 htmlsrcs=\
@@ -41,7 +46,11 @@ htmlsrcs=\
 txtsrcs=\
 	$(basesrcs)
 
+roffsrcs=\
+	roff/genom.mdoc
+
 generatedsrcs=\
+	genom-options.tex	\
 	dotgen-rules.tex	\
 	engcmd-template.tex	\
 	engcmd-engine.tex	\
@@ -50,7 +59,7 @@ generatedsrcs=\
 	engcmd-autoconf.tex
 
 EXTRA_DIST=	$(pdfsrcs) $(htmlsrcs) $(txtsrcs)
-EXTRA_DIST+=	docgen.awk
+EXTRA_DIST+=	optgen.awk docgen.awk
 
 if REGEN_DOC_YACC
 
@@ -96,8 +105,13 @@ genom.pdf: tex/genom.tex
 	export BIBINPUTS=$(srcdir)/tex::;				\
 	$(PDFLATEX) $< &&						\
 	bibtex genom &&							\
+	makeindex -s $(srcdir)/sty/genom.mst genom &&			\
 	$(PDFLATEX) $< &&						\
 	$(PDFLATEX) $<
+
+genom-options.tex: Makefile $(srcdir)/optgen.awk
+genom-options.tex: $(top_srcdir)/src/options.txt
+	$(AWK) -f $(srcdir)/optgen.awk -- -t $< >$@
 
 engcmd-template.tex: Makefile $(srcdir)/docgen.awk
 engcmd-template.tex: $(top_srcdir)/engine/tcl/template.tcl
@@ -127,8 +141,12 @@ if REGEN_DOC_HTML
 genom.html: Makefile $(htmlsrcs) $(generatedsrcs) genom.bbl
 genom.html: tex/genom.tex
 	cat < $(srcdir)/sty/genom.header.html > $@
-	$(TTH) -w2 -r -Lgenom -p$(srcdir)/sty:$(srcdir)/tex < $< |	\
-		sed -e 's/[ 	]*$$//g' -e "s/@date@/`date '+%B %e, %Y'`/"\
+	$(TTH) -w2 -r -j1 -Lgenom					\
+	 -x"makeindex -o genom.tin -s $(srcdir)/sty/genom.mst genom.tid"\
+	 -p$(srcdir)/sty:$(srcdir)/tex < $< |				\
+		sed -e 's/[ 	]*$$//'					\
+			-e "s/(showing section)//"			\
+			-e "s/@date@/`date '+%B %e, %Y'`/"		\
 		>> $@
 	cat < $(srcdir)/sty/genom.footer.html >> $@
 
@@ -139,6 +157,26 @@ if REGEN_DOC_TXT
 genom.txt: Makefile $(txtsrcs)
 genom.txt: genom.html
 	$(W3M) -dump -cols 80 $< >$@
+
+
+# Generate manuals. This require some files generated for the other
+# documentations, this is why this comes after everything.
+#
+genom3.1: Makefile $(roffsrcs) $(generatedsrcs)
+genom3.1: genom-options.mdoc
+genom3.1: roff/genom.mdoc
+	sed <$< >$@							\
+		-e "s/@date@/`date '+%B %e, %Y'`/"			\
+		-e 's/@version@/$(PACKAGE_VERSION)/'			\
+		-e 's|@[p]refix@|$(prefix)|'				\
+		-e 's|@[d]ocdir@|$(docdir)|'				\
+		-e '/@genom-options@/r genom-options.mdoc'		\
+		-e '/@genom-options@/d'
+	test $@ -nt $(srcdir)/genom3.1 && cp $@ $(srcdir)/genom3.1
+
+genom-options.mdoc: Makefile $(srcdir)/optgen.awk
+genom-options.mdoc: $(top_srcdir)/src/options.txt
+	$(AWK) -f $(srcdir)/optgen.awk -- -m $< >$@
 
 endif REGEN_DOC_TXT
 endif REGEN_DOC_HTML

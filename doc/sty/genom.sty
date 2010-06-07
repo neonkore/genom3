@@ -44,6 +44,9 @@
 % output a coma if not already looking at a punctuation sign
 \def\singlepunct{\@ifnextchar.\relax{\@ifnextchar,\relax{\@ifnextchar)\relax{, }}}}
 
+% dot leaders
+\def\xdotfill{ \dotfill\ }
+
 % extendef \ref
 \def\xref#1#2{#2, \nameref{#1}\singlepunct}
 
@@ -53,8 +56,18 @@
 % GenoM
 \def\GenoM{G\textsuperscript{en}oM}
 
+% Add to index
+\def\I#1{\index{#1}#1}
+
 
 % --- Sections -------------------------------------------------------------
+
+% title
+\title{\@@title\pdfbookmark[0]{Title}{title.0}}
+\def\title#1{\gdef\@@title{\fontfamily{lmss}#1}}
+
+% contents
+\def\contentsname{Contents\pdfbookmark[0]{Contents}{chapter.0}}
 
 % chapters
 \def\chapter{%
@@ -71,7 +84,7 @@
       \raggedleft\normalfont%
       \ifnum\c@secnumdepth>\m@ne%
 	 \if@mainmatter%
-            \fontsize{25}{25}\fontfamily{ptm}\bfseries%
+            \fontsize{25}{25}\fontfamily{lmss}\bfseries%
 	    \thechapter\par\vrule height 0pt width 0pt\par%
 	 \fi%
       \fi%
@@ -85,12 +98,47 @@
    \vrule height 15pt width 0pt\par{%
       \parindent\z@
       \raggedleft\normalfont
-      \interlinepenalty\@M\fontsize{30}{35}\fontfamily{ptm}\bfseries
+      \interlinepenalty\@M\fontsize{30}{35}\fontfamily{lmss}\bfseries
       \parbox{\textwidth}{\raggedleft#1}\par
       \nobreak\vskip3\evensidemargin
    }
 }
 
+% descriptions
+\def\description{
+   \list{}{%
+      \labelwidth0pt\itemindent-\leftmargin\let\makelabel\descriptionlabel%
+      \let\@@item\@item\def\@item[##1]{\@@item[##1]\hfill\\}
+   }%
+}
+
+% biblio
+\def\thebibliography#1{
+   \chapter*{\bibname}\chaptermark{\bibname}
+   \phantomsection\addcontentsline{toc}{chapter}{\bibname}%
+   \list{\@biblabel{\@arabic\c@enumiv}}
+   {
+      \settowidth\labelwidth{\@biblabel{#1}}
+      \leftmargin\labelwidth\advance\leftmargin\labelsep
+      \@openbib@code
+      \usecounter{enumiv}\let\p@enumiv\@empty
+      \renewcommand\theenumiv{\@arabic\c@enumiv}
+   }
+   \sloppy\clubpenalty4000\@clubpenalty\clubpenalty\widowpenalty4000
+   \sfcode`\.\@m
+   \small%
+}
+
+% index
+\def\theindex{
+   \columnsep3em\twocolumn%
+   \chapter*{\indexname}\chaptermark{\indexname}%
+   \phantomsection\addcontentsline{toc}{chapter}{\indexname}%
+   \parindent\z@\parskip\z@\@plus.3\p@\relax
+   \let\item\@idxitem%
+   \small%
+}
+\def\indexheading#1{\fontfamily{lmss}\bfseries\large #1}
 
 % --- Custom environments --------------------------------------------------
 

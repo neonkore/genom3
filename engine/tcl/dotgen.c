@@ -35,12 +35,14 @@
 /* --- genom --------------------------------------------------------------- */
 
 /* \section dotgen genom
+ * \index dotgen genom
  *
  * Those commands implement access to genom program parameters or general
  * information.
  */
 
 /* \proc dotgen genom program
+ * \index dotgen genom program
  *
  * Returns the absolute path to the GenoM executable currently running.
  */
@@ -56,6 +58,7 @@ dg_genom_program(ClientData d, Tcl_Interp *interp, int objc,
 }
 
 /* \proc dotgen genom cmdline
+ * \index dotgen genom cmdline
  *
  * Returns a string containing the options passed to the GenoM program.
  */
@@ -68,6 +71,7 @@ dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
 }
 
 /* \proc dotgen genom version
+ * \index dotgen genom version
  *
  * Returns the full version string of the GenoM program.
  */
@@ -80,6 +84,7 @@ dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
 }
 
 /* \proc dotgen genom debug
+ * \index dotgen genom debug
  *
  * Returns a boolean indicating whether genom was invoked in debugging mode or
  * not.
@@ -92,7 +97,8 @@ dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc	dotgen genom stdout [on]
+/* \proc dotgen genom stdout [on]
+ * \index dotgen genom stdout
  *
  * With optional boolean argument {\em on}, turns on or off the standard output
  * channel of the template engine.
@@ -133,11 +139,13 @@ dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
 /* --- template ------------------------------------------------------------ */
 
 /* \section dotgen template
+ * \index dotgen template
  *
  * Those commands return information about the template currently being parsed.
  */
 
 /* \proc dotgen template name
+ * \index dotgen template name
  *
  * Return the current template name.
  */
@@ -153,6 +161,7 @@ dg_template_name(ClientData v, Tcl_Interp *interp, int objc,
 }
 
 /* \proc dotgen template dir
+ * \index dotgen template dir
  *
  * Return a path to the current template directory (the directory holding the
  * template.tcl file).
@@ -166,6 +175,7 @@ dg_template_dir(ClientData v, Tcl_Interp *interp, int objc,
 }
 
 /* \proc dotgen template sysdir
+ * \index dotgen template sysdir
  *
  * Return a path to the genom system directory.
  */
@@ -178,6 +188,7 @@ dg_template_sysdir(ClientData v, Tcl_Interp *interp, int objc,
 }
 
 /* \proc dotgen template tmpdir
+ * \index dotgen template tmpdir
  *
  * Return a path to the temporary directory where the template engine writes
  * its temporary files.
@@ -194,12 +205,14 @@ dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc,
 /* --- input --------------------------------------------------------------- */
 
 /* \section dotgen input
+ * \index dotgen input
  *
  * Those commands return information about the current genom input file (.gen
  * file).
  */
 
 /* \proc dotgen input file
+ * \index dotgen input file
  *
  * Return the full path to the current .gen file.
  */
@@ -211,6 +224,7 @@ dg_input_file(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 }
 
 /* \proc dotgen input base
+ * \index dotgen input base
  *
  * Return the base name of the current .gen file, i.e. the file name with all
  * directories stripped out.
@@ -226,6 +240,7 @@ dg_input_base(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 }
 
 /* \proc dotgen input dir
+ * \index dotgen input dir
  *
  * Return the directory name of the current .gen file.
  */
@@ -240,6 +255,7 @@ dg_input_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 }
 
 /* \proc dotgen input notice
+ * \index dotgen input notice
  *
  * Return the copyright notice (as text) found in the .gen file. This notice
  * can actually be any text and is the content of the special comment starting
@@ -268,6 +284,7 @@ dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
  */
 
 /* \proc dotgen types [pattern]
+ * \index dotgen types
  *
  * This command returns the list of type objects that are defined in the
  * current .gen file. This list may be filtered with the optional {\em pattern}
@@ -315,6 +332,7 @@ dg_types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
  */
 
 /* \proc dotgen components [pattern]
+ * \index dotgen components
  *
  * This command returns the list of components that are defined in the current
  * .gen file (normally just one). This list may be filtered with the optional

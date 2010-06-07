@@ -27,6 +27,7 @@ namespace eval language {
     # --- fileext ----------------------------------------------------------
 
     # \proc language fileext lang [kind]
+    # \index language fileext
     #
     # Return the cannonical file extension for the given language.
     #
@@ -42,6 +43,7 @@ namespace eval language {
     # --- comment ----------------------------------------------------------
 
     # \proc language comment lang text
+    # \index language comment
     #
     # Return a string that is a valid comment in the given language.
     #
@@ -70,6 +72,7 @@ namespace eval language {
     # --- mapping ----------------------------------------------------------
 
     # \proc language mapping lang [pattern]
+    # \index language mapping
     #
     # Generate and return the mapping of the types matching the glob {\em
     # pattern} (or all types if no pattern is given), for the given language.
@@ -92,6 +95,7 @@ namespace eval language {
     # --- declarator -------------------------------------------------------
 
     # \proc language declarator lang {\em type} [{\em var}]
+    # \index language declarator
     #
     # Return the abstract declarator for {\em type} or for a variable {\em var}
     # of that type, in the given language.
@@ -107,6 +111,7 @@ namespace eval language {
     namespace export declarator
 
     # \proc language declarator\& lang {\em type} [{\em var}]
+    # \index language declarator\&
     #
     # Return the abstract declarator of a reference to the {\em type} or to a
     # variable {\em var} of that type, in the given language.
@@ -122,6 +127,7 @@ namespace eval language {
     namespace export declarator&
 
     # \proc language declarator* lang {\em type} [{\em var}]
+    # \index language declarator*
     #
     # Return the abstract declarator of a pointer to the {\em type} or to a
     # variable {\em var} of that type, in the given language.
@@ -140,6 +146,7 @@ namespace eval language {
     # --- reference --------------------------------------------------------
 
     # \proc language reference lang {\em type} [{\em var}]
+    # \index language reference
     #
     # Return the expression representing a reference to a variable.
     #
@@ -157,6 +164,7 @@ namespace eval language {
     # --- dereference ------------------------------------------------------
 
     # \proc language dereference lang {\em type} [{\em var}]
+    # \index language dereference
     #
     # Return the expression that dereferences a variable.
     #
@@ -174,6 +182,7 @@ namespace eval language {
     # --- cname ------------------------------------------------------------
 
     # \proc language cname lang {\em name}
+    # \index language cname
     #
     # Return the cannonical name of a type name in the given language.
     #
@@ -189,6 +198,7 @@ namespace eval language {
     # --- signature --------------------------------------------------------
 
     # \proc language signature codel {\em separator}
+    # \index language signature
     #
     # Return the signature of a codel in the given language. If separator is
     # given, it is a string that is inserted between the return type of the
@@ -270,6 +280,7 @@ namespace eval language {
     # --- hfill ------------------------------------------------------------
 
     # \proc language hfill text [filler] [column]
+    # \index language hfill
     #
     # Return a string of length {\em column} (by default 80), starting with
     # {\em text} and filled with the {\em filler} character (by default -).

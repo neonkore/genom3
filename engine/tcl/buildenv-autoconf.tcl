@@ -34,6 +34,7 @@ namespace eval buildenv::autoconf {
     # --- subdir -----------------------------------------------------------
 
     # \proc buildenv autoconf subdir {\em dir}
+    # \index buildenv autoconf subdir
     #
     # Add the subdirectory {\em dir} to the list of directories to be
     # considered by the autoconf build environment. {\em dir} must be a
@@ -103,6 +104,7 @@ namespace eval buildenv::autoconf {
     # --- create -----------------------------------------------------------
 
     # \proc buildenv autoconf create
+    # \index buildenv autoconf create
     #
     # Create the main autoconf files, in the current output directory. Those
     # files are common to all templates, but each template willing to use

@@ -78,8 +78,8 @@ engcmd-autoconf.tex: $(top_srcdir)/engine/tcl/buildenv-autoconf.tcl
 
 genom.pdf: Makefile $(pdfsrcs)
 genom.pdf: tex/genom.tex
-	export TEXINPUTS=$(srcdir)/tex:$(srcdir)/sty:$(srcdir)::;\
-	$(PDFLATEX) $<;						\
+	export TEXINPUTS=$(srcdir)/tex:$(srcdir)/sty:$(srcdir)::;	\
+	$(PDFLATEX) $< &&						\
 	$(PDFLATEX) $<
 
 if REGEN_DOC_HTML

@@ -22,7 +22,7 @@ dist_doc_DATA=\
 	genom.html		\
 	genom.txt
 
-dist_man_MANS=\
+man_MANS=\
 	genom3.1
 
 basesrcs=\
@@ -46,9 +46,11 @@ htmlsrcs=\
 txtsrcs=\
 	$(basesrcs)
 
+# static source files for manuals
 roffsrcs=\
 	roff/genom.mdoc
 
+# generated source files for all docs
 generatedsrcs=\
 	genom-options.tex	\
 	dotgen-rules.tex	\
@@ -58,8 +60,25 @@ generatedsrcs=\
 	engcmd-language.tex	\
 	engcmd-autoconf.tex
 
-EXTRA_DIST=	$(pdfsrcs) $(htmlsrcs) $(txtsrcs)
+EXTRA_DIST=	$(pdfsrcs) $(htmlsrcs) $(txtsrcs) $(roffsrcs)
 EXTRA_DIST+=	optgen.awk docgen.awk
+
+# Generate manuals.
+#
+genom3.1: Makefile genom-options.mdoc
+genom3.1: roff/genom.mdoc
+	sed <$< >$@							\
+		-e "s/@date@/`date '+%B %e, %Y'`/"			\
+		-e 's/@version@/$(PACKAGE_VERSION)/'			\
+		-e 's|@[p]refix@|$(prefix)|'				\
+		-e 's|@[d]ocdir@|$(docdir)|'				\
+		-e '/@genom-options@/r genom-options.mdoc'		\
+		-e '/@genom-options@/d'					\
+		-e 's/[ 	]*$$//'
+
+genom-options.mdoc: Makefile $(srcdir)/optgen.awk
+genom-options.mdoc: $(top_srcdir)/src/options.txt
+	$(AWK) -f $(srcdir)/optgen.awk -- -m $< >$@
 
 if REGEN_DOC_YACC
 
@@ -156,27 +175,9 @@ if REGEN_DOC_TXT
 #
 genom.txt: Makefile $(txtsrcs)
 genom.txt: genom.html
-	$(W3M) -dump -cols 80 $< >$@
-
-
-# Generate manuals. This require some files generated for the other
-# documentations, this is why this comes after everything.
-#
-genom3.1: Makefile $(roffsrcs) $(generatedsrcs)
-genom3.1: genom-options.mdoc
-genom3.1: roff/genom.mdoc
-	sed <$< >$@							\
-		-e "s/@date@/`date '+%B %e, %Y'`/"			\
-		-e 's/@version@/$(PACKAGE_VERSION)/'			\
-		-e 's|@[p]refix@|$(prefix)|'				\
-		-e 's|@[d]ocdir@|$(docdir)|'				\
-		-e '/@genom-options@/r genom-options.mdoc'		\
-		-e '/@genom-options@/d'
-	test $@ -nt $(srcdir)/genom3.1 && cp $@ $(srcdir)/genom3.1
-
-genom-options.mdoc: Makefile $(srcdir)/optgen.awk
-genom-options.mdoc: $(top_srcdir)/src/options.txt
-	$(AWK) -f $(srcdir)/optgen.awk -- -m $< >$@
+	$(W3M) -dump -cols 80 $< | sed >$@				\
+		-e 's/[ 	]*$$//;'				\
+		-e :a -e '/^\n*$$/{$$d;N;ba' -e '}'
 
 endif REGEN_DOC_TXT
 endif REGEN_DOC_HTML

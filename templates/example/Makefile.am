@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 LAAS/CNRS
+# Copyright (c) 2010 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -14,27 +14,14 @@
 # OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
 # PERFORMANCE OF THIS SOFTWARE.
 #
-#                                             Anthony Mallet on Wed Dec 16 2009
+#                                            Anthony Mallet on Tue Jun  8 2010
 #
-ACLOCAL_AMFLAGS = -I autoconf
 
-if WITH_TCL
-  TCLDIR=\
-	engine/tcl		\
-	templates/interactive	\
-	templates/example	\
-	templates/libcodels	\
-	templates/mappings	\
-	templates/skeleton
-endif
+tdir=$(tmpldir)/example
 
-SUBDIRS=\
-	src		\
-	$(TCLDIR)	\
-	doc		\
-	regress
-
-EXTRA_DIST=\
-	compat/getline.c	\
-	compat/strlcat.c	\
-	compat/strlcpy.c
+dist_t_DATA=			\
+	template.tcl		\
+	example.tcl		\
+	example.Makefile.am	\
+	example.configure.ac	\
+	example.c

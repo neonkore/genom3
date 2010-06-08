@@ -157,6 +157,7 @@ AC_CONFIG_FILES([
 	src/Makefile
 	engine/tcl/Makefile
 	templates/interactive/Makefile
+	templates/example/Makefile
 	templates/libcodels/Makefile
 	templates/mappings/Makefile
 	templates/skeleton/Makefile

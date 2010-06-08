@@ -13,7 +13,11 @@ set name [list]; set version [list]; set email [list]; set lang [list]
 foreach c [dotgen components] {
    lappend name [$c name]
    lappend version [$c version]
-   lappend email [$c email]
+   if {[catch {$c email}]} {
+      lappend email "nobody@example.com"
+   } else {
+      lappend email [$c email]
+   }
    lappend lang [$c language]
 }
 '>
@@ -43,7 +47,7 @@ dnl Include template additions via the generated subdirs.m4 file
 m4_sinclude([autoconf/subdirs.m4])
 
 dnl User extra configuration
-m4_include([<"$userdir">/configure.user.ac])
+m4_sinclude([<"$userdir">/configure.user.ac])
 
 dnl Generate
 AC_SUBST([dotgendir],[<"[dotgen input dir]">])

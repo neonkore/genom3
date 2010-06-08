@@ -28,7 +28,8 @@
 \RequirePackage[pdftex]{hyperref}
 
 \hypersetup{plainpages=false}
-\hypersetup{colorlinks=true,linkcolor=color@link,urlcolor=color@link}
+\hypersetup{colorlinks=true,citecolor=color@link,linkcolor=color@link,%
+   urlcolor=color@link}
 
 \ifpdf\pdfinfo{
    /Author (Sara Fleury, Matthieu Herrb, Anthony Mallet)
@@ -48,10 +49,13 @@
 \def\xdotfill{ \dotfill\ }
 
 % extendef \ref
-\def\xref#1#2{#2, \nameref{#1}\singlepunct}
+\def\xref[#1]#2{#2, \nameref{#1}\singlepunct}
 
 % double horizontal line (in a table)
 \def\doublehline{\hline\hline}
+
+% email address
+\def\email#1{\fontfamily{lmss}\selectfont #1}
 
 % GenoM
 \def\GenoM{G\textsuperscript{en}oM}
@@ -144,7 +148,7 @@
 
 % grammar rules
 \newenvironment{grammar}[1]{%
-   \topsep=0pt\partopsep=0pt%
+   \topsep=0pt\partopsep=0pt\labelsep0pt%
    \fontfamily{lmss}\selectfont\footnotesize%
    \begin{itemize}\item[(#1)\hspace{20pt}]%
 }{%

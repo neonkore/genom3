@@ -36,10 +36,13 @@
 \def\textsuperscript#1{\special{html:<sup>#1</sup>}}
 
 % extended \ref
-\def\xref#1#2{\special{html:<a href="\##1">}#2\special{html:</a>}}
+\def\xref[#1]#2{\special{html:<a href="\##1">}#2\special{html:</a>}}
 
 % double horizontal line (in a table)
 \def\doublehline{\special{html:</td></tr><tr><td id="hline" colspan=0>}\\}
+
+% email address
+\def\email#1{\special{html:<a href="mailto:#1">#1</a>}}
 
 % GenoM
 \def\GenoM{\special{html:G<sup>en</sup>oM}}

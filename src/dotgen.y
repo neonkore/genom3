@@ -102,10 +102,10 @@
 
 %type <i>	module
 %type <type>	const_dcl const_type
-%type <type>	type_dcl constr_type constr_forward_type
+%type <type>	type_dcl constructed_type forward_dcl
 %type <dcl>	declarator simple_declarator array_declarator
 %type <type>	type_spec simple_type_spec base_type_spec template_type_spec
-%type <type>	constr_type_spec switch_type_spec
+%type <type>	constructed_type_spec switch_type_spec
 %type <type>	integer_type unsigned_int unsigned_short_int unsigned_long_int
 %type <type>	signed_int signed_short_int signed_long_int
 %type <type>	floating_pt_type float_type double_type
@@ -665,9 +665,38 @@ const_type:
 /* These rules cover the `typedef' token, but also `struct', `enum' and
  * `union'. */
 
-type_dcl: constr_type | TYPEDEF alias_list { $$ = $2; } | constr_forward_type;
+type_dcl:
+  constructed_type
+  | TYPEDEF alias_list {
+    $$ = $2;
+  }
+  | forward_dcl
+;
 
-constr_type: struct_type | union_type | enum_type;
+constructed_type: struct_type | union_type | enum_type;
+
+alias_list:
+  type_spec declarator
+  {
+    $$ = $1; if (!$2) break;
+
+    if ($1) $1 = dcl_settype($2, $1);
+    if (!$1 || !type_newalias(@2, dcl_name($2), $1))
+      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
+
+    dcl_destroy($2);
+  }
+  | alias_list ',' declarator
+  {
+    $$ = $1; if (!$3) break;
+
+    if ($1) $1 = dcl_settype($3, $1);
+    if (!$1 || !type_newalias(@3, dcl_name($3), $1))
+      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
+
+    dcl_destroy($3);
+  }
+;
 
 struct_type: STRUCT scope_push_struct '{' member_list '}'
   {
@@ -759,7 +788,7 @@ enum_type: ENUM identifier '{' enumerator_list '}'
   }
 ;
 
-constr_forward_type:
+forward_dcl:
   STRUCT identifier
   {
     $$ = type_newforward(@1, $2, IDL_FORWARD_STRUCT);
@@ -813,10 +842,10 @@ type_spec: simple_type_spec
 	$$ = NULL;
       }
   }
-  | constr_type_spec;
+  | constructed_type_spec;
 
 simple_type_spec: base_type_spec | template_type_spec | named_type;
-constr_type_spec: constr_type;
+constructed_type_spec: constructed_type;
 
 named_type: scoped_name
   {
@@ -916,29 +945,6 @@ switch_type_spec:
 switch_body: case | switch_body case
   {
     $$ = $1 ? $1 : $2;
-  }
-;
-
-alias_list:
-  type_spec declarator
-  {
-    $$ = $1; if (!$2) break;
-
-    if ($1) $1 = dcl_settype($2, $1);
-    if (!$1 || !type_newalias(@2, dcl_name($2), $1))
-      parserror(@2, "dropped declaration for '%s'", dcl_name($2));
-
-    dcl_destroy($2);
-  }
-  | alias_list ',' declarator
-  {
-    $$ = $1; if (!$3) break;
-
-    if ($1) $1 = dcl_settype($3, $1);
-    if (!$1 || !type_newalias(@3, dcl_name($3), $1))
-      parserror(@3, "dropped declaration for '%s'", dcl_name($3));
-
-    dcl_destroy($3);
   }
 ;
 

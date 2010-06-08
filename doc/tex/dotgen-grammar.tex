@@ -29,15 +29,15 @@ A  description written  in  dotgen  completely defines  the  interface and  the
 internals of a component.
 
 A    description    of   the    dotgen    preprocessing    is   presented    in
-\xref{sec:iff:preproc}{section~\ref{sec:iff:preproc}}. The grammar is presented
-in    \xref{sec:iff:grammar}{section~\ref{sec:iff:grammar}}    and   associated
-semantics is described  in the rest of this chapter either  in place or through
-references to other sub sections of this chapter.
+\xref[sec:iff:preproc]{section~\ref{sec:iff:preproc}}.     The    grammar    is
+presented    in    \xref[sec:iff:grammar]{section~\ref{sec:iff:grammar}}    and
+associated semantics is  described in the rest of this  chapter either in place
+or through references to other sub sections of this chapter.
 
 A source  file containing a dotgen  component specification must  have a ".gen"
 extension. The description of the dotgen grammar uses a syntax notation that is
 similar        to       Extended        Backus-Naur        Format       (EBNF).
-\xref{table:iff:ebnf}{Table~\ref{table:iff:ebnf}}  lists  the  symbols used  in
+\xref[table:iff:ebnf]{Table~\ref{table:iff:ebnf}}  lists  the  symbols used  in
 this format and their meaning.
 
 \begin{table}
@@ -97,15 +97,15 @@ is:
 \input{dotgen-rule-genomstatement}
 
 Definitions    are     named    be    the    mean     of    identifiers:    see
-\xref{sec:iff:identifier}{section~\ref{sec:iff:identifier}}.      Cpp      line
+\xref[sec:iff:identifier]{section~\ref{sec:iff:identifier}}.       Cpp     line
 directives are normally issued by the C preprocessor and are used to define the
 current        input       file        name        and       line        number
-(\xref{sec:iff:cpphash}{section~\ref{sec:iff:cpphash}}).
+(\xref[sec:iff:cpphash]{section~\ref{sec:iff:cpphash}}).
 
 An          IDL          statement          defines         types          (see
-\xref{sec:iff:type}{section~\ref{sec:iff:type}}),         constants        (see
-\xref{sec:iff:const}{section~\ref{sec:iff:const}})  or  IDL modules  containing
-types and  constants (see \xref{sec:iff:module}{section~\ref{sec:iff:module}}).
+\xref[sec:iff:type]{section~\ref{sec:iff:type}}),         constants        (see
+\xref[sec:iff:const]{section~\ref{sec:iff:const}})  or  IDL modules  containing
+types and  constants (see \xref[sec:iff:module]{section~\ref{sec:iff:module}}).
 The syntax follows  closely the subset the OMG  IDL specification corresponding
 to    type     and    constants    definitions     (see    Part~I,    chapter~7
 of~\cite{omg|corba31}).  Note that this subset  of the dogten grammar is not in
@@ -113,27 +113,6 @@ any manner tied to OMG IDL and may diverge from future OMG specifications.
 
 A  \GenoM{} statement  defines  components, communication  ports, services  and
 execution contexts called tasks.
-
-
-\section{Line directives}
-\label{sec:iff:cpphash}
-
-These directives are normally not used, and are the result of the preprocessing
-of the file (section~\ref{sec:iff:preproc}). They can be used mostly to achieve
-special effects on error reporting or similar.
-
-A line directive starts with the \# sign:
-
-\smallbreak\input{dotgen-rule-cpphash}
-
-The \# sign is followed by the  current line number and file name of the source
-file, optionally  followed by a flag. The  flag is never used  by \GenoM{}. Its
-meaning depends  on the C  preprocessor used: see  for instance chapter  1.8, C
-preprocessor output, of the FSF C preprocessor~\cite{cpp|fsf}.
-
-The file  name and  line number  replace the current  value kept  internally by
-\GenoM{}  and and  used in  error reporting  messages as  well as  a  few other
-places.
 
 
 \section{Identifiers and reserved keywords}
@@ -148,6 +127,27 @@ Words that are  reserved keywords in the dotgen  language are valid identifiers
 where their use is not ambiguous.
 
 
+\section{Line directives}
+\label{sec:iff:cpphash}
+
+Line directives  are normally not used.  They  are inserted by {\tt  cpp}, as a
+result of  preprocessing the input  file (section~\ref{sec:iff:preproc}).  They
+can be used mostly to achieve special effects on error reporting or similar.
+
+A line directive starts with the \# sign:
+
+\smallbreak\input{dotgen-rule-cpphash}
+
+The \# sign is followed by the  current line number and file name of the source
+file,  optionally  followed by  a  numeric  flag. The  flag  is  never used  by
+\GenoM{}.  Its meaning depends  on the  C preprocessor  used: see  for instance
+chapter 1.8, C preprocessor output, of the FSF C preprocessor~\cite{cpp|fsf}.
+
+The file  name and  line number  replace the current  value kept  internally by
+\GenoM{}  and are  used in  error reporting  messages as  well as  a  few other
+places.
+
+
 \section{Module declaration}
 \label{sec:iff:module}
 
@@ -159,16 +159,39 @@ A module definition satisfies the following syntax:
 \input{dotgen-rule-idldef}
 \input{dotgen-rule-idlspec}
 
-A module construct is used to scope IDL identifiers. It is similar to a C++
-or Java namespace; it is considered good practice to enclose your type
-definitions inside a module definition to prevent name clashes between
+The only effect of a module is to scope IDL identifiers. It is similar to a C++
+or  Java  namespace;  it is  considered  good  practice  to enclose  your  type
+definitions  inside  a  module  definition  to  prevent  name  clashes  between
 components.
 
 
 \section{Type declaration}
 \label{sec:iff:type}
 
-\smallbreak\input{dotgen-rule-type_dcl}
+Type declarations  define new data types  and associate a  name (an identifier)
+with it. The  {\tt typedef} keyword can  be used to name an  existing type. The
+constructed types {\tt  struct}, {\tt union} and {\tt enum}  also name the type
+they define. The syntax is the following:
+
+\smallbreak
+\input{dotgen-rule-type_dcl}
+\input{dotgen-rule-constructed_type}
+\input{dotgen-rule-alias_list}
+\bigbreak
+
+A type specification is the description of a type. It can be used in a {\tt
+typedef} construct or anywhere a typed value is expected.
+
+\smallbreak
+\input{dotgen-rule-type_spec}
+\input{dotgen-rule-simple_type_spec}
+\input{dotgen-rule-base_type_spec}
+\input{dotgen-rule-template_type_spec}
+\input{dotgen-rule-constructed_type_spec}
+\input{dotgen-rule-named_type}
+\input{dotgen-rule-scoped_name}
+\input{dotgen-rule-declarator}
+\input{dotgen-rule-simple_declarator}
 
 
 \section{Constant declaration}

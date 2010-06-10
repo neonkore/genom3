@@ -43,8 +43,17 @@ AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
+
 AC_PROG_LEX
+if test x"$LEX" = x:; then
+   AC_MSG_FAILURE([required lex/flex program could not be found on your system.])
+fi
+
 AC_PROG_YACC
+if test x"$YACC" = x:; then
+   AC_MSG_FAILURE([required yacc/bison program could not be found on your system.])
+fi
+
 AC_PATH_PROG(PDFLATEX, [pdflatex], [:])
 AC_PATH_PROG(TTH, [tth], [:])
 AC_PATH_PROG(W3M, [w3m], [:])

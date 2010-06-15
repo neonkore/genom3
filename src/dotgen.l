@@ -153,7 +153,7 @@ chartext	([^\'])|(\\.)
 "stack"		{ yylval->s = string(yytext); return STACK; }
 "validate"	{ yylval->s = string(yytext); return VALIDATE; }
 "yield"		{ yylval->s = string(yytext); return YIELD; }
-"throws"	{ yylval->s = string(yytext); return THROWS; }
+"throw"		{ yylval->s = string(yytext); return THROWS; }
 "interrupts"	{ yylval->s = string(yytext); return INTERRUPTS; }
 "before"	{ yylval->s = string(yytext); return BEFORE; }
 "after"		{ yylval->s = string(yytext); return AFTER; }

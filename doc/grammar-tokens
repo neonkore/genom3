@@ -52,7 +52,7 @@ STRING		string
 STRUCT		struct
 SWITCH		switch
 TASK		task
-THROWS		throws
+THROWS		throw
 TRUE		TRUE
 TYPEDEF		typedef
 UNION		union

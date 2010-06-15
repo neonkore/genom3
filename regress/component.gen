@@ -72,7 +72,7 @@ task t2 {
   codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
   codel stop: c(in d, out e) yield ether;
 
-  throws:	ERR1, ERR2;
+  throw:	ERR1, ERR2;
 };
 
 service s1() {
@@ -98,7 +98,7 @@ service s2(
   codel stop: c(in f, out f::outf) yield ether;
   codel stop: d(in g, out h) yield ether;
 
-  throws:	ERR3;
+  throw:	ERR3;
   interrupts:	all;
   after:	s1;
 };

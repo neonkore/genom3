@@ -22,7 +22,6 @@ bin_PROGRAMS=\
 
 genom3_SOURCES=\
 	genom.h		\
-	main.c		\
 	options.txt	\
 	cpp.c		\
 	hash.c		\
@@ -43,8 +42,13 @@ genom3_SOURCES=\
 
 genom3_YFLAGS= -v -d
 genom3_CFLAGS = $(PTHREAD_CFLAGS)
-genom3_LDADD = $(PTHREAD_LIBS) $(LIBOBJS)
+genom3_LDADD = libmain.a $(PTHREAD_LIBS) $(LIBOBJS)
 genom3_LDFLAGS=	-export-dynamic
+
+# emulate per-file CPPFLAGS
+noinst_LIBRARIES = libmain.a
+libmain_a_SOURCES = main.c
+libmain_a_CPPFLAGS = -DTMPLDIR='"$(tmpldir)"' -DSYSDIR='"$(sysdir)"'
 
 BUILT_SOURCES=\
 	options.c

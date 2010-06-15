@@ -17,16 +17,12 @@ AC_SUBST(GENOM_TOOL, [genom${PACKAGE_VERSION}])
 # define a temporary directory
 AC_DEFINE([TMPDIR],["/tmp"],[Default temporary directory])
 
-# define templates directory
-eval tmpldir="\"$datadir/${PACKAGE_NAME}/${PACKAGE_VERSION}/templates\""
-eval tmpldir="\"$tmpldir\""
-AC_DEFINE_UNQUOTED([TMPLDIR],["${tmpldir}"],[Default templates directory])
+# define templates directory (relative to datadir)
+tmpldir='${datadir}/${PACKAGE_NAME}/${PACKAGE_VERSION}/templates'
 AC_SUBST(tmpldir)
 
-# define sys directory
-eval sysdir="\"$datadir/${PACKAGE_NAME}/${PACKAGE_VERSION}/engines\""
-eval sysdir="\"$sysdir\""
-AC_DEFINE_UNQUOTED([SYSDIR],["${sysdir}"],[System files directory])
+# define sys directory (relative to datadir)
+sysdir='${datadir}/${PACKAGE_NAME}/${PACKAGE_VERSION}/engines'
 AC_SUBST(sysdir)
 
 # generator engines - only tcl, but provide an option for documentation purpose.

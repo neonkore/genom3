@@ -91,6 +91,7 @@ genom3.1: roff/genom.mdoc
 		-e 's/@version@/$(PACKAGE_VERSION)/'			\
 		-e 's|@[p]refix@|$(prefix)|'				\
 		-e 's|@[d]ocdir@|$(docdir)|'				\
+		-e 's|@[C]PP@|$(CPP)|'					\
 		-e '/@genom-options@/r genom-options.mdoc'		\
 		-e '/@genom-options@/d'					\
 		-e 's/[ 	]*$$//'

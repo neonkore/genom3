@@ -421,8 +421,8 @@ type_equal(idltype_s a, idltype_s b)
 
   switch(type_kind(a)) {
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-    case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
-    case IDL_OCTET: case IDL_ANY:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
       return 1;
 
     case IDL_STRING:
@@ -586,10 +586,10 @@ type_final(idltype_s t)
   assert(t);
   switch(type_kind(t)) {
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-    case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
-    case IDL_OCTET: case IDL_STRING: case IDL_ANY: case IDL_ENUM:
-    case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE: case IDL_STRUCT:
-    case IDL_UNION:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ANY: case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY:
+    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
       return t;
 
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
@@ -720,6 +720,8 @@ type_strkind(idlkind k)
     case IDL_SHORT:		return "short";
     case IDL_ULONG:		return "unsigned long";
     case IDL_LONG:		return "long";
+    case IDL_ULONGLONG:		return "unsigned long long";
+    case IDL_LONGLONG:		return "long long";
     case IDL_FLOAT:		return "float";
     case IDL_DOUBLE:		return "double";
     case IDL_CHAR:		return "char";

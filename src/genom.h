@@ -208,6 +208,8 @@ typedef enum idlkind {
   IDL_SHORT,		/**< short */
   IDL_ULONG,		/**< unsigned long */
   IDL_LONG,		/**< long */
+  IDL_ULONGLONG,	/**< unsigned long long */
+  IDL_LONGLONG,		/**< long long */
   IDL_FLOAT,		/**< float */
   IDL_DOUBLE,		/**< double */
   IDL_CHAR,		/**< char */

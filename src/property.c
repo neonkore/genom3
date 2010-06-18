@@ -91,9 +91,10 @@ prop_newids(tloc l, idltype_s t)
   }
   switch(type_kind(type_final(t))) {
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-    case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
-    case IDL_OCTET: case IDL_STRING: case IDL_ENUM: case IDL_ENUMERATOR:
-    case IDL_ARRAY: case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
+    case IDL_STRUCT: case IDL_UNION:
       break;
 
     case IDL_ANY: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:

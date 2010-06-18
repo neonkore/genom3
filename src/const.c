@@ -292,9 +292,11 @@ const_cast(tloc l, cval *value, idltype_s t)
   switch(type_kind(type_final(t))) {
     case IDL_BOOL:      s = const_convert(value, CST_BOOL);	break;
     case IDL_USHORT:
-    case IDL_ULONG:	s = const_convert(value, CST_UINT);	break;
+    case IDL_ULONG:
+    case IDL_ULONGLONG:	s = const_convert(value, CST_UINT);	break;
     case IDL_SHORT:
-    case IDL_LONG:	s = const_convert(value, CST_INT);	break;
+    case IDL_LONG:
+    case IDL_LONGLONG:	s = const_convert(value, CST_INT);	break;
     case IDL_FLOAT:
     case IDL_DOUBLE:	s = const_convert(value, CST_FLOAT);	break;
     case IDL_CHAR:

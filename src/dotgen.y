@@ -107,7 +107,8 @@
 %type <type>	type_spec simple_type_spec base_type_spec template_type_spec
 %type <type>	constructed_type_spec switch_type_spec
 %type <type>	integer_type unsigned_int unsigned_short_int unsigned_long_int
-%type <type>	signed_int signed_short_int signed_long_int
+%type <type>	unsigned_longlong_int signed_int signed_short_int
+%type <type>	signed_long_int signed_longlong_int
 %type <type>	floating_pt_type float_type double_type
 %type <type>	boolean_type char_type octet_type any_type
 %type <type>	sequence_type string_type fixed_type named_type
@@ -139,7 +140,13 @@ statement: idlstatement | genomstatement | cpphash;
 idlstatement:
   module ';'
   | const_dcl ';'
+  {
+    $$ = 0;
+  }
   | type_dcl ';'
+  {
+    $$ = 0;
+  }
   | error ';'
   {
     parserror(@1, "syntax error");
@@ -609,7 +616,7 @@ module_name: identifier
   }
 ;
 
-idldef: /* empty */ | idlstatement | cpphash;
+idldef: idlstatement | cpphash | /* empty */ { $$ = 0; };
 idlspec: idldef | idlspec idldef;
 
 
@@ -638,8 +645,9 @@ const_type:
 
     switch(type_kind(type_final($$))) {
       case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-      case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
-      case IDL_OCTET: case IDL_STRING: case IDL_ENUM:
+      case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+      case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+      case IDL_ENUM:
 	break;
 
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
@@ -862,19 +870,33 @@ template_type_spec: sequence_type | string_type | fixed_type;
 integer_type: signed_int | unsigned_int;
 floating_pt_type: float_type | double_type;
 
-signed_int: signed_long_int | signed_short_int;
-unsigned_int: unsigned_long_int | unsigned_short_int;
+signed_int: signed_longlong_int | signed_long_int | signed_short_int;
+unsigned_int: unsigned_longlong_int | unsigned_long_int | unsigned_short_int;
 
-unsigned_short_int: UNSIGNED SHORT { $$ = type_newbasic(@1, NULL, IDL_USHORT); };
-unsigned_long_int: UNSIGNED LONG   { $$ = type_newbasic(@1, NULL, IDL_ULONG); };
-signed_short_int: SHORT		   { $$ = type_newbasic(@1, NULL, IDL_SHORT); };
-signed_long_int: LONG		   { $$ = type_newbasic(@1, NULL, IDL_LONG); };
-float_type: FLOAT		   { $$ = type_newbasic(@1, NULL, IDL_FLOAT); };
-double_type: DOUBLE		   { $$ = type_newbasic(@1, NULL, IDL_DOUBLE); };
-char_type: CHAR			   { $$ = type_newbasic(@1, NULL, IDL_CHAR); };
-boolean_type: BOOLEAN		   { $$ = type_newbasic(@1, NULL, IDL_BOOL); };
-octet_type: OCTET		   { $$ = type_newbasic(@1, NULL, IDL_OCTET); };
-any_type: ANY			   { $$ = type_newbasic(@1, NULL, IDL_ANY); };
+unsigned_short_int: UNSIGNED SHORT
+  { $$ = type_newbasic(@1, NULL, IDL_USHORT); };
+unsigned_long_int: UNSIGNED LONG
+  { $$ = type_newbasic(@1, NULL, IDL_ULONG); };
+unsigned_longlong_int: UNSIGNED LONG LONG
+  { $$ = type_newbasic(@1, NULL, IDL_ULONGLONG); };
+signed_short_int: SHORT
+  { $$ = type_newbasic(@1, NULL, IDL_SHORT); };
+signed_long_int: LONG
+  { $$ = type_newbasic(@1, NULL, IDL_LONG); };
+signed_longlong_int: LONG LONG
+  { $$ = type_newbasic(@1, NULL, IDL_LONGLONG); };
+float_type: FLOAT
+  { $$ = type_newbasic(@1, NULL, IDL_FLOAT); };
+double_type: DOUBLE
+  { $$ = type_newbasic(@1, NULL, IDL_DOUBLE); };
+char_type: CHAR
+  { $$ = type_newbasic(@1, NULL, IDL_CHAR); };
+boolean_type: BOOLEAN
+  { $$ = type_newbasic(@1, NULL, IDL_BOOL); };
+octet_type: OCTET
+  { $$ = type_newbasic(@1, NULL, IDL_OCTET); };
+any_type: ANY
+  { $$ = type_newbasic(@1, NULL, IDL_ANY); };
 
 string_type:
   STRING '<' positive_int_const '>'
@@ -921,7 +943,8 @@ switch_type_spec:
 
     switch(type_kind(type_final($$))) {
       case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-      case IDL_LONG: case IDL_CHAR: case IDL_ENUM:
+      case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_CHAR:
+      case IDL_ENUM:
 	break;
 
       case IDL_FLOAT: case IDL_DOUBLE: case IDL_OCTET: case IDL_STRING:

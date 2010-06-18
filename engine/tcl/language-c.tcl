@@ -74,30 +74,32 @@ namespace eval language::c {
     #
     proc declarator { type {var {}} } {
 	switch -- [$type kind] {
-	    {boolean}		{ set d "bool" }
-	    {unsigned short}	{ set d "uint16_t" }
-	    {short}		{ set d "int16_t" }
-	    {unsigned long}	{ set d "uint32_t" }
-	    {long}		{ set d "int32_t" }
-	    {float}		{ set d "float" }
-	    {double}		{ set d "double" }
-	    {char}		{ set d "char" }
-	    {octet}		{ set d "uint8_t" }
-	    {any}		{ error "type any not supported yet" }
+	    {boolean}			{ set d "bool" }
+	    {unsigned short}		{ set d "uint16_t" }
+	    {short}			{ set d "int16_t" }
+	    {unsigned long}		{ set d "uint32_t" }
+	    {unsigned long long}	{ set d "uint64_t" }
+	    {long}			{ set d "int32_t" }
+	    {long long}			{ set d "int64_t" }
+	    {float}			{ set d "float" }
+	    {double}			{ set d "double" }
+	    {char}			{ set d "char" }
+	    {octet}			{ set d "uint8_t" }
+	    {any}			{ error "type any not supported yet" }
 
-	    {const}		-
-	    {enum}		-
-	    {enumerator}	-
-	    {struct}		-
-	    {union}		-
-	    {typedef}		{ set d [cname [$type fullname]] }
+	    {const}			-
+	    {enum}			-
+	    {enumerator}		-
+	    {struct}			-
+	    {union}			-
+	    {typedef}			{ set d [cname [$type fullname]] }
 
-	    {struct member}	-
-	    {union member}	-
-	    {forward struct}	-
-	    {forward union}	{ set d [declarator [$type type]] }
+	    {struct member}		-
+	    {union member}		-
+	    {forward struct}		-
+	    {forward union}		{ set d [declarator [$type type]] }
 
-	    {string}		{
+	    {string} {
 		if {[catch { $type length } l]} {
 		    set d "char *"
 		} else {
@@ -105,12 +107,12 @@ namespace eval language::c {
 		}
 	    }
 
-	    {array}		{
+	    {array} {
 		if {[catch { $type length } l]} { set l {} }
 		set d "[declarator [$type type]]\[$l\]"
 	    }
 
-	    {sequence}		{
+	    {sequence} {
 		set t [$type type]
 
 		set d "sequence"
@@ -125,7 +127,7 @@ namespace eval language::c {
 		}
 	    }
 
-	    default		{
+	    default {
 		template fatal "internal error: unhandled type '[$type kind]'"
 	    }
 	}

@@ -229,8 +229,9 @@ engine_gentype(Tcl_Interp *interp, idltype_s t)
   /* generate type references recursively */
   switch(type_kind(t)) {
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-    case IDL_LONG: case IDL_FLOAT: case IDL_DOUBLE: case IDL_CHAR:
-    case IDL_OCTET: case IDL_ANY: case IDL_ENUMERATOR: case IDL_STRING:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
+    case IDL_ENUMERATOR: case IDL_STRING:
       /* no type reference */
       s = 0;
       break;

@@ -25,12 +25,21 @@ package require Tcl 8.5
 
 namespace eval language::c {
 
-    # --- gentype -----------------------------------------------------------
+    # --- filext -----------------------------------------------------------
 
-    # Return the C mapping of type.
+    # Return the canonical file extensions in C
     #
     proc fileext { kind } {
 	if {$kind == "header"} { return ".h" } else { return ".c" }
+    }
+
+
+    # --- gentype-prolog ---------------------------------------------------
+
+    # Return the required C includes for mappings
+    #
+    proc gentype-prolog { } {
+	return "\n#include <stdbool.h>\n#include <stdint.h>\n"
     }
 
 
@@ -65,15 +74,15 @@ namespace eval language::c {
     #
     proc declarator { type {var {}} } {
 	switch -- [$type kind] {
-	    {boolean}		{ set d "unsigned char" }
-	    {unsigned short}	{ set d "unsigned short" }
-	    {short}		{ set d "short" }
-	    {unsigned long}	{ set d "unsigned long" }
-	    {long}		{ set d "long" }
+	    {boolean}		{ set d "bool" }
+	    {unsigned short}	{ set d "uint16_t" }
+	    {short}		{ set d "int16_t" }
+	    {unsigned long}	{ set d "uint32_t" }
+	    {long}		{ set d "int32_t" }
 	    {float}		{ set d "float" }
 	    {double}		{ set d "double" }
 	    {char}		{ set d "char" }
-	    {octet}		{ set d "unsigned char" }
+	    {octet}		{ set d "uint8_t" }
 	    {any}		{ error "type any not supported yet" }
 
 	    {const}		-
@@ -232,16 +241,7 @@ namespace eval language::c {
 
 	set v [$type value]
 	switch [$type valuekind] {
-	    bool	{
-		append m "\n#ifndef FALSE"
-		append m "\n# define FALSE	(0)"
-		append m "\n#endif /* FALSE */"
-		append m "\n"
-		append m "\n#ifndef TRUE"
-		append m "\n# define TRUE	(1)"
-		append m "\n#endif /* TRUE */"
-		if {$v} { set v TRUE } else { set v FALSE }
-	    }
+	    bool	{ if {$v} [expr {$v?"true":"false"}] }
 	    char	{ set v "'$v'" }
 	    string	{ set v "\"[string map {\" \\\"} $v]\"" }
 	    enum	{ set v [cname $v] }
@@ -261,7 +261,7 @@ namespace eval language::c {
 	set n [cname [$type fullname]]
 
 	append m [genloc $type]
-	append m "\ntypedef unsigned long $n;"
+	append m "\ntypedef uint32_t $n;"
 	set v 0
 	foreach e [$type members] {
 	    append m [genloc $e]
@@ -285,12 +285,12 @@ namespace eval language::c {
 	append m [genloc $type]
 	append m "\ntypedef struct $n {"
 	if {[catch {$type length} l]} {
-	    append m "\n  unsigned long _maximum, _length;"
+	    append m "\n  uint32_t _maximum, _length;"
 	    append m "\n  [declarator* [$type type] _buffer];"
 	    append m "\n  void (*_release)(void *_buffer);"
 	} else {
-	    append m "\n  const unsigned long _maximum;"
-	    append m "\n  unsigned long _length;"
+	    append m "\n  const uint32_t _maximum;"
+	    append m "\n  uint32_t _length;"
 	    append m "\n  [declarator [$type type] _buffer\[$l\]];"
 	}
 	append m "\n} $n;"

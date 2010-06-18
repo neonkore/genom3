@@ -254,11 +254,11 @@ const_convert(cval *value, cvalkind k)
     case CST_FLOAT:
       switch(k) {
 	case CST_UINT:
-	  if ((unsigned long)value->f != value->f) return EDOM;
+	  if ((uint64_t)value->f != value->f) return EDOM;
 	  value->u = value->f;
 	  break;
 	case CST_INT:
-	  if ((long)value->f != value->f) return EDOM;
+	  if ((int64_t)value->f != value->f) return EDOM;
 	  value->i = value->f;
 	  break;
 	case CST_FLOAT:	return 0;
@@ -403,8 +403,8 @@ const_strval(cval v)
   switch(v.k) {
     case CST_VOID:	buf[0] = '\0'; break;
     case CST_BOOL:	snprintf(buf, sizeof(buf), "%d", v.b); break;
-    case CST_UINT:	snprintf(buf, sizeof(buf), "%lu", v.u); break;
-    case CST_INT:	snprintf(buf, sizeof(buf), "%ld", v.i); break;
+    case CST_UINT:	snprintf(buf, sizeof(buf), "%llu", v.u); break;
+    case CST_INT:	snprintf(buf, sizeof(buf), "%lld", v.i); break;
     case CST_FLOAT:	snprintf(buf, sizeof(buf), "%g", v.f); break;
     case CST_CHAR:	snprintf(buf, sizeof(buf), "%c", v.c); break;
     case CST_STRING:	return v.s;

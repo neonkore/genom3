@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <limits.h>
 
 /** runtime options */
@@ -149,8 +150,8 @@ typedef struct cval {
   cvalkind k;
   union {
     unsigned char b;
-    unsigned long u;
-    signed long i;
+    uint64_t u;
+    int64_t i;
     double f;
     char c;
     const char *s;

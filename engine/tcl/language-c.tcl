@@ -34,6 +34,28 @@ namespace eval language::c {
     }
 
 
+    # --- mapping ----------------------------------------------------------
+
+    # Generate and return the C mapping of types matching the glob pattern
+    #
+    proc mapping { pattern } {
+	set m ""
+	foreach t [dotgen types $pattern] {
+	    append m [gentype $t]
+	}
+
+	set p ""
+	if {[regexp {u?int(8|16|32|64)_t} $m]} {
+	    append p "#include <stdint.h>\n"
+	}
+	if {[regexp {bool} $m]} {
+	    append p "#include <stdbool.h>\n"
+	}
+
+	return $p$m
+    }
+
+
     # --- gentype-prolog ---------------------------------------------------
 
     # Return the required C includes for mappings
@@ -118,11 +140,19 @@ namespace eval language::c {
 		set d "sequence"
 		if {![catch {$type length} l]} { append d $l }
 
-		append d [cname " [$t kind]"]
+		if {[catch {$t fullname}]} {
+		    append d [cname " [cname [$t kind]]"]
+		} else {
+		    append d [cname " [cname [$t fullname]]"]
+		}
 		if {![catch {$t length} l]} { append d $l }
 		while {[$t kind] == "sequence"} {
 		    set t [$t type]
-		    append d [cname " [$t kind]"]
+		    if {[catch {$t fullname}]} {
+			append d [cname " [cname [$t kind]]"]
+		    } else {
+			append d [cname " [cname [$t fullname]]"]
+		    }
 		    if {![catch {$t length} l]} { append d $l }
 		}
 	    }
@@ -243,7 +273,7 @@ namespace eval language::c {
 
 	set v [$type value]
 	switch [$type valuekind] {
-	    bool	{ if {$v} [expr {$v?"true":"false"}] }
+	    bool	{ set v [expr {$v?"true":"false"}] }
 	    char	{ set v "'$v'" }
 	    string	{ set v "\"[string map {\" \\\"} $v]\"" }
 	    enum	{ set v [cname $v] }
@@ -422,7 +452,7 @@ namespace eval language::c {
 	set b [string first \[ $type]
 	if { $b < 0 } {
 	    if {[string index $type end] eq "*"} {
-	    return "$type$name"
+		return "$type$name"
 	    }
 	    return "$type $name"
 	}

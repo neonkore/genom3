@@ -84,11 +84,7 @@ namespace eval language {
     #
     proc mapping { lang {pattern *} } {
 	set lns [support $lang]
-	set m [${lns}::gentype-prolog]
-	foreach t [dotgen types $pattern] {
-	    append m [${lns}::gentype $t]
-	}
-	return $m
+	return [${lns}::mapping $pattern]
     }
     namespace export mapping
 

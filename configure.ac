@@ -25,6 +25,11 @@ AC_SUBST(tmpldir)
 sysdir='${datadir}/${PACKAGE_NAME}/${PACKAGE_VERSION}/engines'
 AC_SUBST(sysdir)
 
+# define site templates directory (relative to datadir)
+sitetmpldir='${datadir}/${PACKAGE_NAME}/site-templates'
+AC_SUBST(sitetmpldir)
+
+
 # generator engines - only tcl, but provide an option for documentation purpose.
 AC_ARG_ENABLE(tcl,
 	AS_HELP_STRING([--disable-tcl], [don't compile support for Tcl engine]),

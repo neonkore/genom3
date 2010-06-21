@@ -40,7 +40,7 @@ extern struct runopt_s {
   int parse;		/** parse file only */
   int list;		/** list available templates */
   char engine[PATH_MAX];/** generator engine */
-  char tmpldir[PATH_MAX];/** templates directory */
+  char *tmplpath;	/** templates directories, colon separated */
   char sysdir[PATH_MAX];/** system files directory */
   char tmpdir[PATH_MAX];/** temporary directory */
   int cppdotgen;	/** cpp accepts .gen file extension */
@@ -462,12 +462,13 @@ typedef struct engdescr {
   int (*invoke)(const char *tmpl, int argc, char **argv);
 } engdescr;
 
-int	eng_listeng(void);
-int	eng_seteng(const char *tmpl);
-int	eng_optappend(const char *opt, int index);
-int	eng_optrm(int index);
+const char *	eng_findtmpl(const char *tmpl);
+int		eng_listtmpl(void);
+int		eng_seteng(const char *tmpl);
+int		eng_optappend(const char *opt, int index);
+int		eng_optrm(int index);
 
-int	eng_invoke(void);
+int		eng_invoke(void);
 
 
 /* --- strings ------------------------------------------------------------- */

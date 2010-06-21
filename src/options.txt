@@ -126,12 +126,15 @@ options will only affect the template behaviour.
      By default, the standard templates directory is searched, but any \tt
      -t\rm option will be taken into account.
 
-\arg t tmpldir		dir
-     use dir as the directory for templates
+\arg t tmpldir		dir[:dir]
+     use dir as the templates directory
 
-     Use \em dir\rm as the directory containing templates. This is useful only
-     for templates not installed in the genom standard directory, i.e. \tt
-     share/genom/<version>/templates\rm.
+     Use \em dir\rm as the directory containing templates. This can be a colon
+     separated list of directories which are search in order.
+
+     This option is useful only for templates not installed in the genom
+     standard directories, i.e. \tt share/genom/<version>/templates\rm or
+     \tt share/genom/site-templates\rm.
 
      \em dir\rm is searched for files matching \tt dir/*/template.tcl\rm, where
      \tt *\rm is the actual template name.
@@ -202,6 +205,14 @@ options will only affect the template behaviour.
      \tt gcc -E -xc\rm on Linux systems.
 
      The \tt CPP\rmprogram must recognize \tt -I\rm and \tt -D\rm arguments.
+
+\env GENOM_TEMPLATE_PATH
+     Template search path
+
+     The value of \tt GENOM_TEMPLATE_PATH\rm is a colon-separated list of
+     directories, much like \tt PATH\rm, where \name looks for
+     templates. Setting this variable overrides the default search path, but
+     any \tt -t\rm option takes precedence over this variable.
 
 \env TMPDIR
      directory for temporary files

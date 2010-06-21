@@ -87,13 +87,15 @@ EXTRA_DIST+=	optgen.awk docgen.awk
 genom3.1: Makefile genom-options.mdoc
 genom3.1: roff/genom.mdoc
 	sed <$< >$@							\
+		-e '/@genom-options@/r genom-options.mdoc'		\
+		-e '/@genom-options@/d'					\
 		-e "s/@date@/`date '+%B %e, %Y'`/"			\
 		-e 's/@version@/$(PACKAGE_VERSION)/'			\
 		-e 's|@[p]refix@|$(prefix)|'				\
 		-e 's|@[d]ocdir@|$(docdir)|'				\
+		-e 's|@[t]mpldir@|$(tmpldir)|'				\
+		-e 's|@[s]itetmpldir@|$(sitetmpldir)|'			\
 		-e 's|@[C]PP@|$(CPP)|'					\
-		-e '/@genom-options@/r genom-options.mdoc'		\
-		-e '/@genom-options@/d'					\
 		-e 's/[ 	]*$$//'
 
 genom-options.mdoc: Makefile $(srcdir)/optgen.awk

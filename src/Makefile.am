@@ -48,7 +48,8 @@ genom3_LDFLAGS=	-export-dynamic
 # emulate per-file CPPFLAGS
 noinst_LIBRARIES = libmain.a
 libmain_a_SOURCES = main.c
-libmain_a_CPPFLAGS = -DTMPLDIR='"$(tmpldir)"' -DSYSDIR='"$(sysdir)"'
+libmain_a_CPPFLAGS = -DTMPLPATH='"$(tmpldir):$(sitetmpldir)"'
+libmain_a_CPPFLAGS += -DSYSDIR='"$(sysdir)"'
 
 BUILT_SOURCES=\
 	options.c

@@ -75,8 +75,10 @@ main(int argc, char *argv[])
   runopt.input[0] = '\0';
   runopt.tmpl[0] = '\0';
   runopt.engine[0] = '\0';
-  strlcpy(runopt.tmpldir, TMPLDIR, sizeof(runopt.tmpldir));
   strlcpy(runopt.sysdir, SYSDIR, sizeof(runopt.sysdir));
+
+  optarg = getenv("GENOM_TEMPLATE_PATH");
+  runopt.tmplpath = optarg?optarg:TMPLPATH;
 
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
@@ -130,7 +132,7 @@ main(int argc, char *argv[])
 	break;
 
       case 't':
-	strlcpy(runopt.tmpldir, optarg, sizeof(runopt.tmpldir));
+	runopt.tmplpath = string(optarg);
 	runopt.cmdline = strings(runopt.cmdline, " -t ", abspath(optarg), NULL);
 	break;
 
@@ -170,7 +172,7 @@ main(int argc, char *argv[])
   argv += optind;
 
   /* just list templates */
-  if (runopt.list) exit(eng_listeng());
+  if (runopt.list) exit(eng_listtmpl());
 
   /* create a temporary directory */
   strlcat(runopt.tmpdir, "/genomXXXXXX", sizeof(runopt.tmpdir));
@@ -183,24 +185,17 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  runopt.tmpl[0] = '\0';
-  if (argv[0][0] != '/') {
-    if (runopt.tmpldir[0] != '/') {
-      getcwd(runopt.tmpl, sizeof(runopt.tmpl));
-      strlcat(runopt.tmpl, "/", sizeof(runopt.tmpl));
-    }
-    strlcat(runopt.tmpl, runopt.tmpldir, sizeof(runopt.tmpl));
-    strlcat(runopt.tmpl, "/", sizeof(runopt.tmpl));
-  }
-  strlcat(runopt.tmpl, argv[0], sizeof(runopt.tmpl));
-  xwarnx("template path `%s'", runopt.tmpl);
-  argc--;
-  argv++;
-
   if (!runopt.parse && !runopt.preproc) {
+    const char *p = eng_findtmpl(argv[0]);
+    if (!p) goto done;
+    strlcpy(runopt.tmpl, abspath(p), sizeof(runopt.tmpl));
+    xwarnx("template path `%s'", runopt.tmpl);
+
     status = eng_seteng(runopt.tmpl);
     if (status) goto done;
   }
+  argc--;
+  argv++;
 
   while(argc > 1) {
     if (!strcmp(argv[0], "--")) break;

@@ -227,8 +227,9 @@ function output_tex() {
     print "\\begin{description}";
     k = split(envs, key);
     for (i = 1; i <= k; i++) {
-	print "\\item[{" key[i] "}]";
+	print "\\item[{" gensub(/[_]/, "\\\\&", "g", key[i]) "}]";
 	gsub(/[#_]/, "\\\\&", envdesc[key[i]]);
+	gsub(/\\name/, "\\GenoM{}", envdesc[key[i]]);
 	gsub(/\\em/, "{\\em", envdesc[key[i]]);
 	gsub(/\\tt/, "{\\tt", envdesc[key[i]]);
 	gsub(/\\rm/, "}", envdesc[key[i]]);
@@ -282,6 +283,7 @@ function output_mdoc() {
     k = split(envs, key);
     for (i = 1; i <= k; i++) {
 	print ".It Ev " key[i];
+	gsub(/\n?\\name/, "\n.Nm\n.Ns ", envdesc[key[i]]);
 	gsub(/\n?\\em/, "\n.Em", envdesc[key[i]]);
 	gsub(/\n?\\tt/, "\n.Li", envdesc[key[i]]);
 	gsub(/\n?\\rm/, "\n.Ns ", envdesc[key[i]]);

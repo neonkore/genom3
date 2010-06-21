@@ -25,6 +25,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
@@ -62,60 +63,107 @@ static int nengopts;
 int stdfd[4];
 
 
-static char *	eng_findtmpl(const char *dir);
+static char *	eng_findentry(const char *dir);
 static int	eng_printpipe(int fd, FILE *out, const char *bol,
 			int *firstline);
 int		eng_swapfd(int from, int to);
 
 
-/* --- eng_listeng --------------------------------------------------------- */
+/* --- eng_findtmpl -------------------------------------------------------- */
 
-/** list available templates
+/** Find a template
  */
-int
-eng_listeng()
+const char *
+eng_findtmpl(const char *tmpl)
 {
   char path[PATH_MAX];
+  char *dirs, *dir;
+  struct stat sb;
+  char *name;
+
+  /* if template is an absolute path, return that */
+  if (tmpl[0] == '/') return tmpl;
+
+  /* iterate over components of tmplpath */
+  dirs = strdup(runopt.tmplpath);
+  if (!dirs) return tmpl;
+  for (dir = strtok(dirs, ":"); dir; dir = strtok(NULL, ":")) {
+
+    /* look for template.xxx entries */
+    xwarnx("searching template directory '%s'", dir);
+
+    strlcpy(path, dir, sizeof(path));
+    strlcat(path, "/", sizeof(path));
+    strlcat(path, tmpl, sizeof(path));
+    if (stat(path, &sb)) continue;
+    if (!(sb.st_mode & S_IFDIR)) continue;
+
+    xwarnx("looking for template in '%s'", path);
+    name = eng_findentry(path);
+    if (name) {
+      free(dirs);
+      return string(path);
+    }
+  }
+
+  free(dirs);
+  warnx("cannot find template '%s'", tmpl);
+  return NULL;
+}
+
+
+/* --- eng_listtmpl -------------------------------------------------------- */
+
+/** List available templates
+ */
+int
+eng_listtmpl()
+{
+  char path[PATH_MAX];
+  char *dirs, *dir;
   struct dirent de, *r;
   struct stat sb;
   DIR *d;
   char *name;
-  int n;
 
-  /* look for template.xxx entries */
-  xwarnx("using template directory '%s'", runopt.tmpldir);
-  d = opendir(runopt.tmpldir);
-  if (!d) {
-    warnx("cannot open directory %s", runopt.tmpldir);
-    warn(NULL);
-    return errno;
-  }
+  int n = 0;
 
-  n = 0;
-  /* must use readdir_r() here because eng_findtmpl() also readdir() */
-  while(!readdir_r(d, &de, &r) && r) {
-    if (!(de.d_type & DT_DIR) && de.d_type != DT_UNKNOWN) continue;
+  /* iterate over components of tmplpath */
+  dirs = strdup(runopt.tmplpath);
+  if (!dirs) return ENOMEM;
+  for (dir = strtok(dirs, ":"); dir; dir = strtok(NULL, ":")) {
 
-    strlcpy(path, runopt.tmpldir, sizeof(path));
-    strlcat(path, "/", sizeof(path));
-    strlcat(path, de.d_name, sizeof(path));
-    if (stat(path, &sb)) continue;
-    if (!(sb.st_mode & S_IFDIR)) continue;
+    /* look for template.xxx entries */
+    xwarnx("searching template directory '%s'", dir);
+    d = opendir(dir);
+    if (!d) continue;
 
-    xwarnx("looking for template in '%s'", de.d_name);
-    name = eng_findtmpl(path);
-    if (name) {
-      if (strlen(de.d_name) >= 68) {
-	de.d_name[68] = '\0';
-	de.d_name[67] = de.d_name[66] = de.d_name[65] = '.';
+    /* must use readdir_r() here because eng_findentry() also readdir() */
+    while(!readdir_r(d, &de, &r) && r) {
+      if (!(de.d_type & DT_DIR) && de.d_type != DT_UNKNOWN) continue;
+
+      strlcpy(path, dir, sizeof(path));
+      strlcat(path, "/", sizeof(path));
+      strlcat(path, de.d_name, sizeof(path));
+      if (stat(path, &sb)) continue;
+      if (!(sb.st_mode & S_IFDIR)) continue;
+
+      xwarnx("looking for template in '%s'", de.d_name);
+      name = eng_findentry(path);
+      if (name) {
+	if (strlen(de.d_name) >= 68) {
+	  de.d_name[68] = '\0';
+	  de.d_name[67] = de.d_name[66] = de.d_name[65] = '.';
+	}
+	name += strlen(TMPL_SPECIAL_FILE);
+	printf("%-70s %s\n", de.d_name, name);
+	n++;
       }
-      name += strlen(TMPL_SPECIAL_FILE);
-      printf("%-70s %s\n", de.d_name, name);
-      n++;
     }
+    closedir(d);
   }
-  closedir(d);
 
+  free(dirs);
   if (!n) { warnx("no template found!"); return ENOENT; }
   return 0;
 }
@@ -138,7 +186,7 @@ eng_seteng(const char *tmpl)
   char *name;
 
   /* look for template.xxx entry */
-  name = eng_findtmpl(tmpl);
+  name = eng_findentry(tmpl);
   if (!name) {
     warnx("cannot find template entry '" TMPL_SPECIAL_FILE "<engine>'");
     return ENOENT;
@@ -294,12 +342,12 @@ eng_invoke()
 }
 
 
-/* --- eng_findtmpl -------------------------------------------------------- */
+/* --- eng_findentry ------------------------------------------------------- */
 
 /** return the name of the first template.xxx file in directory
  */
 static char *
-eng_findtmpl(const char *dir)
+eng_findentry(const char *dir)
 {
   struct dirent *de;
   char *name;
@@ -323,7 +371,7 @@ eng_findtmpl(const char *dir)
     }
 
     xwarnx("found template entry '%s'", de->d_name);
-    name = de->d_name;
+    name = string(de->d_name);
     break;
   }
   closedir(d);

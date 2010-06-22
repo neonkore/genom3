@@ -249,7 +249,6 @@ unsigned long	type_length(idltype_s t);
 idltype_s	type_discriminator(idltype_s t);
 clist_s		type_casevalues(idltype_s t);
 hash_s		type_members(idltype_s t);
-void		type_setscope(idltype_s t, scope_s s);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
 idltype_s	type_newforward(tloc l, const char *name, idlkind k);

@@ -66,8 +66,6 @@ idlkind
 type_kind(idltype_s t) { assert(t); return t->kind; }
 scope_s
 type_scope(idltype_s t) { assert(t); return t->scope; }
-void
-type_setscope(idltype_s t, scope_s s) { assert(t); t->scope = s; }
 
 
 /** hash of all declared types */
@@ -111,6 +109,7 @@ type_new(tloc l, idlkind k, const char *name)
   t->kind = k;
   t->name = name ? string(name) : NULL;
   t->fullname = name ? strings(scope_fullname(s), "::", name, NULL) : NULL;
+  t->scope = s;
   t->type = NULL;
   t->members = NULL;
   t->length = 0;

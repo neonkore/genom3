@@ -39,3 +39,6 @@ EXTRA_DIST=\
 	compat/getline.c	\
 	compat/strlcat.c	\
 	compat/strlcpy.c
+
+# make sure regression tests are executed before make dist
+dist: check

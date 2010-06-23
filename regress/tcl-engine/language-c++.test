@@ -1,0 +1,106 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+# minimalistic .gen file
+cat >run.gen <<'EOF'
+EOF
+mkdir -p run.t
+
+
+# --- language fileext c++ -------------------------------------------------
+#
+testing '[language fileext c++]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [language fileext c++]
+puts [language fileext c++ source]
+puts [language fileext c++ header]
+EOF
+expect out '/^\.cc|\.h$/ {next}; {exit 2}'
+
+
+# --- language comment c++ -------------------------------------------------
+#
+testing '[language comment c++]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [language comment c++ comment]
+EOF
+expect out '/^\/\/comment$/ {next}; {exit 2}'
+
+
+# --- language mapping c++ -------------------------------------------------
+#
+testing '[language mapping c++]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+puts [language mapping c++]
+puts "int main() { return 0; }\n"
+EOF
+expect out ''
+mv -f run.out run.t/mapping.cc
+run 0 ${CXX} -I"${0%${0##*/}}../../runtime" run.t/mapping.cc
+
+
+# --- language declarator c++ ----------------------------------------------
+#
+testing '[language declarator c++]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+puts [language declarator c++ [dotgen type ::xlong] a]
+puts [language declarator c++ [dotgen type ::xlongarray] a]
+puts [language declarator c++ [dotgen type ::xbstring] a]
+EOF
+expect out '
+	/^xlong a$/ {next}
+	/^xlongarray a$/ {next}
+	/^xbstring a$/ {next}
+	{exit 2}
+'
+
+
+# --- language declarator& c++ ---------------------------------------------
+#
+testing '[language declarator& c++]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+puts [language declarator& c++ [dotgen type ::xlong] a]
+puts [language declarator& c++ [dotgen type ::xlongarray] a]
+puts [language declarator& c++ [dotgen type ::xbstring] a]
+EOF
+expect out '
+	/^xlong &a$/ {next}
+	/^xlongarray a$/ {next}
+	/^xbstring &a$/ {next}
+	{exit 2}
+'
+
+
+# --- language declarator* c++ ---------------------------------------------
+#
+testing '[language declarator* c++]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+puts [language declarator* c++ [dotgen type ::xlong] a]
+puts [language declarator* c++ [dotgen type ::xlongarray] a]
+puts [language declarator* c++ [dotgen type ::xbstring] a]
+EOF
+expect out '
+	/^xlong \*a$/ {next}
+	/^xlongarray a$/ {next}
+	/^xbstring \*a$/ {next}
+	{exit 2}
+'
+
+
+# --- language cname c++ ---------------------------------------------------
+#
+testing '[language cname c++]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+puts [language cname c++ [[dotgen type ::m1::e1] fullname]]
+EOF
+expect out '
+	/^m1::e1$/ {next}
+	{exit 2}
+'

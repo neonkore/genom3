@@ -1,0 +1,30 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+cat >run.gen <<EOF
+#ifndef PREPROCESS_TEST
+# define PREPROCESS_TEST	hello
+# include "run.gen"
+#else
+PREPROCESS_TEST  __GENOM__ CMDLINE_MACRO
+#endif
+EOF
+
+testing 'macro expansion'
+run 0 ${GENOM_BIN} -DCMDLINE_MACRO=world -E run.gen
+expect out '
+	/^#/ || /^$/ || /^hello '"${PACKAGE_VERSION}"' world$/ { next }
+	{ exit 2 }
+'
+run 0 ${GENOM_BIN} -DPREPROCESS_TEST -E run.gen
+expect out '
+	/^#/ || /^$/ || /^1 '"${PACKAGE_VERSION}"' CMDLINE_MACRO$/ { next }
+	{ exit 2 }
+'
+
+testing 'genom -r option'
+run 0 ${GENOM_BIN} -r -DCMDLINE_MACRO=world -E run.gen
+expect out '
+	/^#/ || /^$/ || /^hello '"${PACKAGE_VERSION}"' world$/ { next }
+	{ exit 2 }
+'

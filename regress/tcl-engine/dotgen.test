@@ -1,0 +1,160 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+# minimalistic .gen file
+>run.gen
+mkdir -p run.t
+
+
+# --- dotgen genom program -------------------------------------------------
+#
+testing '[dotgen genom program]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [dotgen genom program]
+EOF
+test -x `cat run.out`
+
+
+# --- dotgen genom cmdline -------------------------------------------------
+#
+testing '[dotgen genom cmdline]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [dotgen genom cmdline]
+EOF
+expect out '/-s [^ ]+ -t [^ ]+/ {next}; {exit 2}'
+
+
+# --- dotgen genom version -------------------------------------------------
+#
+testing '[dotgen genom version]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [dotgen genom version]
+EOF
+expect out '/^genom '${PACKAGE_VERSION}'$/ {next}; {exit 2}'
+
+
+# --- dotgen genom debug ---------------------------------------------------
+#
+testing '[dotgen genom debug]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+exit [dotgen genom debug]
+EOF
+run 1 ${GENOM_BIN} -d -T run.t interactive -b run.gen <<EOF
+exit [dotgen genom debug]
+EOF
+
+
+# --- dotgen template name -------------------------------------------------
+#
+testing '[dotgen template name]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [dotgen template name]
+EOF
+expect out '/^interactive$/ {next}; {exit 2}'
+
+
+# --- dotgen template dir --------------------------------------------------
+#
+testing '[dotgen template dir]'
+
+cat >run.t/template.tcl <<EOF
+template message [dotgen template dir]
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect err '/\/run.t$/ {next}; {exit 2}'
+
+
+# --- dotgen template tmpdir -----------------------------------------------
+#
+testing '[dotgen template tmpdir]'
+
+run 0 ${GENOM_BIN} -T run.t interactive -b run.gen <<EOF
+puts [dotgen template tmpdir]
+EOF
+expect out '/^run.t\/genom/ {next}; {exit 2}'
+
+
+# --- dotgen input file ----------------------------------------------------
+#
+testing '[dotgen input file]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [dotgen input file]
+EOF
+expect out '/\/run.gen$/ {next}; {exit 2}'
+
+
+# --- dotgen input base ----------------------------------------------------
+#
+testing '[dotgen input base]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [dotgen input base]
+EOF
+expect out '/^run.gen$/ {next}; {exit 2}'
+
+
+# --- dotgen input notice --------------------------------------------------
+#
+testing '[dotgen input notice]'
+
+cat >run.gen <<EOF
+/*/notice*/
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [dotgen input notice]
+EOF
+expect out '/^ notice$/ {next}; {exit 2}'
+
+
+# --- dotgen types ---------------------------------------------------------
+#
+testing '[dotgen types]'
+
+>run.gen
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+puts [dotgen types]
+EOF
+expect out '/^$/ {next}; {exit 2}'
+
+cat >run.gen <<EOF
+typedef long a;
+typedef long b;
+typedef long b1;
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach t [dotgen types] { lappend l [$t fullname] }
+puts $l
+EOF
+expect out '/^::a ::b ::b1$/ {next}; {exit 2}'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach t [dotgen types *b*] { lappend l [$t fullname] }
+puts $l
+EOF
+expect out '/^::b ::b1$/ {next}; {exit 2}'
+
+
+# --- dotgen components ----------------------------------------------------
+#
+testing '[dotgen components]'
+
+>run.gen
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+puts [dotgen components]
+EOF
+expect out '/^$/ {next}; {exit 2}'
+
+cat >run.gen <<EOF
+component c;
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach c [dotgen components] { lappend l [$c name] }
+puts $l
+EOF
+expect out '/^c$/ {next}; {exit 2}'

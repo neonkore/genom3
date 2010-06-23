@@ -41,6 +41,7 @@ AM_CONDITIONAL([WITH_TCL], [test "$use_tcl" = yes])
 # compilers et al.
 AC_PROG_CC
 AM_PROG_CC_C_O
+AC_PROG_CXX
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
@@ -166,7 +167,7 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	engine/tcl/Makefile
-	runtime/c++/Makefile
+	runtime/genom3/c++/Makefile
 	templates/interactive/Makefile
 	templates/example/Makefile
 	templates/libcodels/Makefile

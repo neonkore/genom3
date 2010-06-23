@@ -16,52 +16,37 @@
 #
 #                                            Anthony Mallet on Mon Dec 21 2009
 #
-ECHO=	echo
+TESTS=	basics/cpp.test
+TESTS+=	basics/parser.test
 
-check_PROGRAMS=\
-	preprocess	\
-	datatypes	\
-	component	\
-	generate
+if WITH_TCL
+  TESTS+=	tcl-engine/engine.test
+  TESTS+=	tcl-engine/dotgen.test
+  TESTS+=	tcl-engine/template.test
+  TESTS+=	tcl-engine/language-c.test
+  TESTS+=	tcl-engine/language-c++.test
+endif
 
-TESTS=		$(check_PROGRAMS)
+TESTS_ENVIRONMENT=	${SHELL} -e
 
-
-# check cpp - both with and without -r (for default include path)
-preprocess_SOURCES=
-
-preprocess: Makefile
-	@exec >$@;						\
-	${ECHO} '#!${SHELL}';					\
-	${ECHO} ${top_builddir}/src/genom3 -r			\
-			-D CMDLINE_MACRO=world	 		\
-			-E regress ${srcdir}/$@.gen "|"		\
-		grep "'hello ${PACKAGE_VERSION} world'";	\
-	${ECHO} ${top_builddir}/src/genom3			\
-			-DCMDLINE_MACRO=me	 		\
-			-E void ${srcdir}/$@.gen "|"		\
-		grep "'hello ${PACKAGE_VERSION} me'"
-	@chmod u+x $@
+EXTRA_DIST=		${TESTS}
+EXTRA_DIST+=\
+	datatypes.gen
+	component.gen
 
 
-# check data types and genom objects parsing
-component_SOURCES=
-datatypes_SOURCES=
+# export useful variables to the test scripts
+export AWK
+export CC
+export CXX
+export GENOM_BIN=${top_builddir}/src/genom3 \
+		-s ${top_builddir}/engine -t ${top_srcdir}/templates
 
-component: Makefile
-datatypes: Makefile
-
-component datatypes:
-	@exec >$@;						\
-	${ECHO} '#!${SHELL}';					\
-	${ECHO} ${top_builddir}/src/genom3 -n 			\
-			void ${srcdir}/$@.gen
-	@chmod u+x $@
+export PACKAGE_VERSION
+export top_srcdir
 
 
 # check component generation
-generate_SOURCES=
-
 generate: Makefile
 	@exec >$@;						\
 	${ECHO} '#!${SHELL}';					\

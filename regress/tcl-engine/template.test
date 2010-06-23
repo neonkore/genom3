@@ -1,0 +1,133 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+# minimalistic .gen file
+>run.gen
+mkdir -p run.t
+
+
+# --- template option ------------------------------------------------------
+#
+testing '[template option]'
+
+# default option spec
+cat >run.t/template.tcl <<EOF
+template option {}
+EOF
+run 2 ${GENOM_BIN} -t . run.t -h run.gen
+expect err '/^run.t: help not implemented$/ {exit 0}; {exit 2}'
+
+# bad option spec
+cat >run.t/template.tcl <<EOF
+template option { fail }
+EOF
+run 2 ${GENOM_BIN} -t . run.t run.gen
+
+# valid option spec
+cat >run.t/template.tcl <<EOF
+template option { -o { exit 7 } }
+EOF
+run 7 ${GENOM_BIN} -t . run.t -o run.gen
+
+
+# --- template arg ---------------------------------------------------------
+#
+testing '[template arg]'
+
+cat >run.t/template.tcl <<EOF
+template option { -o { exit [template arg] } }
+EOF
+run 7 ${GENOM_BIN} -t . run.t -o 7 run.gen
+
+
+# --- template usage -------------------------------------------------------
+#
+testing '[template usage]'
+
+cat >run.t/template.tcl <<EOF
+template usage {usage ok}
+puts stderr [template usage]
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect err '/^run.t: usage ok$/ {next}; {exit 2}'
+
+
+# --- template fatal -----------------------------------------------------
+#
+testing '[template fatal]'
+
+cat >run.t/template.tcl <<EOF
+template fatal {fatal ok}
+EOF
+run 2 ${GENOM_BIN} -t . run.t run.gen
+expect err '/^run.t: fatal ok$/ {exit 0}; {exit 2}'
+
+
+# --- template message -----------------------------------------------------
+#
+testing '[template message]'
+
+cat >run.t/template.tcl <<EOF
+template message {message ok}
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect err '/^run.t: message ok$/ {next}; {exit 2}'
+
+
+# --- template require -----------------------------------------------------
+#
+testing '[template require]'
+
+cat >run.t/file.tcl <<EOF
+set ::v {require ok}
+EOF
+cat >run.t/template.tcl <<EOF
+template require file.tcl
+puts stderr [concat $::v slave [slave eval set ::v]]
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect err '/^run.t: require ok slave require ok$/ {next}; {exit 2}'
+
+
+# --- template parse -------------------------------------------------------
+#
+testing '[template parse]'
+
+# parse string
+cat >run.t/template.tcl <<EOF
+engine mode +overwrite
+template parse string {<"[dotgen genom version]\n">} file run.data
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect data '/^genom '${PACKAGE_VERSION}'$/ {next}; {exit 2}'
+
+# parse string, args set
+cat >run.t/template.tcl <<'EOF'
+engine mode +overwrite
+template parse args {args ok} string {<"[llength $argv] [join $argv]\n">} \
+	file run.data
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect data '/^2 args ok$/ {next}; {exit 2}'
+
+# parse file, double quote marker
+cat >run.t/file.tcl <<EOF
+<"[dotgen genom version]">
+EOF
+cat >run.t/template.tcl <<EOF
+engine mode +overwrite
+template parse file file.tcl file run.data
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect data '/^genom '${PACKAGE_VERSION}'$/ {next}; {exit 2}'
+
+# parse file, single quote marker
+cat >run.t/file.tcl <<'EOF'
+<'set v [dotgen genom version]; puts $v'>
+EOF
+cat >run.t/template.tcl <<EOF
+engine mode +overwrite
+template parse file file.tcl file run.data
+EOF
+run 0 ${GENOM_BIN} -t . run.t run.gen
+expect data '/^genom '${PACKAGE_VERSION}'$/ {next}; {exit 2}'

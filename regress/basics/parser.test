@@ -1,0 +1,8 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+testing 'dotgen parser against type definitions'
+run 0 ${GENOM_BIN} -n ${thisdir}../datatypes.gen
+
+testing 'dotgen parser against genom objects'
+run 0 ${GENOM_BIN} -n ${thisdir}../component.gen

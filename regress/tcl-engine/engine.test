@@ -1,0 +1,69 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+# minimalistic .gen file
+>run.gen
+mkdir -p run.t
+
+
+# --- engine chdir ---------------------------------------------------------
+#
+testing '[engine chdir]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+engine chdir run.t
+engine::close [engine::open file run.data write]
+EOF
+test -f run.t/run.data || { ls run.t; exit 2; }
+
+
+# --- engine pwd -----------------------------------------------------------
+#
+testing '[engine pwd]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [engine pwd]
+engine chdir run.t
+puts "chdir [engine pwd]"
+EOF
+expect out '/^.$/ {next}; /^chdir run.t$/ {next}; {exit 2}'
+
+
+
+# --- engine mode ----------------------------------------------------------
+#
+testing '[engine mode]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+engine mode +verbose
+puts yes
+engine mode -verbose
+puts no
+engine mode verbose
+puts yes
+EOF
+expect out '/^yes$/ {next}; /^verbose mode off$/ {next}; {exit 2}'
+
+cat >run.data <<EOF
+overwrite
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+engine mode +overwrite
+engine::close [engine::open file run.data write]
+EOF
+expect out '/^overwrite mode on$/ {next}; /run.data/ {next}; {exit 2}'
+
+cat >run.data <<EOF
+overwrite
+EOF
+run 2 ${GENOM_BIN} interactive -b run.gen <<EOF
+engine mode -overwrite
+engine::close [engine::open file run.data write]
+EOF
+
+>run.data
+run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
+engine mode -overwrite +move-if-change
+engine::close [engine::open file run.data write]
+EOF
+expect err '/run.data.*up-to-date/ {next}; {exit 2}'

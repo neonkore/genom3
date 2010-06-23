@@ -1,5 +1,9 @@
 /* Datatypes parsing test */
 
+typedef long xlong;
+typedef long xlongarray[1][2];
+typedef string<16> xbstring;
+
 module m1 {
   enum e1 { e1v1, e1v2 };
 };
@@ -41,12 +45,6 @@ typedef struct s3 {
 } t2;
 
 typedef union u2 switch(boolean) {
- case TRUE: ss3 a;
- case FALSE: su2 b;
+ case TRUE: s1 a;
+ case FALSE: u1 b;
 } t3;
-
-component c {
-  ids:		t3;
-  version:	"1.0";
-  lang:		"c";
-};

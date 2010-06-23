@@ -31,7 +31,7 @@ namespace eval language {
     #
     # Return the cannonical file extension for the given language.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg kind	Must be one of the strings {\tt source} or {\tt header}.
     #
     proc fileext { lang {kind source}} {
@@ -47,7 +47,7 @@ namespace eval language {
     #
     # Return a string that is a valid comment in the given language.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg text	The string to be commented.
     #
     proc comment { lang text } {
@@ -78,7 +78,7 @@ namespace eval language {
     # pattern} (or all types if no pattern is given), for the given language.
     # The returned string is a valid source code for the language.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg pattern	A glob pattern to generate the mapping only for those
     #			type names that match the pattern.
     #
@@ -97,7 +97,7 @@ namespace eval language {
     # Return the abstract declarator for {\em type} or for a variable {\em var}
     # of that type, in the given language.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg type	A type object.
     # \arg var	A string representing the name of a variable of type {\em
     #		type}.
@@ -113,7 +113,7 @@ namespace eval language {
     # Return the abstract declarator of a reference to the {\em type} or to a
     # variable {\em var} of that type, in the given language.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg type	A type object.
     # \arg var	A string representing the name of a variable of type {\em
     #		type}.
@@ -129,7 +129,7 @@ namespace eval language {
     # Return the abstract declarator of a pointer to the {\em type} or to a
     # variable {\em var} of that type, in the given language.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg type	A type object.
     # \arg var	A string representing the name of a variable of type {\em
     #		type}.
@@ -147,7 +147,7 @@ namespace eval language {
     #
     # Return the expression representing a reference to a variable.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg type	A type object.
     # \arg var	A string representing the name of a variable of type {\em
     #		type}.
@@ -165,7 +165,7 @@ namespace eval language {
     #
     # Return the expression that dereferences a variable.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg type	A type object.
     # \arg var	A string representing the name of a variable of type {\em
     #		type}.
@@ -183,7 +183,7 @@ namespace eval language {
     #
     # Return the cannonical name of a type name in the given language.
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg name	The name to convert.
     #
     proc cname { lang name } {
@@ -202,7 +202,7 @@ namespace eval language {
     # codel and the codel name (for instance, a \string\n{} in C so that the
     # symbol name is guaranteed to be on the first column).
     #
-    # \arg lang	The language name. Must be one of {\tt c}.
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg codel	A codel object.
     # \arg separator	A string, inserted between the return type and the
     #			codel symbol name.
@@ -297,7 +297,7 @@ namespace eval language {
 
     # Return the namespace for language or raise an error
     #
-    variable lns [dict create c c]
+    variable lns [dict create c c c++ c++]
     proc support { lang } {
 	variable lns
 

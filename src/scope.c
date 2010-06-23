@@ -37,6 +37,7 @@
 /** IDL scope definition */
 struct scope_s {
   tloc loc;
+  scopekind kind;
   const char *name;
   const char *fullname;
 
@@ -46,6 +47,8 @@ struct scope_s {
   hash_s children;
 };
 
+scopekind
+scope_kind(scope_s s) { assert(s); return s->kind; }
 const char *
 scope_name(scope_s s) { assert(s); return s->name; }
 const char *
@@ -249,6 +252,7 @@ scope_push(tloc l, const char *name, scopekind k)
   /* create */
   s = scope_new(l, name, current->fullname);
   if (!s) return NULL;
+  s->kind = k;
   s->parent = current;
   e = hash_insert(current->children, name, s, (hrelease_f)scope_destroy);
   if (e) { scope_destroy(s); return NULL; }
@@ -379,4 +383,23 @@ scope_new(tloc l, const char *name, const char *pname)
   }
 
   return s;
+}
+
+
+/* --- scope_strkind ------------------------------------------------------- */
+
+/** Return a scope kind as a string
+ */
+
+const char *
+scope_strkind(scopekind k)
+{
+  switch(k) {
+    case SCOPE_MODULE:		return "module";
+    case SCOPE_STRUCT:		return "struct";
+    case SCOPE_UNION:		return "union";
+  }
+
+  assert(0);
+  return NULL;
 }

@@ -110,6 +110,7 @@ typedef enum scopekind {
   SCOPE_UNION
 } scopekind;
 
+scopekind	scope_kind(scope_s s);
 const char *	scope_name(scope_s s);
 const char *	scope_fullname(scope_s s);
 hash_s		scope_types(scope_s s);
@@ -130,6 +131,8 @@ scope_s		scope_detach(scope_s s);
 int		scope_pushglobal(void);
 
 void		scope_destroy(scope_s s);
+
+const char *	scope_strkind(scopekind k);
 
 
 /* --- constants ----------------------------------------------------------- */

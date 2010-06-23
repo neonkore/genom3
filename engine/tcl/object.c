@@ -79,9 +79,19 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = type_fullname(t) ? Tcl_NewStringObj(type_fullname(t), -1) : NULL;
       break;
 
-    case typeidx_scope:
-      r = NULL; /* XXX TBD */
+    case typeidx_scope: {
+      scope_s s = type_scope(t);
+      Tcl_Obj *n[2], *l;
+
+      r = Tcl_NewListObj(0, NULL);
+      for (s = type_scope(t); scope_parent(s); s = scope_parent(s)) {
+	n[0] = Tcl_NewStringObj(scope_strkind(scope_kind(s)), -1);
+	n[1] = Tcl_NewStringObj(scope_name(s), -1);
+	l = Tcl_NewListObj(2, n);
+	Tcl_ListObjReplace(interp, r, 0, 0, 1, &l);
+      }
       break;
+    }
 
     case typeidx_final:
       r = Tcl_NewStringObj(type_genref(type_final(t)), -1);

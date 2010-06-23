@@ -166,6 +166,7 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	engine/tcl/Makefile
+	runtime/c++/Makefile
 	templates/interactive/Makefile
 	templates/example/Makefile
 	templates/libcodels/Makefile

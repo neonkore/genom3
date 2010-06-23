@@ -24,6 +24,7 @@ dist_systcl_DATA=\
 	template.tcl		\
 	language.tcl		\
 	language-c.tcl		\
+	language-c++.tcl	\
 	buildenv.tcl		\
 	buildenv-autoconf.tcl	\
 	engine.tcl

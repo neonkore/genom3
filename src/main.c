@@ -77,7 +77,7 @@ main(int argc, char *argv[])
   runopt.engine[0] = '\0';
   strlcpy(runopt.sysdir, SYSDIR, sizeof(runopt.sysdir));
 
-  optarg = getenv("GENOM_TEMPLATE_PATH");
+  optarg = getenv("GENOM_TMPL_PATH");
   runopt.tmplpath = optarg?optarg:TMPLPATH;
 
   optarg = getenv("TMPDIR");
@@ -151,10 +151,25 @@ main(int argc, char *argv[])
 	runopt.cmdline = strings(runopt.cmdline, " --no-rename", NULL);
 	break;
 
-      case 'n': runopt.parse = 1; break;
-      case 'l': runopt.list = 1; break;
+      case 'l':
+	if (runopt.preproc || runopt.parse)
+	  errx(2, "mutually exclusive options near '%s'", argv[optind-1]);
+	runopt.list = 1;
+	break;
+
+      case 'n':
+	if (runopt.list || runopt.preproc)
+	  errx(2, "mutually exclusive options near '%s'", argv[optind-1]);
+	runopt.parse = 1;
+	break;
+
+      case 'E':
+	if (runopt.list || runopt.parse)
+	  errx(2, "mutually exclusive options near '%s'", argv[optind-1]);
+	runopt.preproc = 1;
+	break;
+
       case 'v': runopt.verbose = 1; break;
-      case 'E': runopt.preproc = 1; break;
       case 'd': runopt.debug = 1; break;
 
       case 'h':
@@ -172,20 +187,23 @@ main(int argc, char *argv[])
   argv += optind;
 
   /* just list templates */
-  if (runopt.list) exit(eng_listtmpl());
+  if (runopt.list) {
+    if (argc != 0) errx(2, "wrong number of arguments");
+    exit(eng_listtmpl());
+  }
 
   /* create a temporary directory */
   strlcat(runopt.tmpdir, "/genomXXXXXX", sizeof(runopt.tmpdir));
   strlcpy(runopt.tmpdir, mkdtemp(runopt.tmpdir), sizeof(runopt.tmpdir));
   xwarnx("created directory `%s'", runopt.tmpdir);
 
-  /* configure template arguments */
-  if (argc < 2) {
-    usage(stderr, argv0);
-    exit(1);
-  }
-
+  /* if a template is required (not -E or -n), configure template arguments */
   if (!runopt.parse && !runopt.preproc) {
+    if (argc < 2) {
+      usage(stderr, argv0);
+      exit(1);
+    }
+
     const char *p = eng_findtmpl(argv[0]);
     if (!p) goto done;
     strlcpy(runopt.tmpl, abspath(p), sizeof(runopt.tmpl));
@@ -193,25 +211,26 @@ main(int argc, char *argv[])
 
     status = eng_seteng(runopt.tmpl);
     if (status) goto done;
-  }
-  argc--;
-  argv++;
 
-  while(argc > 1) {
-    if (!strcmp(argv[0], "--")) break;
-    if (argv[0][0] != '-' && argv[1][0] != '-') {
-      /* treat any argument preceeding something that looks like an option as
-       * an option itself */
-      struct stat sb;
-      s = stat(argv[0], &sb);
-      if (!s && S_ISREG(sb.st_mode)) break;
+    argc--;
+    argv++;
+
+    while(argc > 1) {
+      if (!strcmp(argv[0], "--")) break;
+      if (argv[0][0] != '-' && argv[1][0] != '-') {
+	/* treat any argument preceeding something that looks like an option as
+	 * an option itself */
+	struct stat sb;
+	s = stat(argv[0], &sb);
+	if (!s && S_ISREG(sb.st_mode)) break;
       /* treat any argument that is not an existing file as an option */
-    }
+      }
 
-    eng_optappend(argv[0], -1);
-    argc--; argv++;
+      eng_optappend(argv[0], -1);
+      argc--; argv++;
+    }
+    if (!strcmp(argv[0], "--")) { argc--; argv++; }
   }
-  if (!strcmp(argv[0], "--")) { argc--; argv++; }
 
   /* configure input files */
   if (argc != 1) errx(2, "wrong number of arguments near '%s'", argv[0]);
@@ -356,8 +375,10 @@ usage(FILE *channel, char *argv0)
 {
   fprintf(channel,
 	  "GenoM " PACKAGE_VERSION " component generator\n\n"
-	  "Usage:\n  %s [general options] template [template options] file\n"
-	  "\n%s",
+	  "Usage:\n  %1$s [-l] [-h]\n"
+	  "  %1$s [-I dir] [-D macro[=value]] [-E|-n] [-v] [-d] file.gen\n"
+	  "  %1$s [general options] template [template options] file.gen\n"
+	  "\n%2$s",
 	  basename(argv0), usage_string);
 }
 

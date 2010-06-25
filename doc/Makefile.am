@@ -42,6 +42,9 @@ basesrcs=\
 	tex/genom.tex		\
 	tex/running.tex		\
 	tex/dotgen-grammar.tex	\
+	tex/mappings.tex	\
+	tex/mappings-c.tex	\
+	tex/mappings-c++.tex	\
 	tex/tcl-engine.tex
 
 # static source files for PDF

@@ -1,0 +1,207 @@
+%
+% Copyright (c) 2009-2010 LAAS/CNRS
+% All rights reserved.
+%
+% Permission to use, copy, modify, and distribute this software for any purpose
+% with or without   fee is hereby granted, provided   that the above  copyright
+% notice and this permission notice appear in all copies.
+%
+% THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+% REGARD TO THIS  SOFTWARE INCLUDING ALL  IMPLIED WARRANTIES OF MERCHANTABILITY
+% AND FITNESS. IN NO EVENT SHALL THE AUTHOR  BE LIABLE FOR ANY SPECIAL, DIRECT,
+% INDIRECT, OR CONSEQUENTIAL DAMAGES OR  ANY DAMAGES WHATSOEVER RESULTING  FROM
+% LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+% OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
+% PERFORMANCE OF THIS SOFTWARE.
+%
+%                                             Anthony Mallet on Fri Jun 25 2010
+%
+
+\subsection{Scoped names}
+
+The {\tt C++}  mappings for scoped names use C++ scopes.  IDL {\tt module}s are
+mapped to {\tt namespace}s. For instance, the following IDL:\hfill\\
+\verb|      module m {|\hfill\\
+\verb|         const string str = "scoped string";|\hfill\\
+\verb|      };|\hfill\\
+would map into\hfill\\
+\verb|      namespace m {|\hfill\\
+\verb|         const std::string str = "scoped string";|\hfill\\
+\verb|      }|\hfill\\
+
+
+\subsection{Mapping for constants}
+
+\GenoM{} IDL constants are mapped to a C++ constant. For instance,
+the following IDL:\hfill\\
+\verb| const long longint = 1;|\hfill\\
+\verb| const string str = "string example";|\hfill\\
+would map into\hfill\\
+\verb| const int32_t longint = 1;|\hfill\\
+\verb| const std::string str = "string example";|\hfill\\
+
+
+\subsection{Mapping for basic data types}
+
+The     basic     data     types     have     the     mappings     shown     in
+\xref[table:mapping:cxxbasic]{Table~\ref{table:mapping:cxxbasic}}.       Integer
+types  use the  {\tt C99}  fixed size  integer types  as provided  by  the {\tt
+stdint.h} standard  header (since the C++  {\tt cstdint} header is  not part of
+the C++ at  the time of writing  this document).  Users do not  have to include
+this header:  the template mapping generation procedure  output the appropriate
+{\tt \#include} directive along with the mappings for the integer types.
+
+\begin{table}
+\caption{Basic data types C++ mappings}
+\centering
+\begin{tabular}{|ll|}
+\doublehline
+{\tt\bfseries IDL} & {\tt\bfseries C++}\\
+\hline
+\tt boolean              & \tt bool\\
+\tt unsigned short       & \tt uint16\_t\\
+\tt short                & \tt int16\_t\\
+\tt unsigned long        & \tt uint32\_t\\
+\tt long                 & \tt int32\_t\\
+\tt unsigned long long   & \tt uint64\_t\\
+\tt long long            & \tt int64\_t\\
+\tt float                & \tt float\\
+\tt double               & \tt double\\
+\tt char                 & \tt char\\
+\tt octet                & \tt uint8\_t\\
+\tt any                  & type any not implemented yet\\
+\hline
+\end{tabular}
+\label{table:mapping:cxxbasic}
+\end{table}
+
+
+\subsection{Mapping for enumerated types}
+
+The  C++ mapping  of  an IDL  {\tt enum}  type  is the  corresponding C++  {\tt
+enum}. An additional constant is  generated to guarantee that the type occupies
+a $32$ bits wide integer.
+
+For instance, the following IDL:\hfill\\
+\verb|      enum e {|\hfill\\
+\verb|         value1,|\hfill\\
+\verb|         value2|\hfill\\
+\verb|      };|\hfill\\
+
+would map, according to the scoped names rules, into\hfill\\
+\verb|      enum e {|\hfill\\
+\verb|         value 1,|\hfill\\
+\verb|         value 2,|\hfill\\
+\verb|         _unused = 0xffffffff,|\hfill\\
+\verb|      };|\hfill\\
+
+
+\subsection{Mapping for strings}
+
+\GenoM{}  IDL bounded  strings are  mapped to  nul terminated  character arrays
+(i.e.,  C strings)  wrapped  inside the  specific {\tt  genom::bounded\_string}
+class. Unbounded strings are mapped to {\tt std:string} provided by the C++
+standard.
+
+For instance, the following OMG IDL declarations:\hfill\\
+\verb|      typedef string unbounded;|\hfill\\
+\verb|      typedef string<16> bounded;|\hfill\\
+
+would map into\hfill\\
+\verb|      typedef std::string unbounded;|\hfill\\
+\verb|      typedef genom::bounded_string<16> bounded;|\hfill\\
+
+The {\tt genom::bounded\_string} provides the following interface:\hfill\\
+\verb|      namespace genom3 {|\hfill\\
+\verb|         template<std::size_t L> struct bounded_string {|\hfill\\
+\verb|            char c[L];|\hfill\\
+\verb|         };|\hfill\\
+\verb|      }|\hfill\\
+
+This minimalistic definition will be refined before the official 3.0 \GenoM{}
+release.
+
+
+\subsection{Mapping for arrays}
+
+\GenoM{} IDL arrays map directly to C++ arrays. All array indices run from 0 to
+{\tt size-1}.
+
+For instance, the following IDL:\hfill\\
+\verb|      typedef long array[4][16];|\hfill\\
+
+would map into\hfill\\
+\verb|      typedef int32_t array[4][16];|\hfill\\
+
+
+\subsection{Mapping for structure types}
+
+\GenoM{} IDL  structures map directly onto  C++ {\tt struct}s.  Note that these
+structures may potentially include padding.
+
+For instance, the following IDL:\hfill\\
+\verb|      struct s {|\hfill\\
+\verb|         long a;|\hfill\\
+\verb|         long b;|\hfill\\
+\verb|      };|\hfill\\
+
+would map into\hfill\\
+\verb|      struct s {|\hfill\\
+\verb|         int32_t a;|\hfill\\
+\verb|         int32_t b;|\hfill\\
+\verb|      };|\hfill\\
+
+
+\subsection{Mapping for union types}
+
+\GenoM{} IDL unions map onto C  {\tt struct}s. The discriminator in the enum is
+referred to as  {\tt \_d}, the union  itself is referred to as  {\tt \_u}.
+
+For instance, the following IDL:\hfill\\
+\verb|      union u switch(long) {|\hfill\\
+\verb|         case 1: long a;|\hfill\\
+\verb|         case 2: float b;|\hfill\\
+\verb|         default: char c;|\hfill\\
+\verb|      };|\hfill\\
+
+would map into\hfill\\
+\verb|      struct u {|\hfill\\
+\verb|         int32_t _d;|\hfill\\
+\verb|         union {|\hfill\\
+\verb|            int32_t a;|\hfill\\
+\verb|            float b;|\hfill\\
+\verb|            char c;|\hfill\\
+\verb|         } _u;|\hfill\\
+\verb|      };|\hfill\\
+
+Note that the C++ standard does  not allow union members that have a non-trivial
+constructor.   Consequently, the C++  mapping for  such kind  of unions  is not
+allowed in  \GenoM{} either. This  concerns {\tt sequence}s and  {\tt string}s,
+and structures  or unions that  contain such a  type. You should thus  avoid to
+define such datatypes  in \GenoM{} IDL in order to  maximize the portability of
+your definitions.
+
+\subsection{Mapping for sequence types}
+
+\GenoM{} IDL sequences mapping differ for bounded or unbouded variations of the
+sequence. The unbounded sequence maps  onto a C++ {\tt std::vector} provided by
+the  C++  standard.   The  bounded  sequences  maps  onto   the  specific  {\tt
+genom3::bounded\_vector} class.
+
+For instance, the following IDL:\hfill\\
+\verb|      typedef sequence<long> unbounded;|\hfill\\
+\verb|      typedef sequence<long,16> bounded;|\hfill\\
+
+would map into\hfill\\
+\verb|      typedef std::vector<int32_t> unbounded;|\hfill\\
+\verb|      typedef genom3::bounded_vector<int32_t, 16> bounded;|\hfill\\
+
+The {\tt genom::bounded\_vector} provides the following interface:\hfill\\
+\verb|      namespace genom3 {|\hfill\\
+\verb|         template<typename T, std::size_t L> struct bounded_vector {|\hfill\\
+\verb|            T e[L];|\hfill\\
+\verb|         };|\hfill\\
+\verb|      }|\hfill\\
+
+This minimalistic definition will be refined before the official 3.0 \GenoM{}
+release.

@@ -1,0 +1,45 @@
+%
+% Copyright (c) 2009-2010 LAAS/CNRS
+% All rights reserved.
+%
+% Permission to use, copy, modify, and distribute this software for any purpose
+% with or without   fee is hereby granted, provided   that the above  copyright
+% notice and this permission notice appear in all copies.
+%
+% THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+% REGARD TO THIS  SOFTWARE INCLUDING ALL  IMPLIED WARRANTIES OF MERCHANTABILITY
+% AND FITNESS. IN NO EVENT SHALL THE AUTHOR  BE LIABLE FOR ANY SPECIAL, DIRECT,
+% INDIRECT, OR CONSEQUENTIAL DAMAGES OR  ANY DAMAGES WHATSOEVER RESULTING  FROM
+% LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+% OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
+% PERFORMANCE OF THIS SOFTWARE.
+%
+%                                             Anthony Mallet on Fri Jun 25 2010
+%
+
+\GenoM{} IDL is  independent of the programming language  used to implement the
+services and internals  of a component. In order to  use the \GenoM{} generated
+source code, it is necessary for  programmers to know how to access the service
+parameters and ports from their programming languages. This chapter defines the
+mapping of \GenoM{} IDL constructs to the supported programming languages.
+
+The mapping between  \GenoM{} IDL and a programming  language diverges from the
+OMG  CORBA standard.   This is  unfortunate, because  this might  lead  to some
+confusion for the developers used to  OMG CORBA, but it was necessary to define
+mappings well  targetting real-time platforms. The design  strategy that guided
+the definition of those mappings was to try to have contiguous memory segments,
+that do not  require memory management primitives, for most  of the data types.
+Only unbounded string and sequences do not follow this scheme.
+
+\GenoM{}  currently  implements  mappings  for   the  {\tt  C}  and  {\tt  C++}
+languages.        For       the        {\tt       C}        language,       see
+\xref[sec:mappings:c]{section~\ref{sec:mappings:c}}. For the {\tt C++}
+language, see \xref[sec:mappings:cxx]{section~\ref{sec:mappings:cxx}}
+
+\section{C mappings}
+\label{sec:mappings:c}
+\input{mappings-c}
+
+\section{C++ mappings}
+\label{sec:mappings:cxx}
+\input{mappings-c++}

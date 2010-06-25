@@ -74,13 +74,17 @@ AC_ARG_ENABLE(docgen,
 	[enable_docgen=$enableval],[enable_docgen=no])
 
 AM_CONDITIONAL([REGEN_DOC_YACC],
-  [test "$Y2L" != ":"])
+  [test "$enable_docgen" = yes -a	\
+	"$Y2L" != ":"])
 AM_CONDITIONAL([REGEN_DOC_PDF],
-  [test "$Y2L" != ":" -a "$PDFLATEX" != ":"])
+  [test "$enable_docgen" = yes -a \
+	"$Y2L" != ":" -a "$PDFLATEX" != ":"])
 AM_CONDITIONAL([REGEN_DOC_HTML],
-  [test "$Y2L" != ":" -a "$PDFLATEX" != ":" -a "$TTH" != ":"])
+  [test "$enable_docgen" = yes -a \
+	"$Y2L" != ":" -a "$PDFLATEX" != ":" -a "$TTH" != ":"])
 AM_CONDITIONAL([REGEN_DOC_TXT],
-  [test "$Y2L" != ":" -a "$PDFLATEX" != ":" -a "$TTH" != ":" -a "$W3M" != ":"])
+  [test "$enable_docgen" = yes -a \
+	"$Y2L" != ":" -a "$PDFLATEX" != ":" -a "$TTH" != ":" -a "$W3M" != ":"])
 
 
 # test that cpp accepts .gen files, maybe with -xc
@@ -120,7 +124,7 @@ if test x"$use_tcl" = xyes; then
   AC_MSG_RESULT([$TCL_VERSION])
   case ${TCL_VERSION} in
        8.[[5-9]]*) ;;
-       *)	 AC_MSG_ERROR([Tcl >= 8.5 is required]);;
+       *)	 AC_MSG_ERROR([Tcl >= 8.5 is required. Use --with-tcl option.]);;
   esac
   AC_MSG_CHECKING([for threaded tcl])
   if test "$TCL_THREADS" = 1; then
@@ -205,49 +209,51 @@ fi
 
 summary=["$summary
 
-Documentation generation:
+Documentation generation:"]
+if test x"$enable_docgen" = xno; then
+  if test -f "$srcdir/doc/genom.pdf"; then
+    summary=["${summary}	static"]
+  else
+    summary=["${summary}	no"]
+  fi
+  summary=["${summary} (use --enable-docgen to regen)"]
+else
+  summary=["${summary}
     yacc to text:		"]
-if test x"$Y2L" = x:; then
-  summary=["${summary}no"]
-  if test "$enable_docgen" = "yes"; then
+  if test x"$Y2L" = x:; then
+    summary=["${summary}no"]
     summary=["${summary}: see http://www.alchar.org/~aedil/Projects/y2l.html"]
-  fi
-else
-  summary=["${summary}yes
+  else
+    summary=["${summary}yes
 	(with ${Y2L})"]
-fi
-summary=["$summary
+  fi
+  summary=["$summary
     pdf:			"]
-if test x"$Y2L" = x: -o x"$PDFLATEX" = x:; then
-  summary=["${summary}no"]
-  if test "$enable_docgen" = "yes" -a x"$PDFLATEX" = x:; then
+  if test x"$Y2L" = x: -o x"$PDFLATEX" = x:; then
+    summary=["${summary}no"]
     summary=["${summary}: see http://www.tug.org/texlive/"]
-  fi
-else
-  summary=["${summary}yes
+  else
+    summary=["${summary}yes
 	(with ${PDFLATEX})"]
-fi
-summary=["$summary
+  fi
+  summary=["$summary
     html:			"]
-if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x:; then
-  summary=["${summary}no"]
-  if test "$enable_docgen" = "yes" -a x"$TTH" = x:; then
+  if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x:; then
+    summary=["${summary}no"]
     summary=["${summary}: see http://hutchinson.belmont.ma.us/tth/"]
-  fi
-else
-  summary=["${summary}yes
+  else
+    summary=["${summary}yes
 	(with ${TTH})"]
-fi
-summary=["$summary
-    text:			"]
-if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x: -o x"$W3M" = x:; then
-  summary=["${summary}no"]
-  if test "$enable_docgen" = "yes" -a x"$W3M" = x:; then
-    summary=["${summary}: see http://w3m.sourceforge.net/"]
   fi
-else
-  summary=["${summary}yes
+  summary=["$summary
+    text:			"]
+  if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x: -o x"$W3M" = x:; then
+    summary=["${summary}no"]
+    summary=["${summary}: see http://w3m.sourceforge.net/"]
+  else
+    summary=["${summary}yes
 	(with ${W3M})"]
+  fi
 fi
 
 summary=["$summary

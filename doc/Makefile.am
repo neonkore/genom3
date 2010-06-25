@@ -81,6 +81,7 @@ generatedsrcs=\
 
 EXTRA_DIST=	$(pdfsrcs) $(htmlsrcs) $(txtsrcs) $(roffsrcs)
 EXTRA_DIST+=	optgen.awk docgen.awk
+EXTRA_DIST+=	grammar-tokens
 
 
 # --- Doc generation rules -------------------------------------------------

@@ -1,0 +1,78 @@
+GenoM3 - Generator of robotic component
+Copyright (c) 2009-2010 LAAS/CNRS
+
+			    Changes in genom 2.99.2
+
+Released on June 27th, 2010
+
+ . Developed the first draft of the C++ mappings.
+   For bounded version of string and sequences, the mapping relies on a runtime
+   header that contains a generic implementation of those types. For now, those
+   structs provide no method, until we decide what is really needed. Unbounded
+   strings and sequences use the STL string and vector types directly. Unions
+   are mapped to a struct containing the discriminant plus a native union, but
+   union members whose C++ mapping have a non-trivial constructor are not
+   allowed. The other (basic) types have the same mapping as in C.
+
+ . Make everything optional in a .gen file: it is up to a template to decide
+   what is mandatory for it.
+
+ . The 'throws' keyword was renamed to 'throw', for consistency with other
+   keywords.
+
+ . Implement the long long integers. Long long are 64 bits integers.
+
+ . Make the C mapping use the C99 fixed size integer types.
+
+ . Templates are now looked in a path (colon-separated list of directories).
+   Added the GENOM_TMPL_PATH environment variable that can define (as for the
+   -t option) this path. Added the default share/genom/site-template directory
+   in the template search path, so that external templates can install in a
+   location not dependent on GenoM version.
+
+ . Interactive template accepts a -b (batch) option that disable line editing
+   facility and is well suited for non-interactive use.
+
+ . Improved a bit the regression tests. In particular, the C and C++ mappings
+   for a set of complex IDL datatypes are compiled to check that the mapping at
+   least generate code that has a meaning.
+
+ . Add --version option to the genom tool.
+
+
+			    Changes in genom 2.99.1
+
+ Released on June 9th, 2010.
+
+ . Started documentation. The full document is available in PDF, HTML or ascii
+   text. It contains a detailed list of the dotgen (.gen) grammar rules; some
+   of the most basic rules are explained. The genom command line tool usage is
+   described (also available as a separate unix man page). Tcl template
+   commands are extensively described.
+
+ . Added a release() method in the C mapping for unbounded sequences. The code
+   allocating some memory for the sequence is expected to update this pointer
+   so that other parts of the code can possibly reallocate some storage.
+
+ . Improved some TCL template commands. Parameters of a service can now be
+   retrieved by filtering them on their nature (in, out, inout, port...).
+   Same for the port list.
+
+ . Added [template require] template procedure. It loads additional tcl source
+   code that is made available to the template files.
+
+ . Beautify code generation: two newline characters around <' ... '> markers in
+   template files are replaced by only one newline. This handles the case where
+   a whole line of template source consists only in TCL code: you naturally
+   expect this line to be removed in the generated source.
+
+ . Fixed error line reporting in template files, and improved error reporting
+   verbosity in verbose (-v) mode.
+
+
+			    Changes in genom 2.99.0
+
+ Released on March 26th, 2010.
+
+ . First public version. This was released after the most basic design was
+   achieved and has proven to be able to generate some code.

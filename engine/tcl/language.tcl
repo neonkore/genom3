@@ -47,24 +47,19 @@ namespace eval language {
     #
     # Return a string that is a valid comment in the given language.
     #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
+    # \arg lang	The language name. Must be {\tt c}, {\tt c++} or {\tt shell}.
     # \arg text	The string to be commented.
     #
     proc comment { lang text } {
 	switch -nocase -- $lang {
-	    c {
-		regsub -all "\n(?=.)" "/*${text}" "\n *" text
-		set text "${text} */"
-		return $text
-	    }
-
 	    shell {
 		regsub -all "\n(?=.)" "${text}" "\n#" text
 		return $text
 	    }
 	}
 
-	template fatal "unsupported language $lang"
+	set lns [support $lang]
+	return [${lns}::comment $text]
     }
     namespace export comment
 

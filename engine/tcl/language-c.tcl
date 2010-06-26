@@ -34,6 +34,17 @@ namespace eval language::c {
     }
 
 
+    # --- comment ----------------------------------------------------------
+
+    # Return a string that is a valid comment in C.
+    #
+    proc comment { text } {
+	regsub -all "\n(?=.)" "/*${text}" "\n *" text
+	set text "${text} */"
+	return $text
+    }
+
+
     # --- mapping ----------------------------------------------------------
 
     # Generate and return the C mapping of types matching the glob pattern

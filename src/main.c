@@ -172,10 +172,8 @@ main(int argc, char *argv[])
       case 'v': runopt.verbose = 1; break;
       case 'd': runopt.debug = 1; break;
 
-      case 'h':
-	usage(stdout, argv0);
-	exit(0);
-	break;
+      case -'v': puts(PACKAGE_VERSION); exit(0); break;
+      case 'h':  usage(stdout, argv0);  exit(0); break;
 
       case '?':
       default:
@@ -375,7 +373,7 @@ usage(FILE *channel, char *argv0)
 {
   fprintf(channel,
 	  "GenoM " PACKAGE_VERSION " component generator\n\n"
-	  "Usage:\n  %1$s [-l] [-h]\n"
+	  "Usage:\n  %1$s [-l] [-h] [--version]\n"
 	  "  %1$s [-I dir] [-D macro[=value]] [-E|-n] [-v] [-d] file.gen\n"
 	  "  %1$s [general options] template [template options] file.gen\n"
 	  "\n%2$s",

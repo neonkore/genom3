@@ -180,6 +180,11 @@ options will only affect the template behaviour.
      Activate some debugging options. In particular, temporary files are not
      deleted. Useful for debugging genom itself or generator engines.
 
+\arg -'v' version
+     display the version number of the invoked GenoM
+
+     Display the version number of the invoked GenoM.
+
 \arg h help
      print usage summary (this text)
 

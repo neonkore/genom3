@@ -46,59 +46,59 @@ dotgen_consolidate()
 {
   hash_s types = type_all();
   comp_s c = comp_dotgen();
-  hash_s services = comp_services(c);
   prop_s p;
   hiter i, j;
-  int e;
+
+  int e = 0;
 
   xwarnx("consolidating parsed tree");
 
-  /* a component must exist */
-  if (!c) {
-    extern tloc curloc;
-    parserror(curloc, "missing component declaration");
-    return EINVAL;
-  }
-
   /* look for unresolved forward type declaration */
-  for(hash_first(types, &i); i.current; hash_next(&i)) {
-    assert(type_fullname(i.value));
-    switch(type_kind(i.value)) {
-      case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION:
-	if (!type_type(i.value))
-	  parserror(type_loc(i.value), "%s %s was never defined",
-		    type_strkind(type_kind(i.value)), type_fullname(i.value));
-	break;
+  if (types) {
+    for(hash_first(types, &i); i.current; hash_next(&i)) {
+      assert(type_fullname(i.value));
+      switch(type_kind(i.value)) {
+	case IDL_FORWARD_STRUCT:
+	case IDL_FORWARD_UNION:
+	  if (!type_type(i.value))
+	    parserror(type_loc(i.value), "%s %s was never defined",
+		      type_strkind(type_kind(i.value)), type_fullname(i.value));
+	  break;
 
-      default: break;
+	default: break;
+      }
     }
   }
 
   /* check clock-rate or compute default value if not specified */
-  e = 0;
-  p = hash_find(comp_props(c), prop_strkind(PROP_CLOCKRATE));
-  if (p)
-    e |= dotgen_clkratechk(c, p);
-  else
-    e |= dotgen_clkratedefault(c);
+  if (c) {
+    p = hash_find(comp_props(c), prop_strkind(PROP_CLOCKRATE));
+    if (p)
+      e |= dotgen_clkratechk(c, p);
+    else
+      e |= dotgen_clkratedefault(c);
+  }
 
 
   /* resolve service names in interrupts, before and after properties */
-  for(hash_first(services, &i); i.current; hash_next(&i)) {
-    for(hash_first(service_props(i.value), &j); j.current; hash_next(&j)) {
-      switch(prop_kind(j.value)) {
-	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-	case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
-	case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
-	case PROP_CLOCKRATE: case PROP_TASK: case PROP_VALIDATE:
-	case PROP_CODEL: case PROP_THROWS:
-	  break;
+  if (c) {
+    hash_s services = comp_services(c);
 
-	case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
-	  e |= comp_resolvesvc(
-	    prop_loc(j.value), c, prop_identifiers(j.value));
-	  break;
+    for(hash_first(services, &i); i.current; hash_next(&i)) {
+      for(hash_first(service_props(i.value), &j); j.current; hash_next(&j)) {
+	switch(prop_kind(j.value)) {
+	  case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
+	  case PROP_STACK: case PROP_DOC: case PROP_IDS: case PROP_VERSION:
+	  case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+	  case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE: case PROP_TASK:
+	  case PROP_VALIDATE: case PROP_CODEL: case PROP_THROWS:
+	    break;
+
+	  case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+	    e |= comp_resolvesvc(
+	      prop_loc(j.value), c, prop_identifiers(j.value));
+	    break;
+	}
       }
     }
   }

@@ -310,12 +310,14 @@ dg_types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
 
   l = Tcl_NewListObj(0, NULL);
-  for(hash_first(type_all(), &i); i.current; hash_next(&i)) {
-    assert(type_fullname(i.value));
-    if (p && !Tcl_StringMatch(type_fullname(i.value), p)) continue;
+  if (type_all()) {
+    for(hash_first(type_all(), &i); i.current; hash_next(&i)) {
+      assert(type_fullname(i.value));
+      if (p && !Tcl_StringMatch(type_fullname(i.value), p)) continue;
 
-    Tcl_ListObjAppendElement(
-      interp, l, Tcl_NewStringObj(type_genref(i.value), -1));
+      Tcl_ListObjAppendElement(
+	interp, l, Tcl_NewStringObj(type_genref(i.value), -1));
+    }
   }
 
   Tcl_SetObjResult(interp, l);
@@ -355,6 +357,11 @@ dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     return TCL_ERROR;
   }
   if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
+
+  if (!comp_dotgen()) {
+    Tcl_ResetResult(interp);
+    return TCL_OK;
+  }
 
   if (p && !Tcl_StringMatch(comp_name(comp_dotgen()), p)) {
     Tcl_ResetResult(interp);

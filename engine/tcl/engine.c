@@ -144,16 +144,26 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
     goto error;
 
   /* create dotgen objects */
-  for(hash_first(type_all(), &t); t.current; hash_next(&t)) {
-    assert(type_fullname(t.value));
-    if (engine_gentype(interp, t.value)) goto error;
+  if (!Tcl_CreateNamespace(interp, "::" DOTGEN_NS, NULL, NULL))
+    goto error;
+
+  if (type_all()) {
+    for(hash_first(type_all(), &t); t.current; hash_next(&t)) {
+      assert(type_fullname(t.value));
+      if (engine_gentype(interp, t.value)) goto error;
+    }
   }
 
-  s = engine_gencomponent(interp, comp_dotgen());
-  if (s) goto error;
+  if (comp_dotgen()) {
+    s = engine_gencomponent(interp, comp_dotgen());
+    if (s) goto error;
+  }
 
-  Tcl_SetVar(interp, "::" DOTGEN_NS "::ns(object)",
-	     "::" DOTGEN_NS "::" OBJECT_NS, TCL_GLOBAL_ONLY);
+  if (!Tcl_SetVar(interp, "::" DOTGEN_NS "::ns(object)",
+		 "::" DOTGEN_NS "::" OBJECT_NS,
+		  TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG))
+    goto error;
+
 
   /* create dotgen commands */
   for(i = dgcmds; i->cmd; i++)

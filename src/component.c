@@ -110,7 +110,7 @@ comp_create(tloc l, const char *name, hash_s props)
   prop_s p;
   hash_s h;
   hiter i;
-  int e, k;
+  int e;
   assert(name && props);
 
   if (dotgen) {
@@ -119,17 +119,6 @@ comp_create(tloc l, const char *name, hash_s props)
     return NULL;
   }
   e = 0;
-
-  /* check mandatory properties */
-  static const propkind m[] = {
-    PROP_IDS, PROP_VERSION, PROP_LANG
-  };
-  for(k = 0; k<sizeof(m)/sizeof(m[0]); k++)
-    if (!hash_find(props, prop_strkind(m[k]))) {
-      parserror(l, "missing %s definition for component %s",
-		prop_strkind(m[k]), name);
-      e = 1;
-    }
 
   /* check consitency of some properties */
   p = hash_find(props, prop_strkind(PROP_CLOCKRATE));

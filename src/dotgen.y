@@ -169,7 +169,8 @@ genomstatement:
 
 /* --- GenoM objects ------------------------------------------------------- */
 
-component: COMPONENT identifier '{' attr_list '}'
+component:
+  COMPONENT identifier '{' attr_list '}'
   {
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' component", $2);
@@ -177,6 +178,16 @@ component: COMPONENT identifier '{' attr_list '}'
       break;
     }
     if (!comp_create(@1, $2, $4)) YYABORT;
+  }
+  | COMPONENT identifier
+  {
+    hash_s p = hash_create("property list", 0);
+    if (!$2 || !p) {
+      if ($2) parserror(@1, "dropped '%s' component", $2);
+      if (p) hash_destroy(p);
+      break;
+    }
+    if (!comp_create(@1, $2, p)) YYABORT;
   }
 ;
 

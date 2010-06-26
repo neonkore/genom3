@@ -288,7 +288,8 @@ namespace eval language {
     #
     proc hfill { text { filler - } { column 80 } } {
 	return \
-	    "$text[string repeat - [expr {$column - [string length $text]}]]"
+	    "$text[string repeat $filler \
+		[expr {$column-[string length $text]}]]"
     }
     namespace export hfill
 

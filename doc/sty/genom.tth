@@ -28,6 +28,7 @@
 \def\chaptername{}
 \def\today{@date@}
 \def\linewidth{60em}
+\def\AtBeginDocument#1{#1}
 
 % dot leaders
 \def\xdotfill{, }

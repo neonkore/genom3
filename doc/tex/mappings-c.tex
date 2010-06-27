@@ -28,12 +28,17 @@ leading underscore.
 \subsection{Mapping for constants}
 
 In {\tt C}, constants defined in dotgen are {\tt \#define}d. For instance, the
-following IDL:\hfill\\
-\verb|      const long longint = 1;|\hfill\\
-\verb|      const string str = "string example";|\hfill\\
-would map into\hfill\\
-\verb|      #define longint 1|\hfill\\
-\verb|      #define str "string example"|\hfill\\
+following IDL:
+\begin{verbatim}
+      const long longint = 1;
+      const string str = "string example";
+\end{verbatim}
+
+would map into
+\begin{verbatim}
+      #define longint 1
+      #define str "string example"
+\end{verbatim}
 
 The  identifier can  be referenced  at any  point in  the user's  code  where a
 literal of that type is legal.
@@ -49,7 +54,6 @@ generation  procedure output  the appropriate  {\tt \#include}  directive along
 with the mappings for the integer types.
 
 \begin{table}
-\caption{Basic data types C mappings}
 \centering
 \begin{tabular}{|ll|}
 \doublehline
@@ -69,6 +73,7 @@ with the mappings for the integer types.
 \tt any                  & type any not implemented yet\\
 \hline
 \end{tabular}
+\caption{Basic data types C mappings}
 \label{table:mapping:cbasic}
 \end{table}
 
@@ -79,16 +84,20 @@ The C mapping of an IDL {\tt enum} type is an unsigned, $32$ bits wide integer.
 Each  enumerator in an  enum is  {\tt \#define}d  with an  appropriate unsigned
 integer  value  conforming  to  the  ordering constraints.
 
-For instance, the following IDL:\hfill\\
-\verb|      enum e {|\hfill\\
-\verb|         value1,|\hfill\\
-\verb|         value2|\hfill\\
-\verb|      };|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      enum e {
+         value1,
+         value2
+      };
+\end{verbatim}
 
-would map, according to the scoped names rules, into\hfill\\
-\verb|      typedef uint32_t e|\hfill\\
-\verb|      #define e_value1  1|\hfill\\
-\verb|      #define e_value2  2|\hfill\\
+would map, according to the scoped names rules, into
+\begin{verbatim}
+      typedef uint32_t e
+      #define e_value1  1
+      #define e_value2  2
+\end{verbatim}
 
 
 \subsection{Mapping for strings}
@@ -97,13 +106,17 @@ would map, according to the scoped names rules, into\hfill\\
 (i.e., C strings). Unbounded strings are mapped to a pointer on such a
 character array.
 
-For instance, the following OMG IDL declarations:\hfill\\
-\verb|      typedef string unbounded;|\hfill\\
-\verb|      typedef string<16> bounded;|\hfill\\
+For instance, the following OMG IDL declarations:
+\begin{verbatim}
+      typedef string unbounded;
+      typedef string<16> bounded;
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef char *unbounded;|\hfill\\
-\verb|      typedef char bounded[16];|\hfill\\
+would map into
+\begin{verbatim}
+      typedef char *unbounded;
+      typedef char bounded[16];
+\end{verbatim}
 
 
 \subsection{Mapping for arrays}
@@ -111,11 +124,15 @@ would map into\hfill\\
 \GenoM{} IDL arrays map directly to C arrays. All array indices run from 0 to
 {\tt size-1}.
 
-For instance, the following IDL:\hfill\\
-\verb|      typedef long array[4][16];|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      typedef long array[4][16];
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef int32_t array[4][16];|\hfill\\
+would map into
+\begin{verbatim}
+      typedef int32_t array[4][16];
+\end{verbatim}
 
 
 \subsection{Mapping for structure types}
@@ -123,17 +140,21 @@ would map into\hfill\\
 \GenoM{}  IDL structures map  directly onto  C {\tt  struct}s. Note  that these
 structures  may  potentially  include  padding.
 
-For instance, the following IDL:\hfill\\
-\verb|      struct s {|\hfill\\
-\verb|         long a;|\hfill\\
-\verb|         long b;|\hfill\\
-\verb|      };|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      struct s {
+         long a;
+         long b;
+      };
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef struct {|\hfill\\
-\verb|         int32_t a;|\hfill\\
-\verb|         int32_t b;|\hfill\\
-\verb|      } s;|\hfill\\
+would map into
+\begin{verbatim}
+      typedef struct {
+         int32_t a;
+         int32_t b;
+      } s;
+\end{verbatim}
 
 
 \subsection{Mapping for union types}
@@ -141,22 +162,26 @@ would map into\hfill\\
 \GenoM{}  IDL unions map onto  C {\tt  struct}s. The discriminator in the enum
 is referred to as {\tt \_d}, the union itself is referred to as {\tt \_u}.
 
-For instance, the following IDL:\hfill\\
-\verb|      union u switch(long) {|\hfill\\
-\verb|         case 1: long a;|\hfill\\
-\verb|         case 2: float b;|\hfill\\
-\verb|         default: char c;|\hfill\\
-\verb|      };|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      union u switch(long) {
+         case 1: long a;
+         case 2: float b;
+         default: char c;
+      };
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef struct {|\hfill\\
-\verb|         int32_t _d;|\hfill\\
-\verb|         union {|\hfill\\
-\verb|            int32_t a;|\hfill\\
-\verb|            float b;|\hfill\\
-\verb|            char c;|\hfill\\
-\verb|         } _u;|\hfill\\
-\verb|      } u;|\hfill\\
+would map into
+\begin{verbatim}
+      typedef struct {
+         int32_t _d;
+         union {
+            int32_t a;
+            float b;
+            char c;
+         } _u;
+      } u;
+\end{verbatim}
 
 
 \subsection{Mapping for sequence types}
@@ -175,19 +200,23 @@ For bounded  sequences, {\tt  buffer} is  an array of  at most  {\tt \_maximum}
 elements and containing {\tt \_length}  valid elements. Since {\tt \_buffer} is
 an array, no memory management is necessary for this data type.
 
-For instance, the following IDL:\hfill\\
-\verb|      typedef sequence<long> unbounded;|\hfill\\
-\verb|      typedef sequence<long,16> bounded;|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      typedef sequence<long> unbounded;
+      typedef sequence<long,16> bounded;
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef struct {|\hfill\\
-\verb|         uint32_t _maximum, _length;|\hfill\\
-\verb|         int32_t *_buffer;|\hfill\\
-\verb|         void (*release)(void *_buffer);|\hfill\\
-\verb|      } unbounded;|\hfill\\
-\verb||\hfill\\
-\verb|      typedef struct {|\hfill\\
-\verb|         const uint32_t _maximum;|\hfill\\
-\verb|         uint32_t _length;|\hfill\\
-\verb|         int32_t _buffer[16];|\hfill\\
-\verb|      } bounded;|\hfill\\
+would map into
+\begin{verbatim}
+      typedef struct {
+         uint32_t _maximum, _length;
+         int32_t *_buffer;
+         void (*release)(void *_buffer);
+      } unbounded;
+
+      typedef struct {
+         const uint32_t _maximum;
+         uint32_t _length;
+         int32_t _buffer[16];
+      } bounded;
+\end{verbatim}

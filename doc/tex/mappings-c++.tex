@@ -20,25 +20,35 @@
 \subsection{Scoped names}
 
 The {\tt C++}  mappings for scoped names use C++ scopes.  IDL {\tt module}s are
-mapped to {\tt namespace}s. For instance, the following IDL:\hfill\\
-\verb|      module m {|\hfill\\
-\verb|         const string str = "scoped string";|\hfill\\
-\verb|      };|\hfill\\
-would map into\hfill\\
-\verb|      namespace m {|\hfill\\
-\verb|         const std::string str = "scoped string";|\hfill\\
-\verb|      }|\hfill\\
+mapped to {\tt namespace}s. For instance, the following IDL:
+\begin{verbatim}
+      module m {
+         const string str = "scoped string";
+      };
+\end{verbatim}
+
+would map into
+\begin{verbatim}
+      namespace m {
+         const std::string str = "scoped string";
+      }
+\end{verbatim}
 
 
 \subsection{Mapping for constants}
 
 \GenoM{} IDL constants are mapped to a C++ constant. For instance,
-the following IDL:\hfill\\
-\verb| const long longint = 1;|\hfill\\
-\verb| const string str = "string example";|\hfill\\
-would map into\hfill\\
-\verb| const int32_t longint = 1;|\hfill\\
-\verb| const std::string str = "string example";|\hfill\\
+the following IDL:
+\begin{verbatim}
+   const long longint = 1;
+   const string str = "string example";
+\end{verbatim}
+
+would map into
+\begin{verbatim}
+   const int32_t longint = 1;
+   const std::string str = "string example";
+\end{verbatim}
 
 
 \subsection{Mapping for basic data types}
@@ -52,7 +62,6 @@ this header:  the template mapping generation procedure  output the appropriate
 {\tt \#include} directive along with the mappings for the integer types.
 
 \begin{table}
-\caption{Basic data types C++ mappings}
 \centering
 \begin{tabular}{|ll|}
 \doublehline
@@ -72,6 +81,7 @@ this header:  the template mapping generation procedure  output the appropriate
 \tt any                  & type any not implemented yet\\
 \hline
 \end{tabular}
+\caption{Basic data types C++ mappings}
 \label{table:mapping:cxxbasic}
 \end{table}
 
@@ -82,19 +92,22 @@ The  C++ mapping  of  an IDL  {\tt enum}  type  is the  corresponding C++  {\tt
 enum}. An additional constant is  generated to guarantee that the type occupies
 a $32$ bits wide integer.
 
-For instance, the following IDL:\hfill\\
-\verb|      enum e {|\hfill\\
-\verb|         value1,|\hfill\\
-\verb|         value2|\hfill\\
-\verb|      };|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      enum e {
+         value1,
+         value2
+      };
+\end{verbatim}
 
-would map, according to the scoped names rules, into\hfill\\
-\verb|      enum e {|\hfill\\
-\verb|         value 1,|\hfill\\
-\verb|         value 2,|\hfill\\
-\verb|         _unused = 0xffffffff,|\hfill\\
-\verb|      };|\hfill\\
-
+would map, according to the scoped names rules, into
+\begin{verbatim}
+      enum e {
+         value 1,
+         value 2,
+         _unused = 0xffffffff,
+      };
+\end{verbatim}
 
 \subsection{Mapping for strings}
 
@@ -103,20 +116,26 @@ would map, according to the scoped names rules, into\hfill\\
 class. Unbounded strings are mapped to {\tt std:string} provided by the C++
 standard.
 
-For instance, the following OMG IDL declarations:\hfill\\
-\verb|      typedef string unbounded;|\hfill\\
-\verb|      typedef string<16> bounded;|\hfill\\
+For instance, the following OMG IDL declarations:
+\begin{verbatim}
+      typedef string unbounded;
+      typedef string<16> bounded;
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef std::string unbounded;|\hfill\\
-\verb|      typedef genom::bounded_string<16> bounded;|\hfill\\
+would map into
+\begin{verbatim}
+      typedef std::string unbounded;
+      typedef genom::bounded_string<16> bounded;
+\end{verbatim}
 
-The {\tt genom::bounded\_string} provides the following interface:\hfill\\
-\verb|      namespace genom3 {|\hfill\\
-\verb|         template<std::size_t L> struct bounded_string {|\hfill\\
-\verb|            char c[L];|\hfill\\
-\verb|         };|\hfill\\
-\verb|      }|\hfill\\
+The {\tt genom::bounded\_string} provides the following interface:
+\begin{verbatim}
+      namespace genom3 {
+         template<std::size_t L> struct bounded_string {
+            char c[L];
+         };
+      }
+\end{verbatim}
 
 This minimalistic definition will be refined before the official 3.0 \GenoM{}
 release.
@@ -127,29 +146,36 @@ release.
 \GenoM{} IDL arrays map directly to C++ arrays. All array indices run from 0 to
 {\tt size-1}.
 
-For instance, the following IDL:\hfill\\
-\verb|      typedef long array[4][16];|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      typedef long array[4][16];
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef int32_t array[4][16];|\hfill\\
-
+would map into
+\begin{verbatim}
+      typedef int32_t array[4][16];
+\end{verbatim}
 
 \subsection{Mapping for structure types}
 
 \GenoM{} IDL  structures map directly onto  C++ {\tt struct}s.  Note that these
 structures may potentially include padding.
 
-For instance, the following IDL:\hfill\\
-\verb|      struct s {|\hfill\\
-\verb|         long a;|\hfill\\
-\verb|         long b;|\hfill\\
-\verb|      };|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      struct s {
+         long a;
+         long b;
+      };
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      struct s {|\hfill\\
-\verb|         int32_t a;|\hfill\\
-\verb|         int32_t b;|\hfill\\
-\verb|      };|\hfill\\
+would map into
+\begin{verbatim}
+      struct s {
+         int32_t a;
+         int32_t b;
+      };
+\end{verbatim}
 
 
 \subsection{Mapping for union types}
@@ -157,22 +183,26 @@ would map into\hfill\\
 \GenoM{} IDL unions map onto C  {\tt struct}s. The discriminator in the enum is
 referred to as  {\tt \_d}, the union  itself is referred to as  {\tt \_u}.
 
-For instance, the following IDL:\hfill\\
-\verb|      union u switch(long) {|\hfill\\
-\verb|         case 1: long a;|\hfill\\
-\verb|         case 2: float b;|\hfill\\
-\verb|         default: char c;|\hfill\\
-\verb|      };|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      union u switch(long) {
+         case 1: long a;
+         case 2: float b;
+         default: char c;
+      };|
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      struct u {|\hfill\\
-\verb|         int32_t _d;|\hfill\\
-\verb|         union {|\hfill\\
-\verb|            int32_t a;|\hfill\\
-\verb|            float b;|\hfill\\
-\verb|            char c;|\hfill\\
-\verb|         } _u;|\hfill\\
-\verb|      };|\hfill\\
+would map into
+\begin{verbatim}
+      struct u {
+         int32_t _d;
+         union {
+            int32_t a;
+            float b;
+            char c;
+         } _u;
+      };
+\end{verbatim}
 
 Note that the C++ standard does  not allow union members that have a non-trivial
 constructor.   Consequently, the C++  mapping for  such kind  of unions  is not
@@ -188,20 +218,26 @@ sequence. The unbounded sequence maps  onto a C++ {\tt std::vector} provided by
 the  C++  standard.   The  bounded  sequences  maps  onto   the  specific  {\tt
 genom3::bounded\_vector} class.
 
-For instance, the following IDL:\hfill\\
-\verb|      typedef sequence<long> unbounded;|\hfill\\
-\verb|      typedef sequence<long,16> bounded;|\hfill\\
+For instance, the following IDL:
+\begin{verbatim}
+      typedef sequence<long> unbounded;
+      typedef sequence<long,16> bounded;
+\end{verbatim}
 
-would map into\hfill\\
-\verb|      typedef std::vector<int32_t> unbounded;|\hfill\\
-\verb|      typedef genom3::bounded_vector<int32_t, 16> bounded;|\hfill\\
+would map into
+\begin{verbatim}
+      typedef std::vector<int32_t> unbounded;
+      typedef genom3::bounded_vector<int32_t, 16> bounded;
+\end{verbatim}
 
-The {\tt genom::bounded\_vector} provides the following interface:\hfill\\
-\verb|      namespace genom3 {|\hfill\\
-\verb|         template<typename T, std::size_t L> struct bounded_vector {|\hfill\\
-\verb|            T e[L];|\hfill\\
-\verb|         };|\hfill\\
-\verb|      }|\hfill\\
+The {\tt genom::bounded\_vector} provides the following interface:
+\begin{verbatim}
+      namespace genom3 {
+         template<typename T, std::size_t L> struct bounded_vector {
+            T e[L];
+         };
+      }
+\end{verbatim}
 
 This minimalistic definition will be refined before the official 3.0 \GenoM{}
 release.

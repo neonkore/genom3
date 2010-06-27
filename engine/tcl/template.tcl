@@ -104,7 +104,6 @@ namespace eval template {
     #
     # \begin{description}
     # \item[Examples:]
-    #
     # {\tt template parse file mysrc file mydst}
     #
     # Will parse the input file {\tt mysrc}, process it and save the result in
@@ -235,7 +234,6 @@ namespace eval template {
     #
     # \begin{description}
     # \item[Examples:]
-    #
     # {\tt template options \{\par -h - --help	\{ puts "help option" \}\par \}}
     #
     # This will make the template print the text "help option" whenever -h or

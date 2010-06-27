@@ -30,9 +30,9 @@ endif
 TESTS_ENVIRONMENT=	${SHELL} -e
 
 EXTRA_DIST=		${TESTS}
-EXTRA_DIST+=\
-	datatypes.gen
-	component.gen
+EXTRA_DIST+=		test.sh
+EXTRA_DIST+=		datatypes.gen
+EXTRA_DIST+=		component.gen
 
 
 # export useful variables to the test scripts

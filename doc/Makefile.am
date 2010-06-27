@@ -83,6 +83,25 @@ EXTRA_DIST=	$(pdfsrcs) $(htmlsrcs) $(txtsrcs) $(roffsrcs)
 EXTRA_DIST+=	optgen.awk docgen.awk
 EXTRA_DIST+=	grammar-tokens
 
+CLEANFILES=	$(man_MANS)
+CLEANFILES+=	genom-options.mdoc
+if REGEN_DOC_YACC
+  CLEANFILES+=	$(generatedsrcs)
+  CLEANFILES+=	dotgen-rule-*.tex
+endif
+if REGEN_DOC_PDF
+  CLEANFILES+=	genom.pdf
+  CLEANFILES+=	genom.log genom.aux genom.out genom.toc
+  CLEANFILES+=	genom.blg genom.bbl genom.idx genom.ind genom.ilg
+endif
+if REGEN_DOC_HTML
+  CLEANFILES+=	genom.html
+  CLEANFILES+=	genom.tid genom.tms genom.tin
+endif
+if REGEN_DOC_TXT
+  CLEANFILES+=	genom.txt
+endif
+
 
 # --- Doc generation rules -------------------------------------------------
 

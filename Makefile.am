@@ -40,5 +40,10 @@ EXTRA_DIST=\
 	compat/strlcat.c	\
 	compat/strlcpy.c
 
-# make sure regression tests are executed before make dist
-dist: check
+
+# distcheck configuration
+DISTCHECK_CONFIGURE_FLAGS=	CFLAGS='-Wall -Werror'
+DISTCHECK_CONFIGURE_FLAGS+=	--enable-docgen
+if WITH_TCL
+  DISTCHECK_CONFIGURE_FLAGS+=	--with-tcl="$(TCL_BIN_DIR)"
+endif

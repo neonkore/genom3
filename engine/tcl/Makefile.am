@@ -48,7 +48,8 @@ engine_la_CPPFLAGS=	-I$(top_srcdir)/src $(TCL_INCLUDE_SPEC)
 engine_la_LIBADD=	$(TCL_LIB_SPEC)
 engine_la_LDFLAGS=	-module -release $(PACKAGE_VERSION)
 
-BUILT_SOURCES=version.tcl pkgIndex.tcl
+BUILT_SOURCES=	version.tcl pkgIndex.tcl
+CLEANFILES=	version.tcl pkgIndex.tcl
 
 version.tcl: Makefile
 	exec >$@;						\

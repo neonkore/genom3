@@ -51,10 +51,11 @@ libmain_a_SOURCES = main.c
 libmain_a_CPPFLAGS = -DTMPLPATH='"$(tmpldir):$(sitetmpldir)"'
 libmain_a_CPPFLAGS += -DSYSDIR='"$(sysdir)"'
 
-BUILT_SOURCES=\
-	options.c
 
 # generate options strings and usage doc
+BUILT_SOURCES=	options.c
+CLEANFILES=	options.c
+
 options.c: Makefile $(top_srcdir)/doc/optgen.awk
 options.c: options.txt
 	$(AWK) -f $(top_srcdir)/doc/optgen.awk -- -c $< >$@

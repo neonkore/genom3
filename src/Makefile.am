@@ -28,6 +28,7 @@ genom3_SOURCES=\
 	property.c	\
 	component.c	\
 	codel.c		\
+	initializer.c	\
 	const.c		\
 	scope.c		\
 	declarator.c	\

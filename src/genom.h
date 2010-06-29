@@ -427,7 +427,7 @@ idltype_s	param_type(param_s p);
 port_s		param_port(param_s p);
 initer_s	param_initer(param_s p);
 
-unsigned int	initer_element(initer_s i);
+unsigned int	initer_index(initer_s i);
 const char *	initer_member(initer_s i);
 const char *	initer_doc(initer_s i);
 cval		initer_value(initer_s i);
@@ -448,10 +448,11 @@ int		param_setinitv(tloc l, param_s p, initer_s i);
 
 const char *	param_strdir(pdir d);
 
-initer_s	initer_create(unsigned int a, const char *m, initer_s s,
-			cval v);
+initer_s	initer_create(unsigned int index, const char *member,
+			initer_s sub, cval v);
 int		initer_setdoc(initer_s i, const char *d);
 initer_s	initer_append(initer_s l, initer_s m);
+int		initer_matchtype(tloc l, idltype_s t, initer_s i);
 void		initer_destroy(initer_s l);
 
 

@@ -556,6 +556,15 @@ constr_initializer_list:
 
 doc_initializer:
   constr_initializer
+  | COLONCOLON string_literals
+  {
+    cval v; v.k = CST_VOID; v.u = -1U;
+    if ($2) {
+      $$ = initer_create(-1U, NULL, NULL, v);
+      (void)initer_setdoc($$, $2);
+    } else
+      $$ = NULL;
+  }
   | constr_initializer COLONCOLON string_literals
   {
     $$ = $1; if (!$1 || !$3) break;

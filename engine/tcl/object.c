@@ -931,8 +931,8 @@ initer_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     case initeridx_member:
       if (initer_member(i))
 	r = Tcl_NewStringObj(initer_member(i), -1);
-      else if (initer_element(i) != -1U)
-	r = Tcl_NewIntObj(initer_element(i));
+      else if (initer_index(i) != -1U)
+	r = Tcl_NewIntObj(initer_index(i));
       break;
 
     case initeridx_doc:

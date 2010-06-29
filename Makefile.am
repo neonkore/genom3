@@ -47,3 +47,12 @@ DISTCHECK_CONFIGURE_FLAGS+=	--enable-docgen
 if WITH_TCL
   DISTCHECK_CONFIGURE_FLAGS+=	--with-tcl="$(TCL_BIN_DIR)"
 endif
+
+# message
+install-data-hook:
+	@echo '=============================================================='
+	@echo '    Installation complete.'
+	@echo ''
+	@echo '    Documentation is available in'
+	@echo '    $(docdir)'
+	@echo '=============================================================='

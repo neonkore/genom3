@@ -21,6 +21,7 @@ ECHO=	echo
 systcldir=$(sysdir)/tcl
 
 dist_systcl_DATA=\
+	object.tcl		\
 	template.tcl		\
 	language.tcl		\
 	language-c.tcl		\

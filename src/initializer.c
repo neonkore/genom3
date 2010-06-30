@@ -294,7 +294,14 @@ initer_typeiniter(initer_s i, idltype_s haystack, idltype_s needle)
     case IDL_MEMBER: case IDL_TYPEDEF:
       return initer_typeiniter(i, type_type(haystack), needle);
 
-    case IDL_CASE: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      /* note: recursion should normally be avoided here (this would lead to
+       * endless loop). But since the initializer itself will not be infinite,
+       * the recursion will eventually stop. OTOH, it is important to
+       * recurse so that initializer for such structures can be used. */
+      return initer_typeiniter(i, type_type(haystack), needle);
+
+    case IDL_CASE:
       break;
   }
 

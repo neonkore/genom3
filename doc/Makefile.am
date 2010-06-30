@@ -73,6 +73,7 @@ roffsrcs=\
 generatedsrcs=\
 	genom-options.tex	\
 	dotgen-rules.tex	\
+	engcmd-object.tex	\
 	engcmd-template.tex	\
 	engcmd-engine.tex	\
 	engcmd-dotgen.tex	\
@@ -176,6 +177,10 @@ genom.pdf: tex/genom.tex
 genom-options.tex: Makefile $(srcdir)/optgen.awk
 genom-options.tex: $(top_srcdir)/src/options.txt
 	$(AWK) -f $(srcdir)/optgen.awk -- -t $< >$@
+
+engcmd-object.tex: Makefile $(srcdir)/docgen.awk
+engcmd-object.tex: $(top_srcdir)/engine/tcl/object.tcl
+	$(AWK) -f $(srcdir)/docgen.awk $< >$@
 
 engcmd-template.tex: Makefile $(srcdir)/docgen.awk
 engcmd-template.tex: $(top_srcdir)/engine/tcl/template.tcl

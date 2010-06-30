@@ -257,6 +257,51 @@ initer_matchcomp(tloc l, idltype_s t, initer_s i)
 }
 
 
+/* --- initer_typeiniter --------------------------------------------------- */
+
+/** Return the initializer for needle, considering i is the initializer for
+ * haystack.
+ */
+initer_s
+initer_typeiniter(initer_s i, idltype_s haystack, idltype_s needle)
+{
+  if (!i || needle == haystack) return i;
+
+  switch(type_kind(haystack)) {
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ANY: case IDL_CONST: case IDL_ENUM: case IDL_ENUMERATOR:
+      break;
+
+    case IDL_ARRAY: case IDL_SEQUENCE:
+      return initer_typeiniter(i->sub, type_type(haystack), needle);
+
+    case IDL_STRUCT: case IDL_UNION: {
+      idltype_s t;
+      initer_s j, f;
+
+      for(j=i->sub; j; j = j->next) {
+	t = type_member(haystack, j->member);
+	if (t) {
+	  f = initer_typeiniter(j, t, needle);
+	  if (f) return f;
+	}
+      }
+      break;
+    }
+
+    case IDL_MEMBER: case IDL_TYPEDEF:
+      return initer_typeiniter(i, type_type(haystack), needle);
+
+    case IDL_CASE: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      break;
+  }
+
+  return NULL;
+}
+
+
 /* --- initer_destroy ------------------------------------------------------ */
 
 /** Destroy a list

@@ -821,14 +821,25 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   int i = paramidx_name; /* return name by default */
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$param subcommand");
-    return TCL_ERROR;
-  }
   if (objc > 1) {
     s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
     if (s != TCL_OK) return s;
   }
+
+  /* 'initializer' subcommand can have one additional parameters, other
+   * subcommand don't have any. */
+  if (i == paramidx_initer) {
+    if (objc > 3) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$param initializer ?type?");
+      return TCL_ERROR;
+    }
+  } else {
+    if (objc > 2) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$param subcommand");
+      return TCL_ERROR;
+    }
+  }
+
   switch(i) {
     case paramidx_name:
       r = Tcl_NewStringObj(param_name(p), -1);
@@ -866,10 +877,27 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case paramidx_initer:
-      if (param_initer(p))
-	r = Tcl_NewStringObj(initer_genref(param_initer(p)), -1);
-      else
-	r = NULL;
+      r = NULL;
+      if (objc == 2) {
+	if (param_initer(p))
+	  r = Tcl_NewStringObj(initer_genref(param_initer(p)), -1);
+      } else {
+	Tcl_CmdInfo info;
+	Tcl_Command c = Tcl_GetCommandFromObj(interp, objv[2]);
+	if (c && Tcl_GetCommandInfoFromToken(c, &info)) {
+	  initer_s initer = param_typeiniter(p, info.objClientData);
+	  if (initer)
+	    r = Tcl_NewStringObj(initer_genref(initer), -1);
+	  else {
+	    Tcl_AppendResult(interp, "no initializer for type", NULL);
+	    return TCL_ERROR;
+	  }
+	} else {
+	  Tcl_AppendResult(interp, "no such type \"", Tcl_GetString(objv[2]),
+			   "\"", NULL);
+	  return TCL_ERROR;
+	}
+      }
       break;
 
     case paramidx_loc: {

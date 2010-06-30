@@ -445,6 +445,7 @@ int		param_setname(tloc l, param_s p, const char *name);
 int		param_setmember(tloc l, param_s p, const char *name);
 int		param_setelement(tloc l, param_s p, unsigned int e);
 int		param_setinitv(tloc l, param_s p, initer_s i);
+initer_s	param_typeiniter(param_s p, idltype_s t);
 
 const char *	param_strdir(pdir d);
 
@@ -453,6 +454,9 @@ initer_s	initer_create(unsigned int index, const char *member,
 int		initer_setdoc(initer_s i, const char *d);
 initer_s	initer_append(initer_s l, initer_s m);
 int		initer_matchtype(tloc l, idltype_s t, initer_s i);
+initer_s	initer_typeiniter(initer_s i, idltype_s haystack,
+			idltype_s needle);
+
 void		initer_destroy(initer_s l);
 
 

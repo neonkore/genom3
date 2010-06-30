@@ -241,13 +241,27 @@ int
 param_setinitv(tloc l, param_s p, initer_s i)
 {
   int s;
-  assert(p && i);
+  assert(p && i && !p->init);
 
   s = initer_matchtype(l, p->type, i);
   if (s) return s;
 
   p->init = i;
   return 0;
+}
+
+
+/* --- param_typeiniter ---------------------------------------------------- */
+
+/** return initializer for type, which must be a member of the type of the
+ * parameter.
+ */
+initer_s
+param_typeiniter(param_s p, idltype_s t)
+{
+  assert(p && t);
+  if (!p->init) return NULL;
+  return initer_typeiniter(p->init, p->type, t);
 }
 
 

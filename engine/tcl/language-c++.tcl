@@ -244,6 +244,7 @@ namespace eval language::c++ {
 	    set sym [$t name]
 	}
 	append sym _[cname [$codel name]]
+	set arg [list]
 	foreach p [$codel parameters] {
 	    set a ""
 	    switch -- [$p dir] {

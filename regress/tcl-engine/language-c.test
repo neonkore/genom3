@@ -106,6 +106,27 @@ expect out '
 '
 
 
+# --- language signature c -------------------------------------------------
+#
+testing '[language signature c]'
+
+cat >run.gen <<'EOF'
+component c;
+service s() {
+  task: control;
+  codel x: codel() yield ether;
+};
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+set c [[[dotgen component] service] codel]
+puts [language signature c $c |sep|]
+EOF
+expect out '
+	/^c_event|sep|s_codel()$/ {next}
+	{exit 2}
+'
+
+
 # --- language hfill -------------------------------------------------------
 #
 testing '[language hfill]'

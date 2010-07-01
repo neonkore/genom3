@@ -189,7 +189,7 @@ namespace eval language {
 
     # --- signature --------------------------------------------------------
 
-    # \proc language signature codel {\em separator}
+    # \proc language signature lang codel [{\em separator}]
     # \index language signature
     #
     # Return the signature of a codel in the given language. If separator is

@@ -419,7 +419,7 @@ static int
 engine_genservice(Tcl_Interp *interp, service_s s)
 {
   hiter i;
-  int e;
+  int e = 0;
 
   if (!Tcl_CreateObjCommand(interp, service_genref(s), service_cmd, s, NULL))
     return EINVAL;

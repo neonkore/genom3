@@ -60,10 +60,13 @@ proc interactive {} {
 	    }
 
 	    set r [catch {uplevel #0 $cmd} cmd opts]
-	    if {!$tcl_interactive && $r} { return -options $opts $cmd }
-	    if {$cmd != ""} { puts $cmd }
+	    if {$tcl_interactive} {
+		if {$cmd != ""} { puts $cmd }
+		puts -nonewline {% }; flush stdout
+	    } else {
+		if {$r} { return -options $opts $cmd }
+	    }
 	    unset cmd
-	    if {$tcl_interactive} { puts -nonewline {% }; flush stdout }
 	}
 	if {![info exists cmd]} break
 	unset cmd

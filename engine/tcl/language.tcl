@@ -173,16 +173,24 @@ namespace eval language {
 
     # --- cname ------------------------------------------------------------
 
-    # \proc language cname lang {\em name}
+    # \proc language cname {\em lang} \{{\em string}|{\em object}\}
     # \index language cname
     #
-    # Return the cannonical name of a type name in the given language.
+    # Return the cannonical name of the {\em string} or the \GenoM{} {\em
+    # object}, according to the language {\em lang}.
     #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg name	The name to convert.
+    # If a regular string is given, this procedure typically maps IDL :: scope
+    # separator into the native symbol in the given language.
+    # If a codel object is given, this procedure returns the symbol name of the
+    # codel in the given language.
     #
-    proc cname { lang name } {
-	return [[support $lang]::cname $name]
+    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
+    # \arg string	The name to convert.
+    # \arg object	A \GenoM{} object. Only class {\tt codel} is supported
+    #			at the moment.
+    #
+    proc cname { lang object } {
+	return [[support $lang]::cname $object]
     }
     namespace export cname
 

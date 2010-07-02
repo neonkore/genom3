@@ -502,12 +502,30 @@ namespace eval language::c++ {
 
     # --- cname ------------------------------------------------------------
 
+    # Cannonical name of an object or string in C++.
     # Remove leading :: and map other :: to _
     #
-    proc cname { name } {
-	if { [string first :: $name] == 0 } {
-	    set name [string range $name 2 end]
+    proc cname { object } {
+	if {![catch {$object class} class]} {
+	    switch -- $class {
+		codel	{
+		    if {![catch {$object service} s]} {
+			set scope [$s name]
+		    } elseif {![catch {$object task} t]} {
+			set scope [$t name]
+		    }
+		    set object ${scope}_[$object name]
+		}
+
+		default {
+		    template fatal "unsupported object class '$class'"
+		}
+	    }
 	}
-	return [string map {{ } _} $name]
+
+	if { [string first :: $object] == 0 } {
+	    set object [string range $object 2 end]
+	}
+	return [string map {{ } _} $object]
     }
 }

@@ -97,11 +97,31 @@ expect out '
 #
 testing '[language cname c++]'
 
-run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
-puts [language cname c++ [[dotgen type ::m1::e1] fullname]]
+cat >run.gen <<'EOF'
+struct s {
+  struct ss {
+    long a;
+  } a;
+};
+component c;
+task t {
+  codel x: tcodel() yield ether;
+};
+service s() {
+  task: control;
+  codel x: scodel() yield ether;
+};
+EOF
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+puts 1,[language cname c++ [[dotgen type ::s::ss::a] fullname]]
+puts 2,[language cname c++ [[lindex [[dotgen component] task] 1] codel]]
+puts 3,[language cname c++ [[[dotgen component] service] codel]]
 EOF
 expect out '
-	/^m1::e1$/ {next}
+	/^1,s::ss::a$/ {next}
+	/^2,t_tcodel$/ {next}
+	/^3,s_scodel$/ {next}
 	{exit 2}
 '
 

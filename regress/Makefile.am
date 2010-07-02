@@ -22,6 +22,7 @@ TESTS+=	basics/parser.test
 if WITH_TCL
   TESTS+=	tcl-engine/engine.test
   TESTS+=	tcl-engine/dotgen.test
+  TESTS+=	tcl-engine/object.test
   TESTS+=	tcl-engine/template.test
   TESTS+=	tcl-engine/language-c.test
   TESTS+=	tcl-engine/language-c++.test

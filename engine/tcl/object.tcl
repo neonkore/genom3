@@ -29,13 +29,19 @@ namespace eval object {
     # \proc object foreach {\em var} {\em object} {\em body}
     # \index object foreach
     #
-    # Evaluate {\em body} for each element of {\em object}, with {\em var} set
-    # to the current element. The result of the command is an empty string.
+    # Evaluate {\em body} for each element of the \GenoM{} {\em object}, with
+    # {\em var} set to the current element. The result of the command is an
+    # empty string.
     #
-    # If the {\em object} is of class 'type' (a type object), the exploration
+    # {\em var} is either a variable name, or a list of two variable names. In
+    # the latter case, the first variable is set to the current element and the
+    # second variable is set to a list of elements representing the hiearchy of
+    # objects leading to the current element.
+    #
+    # If {\em object} is of class 'type' (a type object), the exploration
     # of the type tree is done in depth-first order. If {\em body} returns with
     # no error, the next element in explored. If {\em body} returns with
-    # 'continue', the descent of the current branch is stopped and the next
+    # 'continue', the exploration of the current branch is stopped and the next
     # sibling element is explored. If {\em body} returns with 'break', the
     # procedure returns immediately.
     #
@@ -50,8 +56,11 @@ namespace eval object {
     # at some point to skip further exploration of that branch.
     #
     # \arg var	A variable name that is set to the current element of object
-    #		while iterating.
-    # \arg object	A genom object. Must be of class {\tt type}.
+    #		while iterating, or a list of two variable names respectively
+    #		set to the current element and the hierarchy of elements
+    #		leading to the current element.
+    # \arg object
+    #		A genom object. Must be of class {\tt type}.
     # \arg body	A script evaluated for each element of object.
     #
     proc foreach { var object body } {
@@ -59,11 +68,12 @@ namespace eval object {
 	    error "$object is not a genom object"
 	}
 
+	# call the appropriate procedure, depending on object type
 	switch -- [$object class] {
 	    type {
 		set e [catch {
-		    uplevel \
-			[list [namespace code foreach-type] $var $object $body]
+		    uplevel [list object::foreach-type \
+				 $var $object [list] $body]
 		} r opts]
 	    }
 	}
@@ -83,9 +93,10 @@ namespace eval object {
 
     # foreach implementation for 'type' objects
     #
-    proc foreach-type { var object body } {
+    proc foreach-type { var object hier body } {
 	set e [catch {
-	    uplevel "set $var [list $object]; eval [list $body]"
+	    uplevel [list lassign [list $object $hier] {*}$var]
+	    uplevel [list eval $body]
 	} r opts]
 	if {$e} {
 	    switch -- $e {
@@ -95,6 +106,8 @@ namespace eval object {
 	    }
 	    return -code 2
 	}
+
+	lappend hier $object
 
 	switch -- [$object kind] {
 	    {boolean}			-
@@ -118,8 +131,7 @@ namespace eval object {
 	    {union} {
 		::foreach m [$object members] {
 		    set e [catch {
-			uplevel [list [namespace code foreach-type] \
-				     $var $m $body]
+			uplevel [list object::foreach-type $var $m $hier $body]
 		    } r opts]
 		    if {$e} break
 		}
@@ -132,8 +144,8 @@ namespace eval object {
 	    {union member}		-
 	    {typedef} {
 		set e [catch {
-		    uplevel [list [namespace code foreach-type] \
-				 $var [$object type] $body]
+		    uplevel [list object::foreach-type \
+				 $var [$object type] $hier $body]
 		} r opts]
 	    }
 
@@ -143,8 +155,8 @@ namespace eval object {
 		# endless recursion if the body script never issue
 		# a 'continue' statement to skip this branch.
 		set e [catch {
-		    uplevel [list [namespace code foreach-type] \
-				 $var [$object type] $body]
+		    uplevel [list object::foreach-type] \
+			$var [$object type] $hier $body]
 		} r opts]
 	    }
 

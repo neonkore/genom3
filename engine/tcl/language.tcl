@@ -216,6 +216,26 @@ namespace eval language {
     namespace export signature
 
 
+    # --- invoke -----------------------------------------------------------
+
+    # \proc language invoke {\em lang} {\em codel} {\em params}
+    # \index language invoke
+    #
+    # Return a string corresponding to the invocation of a codel in the given
+    # language.
+    #
+    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
+    # \arg codel	A codel object.
+    # \arg params	The list of parameters passed to the codel. Each
+    #			element of this list must be a valid string in
+    #			the {\em lang} language corresponding to each parameter
+    #			value or reference to be passed to the codel.
+    proc invoke { lang codel params } {
+	return [[support $lang]::invoke $codel $params]
+    }
+    namespace export invoke
+
+
     # --- sizeof -----------------------------------------------------------
 
     # Return binary size of type, in bytes

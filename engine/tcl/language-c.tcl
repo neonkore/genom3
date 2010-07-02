@@ -252,12 +252,7 @@ namespace eval language::c {
     #
     proc signature { codel {symchar " "}} {
 	set ret [declarator [$codel return]]
-	if {![catch {$codel service} s]} {
-	    set sym [$s name]
-	} elseif {![catch {$codel task} t]} {
-	    set sym [$t name]
-	}
-	append sym _[cname [$codel name]]
+	set sym [cname $codel]
 	set arg [list]
 	foreach p [$codel parameters] {
 	    set a ""
@@ -272,6 +267,20 @@ namespace eval language::c {
 	    lappend arg $a
 	}
 	return [join [list $ret ${sym}([join $arg {, }])] $symchar]
+    }
+
+
+    # --- invoke -----------------------------------------------------------
+
+    # Return the C invocation of a codel
+    #
+    proc invoke { codel params } {
+	set sym [cname $codel]
+	if {[llength $params] != [llength [$codel parameters]]} {
+	    template fatal "wrong # arguments for codel [$codel name]"
+	}
+
+	return "${sym}([join $params {, }])"
     }
 
 

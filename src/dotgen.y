@@ -59,6 +59,7 @@
   char		c;
   char *	s;
   cval		v;
+  pdir		pdir;
   clist_s	vlist;
   prop_s	prop;
   codel_s	codel;
@@ -86,19 +87,20 @@
 
 %token <s>	S MS US K M
 %token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
-%token <s>	INPUT OUTPUT EVENT IMPORT FROM VERSION LANG EMAIL REQUIRE
-%token <s>	BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD THROWS
-%token <s>	DOC INTERRUPTS BEFORE AFTER CLOCKRATE
+%token <s>	ATTRIBUTE INPUT OUTPUT EVENT IMPORT FROM VERSION LANG EMAIL
+%token <s>	REQUIRE BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
+%token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE
 
 %type <i>	spec idlspec statement idldef idlstatement genomstatement
 
 %type <i>	component port task service
 %type <prop>	attr
-%type <hash>	attr_list named_param_list
-%type <initer>	constr_initializer doc_initializer constr_initializer_list
+%type <hash>	attr_list param_list nodir_param_list
+%type <initer>	initializer_value initializer initializer_list
 %type <codel>	validate codel
-%type <port>	named_port
-%type <param>	param param_member named_param initialized_param
+%type <param>	param named_param nodir_param
+%type <vlist>	param_member
+%type <pdir>	param_dir
 
 %type <i>	module
 %type <type>	const_dcl const_type
@@ -161,6 +163,7 @@ idlstatement:
 
 genomstatement:
   component ';'
+  | attribute ';'
   | port ';'
   | task ';'
   | service ';'
@@ -212,6 +215,15 @@ port:
   }
 ;
 
+attribute:
+  ATTRIBUTE nodir_param_list
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); break; } else {
+      if (comp_addattr(@2, $2))
+	parserror(@1, "dropping '%s' property", $1);
+    }
+  }
+;
 
 task:
   TASK identifier '{' attr_list '}'
@@ -242,7 +254,7 @@ task:
 ;
 
 service:
-  SERVICE identifier '(' named_param_list ')' '{' attr_list '}'
+  SERVICE identifier '(' param_list ')' '{' attr_list '}'
   {
     if (!$2 || !$4 || !$7) {
       if ($2) parserror(@1, "dropped '%s' service", $2);
@@ -259,7 +271,7 @@ service:
 ;
 
 
-/* --- GenoM object attributes --------------------------------------------- */
+/* --- GenoM object properties --------------------------------------------- */
 
 attr_list:
   attr ';'
@@ -399,20 +411,20 @@ attr:
 /* --- codels -------------------------------------------------------------- */
 
 validate:
-  identifier '(' named_param_list ')'
+  identifier '(' param_list ')'
   {
     $$ = codel_create(@1, $1, NULL, NULL, $3);
   }
 
 codel:
-  event_list ':' identifier '(' named_param_list ')' YIELD event_list
+  event_list ':' identifier '(' param_list ')' YIELD event_list
   {
     if (!$1 || !$8) {
       parserror(@1, "dropped codel '%s'", $3); $$ = NULL; break;
     }
     $$ = codel_create(@3, $3, $1, $8, $5);
   }
-  | event_list ':' identifier '(' named_param_list ')' error
+  | event_list ':' identifier '(' param_list ')' error
   {
     $$ = NULL;
     parserror(@1, "missing 'yield' values for codel %s", $3);
@@ -427,18 +439,14 @@ event_list: identifier_list
   }
 ;
 
-named_param_list:
+param_list:
   /* empty */
   {
     $$ = hash_create("parameter list", 0);
   }
-  | initialized_param
+  | param
   {
     $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
-    if (param_name($1)[0] == '\0') {
-      parserror(@1, "unnamed parameter not allowed, use ::name");
-      break;
-    }
     switch(hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
       case 0: break;
       case EEXIST:
@@ -447,13 +455,9 @@ named_param_list:
       default: param_destroy($1); break;
     }
   }
-  | named_param_list ',' initialized_param
+  | param_list ',' param
   {
     $$ = $1; if (!$3) break;
-    if (param_name($3)[0] == '\0') {
-      parserror(@3, "unnamed parameter not allowed, use ::name");
-      break;
-    }
     switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
       case 0: break;
       case EEXIST:
@@ -464,98 +468,132 @@ named_param_list:
   }
 ;
 
-initialized_param:
-  named_param
-  | named_param '=' doc_initializer
+nodir_param_list:
+  nodir_param
   {
-    $$ = $1; if (!$1 || !$3) break;
-    if (param_setinitv(@3, $1, $3))
-      parserror(@3, "dropping initializer for '%s'", param_name($1));
+    $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
+    switch(hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
+      case 0: break;
+      case EEXIST:
+	parserror(@1, "duplicate parameter '%s'", param_name($1));
+	/*FALLTHROUGH*/
+      default: param_destroy($1); break;
+    }
   }
-;
-
-named_param: param_member | param_member COLONCOLON identifier
+  | nodir_param_list ',' nodir_param
   {
-    $$ = $1; if (!$$) break;
-    if (param_setname(@3, $$, $3)) { param_destroy($$); $$ = NULL; }
-  }
-;
-
-param_member:
-  param
-  | param_member '.' identifier
-  {
-    $$ = $1; if (!$$) break;
-    if (param_setmember(@3, $$, $3)) { param_destroy($$); $$ = NULL; }
-  }
-  | param_member '[' positive_int_const ']'
-  {
-    assert($3.k == CST_UINT);
-    $$ = $1; if (!$$) break;
-    if (param_setelement(@3, $$, $3.u)) { param_destroy($$); $$ = NULL; }
+    $$ = $1; if (!$3) break;
+    switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
+      case 0: break;
+      case EEXIST:
+	parserror(@3, "duplicate parameter '%s'", param_name($3));
+	/*FALLTHROUGH*/
+      default: param_destroy($3); break;
+    }
   }
 ;
 
 param:
-  IN
+  param_dir named_param
   {
-    $$ = param_newids(@1, P_IN, NULL);
+    $$ = $2; if (!$2) break;
+    if (param_setdir($2, $1))
+      parserror(@2, "dropping initializer for '%s'", param_name($2));
   }
-  | OUT
+  | param_dir named_param '=' initializer
   {
-    $$ = param_newids(@1, P_OUT, NULL);
-  }
-  | INOUT
-  {
-    $$ = param_newids(@1, P_INOUT, NULL);
-  }
-  | IN identifier
-  {
-    $$ = param_newids(@1, P_IN, $2);
-  }
-  | OUT identifier
-  {
-    $$ = param_newids(@1, P_OUT, $2);
-  }
-  | INOUT identifier
-  {
-    $$ = param_newids(@1, P_INOUT, $2);
-  }
-  | INPORT named_port
-  {
-    if (!$2) { $$ = NULL; break; }
-    $$ = param_newport(@1, P_INPORT, NULL, $2);
-  }
-  | OUTPORT named_port
-  {
-    if (!$2) { $$ = NULL; break; }
-    $$ = param_newport(@1, P_OUTPORT, NULL, $2);
+    $$ = $2; if (!$2 || !$4) break;
+    if (param_setdir($2, $1) || param_setinitv(@4, $2, $4))
+      parserror(@3, "dropping initializer for '%s'", param_name($2));
   }
 ;
 
-named_port: identifier
+nodir_param:
+  named_param
   {
-    comp_s c = comp_dotgen();
-    if (!$1 || !c) { $$ = NULL; break; }
-
-    $$ = comp_port(c, $1);
-    if (!$$) parserror(@1, "unknown port '%s'", $1);
+    $$ = $1; if (!$1) break;
+    if (param_setdir($1, P_INOUT))
+      parserror(@1, "dropping initializer for '%s'", param_name($1));
   }
+  | named_param '=' initializer
+  {
+    $$ = $1; if (!$1 || !$3) break;
+    if (param_setdir($1, P_INOUT) || param_setinitv(@3, $1, $3))
+      parserror(@1, "dropping initializer for '%s'", param_name($1));
+  }
+;
 
-constr_initializer_list:
+named_param:
+  param_member
+  {
+    const char *n = NULL;
+    citer i;
+    if (!$1) { $$ = NULL; break; }
+    for (clist_first($1, &i); i.value; clist_next(&i))
+      if (i.value->k == CST_STRING) n = i.value->s;
+    if (!n) { $$ = NULL; clist_destroy($1); break; }
+
+    $$ = param_new(@1, n, $1);
+  }
+  | param_member COLONCOLON identifier
+  {
+    if (!$1 || !$3) { $$ = NULL; break; }
+    $$ = param_new(@1, $3, $1);
+  }
+  | /* empty */ COLONCOLON identifier
+  {
+    if (!$2) { $$ = NULL; break; }
+    $$ = param_new(@2, $2, NULL);
+  }
+;
+
+param_member:
+  identifier
+  {
+    cval v = { .k = CST_STRING, { .s = $1 } };
+    if (!$1) { $$ = NULL; break; }
+    $$ = clist_append(NULL, v, 0/*!unique*/);
+  }
+  | param_member '.' identifier
+  {
+    cval v = { .k = CST_STRING, { .s = $3 } };
+    if ($1)
+      $$ = clist_append($1, v, 0/*!unique*/);
+    else
+      $$ = NULL;
+  }
+  | param_member '[' positive_int_const ']'
+  {
+    assert($3.k == CST_UINT);
+    if ($1)
+      $$ = clist_append($1, $3, 0/*!unique*/);
+    else
+      $$ = NULL;
+  }
+;
+
+param_dir:
+    IN		{ $$ = P_IN; }
+  | OUT		{ $$ = P_OUT; }
+  | INOUT	{ $$ = P_INOUT; }
+  | INPORT	{ $$ = P_INPORT; }
+  | OUTPORT	{ $$ = P_OUTPORT; }
+;
+
+initializer_list:
   /* empty */
   {
     $$ = NULL;
   }
-  | doc_initializer
-  | constr_initializer_list ',' doc_initializer
+  | initializer
+  | initializer_list ',' initializer
   {
     $$ = $3 ? initer_append($1, $3) : $1;
   }
 ;
 
-doc_initializer:
-  constr_initializer
+initializer:
+  initializer_value
   | COLONCOLON string_literals
   {
     cval v; v.k = CST_VOID; v.u = -1U;
@@ -565,19 +603,19 @@ doc_initializer:
     } else
       $$ = NULL;
   }
-  | constr_initializer COLONCOLON string_literals
+  | initializer_value COLONCOLON string_literals
   {
     $$ = $1; if (!$1 || !$3) break;
     (void)initer_setdoc($1, $3);
   }
 ;
 
-constr_initializer:
+initializer_value:
   const_expr
   {
     $$ = initer_create(-1U, NULL, NULL, $1);
   }
-  | '{' constr_initializer_list '}'
+  | '{' initializer_list '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     $$ = $2 ? initer_create(-1U, NULL, $2, v) : NULL;
@@ -587,7 +625,7 @@ constr_initializer:
     assert($2.k == CST_UINT);
     $$ = initer_create($2.u, NULL, NULL, $5);
   }
-  | '[' positive_int_const ']' '=' '{' constr_initializer_list '}'
+  | '[' positive_int_const ']' '=' '{' initializer_list '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     assert($2.k == CST_UINT);
@@ -597,7 +635,7 @@ constr_initializer:
   {
     $$ = initer_create(-1U, $2, NULL, $4);
   }
-  | '.' identifier '=' '{' constr_initializer_list '}'
+  | '.' identifier '=' '{' initializer_list '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     $$ = initer_create(-1U, $2, $5, v);
@@ -1423,10 +1461,10 @@ size_unit:
 
 identifier:
   IDENTIFIER | S | MS | US | K | M
-  | COMPONENT | IDS | VERSION | LANG | EMAIL | REQUIRE | BUILDREQUIRE
-  | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL | VALIDATE
-  | YIELD | THROWS | DOC | INTERRUPTS | BEFORE | AFTER | EVENT | INPORT
-  | OUTPORT | IN | OUT | INOUT
+  | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
+  | BUILDREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL
+  | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE | AFTER | EVENT
+  | INPORT | OUTPORT | IN | OUT | INOUT
 ;
 
 identifier_list:

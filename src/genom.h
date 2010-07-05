@@ -176,6 +176,7 @@ const char *	const_strkind(cvalkind k);
 const char *	const_strval(cval v);
 
 clist_s	clist_append(clist_s l, cval v, int unique);
+cval	clist_pop(clist_s *l);
 void	clist_destroy(clist_s l);
 int	clist_first(clist_s l, citer *i);
 int	clist_next(citer *i);
@@ -298,6 +299,7 @@ typedef struct prop_s *prop_s;
 typedef enum propkind {
   PROP_DOC,		/**< doc string */
   PROP_IDS,		/**< internal data structure */
+  PROP_ATTRIBUTE,	/**< component attributes */
   PROP_VERSION,		/**< component version */
   PROP_LANG,		/**< codels language */
   PROP_EMAIL,		/**< support e-mail */
@@ -339,7 +341,7 @@ clist_s		prop_list(prop_s p);
 idltype_s	prop_value(prop_s p);
 task_s		prop_task(prop_s p);
 codel_s		prop_codel(prop_s p);
-hash_s		prop_identifiers(prop_s p);
+hash_s		prop_hash(prop_s p);
 
 const char *	prop_strkind(propkind k);
 
@@ -384,6 +386,7 @@ hash_s		service_props(service_s s);
 hash_s		service_params(service_s s);
 
 comp_s		comp_create(tloc l, const char *name, hash_s props);
+int		comp_addattr(tloc l, hash_s attrs);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
 port_s		comp_addport(tloc l, portkind k, const char *name,
 			idltype_s t);
@@ -402,6 +405,8 @@ void		service_destroy(service_s s);
 typedef struct param_s *param_s;
 typedef struct initer_s *initer_s;
 typedef enum pdir {
+  P_NODIR,
+
   P_IN,
   P_OUT,
   P_INOUT,
@@ -437,13 +442,9 @@ initer_s	initer_next(initer_s i);
 codel_s		codel_create(tloc l, const char *name, hash_s triggers,
 			hash_s yields, hash_s params);
 
-param_s		param_newids(tloc l, pdir d, const char *name);
-param_s		param_newport(tloc l, pdir d, const char *name, port_s port);
+param_s		param_new(tloc l, const char *name, clist_s member);
 void		param_destroy(param_s p);
-
-int		param_setname(tloc l, param_s p, const char *name);
-int		param_setmember(tloc l, param_s p, const char *name);
-int		param_setelement(tloc l, param_s p, unsigned int e);
+int		param_setdir(param_s p, pdir dir);
 int		param_setinitv(tloc l, param_s p, initer_s i);
 initer_s	param_typeiniter(param_s p, idltype_s t);
 

@@ -45,7 +45,7 @@ struct prop_s {
     clist_s clist;	/**< require, build-require */
     idltype_s value;	/**< clock-rate, period, delay, priority, stack */
     codel_s codel;	/**< codel */
-    hash_s hash;	/**< throws */
+    hash_s hash;	/**< attribute, throws */
     task_s task;	/**< task */
   };
 };
@@ -285,14 +285,15 @@ prop_codel(prop_s p)
 }
 
 
-/* --- prop_identifiers ---------------------------------------------------- */
+/* --- prop_hash ----------------------------------------------------------- */
 
 hash_s
-prop_identifiers(prop_s p)
+prop_hash(prop_s p)
 {
   assert(p);
-  assert(p->kind == PROP_THROWS || p->kind == PROP_INTERRUPTS ||
-	 p->kind == PROP_BEFORE || p->kind == PROP_AFTER);
+  assert(p->kind == PROP_ATTRIBUTE || p->kind == PROP_THROWS ||
+	 p->kind == PROP_INTERRUPTS || p->kind == PROP_BEFORE ||
+	 p->kind == PROP_AFTER);
   return p->hash;
 }
 
@@ -322,6 +323,7 @@ prop_strkind(propkind k)
   switch(k) {
     case PROP_DOC:		return "doc";
     case PROP_IDS:		return "ids";
+    case PROP_ATTRIBUTE:	return "attribute";
     case PROP_VERSION:		return "version";
     case PROP_LANG:		return "language";
     case PROP_EMAIL:		return "e-mail";

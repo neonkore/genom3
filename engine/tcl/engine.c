@@ -287,7 +287,7 @@ static int
 engine_gencomponent(Tcl_Interp *interp, comp_s c)
 {
   idltype_s iev;
-  hiter i;
+  hiter i, p;
   int s;
 
   if (!Tcl_CreateObjCommand(interp, comp_genref(c), comp_cmd, c, NULL))
@@ -304,6 +304,13 @@ engine_gencomponent(Tcl_Interp *interp, comp_s c)
     switch(prop_kind(i.value)) {
       case PROP_IDS:
 	s = engine_gentype(interp, prop_type(i.value));
+	break;
+
+      case PROP_ATTRIBUTE:
+	for(hash_first(prop_hash(i.value), &p); p.current; hash_next(&p)) {
+	  s = engine_genparam(interp, p.value);
+	  if (s) break;
+	}
 	break;
 
       case PROP_CLOCKRATE:
@@ -371,10 +378,11 @@ engine_gentask(Tcl_Interp *interp, task_s t)
 	s = engine_gencodel(interp, prop_codel(i.value));
 	break;
 
-      case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
-      case PROP_CLOCKRATE: case PROP_TASK: case PROP_THROWS:
-      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
+      case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+      case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE: case PROP_TASK:
+      case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
+      case PROP_AFTER:
 	break;
     }
 
@@ -439,10 +447,11 @@ engine_genservice(Tcl_Interp *interp, service_s s)
 	break;
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-      case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
-      case PROP_CLOCKRATE: case PROP_TASK: case PROP_THROWS:
-      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      case PROP_DOC: case PROP_IDS:  case PROP_ATTRIBUTE: case PROP_VERSION:
+      case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+      case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE: case PROP_TASK:
+      case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
+      case PROP_AFTER:
 	break;
     }
 

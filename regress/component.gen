@@ -47,6 +47,7 @@ struct ids {
 
 component c {
   ids:		ids;
+
   version:	"1.0";
   email:	"null@example.com";
   lang:		"c";
@@ -54,6 +55,9 @@ component c {
   require:	"a", "b", "c";
   build-require:"d", "e";
 };
+
+attribute a = 0 :: "first attribute", b;
+attribute d = "none";
 
 inport long a;
 outport ids::str b;

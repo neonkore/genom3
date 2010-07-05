@@ -445,6 +445,31 @@ clist_append(clist_s l, cval v, int unique)
 }
 
 
+/* --- clist_pop ----------------------------------------------------------- */
+
+/** Destroy the first element of a list and return its value.
+ */
+
+cval
+clist_pop(clist_s *l)
+{
+  cval c;
+  clist_s n;
+
+  if (!*l) {
+    c.k = CST_VOID;
+    c.u = -1U;
+    return c;
+  }
+
+  n = (*l)->next;
+  c = (*l)->v;
+  free(*l);
+  *l = n;
+  return c;
+}
+
+
 /* --- clist_destroy ------------------------------------------------------- */
 
 /** Destroy a list

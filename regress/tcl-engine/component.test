@@ -1,0 +1,35 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+mkdir -p run.t
+
+
+# --- component ids --------------------------------------------------------
+#
+testing '[$component ids]'
+
+cat >run.gen <<EOF
+component c;
+EOF
+run 2 ${GENOM_BIN} interactive -b run.gen <<EOF
+puts [[dotgen component] ids]
+EOF
+
+
+# --- component attribute ---------------------------------------------------
+#
+testing '[$component attribute]'
+
+run 0 ${GENOM_BIN} interactive -b ${thisdir}../component.gen <<'EOF'
+set i 0
+foreach a [[dotgen component] attribute] {
+  puts "$i,[$a name],[$a dir],[$a member]"
+  incr i
+}
+EOF
+expect out '
+	/^0,a,inout,a$/ {next}
+	/^1,b,inout,b$/ {next}
+	/^2,d,inout,d$/ {next}
+	{exit 2}
+'

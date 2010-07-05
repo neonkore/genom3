@@ -141,6 +141,7 @@ chartext	([^\'])|(\\.)
 
 "doc"		{ yylval->s = string(yytext); return DOC; }
 "ids"		{ yylval->s = string(yytext); return IDS; }
+"attribute"	{ yylval->s = string(yytext); return ATTRIBUTE; }
 "version"	{ yylval->s = string(yytext); return VERSION; }
 "lang"		{ yylval->s = string(yytext); return LANG; }
 "email"		{ yylval->s = string(yytext); return EMAIL; }

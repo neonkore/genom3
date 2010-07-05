@@ -1,5 +1,6 @@
 AFTER		after
 ANY		any
+ATTRIBUTE	attribute
 BEFORE		before
 BOOLEAN		boolean
 BUILDREQUIRE	build-require

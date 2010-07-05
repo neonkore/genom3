@@ -134,9 +134,9 @@ comp_create(tloc l, const char *name, hash_s props)
   /* check unwanted properties */
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
-      case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
-      case PROP_CLOCKRATE:
+      case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
+      case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+      case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
 	break;
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
@@ -245,6 +245,58 @@ comp_service(comp_s c, const char *name)
 }
 
 
+/* --- comp_addattr -------------------------------------------------------- */
+
+/** create an attribute for component
+ */
+int
+comp_addattr(tloc l, hash_s attrs)
+{
+  hash_s h;
+  hiter i;
+  prop_s p;
+
+  /* a component must exist */
+  if (!dotgen) {
+    parserror(l, "missing component declaration before attribute");
+    return errno = EINVAL;
+  }
+
+  /* append to existing attributes, or create one */
+  p = hash_find(dotgen->props, prop_strkind(PROP_ATTRIBUTE));
+  if (p) {
+    h = prop_hash(p);
+    for (hash_first(attrs, &i); i.current; hash_first(attrs, &i)) {
+      if (hash_insert(h, i.key, i.value, (hrelease_f)param_destroy)) {
+	if (errno == EEXIST) {
+	  param_s p = hash_find(h, i.key); assert(p);
+	  parserror(l, "duplicate attribute '%s' declaration", i.key);
+	  parsenoerror(param_loc(p), " %s declared here", param_name(p));
+	} else
+	  parserror(l, "dropped attribute '%s' declaration", i.key);
+	hash_remove(attrs, i.key, 1);
+      } else {
+	xwarnx("created attribute '%s'", i.key);
+	hash_remove(attrs, i.key, 0);
+      }
+    }
+    hash_destroy(attrs);
+  } else {
+    p = prop_newhash(l, PROP_ATTRIBUTE, attrs);
+    if (hash_insert(dotgen->props,
+		    prop_name(p), p, (hrelease_f)prop_destroy)) {
+      parserror(l, "dropped attribute declaration");
+      return errno;
+    }
+    for (hash_first(attrs, &i); i.current; hash_next(&i)) {
+      xwarnx("created attribute '%s'", i.key);
+    }
+  }
+
+  return 0;
+}
+
+
 /* --- comp_addtask -------------------------------------------------------- */
 
 /** create a task in component
@@ -307,10 +359,10 @@ comp_addtask(tloc l, const char *name, hash_s props)
       case PROP_STACK: case PROP_CODEL: case PROP_THROWS:
 	break;
 
-      case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-      case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
-      case PROP_TASK: case PROP_VALIDATE: case PROP_INTERRUPTS:
-      case PROP_BEFORE: case PROP_AFTER:
+      case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_CLOCKRATE: case PROP_TASK: case PROP_VALIDATE:
+      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
 	parserror(prop_loc(i.value), "property %s is not suitable for tasks",
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
@@ -460,9 +512,10 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
       case PROP_AFTER:
 	break;
 
-      case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-      case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
-      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
+      case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_CLOCKRATE: case PROP_PERIOD: case PROP_DELAY:
+      case PROP_PRIORITY: case PROP_STACK:
 	parserror(prop_loc(i.value), "property %s is not suitable for services",
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
@@ -471,7 +524,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   /* check parameters */
   for(hash_first(params, &i); i.current; hash_next(&i)) {
     switch(param_dir(i.value)) {
-      case P_IN: case P_OUT: case P_INOUT:
+      case P_NODIR: case P_IN: case P_OUT: case P_INOUT:
 	break;
       case P_INPORT: case P_OUTPORT:
 	parserror(param_loc(i.value),

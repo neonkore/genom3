@@ -1,0 +1,17 @@
+
+What is missing for 3.0
+-----------------------
+
+  Simplify parameter that are "members" of the ids. Currently what is returned
+  in TCL is a list of integers and strings. Maybe change that to a hierachy of
+  types, like for initializers. Maybe add a [language lang member type-list
+  var] procedure that converts the member list into a language construct.
+
+  Define TCL procedures to add services, parameters, maybe tasks, maybe
+  components.
+
+  Create typed events, and merge with ports. We should have {in|out}port
+  {data|event}.
+
+  Create tcl procedure to retrieve a component, service, task, ... by name (or
+  pattern, like [dotgen types]).

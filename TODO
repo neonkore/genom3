@@ -8,6 +8,8 @@ What is missing for 3.0
   Create tcl procedure to retrieve a component, service, task, ... by name (or
   pattern, like [dotgen types]).
 
+  Replace task:control in services by nothing.
+
   Document tcl object procedures
 
   Write introduction in documentation

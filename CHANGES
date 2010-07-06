@@ -1,6 +1,46 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2010 LAAS/CNRS
 
+			    Changes in genom 2.99.3
+
+Released on July 6th, 2010
+
+ . Added [language member {lang} {type} {members}] tcl procedure. This
+   procedure returns a language construction to access a member of a type.
+   If 'members' is a list, it is interpreted as a hierachy of members.
+
+ . Added [$parameter base] tcl procedure. It returns the base type (i.e. the
+   IDS or a port type) of that parameter.
+
+ . Added optional pattern in the tcl [$type members ?pattern?] procedure, to
+   retrive members of a type matching pattern only. If pattern is the name of a
+   member, that member only is returned.
+
+ . Changed port declaration syntax and added input and output typed event
+   ports. Ports are now declared with {in|out}port {data|event}<[type]> name;
+
+ . Added components 'attributes'. Component attributes are values from the IDS
+   that are considered as global parameters controlling the component
+   behaviour.
+
+ . Added [language invoke {lang} {codel} {params}] tcl procedure. It returns a
+   string corresponding to the invocation of a codel in the language lang, with
+   the list of parameters params.
+
+ . The tcl [language cname {lang} {object} ] procedure now accepts codel
+   objects and return the symbol name of the codel in the language lang.
+
+ . Added [object foreach {var} {object} {body}] tcl procedure. It works for
+   object of class 'type' and traverses, in depth-first order, the type tree.
+   For each sub-type in the tree, it evaluates the body with var set to the
+   current element. If var is a list of two variable names, the second variable
+   is set to the hierachy of types leading from the main type to the current
+   element.
+
+ . Added optional type parameter in the  [$parameter initializer ?type?] tcl
+   procedure for parameters. If type is a sub-type of the parameter type, the
+   procedure returns the initializer for that specific sub-type only.
+
 			    Changes in genom 2.99.2
 
 Released on June 27th, 2010

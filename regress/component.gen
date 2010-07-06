@@ -89,6 +89,7 @@ service s2(
 	       [2] = { .b = 2, .a = 4, .c = { 2 } }
 	     }, ee1} :: "also doc",
 	   in a = 2 :: "long doc",
+	   in b[2].c.d::b = :: "long doc",
 	   in d = "test string" :: "a string",
 	   in f, in g,
 	   out e, out c, out f::outf, out h) {

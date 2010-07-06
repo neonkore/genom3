@@ -256,6 +256,70 @@ namespace eval language::c++ {
     }
 
 
+    # --- member -----------------------------------------------------------
+
+    # Return the C construction to access members of type
+    #
+    proc member { type members } {
+	if {[llength $members] == 0} return ""
+	set members [lassign $members member]
+
+	switch -- [$type kind] {
+	    {boolean}				-
+	    {unsigned short} - {short}		-
+	    {unsigned long} - {long}		-
+	    {unsigned long long} - {long long}	-
+	    {float} - {double}			-
+	    {char} - {octet}			-
+	    {enum} - {enumerator} - {string} {
+		# basic types: no member
+		template fatal "[$type kind] has no member"
+	    }
+
+	    {array} - {sequence} {
+		if {![string is digit [string index $member 0]]} {
+		    template fatal "[$type kind] has no member $member"
+		}
+		append access "\[$member\]"
+		set type [$type type]
+	    }
+
+	    {struct} {
+		set m [$type members $member]
+		if {[llength $m] == 0} {
+		    template fatal "[$type kind] has no member $member"
+		}
+		append access ".$member"
+		set type $m
+	    }
+
+	    {union} {
+		set m [$type members $member]
+		if {[llength $m] == 0} {
+		    template fatal "[$type kind] has no member $member"
+		}
+		append access "._u.$member"
+		set type $m
+	    }
+
+	    {forward struct} - {forward union}	-
+	    {struct member} - {union member}	-
+	    {typedef} {
+		set type [$type type]
+		set members [concat $member $members]
+	    }
+
+	    default { error "internal error: unhandled type '[$type kind]'" }
+	}
+
+	if {[llength $members] > 0} {
+	    append access [member $type $members]
+	}
+
+	return $access
+    }
+
+
     # --- invoke -----------------------------------------------------------
 
     # Return the C++ invocation of a codel

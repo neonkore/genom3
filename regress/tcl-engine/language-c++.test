@@ -93,6 +93,32 @@ expect out '
 '
 
 
+# --- language member c++ --------------------------------------------------
+#
+testing '[language member c++]'
+
+cat >run.gen <<'EOF'
+struct s {
+  struct ss {
+    long a;
+  } a[2];
+};
+component c { ids: s; };
+service s(in a[1].a) {
+  task: control;
+};
+EOF
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+set p [[[dotgen component] service] parameter]
+puts [language member c [$p base] [$p member]]
+EOF
+expect out '
+	/^.a\[1\]\.a$/ {next}
+	{exit 2}
+'
+
+
 # --- language cname c++ ---------------------------------------------------
 #
 testing '[language cname c++]'

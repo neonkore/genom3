@@ -171,6 +171,32 @@ namespace eval language {
     namespace export dereference
 
 
+    # --- member -----------------------------------------------------------
+
+    # \proc language member {\em lang} {\em type} {\em members}
+    # \index language member
+    #
+    # Return the language construction to access a member of a {\em type}. If
+    # {\em members} is a list, it is interpreted as a hierachy. Each element of
+    # {\em members} is interpreted as follow: if it starts with a letter, {\em
+    # type} should be an aggregate type (like {\tt struct}); if it starts with
+    # a numeric digit, {\em type} should be an array type (like {\tt
+    # sequence}).
+    #
+    # This procedure can typically be used with parameters objects, for which
+    # the 'member' subcommand returns a compatible {\em members} list.
+    #
+    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
+    # \arg type		A type object
+    # \arg members	A member name, or a list of hierachical members to
+    #			access.
+    #
+    proc member { lang type members } {
+	return [[support $lang]::member $type $members]
+    }
+    namespace export member
+
+
     # --- cname ------------------------------------------------------------
 
     # \proc language cname {\em lang} \{{\em string}|{\em object}\}

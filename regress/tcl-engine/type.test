@@ -1,0 +1,24 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+mkdir -p run.t
+
+
+# --- type member ----------------------------------------------------------
+#
+testing '[$type member]'
+
+run 0 ${GENOM_BIN} interactive -b ${thisdir}../component.gen <<'EOF'
+foreach m [[[dotgen component] ids] members] {
+  puts -nonewline "[$m name] "
+}
+puts ""
+foreach m [[[dotgen component] ids] members a] {
+  puts -nonewline "[$m name] "
+}
+EOF
+expect out '
+	/^a b c d e f g h $/ {next}
+	/^a $/ {next}
+	{exit 2}
+'

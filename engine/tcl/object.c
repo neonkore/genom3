@@ -31,6 +31,12 @@
 #include "engine.h"
 
 
+/* --- local data ---------------------------------------------------------- */
+
+static Tcl_Obj *	member_list(Tcl_Interp *interp, idltype_s t,
+				Tcl_Obj *pattern);
+
+
 /* --- type command -------------------------------------------------------- */
 
 /** Implements the command associated to a type object.
@@ -58,13 +64,22 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   int i = typeidx_fullname; /* return full name by default */
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$type subcommand");
-    return TCL_ERROR;
-  }
   if (objc > 1) {
     s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
     if (s != TCL_OK) return s;
+  }
+  if (i == typeidx_members) {
+    /* 'members' subcommand can have one additional parameter, others don't
+     * have any */
+    if (objc > 3) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$type members ?pattern?");
+      return TCL_ERROR;
+    }
+  } else {
+    if (objc > 2) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$type subcommand");
+      return TCL_ERROR;
+    }
   }
   switch(i) {
     case typeidx_kind:
@@ -141,20 +156,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       }
       break;
 
-    case typeidx_members: {
-      idltype_s e;
-      hiter m;
-      switch(type_kind(t)) {
-	case IDL_STRUCT: case IDL_UNION: case IDL_ENUM:
-	  r = Tcl_NewListObj(0, NULL);
-	  for(e = type_first(t, &m); e; e = type_next(&m)) {
-	    Tcl_ListObjAppendElement(
-	      interp, r, Tcl_NewStringObj(type_genref(e), -1));
-	  }
-	  break;
-
-	default: r = NULL; break;
-      }
+    case typeidx_members:
+      r = member_list(interp, t, objc > 2 ? objv[2] : NULL);
       break;
 
     case typeidx_discriminator:
@@ -177,7 +180,6 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	r = Tcl_NewListObj(3, l);
       }
       break;
-    }
 
     case typeidx_class:
       r = Tcl_NewStringObj("type", -1);
@@ -191,6 +193,32 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   Tcl_SetObjResult(interp, r);
   return TCL_OK;
+}
+
+
+/* --- member_list --------------------------------------------------------- */
+
+/** return a Tcl list of type members, matching a pattern if not NULL.
+*/
+static Tcl_Obj *
+member_list(Tcl_Interp *interp, idltype_s t, Tcl_Obj *pattern)
+{
+  const char *p;
+  idltype_s e;
+  hiter m;
+
+  Tcl_Obj *r = Tcl_NewListObj(0, NULL);
+  p =  pattern ? Tcl_GetString(pattern) : NULL;
+
+  for(e = type_first(t, &m); e; e = type_next(&m)) {
+    if (p && type_name(e) && !Tcl_StringMatch(type_name(e), p))
+      continue;
+
+    Tcl_ListObjAppendElement(
+      interp, r, Tcl_NewStringObj(type_genref(e), -1));
+  }
+
+  return r;
 }
 
 

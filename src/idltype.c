@@ -520,10 +520,11 @@ type_first(idltype_s t, hiter *i)
   /* only structs, unions and enum have members */
   switch(type_kind(t)) {
     case IDL_STRUCT: case IDL_UNION:
-      do {
-	if (scope_firstype(t->elems, i)) return NULL;
-	t = i->value;
-      } while (type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE);
+      if (scope_firstype(t->elems, i)) return NULL;
+      while (type_kind(i->value) != IDL_MEMBER &&
+	     type_kind(i->value) != IDL_CASE)
+	if (scope_nextype(i)) return NULL;
+      t = i->value;
       break;
 
     case IDL_ENUM:

@@ -40,6 +40,7 @@ struct param_s {
   const char *name;
 
   clist_s member;	/**< ids or port member */
+  idltype_s base;	/**< base type (ids or port) */
   idltype_s type;	/**< member type */
   port_s port;		/**< in/out port (for port only) */
 
@@ -50,6 +51,7 @@ tloc		param_loc(param_s p) { assert(p); return p->loc; }
 pdir		param_dir(param_s p) { assert(p); return p->dir; }
 const char *	param_name(param_s p) { assert(p); return p->name; }
 clist_s		param_member(param_s p) { assert(p); return p->member; }
+idltype_s	param_base(param_s p) { assert(p); return p->base; }
 idltype_s	param_type(param_s p) { assert(p); return p->type; }
 port_s		param_port(param_s p) {
   assert(p && (p->dir == P_INPORT || p->dir == P_OUTPORT)); return p->port;
@@ -81,6 +83,7 @@ param_new(tloc l, const char *name, clist_s member)
   p->name = string(name);
   p->member = member;
 
+  p->base = NULL;
   p->type = NULL;
   p->port = NULL;
   p->init = NULL;
@@ -99,11 +102,10 @@ param_new(tloc l, const char *name, clist_s member)
 int
 param_setdir(param_s p, pdir dir)
 {
-  idltype_s base;
   comp_s c;
   citer i;
   int s;
-  assert(p && p->dir == P_NODIR && !p->port);
+  assert(p && p->dir == P_NODIR && !p->base && !p->port);
 
   c = comp_dotgen(); if (!c) {
     parserror(p->loc, "missing component declaration before parameter '%s'",
@@ -116,7 +118,7 @@ param_setdir(param_s p, pdir dir)
     case P_NODIR: /* must not set a direction to NODIR */ assert(0); break;
 
     case P_IN: case P_OUT: case P_INOUT:
-      base = comp_ids(c); if (!base) {
+      p->base = comp_ids(c); if (!p->base) {
 	parserror(p->loc, "component %s has no ids", comp_name(c));
 	return errno = EINVAL;
       }
@@ -135,13 +137,13 @@ param_setdir(param_s p, pdir dir)
 	parserror(p->loc, "unknown port '%s'", p->name);
 	return errno = EINVAL;
       }
-      base = port_type(p->port);
+      p->base = port_type(p->port);
       break;
     }
   }
 
   /* set member type */
-  p->type = base;
+  p->type = p->base;
   for(clist_first(p->member, &i); i.value; clist_next(&i)) {
     switch(i.value->k) {
       case CST_UINT:	s = param_setelement(p, i.value->u); break;

@@ -429,6 +429,7 @@ tloc		param_loc(param_s p);
 const char *	param_name(param_s p);
 pdir		param_dir(param_s p);
 clist_s		param_member(param_s p);
+idltype_s	param_base(param_s p);
 idltype_s	param_type(param_s p);
 port_s		param_port(param_s p);
 initer_s	param_initer(param_s p);

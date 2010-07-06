@@ -60,6 +60,7 @@
   char *	s;
   cval		v;
   pdir		pdir;
+  portkind	pkind;
   clist_s	vlist;
   prop_s	prop;
   codel_s	codel;
@@ -87,13 +88,15 @@
 
 %token <s>	S MS US K M
 %token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
-%token <s>	ATTRIBUTE INPUT OUTPUT EVENT IMPORT FROM VERSION LANG EMAIL
+%token <s>	ATTRIBUTE INPUT OUTPUT EVENT DATA VERSION LANG EMAIL
 %token <s>	REQUIRE BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
 %token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE
 
 %type <i>	spec idlspec statement idldef idlstatement genomstatement
 
 %type <i>	component port task service
+%type <pkind>	port_dir
+%type <type>	port_type
 %type <prop>	attr
 %type <hash>	attr_list param_list nodir_param_list
 %type <initer>	initializer_value initializer initializer_list
@@ -195,24 +198,28 @@ component:
 ;
 
 port:
-  INPORT type_spec identifier
+  port_dir '<' port_type '>' identifier
   {
-    if (!$2 || !$3) { if ($3) parserror(@1, "dropped '%s' port", $3); break; }
-    if (!comp_addport(@1, PORT_IN, $3, $2))
-      parserror(@1, "dropped '%s' port", $3);
+    if (!$5) { parserror(@1, "dropped port"); break; }
+    if (!$3) {
+      if ($1 == PORT_INDATA || $1 == PORT_OUTDATA) {
+	parserror(@1, "%s port '%s' port cannot be void",
+		  port_strkind($1), $5);
+	break;
+      }
+    }
+    if (!comp_addport(@1, $1, $5, $3))
+      parserror(@1, "dropped '%s' port", $5);
   }
-  | OUTPORT type_spec identifier
-  {
-    if (!$2 || !$3) { if ($3) parserror(@1, "dropped '%s' port", $3); break; }
-    if (!comp_addport(@1, PORT_OUT, $3, $2))
-      parserror(@1, "dropped '%s' port", $3);
-  }
-  | EVENT identifier
-  {
-    if (!$2) break;
-    if (!comp_addport(@1, PORT_EVENT, $2, NULL))
-      parserror(@1, "dropped '%s' port", $2);
-  }
+;
+
+port_type: type_spec | /* empty */ { $$ = NULL; };
+
+port_dir:
+    INPORT DATA		{ $$ = PORT_INDATA; }
+  | INPORT EVENT	{ $$ = PORT_INEVENT; }
+  | OUTPORT DATA	{ $$ = PORT_OUTDATA; }
+  | OUTPORT EVENT	{ $$ = PORT_OUTEVENT; }
 ;
 
 attribute:
@@ -1464,7 +1471,7 @@ identifier:
   | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
   | BUILDREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL
   | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE | AFTER | EVENT
-  | INPORT | OUTPORT | IN | OUT | INOUT
+  | DATA | INPORT | OUTPORT | IN | OUT | INOUT
 ;
 
 identifier_list:

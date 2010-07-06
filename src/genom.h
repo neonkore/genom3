@@ -352,9 +352,10 @@ typedef struct comp_s *comp_s;
 typedef struct port_s *port_s;
 typedef struct service_s *service_s;
 typedef enum portkind {
-  PORT_IN,
-  PORT_OUT,
-  PORT_EVENT
+  PORT_INDATA,
+  PORT_INEVENT,
+  PORT_OUTDATA,
+  PORT_OUTEVENT
 } portkind;
 
 tloc		comp_loc(comp_s c);

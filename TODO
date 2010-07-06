@@ -10,8 +10,5 @@ What is missing for 3.0
   Define TCL procedures to add services, parameters, maybe tasks, maybe
   components.
 
-  Create typed events, and merge with ports. We should have {in|out}port
-  {data|event}.
-
   Create tcl procedure to retrieve a component, service, task, ... by name (or
   pattern, like [dotgen types]).

@@ -596,9 +596,10 @@ const char *
 port_strkind(portkind k)
 {
   switch(k) {
-    case PORT_IN:		return "in";
-    case PORT_OUT:		return "out";
-    case PORT_EVENT:		return "event";
+    case PORT_INDATA:	return "data in";
+    case PORT_INEVENT:	return "event in";
+    case PORT_OUTDATA:	return "data out";
+    case PORT_OUTEVENT:	return "event out";
   }
 
   assert(0);

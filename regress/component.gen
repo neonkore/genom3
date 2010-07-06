@@ -59,9 +59,9 @@ component c {
 attribute a = 0 :: "first attribute", b;
 attribute d = "none";
 
-inport long a;
-outport ids::str b;
-event c;
+inport data<long> a;
+outport data<ids::str> b;
+inport event<> c;
 
 task t1;
 

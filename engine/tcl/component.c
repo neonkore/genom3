@@ -33,6 +33,11 @@
 
 /* --- local data ---------------------------------------------------------- */
 
+static Tcl_Obj *	port_list(Tcl_Interp *interp, comp_s c,
+				Tcl_Obj *const dfilter[],
+				unsigned int ndfilter);
+
+
 
 /* --- component command --------------------------------------------------- */
 
@@ -145,32 +150,9 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
-    case compidx_ports: {
-      static const char *dirarg[] = {
-	[PORT_IN] = "in", [PORT_OUT] = "out", [PORT_EVENT] = "event",
-	NULL
-      };
-      int d = -1, sc;
-      hiter i;
-
-      r = Tcl_NewListObj(0, NULL);
-      for(hash_first(comp_ports(c), &i); i.current; hash_next(&i)) {
-	if (objc < 3) {
-	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
-	} else for(sc = 2; sc < objc; sc++) {
-	    s = Tcl_GetIndexFromObj(interp, objv[sc], dirarg, "direction", 0, &d);
-	    if (s != TCL_OK) return s;
-
-	    if (d == port_kind(i.value)) {
-	      Tcl_ListObjAppendElement(
-		interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
-	      break;
-	    }
-	  }
-      }
+    case compidx_ports:
+      r = port_list(interp, c, &objv[2], objc-2);
       break;
-    }
 
     case compidx_services: {
       hiter i;
@@ -205,4 +187,51 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   Tcl_SetObjResult(interp, r);
   return TCL_OK;
+}
+
+
+/* --- port_list ----------------------------------------------------------- */
+
+/** return a Tcl list of ports
+ */
+static Tcl_Obj *
+port_list(Tcl_Interp *interp, comp_s c, Tcl_Obj * const dfilter[],
+	  unsigned int ndfilter)
+{
+  static const char *dirarg[] = {
+    [PORT_INDATA] = "indata",	[PORT_OUTDATA] = "outdata",
+    [PORT_INEVENT] = "inevent",	[PORT_OUTEVENT] = "outevent",
+    NULL
+  };
+
+  hiter i;
+  int d = -1, f;
+  int s;
+
+  Tcl_Obj *r = Tcl_NewListObj(0, NULL);
+
+  for(hash_first(comp_ports(c), &i); i.current; hash_next(&i)) {
+    switch(ndfilter) {
+      case 0:
+	Tcl_ListObjAppendElement(
+	  interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
+	break;
+
+      default:
+	for(f = 0; f < ndfilter; f++) {
+	  s = Tcl_GetIndexFromObj(
+	    interp, dfilter[f], dirarg, "direction", 0, &d);
+	  if (s != TCL_OK) return NULL;
+
+	  if (d == port_kind(i.value)) {
+	    Tcl_ListObjAppendElement(
+	      interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
+	    break;
+	  }
+	}
+	break;
+    }
+  }
+
+  return r;
 }

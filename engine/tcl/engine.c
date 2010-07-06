@@ -406,13 +406,9 @@ engine_genport(Tcl_Interp *interp, port_s p)
     return EINVAL;
   printf("exported port %s\n", port_name(p));
 
-  switch(port_kind(p)) {
-    case PORT_IN: case PORT_OUT:
-      s = engine_gentype(interp, port_type(p));
-      if (s) return s;
-      break;
-
-    case PORT_EVENT: break;
+  if (port_type(p)) {
+    s = engine_gentype(interp, port_type(p));
+    if (s) return s;
   }
 
   return 0;

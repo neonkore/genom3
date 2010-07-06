@@ -12,6 +12,7 @@ CODEL		codel
 COLONCOLON	::
 COMPONENT	component
 CONST		const
+DATA		data
 DEFAULT		default
 DELAY		delay
 DOC		doc

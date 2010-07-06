@@ -138,6 +138,7 @@ chartext	([^\'])|(\\.)
 "inport"	{ yylval->s = string(yytext); return INPORT; }
 "outport"	{ yylval->s = string(yytext); return OUTPORT; }
 "event"		{ yylval->s = string(yytext); return EVENT; }
+"data"		{ yylval->s = string(yytext); return DATA; }
 
 "doc"		{ yylval->s = string(yytext); return DOC; }
 "ids"		{ yylval->s = string(yytext); return IDS; }

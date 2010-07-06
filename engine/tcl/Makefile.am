@@ -44,6 +44,7 @@ engine_la_SOURCES=\
 	engine.c	\
 	dotgen.c	\
 	component.c	\
+	port.c		\
 	object.c
 
 engine_la_CPPFLAGS=	-I$(top_srcdir)/src $(TCL_INCLUDE_SPEC)

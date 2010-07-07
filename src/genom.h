@@ -289,7 +289,6 @@ void		type_usage(void);
     "ok", "ether", "start", "stop", "sleep"				\
       }
 
-#define CNTRL_TASK_NAME			"control"
 #define ALL_SERVICE_NAME		"all"
 
 typedef struct task_s *task_s;

@@ -108,7 +108,6 @@ comp_create(tloc l, const char *name, hash_s props)
 {
   idltype_s iev;
   prop_s p;
-  hash_s h;
   hiter i;
   int e;
   assert(name && props);
@@ -184,13 +183,6 @@ comp_create(tloc l, const char *name, hash_s props)
   }
 
   xwarnx("created component %s", dotgen->name);
-
-  /* create control task */
-  h = hash_create("property list", 0);
-  if (!h) return NULL;
-  if (!comp_addtask(l, CNTRL_TASK_NAME, h))
-    return NULL;
-
   return dotgen;
 }
 
@@ -387,13 +379,9 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
     case EEXIST:
       /* control task is a reserved name */
-      if (!strcmp(name, CNTRL_TASK_NAME))
-	parserror(l, "'%s' is a reserved task name", name);
-      else {
-	parserror(l, "duplicate task %s", t->name);
-	task_s u = hash_find(dotgen->tasks, name);
-	if (u) parserror(u->loc, " task %s declared here", u->name);
-      }
+      parserror(l, "duplicate task %s", t->name);
+      task_s u = hash_find(dotgen->tasks, name);
+      if (u) parserror(u->loc, " task %s declared here", u->name);
       /*FALLTHROUGH*/
     default:
       free(t);
@@ -472,7 +460,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   service_s s;
   task_s t;
   codel_s c;
-  int e, k;
+  int e;
   assert(name && params && props);
 
   /* all is a reserved name */
@@ -487,17 +475,6 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
     return NULL;
   }
   e = 0;
-
-  /* check mandatory properties */
-  static const propkind m[] = {
-    PROP_TASK
-  };
-  for(k = 0; k<sizeof(m)/sizeof(m[0]); k++)
-    if (!hash_find(props, prop_strkind(m[k]))) {
-      parserror(l, "missing %s definition for service %s",
-		prop_strkind(m[k]), name);
-      e = 1;
-    }
 
   /* check unwanted properties */
   t = NULL;
@@ -563,9 +540,6 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   }
 
   /* set codels parent task and service */
-  if (!t) t = comp_task(dotgen, CNTRL_TASK_NAME);
-  assert(t);
-
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch (prop_kind(i.value)) {
       case PROP_CODEL:
@@ -576,7 +550,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
       case PROP_VALIDATE:
 	c = prop_codel(i.value);
-	*codel_task(c) = comp_task(dotgen, CNTRL_TASK_NAME);
+	*codel_task(c) = NULL;
 	*codel_service(c) = s;
 	break;
 

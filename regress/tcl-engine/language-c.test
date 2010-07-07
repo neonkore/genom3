@@ -104,9 +104,7 @@ struct s {
   } a[2];
 };
 component c { ids: s; };
-service s(in a[1].a) {
-  task: control;
-};
+service s(in a[1].a);
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
@@ -134,14 +132,14 @@ task t {
   codel x: tcodel() yield ether;
 };
 service s() {
-  task: control;
+  task: t;
   codel x: scodel() yield ether;
 };
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 puts 1,[language cname c [[dotgen type ::s::ss::a] fullname]]
-puts 2,[language cname c [[lindex [[dotgen component] task] 1] codel]]
+puts 2,[language cname c [[lindex [[dotgen component] task] 0] codel]]
 puts 3,[language cname c [[[dotgen component] service] codel]]
 EOF
 expect out '
@@ -159,7 +157,6 @@ testing '[language signature c]'
 cat >run.gen <<'EOF'
 component c;
 service s() {
-  task: control;
   codel x: codel() yield ether;
 };
 EOF
@@ -180,7 +177,6 @@ testing '[language invoke c]'
 cat >run.gen <<'EOF'
 component c;
 service s() {
-  task: control;
   codel x: codel() yield ether;
 };
 EOF

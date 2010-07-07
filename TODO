@@ -8,8 +8,6 @@ What is missing for 3.0
   Create tcl procedure to retrieve a component, service, task, ... by name (or
   pattern, like [dotgen types]).
 
-  Replace task:control in services by nothing.
-
   Document tcl object procedures
 
   Write introduction in documentation
@@ -26,3 +24,7 @@ What is missing for 3.0
   In particular: add operator[] for sequences.
 
   Improve documentation index
+
+  Add the 'scheduling' attribute for tasks.
+
+  Rethink the buildenv stuff and how to build codels, add cmake support.

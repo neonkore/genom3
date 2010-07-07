@@ -275,6 +275,21 @@ service:
       hash_destroy($7);
     }
   }
+  | SERVICE identifier '(' param_list ')'
+  {
+    hash_s h = hash_create("property list", 0);
+    if (!$2 || !$4 || !h) {
+      if ($2) parserror(@1, "dropped '%s' service", $2);
+      if ($4) hash_destroy($4);
+      if (h) hash_destroy(h);
+      break;
+    }
+    if (!comp_addservice(@1, $2, $4, h)) {
+      parserror(@1, "dropped '%s' service", $2);
+      hash_destroy($4);
+      hash_destroy(h);
+    }
+  }
 ;
 
 

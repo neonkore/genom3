@@ -81,7 +81,6 @@ task t2 {
 
 service s1() {
   doc: "service s1";
-  task: control;
 };
 
 service s2(

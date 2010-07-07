@@ -1,0 +1,23 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+mkdir -p run.t
+
+
+# --- simple invocation ----------------------------------------------------
+#
+testing 'skeleton template invocation'
+
+run 0 ${GENOM_BIN} skeleton -C run.t ${thisdir}../component.gen
+run 0 ls -R -1 run.t
+expect out '
+	/^run.t:$/ {next}
+	/^run.t\/codels:$/ {next}
+	/^codels$/ {next}
+	/^configure.user.ac$/ {next}
+	/^Makefile.user.am$/ {next}
+	/^c_t[12]\.c$/ {next}
+	/^c\.c$/ {next}
+	/^$/ {next}
+	{exit 2}
+'

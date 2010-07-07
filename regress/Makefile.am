@@ -20,6 +20,9 @@ TESTS=	basics/cpp.test
 TESTS+=	basics/parser.test
 
 if WITH_TCL
+  TESTS+=	templates/mappings.test
+  TESTS+=	templates/skeleton.test
+
   TESTS+=	tcl-engine/engine.test
   TESTS+=	tcl-engine/dotgen.test
   TESTS+=	tcl-engine/type.test

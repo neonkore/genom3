@@ -54,7 +54,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
-    [compidx_attr] = "attribute", [compidx_iev] = "event-type",
+    [compidx_attr] = "attributes", [compidx_iev] = "event-type",
     [compidx_version] = "version", [compidx_lang] = "language",
     [compidx_email] = "email", [compidx_require] = "require",
     [compidx_brequire] = "build-require", [compidx_clockrate] = "clock-rate",

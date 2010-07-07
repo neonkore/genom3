@@ -1,0 +1,36 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+mkdir -p run.t
+
+
+# --- service parameter ----------------------------------------------------
+#
+testing '[$service parameter]'
+
+cat >run.gen <<EOF
+struct s { struct ss { long a; } a[2]; };
+component c { ids: s; };
+service s(in a, inout a[1]::b);
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach p [[[dotgen component] service] parameter] {
+  puts -nonewline "[$p name] "
+}
+puts ""
+EOF
+expect out '
+	/^a b $/ {next}
+	{exit 2}
+'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach p [[[dotgen component] service] parameter in] {
+  puts -nonewline "[$p name] "
+}
+puts ""
+EOF
+expect out '
+	/^a $/ {next}
+	{exit 2}
+'

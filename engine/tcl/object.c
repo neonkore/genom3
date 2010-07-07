@@ -325,8 +325,9 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case serviceidx_params: {
       static const char *dirarg[] = {
-	[P_IN] = "in", [P_OUT] = "out", [P_INOUT] = "inout",
-	[P_INPORT] = "inport", [P_OUTPORT] = "outport", NULL
+	[P_NODIR] = "none", [P_IN] = "in", [P_OUT] = "out",
+	[P_INOUT] = "inout", [P_INPORT] = "inport", [P_OUTPORT] = "outport",
+	NULL
       };
       int d = -1, sc;
       hiter i;

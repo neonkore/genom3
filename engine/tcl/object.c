@@ -292,8 +292,9 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case serviceidx_task:
-      p = hash_find(service_props(s), prop_strkind(PROP_TASK)); assert(p);
-      r = Tcl_NewStringObj(task_genref(prop_task(p)), -1);
+      p = hash_find(service_props(s), prop_strkind(PROP_TASK));
+      if (p)
+	r = Tcl_NewStringObj(task_genref(prop_task(p)), -1);
       break;
 
     case serviceidx_throws: {

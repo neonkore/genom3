@@ -28,3 +28,5 @@ What is missing for 3.0
   Add the 'scheduling' attribute for tasks.
 
   Rethink the buildenv stuff and how to build codels, add cmake support.
+
+  Add more 'standard' template options, like -C, -f(orce)/-p(reserve) etc.

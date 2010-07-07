@@ -395,7 +395,7 @@ abspath(const char *path)
     p = strings(r, "/", path, NULL);
     free(r);
   } else
-    p = path;
+    p = string(path);
 
   return p;
 }
@@ -416,11 +416,11 @@ findexec(const char *prog)
   char *path = getenv("PATH");
   if (!path) path = "/usr/bin:/bin";
 
-  /* create a writable copy of PATH */
-  path = string(path);
-
   if (!stat(prog, &sb) && S_ISREG(sb.st_mode) && !access(prog, X_OK))
     return abspath(prog);
+
+  /* create a writable copy of PATH */
+  path = string(path);
 
   for (p = path; p; ) {
       /* for each path... */
@@ -432,7 +432,7 @@ findexec(const char *prog)
 	if (strlen(t) == 0) t = ".";
 
       len = snprintf(f, sizeof(f), "%s/%s", t, prog);
-      if (p) *p++ = ':';
+      if (p) p++;
 
       if (len >= sizeof(f)) continue;
       if (stat(f, &sb) == -1) continue;

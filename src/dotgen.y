@@ -86,11 +86,11 @@
 %token <c>	CHAR_LIT
 %token <s>	string_literal IDENTIFIER
 
-%token <s>	S MS US K M
+%token <s>	S MS US K M REAL_TIME
 %token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
 %token <s>	ATTRIBUTE INPUT OUTPUT EVENT DATA VERSION LANG EMAIL
 %token <s>	REQUIRE BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
-%token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE
+%token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 
 %type <i>	spec idlspec statement idldef idlstatement genomstatement
 
@@ -382,6 +382,10 @@ attr:
   | PRIORITY ':' positive_int_const
   {
     $$ = prop_newvalue(@1, PROP_PRIORITY, $3);
+  }
+  | SCHEDULING ':' REAL_TIME
+  {
+    $$ = prop_newstring(@1, PROP_SCHEDULING, $3);
   }
   | STACK ':' positive_int_const size_unit
   {
@@ -1482,11 +1486,11 @@ size_unit:
 /* when the context allows it, identifiers can be GenoM special keywords */
 
 identifier:
-  IDENTIFIER | S | MS | US | K | M
+  IDENTIFIER | S | MS | US | K | M | REAL_TIME
   | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
-  | BUILDREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | STACK | CODEL
-  | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE | AFTER | EVENT
-  | DATA | INPORT | OUTPORT | IN | OUT | INOUT
+  | BUILDREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
+  | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
+  | AFTER | EVENT | DATA | INPORT | OUTPORT | IN | OUT | INOUT
 ;
 
 identifier_list:

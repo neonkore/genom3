@@ -42,8 +42,10 @@ OUT		out
 OUTPORT		outport
 PERIOD		period
 PRIORITY	priority
+REAL_TIME	real-time
 REQUIRE		require
 S		s
+SCHEDULING	scheduling
 SEQUENCE	sequence
 SERVICE		service
 SHORT		short

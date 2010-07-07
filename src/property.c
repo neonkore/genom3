@@ -233,7 +233,8 @@ prop_text(prop_s p)
 {
   assert(p);
   assert(p->kind == PROP_DOC || p->kind == PROP_VERSION ||
-	 p->kind == PROP_EMAIL || p->kind == PROP_LANG);
+	 p->kind == PROP_EMAIL || p->kind == PROP_LANG ||
+	 p->kind == PROP_SCHEDULING);
   return p->text;
 }
 
@@ -333,6 +334,7 @@ prop_strkind(propkind k)
     case PROP_PERIOD:		return "period";
     case PROP_DELAY:		return "delay";
     case PROP_PRIORITY:		return "priority";
+    case PROP_SCHEDULING:	return "scheduling";
     case PROP_STACK:		return "stack";
     case PROP_TASK:		return "task";
     case PROP_VALIDATE:		return "validate";

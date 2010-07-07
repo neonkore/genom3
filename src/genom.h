@@ -310,6 +310,7 @@ typedef enum propkind {
   PROP_PERIOD,		/**< period */
   PROP_DELAY,		/**< delay */
   PROP_PRIORITY,	/**< priority */
+  PROP_SCHEDULING,	/**< scheduling */
   PROP_STACK,		/**< stack size */
 
   PROP_TASK,		/**< service task */

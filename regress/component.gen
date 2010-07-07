@@ -69,6 +69,7 @@ task t2 {
   period:	5ms;
   delay:	3ms;
   priority:	100;
+  scheduling:	real-time;
   stack:	20k;
 
   codel start, stop:

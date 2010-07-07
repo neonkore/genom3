@@ -152,6 +152,7 @@ chartext	([^\'])|(\\.)
 "period"	{ yylval->s = string(yytext); return PERIOD; }
 "delay"		{ yylval->s = string(yytext); return DELAY; }
 "priority"	{ yylval->s = string(yytext); return PRIORITY; }
+"scheduling"	{ yylval->s = string(yytext); return SCHEDULING; }
 "stack"		{ yylval->s = string(yytext); return STACK; }
 "validate"	{ yylval->s = string(yytext); return VALIDATE; }
 "yield"		{ yylval->s = string(yytext); return YIELD; }
@@ -169,6 +170,7 @@ chartext	([^\'])|(\\.)
 "us"		{ yylval->s = string(yytext); return US; }
 "k"		{ yylval->s = string(yytext); return K; }
 "M"		{ yylval->s = string(yytext); return M; }
+"real-time"	{ yylval->s = string(yytext); return REAL_TIME; }
 
  /* integers literals */
 "0"[xX][0-9a-fA-F]+{intsuffix}? {

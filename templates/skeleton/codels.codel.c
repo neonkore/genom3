@@ -41,6 +41,7 @@ proc map {lambda list} {
 #include "<"[$component name]">_types.h"
 
 <'# --- Task codels -------------------------------------------------------- '>
+<'if {$task ne ""} {'>
 
 /* --- Task <"[language hfill "[$task name] " - 62]"> */
 <' foreach codel [$task codels] { '>
@@ -58,12 +59,14 @@ proc map {lambda list} {
   return <"[language declarator c [lindex [$codel yields] 0]]">;
 }
 <' } '>
+<'}'>
+
 
 <'# --- Validation codels -------------------------------------------------- '>
+<'if {$task eq ""} {'>
 
-<' if {[$task name] == "control"} {
-      foreach service [$component services] {
-         if {[llength [$service validate]] == 0} continue '>
+<' foreach service [$component services] {
+      if {[llength [$service validate]] == 0} continue'>
 /* --- Service <"[language hfill "[$service name] " - 59]"> */
 <'       foreach codel [$service validate] { '>
 
@@ -80,12 +83,14 @@ proc map {lambda list} {
 }
 <'       } '>
 <'    } '>
-<' } '>
+<'} '>
+
 
 <'# --- Services codels ---------------------------------------------------- '>
 
 <' foreach service [$component services] {
-      if {[$service task] != $task || [llength [$service codels]] == 0} {
+      if {[catch {$service task} t]} { set t "" }
+      if {$t != $task || [llength [$service codels]] == 0} {
          continue
       } '>
 /* --- Service <"[language hfill "[$service name] " - 59]"> */

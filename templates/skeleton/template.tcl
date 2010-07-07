@@ -54,11 +54,17 @@ engine chdir $outdir
 # generate codel files
 foreach c [dotgen components] {
     set ext [language fileext [$c language]]
+    # for each task
     foreach t [$c tasks] {
 	template parse					\
 	    args [list $c $t] file codels.codel$ext	\
 	    file codels/[$c name]_[$t name]$ext
     }
+
+    # and for codels with no task
+    template parse					\
+	args [list $c ""] file codels.codel$ext	\
+	file codels/[$c name]$ext
 }
 
 # generate user build files fragment

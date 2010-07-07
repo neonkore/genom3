@@ -32,7 +32,7 @@ catch {puts [language comment shell [dotgen input notice]]}
 
 # compute list of source
 set ext [language fileext [$component language]]
-set sources [list]
+set sources "[$component name]$ext"
 foreach t [$component tasks] {
    lappend sources "[$component name]_[$t name]$ext"
 }

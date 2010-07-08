@@ -38,7 +38,7 @@ proc map {lambda list} {
 }
 '>
 
-#include "<"[$component name]">_types.h"
+#include "<"[$component name]_[language cname c c]">_types.h"
 
 <'# --- Task codels -------------------------------------------------------- '>
 <'if {$task ne ""} {'>

@@ -581,6 +581,6 @@ namespace eval language::c {
 	    set object [string range $object 2 end]
 	}
 
-	return [string map {:: _ { } _} $object]
+	return [string map {:: _ { } _ + x} $object]
     }
 }

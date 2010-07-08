@@ -600,6 +600,6 @@ namespace eval language::c++ {
 	if { [string first :: $object] == 0 } {
 	    set object [string range $object 2 end]
 	}
-	return [string map {{ } _} $object]
+	return [string map {{ } _ + x} $object]
     }
 }

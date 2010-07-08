@@ -73,9 +73,10 @@ if {![catch {dotgen input notice} notice]} {
 foreach c [dotgen components] {
     if {[info exists lang]} { set l $lang } else { set l [$c language] }
     foreach l $l {
+	set safel [language cname $l $l]
 	template parse					\
 	    raw [language comment $l $header]		\
 	    string [language mapping $l *]		\
-	    file "[$c name]$suffix[language fileext $l header]"
+	    file "[$c name]_$safel$suffix[language fileext $l header]"
     }
 }

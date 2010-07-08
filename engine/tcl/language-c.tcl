@@ -564,9 +564,9 @@ namespace eval language::c {
 	    switch -- $class {
 		codel	{
 		    if {![catch {$object service} s]} {
-			set scope [$s name]
+			set scope [[$s comp] name]_[$s name]
 		    } elseif {![catch {$object task} t]} {
-			set scope [$t name]
+			set scope [[$t comp] name]_[$t name]
 		    }
 		    set object ${scope}_[$object name]
 		}

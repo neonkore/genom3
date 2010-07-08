@@ -39,17 +39,17 @@ int
 task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum taskidx {
-    taskidx_name, taskidx_doc, taskidx_period, taskidx_delay, taskidx_priority,
-    taskidx_scheduling, taskidx_stack, taskidx_codels, taskidx_throws,
-    taskidx_loc, taskidx_class
+    taskidx_name, taskidx_comp, taskidx_doc, taskidx_period, taskidx_delay,
+    taskidx_priority, taskidx_scheduling, taskidx_stack, taskidx_codels,
+    taskidx_throws, taskidx_loc, taskidx_class
   };
   static const char *args[] = {
-    [taskidx_name] = "name", [taskidx_doc] = "doc",
-    [taskidx_period] = "period", [taskidx_delay] = "delay",
-    [taskidx_priority] = "priority", [taskidx_scheduling] = "scheduling",
-    [taskidx_stack] = "stack", [taskidx_codels] = "codels",
-    [taskidx_throws] = "throws", [taskidx_loc] = "loc",
-    [taskidx_class] = "class", NULL
+    [taskidx_name] = "name", [taskidx_comp] = "component",
+    [taskidx_doc] = "doc", [taskidx_period] = "period",
+    [taskidx_delay] = "delay", [taskidx_priority] = "priority",
+    [taskidx_scheduling] = "scheduling", [taskidx_stack] = "stack",
+    [taskidx_codels] = "codels", [taskidx_throws] = "throws",
+    [taskidx_loc] = "loc", [taskidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [taskidx_doc] = PROP_DOC, [taskidx_period] = PROP_PERIOD,
@@ -74,6 +74,10 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch(i) {
     case taskidx_name:
       r = Tcl_NewStringObj(task_name(t), -1);
+      break;
+
+    case taskidx_comp:
+      r = Tcl_NewStringObj(comp_genref(task_comp(t)), -1);
       break;
 
     case taskidx_doc: case taskidx_scheduling:

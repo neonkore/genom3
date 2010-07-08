@@ -372,17 +372,20 @@ service_s	comp_service(comp_s c, const char *name);
 comp_s		comp_dotgen(void);
 
 tloc		task_loc(task_s t);
-const char *	task_name(task_s c);
+const char *	task_name(task_s t);
+comp_s		task_comp(task_s t);
 hash_s		task_props(task_s t);
 
 tloc		port_loc(port_s p);
 const char *	port_name(port_s p);
 portkind	port_kind(port_s p);
+comp_s		port_comp(port_s p);
 idltype_s	port_type(port_s p);
 const char *	port_strkind(portkind k);
 
 tloc		service_loc(service_s s);
 const char *	service_name(service_s s);
+comp_s		service_comp(service_s s);
 hash_s		service_props(service_s s);
 hash_s		service_params(service_s s);
 

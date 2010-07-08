@@ -42,11 +42,13 @@ int
 port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum portidx {
-    portidx_name, portidx_kind, portidx_type, portidx_loc, portidx_class
+    portidx_name, portidx_kind, portidx_comp, portidx_type, portidx_loc,
+    portidx_class
   };
   static const char *args[] = {
     [portidx_name] = "name", [portidx_kind] = "kind",
-    [portidx_type] = "type", [portidx_loc] = "loc", [portidx_class] = "class",
+    [portidx_comp] = "component", [portidx_type] = "type",
+    [portidx_loc] = "loc", [portidx_class] = "class",
     NULL
   };
   port_s p = v;
@@ -70,6 +72,10 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case portidx_kind:
       r = Tcl_NewStringObj(port_strkind(port_kind(p)), -1);
+      break;
+
+    case portidx_comp:
+      r = Tcl_NewStringObj(comp_genref(port_comp(p)), -1);
       break;
 
     case portidx_type:

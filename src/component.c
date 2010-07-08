@@ -56,30 +56,35 @@ hash_s		comp_services(comp_s c) { assert(c); return c->services; }
 struct task_s {
   tloc loc;
   const char *name;
+  comp_s component;
 
   hash_s props;
 };
 
 tloc		task_loc(task_s t) { assert(t); return t->loc; }
 const char *	task_name(task_s t) { assert(t); return t->name; }
+comp_s		task_comp(task_s t) { assert(t); return t->component; }
 hash_s		task_props(task_s t) { assert(t); return t->props; }
 
 struct port_s {
   tloc loc;
   portkind kind;
   const char *name;
+  comp_s component;
   idltype_s type;
 };
 
 tloc		port_loc(port_s p) { assert(p); return p->loc; }
 const char *	port_name(port_s p) { assert(p); return p->name; }
 portkind	port_kind(port_s p) { assert(p); return p->kind; }
+comp_s		port_comp(port_s p) { assert(p); return p->component; }
 idltype_s	port_type(port_s p) { assert(p); return p->type; }
 
 
 struct service_s {
   tloc loc;
   const char *name;
+  comp_s component;
 
   hash_s props;
   hash_s params;
@@ -87,6 +92,7 @@ struct service_s {
 
 tloc		service_loc(service_s s) { assert(s); return s->loc; }
 const char *	service_name(service_s s) { assert(s); return s->name; }
+comp_s		service_comp(service_s s) { assert(s); return s->component; }
 hash_s		service_props(service_s s) { assert(s); return s->props; }
 hash_s		service_params(service_s s) { assert(s); return s->params; }
 
@@ -372,6 +378,7 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
   t->loc = l;
   t->name = string(name);
+  t->component = dotgen;
   t->props = props;
 
   e = hash_insert(dotgen->tasks, t->name, t, (hrelease_f)task_destroy);
@@ -429,6 +436,7 @@ comp_addport(tloc l, portkind k, const char *name, idltype_s t)
   p->loc = l;
   p->kind = k;
   p->name = string(name);
+  p->component = dotgen;
   p->type = t;
 
   e = hash_insert(dotgen->ports, p->name, p, (hrelease_f)port_destroy);
@@ -523,6 +531,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   s->loc = l;
   s->name = string(name);
+  s->component = dotgen;
   s->props = props;
   s->params = params;
 

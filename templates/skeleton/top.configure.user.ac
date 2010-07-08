@@ -23,6 +23,10 @@
 #                                           Anthony Mallet on Thu Jan 28 2010
 #
 
+# check arguments
+if {[llength $argv] != 1} { error "expected argument: lang" }
+lassign $argv lang
+
 # generate copyright notice (if any)
 catch {puts [language comment shell [dotgen input notice]]}
 '>
@@ -37,7 +41,7 @@ LT_INIT
 
 <'
 # compute package languages
-set lang [list]
+set lang $lang
 foreach c [dotgen components] { lappend lang [$c language] }
 
 foreach l [lsort -unique $lang] {
@@ -45,7 +49,10 @@ foreach l [lsort -unique $lang] {
       c		{
 		  puts {AC_PROG_CC}
 		}
-      default	{ template fatal "$l language unsupported" }
+      c++	{
+		  puts {AC_PROG_CXX}
+		}
+      default	{ error "$l language unsupported" }
    }
 }
 '>

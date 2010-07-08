@@ -32,7 +32,14 @@ template usage {*}{
     "put in a \"codels\" subdirectory of the directory of the .gen file,\n"
     "unless -C option is used (but you should normally not use this option).\n"
     "\n"
+    "The -l option can be used to define the language in which the codels\n"
+    "are written. This is not to be confused with the codel interface\n"
+    "language which is defined in the .gen file. The -l switch is only\n"
+    "useful to have a codel interface in C with codels written in C++; other\n"
+    "combinations are not supported.\n"
+    "\n"
     "Supported options:\n"
+    "  -l, --language=lang\tset codels language\n"
     "  -C, --directory=dir\toutput files in dir instead of source directory\n"
     "  -f, --force\t\toverwrite existing files (use with caution)\n"
     "  -h, --help\t\tprint usage summary (this text)"
@@ -40,37 +47,56 @@ template usage {*}{
 
 # defaults
 engine mode -overwrite
+if {[catch {[dotgen component] lang} iface]} {
+    set iface c
+}
+set lang $iface
 set outdir [dotgen input dir]
 
 # parse options
 template options {
+    -l - --language	{ set lang [template arg] }
     -C - --directory	{ set outdir [template arg] }
     -f - --force	{ engine mode +overwrite }
     -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
+}
+
+# check options consistency
+if {$iface ne $lang} {
+    switch -- "$iface|$lang" {
+	c|c++ {}
+	default {
+	    template fatal \
+		"codel interface in $iface compiled in $lang is not allowed"
+	}
+    }
 }
 
 engine chdir $outdir
 
 # generate codel files
 foreach c [dotgen components] {
-    set ext [language fileext [$c language]]
+    set ext [language fileext $lang]
+    set src [language fileext $iface]
+
     # for each task
     foreach t [$c tasks] {
 	template parse					\
-	    args [list $c $t] file codels.codel$ext	\
+	    args [list $c $t] file codels.codel$src	\
 	    file codels/[$c name]_[$t name]$ext
     }
 
     # and for codels with no task
     template parse					\
-	args [list $c ""] file codels.codel$ext	\
+	args [list $c ""] file codels.codel$src		\
 	file codels/[$c name]$ext
 }
 
 # generate user build files fragment
-template parse					\
-    file top.configure.user.ac			\
+template parse						\
+    args [list $lang]					\
+    file top.configure.user.ac				\
     file configure.user.ac
-template parse					\
-    args [list $c] file codels.Makefile.user.am	\
+template parse						\
+    args [list $c $lang] file codels.Makefile.user.am	\
     file codels/Makefile.user.am

@@ -24,14 +24,14 @@
 #
 
 # check arguments
-if {[llength $argv] != 1} { error "expected argument: component" }
-lassign $argv component
+if {[llength $argv] != 2} { error "expected argument: component lang" }
+lassign $argv component lang
 
 # generate copyright notice (if any)
 catch {puts [language comment shell [dotgen input notice]]}
 
 # compute list of source
-set ext [language fileext [$component language]]
+set ext [language fileext $lang]
 set sources "[$component name]$ext"
 foreach t [$component tasks] {
    lappend sources "[$component name]_[$t name]$ext"

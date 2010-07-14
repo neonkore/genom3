@@ -51,9 +51,10 @@ namespace eval engine {
     }
 
     # interpreter evaluating templates substitutions. Objects from the .gen as
-    # well as the commands 'dotgen' and 'language' are available, (but not the
-    # template command that are reserved to the toplevel template.tcl file) and
-    # puts is redefined to catch template output within <' '> markups.
+    # well as the commands 'dotgen', 'language' and 'object' are available,
+    # (but not the 'template' commands that are reserved to the toplevel
+    # template.tcl file). 'puts' is redefined to catch template output within
+    # <' '> markups.
     interp create -safe slave
     slave hide puts
     slave alias puts slave invokehidden puts
@@ -62,6 +63,11 @@ namespace eval engine {
     foreach o [info commands $::dotgen::ns(object)::*] {
 	slave alias $o $o
     }
+    # the object foreach cannot easily be aliased, because it runs uplevel
+    # scripts that must run in the slave's context. The easiest is to create
+    # the object::* procedures in that slave interpreter
+    slave invokehidden source \
+	[file join [dotgen template sysdir] tcl object.tcl]
 
 
     # --- mode -------------------------------------------------------------

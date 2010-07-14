@@ -152,6 +152,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case compidx_ports:
       r = port_list(interp, c, &objv[2], objc-2);
+      if (!r) return TCL_ERROR;
       break;
 
     case compidx_services: {

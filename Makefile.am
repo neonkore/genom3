@@ -31,6 +31,7 @@ endif
 SUBDIRS=\
 	src			\
 	$(TCLDIR)		\
+	runtime/genom3/c	\
 	runtime/genom3/c++	\
 	doc			\
 	regress

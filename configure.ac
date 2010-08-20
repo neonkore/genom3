@@ -171,6 +171,7 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	engine/tcl/Makefile
+	runtime/genom3/c/Makefile
 	runtime/genom3/c++/Makefile
 	templates/interactive/Makefile
 	templates/example/Makefile

@@ -345,8 +345,8 @@ namespace eval engine {
 			incr nldiscarded
 		    }
 
-		    # output raw data
-		    append code "puts -nonewline [quote $notag]\n"
+		    # output raw data (properly quoted with 'list')
+		    append code "puts -nonewline [list $notag]\n"
 		}
 
 		# generate code to track source line number
@@ -358,7 +358,7 @@ namespace eval engine {
 		# generate tag program
 		switch -- $o$c {
 		    {''} { set s $t }
-		    {""} { set s "puts -nonewline \[subst [quote $t]\]" }
+		    {""} { set s "puts -nonewline \[subst [list $t]\]" }
 		    default {
 			if {[string equal $o $c]} {
 			    error "$src:$linenum: unknown tag '$o'"
@@ -394,8 +394,8 @@ namespace eval engine {
 	    # incomplete opening tag: must read more text
 	    if [regexp $markup(open) $raw] { continue }
 
-	    # concatenate remaining raw output
-	    append code "puts -nonewline [quote $raw]\n"
+	    # concatenate remaining raw output (properly quoted with 'list')
+	    append code "puts -nonewline [list $raw]\n"
 	    incr linenum [linecount $raw]
 	    set raw {}
 	}
@@ -464,21 +464,6 @@ namespace eval engine {
 
 	puts -nonewline $out [lindex $args 0]${nl}
 	return
-    }
-
-
-    # --- quote ------------------------------------------------------------
-
-    # Return a self quoting string. The result is s enclosed in braces if s
-    # contains no \, { or }. If s contains such characters, they are escaped
-    # with a leading backlash and the result is an expression that performs the
-    # opposite substitution.
-    #
-    proc quote { s } {
-	if {[regsub -all {([\\{}])} $s {\\\1} s] == 0} {
-	    return [format "{%s}" $s]
-	}
-	return [format {[regsub -all {\\([\\{}])} {%s} {\1}]} $s]
     }
 
 

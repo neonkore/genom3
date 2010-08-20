@@ -29,8 +29,8 @@
  *					Anthony Mallet on Mon Jun 21 2010
  */
 
-#ifndef H_GENOM3_IDLVECTOR
-#define H_GENOM3_IDLVECTOR
+#ifndef H_GENOM3_CXX_IDLVECTOR
+#define H_GENOM3_CXX_IDLVECTOR
 
 #include <cstring>
 
@@ -42,4 +42,4 @@ namespace genom3 {
 
 };
 
-#endif /* H_GENOM3_IDLVECTOR */
+#endif /* H_GENOM3_CXX_IDLVECTOR */

@@ -29,8 +29,8 @@
  *					Anthony Mallet on Mon Jun 21 2010
  */
 
-#ifndef H_GENOM3_IDLSTRING
-#define H_GENOM3_IDLSTRING
+#ifndef H_GENOM3_CXX_IDLSTRING
+#define H_GENOM3_CXX_IDLSTRING
 
 #include <cstring>
 
@@ -42,4 +42,4 @@ namespace genom3 {
 
 };
 
-#endif /* H_GENOM3_IDLSTRING */
+#endif /* H_GENOM3_CXX_IDLSTRING */

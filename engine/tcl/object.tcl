@@ -152,8 +152,8 @@ namespace eval object {
     # invoke body for the end of the current object - if needed
     set hier [lrange $hier 0 end-1]
     switch -- [$object kind] {
-      {enum} - {array} - {sequence} - {struct} - {union} - {forward struct} -
-      {forward union} {
+      {enum} - {array} - {sequence} - {struct} - {struct member} - {union} -
+      {forward struct} - {forward union} {
 	set e [catch {
 	  uplevel [list lassign [list /[$object kind] $object $hier] {*}$vlist]
 	  uplevel $body

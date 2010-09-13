@@ -62,6 +62,9 @@ namespace eval language::c {
 	if {[regexp {bool} $m]} {
 	    append p "#include <stdbool.h>\n"
 	}
+	if {[regexp {sequence} $m]} {
+	    append p "#include <genom3/c/idlsequence.h>\n"
+	}
 
 	return $p$m
     }

@@ -9,6 +9,6 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
-sitetmpldir=@sitetmpldir@
 
 GENOM_TOOL=${exec_prefix}/@GENOM_TOOL@
+Cflags: -I${includedir}

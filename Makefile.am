@@ -18,6 +18,9 @@
 #
 ACLOCAL_AMFLAGS = -I autoconf
 
+pkgconfigdir=	$(libdir)/pkgconfig
+pkgconfig_DATA=	genom3.pc
+
 if WITH_TCL
   TCLDIR=\
 	engine/tcl		\

@@ -60,7 +60,7 @@ static char **engopts = NULL;
 static int nengopts;
 
 /** standard file descriptors of genom and template child */
-int stdfd[4];
+int stdfd[3][2];
 
 
 static char *	eng_findentry(const char *dir);
@@ -252,9 +252,9 @@ eng_invoke()
 
   if (!engine) { warnx("no template engine"); return EINVAL; }
 
-  /* setup engine's standard output and error descriptors */
-  if (pipe(&stdfd[0]) < 0 || pipe(&stdfd[2]) < 0) {
-    warn("cannot create a pipe to template engine:");
+  /* setup engine's standard output/verbose output and error descriptors */
+  if (pipe(stdfd[0]) < 0 || pipe(stdfd[1]) < 0 || pipe(stdfd[2]) < 0) {
+    warn("cannot create pipes to the template engine:");
     return errno;
   }
 
@@ -279,10 +279,10 @@ eng_invoke()
       return errno = EAGAIN;
 
     case 0: /* child */
-      close(stdfd[0]); close(stdfd[2]);
+      close(stdfd[0][0]); close(stdfd[1][0]); close(stdfd[2][0]);
 
-      if (eng_swapfd(stdfd[1], fileno(stdout)) < 0 ||
-	  eng_swapfd(stdfd[3], fileno(stderr)) < 0) {
+      if (eng_swapfd(stdfd[1][1], fileno(stdout)) < 0 ||
+	  eng_swapfd(stdfd[2][1], fileno(stderr)) < 0) {
 	warnx("unable to set template engine stdout/stderr"); warn(NULL);
 	_exit(2);
       }
@@ -296,36 +296,43 @@ eng_invoke()
       break;
 
     default: /* parent */
-      close(stdfd[1]); close(stdfd[3]);
+      close(stdfd[0][1]); close(stdfd[1][1]); close(stdfd[2][1]);
       eng_optrm(0);
       break;
   }
 
   /* wait for engine and print output */
   bol[0] = bol[1] = 0;
-  m = stdfd[0]>stdfd[2] ? stdfd[0] : stdfd[2];
+  m = stdfd[0][0]>stdfd[1][0] ? stdfd[0][0] : stdfd[1][0];
+  m = m>stdfd[2][0] ? m : stdfd[2][0];
   FD_ZERO(&fdset);
-  FD_SET(stdfd[0], &fdset);
-  FD_SET(stdfd[2], &fdset);
+  FD_SET(stdfd[0][0], &fdset);
+  FD_SET(stdfd[1][0], &fdset);
+  FD_SET(stdfd[2][0], &fdset);
   do {
     s = select(1 + m, &fdset, NULL, NULL, NULL);
     if (s > 0) {
-      if (FD_ISSET(stdfd[0], &fdset)) {
-	if (eng_printpipe(stdfd[0], runopt.verbose?stdout:NULL, tmpl, &bol[0]))
-	  bol[0] = -1;
-      } else FD_SET(stdfd[0], &fdset);
-
-      if (FD_ISSET(stdfd[2], &fdset)) {
-	if (eng_printpipe(stdfd[2], stderr, tmpl, &bol[1]))
+      if (FD_ISSET(stdfd[2][0], &fdset)) {
+	if (eng_printpipe(stdfd[2][0], stderr, tmpl, &bol[1]))
 	  bol[1] = -1;
-      } else FD_SET(stdfd[2], &fdset);
+      } else FD_SET(stdfd[2][0], &fdset);
+
+      if (FD_ISSET(stdfd[1][0], &fdset)) {
+	if (eng_printpipe(stdfd[1][0], runopt.verbose?stdout:NULL, tmpl, &bol[0]))
+	  bol[0] = -1;
+      } else FD_SET(stdfd[1][0], &fdset);
+
+      if (FD_ISSET(stdfd[0][0], &fdset)) {
+	if (eng_printpipe(stdfd[0][0], stdout, NULL, NULL))
+	  bol[0] = -1;
+      } else FD_SET(stdfd[0][0], &fdset);
 
       if (bol[0] == -1 && bol[1] == -1) break;
     }
   } while(s >= 0 || errno == EINTR);
   if (s < 0) warnx("unable to read template engine output");
 
-  close(stdfd[0]); close(stdfd[2]);
+  close(stdfd[0][0]); close(stdfd[1][0]); close(stdfd[2][0]);
 
   waitpid(pid, &s, 0);
   if ((!WIFEXITED(s) || WEXITSTATUS(s))) {
@@ -403,6 +410,7 @@ eng_printpipe(int fd, FILE *out, const char *bol, int *firstline)
   if (!out) return 0;
   if (!bol) {
     fputs(buffer, out);
+    fflush(out);
     return 0;
   }
 

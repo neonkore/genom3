@@ -115,7 +115,7 @@ dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[])
 {
   extern int eng_swapfd(int from, int to);
-  extern int stdfd[4];
+  extern int stdfd[3][2];
   static int verbose = 0;
   int v;
 
@@ -130,7 +130,8 @@ dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
   if ((v && verbose) || (!v && !verbose))
     return TCL_OK;
 
-  eng_swapfd(stdfd[1], 1);
+  eng_swapfd(stdfd[0][1], 1);
+
   verbose = v;
   return TCL_OK;
 }

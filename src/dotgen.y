@@ -187,13 +187,7 @@ component:
   }
   | COMPONENT identifier
   {
-    hash_s p = hash_create("property list", 0);
-    if (!$2 || !p) {
-      if ($2) parserror(@1, "dropped '%s' component", $2);
-      if (p) hash_destroy(p);
-      break;
-    }
-    if (!comp_create(@1, $2, p)) YYABORT;
+    if (!comp_create(@1, $2, NULL)) YYABORT;
   }
 ;
 

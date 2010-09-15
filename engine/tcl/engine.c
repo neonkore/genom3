@@ -115,6 +115,7 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   const char **j;
   Tcl_Obj *obj;
   char *args;
+  comp_s c;
   hiter t;
   int p, s;
 
@@ -154,8 +155,8 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
     }
   }
 
-  if (comp_dotgen()) {
-    s = engine_gencomponent(interp, comp_dotgen());
+  for(c = comp_current(); c; c = comp_next(c)) {
+    s = engine_gencomponent(interp, c);
     if (s) goto error;
   }
 

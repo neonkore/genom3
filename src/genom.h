@@ -369,7 +369,8 @@ hash_s		comp_services(comp_s c);
 port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
 service_s	comp_service(comp_s c, const char *name);
-comp_s		comp_dotgen(void);
+comp_s		comp_current(void);
+comp_s		comp_next(comp_s c);
 
 tloc		task_loc(task_s t);
 const char *	task_name(task_s t);

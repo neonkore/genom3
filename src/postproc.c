@@ -45,7 +45,7 @@ int
 dotgen_consolidate()
 {
   hash_s types = type_all();
-  comp_s c = comp_dotgen();
+  comp_s c;
   prop_s p;
   hiter i, j;
 
@@ -71,7 +71,7 @@ dotgen_consolidate()
   }
 
   /* check clock-rate or compute default value if not specified */
-  if (c) {
+  for(c = comp_current(); c; c = comp_next(c)) {
     p = hash_find(comp_props(c), prop_strkind(PROP_CLOCKRATE));
     if (p)
       e |= dotgen_clkratechk(c, p);
@@ -81,7 +81,7 @@ dotgen_consolidate()
 
 
   /* resolve service names in interrupts, before and after properties */
-  if (c) {
+  for(c = comp_current(); c; c = comp_next(c)) {
     hash_s services = comp_services(c);
 
     for(hash_first(services, &i); i.current; hash_next(&i)) {

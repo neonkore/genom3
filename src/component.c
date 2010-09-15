@@ -97,10 +97,13 @@ hash_s		service_props(service_s s) { assert(s); return s->props; }
 hash_s		service_params(service_s s) { assert(s); return s->params; }
 
 
-/** the component of a dotgen file */
-static comp_s dotgen;
+/** the components of a dotgen file */
+static struct comp_list_s {
+  comp_s c;
+  struct comp_list_s *next;
+} *clist;
 
-comp_s	comp_dotgen() { return dotgen; }
+comp_s		comp_current() { return clist?clist->c:NULL; }
 
 static idltype_s	comp_ievcreate(tloc l, const char *name);
 
@@ -112,85 +115,128 @@ static idltype_s	comp_ievcreate(tloc l, const char *name);
 comp_s
 comp_create(tloc l, const char *name, hash_s props)
 {
+  struct comp_list_s *cl;
   idltype_s iev;
+  comp_s c;
   prop_s p;
   hiter i;
   int e;
-  assert(name && props);
+  assert(name);
 
-  if (dotgen) {
-    parserror(l, "only one component declaration is allowed");
-    parsenoerror(dotgen->loc, " component %s declared here", dotgen->name);
-    return NULL;
-  }
+  /* search for an existing component and move it to the front if it exists */
+  for(c = comp_current(); c; c = comp_next(c))
+    if (!strcmp(comp_name(c), name)) {
+      struct comp_list_s *n;
+
+      if (comp_current() == c) break;
+      for(cl = clist; cl->next->c != c; cl = cl->next) /*empty body */;
+      n = cl->next;
+      cl->next = n->next;
+      n->next = clist;
+      clist = n;
+      break;
+    }
+
   e = 0;
 
   /* check consitency of some properties */
-  p = hash_find(props, prop_strkind(PROP_CLOCKRATE));
-  if (p) {
-    cval c = type_constvalue(prop_value(p));
-    if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
-      parserror(prop_loc(p),
-		"invalid numeric value for %s", prop_strkind(PROP_CLOCKRATE));
-      e = 1;
+  if (props) {
+    p = hash_find(props, prop_strkind(PROP_CLOCKRATE));
+    if (p) {
+      cval c = type_constvalue(prop_value(p));
+      if (const_convert(&c, CST_FLOAT) || c.f < 0.) {
+	parserror(prop_loc(p), "invalid numeric value for %s",
+		  prop_strkind(PROP_CLOCKRATE));
+	e = 1;
+      }
     }
   }
 
   /* check unwanted properties */
-  for(hash_first(props, &i); i.current; hash_next(&i))
-    switch(prop_kind(i.value)) {
-      case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
-      case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
-      case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
-	break;
+  if (props)
+    for(hash_first(props, &i); i.current; hash_next(&i))
+      switch(prop_kind(i.value)) {
+	case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
+	case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+	case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
+	  break;
 
-      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
-      case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
-      case PROP_CODEL: case PROP_THROWS: case PROP_TASK: case PROP_INTERRUPTS:
-      case PROP_BEFORE: case PROP_AFTER:
-	parserror(prop_loc(i.value),
-		  "property %s is not suitable for components",
-		  prop_strkind(prop_kind(i.value)));
-	e = 1; break;
-    }
+	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
+	case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
+	case PROP_CODEL: case PROP_THROWS: case PROP_TASK:
+	case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+	  parserror(prop_loc(i.value),
+		    "property %s is not suitable for components",
+		    prop_strkind(prop_kind(i.value)));
+	  e = 1; break;
+      }
   if (e) return NULL;
+
+  /* merge properties when component already exists */
+  if (c) {
+    if (props) {
+      hiter i;
+
+      for(hash_first(props, &i); i.current; hash_next(&i)) {
+	e = hash_insert(comp_props(c), i.key, i.value, NULL);
+	if (e == EEXIST) {
+	  prop_s p = hash_find(comp_props(c), i.key); assert(p);
+	  parserror(l, "duplicate attribute '%s'", i.key);
+	  parsenoerror(prop_loc(p), " %s declared here", prop_name(p));
+	}
+      }
+      if (e) return NULL;
+    }
+
+    return c;
+  }
 
   /* define internal event type */
   iev = comp_ievcreate(l, name);
   if (!iev) return NULL;
 
-  /* create */
-  dotgen = malloc(sizeof(*dotgen));
-  if (!dotgen) {
+  /* create new component */
+  c = malloc(sizeof(*c));
+  if (!c) {
     warnx("memory exhausted, cannot create component");
     return NULL;
   }
 
-  dotgen->loc = l;
-  dotgen->name = string(name);
-  dotgen->events = iev;
-  dotgen->props = props;
-  dotgen->tasks = hash_create(strings(name, " tasks", NULL), 2);
-  if (!dotgen->tasks) {
-    free(dotgen);
-    return dotgen = NULL;
+  c->loc = l;
+  c->name = string(name);
+  c->events = iev;
+  c->props = props ? props : hash_create("property list", 0);
+  c->tasks = hash_create(strings(name, " tasks", NULL), 2);
+  if (!c->tasks) {
+    free(c);
+    return NULL;
   }
-  dotgen->ports = hash_create(strings(name, " ports", NULL), 2);
-  if (!dotgen->ports) {
-    hash_destroy(dotgen->tasks);
-    free(dotgen);
-    return dotgen = NULL;
+  c->ports = hash_create(strings(name, " ports", NULL), 2);
+  if (!c->ports) {
+    hash_destroy(c->tasks);
+    free(c);
+    return NULL;
   }
-  dotgen->services = hash_create(strings(name, " services", NULL), 2);
-  if (!dotgen->services) {
-    hash_destroy(dotgen->tasks);
-    hash_destroy(dotgen->ports);
-    free(dotgen);
-    return dotgen = NULL;
+  c->services = hash_create(strings(name, " services", NULL), 2);
+  if (!c->services) {
+    hash_destroy(c->tasks);
+    hash_destroy(c->ports);
+    free(c);
+    return NULL;
   }
 
-  xwarnx("created component %s", dotgen->name);
-  return dotgen;
+  cl = malloc(sizeof(*cl));
+  if (!cl) {
+    free(c);
+    warnx("memory exhausted, cannot create component");
+    return NULL;
+  }
+  cl->c = c;
+  cl->next = clist;
+  clist = cl;
+
+  xwarnx("created component %s", c->name);
+  return c;
 }
 
 
@@ -244,6 +290,22 @@ comp_service(comp_s c, const char *name)
 }
 
 
+/* --- comp_next ----------------------------------------------------------- */
+
+/** return the component after the one given
+ */
+comp_s
+comp_next(comp_s c)
+{
+  struct comp_list_s *l;
+
+  for(l = clist; l; l = l->next)
+    if (l->c == c) return l->next?l->next->c:NULL;
+
+  return NULL;
+}
+
+
 /* --- comp_addattr -------------------------------------------------------- */
 
 /** create an attribute for component
@@ -256,13 +318,13 @@ comp_addattr(tloc l, hash_s attrs)
   prop_s p;
 
   /* a component must exist */
-  if (!dotgen) {
+  if (!comp_current()) {
     parserror(l, "missing component declaration before attribute");
     return errno = EINVAL;
   }
 
   /* append to existing attributes, or create one */
-  p = hash_find(dotgen->props, prop_strkind(PROP_ATTRIBUTE));
+  p = hash_find(comp_current()->props, prop_strkind(PROP_ATTRIBUTE));
   if (p) {
     h = prop_hash(p);
     for (hash_first(attrs, &i); i.current; hash_first(attrs, &i)) {
@@ -282,7 +344,7 @@ comp_addattr(tloc l, hash_s attrs)
     hash_destroy(attrs);
   } else {
     p = prop_newhash(l, PROP_ATTRIBUTE, attrs);
-    if (hash_insert(dotgen->props,
+    if (hash_insert(comp_current()->props,
 		    prop_name(p), p, (hrelease_f)prop_destroy)) {
       parserror(l, "dropped attribute declaration");
       return errno;
@@ -311,7 +373,7 @@ comp_addtask(tloc l, const char *name, hash_s props)
   assert(name && props);
 
   /* a component must exist */
-  if (!dotgen) {
+  if (!comp_current()) {
     parserror(l, "missing component declaration before task %s", name);
     return NULL;
   }
@@ -378,17 +440,17 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
   t->loc = l;
   t->name = string(name);
-  t->component = dotgen;
+  t->component = comp_current();
   t->props = props;
 
-  e = hash_insert(dotgen->tasks, t->name, t, (hrelease_f)task_destroy);
+  e = hash_insert(comp_current()->tasks, t->name, t, (hrelease_f)task_destroy);
   switch(e) {
     case 0: break;
 
     case EEXIST:
       /* control task is a reserved name */
       parserror(l, "duplicate task %s", t->name);
-      task_s u = hash_find(dotgen->tasks, name);
+      task_s u = hash_find(comp_current()->tasks, name);
       if (u) parserror(u->loc, " task %s declared here", u->name);
       /*FALLTHROUGH*/
     default:
@@ -421,7 +483,7 @@ comp_addport(tloc l, portkind k, const char *name, idltype_s t)
   assert(name);
 
   /* a component must exist */
-  if (!dotgen) {
+  if (!comp_current()) {
     parserror(l, "missing component declaration before port %s", name);
     return NULL;
   }
@@ -436,16 +498,16 @@ comp_addport(tloc l, portkind k, const char *name, idltype_s t)
   p->loc = l;
   p->kind = k;
   p->name = string(name);
-  p->component = dotgen;
+  p->component = comp_current();
   p->type = t;
 
-  e = hash_insert(dotgen->ports, p->name, p, (hrelease_f)port_destroy);
+  e = hash_insert(comp_current()->ports, p->name, p, (hrelease_f)port_destroy);
   switch(e) {
     case 0: break;
 
     case EEXIST:
       parserror(l, "duplicate port %s", p->name);
-      port_s u = hash_find(dotgen->ports, name);
+      port_s u = hash_find(comp_current()->ports, name);
       if (u) parserror(u->loc, " port %s declared here", u->name);
       /*FALLTHROUGH*/
     default:
@@ -479,7 +541,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   }
 
   /* a component must exist */
-  if (!dotgen) {
+  if (!comp_current()) {
     parserror(l, "missing component declaration before service %s", name);
     return NULL;
   }
@@ -531,17 +593,19 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   s->loc = l;
   s->name = string(name);
-  s->component = dotgen;
+  s->component = comp_current();
   s->props = props;
   s->params = params;
 
-  e = hash_insert(dotgen->services, s->name, s, (hrelease_f)service_destroy);
+  e = hash_insert(comp_current()->services,
+		  s->name, s, (hrelease_f)service_destroy);
+
   switch(e) {
     case 0: break;
 
     case EEXIST:
       parserror(l, "duplicate service %s", s->name);
-      service_s u = hash_find(dotgen->services, name);
+      service_s u = hash_find(comp_current()->services, name);
       if (u) parserror(u->loc, " service %s declared here", u->name);
       /*FALLTHROUGH*/
     default:
@@ -694,9 +758,9 @@ comp_addievs(tloc l, hash_s h)
   int r;
   assert(h);
 
-  iev = comp_eventtype(comp_dotgen()); assert(iev);
+  iev = comp_eventtype(comp_current()); assert(iev);
 
-  s = scope_push(l, comp_name(comp_dotgen()), SCOPE_MODULE);
+  s = scope_push(l, comp_name(comp_current()), SCOPE_MODULE);
   if (!s) return 1;
 
   r = 0;

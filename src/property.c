@@ -202,7 +202,7 @@ prop_newtask(tloc l, const char *name)
   task_s t;
   prop_s p;
 
-  t = comp_task(comp_dotgen(), name);
+  t = comp_task(comp_current(), name);
   if (!t) {
     parserror(l, "unknown task '%s'", name);
     return NULL;

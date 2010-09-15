@@ -107,7 +107,7 @@ param_setdir(param_s p, pdir dir)
   int s;
   assert(p && p->dir == P_NODIR && !p->base && !p->port);
 
-  c = comp_dotgen(); if (!c) {
+  c = comp_current(); if (!c) {
     parserror(p->loc, "missing component declaration before parameter '%s'",
 	      p->name);
     return EINVAL;

@@ -352,6 +352,8 @@ int
 dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   const char *p;
+  Tcl_Obj *l;
+  comp_s c;
 
   if (objc > 2) {
     Tcl_WrongNumArgs(interp, 1, objv, "?pattern?");
@@ -359,16 +361,13 @@ dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   }
   if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
 
-  if (!comp_dotgen()) {
-    Tcl_ResetResult(interp);
-    return TCL_OK;
+  l = Tcl_NewListObj(0, NULL);
+  for(c = comp_current(); c; c = comp_next(c)) {
+    if (p && !Tcl_StringMatch(comp_name(c), p)) continue;
+
+    Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(comp_genref(c), -1));
   }
 
-  if (p && !Tcl_StringMatch(comp_name(comp_dotgen()), p)) {
-    Tcl_ResetResult(interp);
-    return TCL_OK;
-  }
-
-  Tcl_AppendResult(interp, comp_genref(comp_dotgen()), NULL);
+  Tcl_SetObjResult(interp, l);
   return TCL_OK;
 }

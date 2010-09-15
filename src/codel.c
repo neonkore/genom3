@@ -76,7 +76,7 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
   c->loc = l;
   c->name = string(name);
 
-  c->rettype = comp_eventtype(comp_dotgen());
+  c->rettype = comp_eventtype(comp_current());
 
   c->params = params;
   c->yields = yields ? yields : hash_create("yields list", 0);

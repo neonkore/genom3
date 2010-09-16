@@ -134,6 +134,8 @@ comp_create(tloc l, const char *name, hash_s props)
       cl->next = n->next;
       n->next = clist;
       clist = n;
+
+      xwarnx("reopened component %s", c->name);
       break;
     }
 

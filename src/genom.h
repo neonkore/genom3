@@ -67,6 +67,12 @@ typedef struct tloc {
   int line, col;
 } tloc;
 
+typedef enum dotgen_input_kind {
+  DG_INPUT_FILE,
+  DG_INPUT_BUFFER
+} dotgen_input_kind;
+
+void	dotgen_input(dotgen_input_kind k, ...);
 int	dotgenparse(void);
 int	dotgen_consolidate(void);
 void	parserror(tloc l, const char *fmt, ...);

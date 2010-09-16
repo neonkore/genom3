@@ -52,9 +52,6 @@ static int		rmrfdir(const char *path);
 /** runtime options */
 struct runopt_s runopt;
 
-/** dotgen file descriptor */
-int dotgenfd;
-
 /** number of errors and warnings */
 static int nerrors, nwarnings;
 
@@ -256,7 +253,7 @@ main(int argc, char *argv[])
     warn("cannot create a pipe to cpp:");
     status = 2; goto done;
   }
-  dotgenfd = pipefd[0];
+  dotgen_input(DG_INPUT_FILE, pipefd[0]);
 
   runopt.notice = cpp_getnotice(runopt.input);
   cpp_invoke(runopt.input, pipefd[1]);

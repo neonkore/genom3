@@ -24,28 +24,22 @@
 
 %option prefix="dotgen"
 %option outfile="lex.yy.c"
-%option noyywrap nounput
+%option noyywrap noinput nounput
 %option bison-locations
 
 %{
 #include "acgenom.h"
 
+#include <stdarg.h>
 #include <string.h>
 #include <err.h>
 #include <sys/wait.h>
 
 #include "genom.h"
 
-#define YY_NO_INPUT
-#define YY_INPUT(buf, result, max)					\
-   do {									\
-     extern int dotgenfd;						\
-     result = read(dotgenfd, buf, max);					\
-     if (result < 0 && errno != EAGAIN) {				\
-       warnx("input failed");						\
-       result = 0;							\
-     }									\
-   } while(result < 0)
+   static size_t	dotgen_read(char *buffer, size_t max_size);
+
+#define YY_INPUT(buf, result, max) ((result) = dotgen_read(buf, max))
 
 #define YYLTYPE	tloc
 
@@ -238,3 +232,70 @@ chartext	([^\'])|(\\.)
 }
 
 %%
+
+/** current input source */
+static struct {
+  dotgen_input_kind k;
+  union {
+    int fd;
+    const char *buffer;
+  } src;
+} dg_input;
+
+
+/* --- dotgen_input -------------------------------------------------------- */
+
+/** Set current input source
+ */
+void
+dotgen_input(dotgen_input_kind k, ...)
+{
+  va_list va;
+
+  dg_input.k = k;
+  va_start(va, k);
+  switch(k) {
+    case DG_INPUT_FILE:
+      dg_input.src.fd = va_arg(va, int);
+      curloc.file = NULL;
+      break;
+    case DG_INPUT_BUFFER:
+      dg_input.src.buffer = va_arg(va, const char *);
+      curloc.file = "<command-line>";
+      break;
+  }
+  va_end(va);
+
+  curloc.line = 1;
+  curloc.col = 0;
+  YY_FLUSH_BUFFER;
+}
+
+
+/* --- dotgen_read --------------------------------------------------------- */
+
+/** Read max_size bytes into buffer from current input
+ */
+static size_t
+dotgen_read(char *buffer, size_t max_size)
+{
+  ssize_t r;
+
+  switch(dg_input.k) {
+    case DG_INPUT_FILE:
+      r = read(dg_input.src.fd, buffer, max_size);
+      if (r < 0 && errno != EAGAIN) {
+	warnx("input failed");
+	r = YY_NULL;
+      }
+      break;
+
+    case DG_INPUT_BUFFER:
+      strncpy(buffer, dg_input.src.buffer, max_size);
+      for(r = 0; buffer[r] != '\0' && r < max_size; r++) /* empty body */;
+      dg_input.src.buffer += r;
+      break;
+  }
+
+  return r;
+}

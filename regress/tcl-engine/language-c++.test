@@ -98,12 +98,12 @@ expect out '
 testing '[language member c++]'
 
 cat >run.gen <<'EOF'
-struct s {
+component c;
+ids {
   struct ss {
     long a;
   } a[2];
 };
-component c { ids: s; };
 service s(in a[1].a);
 EOF
 

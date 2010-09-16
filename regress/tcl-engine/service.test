@@ -9,8 +9,8 @@ mkdir -p run.t
 testing '[$service parameter]'
 
 cat >run.gen <<EOF
-struct s { struct ss { long a; } a[2]; };
-component c { ids: s; };
+component c;
+ids { struct ss { long a; } a[2]; };
 service s(in a, inout a[1]::b);
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'

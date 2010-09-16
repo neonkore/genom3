@@ -28,7 +28,16 @@ enum e1 { ee1, ee2, ee3 };
 
 typedef sequence<string<28>, 10> x;
 
-struct ids {
+component c {
+  version:	"1.0";
+  email:	"null@example.com";
+  lang:		"c";
+
+  require:	"a", "b", "c";
+  build-require:"d", "e";
+};
+
+ids {
   long a;
   struct str {
     long a;
@@ -45,22 +54,11 @@ struct ids {
   sequence<long,128> h;
 };
 
-component c {
-  ids:		ids;
-
-  version:	"1.0";
-  email:	"null@example.com";
-  lang:		"c";
-
-  require:	"a", "b", "c";
-  build-require:"d", "e";
-};
-
 attribute a = 0 :: "first attribute", b;
 attribute d = "none";
 
 inport data<long> a;
-outport data<ids::str> b;
+outport data<c::ids::str> b;
 inport event<> c;
 
 task t1;

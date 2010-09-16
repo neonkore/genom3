@@ -116,7 +116,6 @@ comp_s
 comp_create(tloc l, const char *name, hash_s props)
 {
   struct comp_list_s *cl;
-  idltype_s iev;
   comp_s c;
   prop_s p;
   hiter i;
@@ -193,10 +192,6 @@ comp_create(tloc l, const char *name, hash_s props)
     return c;
   }
 
-  /* define internal event type */
-  iev = comp_ievcreate(l, name);
-  if (!iev) return NULL;
-
   /* create new component */
   c = malloc(sizeof(*c));
   if (!c) {
@@ -206,7 +201,6 @@ comp_create(tloc l, const char *name, hash_s props)
 
   c->loc = l;
   c->name = string(name);
-  c->events = iev;
   c->props = props ? props : hash_create("property list", 0);
   c->tasks = hash_create(strings(name, " tasks", NULL), 2);
   if (!c->tasks) {
@@ -227,6 +221,11 @@ comp_create(tloc l, const char *name, hash_s props)
     return NULL;
   }
 
+  /* define internal event type */
+  c->events = comp_ievcreate(l, name);
+  if (!c->events) return NULL;
+
+  /* link component to others */
   cl = malloc(sizeof(*cl));
   if (!cl) {
     free(c);
@@ -305,6 +304,48 @@ comp_next(comp_s c)
     if (l->c == c) return l->next?l->next->c:NULL;
 
   return NULL;
+}
+
+
+/* --- comp_addids --------------------------------------------------------- */
+
+/** add IDS members in a component
+ */
+idltype_s
+comp_addids(tloc l, scope_s s)
+{
+  idltype_s ids;
+  comp_s c = comp_current();
+  assert(s);
+
+  /* a component must exist */
+  if (!c) {
+    scope_destroy(s);
+    parserror(l, "missing component declaration before ids");
+    errno = EINVAL;
+    return NULL;
+  }
+
+  /* create or recreate ids type, so that it always appears to be declared at
+   * this point. This is important if type declares other nested types,
+   * because the later have to always appear before the main type. */
+  ids = comp_ids(c);
+  if (!ids) {
+    scope_s p;
+    prop_s idsp;
+
+    p = scope_push(l, comp_name(c), SCOPE_MODULE);
+    if (!p) return NULL;
+    ids = type_newstruct(l, "ids", s);
+    scope_pop();
+    if (!ids) return NULL;
+
+    idsp = prop_newids(l, ids);
+    hash_insert(c->props, prop_name(idsp), idsp, (hrelease_f)prop_destroy);
+  } else
+    type_renew(ids);
+
+  return ids;
 }
 
 

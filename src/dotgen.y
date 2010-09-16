@@ -94,7 +94,7 @@
 
 %type <i>	spec idlspec statement idldef idlstatement genomstatement
 
-%type <i>	component port task service
+%type <i>	component ids attribute port task service
 %type <pkind>	port_dir
 %type <type>	port_type
 %type <prop>	attr
@@ -122,7 +122,7 @@
 %type <hash>	enumerator_list
 %type <v>	case_label
 %type <vlist>	case_label_list
-%type <scope>	module_name scope_push_struct scope_push_union
+%type <scope>	module_name scope_push_struct scope_push_union scope_push_ids
 
 %type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
@@ -166,6 +166,7 @@ idlstatement:
 
 genomstatement:
   component ';'
+  | ids ';'
   | attribute ';'
   | port ';'
   | task ';'
@@ -215,6 +216,16 @@ port_dir:
   | OUTPORT DATA	{ $$ = PORT_OUTDATA; }
   | OUTPORT EVENT	{ $$ = PORT_OUTEVENT; }
 ;
+
+ids:
+  scope_push_ids '{' member_list '}'
+  {
+    scope_s s = scope_set(scope_global());
+    assert(s == $1);
+
+    if (!comp_addids(@1, s))
+      parserror(@1, "dropping ids declaration");
+  }
 
 attribute:
   ATTRIBUTE nodir_param_list
@@ -318,11 +329,6 @@ attr:
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_DOC, $3);
-  }
-  | IDS ':' named_type
-  {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newids(@1, $3);
   }
   | VERSION ':' string_literals
   {
@@ -1171,6 +1177,33 @@ scope_push_union: identifier
       /* on error, still create a scope to continue the parsing
        * but with a special name -- it will be deleted afterwards */
       $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_UNION);
+      if (!$$) { /* still failed, just resign */ YYABORT; }
+    }
+  }
+;
+
+scope_push_ids: IDS
+  {
+    comp_s c = comp_current();
+    if (c) {
+      idltype_s ids = comp_ids(c);
+      if (ids) {
+	$$ = type_membersscope(ids);
+	scope_set($$);
+      } else {
+	$$ = scope_push(@1, comp_name(c), SCOPE_MODULE);
+	if ($$) {
+	  $$ = scope_push(@1, "ids", SCOPE_STRUCT);
+	  if ($$) scope_detach($$);
+	}
+      }
+    } else
+      $$ = NULL;
+    if (!$$) {
+      /* on error, still create a scope to continue the parsing
+       * but with a special name -- it will be deleted afterwards */
+      scope_set(scope_global());
+      $$ = scope_push(@1, "&ids", SCOPE_STRUCT);
       if (!$$) { /* still failed, just resign */ YYABORT; }
     }
   }

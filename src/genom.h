@@ -400,6 +400,7 @@ hash_s		service_props(service_s s);
 hash_s		service_params(service_s s);
 
 comp_s		comp_create(tloc l, const char *name, hash_s props);
+idltype_s	comp_addids(tloc l, scope_s s);
 int		comp_addattr(tloc l, hash_s attrs);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
 port_s		comp_addport(tloc l, portkind k, const char *name,

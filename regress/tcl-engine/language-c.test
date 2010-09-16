@@ -39,7 +39,7 @@ puts "int main() { return 0; }\n"
 EOF
 expect out ''
 mv -f run.out run.t/mapping.c
-run 0 ${CC} run.t/mapping.c
+run 0 ${CC} -I${top_srcdir}/runtime run.t/mapping.c
 
 
 # --- language declarator c ------------------------------------------------

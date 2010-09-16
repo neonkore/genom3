@@ -387,6 +387,31 @@ type_newalias(tloc l, const char *name, idltype_s t)
 }
 
 
+/* --- type_renew ---------------------------------------------------------- */
+
+/** Make type appear as if it had been declared at this point
+ */
+int
+type_renew(idltype_s t)
+{
+  int e;
+  if (!t) return 0;
+
+  if (t->name) {
+    (void)hash_remove(htypes, t->fullname, 0);
+    e = hash_insert(htypes, t->fullname, t, (hrelease_f)type_destroy);
+    if (e) return e;
+
+    (void)scope_deltype(t->scope, t);
+    e = scope_addtype(t->scope, t);
+    if (e) return e;
+
+    xwarnx("renewed %s type %s", type_strkind(t->kind), t->fullname);
+  }
+  return 0;
+}
+
+
 /* --- type_destroy -------------------------------------------------------- */
 
 /** Destroy type

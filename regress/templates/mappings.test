@@ -12,7 +12,7 @@ run 0 ${GENOM_BIN} mappings -C run.t ${thisdir}../component.gen
 run 0 ls -R -1 run.t
 expect out '
 	/^run.t:$/ {next}
-	/^c_types\.h$/ {next}
+	/^c_c_types\.h$/ {next}
 	/^$/ {next}
 	{exit 2}
 '

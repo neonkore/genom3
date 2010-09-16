@@ -144,8 +144,8 @@ puts 3,[language cname c [[[dotgen component] service] codel]]
 EOF
 expect out '
 	/^1,s_ss_a$/ {next}
-	/^2,t_tcodel$/ {next}
-	/^3,s_scodel$/ {next}
+	/^2,c_t_tcodel$/ {next}
+	/^3,c_s_scodel$/ {next}
 	{exit 2}
 '
 
@@ -162,10 +162,10 @@ service s() {
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 set c [[[dotgen component] service] codel]
-puts [language signature c $c |sep|]
+puts [language signature c $c -sep-]
 EOF
 expect out '
-	/^c_event|sep|s_codel()$/ {next}
+	/^c_event-sep-c_s_codel\(\)$/ {next}
 	{exit 2}
 '
 
@@ -185,7 +185,7 @@ set c [[[dotgen component] service] codel]
 puts [language invoke c $c {}]
 EOF
 expect out '
-	/^s_codel\(\)$/ {next}
+	/^c_s_codel\(\)$/ {next}
 	{exit 2}
 '
 

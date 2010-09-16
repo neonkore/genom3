@@ -19,8 +19,8 @@ testing '[object foreach]'
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 set i 0
-object foreach t [dotgen type ::s] {
-  puts -nonewline "$i,[$t kind],"
+object foreach {k t} [dotgen type ::s] {
+  puts -nonewline "$i,$k,"
   catch { puts -nonewline [$t fullname] }
   puts ","
   incr i
@@ -30,17 +30,23 @@ expect out '
 	/^0,struct,::s,$/ {next}
 	/^1,struct member,::s::a,$/ {next}
 	/^2,long,,$/ {next}
-	/^3,struct member,::s::b,$/ {next}
-	/^4,array,,$/ {next}
-	/^5,struct,::s::ss,$/ {next}
-	/^6,struct member,::s::ss::c,$/ {next}
-	/^7,long,,$/ {next}
+	/^3,\/struct member,::s::a,$/ {next}
+	/^4,struct member,::s::b,$/ {next}
+	/^5,array,,$/ {next}
+	/^6,struct,::s::ss,$/ {next}
+	/^7,struct member,::s::ss::c,$/ {next}
+	/^8,long,,$/ {next}
+	/^9,\/struct member,::s::ss::c,$/ {next}
+	/^10,\/struct,::s::ss,$/ {next}
+	/^11,\/array,,$/ {next}
+	/^12,\/struct member,::s::b,$/ {next}
+	/^13,\/struct,::s,$/ {next}
 	{exit 2}
 '
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 set i 0
-object foreach {t h} [dotgen type ::s] {
+object foreach {k t h} [dotgen type ::s] {
   puts -nonewline "$i,"
   foreach x $h {
     puts -nonewline [$x kind],
@@ -54,9 +60,15 @@ expect out '
 	/^1,struct,$/ {next}
 	/^2,struct,struct member,$/ {next}
 	/^3,struct,$/ {next}
-	/^4,struct,struct member,$/ {next}
-	/^5,struct,struct member,array,$/ {next}
-	/^6,struct,struct member,array,struct,$/ {next}
-	/^7,struct,struct member,array,struct,struct member,$/ {next}
+	/^4,struct,$/ {next}
+	/^5,struct,struct member,$/ {next}
+	/^6,struct,struct member,array,$/ {next}
+	/^7,struct,struct member,array,struct,$/ {next}
+	/^8,struct,struct member,array,struct,struct member,$/ {next}
+	/^9,struct,struct member,array,struct,$/ {next}
+	/^10,struct,struct member,array,$/ {next}
+	/^11,struct,struct member,$/ {next}
+	/^12,struct,$/ {next}
+	/^13,$/ {next}
 	{exit 2}
 '

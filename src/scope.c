@@ -86,6 +86,17 @@ scope_global()
   return global;
 }
 
+scope_s
+scope_set(scope_s s)
+{
+  scope_s p = current;
+  assert(s);
+  current = s;
+
+  xwarnx("changed to %s scope", s->fullname[0]?s->fullname:"global");
+  return p;
+}
+
 
 /* --- scope_findtype ------------------------------------------------------ */
 

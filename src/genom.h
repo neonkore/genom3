@@ -123,6 +123,7 @@ hash_s		scope_types(scope_s s);
 scope_s		scope_parent(scope_s s);
 scope_s		scope_current(void);
 scope_s		scope_global(void);
+scope_s		scope_set(scope_s s);
 
 idltype_s	scope_findtype(scope_s s, const char *name);
 int		scope_addtype(scope_s s, idltype_s t);

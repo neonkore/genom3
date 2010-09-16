@@ -24,8 +24,10 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <libgen.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include <tcl.h>
 
@@ -273,6 +275,71 @@ dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
 
   Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.notice, -1));
   return TCL_OK;
+}
+
+
+/* --- parse --------------------------------------------------------------- */
+
+/* \section dotgen parse
+ * \proc dotgen parse file\string|string data
+ * \index dotgen parse
+ *
+ * Parse .gen data either from a file or from a string. When parsing is
+ * successful, the corresponding objects are exported to the engine.
+ *
+ * \arg file\string|string	Specify if parsing from a file or from a
+ *				string.
+ * \arg data			When parsing from a file, data is the file
+ *				name. When parsing from a string, data is the
+ *				data to be parsed.
+ */
+int
+dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+  enum parseidx { parseidx_file, parseidx_string };
+  static const char *args[] = {
+    [parseidx_file] = "file", [parseidx_string] = "string", NULL
+  };
+  int fd;
+  int k, s;
+
+  if (objc != 3) {
+    Tcl_WrongNumArgs(interp, 1, objv, "file|string data");
+    return TCL_ERROR;
+  }
+
+  s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &k);
+  if (s != TCL_OK) return s;
+
+  switch(k) {
+    case parseidx_file: {
+      extern tloc curloc;
+      fd = open(Tcl_GetString(objv[2]), O_RDONLY);
+      if (fd < 0) {
+	Tcl_AppendResult(interp, "unable to open \"", Tcl_GetString(objv[2]),
+			 "\": ", strerror(errno), NULL);
+	return TCL_ERROR;
+      }
+      dotgen_input(DG_INPUT_FILE, fd);
+      curloc.file = Tcl_GetString(objv[2]);
+      break;
+    }
+
+    case parseidx_string:
+      dotgen_input(DG_INPUT_BUFFER, Tcl_GetString(objv[2]));
+      break;
+  }
+
+  s = dotgenparse();
+
+  if (k == parseidx_file) close(fd);
+  if (s) {
+    Tcl_AppendResult(interp, "parse errors", NULL);
+    return TCL_ERROR;
+  }
+
+  s = engine_export(interp);
+  return s?TCL_ERROR:TCL_OK;
 }
 
 

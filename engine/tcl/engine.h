@@ -62,6 +62,8 @@ int	dg_input_dir(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
+int	dg_parse(ClientData v, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[]);
 int	dg_types(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_components(ClientData d, Tcl_Interp *interp, int objc,
@@ -92,5 +94,7 @@ char *	service_genref(service_s s);
 char *	codel_genref(codel_s c);
 char *	param_genref(param_s p);
 char *	initer_genref(initer_s p);
+
+int	engine_export(Tcl_Interp *interp);
 
 #endif /* H_ENGINE */

@@ -705,6 +705,21 @@ type_members(idltype_s t)
   return NULL;
 }
 
+scope_s
+type_membersscope(idltype_s t)
+{
+  assert(t);
+
+  switch(type_kind(t)) {
+    case IDL_STRUCT: case IDL_UNION:
+      return t->elems;
+
+    default: assert(0);
+  }
+
+  return NULL;
+}
+
 
 /* --- type_strkind -------------------------------------------------------- */
 

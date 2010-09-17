@@ -226,7 +226,7 @@ chartext	([^\'])|(\\.)
 
  /* errors */
 . {
-  parserror(curloc, "unexpected character `%c', column %d",
+  parserror(curloc, "stray `%c', column %d",
 	    yytext[0], curloc.col);
   *yylloc_param = curloc;
 }
@@ -261,7 +261,7 @@ dotgen_input(dotgen_input_kind k, ...)
       break;
     case DG_INPUT_BUFFER:
       dg_input.src.buffer = va_arg(va, const char *);
-      curloc.file = "<command-line>";
+      curloc.file = "<inline string>";
       break;
   }
   va_end(va);

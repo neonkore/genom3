@@ -31,6 +31,10 @@
 
 #include "genom.h"
 
+#ifndef NDEBUG
+# define YYDEBUG 1
+#endif
+
 #define YYLTYPE	tloc
 
 #define YYLLOC_DEFAULT(c, rhs, n)		\
@@ -40,6 +44,7 @@
     (c).col = YYRHSLOC(rhs, (n)?1:0).col;	\
   } while (0)
 
+  extern char *dotgentext;
 %}
 
 %name-prefix "dotgen"
@@ -1591,5 +1596,5 @@ cpphash:
 void
 dotgenerror(const char *msg)
 {
-  parserror(curloc, "%s before or at column %d", msg, curloc.col);
+  parserror(curloc, "%s at `%s' (near column %d)", msg, dotgentext, curloc.col);
 }

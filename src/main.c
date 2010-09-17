@@ -167,7 +167,14 @@ main(int argc, char *argv[])
 	break;
 
       case 'v': runopt.verbose = 1; break;
-      case 'd': runopt.debug = 1; break;
+      case 'd': {
+#ifndef NDEBUG
+	extern int dotgendebug;
+	dotgendebug = 1;
+#endif
+	runopt.debug = 1;
+	break;
+      }
 
       case -'v': puts(PACKAGE_VERSION); exit(0); break;
       case 'h':  usage(stdout, argv0);  exit(0); break;

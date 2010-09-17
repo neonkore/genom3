@@ -24,6 +24,7 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <string.h>
 
 #include <tcl.h>
 
@@ -93,14 +94,25 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case serviceidx_before: case serviceidx_after:
     case serviceidx_interrupts: {
-      hiter j;
+      comp_s c = service_comp(s);
+      hiter j, k;
 
       r = Tcl_NewListObj(0, NULL);
       p = hash_find(service_props(s), prop_strkind(argkind[i]));
       if (p)
 	for(hash_first(prop_hash(p), &j); j.current; hash_next(&j)) {
+	  if (!strcmp(j.value, ALL_SERVICE_NAME)) {
+	    Tcl_SetListObj(r, 0, NULL);
+	    for(hash_first(comp_services(c), &k); k.current; hash_next(&k)) {
+	      Tcl_ListObjAppendElement(
+		interp, r, Tcl_NewStringObj(service_genref(k.value), -1));
+	    }
+	    break;
+	  }
+
 	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(service_genref(j.value), -1));
+	    interp, r,
+	    Tcl_NewStringObj(service_genref(comp_service(c, j.value)), -1));
 	}
       break;
     }

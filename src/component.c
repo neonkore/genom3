@@ -830,48 +830,25 @@ comp_addievs(tloc l, hash_s h)
 
 /* --- comp_resolvesvc ----------------------------------------------------- */
 
-/** Rebuild input hash by resolving service names. Number of entries may change
- * because of the 'all' wildcard.
+/** Resolve service names in given hash.
  */
 int
 comp_resolvesvc(tloc l, comp_s c, hash_s h)
 {
-  hiter i, j;
+  hiter i;
   service_s s;
   int e;
   assert(c && h);
 
   e = 0;
   for(hash_first(h, &i); i.current; hash_next(&i)) {
-    if (!strcmp(i.value, ALL_SERVICE_NAME)) {
-      /* 'all' wildcard */
-      hash_s all = comp_services(c); assert(all);
-      for(hash_first(all, &j); j.current; hash_next(&j))
-	if (hash_insert(h, service_name(j.value), j.value, NULL)) {
-	  if (errno == EEXIST) {
-	    parserror(l, "service '%s' is already contained in '"
-		      ALL_SERVICE_NAME "'", service_name(j.value));
-	  }
-	  e = 1;
-	}
-      if (hash_remove(h, i.key, 1))
-	e = 1;
-      else
-	xwarnx("expanded services '" ALL_SERVICE_NAME "'");
-      break; /* by definition, all services are there */
-    } else {
+    if (strcmp(i.value, ALL_SERVICE_NAME)) {
       s = comp_service(c, i.value);
       if (!s) {
 	parserror(l, "no such service '%s'", i.value);
 	e = 1;
-      } else {
-	if (hash_set(h, i.key, s))
-	  e = 1;
-	else
-	  xwarnx("resolved service name '%s'", i.value);
       }
     }
-
   }
 
   return e;

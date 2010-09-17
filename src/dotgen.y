@@ -1518,6 +1518,11 @@ identifier:
   | BUILDREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
   | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
   | AFTER | EVENT | DATA | INPORT | OUTPORT | IN | OUT | INOUT
+  | error
+  {
+    parserror(@1, "expected identifier but got '%s'", dotgentext);
+    YYABORT;
+  }
 ;
 
 identifier_list:

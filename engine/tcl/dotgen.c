@@ -331,6 +331,7 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   }
 
   s = dotgenparse();
+  if (!s) s = dotgen_consolidate();
 
   if (k == parseidx_file) close(fd);
   if (s) {

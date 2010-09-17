@@ -246,15 +246,13 @@ engine_gentype(Tcl_Interp *interp, idltype_s t)
   int s;
   assert(t);
 
-  /* the type might already exist (because of recursion). In this case, just
-   * do nothing. */
-  if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-  /* create the command for the type object */
-  if (!Tcl_CreateObjCommand(interp, key, type_cmd, t, NULL))
-    return EINVAL;
-  if (type_fullname(t))
-    printf("exported %s %s\n", type_strkind(type_kind(t)), type_fullname(t));
+  /* create the command for the type object if needed */
+  if (!Tcl_GetCommandInfo(interp, key, &info)) {
+    if (!Tcl_CreateObjCommand(interp, key, type_cmd, t, NULL))
+      return EINVAL;
+    if (type_fullname(t))
+      printf("exported %s %s\n", type_strkind(type_kind(t)), type_fullname(t));
+  }
 
   /* generate type references recursively */
   switch(type_kind(t)) {
@@ -308,20 +306,18 @@ engine_gencomponent(Tcl_Interp *interp, comp_s c)
 {
   Tcl_CmdInfo info;
   const char *key = comp_genref(c);
-  idltype_s iev;
   hiter i, p;
   int s;
 
   /* do nothing if the command already exists */
-  if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-  if (!Tcl_CreateObjCommand(interp, key, comp_cmd, c, NULL))
-    return EINVAL;
-  printf("exported component %s\n", comp_name(c));
+  if (!Tcl_GetCommandInfo(interp, key, &info)) {
+    if (!Tcl_CreateObjCommand(interp, key, comp_cmd, c, NULL))
+      return EINVAL;
+    printf("exported component %s\n", comp_name(c));
+  }
 
   /* internal event type */
-  iev = comp_eventtype(c);
-  s = engine_gentype(interp, iev);
+  s = engine_gentype(interp, comp_eventtype(c));
   if (s) return s;
 
   /* properties */
@@ -390,11 +386,11 @@ engine_gentask(Tcl_Interp *interp, task_s t)
   int s;
 
   /* do nothing if the command already exists */
-  if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-  if (!Tcl_CreateObjCommand(interp, key, task_cmd, t, NULL))
-    return EINVAL;
-  printf("exported task %s\n", task_name(t));
+  if (!Tcl_GetCommandInfo(interp, key, &info)) {
+    if (!Tcl_CreateObjCommand(interp, key, task_cmd, t, NULL))
+      return EINVAL;
+    printf("exported task %s\n", task_name(t));
+  }
 
   /* properties */
   s = 0;
@@ -436,11 +432,11 @@ engine_genport(Tcl_Interp *interp, port_s p)
   int s;
 
   /* do nothing if the command already exists */
-  if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-  if (!Tcl_CreateObjCommand(interp, key, port_cmd, p, NULL))
-    return EINVAL;
-  printf("exported port %s\n", port_name(p));
+  if (!Tcl_GetCommandInfo(interp, key, &info)) {
+    if (!Tcl_CreateObjCommand(interp, key, port_cmd, p, NULL))
+      return EINVAL;
+    printf("exported port %s\n", port_name(p));
+  }
 
   if (port_type(p)) {
     s = engine_gentype(interp, port_type(p));
@@ -464,11 +460,11 @@ engine_genservice(Tcl_Interp *interp, service_s s)
   int e = 0;
 
   /* do nothing if the command already exists */
-  if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-  if (!Tcl_CreateObjCommand(interp, key, service_cmd, s, NULL))
-    return EINVAL;
-  printf("exported service %s\n", service_name(s));
+  if (!Tcl_GetCommandInfo(interp, key, &info)) {
+    if (!Tcl_CreateObjCommand(interp, key, service_cmd, s, NULL))
+      return EINVAL;
+    printf("exported service %s\n", service_name(s));
+  }
 
   /* parameters */
   for(hash_first(service_params(s), &i); i.current; hash_next(&i)) {
@@ -512,11 +508,11 @@ engine_gencodel(Tcl_Interp *interp, codel_s c)
   int s;
 
   /* do nothing if the command already exists */
-  if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-  if (!Tcl_CreateObjCommand(interp, key, codel_cmd, c, NULL))
-    return EINVAL;
-  printf("exported codel %s\n", codel_name(c));
+  if (!Tcl_GetCommandInfo(interp, key, &info)) {
+    if (!Tcl_CreateObjCommand(interp, key, codel_cmd, c, NULL))
+      return EINVAL;
+    printf("exported codel %s\n", codel_name(c));
+  }
 
   /* parameters */
   for(hash_first(codel_params(c), &i); i.current; hash_next(&i)) {
@@ -541,11 +537,11 @@ engine_genparam(Tcl_Interp *interp, param_s p)
   int s;
 
   /* do nothing if the command already exists */
-  if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-  if (!Tcl_CreateObjCommand(interp, key, param_cmd, p, NULL))
-    return EINVAL;
-  printf("exported parameter %s\n", param_name(p));
+  if (!Tcl_GetCommandInfo(interp, key, &info)) {
+    if (!Tcl_CreateObjCommand(interp, key, param_cmd, p, NULL))
+      return EINVAL;
+    printf("exported parameter %s\n", param_name(p));
+  }
 
   /* initializer */
   i = param_initer(p);
@@ -578,10 +574,10 @@ engine_geniniter(Tcl_Interp *interp, initer_s i)
     key = initer_genref(i);
 
     /* do nothing if the command already exists */
-    if (Tcl_GetCommandInfo(interp, key, &info)) return 0;
-
-    if (!Tcl_CreateObjCommand(interp, key, initer_cmd, i, NULL))
-      return EINVAL;
+    if (!Tcl_GetCommandInfo(interp, key, &info)) {
+      if (!Tcl_CreateObjCommand(interp, key, initer_cmd, i, NULL))
+	return EINVAL;
+    }
 
     i = initer_next(i);
   }

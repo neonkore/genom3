@@ -1,6 +1,69 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2010 LAAS/CNRS
 
+			    Changes in genom 2.99.4
+
+Released on September 20th, 2010
+
+ . Removed the restriction about having only one component in a .gen
+   file. There can now be several components defined. Objects that are
+   implicitely attached to a component (such as tasks, services...) use the
+   latest component declaration.
+
+ . Changed the syntax for IDS definition. IDS is now declared with the
+   top-level 'ids' keyword, much like an IDL struct. For instance:
+      ids {
+        long a;
+        long b;
+      };
+   Several ids declarations are allowed and concatenated all together for each
+   component. This allows to assemble an IDS from different bits easily.
+
+ . Added a 'scheduling' property for tasks in .gen files. The only possible
+   value is 'real-time' (leaving the scheduling property undefined meaning "no
+   real-time constraints").
+
+ . Made the 'task' property of services optional in .gen files. It is up to the
+   templates to provide a default execution context for services without an
+   explicit task.
+
+ . Added -l option switch in built-in 'skeleton' template, for selecting the
+   codels language (the interface of codels being defined by the "lang"
+   attribute of the .gen file). The only case where it is useful to have a
+   different language for interface and implementation of codels is for the
+   generation of codels with a C signature but implemented with C++ code
+   (equivalent of the "lang: c++" of GenoM version 2).
+
+ . Added [dotgen parse] tcl engine procedure, for parsing extra .gen code
+   either from a file or from a string. This is useful for templates willing to
+   implement extra services or features on top of a .gen file. [dotgen parse]
+   appends to the existing specification.
+
+ . Added a 'component' property for tasks, services and ports in tcl engine. It
+   returns the component object to which the task, service or port belongs.
+
+ . Added the component namespace in codel signatures.
+
+ . Added regression tests for built-in templates 'mappings' and 'skeleton'.
+
+ . Changed [object foreach] tcl engine procedure to invoke its 'body' script
+   before and after recursion into deeper objects, so that it is possible to
+   generate "opening" and "closing" code in a non-recursive manner with the
+   [object foreach] procedure.
+
+ . Added runtime C helper macros for managing memory allocation of
+   variable-length sequences. These functions are helper macros only, meaning
+   that a codel is free to implement its own strategy. The helper macros can
+   be used by templates as well.
+
+ . Fixed installation of .pc pkg-config file that was not installed.
+
+ . Fixed stdout and stderr of interactive template sometimes randomly
+   intermingled.
+
+ . Improved some error messages in case of a syntax error in a .gen file.
+
+
 			    Changes in genom 2.99.3
 
 Released on July 6th, 2010

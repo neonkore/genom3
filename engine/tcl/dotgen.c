@@ -339,7 +339,7 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     return TCL_ERROR;
   }
 
-  s = engine_export(interp);
+  s = engine_export(interp, Tcl_GetSlave(interp, "slave"));
   return s?TCL_ERROR:TCL_OK;
 }
 

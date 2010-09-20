@@ -91,14 +91,22 @@ static const char *nslist[] = {
 };
 
 
-static int	engine_gentype(Tcl_Interp *interp, idltype_s t);
-static int	engine_gencomponent(Tcl_Interp *interp, comp_s c);
-static int	engine_gentask(Tcl_Interp *interp, task_s t);
-static int	engine_genport(Tcl_Interp *interp, port_s p);
-static int	engine_genservice(Tcl_Interp *interp, service_s s);
-static int	engine_gencodel(Tcl_Interp *interp, codel_s c);
-static int	engine_genparam(Tcl_Interp *interp, param_s p);
-static int	engine_geniniter(Tcl_Interp *interp, initer_s i);
+static int	engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave,
+			idltype_s t);
+static int	engine_gencomponent(Tcl_Interp *interp,Tcl_Interp *slave,
+			comp_s c);
+static int	engine_gentask(Tcl_Interp *interp, Tcl_Interp *slave,
+			task_s t);
+static int	engine_genport(Tcl_Interp *interp, Tcl_Interp *slave,
+			port_s p);
+static int	engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave,
+			service_s s);
+static int	engine_gencodel(Tcl_Interp *interp, Tcl_Interp *slave,
+			codel_s c);
+static int	engine_genparam(Tcl_Interp *interp, Tcl_Interp *slave,
+			param_s p);
+static int	engine_geniniter(Tcl_Interp *interp, Tcl_Interp *slave,
+			initer_s i);
 
 static char *	genref(const char *prefix, void *o);
 
@@ -112,7 +120,7 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
 {
   const struct dgcmd *i;
   char path[PATH_MAX];
-  Tcl_Interp *interp;
+  Tcl_Interp *interp, *slave;
   Tcl_Namespace *n;
   const char **j;
   Tcl_Obj *obj;
@@ -144,11 +152,15 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   if (!Tcl_PkgRequire(interp, "Tcl", "8.5", 0))
     goto error;
 
+  /* create a safe slave interpreter for evaluating template files */
+  slave = Tcl_CreateSlave(interp, "slave", 1/*safe*/);
+  if (!slave) goto error;
+
   /* create dotgen objects */
   if (!Tcl_CreateNamespace(interp, "::" DOTGEN_NS, NULL, NULL))
     goto error;
 
-  if (engine_export(interp)) goto error;
+  if (engine_export(interp, slave)) goto error;
 
   if (!Tcl_SetVar(interp, "::" DOTGEN_NS "::ns(object)",
 		 "::" DOTGEN_NS "::" OBJECT_NS,
@@ -205,12 +217,40 @@ error:
 }
 
 
+/* --- engine_createcmd ---------------------------------------------------- */
+
+/** Create a tcl command and alias it into the slave interpreter
+ */
+
+int
+engine_createcmd(Tcl_Interp *interp, Tcl_Interp *slave, const char *cmd,
+		 Tcl_ObjCmdProc *proc, ClientData data)
+{
+  Tcl_CmdInfo info;
+
+  /* do nothing if the command exists already */
+  if (Tcl_GetCommandInfo(interp, cmd, &info))
+    return errno = EEXIST;
+
+  if (!Tcl_CreateObjCommand(interp, cmd, proc, data, NULL))
+    return errno = EINVAL;
+  if (slave) {
+    if (Tcl_CreateAliasObj(slave, cmd, interp, cmd, 0, NULL) != TCL_OK) {
+      Tcl_DeleteCommand(interp, cmd);
+      return errno = EINVAL;
+    }
+  }
+
+  return 0;
+}
+
+
 /* --- engine_export ------------------------------------------------------- */
 
 /** Generate Tcl procedures corresponding to dotgen objects.
  */
 int
-engine_export(Tcl_Interp *interp)
+engine_export(Tcl_Interp *interp, Tcl_Interp *slave)
 {
   hiter t;
   comp_s c;
@@ -219,13 +259,13 @@ engine_export(Tcl_Interp *interp)
   if (type_all()) {
     for(hash_first(type_all(), &t); t.current; hash_next(&t)) {
       assert(type_fullname(t.value));
-      s = engine_gentype(interp, t.value);
+      s = engine_gentype(interp, slave, t.value);
       if (s) return s;
     }
   }
 
   for(c = comp_current(); c; c = comp_next(c)) {
-    s = engine_gencomponent(interp, c);
+    s = engine_gencomponent(interp, slave, c);
     if (s) return s;
   }
 
@@ -233,26 +273,22 @@ engine_export(Tcl_Interp *interp)
 }
 
 
-
 /* --- engine_gentype ------------------------------------------------------ */
 
 /** Generate Tcl IDL type object.
  */
 static int
-engine_gentype(Tcl_Interp *interp, idltype_s t)
+engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave, idltype_s t)
 {
-  Tcl_CmdInfo info;
   const char *key = type_genref(t);
   int s;
   assert(t);
 
   /* create the command for the type object if needed */
-  if (!Tcl_GetCommandInfo(interp, key, &info)) {
-    if (!Tcl_CreateObjCommand(interp, key, type_cmd, t, NULL))
-      return EINVAL;
-    if (type_fullname(t))
-      printf("exported %s %s\n", type_strkind(type_kind(t)), type_fullname(t));
-  }
+  if (engine_createcmd(interp, slave, key, type_cmd, t)) {
+    if (errno != EEXIST) return errno;
+  } else if (type_fullname(t))
+    printf("exported %s %s\n", type_strkind(type_kind(t)), type_fullname(t));
 
   /* generate type references recursively */
   switch(type_kind(t)) {
@@ -264,19 +300,22 @@ engine_gentype(Tcl_Interp *interp, idltype_s t)
       s = 0;
       break;
 
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      /* don't recurse infinitely, the real object takes care of it */
+      s = 0;
+      break;
+
     case IDL_CONST:
     case IDL_ARRAY:
     case IDL_SEQUENCE:
     case IDL_MEMBER:
     case IDL_CASE:
     case IDL_TYPEDEF:
-    case IDL_FORWARD_STRUCT:
-    case IDL_FORWARD_UNION:
-      s = engine_gentype(interp, type_type(t));
+      s = engine_gentype(interp, slave, type_type(t));
       break;
 
     case IDL_UNION:
-      s = engine_gentype(interp, type_discriminator(t));
+      s = engine_gentype(interp, slave, type_discriminator(t));
       if (s) break;
       /*FALLTHROUGH*/
     case IDL_STRUCT:
@@ -286,7 +325,7 @@ engine_gentype(Tcl_Interp *interp, idltype_s t)
 
       h = type_members(t); assert(h);
       for(hash_first(h, &i); i.value; hash_next(&i)) {
-	s = engine_gentype(interp, i.value);
+	s = engine_gentype(interp, slave, i.value);
 	if (s) break;
       }
       break;
@@ -302,40 +341,38 @@ engine_gentype(Tcl_Interp *interp, idltype_s t)
 /** Generate Tcl component object.
  */
 static int
-engine_gencomponent(Tcl_Interp *interp, comp_s c)
+engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
 {
-  Tcl_CmdInfo info;
   const char *key = comp_genref(c);
   hiter i, p;
   int s;
 
-  /* do nothing if the command already exists */
-  if (!Tcl_GetCommandInfo(interp, key, &info)) {
-    if (!Tcl_CreateObjCommand(interp, key, comp_cmd, c, NULL))
-      return EINVAL;
+  /* create the command if needed */
+  if (engine_createcmd(interp, slave, key, comp_cmd, c)) {
+    if (errno != EEXIST) return errno;
+  } else
     printf("exported component %s\n", comp_name(c));
-  }
 
   /* internal event type */
-  s = engine_gentype(interp, comp_eventtype(c));
+  s = engine_gentype(interp, slave, comp_eventtype(c));
   if (s) return s;
 
   /* properties */
   for(hash_first(comp_props(c), &i); i.current; hash_next(&i)) {
     switch(prop_kind(i.value)) {
       case PROP_IDS:
-	s = engine_gentype(interp, prop_type(i.value));
+	s = engine_gentype(interp, slave, prop_type(i.value));
 	break;
 
       case PROP_ATTRIBUTE:
 	for(hash_first(prop_hash(i.value), &p); p.current; hash_next(&p)) {
-	  s = engine_genparam(interp, p.value);
+	  s = engine_genparam(interp, slave, p.value);
 	  if (s) break;
 	}
 	break;
 
       case PROP_CLOCKRATE:
-	s = engine_gentype(interp, prop_value(i.value));
+	s = engine_gentype(interp, slave, prop_value(i.value));
 	break;
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
@@ -352,19 +389,19 @@ engine_gencomponent(Tcl_Interp *interp, comp_s c)
 
   /* tasks */
   for(hash_first(comp_tasks(c), &i); i.current; hash_next(&i)) {
-    s = engine_gentask(interp, i.value);
+    s = engine_gentask(interp, slave, i.value);
     if (s) return s;
   }
 
   /* ports */
   for(hash_first(comp_ports(c), &i); i.current; hash_next(&i)) {
-    s = engine_genport(interp, i.value);
+    s = engine_genport(interp, slave, i.value);
     if (s) return s;
   }
 
   /* services */
   for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
-    s = engine_genservice(interp, i.value);
+    s = engine_genservice(interp, slave, i.value);
     if (s) return s;
   }
 
@@ -377,20 +414,18 @@ engine_gencomponent(Tcl_Interp *interp, comp_s c)
 /** Generate Tcl task object.
  */
 static int
-engine_gentask(Tcl_Interp *interp, task_s t)
+engine_gentask(Tcl_Interp *interp, Tcl_Interp *slave, task_s t)
 {
-  Tcl_CmdInfo info;
   const char *key = task_genref(t);
   hash_s h;
   hiter i;
   int s;
 
-  /* do nothing if the command already exists */
-  if (!Tcl_GetCommandInfo(interp, key, &info)) {
-    if (!Tcl_CreateObjCommand(interp, key, task_cmd, t, NULL))
-      return EINVAL;
+  /* create the command if needed */
+  if (engine_createcmd(interp, slave, key, task_cmd, t)) {
+    if (errno != EEXIST) return errno;
+  } else
     printf("exported task %s\n", task_name(t));
-  }
 
   /* properties */
   s = 0;
@@ -398,11 +433,11 @@ engine_gentask(Tcl_Interp *interp, task_s t)
   for(hash_first(h, &i); i.current; hash_next(&i)) {
     switch(prop_kind(i.value)) {
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY: case PROP_STACK:
-	s = engine_gentype(interp, prop_value(i.value));
+	s = engine_gentype(interp, slave, prop_value(i.value));
 	break;
 
       case PROP_VALIDATE: case PROP_CODEL:
-	s = engine_gencodel(interp, prop_codel(i.value));
+	s = engine_gencodel(interp, slave, prop_codel(i.value));
 	break;
 
       case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
@@ -425,21 +460,19 @@ engine_gentask(Tcl_Interp *interp, task_s t)
 /** Generate Tcl port object.
  */
 static int
-engine_genport(Tcl_Interp *interp, port_s p)
+engine_genport(Tcl_Interp *interp, Tcl_Interp *slave, port_s p)
 {
-  Tcl_CmdInfo info;
   const char *key = port_genref(p);
   int s;
 
-  /* do nothing if the command already exists */
-  if (!Tcl_GetCommandInfo(interp, key, &info)) {
-    if (!Tcl_CreateObjCommand(interp, key, port_cmd, p, NULL))
-      return EINVAL;
+  /* create the command if needed */
+  if (engine_createcmd(interp, slave, key, port_cmd, p)) {
+    if (errno != EEXIST) return errno;
+  } else
     printf("exported port %s\n", port_name(p));
-  }
 
   if (port_type(p)) {
-    s = engine_gentype(interp, port_type(p));
+    s = engine_gentype(interp, slave, port_type(p));
     if (s) return s;
   }
 
@@ -452,23 +485,21 @@ engine_genport(Tcl_Interp *interp, port_s p)
 /** Generate Tcl service object.
  */
 static int
-engine_genservice(Tcl_Interp *interp, service_s s)
+engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave, service_s s)
 {
-  Tcl_CmdInfo info;
   const char *key = service_genref(s);
   hiter i;
   int e = 0;
 
-  /* do nothing if the command already exists */
-  if (!Tcl_GetCommandInfo(interp, key, &info)) {
-    if (!Tcl_CreateObjCommand(interp, key, service_cmd, s, NULL))
-      return EINVAL;
+  /* create the command if needed */
+  if (engine_createcmd(interp, slave, key, service_cmd, s)) {
+    if (errno != EEXIST) return errno;
+  } else
     printf("exported service %s\n", service_name(s));
-  }
 
   /* parameters */
   for(hash_first(service_params(s), &i); i.current; hash_next(&i)) {
-    e = engine_genparam(interp, i.value);
+    e = engine_genparam(interp, slave, i.value);
     if (e) return e;
   }
 
@@ -476,7 +507,7 @@ engine_genservice(Tcl_Interp *interp, service_s s)
   for(hash_first(service_props(s), &i); i.current; hash_next(&i)) {
     switch(prop_kind(i.value)) {
       case PROP_VALIDATE: case PROP_CODEL:
-	e = engine_gencodel(interp, prop_codel(i.value));
+	e = engine_gencodel(interp, slave, prop_codel(i.value));
 	break;
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
@@ -500,23 +531,21 @@ engine_genservice(Tcl_Interp *interp, service_s s)
 /** Generate Tcl codel object.
  */
 static int
-engine_gencodel(Tcl_Interp *interp, codel_s c)
+engine_gencodel(Tcl_Interp *interp, Tcl_Interp *slave, codel_s c)
 {
-  Tcl_CmdInfo info;
   const char *key = codel_genref(c);
   hiter i;
   int s;
 
-  /* do nothing if the command already exists */
-  if (!Tcl_GetCommandInfo(interp, key, &info)) {
-    if (!Tcl_CreateObjCommand(interp, key, codel_cmd, c, NULL))
-      return EINVAL;
+  /* create the command if needed */
+  if (engine_createcmd(interp, slave, key, codel_cmd, c)) {
+    if (errno != EEXIST) return errno;
+  } else
     printf("exported codel %s\n", codel_name(c));
-  }
 
   /* parameters */
   for(hash_first(codel_params(c), &i); i.current; hash_next(&i)) {
-    s = engine_genparam(interp, i.value);
+    s = engine_genparam(interp, slave, i.value);
     if (s) return s;
   }
 
@@ -529,24 +558,22 @@ engine_gencodel(Tcl_Interp *interp, codel_s c)
 /** Generate Tcl param object.
  */
 static int
-engine_genparam(Tcl_Interp *interp, param_s p)
+engine_genparam(Tcl_Interp *interp, Tcl_Interp *slave, param_s p)
 {
-  Tcl_CmdInfo info;
   const char *key = param_genref(p);
   initer_s i;
   int s;
 
-  /* do nothing if the command already exists */
-  if (!Tcl_GetCommandInfo(interp, key, &info)) {
-    if (!Tcl_CreateObjCommand(interp, key, param_cmd, p, NULL))
-      return EINVAL;
+  /* create the command if needed */
+  if (engine_createcmd(interp, slave, key, param_cmd, p)) {
+    if (errno != EEXIST) return errno;
+  } else
     printf("exported parameter %s\n", param_name(p));
-  }
 
   /* initializer */
   i = param_initer(p);
   if (i) {
-    s = engine_geniniter(interp, i);
+    s = engine_geniniter(interp, slave, i);
     if (s) return s;
   }
 
@@ -559,24 +586,22 @@ engine_genparam(Tcl_Interp *interp, param_s p)
 /** Generate Tcl initializer object.
  */
 static int
-engine_geniniter(Tcl_Interp *interp, initer_s i)
+engine_geniniter(Tcl_Interp *interp, Tcl_Interp *slave, initer_s i)
 {
-  Tcl_CmdInfo info;
   const char *key;
   int s;
 
   while(i) {
     if (initer_compound(i)) {
-      s = engine_geniniter(interp, initer_compound(i));
+      s = engine_geniniter(interp, slave, initer_compound(i));
       if (s) return s;
     }
 
     key = initer_genref(i);
 
-    /* do nothing if the command already exists */
-    if (!Tcl_GetCommandInfo(interp, key, &info)) {
-      if (!Tcl_CreateObjCommand(interp, key, initer_cmd, i, NULL))
-	return EINVAL;
+    /* create the command if needed */
+    if (engine_createcmd(interp, slave, key, initer_cmd, i)) {
+      if (errno != EEXIST) return errno;
     }
 
     i = initer_next(i);

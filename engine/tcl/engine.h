@@ -95,6 +95,8 @@ char *	codel_genref(codel_s c);
 char *	param_genref(param_s p);
 char *	initer_genref(initer_s p);
 
-int	engine_export(Tcl_Interp *interp);
+int	engine_createcmd(Tcl_Interp *interp, Tcl_Interp *slave,
+		const char *cmd, Tcl_ObjCmdProc *proc, ClientData data);
+int	engine_export(Tcl_Interp *interp, Tcl_Interp *slave);
 
 #endif /* H_ENGINE */

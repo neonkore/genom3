@@ -158,14 +158,14 @@ comp_create(tloc l, const char *name, hash_s props)
     for(hash_first(props, &i); i.current; hash_next(&i))
       switch(prop_kind(i.value)) {
 	case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
-	case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+	case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE: case PROP_THROWS:
 	case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
 	  break;
 
 	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
 	case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
-	case PROP_CODEL: case PROP_THROWS: case PROP_TASK:
-	case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+	case PROP_CODEL: case PROP_TASK: case PROP_INTERRUPTS:
+	case PROP_BEFORE: case PROP_AFTER:
 	  parserror(prop_loc(i.value),
 		    "property %s is not suitable for components",
 		    prop_strkind(prop_kind(i.value)));
@@ -182,8 +182,30 @@ comp_create(tloc l, const char *name, hash_s props)
 	e = hash_insert(comp_props(c), i.key, i.value, NULL);
 	if (e == EEXIST) {
 	  prop_s p = hash_find(comp_props(c), i.key); assert(p);
-	  parserror(l, "duplicate attribute '%s'", i.key);
-	  parsenoerror(prop_loc(p), " %s declared here", prop_name(p));
+	  switch(prop_kind(i.value)) {
+	    case PROP_THROWS: {
+	      hiter j;
+	      for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
+		e = hash_insert(prop_hash(p), j.key, j.value, NULL);
+		if (e && e != EEXIST) break; else e = 0;
+	      }
+	      break;
+	    }
+
+	    default:
+	      parserror(l, "duplicate attribute '%s'", i.key);
+	      parsenoerror(prop_loc(p), " %s declared here", prop_name(p));
+	      break;
+	  }
+
+	  if (e) break;
+	}
+
+	switch(prop_kind(i.value)) {
+	  case PROP_THROWS:
+	    if (comp_addievs(l, prop_hash(i.value)))return NULL;
+	    break;
+	  default: break;
 	}
       }
       if (e) return NULL;
@@ -221,10 +243,6 @@ comp_create(tloc l, const char *name, hash_s props)
     return NULL;
   }
 
-  /* define internal event type */
-  c->events = comp_ievcreate(l, name);
-  if (!c->events) return NULL;
-
   /* link component to others */
   cl = malloc(sizeof(*cl));
   if (!cl) {
@@ -235,6 +253,17 @@ comp_create(tloc l, const char *name, hash_s props)
   cl->c = c;
   cl->next = clist;
   clist = cl;
+
+  /* define internal event type */
+  c->events = comp_ievcreate(l, name);
+  if (!c->events) return NULL;
+  p = hash_find(c->props, prop_strkind(PROP_THROWS));
+  if (p) {
+    /* register internal events */
+    if (comp_addievs(l, prop_hash(p))) {
+      free(c); return NULL;
+    }
+  }
 
   xwarnx("created component %s", c->name);
   return c;
@@ -459,8 +488,13 @@ comp_addtask(tloc l, const char *name, hash_s props)
   /* check unwanted properties */
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
+      case PROP_THROWS:
+	/* register internal events */
+	if (comp_addievs(l, prop_hash(i.value))) e = errno;
+	break;
+
       case PROP_DOC: case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
-      case PROP_SCHEDULING: case PROP_STACK: case PROP_CODEL: case PROP_THROWS:
+      case PROP_SCHEDULING: case PROP_STACK: case PROP_CODEL:
 	break;
 
       case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
@@ -598,9 +632,13 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	t = prop_task(i.value);
 	break;
 
-      case PROP_DOC: case PROP_VALIDATE: case PROP_CODEL:
-      case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
-      case PROP_AFTER:
+      case PROP_THROWS:
+	/* register internal events */
+	if (comp_addievs(l, prop_hash(i.value))) e = errno;
+	break;
+
+      case PROP_DOC: case PROP_VALIDATE: case PROP_CODEL: case PROP_INTERRUPTS:
+      case PROP_BEFORE: case PROP_AFTER:
 	break;
 
       case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
@@ -804,7 +842,7 @@ comp_addievs(tloc l, hash_s h)
   iev = comp_eventtype(comp_current()); assert(iev);
 
   s = scope_push(l, comp_name(comp_current()), SCOPE_MODULE);
-  if (!s) return 1;
+  if (!s) return errno;
 
   r = 0;
   for(hash_first(h, &i); i.current; hash_next(&i)) {
@@ -815,7 +853,7 @@ comp_addievs(tloc l, hash_s h)
 	xwarnx("added component internal event %s", type_name(e));
       else {
 	parserror(l, "failed to create component internal event '%s'", i.value);
-	r = 1;
+	r = r?r:EINVAL;
       }
     }
     hash_set(h, i.key, e);
@@ -824,6 +862,7 @@ comp_addievs(tloc l, hash_s h)
   p = scope_pop();
   assert(p == s);
 
+  if (r) errno = r;
   return r;
 }
 

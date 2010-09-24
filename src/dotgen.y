@@ -464,11 +464,7 @@ codel:
   }
 ;
 
-event_list: identifier_list
-  {
-    $$ = comp_addievs(@1, $1) ? NULL : $1;
-  }
-;
+event_list: identifier_list;
 
 param_list:
   /* empty */

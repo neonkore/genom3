@@ -87,10 +87,14 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
 
   if (!yields) {
     /* validation codels return OK, or one of the exceptions of the service */
-    if (!hash_insert(c->yields, "ok", "ok", NULL))
-      comp_addievs(l, c->yields);
-    else
+    if (hash_insert(c->yields, "ok", "ok", NULL))
       parserror(l, "failed to create component internal event '%s'", "ok");
+  }
+
+  /* register internal events */
+  if (comp_addievs(l, c->yields) || comp_addievs(l, c->triggers)) {
+    free(c);
+    return NULL;
   }
 
   xwarnx("created codel %s", c->name);

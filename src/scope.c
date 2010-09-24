@@ -235,6 +235,7 @@ scope_push(tloc l, const char *name, scopekind k)
     parserror(l, "declaration of '%s' clashes with name of enclosing module",
 	      name);
     parsenoerror(current->loc, "  module '%s' declared here", current->name);
+    errno = EEXIST;
     return NULL;
   }
 
@@ -247,6 +248,7 @@ scope_push(tloc l, const char *name, scopekind k)
 		name, type_strkind(type_kind(t)));
       parsenoerror(type_loc(t), "  %s '%s' declared here",
 		   type_strkind(type_kind(t)), type_name(t));
+      errno = EEXIST;
       return NULL;
     }
   }
@@ -365,6 +367,7 @@ scope_new(tloc l, const char *name, const char *pname)
   s = malloc(sizeof(*s));
   if (!s) {
     warnx("memory exhausted, cannot create %s scope", name[0]?name:"global");
+    errno = ENOMEM;
     return NULL;
   }
 
@@ -376,6 +379,7 @@ scope_new(tloc l, const char *name, const char *pname)
   if (!s->idltypes) {
     free(s);
     warnx("memory exhausted, cannot create %s scope", name[0]?name:"global");
+    errno = ENOMEM;
     return NULL;
   }
 
@@ -388,6 +392,7 @@ scope_new(tloc l, const char *name, const char *pname)
     hash_destroy(s->idltypes);
     free(s);
     warnx("memory exhausted, cannot create %s scope", name[0]?name:"global");
+    errno = ENOMEM;
     return NULL;
   }
 

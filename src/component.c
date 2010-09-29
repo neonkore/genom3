@@ -175,43 +175,8 @@ comp_create(tloc l, const char *name, hash_s props)
 
   /* merge properties when component already exists */
   if (c) {
-    if (props) {
-      hiter i;
-
-      for(hash_first(props, &i); i.current; hash_next(&i)) {
-	e = hash_insert(comp_props(c), i.key, i.value, NULL);
-	if (e == EEXIST) {
-	  prop_s p = hash_find(comp_props(c), i.key); assert(p);
-	  switch(prop_kind(i.value)) {
-	    case PROP_THROWS: {
-	      hiter j;
-	      for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
-		e = hash_insert(prop_hash(p), j.key, j.value, NULL);
-		if (e && e != EEXIST) break; else e = 0;
-	      }
-	      break;
-	    }
-
-	    default:
-	      parserror(l, "duplicate attribute '%s'", i.key);
-	      parsenoerror(prop_loc(p), " %s declared here", prop_name(p));
-	      break;
-	  }
-
-	  if (e) break;
-	}
-
-	switch(prop_kind(i.value)) {
-	  case PROP_THROWS:
-	    if (comp_addievs(l, prop_hash(i.value)))return NULL;
-	    break;
-	  default: break;
-	}
-      }
-      if (e) return NULL;
-    }
-
-    return c;
+    e = prop_merge(comp_props(c), props);
+    return e?NULL:c;
   }
 
   /* create new component */
@@ -260,9 +225,7 @@ comp_create(tloc l, const char *name, hash_s props)
   p = hash_find(c->props, prop_strkind(PROP_THROWS));
   if (p) {
     /* register internal events */
-    if (comp_addievs(l, prop_hash(p))) {
-      free(c); return NULL;
-    }
+    if (comp_addievs(l, prop_hash(p))) return NULL;
   }
 
   xwarnx("created component %s", c->name);

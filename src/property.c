@@ -313,6 +313,60 @@ prop_destroy(prop_s p)
 }
 
 
+/* --- prop_merge ---------------------------------------------------------- */
+
+/** Merge two lists of properties into the first one. Destroy second hash.
+ */
+int
+prop_merge(hash_s p, hash_s m)
+{
+  hiter i, j;
+  prop_s q;
+  int e;
+
+  if (!m) return 0;
+  assert(p);
+
+  for(hash_first(m, &i); i.current; hash_next(&i)) {
+    e = hash_insert(p, i.key, i.value, (hrelease_f)prop_destroy);
+    /* property might already exist */
+    if (e == EEXIST) {
+      q = hash_find(p, i.key); assert(q);
+      /* some properties can be merged */
+      switch(prop_kind(i.value)) {
+	case PROP_THROWS:
+	  for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
+	    e = hash_insert(prop_hash(q), j.key, j.value, NULL);
+	    if (e && e != EEXIST) break; else e = 0;
+	  }
+	  break;
+
+	default:
+	  parserror(prop_loc(i.value), "duplicate attribute '%s'", i.key);
+	  parsenoerror(prop_loc(q), " %s declared here", prop_name(q));
+	  break;
+      }
+    }
+
+    switch(prop_kind(i.value)) {
+      case PROP_THROWS:
+	e = comp_addievs(prop_loc(i.value), prop_hash(i.value));
+	break;
+      default: break;
+    }
+
+    if (e) break;
+  }
+
+  /* destroy merged hash but keep properties */
+  for(hash_first(m, &i); i.current; hash_first(m, &i))
+    hash_remove(m, i.key, 0/*release*/);
+  hash_destroy(m);
+
+  return e;
+}
+
+
 /* --- prop_strkind -------------------------------------------------------- */
 
 /** Return a property kind as a string

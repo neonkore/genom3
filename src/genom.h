@@ -352,6 +352,8 @@ task_s		prop_task(prop_s p);
 codel_s		prop_codel(prop_s p);
 hash_s		prop_hash(prop_s p);
 
+int		prop_merge(hash_s p, hash_s m);
+
 const char *	prop_strkind(propkind k);
 
 

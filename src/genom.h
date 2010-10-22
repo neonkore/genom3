@@ -295,7 +295,7 @@ void		type_usage(void);
 
 #define COMPONENT_EVENTTYPE_NAME	"event"
 #define COMPONENT_EVENT_STD_NAMES {					\
-    "ok", "ether", "start", "stop", "sleep"				\
+    "ok", "error", "ether", "start", "stop", "sleep"			\
       }
 
 #define ALL_SERVICE_NAME		"all"

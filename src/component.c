@@ -571,6 +571,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   service_s s;
   task_s t;
   codel_s c;
+  prop_s p;
   int e;
   assert(name && params && props);
 
@@ -587,14 +588,13 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   }
   e = 0;
 
+  /* remember task for later use (below) */
+  p = hash_find(props, prop_strkind(PROP_TASK));
+  t = p ? prop_task(p) : NULL;
+
   /* check unwanted properties */
-  t = NULL;
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
-      case PROP_TASK: /* remember task for later use (below) */
-	t = prop_task(i.value);
-	break;
-
       case PROP_THROWS:
 	/* register internal events */
 	if (comp_addievs(l, prop_hash(i.value))) e = errno;
@@ -616,8 +616,16 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	}
 	break;
 
-      case PROP_DOC: case PROP_CODEL: case PROP_INTERRUPTS:
-      case PROP_BEFORE: case PROP_AFTER:
+      case PROP_CODEL:
+	if (!t) {
+	  parserror(prop_loc(i.value),
+		    "service %s with no task cannot have codels", name);
+	  e = 1; break;
+	}
+	break;
+
+      case PROP_DOC: case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      case PROP_TASK:
 	break;
 
       case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:

@@ -567,7 +567,7 @@ comp_addport(tloc l, portkind k, const char *name, idltype_s t)
 service_s
 comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 {
-  hiter i;
+  hiter i, j;
   service_s s;
   task_s t;
   codel_s c;
@@ -600,7 +600,23 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	if (comp_addievs(l, prop_hash(i.value))) e = errno;
 	break;
 
-      case PROP_DOC: case PROP_VALIDATE: case PROP_CODEL: case PROP_INTERRUPTS:
+      case PROP_VALIDATE:
+	c = prop_codel(i.value);
+	for(hash_first(codel_params(c), &j); j.current; hash_next(&j)) {
+	  switch(param_dir(j.value)) {
+	    case P_NODIR: case P_IN: case P_OUT: case P_INOUT:
+	      break;
+
+	    case P_INPORT: case P_OUTPORT:
+	      parserror(prop_loc(j.value),
+			"port %s is not allowed in validate codel %s",
+			port_name(param_port(j.value)), codel_name(c));
+	      e = 1; break;
+	  }
+	}
+	break;
+
+      case PROP_DOC: case PROP_CODEL: case PROP_INTERRUPTS:
       case PROP_BEFORE: case PROP_AFTER:
 	break;
 

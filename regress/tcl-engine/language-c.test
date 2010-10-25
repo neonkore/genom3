@@ -157,11 +157,11 @@ testing '[language signature c]'
 cat >run.gen <<'EOF'
 component c;
 service s() {
-  codel x: codel() yield ether;
+  validate: codel();
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
-set c [[[dotgen component] service] codel]
+set c [[[dotgen component] service] validate]
 puts [language signature c $c -sep-]
 EOF
 expect out '
@@ -177,11 +177,11 @@ testing '[language invoke c]'
 cat >run.gen <<'EOF'
 component c;
 service s() {
-  codel x: codel() yield ether;
+  validate: codel();
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
-set c [[[dotgen component] service] codel]
+set c [[[dotgen component] service] validate]
 puts [language invoke c $c {}]
 EOF
 expect out '

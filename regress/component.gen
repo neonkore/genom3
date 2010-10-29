@@ -70,9 +70,8 @@ task t2 {
   scheduling:	real-time;
   stack:	20k;
 
-  codel start, stop:
-   a(inport a, outport b.b::port) yield sleep, stop;
-  codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
+  codel start, other: a(inport a, outport b.b::port) yield sleep, main;
+  codel main: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
   codel stop: c(in d, out e) yield ether;
 
   throw:	ERR1, ERR2;
@@ -97,8 +96,8 @@ service s2(
   validate: v(in b[0].c::a, out c);
 
   codel start: a(inport a, outport b.b::port) yield sleep, ether;
-  codel stop: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
-  codel stop: c(in f, out f::outf) yield ether;
+  codel main: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
+  codel other: c(in f, out f::outf) yield ether;
   codel stop: d(in g, out h) yield ether;
 
   throw:	ERR3;

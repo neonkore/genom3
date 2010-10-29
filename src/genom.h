@@ -387,6 +387,7 @@ tloc		task_loc(task_s t);
 const char *	task_name(task_s t);
 comp_s		task_comp(task_s t);
 hash_s		task_props(task_s t);
+hash_s		task_fsm(task_s t);
 
 tloc		port_loc(port_s p);
 const char *	port_name(port_s p);
@@ -400,6 +401,7 @@ const char *	service_name(service_s s);
 comp_s		service_comp(service_s s);
 hash_s		service_props(service_s s);
 hash_s		service_params(service_s s);
+hash_s		service_fsm(service_s s);
 
 comp_s		comp_create(tloc l, const char *name, hash_s props);
 idltype_s	comp_addids(tloc l, scope_s s);
@@ -459,6 +461,7 @@ initer_s	initer_next(initer_s i);
 
 codel_s		codel_create(tloc l, const char *name, hash_s triggers,
 			hash_s yields, hash_s params);
+hash_s		codel_fsmcreate(tloc l, hash_s props);
 
 param_s		param_new(tloc l, const char *name, clist_s member);
 void		param_destroy(param_s p);

@@ -41,15 +41,16 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   enum taskidx {
     taskidx_name, taskidx_comp, taskidx_doc, taskidx_period, taskidx_delay,
     taskidx_priority, taskidx_scheduling, taskidx_stack, taskidx_codels,
-    taskidx_throws, taskidx_loc, taskidx_class
+    taskidx_fsm, taskidx_throws, taskidx_loc, taskidx_class
   };
   static const char *args[] = {
     [taskidx_name] = "name", [taskidx_comp] = "component",
     [taskidx_doc] = "doc", [taskidx_period] = "period",
     [taskidx_delay] = "delay", [taskidx_priority] = "priority",
     [taskidx_scheduling] = "scheduling", [taskidx_stack] = "stack",
-    [taskidx_codels] = "codels", [taskidx_throws] = "throws",
-    [taskidx_loc] = "loc", [taskidx_class] = "class", NULL
+    [taskidx_codels] = "codels", [taskidx_fsm] = "fsm",
+    [taskidx_throws] = "throws", [taskidx_loc] = "loc",
+    [taskidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [taskidx_doc] = PROP_DOC, [taskidx_period] = PROP_PERIOD,
@@ -61,15 +62,22 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   prop_s p;
   int s;
 
-  int i = taskidx_name; /* return name by default */
+  enum taskidx i = taskidx_name; /* return name by default */
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 0, objv, "$task subcommand");
-    return TCL_ERROR;
-  }
   if (objc > 1) {
-    s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
+    s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, (int *)&i);
     if (s != TCL_OK) return s;
+  }
+  if (i == taskidx_fsm) {
+    if (objc != 3) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$task fsm event");
+      return TCL_ERROR;
+    }
+  } else {
+    if (objc > 2) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$task subcommand");
+      return TCL_ERROR;
+    }
   }
   switch(i) {
     case taskidx_name:
@@ -113,6 +121,17 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	Tcl_ListObjAppendElement(
 	  interp, r, Tcl_NewStringObj(codel_genref(prop_codel(i.value)), -1));
       }
+      break;
+    }
+
+    case taskidx_fsm: {
+      codel_s c;
+
+      c = hash_find(task_fsm(t), Tcl_GetString(objv[2]));
+      if (c)
+	r = Tcl_NewStringObj(codel_genref(c), -1);
+      else
+	r = Tcl_NewListObj(0, NULL);
       break;
     }
 

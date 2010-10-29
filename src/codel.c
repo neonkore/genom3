@@ -100,3 +100,54 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
   xwarnx("created codel %s", c->name);
   return c;
 }
+
+
+/* --- codel_fsmcreate ----------------------------------------------------- */
+
+/** Build a fsm hash from existing codels in a list of properties
+ */
+hash_s
+codel_fsmcreate(tloc l, hash_s props)
+{
+  const char *e;
+  hash_s h;
+  codel_s c, u;
+  hiter i, j;
+  int s;
+
+  h = hash_create("fsm", 1);
+  if (!h) {
+    parserror(l, "failed to create fsm");
+    return NULL;
+  }
+
+  for(hash_first(props, &i); i.current; hash_next(&i))
+    switch(prop_kind(i.value)) {
+      case PROP_CODEL:
+	c = prop_codel(i.value);
+	for(hash_first(codel_triggers(c), &j); j.current; hash_next(&j)) {
+	  assert(type_kind(j.value) == IDL_ENUMERATOR);
+	  e = type_name(j.value);
+	  s = hash_insert(h, e, c, NULL);
+	  switch(s) {
+	    case 0: break;
+
+	    case EEXIST:
+	      /* only one codel per event is allowed */
+	      parserror(codel_loc(c), "duplicate event %s", e);
+	      u = hash_find(h, e);
+	      if (u) parserror(codel_loc(u), " event %s declared here", e);
+	      break;
+
+	    default:
+	      hash_destroy(h);
+	      return NULL;
+	  }
+	}
+	break;
+
+      default: break;
+    }
+
+  return h;
+}

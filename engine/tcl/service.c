@@ -41,7 +41,7 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum serviceidx {
     serviceidx_name, serviceidx_comp, serviceidx_doc, serviceidx_task,
-    serviceidx_validate, serviceidx_codels, serviceidx_params,
+    serviceidx_validate, serviceidx_codels, serviceidx_params, serviceidx_fsm,
     serviceidx_throws, serviceidx_interrupts, serviceidx_before,
     serviceidx_after, serviceidx_loc, serviceidx_class
   };
@@ -49,10 +49,10 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [serviceidx_name] = "name", [serviceidx_comp] = "component",
     [serviceidx_doc] = "doc", [serviceidx_task] = "task",
     [serviceidx_validate] = "validate", [serviceidx_codels] = "codels",
-    [serviceidx_params] = "parameters", [serviceidx_throws] = "throws",
-    [serviceidx_interrupts] = "interrupts", [serviceidx_before] = "before",
-    [serviceidx_after] = "after", [serviceidx_loc] = "loc",
-    [serviceidx_class] = "class", NULL
+    [serviceidx_params] = "parameters", [serviceidx_fsm] = "fsm",
+    [serviceidx_throws] = "throws", [serviceidx_interrupts] = "interrupts",
+    [serviceidx_before] = "before", [serviceidx_after] = "after",
+    [serviceidx_loc] = "loc", [serviceidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [serviceidx_codels] = PROP_CODEL, [serviceidx_validate] = PROP_VALIDATE,
@@ -70,7 +70,12 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     e = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, (int *)&i);
     if (e != TCL_OK) return e;
   }
-  if (i != serviceidx_params) {
+  if (i == serviceidx_fsm) {
+    if (objc != 3) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$service fsm event");
+      return TCL_ERROR;
+    }
+  } else if (i != serviceidx_params) {
     /* 'parameters' subcommand can have unlimited additional parameters, other
      * subcommand don't have any. */
     if (objc > 2) {
@@ -179,6 +184,17 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	  }
 	}
       }
+      break;
+    }
+
+    case serviceidx_fsm: {
+      codel_s c;
+
+      c = hash_find(service_fsm(s), Tcl_GetString(objv[2]));
+      if (c)
+	r = Tcl_NewStringObj(codel_genref(c), -1);
+      else
+	r = Tcl_NewListObj(0, NULL);
       break;
     }
 

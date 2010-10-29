@@ -59,12 +59,14 @@ struct task_s {
   comp_s component;
 
   hash_s props;
+  hash_s fsm;
 };
 
 tloc		task_loc(task_s t) { assert(t); return t->loc; }
 const char *	task_name(task_s t) { assert(t); return t->name; }
 comp_s		task_comp(task_s t) { assert(t); return t->component; }
 hash_s		task_props(task_s t) { assert(t); return t->props; }
+hash_s		task_fsm(task_s t) { assert(t); return t->fsm; }
 
 struct port_s {
   tloc loc;
@@ -88,6 +90,7 @@ struct service_s {
 
   hash_s props;
   hash_s params;
+  hash_s fsm;
 };
 
 tloc		service_loc(service_s s) { assert(s); return s->loc; }
@@ -95,6 +98,7 @@ const char *	service_name(service_s s) { assert(s); return s->name; }
 comp_s		service_comp(service_s s) { assert(s); return s->component; }
 hash_s		service_props(service_s s) { assert(s); return s->props; }
 hash_s		service_params(service_s s) { assert(s); return s->params; }
+hash_s		service_fsm(service_s s) { assert(s); return s->fsm; }
 
 
 /** the components of a dotgen file */
@@ -498,6 +502,13 @@ comp_addtask(tloc l, const char *name, hash_s props)
       return NULL;
   }
 
+  /* build task's fsm */
+  t->fsm = codel_fsmcreate(l, t->props);
+  if (!t->fsm) {
+    free(t);
+    return NULL;
+  }
+
   /* set codel's parent task and (NULL) service */
   for(hash_first(props, &i); i.current; hash_next(&i))
     if (prop_kind(i.value) == PROP_CODEL) {
@@ -679,6 +690,13 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
     default:
       free(s);
       return NULL;
+  }
+
+  /* build service's fsm */
+  s->fsm = codel_fsmcreate(l, s->props);
+  if (!s->fsm) {
+    free(s);
+    return NULL;
   }
 
   /* set codels parent task and service */

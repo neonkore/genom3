@@ -59,40 +59,6 @@ expect out '
 '
 
 
-# --- language declarator& c++ ---------------------------------------------
-#
-testing '[language declarator& c++]'
-
-run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
-puts [language declarator& c++ [dotgen type ::xlong] a]
-puts [language declarator& c++ [dotgen type ::xlongarray] a]
-puts [language declarator& c++ [dotgen type ::xbstring] a]
-EOF
-expect out '
-	/^xlong &a$/ {next}
-	/^xlongarray a$/ {next}
-	/^xbstring &a$/ {next}
-	{exit 2}
-'
-
-
-# --- language declarator* c++ ---------------------------------------------
-#
-testing '[language declarator* c++]'
-
-run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
-puts [language declarator* c++ [dotgen type ::xlong] a]
-puts [language declarator* c++ [dotgen type ::xlongarray] a]
-puts [language declarator* c++ [dotgen type ::xbstring] a]
-EOF
-expect out '
-	/^xlong \*a$/ {next}
-	/^xlongarray a$/ {next}
-	/^xbstring \*a$/ {next}
-	{exit 2}
-'
-
-
 # --- language member c++ --------------------------------------------------
 #
 testing '[language member c++]'

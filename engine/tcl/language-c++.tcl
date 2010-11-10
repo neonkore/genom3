@@ -175,41 +175,16 @@ namespace eval language::c++ {
 	return $d
     }
 
-    # Return the C++ mapping of a reference on the type declarator.
+
+    # --- address ----------------------------------------------------------
+
+    # Return the C++ mapping of a variable address.
     #
-    proc declarator& { type {var {}} } {
-	switch -- [[$type final] kind] {
-	    array	{ return [declarator $type $var] }
-	    default	{ return [declarator $type &$var] }
-	}
-    }
-
-    # Return the C++ mapping of a pointer on the type declarator.
-    #
-    proc declarator* { type {var {}} } {
-	switch -- [[$type final] kind] {
-	    {array}	{ return [declarator $type $var] }
-	    default	{ return [declarator $type *$var] }
-	}
-    }
-
-
-    # --- reference --------------------------------------------------------
-
-    # Return the C++ mapping of a variable reference.
-    #
-    proc reference { type {var {}} } {
-	switch -- [[$type final] kind] {
-	    {array} {
-		if {[catch { [$type final] length }]} {
-		    return "&($var)"
-		} else {
-		    return $var
-		}
-	    }
-
-	    default	{ return "&($var)" }
-	}
+    proc address { type {var {}} } {
+      switch -- [[$type final] kind] {
+	{array}	{ return $var }
+	default	{ return "&($var)" }
+      }
     }
 
 
@@ -218,17 +193,57 @@ namespace eval language::c++ {
     # Return the C++ mapping of a variable dereference.
     #
     proc dereference { type {var {}} } {
-	switch -- [[$type final] kind] {
-	    {array} {
-		if {[catch { [$type final] length }]} {
-		    return "(*$var)"
-		} else {
-		    return $var
-		}
-	    }
+      switch -- [[$type final] kind] {
+	{array} { return $var }
+	default	{ return "(*$var)" }
+      }
+    }
 
-	    default	{ return "(*$var)" }
+
+    # --- parameter --------------------------------------------------------
+
+    # Return the C++ mapping for declaring a parameter.
+    #
+    proc parameter { kind type {var {}} } {
+      switch -- $kind {
+	{value}		{
+	  return "const [declarator $type &$var]"
 	}
+	{reference}	{
+	  switch -- [[$type final] kind] {
+	    {array} {
+	      return [declarator $type $var]
+	    }
+	    default {
+	      return [declarator $type &$var]
+	    }
+	  }
+	}
+	default	{
+	  template fatal \
+	      "unknown argument kind \"$kind\": must be value or reference"
+	}
+      }
+    }
+
+
+    # --- argument ---------------------------------------------------------
+
+    # Return the C++ mapping for passing a variable.
+    #
+    proc argument { kind type {var {}} } {
+      switch -- $kind {
+	{value}		{
+	  return $var
+	}
+	{reference}	{
+	  return $var
+	}
+	default	{
+	  template fatal \
+	      "unknown argument kind \"$kind\": must be value or reference"
+	}
+      }
     }
 
 
@@ -244,10 +259,10 @@ namespace eval language::c++ {
 	    set a ""
 	    switch -- [$p dir] {
 		"in" - "inport"	{
-		    append a "const [declarator& [$p type] [$p name]]"
+		  append a [parameter value [$p type] [$p name]]
 		}
 		default	{
-		    append a [declarator& [$p type] [$p name]]
+		  append a [parameter reference [$p type] [$p name]]
 		}
 	    }
 	    lappend arg $a
@@ -327,10 +342,6 @@ namespace eval language::c++ {
     #
     proc invoke { codel params } {
 	set sym [cname $codel]
-	if {[llength $params] != [llength [$codel parameters]]} {
-	    template fatal "wrong # arguments for codel [$codel name]"
-	}
-
 	return "${sym}([join $params {, }])"
     }
 

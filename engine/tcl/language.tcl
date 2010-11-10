@@ -102,55 +102,23 @@ namespace eval language {
     }
     namespace export declarator
 
-    # \proc language declarator\& lang {\em type} [{\em var}]
-    # \index language declarator\&
+
+    # --- address ----------------------------------------------------------
+
+    # \proc language address lang {\em type} [{\em var}]
+    # \index language address
     #
-    # Return the abstract declarator of a reference to the {\em type} or to a
-    # variable {\em var} of that type, in the given language.
+    # Return an expression evaluating to the address of a variable.
     #
     # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg type	A type object.
     # \arg var	A string representing the name of a variable of type {\em
     #		type}.
     #
-    proc declarator& { lang type {var {}} } {
-	return [[support $lang]::declarator& $type $var]
+    proc address { lang type {var {}} } {
+	return [[support $lang]::address $type $var]
     }
-    namespace export declarator&
-
-    # \proc language declarator* lang {\em type} [{\em var}]
-    # \index language declarator*
-    #
-    # Return the abstract declarator of a pointer to the {\em type} or to a
-    # variable {\em var} of that type, in the given language.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg type	A type object.
-    # \arg var	A string representing the name of a variable of type {\em
-    #		type}.
-    #
-    proc declarator* { lang type {var {}} } {
-	return [[support $lang]::declarator* $type $var]
-    }
-    namespace export declarator*
-
-
-    # --- reference --------------------------------------------------------
-
-    # \proc language reference lang {\em type} [{\em var}]
-    # \index language reference
-    #
-    # Return the expression representing a reference to a variable.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg type	A type object.
-    # \arg var	A string representing the name of a variable of type {\em
-    #		type}.
-    #
-    proc reference { lang type {var {}} } {
-	return [[support $lang]::reference $type $var]
-    }
-    namespace export reference
+    namespace export address
 
 
     # --- dereference ------------------------------------------------------
@@ -158,7 +126,7 @@ namespace eval language {
     # \proc language dereference lang {\em type} [{\em var}]
     # \index language dereference
     #
-    # Return the expression that dereferences a variable.
+    # Return an expression able to dereference a pointer on a variable.
     #
     # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
     # \arg type	A type object.
@@ -169,6 +137,46 @@ namespace eval language {
 	return [[support $lang]::dereference $type $var]
     }
     namespace export dereference
+
+
+    # --- parameter --------------------------------------------------------
+
+    # \proc language parameter lang {\em kind} {\em type} [{\em var}]
+    # \index language parameter
+    #
+    # Return an expression that declares a parameter {\em var} of type {\em
+    # type}, passed by value or reference according to {\em kind}.
+    #
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
+    # \arg kind	Must be "value" or "reference".
+    # \arg type	A type object.
+    # \arg var	A string representing the name of a variable of type {\em
+    #		type}.
+    #
+    proc parameter { lang kind type {var {}} } {
+	return [[support $lang]::parameter $kind $type $var]
+    }
+    namespace export parameter
+
+
+    # --- argument ---------------------------------------------------------
+
+    # \proc language argument lang {\em kind} {\em type} [{\em var}]
+    # \index language argument
+    #
+    # Return an expression that passes {\em var} of type {\em type} as a
+    # parameter, by value or reference according to {\em kind}.
+    #
+    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
+    # \arg kind	Must be "value" or "reference".
+    # \arg type	A type object.
+    # \arg var	A string representing the name of a variable of type {\em
+    #		type}.
+    #
+    proc argument { lang kind type {var {}} } {
+	return [[support $lang]::argument $kind $type $var]
+    }
+    namespace export argument
 
 
     # --- member -----------------------------------------------------------
@@ -242,6 +250,37 @@ namespace eval language {
     namespace export signature
 
 
+    # --- arguments --------------------------------------------------------
+
+    # \proc language arguments {\em lang} {\em codel} {\em base}
+    # \index language arguments
+    #
+    # Return a list of strings corresponding to each parameter of a codel fetch
+    # from the given {\em base}.
+    #
+    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
+    # \arg codel	A codel object.
+    # \arg base		A string from which parameters are fetched.
+    #
+    proc arguments { lang codel base } {
+      set plist [list]
+      set cparam [$codel parameters]
+      foreach p $cparam {
+	set member "$base[language member $lang [$p base] [$p member]]"
+	switch -- [$p dir] {
+	  "in" - "inport" {
+	    lappend plist [argument $lang value [$p type] $member]
+	  }
+	  default {
+	    lappend plist [argument $lang reference [$p type] $member]
+	  }
+	}
+      }
+      return $plist
+    }
+    namespace export arguments
+
+
     # --- invoke -----------------------------------------------------------
 
     # \proc language invoke {\em lang} {\em codel} {\em params}
@@ -257,6 +296,10 @@ namespace eval language {
     #			the {\em lang} language corresponding to each parameter
     #			value or reference to be passed to the codel.
     proc invoke { lang codel params } {
+	if {[llength $params] != [llength [$codel parameters]]} {
+	    template fatal "wrong # arguments for codel [$codel name]"
+	}
+
 	return [[support $lang]::invoke $codel $params]
     }
     namespace export invoke

@@ -77,9 +77,8 @@ namespace eval object {
 	} r opts]
       }
     }
-
     if {$e} {
-      switch -- $e {
+      switch -- [dict get $opts -code] {
 	0	{ return -options $opts $r }
 	1	{ return -options $opts $r }
       }
@@ -99,11 +98,13 @@ namespace eval object {
       uplevel [list lassign [list [$object kind] $object $hier] {*}$vlist]
       uplevel $body
     } r opts]
-    switch -- $e {
-      0		{}
-      1		{ return -options $opts $r }
-      4		{ return }
-      default	{ return -code 2 }
+    if {$e} {
+      switch -- [dict get $opts -code] {
+	0 - 2	{}
+	3	{ return -code 3 }
+	4	{ return -code 4 }
+	default	{ return -options $opts $r }
+      }
     }
 
     # recurse into object - if needed
@@ -120,7 +121,10 @@ namespace eval object {
 	  set e [catch {
 	    uplevel [list object::foreach-type $vlist $m $hier $body]
 	  } r opts]
-	  if {$e} break
+	  if {$e} {
+	    if {[dict get $opts -code] == 4} { set e 0 }
+	    break
+	  }
 	}
       }
 
@@ -142,11 +146,13 @@ namespace eval object {
 
       default {	error "internal error: unhandled type '[$object kind]'" }
     }
-
-    switch -- $e {
-      0		{}
-      1		{ return -options $opts $r }
-      default	{ return -code 2 }
+    if {$e} {
+      switch -- [dict get $opts -code] {
+	0 - 2		{}
+	3		{ return -code 3 }
+	4		{ return -code 4 }
+	default		{ return -options $opts $r }
+      }
     }
 
     # invoke body for the end of the current object - if needed
@@ -158,11 +164,13 @@ namespace eval object {
 	  uplevel [list lassign [list /[$object kind] $object $hier] {*}$vlist]
 	  uplevel $body
 	} r opts]
-	switch -- $e {
-	  0		{}
-	  1		{ return -options $opts $r }
-	  4		{ return }
-	  default	{ return -code 2 }
+	if {$e} {
+	  switch -- [dict get $opts -code] {
+	    0 - 2	{}
+	    3		{ return -code 3 }
+	    4		{ return -code 4 }
+	    default	{ return -options $opts $r }
+	  }
 	}
       }
     }

@@ -17,6 +17,7 @@ mkdir -p run.t
 #
 testing '[object foreach]'
 
+# basic recursion
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 set i 0
 object foreach {k t} [dotgen type ::s] {
@@ -44,6 +45,7 @@ expect out '
 	{exit 2}
 '
 
+# recursion with hierarchy
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 set i 0
 object foreach {k t h} [dotgen type ::s] {
@@ -70,5 +72,70 @@ expect out '
 	/^11,struct,struct member,$/ {next}
 	/^12,struct,$/ {next}
 	/^13,$/ {next}
+	{exit 2}
+'
+
+# recursion with a break
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+set i 0
+object foreach {k t} [dotgen type ::s] {
+  puts -nonewline "$i,$k,"
+  catch { puts -nonewline [$t fullname] }
+  puts ","
+  incr i
+  if {$k == "long"} break;
+}
+puts "$i,done"
+EOF
+expect out '
+	/^0,struct,::s,$/ {next}
+	/^1,struct member,::s::a,$/ {next}
+	/^2,long,,$/ {next}
+	/^3,done$/ {next}
+	{exit 2}
+'
+
+# recursion with a continue
+cat >run.gen <<EOF
+struct s {
+  long a;
+  struct ss {
+    long a;
+    string b;
+    long c;
+  } d;
+  long b;
+};
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+set i 0
+object foreach {k t} [dotgen type ::s] {
+  puts -nonewline "$i,$k,"
+  catch { puts -nonewline [$t fullname] }
+  puts ","
+  incr i
+  if {$k == "string"} continue;
+}
+puts "$i,done"
+EOF
+expect out '
+	/^0,struct,::s,$/ {next}
+	/^1,struct member,::s::a,$/ {next}
+	/^2,long,,$/ {next}
+	/^3,\/struct member,::s::a,$/ {next}
+	/^4,struct member,::s::d,$/ {next}
+	/^5,struct,::s::ss,$/ {next}
+	/^6,struct member,::s::ss::a,$/ {next}
+	/^7,long,,$/ {next}
+	/^8,\/struct member,::s::ss::a,$/ {next}
+	/^9,struct member,::s::ss::b,$/ {next}
+	/^10,string,,$/ {next}
+	/^11,\/struct,::s::ss,$/ {next}
+	/^12,\/struct member,::s::d,$/ {next}
+	/^13,struct member,::s::b,$/ {next}
+	/^14,long,,$/ {next}
+	/^15,\/struct member,::s::b,$/ {next}
+	/^16,\/struct,::s,$/ {next}
+	/^17,done$/ {next}
 	{exit 2}
 '

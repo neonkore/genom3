@@ -40,16 +40,16 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum taskidx {
     taskidx_name, taskidx_comp, taskidx_doc, taskidx_period, taskidx_delay,
-    taskidx_priority, taskidx_scheduling, taskidx_stack, taskidx_codels,
-    taskidx_fsm, taskidx_throws, taskidx_loc, taskidx_class
+    taskidx_priority, taskidx_scheduling, taskidx_stack, taskidx_services,
+    taskidx_codels, taskidx_fsm, taskidx_throws, taskidx_loc, taskidx_class
   };
   static const char *args[] = {
     [taskidx_name] = "name", [taskidx_comp] = "component",
     [taskidx_doc] = "doc", [taskidx_period] = "period",
     [taskidx_delay] = "delay", [taskidx_priority] = "priority",
     [taskidx_scheduling] = "scheduling", [taskidx_stack] = "stack",
-    [taskidx_codels] = "codels", [taskidx_fsm] = "fsm",
-    [taskidx_throws] = "throws", [taskidx_loc] = "loc",
+    [taskidx_services] = "services", [taskidx_codels] = "codels",
+    [taskidx_fsm] = "fsm", [taskidx_throws] = "throws", [taskidx_loc] = "loc",
     [taskidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
@@ -109,6 +109,21 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	  Tcl_ListObjAppendElement(
 	    interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
 	}
+      break;
+    }
+
+    case taskidx_services: {
+      hiter i;
+      prop_s p;
+
+      r = Tcl_NewListObj(0, NULL);
+      for(hash_first(
+	    comp_services(task_comp(t)), &i); i.current; hash_next(&i)) {
+	p = hash_find(service_props(i.value), prop_strkind(PROP_TASK));
+	if (p && prop_task(p) == t)
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(service_genref(i.value), -1));
+      }
       break;
     }
 

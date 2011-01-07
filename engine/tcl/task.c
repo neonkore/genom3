@@ -69,7 +69,7 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     if (s != TCL_OK) return s;
   }
   if (i == taskidx_fsm) {
-    if (objc != 3) {
+    if (objc > 3) {
       Tcl_WrongNumArgs(interp, 0, objv, "$task fsm event");
       return TCL_ERROR;
     }
@@ -141,12 +141,21 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case taskidx_fsm: {
       codel_s c;
+      hiter i;
 
-      c = hash_find(task_fsm(t), Tcl_GetString(objv[2]));
-      if (c)
-	r = Tcl_NewStringObj(codel_genref(c), -1);
-      else
+      if (objc < 3) {
 	r = Tcl_NewListObj(0, NULL);
+	for(hash_first(task_fsm(t), &i); i.current; hash_next(&i)) {
+	  Tcl_ListObjAppendElement(
+	    interp, r, Tcl_NewStringObj(i.key, -1));
+	}
+      } else {
+	c = hash_find(task_fsm(t), Tcl_GetString(objv[2]));
+	if (c)
+	  r = Tcl_NewStringObj(codel_genref(c), -1);
+	else
+	  r = Tcl_NewListObj(0, NULL);
+      }
       break;
     }
 

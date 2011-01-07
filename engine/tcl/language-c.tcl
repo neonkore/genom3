@@ -214,7 +214,15 @@ namespace eval language::c {
     proc parameter { kind type {var {}} } {
       switch -- $kind {
 	{value}		{
-	  return "const [declarator $type *$var]"
+	   switch -- [[$type final] kind] {
+	       {string} -
+	       {array} {
+		   return "const [declarator $type $var]"
+	       }
+	       default {
+		   return "const [declarator $type *$var]"
+	       }
+	   }
 	}
 	{reference}	{
 	  switch -- [[$type final] kind] {

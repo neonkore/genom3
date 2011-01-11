@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -234,10 +234,11 @@ namespace eval engine {
     # --- close ------------------------------------------------------------
 
     # Close channel. If a "move on close" was recorded by open, execute it.
+    # If permissions are specified, apply them.
     #
     variable moc [dict create]
 
-    proc close { channel } {
+    proc close { channel {perm {}} } {
 	variable moc
 	variable overwrite
 	variable move-if-change
@@ -253,6 +254,9 @@ namespace eval engine {
 	    while { "[read $t 4096]" == "[read $d 4096]" } {
 		if { [eof $t] && [eof $d] } {
 		    close $t; close $d
+		    if {[llength $perm]} {
+		      file attributes $dst -permissions $perm
+		    }
 		    template message "$dst is up-to-date"
 		    return
 		}
@@ -272,6 +276,9 @@ namespace eval engine {
 	}
 	file mkdir [file dirname $dst]
 	file copy -force $tmp $dst
+        if {[llength $perm]} {
+	  file attributes $dst -permissions $perm
+	}
 	return
     }
 

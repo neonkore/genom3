@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -126,15 +126,18 @@ namespace eval template {
     #		the list is available from the template source file in the {\tt
     #		argv} array.
     #
+    # \arg perm	This optional argument may be set to specify the permissions to
+    #		be set for the created file.
+    #
     proc parse { args } {
 	if {[llength $args] < 4 || [llength $args] % 2} {
 	    template fatal "wrong # args"
 	}
-
-	# process options, if not done already
+	# process template options, if not done already
 	getopt
 
 	# produce output
+        set perm {}
 	lassign [lrange $args end-1 end] dtype dst
 	set out [engine::open $dtype $dst write]
 
@@ -142,6 +145,7 @@ namespace eval template {
 	foreach { stype src } [lrange $args 0 end-2] {
 	    switch -- $stype {
 		args	{ engine::args $src }
+		perm	{ set perm $src }
 
 		raw {
 		    set in [engine::open string $src read]
@@ -172,7 +176,7 @@ namespace eval template {
 	}
 	engine::args $savedargs
 
-	engine::close $out
+	engine::close $out $perm
 	return
     }
     namespace export parse

@@ -14,10 +14,12 @@ expect out '
 	/^run.t:$/ {next}
 	/^run.t\/codels:$/ {next}
 	/^codels$/ {next}
-	/^configure.user.ac$/ {next}
-	/^Makefile.user.am$/ {next}
-	/^c_t[12]\.c$/ {next}
-	/^c\.c$/ {next}
+	/^autogen.sh$/ {next}
+	/^configure.ac$/ {next}
+	/^Makefile.am$/ {next}
+	/^libc_codels.pc.in$/ {next}
+	/^c_t[12]_codels\.c$/ {next}
+	/^c_codels\.c$/ {next}
 	/^$/ {next}
 	{exit 2}
 '

@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -20,25 +20,21 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
 # IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-#                                           Anthony Mallet on Thu Jan 28 2010
+#                                           Anthony Mallet on Tue Jan 11 2011
 #
-
-# check arguments
-if {[llength $argv] != 2} { error "expected argument: component lang" }
-lassign $argv component lang
 
 # generate copyright notice (if any)
 catch {puts [language comment shell [dotgen input notice]]}
-
-# compute list of source
-set ext [language fileext $lang]
-set sources "[$component name]$ext"
-foreach t [$component tasks] {
-   lappend sources "[$component name]_[$t name]$ext"
-}
 '>
+ACLOCAL_AMFLAGS=	-I build-aux
+SUBDIRS=		codels
 
-noinst_LTLIBRARIES = lib<"[$component name]">_codels.la
-
-lib<"[$component name]">_codels_la_SOURCES=\
+<'set sources [list]
+  foreach c [dotgen components] {
+    # compute list of pkg-config files
+    lappend sources "lib[$c name]_codels.pc"
+  }
+'>
+pkgconfigdir=   $(libdir)/pkgconfig
+pkgconfig_DATA=\
 	<"[join $sources "\t\\\n\t"]">

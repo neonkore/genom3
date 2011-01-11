@@ -30,9 +30,16 @@ lassign $argv lang
 # generate copyright notice (if any)
 catch {puts [language comment shell [dotgen input notice]]}
 '>
-dnl This file is an autoconf fragment that is included in the main build
-dnl file. This file can be extended as needed: any valid autoconf statement
-dnl can be added, depending on the codels requirements.
+dnl This file is an autoconf fragment for building codels. It can be extended
+dnl as needed: any valid autoconf statement can be added, depending on the codels
+dnl requirements.
+AC_PREREQ(2.59)
+
+<'set c [lindex [dotgen component] 0]'>
+AC_INIT([<"[$c name] codels">],[<"[$c version]">],[<"[$c email]">])
+AC_CONFIG_MACRO_DIR([build-aux])
+AC_CONFIG_AUX_DIR([build-aux])
+AM_INIT_AUTOMAKE([foreign no-define])
 
 
 dnl Compilers
@@ -56,3 +63,17 @@ foreach l [lsort -unique $lang] {
    }
 }
 '>
+
+dnl External packages
+PKG_CHECK_MODULES(genom3, [genom3 >= 2.99.4])
+
+
+dnl Output
+AC_CONFIG_FILES([
+<'foreach c [dotgen components] {'>
+	lib<"[$c name]">_codels.pc
+<'}'>
+	Makefile
+	codels/Makefile
+])
+AC_OUTPUT

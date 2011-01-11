@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -20,8 +20,10 @@
 skeldir=$(tmpldir)/skeleton
 
 dist_skel_DATA=		\
-	codels.Makefile.user.am		\
+	codels.Makefile.am		\
 	codels.codel.c			\
 	codels.codel.cc			\
-	top.configure.user.ac		\
+	top.configure.ac		\
+	top.Makefile.am			\
+	libcodels.pc.in			\
 	template.tcl

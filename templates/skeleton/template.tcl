@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -29,8 +29,8 @@ template usage {*}{
     "Skeleton generation template.\n"
     "\n"
     "This template generates the skeleton of codel functions. Files are\n"
-    "put in a \"codels\" subdirectory of the directory of the .gen file,\n"
-    "unless -C option is used (but you should normally not use this option).\n"
+    "put in a \"codels\" subdirectory of the directory of the .gen file.\n"
+    "The -C option can be used to specify another output directory.\n"
     "\n"
     "The -l option can be used to define the language in which the codels\n"
     "are written. This is not to be confused with the codel interface\n"
@@ -39,13 +39,14 @@ template usage {*}{
     "combinations are not supported.\n"
     "\n"
     "Supported options:\n"
-    "  -l, --language=lang\tset codels language\n"
+    "  -l, --language=lang\tset codels source code language\n"
     "  -C, --directory=dir\toutput files in dir instead of source directory\n"
     "  -f, --force\t\toverwrite existing files (use with caution)\n"
     "  -h, --help\t\tprint usage summary (this text)"
 }
 
-# defaults
+# defaults: no file overwrite, C interface, C source and output in "codel"
+# subdir.
 engine mode -overwrite
 if {[catch {[dotgen component] lang} iface]} {
     set iface c
@@ -75,28 +76,40 @@ if {$iface ne $lang} {
 engine chdir $outdir
 
 # generate codel files
+#
 foreach c [dotgen components] {
     set ext [language fileext $lang]
     set src [language fileext $iface]
 
-    # for each task
+    # one source file for each task
     foreach t [$c tasks] {
 	template parse					\
 	    args [list $c $t] file codels.codel$src	\
-	    file codels/[$c name]_[$t name]$ext
+	    file codels/[$c name]_[$t name]_codels$ext
     }
 
-    # and for codels with no task
+    # and one file for codels with no associated task
     template parse					\
 	args [list $c ""] file codels.codel$src		\
-	file codels/[$c name]$ext
+	file codels/[$c name]_codels$ext
+
+    # mandatory pkg-config file
+    template parse					\
+	args [list $c] file libcodels.pc.in		\
+	file lib[$c name]_codels.pc.in
 }
 
 # generate user build files fragment
+#
+template parse perm a+x					\
+    string "mkdir -p build-aux\nautoreconf -vi\n"	\
+    file autogen.sh
 template parse						\
-    args [list $lang]					\
-    file top.configure.user.ac				\
-    file configure.user.ac
+    args [list $lang] file top.configure.ac		\
+    file configure.ac
 template parse						\
-    args [list $c $lang] file codels.Makefile.user.am	\
-    file codels/Makefile.user.am
+    file top.Makefile.am				\
+    file Makefile.am
+template parse						\
+    args [list $lang] file codels.Makefile.am		\
+    file codels/Makefile.am

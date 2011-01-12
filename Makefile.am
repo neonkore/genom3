@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 LAAS/CNRS
+# Copyright (c) 2009-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -26,7 +26,6 @@ if WITH_TCL
 	engine/tcl		\
 	templates/interactive	\
 	templates/example	\
-	templates/libcodels	\
 	templates/mappings	\
 	templates/skeleton
 endif

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -26,13 +26,7 @@ dist_systcl_DATA=\
 	language.tcl		\
 	language-c.tcl		\
 	language-c++.tcl	\
-	buildenv.tcl		\
-	buildenv-autoconf.tcl	\
 	engine.tcl
-
-nobase_dist_systcl_DATA=\
-	autoconf/top.configure.ac	\
-	autoconf/top.Makefile.am
 
 nodist_systcl_DATA=\
 	version.tcl		\
@@ -68,11 +62,6 @@ pkgIndex.tcl: Makefile
 	for s in $(dist_systcl_DATA); do			\
 	  test -f $$s || $(LN_S) $(srcdir)/$$s $$s;		\
 	  l="$$l"'|[list source [file join $$dir '"$$s"']]';	\
-	done;							\
-	for s in $(nobase_dist_systcl_DATA); do			\
-	  test -f $$s || ( $(MKDIR_P) "$${s%/*}" &&		\
-		cd $${s%/*} &&					\
-		$(LN_S) ../$(srcdir)/$$s $${s#*/}; );		\
 	done;							\
 	test -f engine.so || $(LN_S) .libs/engine.so;		\
 	$(ECHO) "package ifneeded $(PACKAGE_NAME)-engine"	\

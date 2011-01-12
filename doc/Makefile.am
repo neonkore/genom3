@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -77,8 +77,7 @@ generatedsrcs=\
 	engcmd-template.tex	\
 	engcmd-engine.tex	\
 	engcmd-dotgen.tex	\
-	engcmd-language.tex	\
-	engcmd-autoconf.tex
+	engcmd-language.tex
 
 EXTRA_DIST=	$(pdfsrcs) $(htmlsrcs) $(txtsrcs) $(roffsrcs)
 EXTRA_DIST+=	optgen.awk docgen.awk

@@ -421,7 +421,7 @@ namespace eval language::c {
 
 	append m [genloc $type]
 	append m "\ntypedef uint32_t $n;"
-	set v 0
+	set v -1
 	foreach e [$type members] {
 	    append m [genloc $e]
 	    append m "\n# define [cname [$e fullname]]\t([incr v])"

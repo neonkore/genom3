@@ -380,7 +380,7 @@ namespace eval language::c++ {
 	append m [genloc $type]
 
 	append m "\nenum [cname [$type name]] \{"
-	set v 0
+	set v -1
 	foreach e [$type members] {
 	    append m [genloc $e]
 	    append m "\n  [cname [$e name]] = \t[incr v],"

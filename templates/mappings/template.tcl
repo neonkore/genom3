@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -39,6 +39,7 @@ template usage {*}{
     "Supported options:\n"
     "  -l, --language=lang\tgenerate mappings for language\n"
     "  -s, --suffix=string\tset output file name suffix\n"
+    "  --signature\tgenerate codel signatures in addition to the types mappings\n"
     "  -C, --directory=dir\toutput files in dir instead of current directory\n"
     "  -p, --preserve\tdo not overwrite existing files\n"
     "  -m, --modify\t\toverwrite files even if they did not change\n"
@@ -48,10 +49,12 @@ template usage {*}{
 # defaults
 variable dir	.
 variable suffix _types
+variable sign [list]
 engine mode +overwrite +move-if-change
 
 # parse options
 template options {
+	 --signature	{ set sign [list file codels.h] }
     -s - --suffix	{ set suffix [template arg] }
     -l - --language	{ lappend lang [template arg] }
     -C - --directory	{ set dir [template arg] }
@@ -75,8 +78,10 @@ foreach c [dotgen components] {
     foreach l $l {
 	set safel [language cname $l $l]
 	template parse					\
+	    args [list $c $l]				\
 	    raw [language comment $l $header]		\
 	    string [language mapping $l *]		\
+	    {*}$sign					\
 	    file "[$c name]_$safel$suffix[language fileext $l header]"
     }
 }

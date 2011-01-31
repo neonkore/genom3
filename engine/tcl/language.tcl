@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -231,7 +231,7 @@ namespace eval language {
 
     # --- signature --------------------------------------------------------
 
-    # \proc language signature lang codel [{\em separator}]
+    # \proc language signature lang codel [{\em separator} [{\em location}]]
     # \index language signature
     #
     # Return the signature of a codel in the given language. If separator is
@@ -243,9 +243,11 @@ namespace eval language {
     # \arg codel	A codel object.
     # \arg separator	A string, inserted between the return type and the
     #			codel symbol name.
+    # \arg location	A boolean indicating whether to generate \#line directive
+    #			corresponding to the codel definition in .gen file.
     #
-    proc signature { lang codel {symchar { }} } {
-	return [[support $lang]::signature $codel $symchar]
+    proc signature { lang codel {symchar { }} {location off}} {
+	return [[support $lang]::signature $codel $symchar $location]
     }
     namespace export signature
 

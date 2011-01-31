@@ -37,13 +37,13 @@ lassign $argv component l
 <"[language comment $l " Codel functions signatures"]">
 
 <'foreach t [$component tasks] { foreach c [$t codels] {'>
-<"[language signature $l $c]">;
+<"[language signature $l $c " " 1]">;
 <'} }'>
 
 <'foreach s [$component services] { foreach c [$s validate] {'>
-<"[language signature $l $c]">;
+<"[language signature $l $c " " 1]">;
 <'} }'>
 
 <'foreach s [$component services] { foreach c [$s codels] {'>
-<"[language signature $l $c]">;
+<"[language signature $l $c " " 1]">;
 <'} }'>

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -283,7 +283,7 @@ namespace eval language::c {
 
     # Return the C signature of a codel
     #
-    proc signature { codel {symchar " "}} {
+    proc signature { codel {symchar " "} {location 0}} {
 	set ret [declarator [$codel return]]
 	set sym [cname $codel]
 	set arg [list]
@@ -299,7 +299,12 @@ namespace eval language::c {
 	    }
 	    lappend arg $a
 	}
-	return [join [list $ret ${sym}([join $arg {, }])] $symchar]
+        set m ""
+        if {$location} {
+	  append m [genloc $codel]\n
+	}
+        append m [join [list $ret ${sym}([join $arg {, }])] $symchar]
+	return $m
     }
 
 

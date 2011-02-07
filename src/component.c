@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -34,24 +34,39 @@
 
 /* --- local data ---------------------------------------------------------- */
 
+typedef enum compkind {
+  COMP_REG,		/* regular component */
+  COMP_TMPL,		/* template */
+} compkind;
+
 struct comp_s {
   tloc loc;
   const char *name;
-  idltype_s events;
+  compkind kind;
 
+  idltype_s events;
   hash_s props;
   hash_s tasks;
   hash_s ports;
   hash_s services;
+
+  comp_s next;
 };
 
 tloc		comp_loc(comp_s c) { assert(c); return c->loc; }
 const char *	comp_name(comp_s c) { assert(c); return c->name; }
+compkind	comp_kind(comp_s c) { assert(c); return c->kind; }
 idltype_s	comp_eventtype(comp_s c) { assert(c); return c->events; }
 hash_s		comp_props(comp_s c) { assert(c); return c->props; }
 hash_s		comp_tasks(comp_s c) { assert(c); return c->tasks; }
 hash_s		comp_ports(comp_s c) { assert(c); return c->ports; }
 hash_s		comp_services(comp_s c) { assert(c); return c->services; }
+
+static comp_s		comp_get_kind(const char *name, compkind kind);
+static comp_s		comp_create_kind(tloc l, const char *name,
+				hash_s props, compkind kind);
+static idltype_s	comp_ievcreate(tloc l, const char *name);
+static const char *	comp_strkind(compkind k);
 
 struct task_s {
   tloc loc;
@@ -102,14 +117,49 @@ hash_s		service_fsm(service_s s) { assert(s); return s->fsm; }
 
 
 /** the components of a dotgen file */
-static struct comp_list_s {
+static comp_s clist = NULL;
+
+/** the current active component */
+static comp_s active = NULL;
+
+comp_s	comp_active() { return active; }
+void	comp_setactive(comp_s c) { if (c) active = c; }
+
+comp_s
+comp_first()
+{
+  if (clist && comp_kind(clist) != COMP_REG) return comp_next(clist);
+  return clist;
+}
+
+comp_s
+comp_next(comp_s c) {
+  if (c) for(c = c->next; c && comp_kind(c) != COMP_REG; c = c->next);
+  return c;
+}
+
+
+/* --- comp_get ------------------------------------------------------------ */
+
+/** Return a component of that name
+ */
+comp_s
+comp_get(const char *name)
+{
+  return comp_get_kind(name, COMP_REG);
+}
+
+static comp_s
+comp_get_kind(const char *name, compkind kind)
+{
   comp_s c;
-  struct comp_list_s *next;
-} *clist;
 
-comp_s		comp_current() { return clist?clist->c:NULL; }
+  for(c = comp_first(); c; c = comp_next(c))
+    if (!strcmp(comp_name(c), name) && c->kind == kind)
+      return c;
 
-static idltype_s	comp_ievcreate(tloc l, const char *name);
+  return NULL;
+}
 
 
 /* --- comp_create --------------------------------------------------------- */
@@ -119,28 +169,35 @@ static idltype_s	comp_ievcreate(tloc l, const char *name);
 comp_s
 comp_create(tloc l, const char *name, hash_s props)
 {
-  struct comp_list_s *cl;
+  return comp_create_kind(l, name, props, COMP_REG);
+}
+
+/** create a template.
+ * Templates are stored as regular components with a special kind. Tasks,
+ * services, ids, ports and attributes created for this template are applied to
+ * all existing components.
+ */
+comp_s
+tmpl_create(tloc l, const char *name, hash_s props)
+{
+  return comp_create_kind(l, name, props, COMP_TMPL);
+}
+
+static comp_s
+comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
+{
   comp_s c;
   prop_s p;
   hiter i;
   int e;
   assert(name);
 
-  /* search for an existing component and move it to the front if it exists */
-  for(c = comp_current(); c; c = comp_next(c))
-    if (!strcmp(comp_name(c), name)) {
-      struct comp_list_s *n;
-
-      if (comp_current() == c) break;
-      for(cl = clist; cl->next->c != c; cl = cl->next) /*empty body */;
-      n = cl->next;
-      cl->next = n->next;
-      n->next = clist;
-      clist = n;
-
-      xwarnx("reopened component %s", c->name);
-      break;
-    }
+  /* get an existing component, or NULL if not yet created */
+  c = comp_get_kind(name, kind);
+  if (c) {
+    xwarnx("reopened %s %s", comp_strkind(kind), c->name);
+    comp_setactive(c);
+  }
 
   e = 0;
 
@@ -180,6 +237,7 @@ comp_create(tloc l, const char *name, hash_s props)
   /* merge properties when component already exists */
   if (c) {
     e = prop_merge(comp_props(c), props);
+    hash_destroy(props, 0/*do not destroy properties (now referenced)*/);
     return e?NULL:c;
   }
 
@@ -192,6 +250,8 @@ comp_create(tloc l, const char *name, hash_s props)
 
   c->loc = l;
   c->name = string(name);
+  c->kind = kind;
+  c->events = NULL;
   c->props = props ? props : hash_create("property list", 0);
   c->tasks = hash_create(strings(name, " tasks", NULL), 2);
   if (!c->tasks) {
@@ -213,26 +273,26 @@ comp_create(tloc l, const char *name, hash_s props)
   }
 
   /* link component to others */
-  cl = malloc(sizeof(*cl));
-  if (!cl) {
-    free(c);
-    warnx("memory exhausted, cannot create component");
-    return NULL;
-  }
-  cl->c = c;
-  cl->next = clist;
-  clist = cl;
+  c->next = clist;
+  clist = c;
+  comp_setactive(c);
 
   /* define internal event type */
   c->events = comp_ievcreate(l, name);
-  if (!c->events) return NULL;
+  if (!c->events) {
+    comp_setactive(clist = c->next);
+    return NULL;
+  }
   p = hash_find(c->props, prop_strkind(PROP_THROWS));
   if (p) {
     /* register internal events */
-    if (comp_addievs(l, prop_hash(p))) return NULL;
+    if (comp_addievs(l, prop_hash(p))) {
+      comp_setactive(clist = c->next);
+      return NULL;
+    }
   }
 
-  xwarnx("created component %s", c->name);
+  xwarnx("created %s %s", comp_strkind(kind), c->name);
   return c;
 }
 
@@ -287,22 +347,6 @@ comp_service(comp_s c, const char *name)
 }
 
 
-/* --- comp_next ----------------------------------------------------------- */
-
-/** return the component after the one given
- */
-comp_s
-comp_next(comp_s c)
-{
-  struct comp_list_s *l;
-
-  for(l = clist; l; l = l->next)
-    if (l->c == c) return l->next?l->next->c:NULL;
-
-  return NULL;
-}
-
-
 /* --- comp_addids --------------------------------------------------------- */
 
 /** add IDS members in a component
@@ -310,8 +354,11 @@ comp_next(comp_s c)
 idltype_s
 comp_addids(tloc l, scope_s s)
 {
-  idltype_s ids;
-  comp_s c = comp_current();
+  comp_s c = comp_active();
+  idltype_s ids, t, m;
+  scope_s p, cs;
+  hiter it;
+  prop_s idsp;
   assert(s);
 
   /* a component must exist */
@@ -322,24 +369,51 @@ comp_addids(tloc l, scope_s s)
     return NULL;
   }
 
-  /* create or recreate ids type, so that it always appears to be declared at
-   * this point. This is important if type declares other nested types,
-   * because the later have to always appear before the main type. */
+  /* get the ids type */
   ids = comp_ids(c);
-  if (!ids) {
-    scope_s p;
-    prop_s idsp;
 
-    p = scope_push(l, comp_name(c), SCOPE_MODULE);
-    if (!p) return NULL;
-    ids = type_newstruct(l, "ids", s);
-    scope_pop();
-    if (!ids) return NULL;
+  /* if the ids scope was not created in the component, create it. This happens
+   * when the ids is declared in a template context */
+  p = scope_push(l, comp_name(c), SCOPE_MODULE);
+  if (!p) return NULL;
+  if (scope_parent(s) != p) {
+    if (!ids) {
+      cs = scope_push(l, "ids", SCOPE_STRUCT);
+      if (!cs) { scope_set(scope_global()); return NULL; }
+      scope_detach(cs);
+      scope_pop();
+    } else
+      cs = type_membersscope(ids);
+  } else
+    cs = s;
+
+  /* create the ids type */
+  if (!ids) {
+    ids = type_newstruct(l, "ids", cs);
+    if (!ids) { scope_set(scope_global()); return NULL; }
 
     idsp = prop_newids(l, ids);
     hash_insert(c->props, prop_name(idsp), idsp, (hrelease_f)prop_destroy);
-  } else
-    type_renew(ids);
+  }
+
+  /* create new ids members */
+  if (cs != s) {
+    scope_set(cs);
+    for(t = scope_firstype(s, &it); t; t = scope_nextype(&it)) {
+      if (type_kind(t) != IDL_MEMBER) continue;
+      m = scope_findtype(cs, type_name(t));
+      if (m && type_type(m) == type_type(t)) continue;
+
+      m = type_newmember(type_loc(t), type_name(t), type_type(t));
+      if (!m) { scope_set(scope_global()); return NULL; }
+    }
+  }
+
+  /* recreate ids type, so that it always appears to be declared at this
+   * point. This is important if the ids declares other nested types,
+   * because the later have to always appear before the main type. */
+  type_renew(ids);
+  scope_set(scope_global());
 
   return ids;
 }
@@ -350,49 +424,47 @@ comp_addids(tloc l, scope_s s)
 /** create an attribute for component
  */
 int
-comp_addattr(tloc l, hash_s attrs)
+comp_addattr(tloc l, param_s attr)
 {
+  comp_s c;
+  param_s param;
   hash_s h;
-  hiter i;
   prop_s p;
+  assert(attr);
 
   /* a component must exist */
-  if (!comp_current()) {
+  c = comp_active();
+  if (!c) {
     parserror(l, "missing component declaration before attribute");
     return errno = EINVAL;
   }
 
-  /* append to existing attributes, or create one */
-  p = hash_find(comp_current()->props, prop_strkind(PROP_ATTRIBUTE));
+  /* get or create component's attributes hash */
+  p = hash_find(c->props, prop_strkind(PROP_ATTRIBUTE));
   if (p) {
     h = prop_hash(p);
-    for (hash_first(attrs, &i); i.current; hash_first(attrs, &i)) {
-      if (hash_insert(h, i.key, i.value, (hrelease_f)param_destroy)) {
-	if (errno == EEXIST) {
-	  param_s p = hash_find(h, i.key); assert(p);
-	  parserror(l, "duplicate attribute '%s' declaration", i.key);
-	  parsenoerror(param_loc(p), " %s declared here", param_name(p));
-	} else
-	  parserror(l, "dropped attribute '%s' declaration", i.key);
-	hash_remove(attrs, i.key, 1);
-      } else {
-	xwarnx("created attribute '%s'", i.key);
-	hash_remove(attrs, i.key, 0);
-      }
-    }
-    hash_destroy(attrs);
   } else {
-    p = prop_newhash(l, PROP_ATTRIBUTE, attrs);
-    if (hash_insert(comp_current()->props,
-		    prop_name(p), p, (hrelease_f)prop_destroy)) {
-      parserror(l, "dropped attribute declaration");
+    h = hash_create("attribute list", 3);
+    if (!h) return errno;
+    p = prop_newhash(l, PROP_ATTRIBUTE, h);
+    if (!p) { hash_destroy(h, 1); return errno; }
+
+    if (hash_insert(c->props, prop_name(p), p, (hrelease_f)prop_destroy))
       return errno;
-    }
-    for (hash_first(attrs, &i); i.current; hash_next(&i)) {
-      xwarnx("created attribute '%s'", i.key);
-    }
   }
 
+  /* insert attribute in hash */
+  if (hash_insert(h, param_name(attr), attr, (hrelease_f)param_destroy)) {
+    if (errno == EEXIST) {
+      param = hash_find(h, param_name(attr)); assert(param);
+      parserror(l, "duplicate attribute '%s' declaration", param_name(attr));
+      parsenoerror(param_loc(param), " %s declared here", param_name(param));
+    } else
+      parserror(l, "dropped attribute '%s' declaration", param_name(attr));
+    return errno;
+  }
+
+  xwarnx("created attribute '%s'", param_name(attr));
   return 0;
 }
 
@@ -404,19 +476,26 @@ comp_addattr(tloc l, hash_s attrs)
 task_s
 comp_addtask(tloc l, const char *name, hash_s props)
 {
+  comp_s comp;
   hiter i;
   task_s t;
   codel_s c;
   prop_s p, d;
   int e;
-  assert(name && props);
+  assert(name);
 
   /* a component must exist */
-  if (!comp_current()) {
+  comp = comp_active();
+  if (!comp) {
     parserror(l, "missing component declaration before task %s", name);
     return NULL;
   }
   e = 0;
+
+  if (!props) {
+    props = hash_create("property list", 0);
+    if (!props) return NULL;
+  }
 
   /* check consitency of some properties */
   p = hash_find(props, prop_strkind(PROP_PERIOD));
@@ -484,17 +563,16 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
   t->loc = l;
   t->name = string(name);
-  t->component = comp_current();
+  t->component = comp;
   t->props = props;
 
-  e = hash_insert(comp_current()->tasks, t->name, t, (hrelease_f)task_destroy);
+  e = hash_insert(comp->tasks, t->name, t, (hrelease_f)task_destroy);
   switch(e) {
     case 0: break;
 
     case EEXIST:
-      /* control task is a reserved name */
       parserror(l, "duplicate task %s", t->name);
-      task_s u = hash_find(comp_current()->tasks, name);
+      task_s u = hash_find(comp->tasks, name);
       if (u) parserror(u->loc, " task %s declared here", u->name);
       /*FALLTHROUGH*/
     default:
@@ -529,12 +607,14 @@ comp_addtask(tloc l, const char *name, hash_s props)
 port_s
 comp_addport(tloc l, portkind k, const char *name, idltype_s t)
 {
+  comp_s c;
   port_s p;
   int e;
   assert(name);
 
   /* a component must exist */
-  if (!comp_current()) {
+  c = comp_active();
+  if (!c) {
     parserror(l, "missing component declaration before port %s", name);
     return NULL;
   }
@@ -549,16 +629,16 @@ comp_addport(tloc l, portkind k, const char *name, idltype_s t)
   p->loc = l;
   p->kind = k;
   p->name = string(name);
-  p->component = comp_current();
+  p->component = c;
   p->type = t;
 
-  e = hash_insert(comp_current()->ports, p->name, p, (hrelease_f)port_destroy);
+  e = hash_insert(c->ports, p->name, p, (hrelease_f)port_destroy);
   switch(e) {
     case 0: break;
 
     case EEXIST:
       parserror(l, "duplicate port %s", p->name);
-      port_s u = hash_find(comp_current()->ports, name);
+      port_s u = hash_find(c->ports, name);
       if (u) parserror(u->loc, " port %s declared here", u->name);
       /*FALLTHROUGH*/
     default:
@@ -578,13 +658,14 @@ comp_addport(tloc l, portkind k, const char *name, idltype_s t)
 service_s
 comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 {
+  comp_s comp;
   hiter i, j;
   service_s s;
   task_s t;
   codel_s c;
   prop_s p;
   int e;
-  assert(name && params && props);
+  assert(name && params);
 
   /* all is a reserved name */
   if (!strcmp(name, ALL_SERVICE_NAME)) {
@@ -593,11 +674,17 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
   }
 
   /* a component must exist */
-  if (!comp_current()) {
+  comp = comp_active();
+  if (!comp) {
     parserror(l, "missing component declaration before service %s", name);
     return NULL;
   }
   e = 0;
+
+  if (!props) {
+    props = hash_create("property list", 0);
+    if (!props) return NULL;
+  }
 
   /* remember task for later use (below) */
   p = hash_find(props, prop_strkind(PROP_TASK));
@@ -672,19 +759,18 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   s->loc = l;
   s->name = string(name);
-  s->component = comp_current();
+  s->component = comp;
   s->props = props;
   s->params = params;
 
-  e = hash_insert(comp_current()->services,
-		  s->name, s, (hrelease_f)service_destroy);
+  e = hash_insert(comp->services, s->name, s, (hrelease_f)service_destroy);
 
   switch(e) {
     case 0: break;
 
     case EEXIST:
       parserror(l, "duplicate service %s", s->name);
-      service_s u = hash_find(comp_current()->services, name);
+      service_s u = hash_find(comp->services, name);
       if (u) parserror(u->loc, " service %s declared here", u->name);
       /*FALLTHROUGH*/
     default:
@@ -719,6 +805,24 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   xwarnx("created service %s", s->name);
   return s;
+}
+
+
+/* --- comp_strkind -------------------------------------------------------- */
+
+/** Return a component kind as a string
+ */
+
+static const char *
+comp_strkind(compkind k)
+{
+  switch(k) {
+    case COMP_REG:		return "component";
+    case COMP_TMPL:		return "template";
+  }
+
+  assert(0);
+  return NULL;
 }
 
 
@@ -802,7 +906,7 @@ comp_ievcreate(tloc l, const char *name)
   }
 
   /* create standard events */
-  h = hash_create("enumerator list", 5);
+  h = hash_create("enumerator list", 10);
   if (!h) goto error;
 
   for(i=0; i<sizeof(stdev)/sizeof(stdev[0]); i++) {
@@ -833,6 +937,7 @@ error:
 
 /* --- comp_addiev --------------------------------------------------------- */
 
+
 /** Add internal event to component
  */
 int
@@ -844,9 +949,9 @@ comp_addievs(tloc l, hash_s h)
   int r;
   assert(h);
 
-  iev = comp_eventtype(comp_current()); assert(iev);
+  iev = comp_eventtype(comp_active()); assert(iev);
 
-  s = scope_push(l, comp_name(comp_current()), SCOPE_MODULE);
+  s = scope_push(l, comp_name(comp_active()), SCOPE_MODULE);
   if (!s) return errno;
 
   r = 0;
@@ -893,6 +998,80 @@ comp_resolvesvc(tloc l, comp_s c, hash_s h)
 	e = 1;
       }
     }
+  }
+
+  return e;
+}
+
+
+/* --- comp_applytmpl ------------------------------------------------------ */
+
+/** Apply template declarations to all components.
+ */
+int
+comp_applytmpl()
+{
+  comp_s c, t;
+  task_s task;
+  service_s svc;
+  param_s param;
+  hash_s h;
+  hiter i, j;
+  int e = 0;
+
+  for(t = clist; t; t = t->next) {
+    if (comp_kind(t) != COMP_TMPL) continue;
+
+    for(c = comp_first(); c; c = comp_next(c)) {
+      comp_setactive(c);
+      e = prop_merge(comp_props(c), comp_props(t));
+
+      for(hash_first(comp_ports(t), &i); i.current; hash_next(&i)) {
+	if (!comp_addport(port_loc(i.value), port_kind(i.value),
+			  port_name(i.value), port_type(i.value))) e = 1;
+      }
+
+      for(hash_first(comp_tasks(t), &i); i.current; hash_next(&i)) {
+	task = comp_addtask(task_loc(i.value), task_name(i.value), NULL);
+	if (task) {
+	  e |= prop_merge(task_props(task), task_props(i.value));
+	  hash_destroy(task->fsm, 1);
+	  task->fsm = codel_fsmcreate(task_loc(task), task_props(task));
+	}
+	else
+	  e = 1;
+      }
+
+      for(hash_first(comp_services(t), &i); i.current; hash_next(&i)) {
+	h = hash_create("parameter list", 0);
+	for(hash_first(
+	      service_params(i.value), &j); j.current; hash_next(&j)) {
+	  param = param_clone(j.value);
+	  if (!param) { e = 1; break; }
+	  if (hash_insert(h, j.key, param, (hrelease_f)param_destroy)) {
+	    e = 1; break;
+	  }
+	}
+	if (e) break;
+
+	svc = comp_addservice(service_loc(i.value), service_name(i.value),
+			      h, NULL);
+	if (svc) {
+	  e |= prop_merge(service_props(svc), service_props(i.value));
+	  hash_destroy(svc->fsm, 1);
+	  svc->fsm = codel_fsmcreate(service_loc(svc), service_props(svc));
+	}
+	else
+	  e = 1;
+      }
+
+      if (!e)
+	xwarnx("applied template %s to component %s",
+	       comp_name(t), comp_name(c));
+    }
+
+    type_destroy(comp_eventtype(t));
+    type_destroy(comp_ids(t));
   }
 
   return e;

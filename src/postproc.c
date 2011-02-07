@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <err.h>
 #include <math.h>
 
 #include "genom.h"
@@ -70,8 +71,11 @@ dotgen_consolidate()
     }
   }
 
+  /* apply templates declarations */
+  e |= comp_applytmpl();
+
   /* check clock-rate or compute default value if not specified */
-  for(c = comp_current(); c; c = comp_next(c)) {
+  for(c = comp_first(); c; c = comp_next(c)) {
     p = hash_find(comp_props(c), prop_strkind(PROP_CLOCKRATE));
     if (p)
       e |= dotgen_clkratechk(c, p);
@@ -81,7 +85,7 @@ dotgen_consolidate()
 
 
   /* resolve service names in interrupts, before and after properties */
-  for(c = comp_current(); c; c = comp_next(c)) {
+  for(c = comp_first(); c; c = comp_next(c)) {
     hash_s services = comp_services(c);
 
     for(hash_first(services, &i); i.current; hash_next(&i)) {
@@ -103,7 +107,10 @@ dotgen_consolidate()
     }
   }
 
-  if (e) return 2;
+  if (e) {
+    warnx("invalid specification");
+    return 2;
+  }
   return 0;
 }
 

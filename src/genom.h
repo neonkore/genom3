@@ -129,8 +129,8 @@ idltype_s	scope_findtype(scope_s s, const char *name);
 int		scope_addtype(scope_s s, idltype_s t);
 int		scope_deltype(scope_s s, idltype_s t);
 int		scope_renametype(scope_s s, idltype_s t, const char *new);
-int		scope_firstype(scope_s s, hiter *i);
-int		scope_nextype(hiter *i);
+idltype_s	scope_firstype(scope_s s, hiter *i);
+idltype_s	scope_nextype(hiter *i);
 
 scope_s		scope_push(tloc l, const char *name, scopekind k);
 scope_s		scope_pop(void);
@@ -362,12 +362,18 @@ const char *	prop_strkind(propkind k);
 typedef struct comp_s *comp_s;
 typedef struct port_s *port_s;
 typedef struct service_s *service_s;
+typedef struct param_s *param_s;
 typedef enum portkind {
   PORT_INDATA,
   PORT_INEVENT,
   PORT_OUTDATA,
   PORT_OUTEVENT
 } portkind;
+
+comp_s		comp_active(void);
+comp_s		comp_first(void);
+comp_s		comp_next(comp_s c);
+comp_s		comp_get(const char *name);
 
 tloc		comp_loc(comp_s c);
 const char *	comp_name(comp_s c);
@@ -380,8 +386,6 @@ hash_s		comp_services(comp_s c);
 port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
 service_s	comp_service(comp_s c, const char *name);
-comp_s		comp_current(void);
-comp_s		comp_next(comp_s c);
 
 tloc		task_loc(task_s t);
 const char *	task_name(task_s t);
@@ -403,9 +407,10 @@ hash_s		service_props(service_s s);
 hash_s		service_params(service_s s);
 hash_s		service_fsm(service_s s);
 
+comp_s		tmpl_create(tloc l, const char *name, hash_s props);
 comp_s		comp_create(tloc l, const char *name, hash_s props);
 idltype_s	comp_addids(tloc l, scope_s s);
-int		comp_addattr(tloc l, hash_s attrs);
+int		comp_addattr(tloc l, param_s attr);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
 port_s		comp_addport(tloc l, portkind k, const char *name,
 			idltype_s t);
@@ -413,6 +418,7 @@ service_s	comp_addservice(tloc l, const char *name, hash_s params,
 			hash_s props);
 int		comp_addievs(tloc l, hash_s h);
 int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
+int		comp_applytmpl(void);
 
 void		task_destroy(task_s t);
 void		port_destroy(port_s p);
@@ -421,7 +427,6 @@ void		service_destroy(service_s s);
 
 /* --- codel --------------------------------------------------------------- */
 
-typedef struct param_s *param_s;
 typedef struct initer_s *initer_s;
 typedef enum pdir {
   P_NODIR,

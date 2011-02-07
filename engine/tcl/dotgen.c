@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -430,7 +430,7 @@ dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
 
   l = Tcl_NewListObj(0, NULL);
-  for(c = comp_current(); c; c = comp_next(c)) {
+  for(c = comp_first(); c; c = comp_next(c)) {
     if (p && !Tcl_StringMatch(comp_name(c), p)) continue;
 
     Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(comp_genref(c), -1));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -141,7 +141,7 @@ param_setdir(param_s p, pdir dir)
   int s;
   assert(p && p->dir == P_NODIR && !p->base && !p->port);
 
-  c = comp_current(); if (!c) {
+  c = comp_active(); if (!c) {
     parserror(p->loc, "missing component declaration before parameter '%s'",
 	      p->name);
     return EINVAL;
@@ -168,7 +168,7 @@ param_setdir(param_s p, pdir dir)
       }
       assert(k.k == CST_STRING);
       p->port = comp_port(c, k.s); if (!p->port) {
-	parserror(p->loc, "unknown port '%s'", p->name);
+	parserror(p->loc, "unknown port '%s'", k.s);
 	return errno = EINVAL;
       }
       p->base = port_type(p->port);

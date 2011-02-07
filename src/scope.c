@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -202,17 +202,19 @@ scope_renametype(scope_s s, idltype_s t, const char *new)
 
 /** Iterate over scope's types
  */
-int
+idltype_s
 scope_firstype(scope_s s, hiter *i)
 {
   assert(s);
-  return hash_first(s->idltypes, i);
+  if (hash_first(s->idltypes, i)) return NULL;
+  return i->value;
 }
 
-int
+idltype_s
 scope_nextype(hiter *i)
 {
-  return hash_next(i);
+  if (hash_next(i)) return NULL;
+  return i->value;
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -125,6 +125,7 @@ chartext	([^\'])|(\\.)
 "typedef"	{ return TYPEDEF; }
 
  /* GenoM keywords (can be identifiers as well depending on the context) */
+"template"	{ yylval->s = string(yytext); return TEMPLATE; }
 "component"	{ yylval->s = string(yytext); return COMPONENT; }
 "task"		{ yylval->s = string(yytext); return TASK; }
 "service"	{ yylval->s = string(yytext); return SERVICE; }

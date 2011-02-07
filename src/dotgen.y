@@ -92,14 +92,14 @@
 %token <s>	string_literal IDENTIFIER
 
 %token <s>	S MS US K M REAL_TIME
-%token <s>	COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT INOUT IDS
-%token <s>	ATTRIBUTE INPUT OUTPUT EVENT DATA VERSION LANG EMAIL
+%token <s>	TEMPLATE COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT
+%token <s>	INOUT IDS ATTRIBUTE INPUT OUTPUT EVENT DATA VERSION LANG EMAIL
 %token <s>	REQUIRE BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
 %token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 
 %type <i>	spec idlspec statement idldef idlstatement genomstatement
 
-%type <i>	component ids attribute port task service
+%type <i>	template component ids attribute port task service
 %type <pkind>	port_dir
 %type <type>	port_type
 %type <prop>	attr
@@ -170,7 +170,8 @@ idlstatement:
 ;
 
 genomstatement:
-  component ';'
+  template ';'
+  | component ';'
   | ids ';'
   | attribute ';'
   | port ';'
@@ -180,6 +181,22 @@ genomstatement:
 
 
 /* --- GenoM objects ------------------------------------------------------- */
+
+template:
+  TEMPLATE identifier '{' attr_list '}'
+  {
+    if (!$2 || !$4) {
+      if ($2) parserror(@1, "dropped '%s' component", $2);
+      if ($4) hash_destroy($4, 1);
+      break;
+    }
+    if (!tmpl_create(@1, $2, $4)) YYABORT;
+  }
+  | TEMPLATE identifier
+  {
+    if (!tmpl_create(@1, $2, NULL)) YYABORT;
+  }
+;
 
 component:
   COMPONENT identifier '{' attr_list '}'
@@ -235,9 +252,14 @@ ids:
 attribute:
   ATTRIBUTE nodir_param_list
   {
+    hiter i;
+
     if (!$2) { parserror(@1, "dropped '%s' property", $1); break; } else {
-      if (comp_addattr(@2, $2))
-	parserror(@1, "dropping '%s' property", $1);
+      for (hash_first($2, &i); i.current; hash_next(&i)) {
+	if (comp_addattr(@2, i.value))
+	  parserror(@1, "dropping '%s' attribute", param_name(i.value));
+      }
+      hash_destroy($2, 0);
     }
   }
 ;
@@ -257,16 +279,8 @@ task:
   }
   | TASK identifier
   {
-    hash_s h = hash_create("property list", 0);
-    if (!$2 || !h) {
-      if ($2) parserror(@1, "dropped '%s' task", $2);
-      if (h) hash_destroy(h);
-      break;
-    }
-    if (!comp_addtask(@1, $2, h)) {
+    if (!comp_addtask(@1, $2, NULL))
       parserror(@1, "dropped '%s' task", $2);
-      hash_destroy(h);
-    }
   }
 ;
 
@@ -287,13 +301,12 @@ service:
   }
   | SERVICE identifier '(' param_list ')'
   {
-    hash_s h = hash_create("property list", 0);
-    if (!$2 || !$4 || !h) {
+    if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' service", $2);
       if ($4) hash_destroy($4, 1);
       break;
     }
-    if (!comp_addservice(@1, $2, $4, h)) {
+    if (!comp_addservice(@1, $2, $4, NULL)) {
       parserror(@1, "dropped '%s' service", $2);
       hash_destroy($4, 1);
     }
@@ -444,6 +457,7 @@ validate:
   {
     $$ = codel_create(@1, $1, NULL, NULL, $3);
   }
+;
 
 codel:
   event_list ':' identifier '(' param_list ')' YIELD event_list
@@ -522,13 +536,18 @@ param:
   param_dir named_param
   {
     $$ = $2; if (!$2) break;
-    if (param_setdir($2, $1))
-      parserror(@2, "dropping initializer for '%s'", param_name($2));
+    if (param_setdir($2, $1)) {
+      parserror(@2, "dropping parameter '%s'", param_name($2));
+      $$ = NULL;
+    }
   }
   | param_dir named_param '=' initializer
   {
     $$ = $2; if (!$2 || !$4) break;
-    if (param_setdir($2, $1) || param_setinitv(@4, $2, $4))
+    if (param_setdir($2, $1)) {
+      parserror(@2, "dropping parameter '%s'", param_name($2));
+      $$ = NULL;
+    } else if (param_setinitv(@4, $2, $4))
       parserror(@3, "dropping initializer for '%s'", param_name($2));
   }
 ;
@@ -537,13 +556,18 @@ nodir_param:
   named_param
   {
     $$ = $1; if (!$1) break;
-    if (param_setdir($1, P_INOUT))
-      parserror(@1, "dropping initializer for '%s'", param_name($1));
+    if (param_setdir($1, P_INOUT)) {
+      parserror(@1, "dropping parameter '%s'", param_name($1));
+      $$ = NULL;
+    }
   }
   | named_param '=' initializer
   {
     $$ = $1; if (!$1 || !$3) break;
-    if (param_setdir($1, P_INOUT) || param_setinitv(@3, $1, $3))
+    if (param_setdir($1, P_INOUT)) {
+      parserror(@1, "dropping parameter '%s'", param_name($1));
+      $$ = NULL;
+    } else if (param_setinitv(@3, $1, $3))
       parserror(@1, "dropping initializer for '%s'", param_name($1));
   }
 ;
@@ -1183,7 +1207,7 @@ scope_push_union: identifier
 
 scope_push_ids: IDS
   {
-    comp_s c = comp_current();
+    comp_s c = comp_active();
     if (c) {
       idltype_s ids = comp_ids(c);
       if (ids) {
@@ -1513,7 +1537,7 @@ size_unit:
 
 identifier:
   IDENTIFIER | S | MS | US | K | M | REAL_TIME
-  | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
+  | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
   | BUILDREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
   | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
   | AFTER | EVENT | DATA | INPORT | OUTPORT | IN | OUT | INOUT

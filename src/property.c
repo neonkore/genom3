@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -202,7 +202,7 @@ prop_newtask(tloc l, const char *name)
   task_s t;
   prop_s p;
 
-  t = comp_task(comp_current(), name);
+  t = comp_task(comp_active(), name);
   if (!t) {
     parserror(l, "unknown task '%s'", name);
     return NULL;
@@ -340,7 +340,10 @@ prop_merge(hash_s p, hash_s m)
 	  e = hash_insert(iev, j.key, string(j.key), NULL);
 	  if (e) break;
 	}
-	if (comp_addievs(prop_loc(i.value), iev)) e = errno;
+	if (comp_addievs(prop_loc(i.value), iev))
+	  e = errno;
+	else
+	  ((prop_s)i.value)->hash = iev;
 	break;
 
       case PROP_IDS:

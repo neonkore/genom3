@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -436,7 +436,6 @@ typedef enum pdir {
 
 tloc		codel_loc(codel_s c);
 const char *	codel_name(codel_s c);
-idltype_s	codel_return(codel_s c);
 hash_s		codel_params(codel_s c);
 hash_s		codel_triggers(codel_s c);
 hash_s		codel_yields(codel_s c);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -261,7 +261,12 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case codelidx_return:
-      r = Tcl_NewStringObj(type_genref(codel_return(c)), -1);
+      if (*codel_task(c))
+	r = Tcl_NewStringObj(
+	  type_genref(comp_eventtype(task_comp(*codel_task(c)))), -1);
+      else if (*codel_service(c))
+	r = Tcl_NewStringObj(
+	  type_genref(comp_eventtype(service_comp(*codel_service(c)))), -1);
       break;
 
     case codelidx_params: {

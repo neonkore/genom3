@@ -315,31 +315,75 @@ prop_destroy(prop_s p)
 
 /* --- prop_merge ---------------------------------------------------------- */
 
-/** Merge two lists of properties into the first one. Destroy second hash.
+/** Merge two lists of properties into the first one.
  */
 int
 prop_merge(hash_s p, hash_s m)
 {
   hiter i, j;
+  hash_s iev;
   prop_s q;
-  int e;
+  param_s attr;
+  int e = 0;
 
   if (!m) return 0;
   assert(p);
 
   for(hash_first(m, &i); i.current; hash_next(&i)) {
-    e = hash_insert(p, i.key, i.value, (hrelease_f)prop_destroy);
+    /* some properties must be recreated for current component */
+    switch (prop_kind(i.value)) {
+      case PROP_THROWS:
+	iev = hash_create("enumerator list", 0);
+	if (!iev) { e = errno; break; }
+
+	for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
+	  e = hash_insert(iev, j.key, string(j.key), NULL);
+	  if (e) break;
+	}
+	if (comp_addievs(prop_loc(i.value), iev)) e = errno;
+	break;
+
+      case PROP_IDS:
+	if (!comp_addids(type_loc(prop_type(i.value)),
+			 type_membersscope(prop_type(i.value))))
+	  e |= errno;
+	break;
+
+      case PROP_ATTRIBUTE:
+	for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
+	  attr = param_clone(j.value);
+	  if (!attr || comp_addattr(prop_loc(i.value), attr)) {
+	    e = errno; break;
+	  }
+	}
+	break;
+
+      case PROP_VALIDATE:
+      case PROP_CODEL:
+	((prop_s)i.value)->codel = codel_clone(prop_codel(i.value));
+	if (!((prop_s)i.value)->codel) e = errno;
+	break;
+
+      default: break;
+    }
+    if (e) break;
+
+    e = hash_insert(p, i.key, i.value, NULL);
     /* property might already exist */
     if (e == EEXIST) {
       q = hash_find(p, i.key); assert(q);
       /* some properties can be merged */
       switch(prop_kind(i.value)) {
-	case PROP_THROWS:
-	  for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
+	case PROP_THROWS: {
+	  for(hash_first(iev, &j); j.current; hash_next(&j)) {
 	    e = hash_insert(prop_hash(q), j.key, j.value, NULL);
 	    if (e && e != EEXIST) break; else e = 0;
 	  }
 	  break;
+	}
+
+	case PROP_IDS: /* handled above */
+	case PROP_ATTRIBUTE: e = 0; break;
 
 	default:
 	  parserror(prop_loc(i.value), "duplicate attribute '%s'", i.key);
@@ -348,20 +392,8 @@ prop_merge(hash_s p, hash_s m)
       }
     }
 
-    switch(prop_kind(i.value)) {
-      case PROP_THROWS:
-	e = comp_addievs(prop_loc(i.value), prop_hash(i.value));
-	break;
-      default: break;
-    }
-
     if (e) break;
   }
-
-  /* destroy merged hash but keep properties */
-  for(hash_first(m, &i); i.current; hash_first(m, &i))
-    hash_remove(m, i.key, 0/*release*/);
-  hash_destroy(m);
 
   return e;
 }

@@ -93,6 +93,40 @@ param_new(tloc l, const char *name, clist_s member)
 }
 
 
+/* --- param_clone --------------------------------------------------------- */
+
+/** clone a parameter
+ */
+param_s
+param_clone(param_s param)
+{
+  param_s p;
+  assert(param);
+
+  p = malloc(sizeof(*p));
+  if (!p) {
+    warnx("memory exhausted, cannot store parameter '%s'", param_name(param));
+    return NULL;
+  }
+  p->loc = param_loc(param);
+  p->dir = P_NODIR;
+  p->name = param_name(param);
+  p->member = param_member(param);
+
+  p->base = NULL;
+  p->type = NULL;
+  p->port = NULL;
+  p->init = NULL;
+
+  if (param_dir(param) != P_NODIR &&
+      param_setdir(p, param_dir(param))) return NULL;
+  if (param_setinitv(param_loc(param), p, param_initer(param)))
+
+  xwarnx("created parameter %s", p->name);
+  return p;
+}
+
+
 /* --- param_setdir -------------------------------------------------------- */
 
 /** set parameter direction. This function is a bit more complex than it seems,
@@ -166,7 +200,8 @@ int
 param_setinitv(tloc l, param_s p, initer_s i)
 {
   int s;
-  assert(p && i && !p->init);
+  assert(p && !p->init);
+  if (!i) return 0;
 
   s = initer_matchtype(l, p->type, i);
   if (s) return s;

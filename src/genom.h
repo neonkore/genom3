@@ -464,6 +464,7 @@ codel_s		codel_clone(codel_s codel);
 hash_s		codel_fsmcreate(tloc l, hash_s props);
 
 param_s		param_new(tloc l, const char *name, clist_s member);
+param_s		param_clone(param_s param);
 void		param_destroy(param_s p);
 int		param_setdir(param_s p, pdir dir);
 int		param_setinitv(tloc l, param_s p, initer_s i);

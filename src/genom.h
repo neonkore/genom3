@@ -460,6 +460,7 @@ initer_s	initer_next(initer_s i);
 
 codel_s		codel_create(tloc l, const char *name, hash_s triggers,
 			hash_s yields, hash_s params);
+codel_s		codel_clone(codel_s codel);
 hash_s		codel_fsmcreate(tloc l, hash_s props);
 
 param_s		param_new(tloc l, const char *name, clist_s member);

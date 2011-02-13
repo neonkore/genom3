@@ -98,6 +98,73 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
 }
 
 
+/* --- codel_clone --------------------------------------------------------- */
+
+/** clone a codel
+ */
+codel_s
+codel_clone(codel_s codel)
+{
+  codel_s c;
+  param_s p;
+  hiter i;
+  assert(codel);
+
+  c = malloc(sizeof(*c));
+  if (!c) {
+    warnx("memory exhausted, cannot create codel '%s'", codel_name(codel));
+    return NULL;
+  }
+  c->loc = codel_loc(codel);
+  c->name = codel_name(codel);
+
+  c->params = hash_create("parameter list", 0);
+  if (!c->params) { free(c); return NULL; }
+  for(hash_first(codel_params(codel), &i); i.current; hash_next(&i)) {
+    p = param_clone(i.value);
+    if (!p) { hash_destroy(c->params, 1); free(c); return NULL; }
+
+    if (hash_insert(c->params, param_name(p), p, (hrelease_f)param_destroy)) {
+      hash_destroy(c->params, 1); free(c); return NULL;
+    }
+  }
+
+  c->yields = hash_create("yields list", 0);
+  for(hash_first(codel_yields(codel), &i); i.current; hash_next(&i)) {
+    if (hash_insert(c->yields, i.key, string(i.key), NULL)) {
+      hash_destroy(c->yields, 1); hash_destroy(c->params, 1); free(c);
+      return NULL;
+    }
+  }
+
+  c->triggers = hash_create("triggers list", 0);
+  for(hash_first(codel_triggers(codel), &i); i.current; hash_next(&i)) {
+    if (hash_insert(c->triggers, i.key, string(i.key), NULL)) {
+      hash_destroy(c->triggers, 1); hash_destroy(c->yields, 1);
+      hash_destroy(c->params, 1); free(c); return NULL;
+    }
+  }
+
+  if (codel->task)
+    c->task = comp_task(comp_active(), task_name(codel->task));
+  else
+    c->task = NULL;
+  if (codel->service)
+    c->service = comp_service(comp_active(), service_name(codel->service));
+  else
+    c->service = NULL;
+
+  /* register internal events */
+  if (comp_addievs(c->loc, c->yields) || comp_addievs(c->loc, c->triggers)) {
+    free(c);
+    return NULL;
+  }
+
+  xwarnx("created codel %s", c->name);
+  return c;
+}
+
+
 /* --- codel_fsmcreate ----------------------------------------------------- */
 
 /** Build a fsm hash from existing codels in a list of properties

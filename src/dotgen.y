@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -186,7 +186,7 @@ component:
   {
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' component", $2);
-      if ($4) hash_destroy($4);
+      if ($4) hash_destroy($4, 1);
       break;
     }
     if (!comp_create(@1, $2, $4)) YYABORT;
@@ -247,12 +247,12 @@ task:
   {
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' task", $2);
-      if ($4) hash_destroy($4);
+      if ($4) hash_destroy($4, 1);
       break;
     }
     if (!comp_addtask(@1, $2, $4)) {
       parserror(@1, "dropped '%s' task", $2);
-      hash_destroy($4);
+      hash_destroy($4, 1);
     }
   }
   | TASK identifier
@@ -275,14 +275,14 @@ service:
   {
     if (!$2 || !$4 || !$7) {
       if ($2) parserror(@1, "dropped '%s' service", $2);
-      if ($4) hash_destroy($4);
-      if ($7) hash_destroy($7);
+      if ($4) hash_destroy($4, 1);
+      if ($7) hash_destroy($7, 1);
       break;
     }
     if (!comp_addservice(@1, $2, $4, $7)) {
       parserror(@1, "dropped '%s' service", $2);
-      hash_destroy($4);
-      hash_destroy($7);
+      hash_destroy($4, 1);
+      hash_destroy($7, 1);
     }
   }
   | SERVICE identifier '(' param_list ')'
@@ -290,14 +290,12 @@ service:
     hash_s h = hash_create("property list", 0);
     if (!$2 || !$4 || !h) {
       if ($2) parserror(@1, "dropped '%s' service", $2);
-      if ($4) hash_destroy($4);
-      if (h) hash_destroy(h);
+      if ($4) hash_destroy($4, 1);
       break;
     }
     if (!comp_addservice(@1, $2, $4, h)) {
       parserror(@1, "dropped '%s' service", $2);
-      hash_destroy($4);
-      hash_destroy(h);
+      hash_destroy($4, 1);
     }
   }
 ;
@@ -459,8 +457,8 @@ codel:
   {
     $$ = NULL;
     parserror(@1, "missing 'yield' values for codel %s", $3);
-    if ($1) hash_destroy($1);
-    if ($5) hash_destroy($5);
+    if ($1) hash_destroy($1, 1);
+    if ($5) hash_destroy($5, 1);
   }
 ;
 
@@ -874,7 +872,7 @@ enum_type: ENUM identifier '{' enumerator_list '}'
 	hiter i;
 	for(hash_first($4, &i); i.current; hash_next(&i))
 	  type_destroy(i.value);
-	hash_destroy($4);
+	hash_destroy($4, 1);
       }
       parserror(@1, "dropped declaration for '%s'", $2);
     }

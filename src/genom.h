@@ -92,7 +92,7 @@ typedef struct hiter {
 } hiter;
 
 hash_s	hash_create(const char *name, int entries);
-void	hash_destroy(hash_s h);
+void	hash_destroy(hash_s h, int release);
 int	hash_insert(hash_s h, const char *key, void *value,
 		hrelease_f release);
 int	hash_set(hash_s h, const char *key, void *value);

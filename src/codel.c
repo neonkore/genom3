@@ -136,7 +136,7 @@ codel_fsmcreate(tloc l, hash_s props)
 	      break;
 
 	    default:
-	      hash_destroy(h);
+	      hash_destroy(h, 1);
 	      return NULL;
 	  }
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -101,7 +101,7 @@ hash_create(const char *name, int entries)
  */
 
 void
-hash_destroy(hash_s h)
+hash_destroy(hash_s h, int release)
 {
   int i;
   hentry_s e;
@@ -114,7 +114,7 @@ hash_destroy(hash_s h)
       h->bucket[i] = e->next;
 
       free((char *)e->key);
-      if (e->release) e->release(e->value);
+      if (release && e->release) e->release(e->value);
       free(e);
     }
 

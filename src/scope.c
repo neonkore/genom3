@@ -343,12 +343,12 @@ scope_destroy(scope_s s)
   /* destroy registered types */
   for(hash_first(s->idltypes, &i); i.current; hash_next(&i))
     type_destroy(i.value);
-  hash_destroy(s->idltypes);
+  hash_destroy(s->idltypes, 1);
 
   /* remove from children */
   for(hash_first(s->children, &i); i.current; hash_next(&i))
     ((scope_s)i.value)->parent = NULL;
-  hash_destroy(s->children);
+  hash_destroy(s->children, 1);
 
   xwarnx("destroyed %s scope", s->fullname[0]?s->fullname:"global");
   free(s);
@@ -389,7 +389,7 @@ scope_new(tloc l, const char *name, const char *pname)
 	    s->fullname[0]?s->fullname:"global", " scope", NULL),
     2);
   if (!s->children) {
-    hash_destroy(s->idltypes);
+    hash_destroy(s->idltypes, 1);
     free(s);
     warnx("memory exhausted, cannot create %s scope", name[0]?name:"global");
     errno = ENOMEM;

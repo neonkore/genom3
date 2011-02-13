@@ -200,14 +200,14 @@ comp_create(tloc l, const char *name, hash_s props)
   }
   c->ports = hash_create(strings(name, " ports", NULL), 2);
   if (!c->ports) {
-    hash_destroy(c->tasks);
+    hash_destroy(c->tasks, 1);
     free(c);
     return NULL;
   }
   c->services = hash_create(strings(name, " services", NULL), 2);
   if (!c->services) {
-    hash_destroy(c->tasks);
-    hash_destroy(c->ports);
+    hash_destroy(c->tasks, 1);
+    hash_destroy(c->ports, 1);
     free(c);
     return NULL;
   }
@@ -749,7 +749,7 @@ void
 task_destroy(task_s t)
 {
   if (t) {
-    hash_destroy(t->props);
+    hash_destroy(t->props, 1);
     free(t);
   }
 }
@@ -774,8 +774,8 @@ void
 service_destroy(service_s s)
 {
   if (s) {
-    hash_destroy(s->props);
-    hash_destroy(s->params);
+    hash_destroy(s->props, 1);
+    hash_destroy(s->params, 1);
     free(s);
   }
 }

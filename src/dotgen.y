@@ -225,7 +225,7 @@ port:
 	break;
       }
     }
-    if (!comp_addport(@1, $1, $5, $3))
+    if (!port_new(@1, $1, $5, $3))
       parserror(@1, "dropped '%s' port", $5);
   }
 ;

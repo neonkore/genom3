@@ -363,12 +363,6 @@ typedef struct comp_s *comp_s;
 typedef struct port_s *port_s;
 typedef struct service_s *service_s;
 typedef struct param_s *param_s;
-typedef enum portkind {
-  PORT_INDATA,
-  PORT_INEVENT,
-  PORT_OUTDATA,
-  PORT_OUTEVENT
-} portkind;
 
 comp_s		comp_active(void);
 comp_s		comp_first(void);
@@ -393,13 +387,6 @@ comp_s		task_comp(task_s t);
 hash_s		task_props(task_s t);
 hash_s		task_fsm(task_s t);
 
-tloc		port_loc(port_s p);
-const char *	port_name(port_s p);
-portkind	port_kind(port_s p);
-comp_s		port_comp(port_s p);
-idltype_s	port_type(port_s p);
-const char *	port_strkind(portkind k);
-
 tloc		service_loc(service_s s);
 const char *	service_name(service_s s);
 comp_s		service_comp(service_s s);
@@ -412,8 +399,6 @@ comp_s		comp_create(tloc l, const char *name, hash_s props);
 idltype_s	comp_addids(tloc l, scope_s s);
 int		comp_addattr(tloc l, param_s attr);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
-port_s		comp_addport(tloc l, portkind k, const char *name,
-			idltype_s t);
 service_s	comp_addservice(tloc l, const char *name, hash_s params,
 			hash_s props);
 int		comp_addievs(tloc l, hash_s h);
@@ -421,8 +406,27 @@ int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
 int		comp_applytmpl(void);
 
 void		task_destroy(task_s t);
-void		port_destroy(port_s p);
 void		service_destroy(service_s s);
+
+
+/* --- port ---------------------------------------------------------------- */
+
+typedef enum portkind {
+  PORT_INDATA,
+  PORT_INEVENT,
+  PORT_OUTDATA,
+  PORT_OUTEVENT
+} portkind;
+
+port_s		port_new(tloc l, portkind k, const char *name, idltype_s t);
+void		port_destroy(port_s p);
+
+tloc		port_loc(port_s p);
+const char *	port_name(port_s p);
+portkind	port_kind(port_s p);
+comp_s		port_comp(port_s p);
+idltype_s	port_type(port_s p);
+const char *	port_strkind(portkind k);
 
 
 /* --- codel --------------------------------------------------------------- */

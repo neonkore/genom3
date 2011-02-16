@@ -83,21 +83,6 @@ comp_s		task_comp(task_s t) { assert(t); return t->component; }
 hash_s		task_props(task_s t) { assert(t); return t->props; }
 hash_s		task_fsm(task_s t) { assert(t); return t->fsm; }
 
-struct port_s {
-  tloc loc;
-  portkind kind;
-  const char *name;
-  comp_s component;
-  idltype_s type;
-};
-
-tloc		port_loc(port_s p) { assert(p); return p->loc; }
-const char *	port_name(port_s p) { assert(p); return p->name; }
-portkind	port_kind(port_s p) { assert(p); return p->kind; }
-comp_s		port_comp(port_s p) { assert(p); return p->component; }
-idltype_s	port_type(port_s p) { assert(p); return p->type; }
-
-
 struct service_s {
   tloc loc;
   const char *name;
@@ -600,57 +585,6 @@ comp_addtask(tloc l, const char *name, hash_s props)
 }
 
 
-/* --- comp_addport -------------------------------------------------------- */
-
-/** create a port in component
- */
-port_s
-comp_addport(tloc l, portkind k, const char *name, idltype_s t)
-{
-  comp_s c;
-  port_s p;
-  int e;
-  assert(name);
-
-  /* a component must exist */
-  c = comp_active();
-  if (!c) {
-    parserror(l, "missing component declaration before port %s", name);
-    return NULL;
-  }
-
-  /* create */
-  p = malloc(sizeof(*p));
-  if (!p) {
-    warnx("memory exhausted, cannot create port");
-    return NULL;
-  }
-
-  p->loc = l;
-  p->kind = k;
-  p->name = string(name);
-  p->component = c;
-  p->type = t;
-
-  e = hash_insert(c->ports, p->name, p, (hrelease_f)port_destroy);
-  switch(e) {
-    case 0: break;
-
-    case EEXIST:
-      parserror(l, "duplicate port %s", p->name);
-      port_s u = hash_find(c->ports, name);
-      if (u) parserror(u->loc, " port %s declared here", u->name);
-      /*FALLTHROUGH*/
-    default:
-      free(p);
-      return NULL;
-  }
-
-  xwarnx("created port %s", p->name);
-  return p;
-}
-
-
 /* --- comp_addservice ----------------------------------------------------- */
 
 /** create a service in component
@@ -826,25 +760,6 @@ comp_strkind(compkind k)
 }
 
 
-/* --- port_strkind -------------------------------------------------------- */
-
-/** Return a port kind as a string
- */
-const char *
-port_strkind(portkind k)
-{
-  switch(k) {
-    case PORT_INDATA:	return "data in";
-    case PORT_INEVENT:	return "event in";
-    case PORT_OUTDATA:	return "data out";
-    case PORT_OUTEVENT:	return "event out";
-  }
-
-  assert(0);
-  return NULL;
-}
-
-
 /* --- task_destroy -------------------------------------------------------- */
 
 /** destroy task
@@ -856,17 +771,6 @@ task_destroy(task_s t)
     hash_destroy(t->props, 1);
     free(t);
   }
-}
-
-
-/* --- port_destroy -------------------------------------------------------- */
-
-/** destroy port
- */
-void
-port_destroy(port_s p)
-{
-  if (p) free(p);
 }
 
 
@@ -1027,8 +931,8 @@ comp_applytmpl()
       e = prop_merge(comp_props(c), comp_props(t));
 
       for(hash_first(comp_ports(t), &i); i.current; hash_next(&i)) {
-	if (!comp_addport(port_loc(i.value), port_kind(i.value),
-			  port_name(i.value), port_type(i.value))) e = 1;
+	if (!port_new(port_loc(i.value), port_kind(i.value),
+		      port_name(i.value), port_type(i.value))) e = 1;
       }
 
       for(hash_first(comp_tasks(t), &i); i.current; hash_next(&i)) {

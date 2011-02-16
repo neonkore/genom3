@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2010 LAAS/CNRS
+# Copyright (c) 2009-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -27,6 +27,7 @@ genom3_SOURCES=\
 	hash.c		\
 	property.c	\
 	component.c	\
+	port.c		\
 	codel.c		\
 	parameter.c	\
 	initializer.c	\

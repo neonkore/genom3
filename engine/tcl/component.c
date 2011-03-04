@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -199,38 +199,30 @@ static Tcl_Obj *
 port_list(Tcl_Interp *interp, comp_s c, Tcl_Obj * const dfilter[],
 	  unsigned int ndfilter)
 {
-  static const char *dirarg[] = {
-    [PORT_INDATA] = "indata",	[PORT_OUTDATA] = "outdata",
-    [PORT_INEVENT] = "inevent",	[PORT_OUTEVENT] = "outevent",
-    NULL
+  static const struct { char *opt; portkind k; } dirarg[] = {
+    { "in", PORT_IN },	{ "out", PORT_OUT },
+    { "data", PORT_DATA }, { "event", PORT_EVENT },
+    { "static", PORT_STATIC }, { "array", PORT_ARRAY },
+    { NULL }
   };
 
   hiter i;
-  int d = -1, f;
+  int k, d = -1, f;
   int s;
 
   Tcl_Obj *r = Tcl_NewListObj(0, NULL);
 
+  for(f = k = 0; f < ndfilter; f++) {
+    s = Tcl_GetIndexFromObjStruct(
+      interp, dfilter[f], dirarg, sizeof(dirarg[0]), "filter", 0, &d);
+    if (s != TCL_OK) return NULL;
+    k |= dirarg[d].k;
+  }
+
   for(hash_first(comp_ports(c), &i); i.current; hash_next(&i)) {
-    switch(ndfilter) {
-      case 0:
-	Tcl_ListObjAppendElement(
-	  interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
-	break;
-
-      default:
-	for(f = 0; f < ndfilter; f++) {
-	  s = Tcl_GetIndexFromObj(
-	    interp, dfilter[f], dirarg, "direction", 0, &d);
-	  if (s != TCL_OK) return NULL;
-
-	  if (d == port_kind(i.value)) {
-	    Tcl_ListObjAppendElement(
-	      interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
-	    break;
-	  }
-	}
-	break;
+    if ((port_kind(i.value) & k) == k) {
+      Tcl_ListObjAppendElement(
+	interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
     }
   }
 

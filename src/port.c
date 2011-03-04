@@ -61,6 +61,9 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
   int e;
   assert(name);
 
+  /* kind must be well formed */
+  assert((k & PORT_DIRMSK) && (k & PORT_CATMSK) && (k & PORT_FLGMSK));
+
   /* a component must exist */
   c = comp_active();
   if (!c) {
@@ -95,7 +98,7 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
       return NULL;
   }
 
-  xwarnx("created port %s", p->name);
+  xwarnx("created %s port %s", port_strkind(k), p->name);
   return p;
 }
 
@@ -119,10 +122,17 @@ const char *
 port_strkind(portkind k)
 {
   switch(k) {
-    case PORT_INDATA:	return "data in";
-    case PORT_INEVENT:	return "event in";
-    case PORT_OUTDATA:	return "data out";
-    case PORT_OUTEVENT:	return "event out";
+    case PORT_IN|PORT_DATA|PORT_STATIC:		return "data in";
+    case PORT_IN|PORT_EVENT|PORT_STATIC:	return "event in";
+    case PORT_OUT|PORT_DATA|PORT_STATIC:	return "data out";
+    case PORT_OUT|PORT_EVENT|PORT_STATIC:	return "event out";
+
+    case PORT_IN|PORT_DATA|PORT_ARRAY:		return "data in array";
+    case PORT_IN|PORT_EVENT|PORT_ARRAY:		return "event in array";
+    case PORT_OUT|PORT_DATA|PORT_ARRAY:		return "data out array";
+    case PORT_OUT|PORT_EVENT|PORT_ARRAY:	return "event out array";
+
+    default: break;
   }
 
   assert(0);

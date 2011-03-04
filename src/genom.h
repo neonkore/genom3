@@ -412,10 +412,17 @@ void		service_destroy(service_s s);
 /* --- port ---------------------------------------------------------------- */
 
 typedef enum portkind {
-  PORT_INDATA,
-  PORT_INEVENT,
-  PORT_OUTDATA,
-  PORT_OUTEVENT
+  PORT_IN =	0x1,
+  PORT_OUT =	0x2,
+  PORT_DIRMSK =	0xf,
+
+  PORT_DATA =	0x10,
+  PORT_EVENT =	0x20,
+  PORT_CATMSK =	0xf0,
+
+  PORT_STATIC =	0x100,
+  PORT_ARRAY =	0x200,
+  PORT_FLGMSK =	0xf00
 } portkind;
 
 port_s		port_new(tloc l, portkind k, const char *name, idltype_s t);
@@ -424,6 +431,9 @@ void		port_destroy(port_s p);
 tloc		port_loc(port_s p);
 const char *	port_name(port_s p);
 portkind	port_kind(port_s p);
+#define		port_dir(p)	(port_kind(p) & PORT_DIRMSK)
+#define		port_cat(p)	(port_kind(p) & PORT_CATMSK)
+#define		port_flag(p)	(port_kind(p) & PORT_FLGMSK)
 comp_s		port_comp(port_s p);
 idltype_s	port_type(port_s p);
 const char *	port_strkind(portkind k);
@@ -458,6 +468,7 @@ clist_s		param_member(param_s p);
 idltype_s	param_base(param_s p);
 idltype_s	param_type(param_s p);
 port_s		param_port(param_s p);
+param_s		param_index(param_s p);
 initer_s	param_initer(param_s p);
 
 unsigned int	initer_index(initer_s i);
@@ -472,9 +483,12 @@ codel_s		codel_create(tloc l, const char *name, hash_s triggers,
 codel_s		codel_clone(codel_s codel);
 hash_s		codel_fsmcreate(tloc l, hash_s props);
 
-param_s		param_new(tloc l, const char *name, clist_s member);
+param_s		param_newids(tloc l, const char *name, const char *member);
+param_s		param_newport(tloc l, const char *name, param_s index);
 param_s		param_clone(param_s param);
 void		param_destroy(param_s p);
+int		param_setname(param_s p, const char *name);
+int		param_setmember(param_s p, cval m);
 int		param_setdir(param_s p, pdir dir);
 int		param_setinitv(tloc l, param_s p, initer_s i);
 initer_s	param_typeiniter(param_s p, idltype_s t);

@@ -100,15 +100,17 @@
 %type <i>	spec idlspec statement idldef idlstatement genomstatement
 
 %type <i>	template component ids attribute port task service
-%type <pkind>	port_dir
+%type <pkind>	port_dir port_kind port_array
 %type <type>	port_type
 %type <prop>	attr
-%type <hash>	attr_list param_list nodir_param_list
+%type <hash>	attr_list param_list inited_ids_member_list
 %type <initer>	initializer_value initializer initializer_list
 %type <codel>	validate codel
-%type <param>	param named_param nodir_param
-%type <vlist>	param_member
-%type <pdir>	param_dir
+%type <param>	param
+%type <param>	inited_ids_member named_ids_member ids_member
+%type <param>	inited_port_member named_port_member port_member
+%type <v>	param_member
+%type <pdir>	ids_param_dir port_param_dir
 
 %type <i>	module
 %type <type>	const_dcl const_type
@@ -215,28 +217,33 @@ component:
 ;
 
 port:
-  port_dir '<' port_type '>' identifier
+  port_dir port_kind '<' port_type '>' identifier port_array
   {
-    if (!$5) { parserror(@1, "dropped port"); break; }
-    if (!$3) {
-      if ($1 == PORT_INDATA || $1 == PORT_OUTDATA) {
-	parserror(@1, "%s port '%s' port cannot be void",
-		  port_strkind($1), $5);
-	break;
-      }
+    if (!$6) { parserror(@1, "dropped port"); break; }
+    if (!$4 && $2 == PORT_DATA) {
+      parserror(@1, "%s port '%s' port cannot be void", port_strkind($1), $6);
+      break;
     }
-    if (!port_new(@1, $1, $5, $3))
-      parserror(@1, "dropped '%s' port", $5);
+    if (!port_new(@1, $1|$2|$7, $6, $4))
+      parserror(@1, "dropped '%s' port", $6);
   }
 ;
 
 port_type: type_spec | /* empty */ { $$ = NULL; };
 
 port_dir:
-    INPORT DATA		{ $$ = PORT_INDATA; }
-  | INPORT EVENT	{ $$ = PORT_INEVENT; }
-  | OUTPORT DATA	{ $$ = PORT_OUTDATA; }
-  | OUTPORT EVENT	{ $$ = PORT_OUTEVENT; }
+    INPORT	{ $$ = PORT_IN; }
+  | OUTPORT	{ $$ = PORT_OUT; }
+;
+
+port_array:
+  /* empty */	{ $$ = PORT_STATIC; }
+  | '[' ']'	{ $$ = PORT_ARRAY; }
+;
+
+port_kind:
+    DATA	{ $$ = PORT_DATA; }
+  | EVENT	{ $$ = PORT_EVENT; }
 ;
 
 ids:
@@ -250,12 +257,13 @@ ids:
   }
 
 attribute:
-  ATTRIBUTE nodir_param_list
+  ATTRIBUTE inited_ids_member_list
   {
     hiter i;
 
     if (!$2) { parserror(@1, "dropped '%s' property", $1); break; } else {
       for (hash_first($2, &i); i.current; hash_next(&i)) {
+	param_setdir(i.value, P_INOUT);
 	if (comp_addattr(@2, i.value))
 	  parserror(@1, "dropping '%s' attribute", param_name(i.value));
       }
@@ -507,8 +515,21 @@ param_list:
   }
 ;
 
-nodir_param_list:
-  nodir_param
+param:
+  ids_param_dir inited_ids_member
+  {
+    if ($2 && param_setdir($2, $1)) { $$ = NULL; break; }
+    $$ = $2;
+  }
+  | port_param_dir inited_port_member
+  {
+    if ($2 && param_setdir($2, $1)) { $$ = NULL; break; }
+    $$ = $2;
+  }
+;
+
+inited_ids_member_list:
+  inited_ids_member
   {
     $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
     switch(hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
@@ -519,7 +540,7 @@ nodir_param_list:
       default: param_destroy($1); break;
     }
   }
-  | nodir_param_list ',' nodir_param
+  | inited_ids_member_list ',' inited_ids_member
   {
     $$ = $1; if (!$3) break;
     switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
@@ -532,100 +553,95 @@ nodir_param_list:
   }
 ;
 
-param:
-  param_dir named_param
-  {
-    $$ = $2; if (!$2) break;
-    if (param_setdir($2, $1)) {
-      parserror(@2, "dropping parameter '%s'", param_name($2));
-      $$ = NULL;
-    }
-  }
-  | param_dir named_param '=' initializer
-  {
-    $$ = $2; if (!$2 || !$4) break;
-    if (param_setdir($2, $1)) {
-      parserror(@2, "dropping parameter '%s'", param_name($2));
-      $$ = NULL;
-    } else if (param_setinitv(@4, $2, $4))
-      parserror(@3, "dropping initializer for '%s'", param_name($2));
-  }
-;
-
-nodir_param:
-  named_param
-  {
-    $$ = $1; if (!$1) break;
-    if (param_setdir($1, P_INOUT)) {
-      parserror(@1, "dropping parameter '%s'", param_name($1));
-      $$ = NULL;
-    }
-  }
-  | named_param '=' initializer
+inited_ids_member:
+  named_ids_member
+  | named_ids_member '=' initializer
   {
     $$ = $1; if (!$1 || !$3) break;
-    if (param_setdir($1, P_INOUT)) {
-      parserror(@1, "dropping parameter '%s'", param_name($1));
-      $$ = NULL;
-    } else if (param_setinitv(@3, $1, $3))
-      parserror(@1, "dropping initializer for '%s'", param_name($1));
+    if (param_setinitv(@3, $1, $3)) { $$ = NULL; break; }
   }
 ;
 
-named_param:
-  param_member
+named_ids_member:
+  ids_member
+  | ids_member COLONCOLON identifier
   {
-    const char *n = NULL;
-    citer i;
-    if (!$1) { $$ = NULL; break; }
-    for (clist_first($1, &i); i.value; clist_next(&i))
-      if (i.value->k == CST_STRING) n = i.value->s;
-    if (!n) { $$ = NULL; clist_destroy($1); break; }
+    if (param_setname($1, $3)) { $$ = NULL; break; }
+    $$ = $1;
+  }
+  | COLONCOLON identifier
+  {
+    $$ = param_newids(@1, $2, NULL);
+  }
+;
 
-    $$ = param_new(@1, n, $1);
-  }
-  | param_member COLONCOLON identifier
+ids_member:
+  identifier
   {
-    if (!$1 || !$3) { $$ = NULL; break; }
-    $$ = param_new(@1, $3, $1);
+    $$ = param_newids(@1, $1, $1);
   }
-  | /* empty */ COLONCOLON identifier
+  | ids_member param_member
   {
-    if (!$2) { $$ = NULL; break; }
-    $$ = param_new(@2, $2, NULL);
+    $$ = $1;
+    if ($$ && param_setmember($1, $2)) $$ = NULL;
+  }
+;
+
+inited_port_member:
+  named_port_member
+  | named_port_member '=' initializer
+  {
+    $$ = $1; if (!$1 || !$3) break;
+    if (param_setinitv(@3, $1, $3)) { $$ = NULL; break; }
+  }
+;
+
+named_port_member:
+  port_member
+  | port_member COLONCOLON identifier
+  {
+    if ($1 && param_setname($1, $3)) { $$ = NULL; break; }
+    $$ = $1;
+  }
+;
+
+port_member:
+  identifier
+  {
+    $$ = $1 ? param_newport(@1, $1, NULL) : NULL;
+  }
+  | identifier '[' ids_member ']'
+  {
+    $$ = $1 ? param_newport(@1, $1, $3) : NULL;
+  }
+  | port_member param_member
+  {
+    $$ = $1;
+    if ($$ && param_setmember($1, $2)) $$ = NULL;
   }
 ;
 
 param_member:
-  identifier
+  '.' identifier
   {
-    cval v = { .k = CST_STRING, { .s = $1 } };
-    if (!$1) { $$ = NULL; break; }
-    $$ = clist_append(NULL, v, 0/*!unique*/);
+    $$.k = CST_STRING;
+    $$.s = $2;
   }
-  | param_member '.' identifier
+  | '[' positive_int_const ']'
   {
-    cval v = { .k = CST_STRING, { .s = $3 } };
-    if ($1)
-      $$ = clist_append($1, v, 0/*!unique*/);
-    else
-      $$ = NULL;
-  }
-  | param_member '[' positive_int_const ']'
-  {
-    assert($3.k == CST_UINT);
-    if ($1)
-      $$ = clist_append($1, $3, 0/*!unique*/);
-    else
-      $$ = NULL;
+    assert($2.k == CST_UINT);
+    $$ = $2;
   }
 ;
 
-param_dir:
+ids_param_dir:
     IN		{ $$ = P_IN; }
   | OUT		{ $$ = P_OUT; }
   | INOUT	{ $$ = P_INOUT; }
-  | INPORT	{ $$ = P_INPORT; }
+;
+
+port_param_dir:
+    INPORT	{ $$ = P_INPORT; }
   | OUTPORT	{ $$ = P_OUTPORT; }
 ;
 

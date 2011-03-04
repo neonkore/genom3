@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -43,14 +43,14 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum paramidx {
     paramidx_name, paramidx_dir, paramidx_member, paramidx_base, paramidx_type,
-    paramidx_port, paramidx_initer, paramidx_loc, paramidx_class
+    paramidx_port, paramidx_index, paramidx_initer, paramidx_loc, paramidx_class
   };
   static const char *args[] = {
     [paramidx_name] = "name", [paramidx_dir] = "direction",
     [paramidx_member] = "member", [paramidx_base] = "base",
     [paramidx_type] = "type", [paramidx_port] = "port",
-    [paramidx_initer] = "initializer", [paramidx_loc] = "loc",
-    [paramidx_class] = "class", NULL
+    [paramidx_index] = "index", [paramidx_initer] = "initializer",
+    [paramidx_loc] = "loc", [paramidx_class] = "class", NULL
   };
   param_s p = v;
   Tcl_Obj *r;
@@ -114,6 +114,19 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	  break;
 
 	default: r = NULL; break;
+      }
+      break;
+
+    case paramidx_index:
+      switch(param_dir(p)) {
+        case P_INPORT: case P_OUTPORT:
+          if (port_kind(param_port(p)) & PORT_ARRAY)
+            r = Tcl_NewStringObj(param_genref(param_index(p)), -1);
+          else
+            r = NULL;
+          break;
+
+        default: r = NULL; break;
       }
       break;
 

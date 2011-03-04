@@ -38,11 +38,12 @@ struct param_s {
   tloc loc;
   pdir dir;
   const char *name;
-
-  clist_s member;	/**< ids or port member */
   idltype_s base;	/**< base type (ids or port) */
+  clist_s member;	/**< ids or port member */
   idltype_s type;	/**< member type */
+
   port_s port;		/**< in/out port (for port only) */
+  param_s index;	/**< port index (for array port only) */
 
   initer_s init;	/**< initial value (or NULL) */
 };
@@ -56,22 +57,26 @@ idltype_s	param_type(param_s p) { assert(p); return p->type; }
 port_s		param_port(param_s p) {
   assert(p && (p->dir == P_INPORT || p->dir == P_OUTPORT)); return p->port;
 }
+param_s		param_index(param_s p) {
+  assert(p && (p->dir == P_INPORT || p->dir == P_OUTPORT));
+  assert(p->port && (port_kind(p->port) & PORT_ARRAY));
+  return p->index;
+}
 initer_s	param_initer(param_s p) { assert(p); return p->init; }
 
 
-static int	param_setelement(param_s p, unsigned int e);
-static int	param_setmember(param_s p, const char *name);
+static param_s	param_new(tloc l, const char *name, idltype_s base);
 
 
 /* --- param_new ----------------------------------------------------------- */
 
 /** create new parameter
  */
-param_s
-param_new(tloc l, const char *name, clist_s member)
+static param_s
+param_new(tloc l, const char *name, idltype_s base)
 {
   param_s p;
-  assert(name);
+  assert(name && base);
 
   p = malloc(sizeof(*p));
   if (!p) {
@@ -81,14 +86,98 @@ param_new(tloc l, const char *name, clist_s member)
   p->loc = l;
   p->dir = P_NODIR;
   p->name = string(name);
-  p->member = member;
+  p->base = base;
+  p->member = NULL;
+  p->type = base;
 
-  p->base = NULL;
-  p->type = NULL;
   p->port = NULL;
+  p->index = NULL;
   p->init = NULL;
 
-  xwarnx("created parameter %s", p->name);
+  return p;
+}
+
+param_s
+param_newids(tloc l, const char *name, const char *member)
+{
+  param_s p;
+  comp_s c;
+  idltype_s ids;
+
+  assert(name);
+  c = comp_active(); assert(c);
+  ids = comp_ids(c);
+  if (!ids) {
+    parserror(l, "component %s has no ids", comp_name(c));
+    errno = EINVAL; return NULL;
+  }
+
+  p = param_new(l, name, ids);
+  if (p) {
+    xwarnx("created ids parameter %s", p->name);
+    if (member) {
+      cval m = { .k = CST_STRING, { .s = member } };
+      if (param_setmember(p, m)) { free(p); return NULL; }
+    }
+  }
+  return p;
+}
+
+param_s
+param_newport(tloc l, const char *name, param_s index)
+{
+  param_s p;
+  comp_s c;
+  port_s port;
+
+  assert(name);
+  c = comp_active(); assert(c);
+  port = comp_port(c, name);
+  if (!port) {
+    parserror(l, "unknown port '%s'", name);
+    errno = EINVAL; return NULL;
+  }
+  if (index && !(port_kind(port) & PORT_ARRAY)) {
+    parserror(l, "port '%s' is not a dynamic array", name);
+    parsenoerror(port_loc(port), " port '%s' declared here", port_name(port));
+    errno = EINVAL; return NULL;
+  } else if (!index && (port_kind(port) & PORT_ARRAY)) {
+    parserror(l, "missing index for dynamic array port '%s'", name);
+    parsenoerror(port_loc(port), " port '%s' declared here", port_name(port));
+    errno = EINVAL; return NULL;
+  }
+
+  /* check index is scalar */
+  if (index) {
+    idltype_s i = type_final(param_type(index));
+    switch(type_kind(i)) {
+      case IDL_BOOL: case IDL_USHORT: case  IDL_SHORT: case  IDL_ULONG:
+      case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+      case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+      case IDL_ENUM:
+	/* valid index */
+	break;
+
+      case IDL_ANY: case IDL_CONST: case IDL_ENUMERATOR: case IDL_ARRAY:
+      case IDL_SEQUENCE: case IDL_STRUCT: case IDL_MEMBER: case IDL_UNION:
+      case IDL_CASE: case IDL_TYPEDEF: case IDL_FORWARD_STRUCT:
+      case IDL_FORWARD_UNION:
+	parserror(l, "invalid %s %s for port %s index",
+		  type_strkind(type_kind(i)),
+		  type_fullname(i)?type_fullname(i):"type", name);
+	parsenoerror(type_loc(i), " %s %s declared here",
+		     type_strkind(type_kind(i)),
+		     type_fullname(i)?type_fullname(i):"type");
+	errno = EINVAL; return NULL;
+    }
+  }
+
+  p = param_new(l, name, port_type(port));
+  if (p) {
+    p->port = port;
+    p->index = index;
+    xwarnx("created port parameter %s", p->name);
+  }
   return p;
 }
 
@@ -100,92 +189,63 @@ param_new(tloc l, const char *name, clist_s member)
 param_s
 param_clone(param_s param)
 {
-  param_s p;
+  param_s p, idx;
+  citer i;
+  int s;
   assert(param);
 
-  p = malloc(sizeof(*p));
-  if (!p) {
-    warnx("memory exhausted, cannot store parameter '%s'", param_name(param));
-    return NULL;
+  switch (param_dir(param)) {
+    case P_IN: case P_OUT: case P_INOUT:
+      p = param_newids(param_loc(param), param_name(param), NULL);
+      break;
+
+    case P_INPORT: case P_OUTPORT:
+      if (port_kind(param_port(param)) & PORT_ARRAY) {
+	idx = param_clone(param_index(param));
+	if (!idx) return NULL;
+      } else idx = NULL;
+      p = param_newport(param_loc(param), param_name(param), idx);
+      break;
+
+    default: assert(0);
   }
-  p->loc = param_loc(param);
-  p->dir = P_NODIR;
-  p->name = param_name(param);
-  p->member = param_member(param);
+  if (!p) return NULL;
 
-  p->base = NULL;
-  p->type = NULL;
-  p->port = NULL;
-  p->init = NULL;
+  for(clist_first(param_member(param), &i); i.value; clist_next(&i)) {
+    s = param_setmember(p, *i.value);
+    if (s) { free(p); return NULL; }
+  }
 
-  if (param_dir(param) != P_NODIR &&
-      param_setdir(p, param_dir(param))) return NULL;
-  if (param_setinitv(param_loc(param), p, param_initer(param)))
+  if (param_setdir(p, param_dir(param))) return NULL;
+  if (param_setinitv(param_loc(param), p, param_initer(param))) return NULL;
 
   xwarnx("created parameter %s", p->name);
   return p;
 }
 
 
+/* --- param_setname ------------------------------------------------------- */
+
+/** rename parameter.
+ */
+int
+param_setname(param_s p, const char *name)
+{
+  assert(p && name);
+  xwarnx("renamed parameter %s to %s", p->name, name);
+  p->name = string(name);
+  return 0;
+}
+
+
 /* --- param_setdir -------------------------------------------------------- */
 
-/** set parameter direction. This function is a bit more complex than it seems,
- * because the direction implies either an IDS member, or a port. The function
- * retrieves the correct type and performs consistency checks.
+/** set parameter direction.
  */
 int
 param_setdir(param_s p, pdir dir)
 {
-  comp_s c;
-  citer i;
-  int s;
-  assert(p && p->dir == P_NODIR && !p->base && !p->port);
-
-  c = comp_active(); if (!c) {
-    parserror(p->loc, "missing component declaration before parameter '%s'",
-	      p->name);
-    return EINVAL;
-  }
-
-  /* compute base type */
-  switch(dir) {
-    case P_NODIR: /* must not set a direction to NODIR */ assert(0); break;
-
-    case P_IN: case P_OUT: case P_INOUT:
-      p->base = comp_ids(c); if (!p->base) {
-	parserror(p->loc, "component %s has no ids", comp_name(c));
-	return errno = EINVAL;
-      }
-      break;
-
-    case P_INPORT: case P_OUTPORT: {
-      /* pop first member for port name */
-      cval k = clist_pop(&p->member);
-      if (k.k == CST_VOID) {
-	parserror(p->loc, "missing port name in parameter '%s' definition",
-		  p->name);
-	return errno = EINVAL;
-      }
-      assert(k.k == CST_STRING);
-      p->port = comp_port(c, k.s); if (!p->port) {
-	parserror(p->loc, "unknown port '%s'", k.s);
-	return errno = EINVAL;
-      }
-      p->base = port_type(p->port);
-      break;
-    }
-  }
-
-  /* set member type */
-  p->type = p->base;
-  for(clist_first(p->member, &i); i.value; clist_next(&i)) {
-    switch(i.value->k) {
-      case CST_UINT:	s = param_setelement(p, i.value->u); break;
-      case CST_STRING:	s = param_setmember(p, i.value->s); break;
-      default:		assert(0); break;
-    }
-    if (s) return s;
-  }
+  assert(p && p->dir == P_NODIR);
 
   p->dir = dir;
   return 0;
@@ -240,12 +300,12 @@ param_destroy(param_s p)
 }
 
 
-/* --- param_setelement ---------------------------------------------------- */
+/* --- param_setmember ----------------------------------------------------- */
 
-/** update parameter to become an element of its current (array, sequence) type
+/** update parameter to become a member of its current type
  */
-static int
-param_setelement(param_s p, unsigned int e)
+int
+param_setmember(param_s p, cval m)
 {
   unsigned long d;
   idltype_s t;
@@ -253,53 +313,46 @@ param_setelement(param_s p, unsigned int e)
   assert(p);
   assert(p->type);
 
-  switch(type_kind(type_final(p->type))) {
-    case IDL_ARRAY: case IDL_SEQUENCE:
-      t = type_type(type_final(p->type));
-      d = type_length(type_final(p->type));
-      if (t) break;
+  switch(m.k) {
+    case CST_UINT: /* array element */
+      switch(type_kind(type_final(p->type))) {
+	case IDL_ARRAY: case IDL_SEQUENCE:
+	  t = type_type(type_final(p->type));
+	  d = type_length(type_final(p->type));
+	  if (t) break;
+	default:
+	  parserror(p->loc, "%s %s is scalar",
+		    type_strkind(type_kind(p->type)), type_fullname(p->type));
+	  parsenoerror(type_loc(p->type), " %s %s declared here",
+		       type_strkind(type_kind(p->type)),
+		       type_fullname(p->type));
+	  return errno = EINVAL;
+      }
+      if (m.u >= d) {
+	parserror(p->loc, "element %d out of bounds in %s %s", m.u,
+		  type_strkind(type_kind(p->type)), type_fullname(p->type));
+      }
+      break;
+
+    case CST_STRING:
+      t = type_member(p->type, m.s);
+      if (!t) {
+	parserror(p->loc, "unknown member '%s' in %s %s",
+		  m.s, type_strkind(type_kind(p->type)),
+		  type_fullname(p->type));
+	parsenoerror(type_loc(p->type), " %s %s declared here",
+		     type_strkind(type_kind(p->type)), type_fullname(p->type));
+	return errno = ENOENT;
+      }
+      break;
+
     default:
-      parserror(p->loc, "%s %s is scalar",
-		type_strkind(type_kind(p->type)), type_fullname(p->type));
-      parsenoerror(type_loc(p->type), " %s %s declared here",
-		   type_strkind(type_kind(p->type)), type_fullname(p->type));
-      return errno = EINVAL;
-  }
-
-  if (e >= d) {
-    parserror(p->loc, "element %d out of bounds in %s %s", e,
-	      type_strkind(type_kind(p->type)), type_fullname(p->type));
+      assert(0);
   }
 
   p->type = t;
-  xwarnx("set parameter %s to %s %s", p->name,
-	 type_strkind(type_kind(p->type)), type_fullname(p->type));
-  return 0;
-}
+  p->member = clist_append(p->member, m, 0/*!unique*/);
 
-
-/* --- param_setmember ----------------------------------------------------- */
-
-/** update parameter to become a member of its current type
- */
-static int
-param_setmember(param_s p, const char *name)
-{
-  idltype_s t;
-
-  assert(p && name);
-  assert(p->type);
-
-  t = type_member(p->type, name);
-  if (!t) {
-    parserror(p->loc, "unknown member '%s' in %s %s",
-	      name, type_strkind(type_kind(p->type)), type_fullname(p->type));
-    parsenoerror(type_loc(p->type), " %s %s declared here",
-		 type_strkind(type_kind(p->type)), type_fullname(p->type));
-    return errno = ENOENT;
-  }
-
-  p->type = t;
   xwarnx("set parameter %s to %s %s", p->name,
 	 type_strkind(type_kind(p->type)), type_fullname(p->type));
   return 0;

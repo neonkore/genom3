@@ -251,7 +251,7 @@ namespace eval language::c++ {
 
     # Return the C++ signature of a codel
     #
-    proc signature { codel {symchar " "}} {
+    proc signature { codel {symchar " "} {location 0}} {
 	set ret [declarator [$codel return]]
 	set sym [cname $codel]
 	set arg [list]

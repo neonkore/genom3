@@ -143,6 +143,10 @@
 
 %start spec
 
+ /* 2 shift/reduce, shifting ok:
+  * scoped_name: extra :: depends on whether we have an identifier next
+  * port_member: extra [ may be a port index or an array element (impossible) */
+%expect 2
 %%
 
 spec: statement | spec statement;
@@ -724,6 +728,11 @@ module:
       scope_destroy(s);
     }
   }
+  | MODULE module_name '{' '}'
+  {
+    scope_s s = scope_pop();
+    assert(s == $2);
+  }
 ;
 
 module_name: identifier
@@ -739,7 +748,7 @@ module_name: identifier
   }
 ;
 
-idldef: idlstatement | cpphash | /* empty */ { $$ = 0; };
+idldef: idlstatement | cpphash;
 idlspec: idldef | idlspec idldef;
 
 

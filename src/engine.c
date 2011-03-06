@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -60,7 +60,7 @@ static char **engopts = NULL;
 static int nengopts;
 
 /** standard file descriptors of genom and template child */
-int stdfd[3][2];
+int stdfd[4][2];
 
 
 static char *	eng_findentry(const char *dir);
@@ -257,6 +257,11 @@ eng_invoke()
     warn("cannot create pipes to the template engine:");
     return errno;
   }
+  /* setup engine close pipe */
+  if (pipe(stdfd[3]) < 0) {
+    warn("cannot create pipes to the template engine:");
+    return errno;
+  }
 
   /* invoke engine - in a fork()ed process so that it is easy to redefine
    * stdout and stderr or implement a totally different engine strategy (than
@@ -278,8 +283,11 @@ eng_invoke()
       warnx("unable to fork"); warn(NULL);
       return errno = EAGAIN;
 
-    case 0: /* child */
+    case 0: /* child */ {
+      char done;
+
       close(stdfd[0][0]); close(stdfd[1][0]); close(stdfd[2][0]);
+      close(stdfd[3][1]);
 
       if (eng_swapfd(stdfd[1][1], fileno(stdout)) < 0 ||
 	  eng_swapfd(stdfd[2][1], fileno(stderr)) < 0) {
@@ -292,10 +300,17 @@ eng_invoke()
       setvbuf(stderr, NULL, _IONBF, 0);
 
       s = engine->invoke(runopt.tmpl, nengopts, engopts);
+
+      /* wait for parent to drain pipes */
+      write(1, "\0", 1); write(2, "\0", 1);
+      while (read(stdfd[3][0], &done, 1) != 1);
       _exit(s);
       break;
+    }
 
     default: /* parent */
+      /* close(stdfd[3][0]) only later to avoid SIGPIPE when writing into it if
+       * the engine would crash */
       close(stdfd[0][1]); close(stdfd[1][1]); close(stdfd[2][1]);
       eng_optrm(0);
       break;
@@ -318,7 +333,8 @@ eng_invoke()
       } else FD_SET(stdfd[2][0], &fdset);
 
       if (FD_ISSET(stdfd[1][0], &fdset)) {
-	if (eng_printpipe(stdfd[1][0], runopt.verbose?stdout:NULL, tmpl, &bol[0]))
+	if (eng_printpipe(stdfd[1][0],
+			  runopt.verbose?stdout:NULL, tmpl, &bol[0]))
 	  bol[0] = -1;
       } else FD_SET(stdfd[1][0], &fdset);
 
@@ -332,9 +348,12 @@ eng_invoke()
   } while(s >= 0 || errno == EINTR);
   if (s < 0) warnx("unable to read template engine output");
 
-  close(stdfd[0][0]); close(stdfd[1][0]); close(stdfd[2][0]);
-
+  /* signal engine */
+  write(stdfd[3][1], "\0", 1);
   waitpid(pid, &s, 0);
+
+  close(stdfd[3][0]); close(stdfd[3][1]);
+  close(stdfd[0][0]); close(stdfd[1][0]); close(stdfd[2][0]);
   if ((!WIFEXITED(s) || WEXITSTATUS(s))) {
     if (WIFSIGNALED(s)) {
       warnx("generator engine exited with signal %d", WTERMSIG(s));
@@ -396,7 +415,7 @@ static int
 eng_printpipe(int fd, FILE *out, const char *bol, int *firstline)
 {
   char buffer[1024];
-  ssize_t s;
+  ssize_t s, r;
   char *l, *n;
 
   s = read(fd, buffer, sizeof(buffer)-1);
@@ -406,11 +425,14 @@ eng_printpipe(int fd, FILE *out, const char *bol, int *firstline)
     return 0;
   }
   buffer[s] = '\0';
+  r = strlen(buffer);
+  if (r == 0) return 1/*eof*/;
 
   if (!out) return 0;
   if (!bol) {
     fputs(buffer, out);
     fflush(out);
+    if (r < s) return 1/*eof*/;
     return 0;
   }
 
@@ -434,6 +456,7 @@ eng_printpipe(int fd, FILE *out, const char *bol, int *firstline)
     }
   }
 
+  if (r < s) return 1/*eof*/;
   return 0;
 }
 

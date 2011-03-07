@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -272,7 +272,7 @@ main(int argc, char *argv[])
   if (!status) status = s;
   if (!status) status = dotgen_consolidate();
   if (s || nerrors) {
-    warnx(s?"fatal errors":"%d errors", nerrors);
+    warnx(s?"fatal errors":"%d error%s", nerrors, nerrors>1?"s":"");
     if (!status) status = s?s:nerrors;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 LAAS/CNRS
+ * Copyright (c) 2009,2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -64,6 +64,7 @@ dcl_create(tloc l, const char *name)
     return NULL;
   }
 
+  d->l = l;
   d->name = string(name);
   d->dims = 0;
   d->type = NULL;

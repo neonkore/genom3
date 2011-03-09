@@ -55,6 +55,7 @@ namespace eval engine {
     # (but not the 'template' commands that are reserved to the toplevel
     # template.tcl file). 'puts' is redefined to catch template output within
     # <' '> markups.
+    interp share {} stderr slave
     slave hide puts
     slave alias puts slave invokehidden puts
     slave alias dotgen dotgen

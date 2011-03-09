@@ -42,6 +42,7 @@ engine_la_SOURCES=\
 	port.c		\
 	task.c		\
 	parameter.c	\
+	codel.c		\
 	object.c
 
 engine_la_CPPFLAGS=	-I$(top_srcdir)/src $(TCL_INCLUDE_SPEC)

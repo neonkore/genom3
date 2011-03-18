@@ -1,5 +1,65 @@
 GenoM3 - Generator of robotic component
-Copyright (c) 2009-2010 LAAS/CNRS
+Copyright (c) 2009-2011 LAAS/CNRS
+
+			    Changes in genom 2.99.5
+
+Released on March 18th, 2010
+
+ . Added the "port array" type. Port arraya are meant to be used by components
+   that create a variable number of posters, whose name or quantity cannot be
+   determined at compile time. Port arrays are declared by appending an empty
+   `[]' right after the port declaration. Any reference to this port in a codel
+   parameters must specify an IDS member that is used to access a particuler
+   element in the port array.
+
+ . Added a 'template' keyword in .gen language. Template declarations share the
+   same syntax as the components. All tasks, ports, attributes, services and ids
+   created in a template context are applied to all components of a
+   specification. This is meant to be used in template implementations, to add
+   generic services to a .gen specification.
+
+ . Changed the skeleton template so that it generates an installable libray of
+   codels. The strategy is to make sure that genom will not impose any build
+   system for the templates (nor for the codels). To achieve this, codels are
+   required to provide a pkg-config file (.pc) that describes how to link with
+   the codels and should install themselves as a standalone library. Templates
+   must use this file to link with the codels library.
+
+ . Removed the [buildenv] tcl procedure. Codels and templates must now be
+   completely decoupled in terms of build system. There thus is no need to try
+   to implement an abstraction of the build system.
+
+ . Removed the 'libcodel' template. This is now superseeded by the new skeleton
+   template and the strategy of always installing the codels as an independent
+   library.
+
+ . Made generated enum values start from 0, not 1.
+
+ . Added option --signature to the 'mapping' template. Passing --signature
+   generates the codel signatures in addition to the type definitions (the
+   default) of a specification.
+
+ . Added an optional direction parameter to [$codel parameters] template
+   procedure. The optional direction may one of "in", "out", "inout", "inport"
+   or "outport". For "in" and "out", parameters of type "inout" are also
+   returned.
+
+ . Added an optional argument "perm" for setting permissions in [template
+   parse] engine procedure. If the "perm" option is specified, those
+   persmissions are set on the newly created files. The perm argument syntax is
+   the same as the tcl "file attributes -permissions" procedure: an octal
+   number or a string of the form [ugoa][+-][rwx].
+
+ . Made the 'event' argument optional in [$service fsm ?event?] and [$task fsm
+   ?event?] procedures. If no event is specified, those procedures return the
+   full list of events declared for the service or task.
+
+ . Added the [$task services] procedure, returning the list of services of a
+   task.
+
+ . Allowed the throw property in a component declaration. Exceptions declared
+   there are potentially throwable by all services and all tasks.
+
 
 			    Changes in genom 2.99.4
 

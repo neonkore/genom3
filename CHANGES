@@ -3,7 +3,7 @@ Copyright (c) 2009-2011 LAAS/CNRS
 
 			    Changes in genom 2.99.5
 
-Released on March 18th, 2010
+Released on March 18th, 2011
 
  . Added the "port array" type. Port arraya are meant to be used by components
    that create a variable number of posters, whose name or quantity cannot be

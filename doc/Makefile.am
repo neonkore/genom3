@@ -196,10 +196,6 @@ engcmd-dotgen.tex: $(top_srcdir)/engine/tcl/dotgen.c
 engcmd-language.tex: Makefile $(srcdir)/docgen.awk
 engcmd-language.tex: $(top_srcdir)/engine/tcl/language.tcl
 	$(AWK) -f $(srcdir)/docgen.awk $< >$@
-
-engcmd-autoconf.tex: Makefile $(srcdir)/docgen.awk
-engcmd-autoconf.tex: $(top_srcdir)/engine/tcl/buildenv-autoconf.tcl
-	$(AWK) -f $(srcdir)/docgen.awk $< >$@
 endif REGEN_DOC_PDF
 
 if REGEN_DOC_HTML

@@ -34,10 +34,12 @@
 #include <string.h>
 #include <err.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 #include "genom.h"
 
    static size_t	dotgen_read(char *buffer, size_t max_size);
+   static void		dotgen_parsehash(char *buffer);
 
 #define YY_INPUT(buf, result, max) ((result) = dotgen_read(buf, max))
 
@@ -58,16 +60,27 @@ floatsuffix	[fFlL]
 stringtext	([^\"])|(\\.)
 chartext	([^\'])|(\\.)
 
-%s HASH
-
 %%
 
 %{
   *yylloc_param = curloc;
 %}
 
+ /* cpp directives */
+^[ \t]*#[ \t]*[0-9]+[ \t]+\"{stringtext}*\"[ \t]+[0-9]+[ \t]*\n {
+  dotgen_parsehash(yytext);
+}
+
+^[ \t]*#[ \t]*[0-9]+[ \t]+\"{stringtext}*\"[ \t]*\n {
+  dotgen_parsehash(yytext);
+}
+
+^[ \t]*#[ \t]*[0-9]+[ \t]*\n {
+  dotgen_parsehash(yytext);
+}
+
  /* ignore whitespace, as in any decent language. */
-<INITIAL>"\n"	{ curloc.line++; curloc.col = 0; *yylloc_param = curloc; }
+"\n"		{ curloc.line++; curloc.col = 0; *yylloc_param = curloc; }
 [\t\f\v\r ]+	{ *yylloc_param = curloc;  }
 
  /* special characters */
@@ -84,11 +97,6 @@ chartext	([^\'])|(\\.)
 "not"		{ return '!'; }
 "<<"		{ return SL; }
 ">>"		{ return SR; }
-
- /* C preprocessor output */
-"#"		{ BEGIN(HASH); return '#'; }
-<HASH>"\n"	{ BEGIN(INITIAL); curloc.line++; curloc.col = 0; return '\n'; }
-<HASH>"pragma"	{ return PRAGMA; }
 
  /* IDL related keywords */
 "module"	{ return MODULE; }
@@ -299,4 +307,32 @@ dotgen_read(char *buffer, size_t max_size)
   }
 
   return r;
+}
+
+
+/* --- dotgen_parsehash ---------------------------------------------------- */
+
+/** Parse cpp # line directives
+ */
+static void
+dotgen_parsehash(char *buffer)
+{
+  char file[PATH_MAX];
+  struct stat s, si;
+  int line, flag;
+  int n;
+
+  n = sscanf(buffer, "# %d \"%[^\"]\" %d", &line, file, &flag);
+  if (n < 1) return;
+  if (n < 2) { curloc.line = line; return; }
+
+  if (!runopt.cppdotgen) {
+    if (!stat(file, &s) && !stat(runopt.input, &si))
+      if (si.st_dev == s.st_dev && si.st_ino == s.st_ino)
+        strncpy(file, runopt.input, sizeof(file));
+  }
+
+  curloc.file = string(file);
+  curloc.line = line;
+  curloc.col = 1;
 }

@@ -27,7 +27,6 @@
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>
-#include <sys/stat.h>
 
 #include "genom.h"
 
@@ -78,7 +77,6 @@
   idltype_s	type;
 }
 
-%token <i>	PRAGMA
 %token <i>	COLONCOLON SL SR
 %token <i>	MODULE
 %token <i>	UNSIGNED SHORT LONG FIXED FLOAT DOUBLE CHAR WCHAR STRING
@@ -97,7 +95,7 @@
 %token <s>	REQUIRE BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
 %token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 
-%type <i>	spec idlspec statement idldef idlstatement genomstatement
+%type <i>	start spec idlspec statement idlstatement genomstatement
 
 %type <i>	template component ids attribute port task service
 %type <pkind>	port_dir port_kind port_array
@@ -139,19 +137,17 @@
 %type <hash>	event_list identifier_list
 %type <vlist>	string_list
 
-%type <i>	cpphash
-
-%start spec
-
  /* 2 shift/reduce, shifting ok:
   * scoped_name: extra :: depends on whether we have an identifier next
   * port_member: extra [ may be a port index or an array element (impossible) */
 %expect 2
 %%
 
+start: /* empty */ | spec;
+
 spec: statement | spec statement;
 
-statement: idlstatement | genomstatement | cpphash;
+statement: idlstatement | genomstatement;
 
 idlstatement:
   module ';'
@@ -748,8 +744,7 @@ module_name: identifier
   }
 ;
 
-idldef: idlstatement | cpphash;
-idlspec: idldef | idlspec idldef;
+idlspec: idlstatement | idlspec idlstatement;
 
 
 /* --- constant definition ------------------------------------------------- */
@@ -1587,48 +1582,6 @@ identifier_list:
     switch(hash_insert($$, $3, $3, NULL)) {
       case EEXIST: parserror(@3, "duplicate identifier '%s'", $3); break;
     }
-  }
-;
-
-
-/* --- # directives from cpp ----------------------------------------------- */
-
-cpphash:
-  '#' integer_literal string_literal '\n'
-  {
-    if (!runopt.cppdotgen) {
-      struct stat s, si;
-      if (!stat($3, &s) && !stat(runopt.input, &si))
-	if (si.st_dev == s.st_dev && si.st_ino == s.st_ino)
-	  $3 = string(runopt.input);
-    }
-
-    curloc.file = $3;
-    curloc.line = $2;
-    curloc.col = 1;
-  }
-  | '#' integer_literal string_literal integer_literal '\n'
-  {
-    if (!runopt.cppdotgen) {
-      struct stat s, si;
-      if (!stat($3, &s) && !stat(runopt.input, &si))
-	if (si.st_dev == s.st_dev && si.st_ino == s.st_ino)
-	  $3 = string(runopt.input);
-    }
-
-    curloc.file = $3;
-    curloc.line = $2;
-    curloc.col = 1;
-  }
-  | '#' PRAGMA IDENTIFIER error '\n'
-  {
-    parsewarning(@1, "ignoring pragma: %s", $3);
-    yyerrok;
-  }
-  | '#' error '\n'
-  {
-    parsewarning(@1, "unknown # directive");
-    yyerrok;
   }
 ;
 

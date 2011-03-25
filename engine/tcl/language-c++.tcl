@@ -599,12 +599,7 @@ namespace eval language::c++ {
 	if {![catch {$object class} class]} {
 	    switch -- $class {
 		codel	{
-		    if {![catch {$object service} s]} {
-			set scope [[$s comp] name]_[$s name]
-		    } elseif {![catch {$object task} t]} {
-			set scope [[$t comp] name]_[$t name]
-		    }
-		    set object ${scope}_[$object name]
+                  set object [$object name]
 		}
 
 		default {

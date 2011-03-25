@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -195,8 +195,9 @@ err:
  * NULL). #include directive are not processed, and only the first match is
  * returned. No error is ever reported: the notice is optional.
  *
- * Interestingly, the special symbol cannot be put in a slash star comment,
- * except at the very beginning, so it is described in the comment below ;)
+ * Interestingly, that special symbol cannot be put in a C comment except at
+ * the very beginning, so the syntax is documented right after the present
+ * comment ;)
  */
 /*/ <- here! */
 char *
@@ -226,9 +227,11 @@ cpp_getnotice(const char *in)
 	p = strstr(p, "/*/"); if (!p) break;
 	inside = 1;
 
-	/* set text pointer on the end of the token, replacing the last / with
-	 * a space (so that text alignment within the comment is kept) */
-	p += 2; *p = ' ';
+	/* set text pointer to the end of the token, replacing the last / with
+	 * a space except before a newline (so that text alignment within the
+	 * comment is kept) */
+	p += 2;
+        if (p[1] == '\n') p++; else *p = ' ';
 
 	/*FALLTHROUGH*/
       case 1:

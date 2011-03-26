@@ -131,7 +131,7 @@ set c [[[dotgen component] service] validate]
 puts [language signature c $c -sep-]
 EOF
 expect out '
-	/^c_event-sep-codel\(\)$/ {next}
+	/^c_event-sep-codel\(void\)$/ {next}
 	{exit 2}
 '
 

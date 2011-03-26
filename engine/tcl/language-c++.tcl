@@ -267,6 +267,7 @@ namespace eval language::c++ {
 	    }
 	    lappend arg $a
 	}
+        if {[llength $arg] == 0} { set arg "void" }
 
         set m ""
         if {$location} {

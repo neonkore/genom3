@@ -39,9 +39,10 @@ proc map {lambda list} {
 '>
 
 #include "<"[$component name]_[language cname c c]">_types.h"
+<'
+# --- Task codels --------------------------------------------------------
+if {$task ne ""} {'>
 
-<'# --- Task codels -------------------------------------------------------- '>
-<'if {$task ne ""} {'>
 
 /* --- Task <"[language hfill "[$task name] " - 62]"> */
 <' foreach codel [$task codels] { '>
@@ -59,17 +60,18 @@ proc map {lambda list} {
   return <"[language declarator c [lindex [$codel yields] 0]]">;
 }
 <' } '>
-<'}'>
+<'}
 
 
-<'# --- Validation codels -------------------------------------------------- '>
-<'if {$task eq ""} {'>
+# --- Validation codels --------------------------------------------------
 
-<' foreach service [$component services] {
-      if {[llength [$service validate]] == 0} continue'>
+if {$task eq ""} {
+  foreach service [$component services] {
+    if {[llength [$service validate]] == 0} continue'>
+
+
 /* --- Service <"[language hfill "[$service name] " - 59]"> */
 <'       foreach codel [$service validate] { '>
-
 
 /** Validation codel <"[$codel name]"> of service <"[$service name]">.
  *
@@ -83,19 +85,19 @@ proc map {lambda list} {
 }
 <'       } '>
 <'    } '>
-<'} '>
+<'}
+
+# --- Services codels ----------------------------------------------------
+
+foreach service [$component services] {
+  if {[catch {$service task} t]} { set t "" }
+  if {$t != $task || [llength [$service codels]] == 0} {
+    continue
+  } '>
 
 
-<'# --- Services codels ---------------------------------------------------- '>
-
-<' foreach service [$component services] {
-      if {[catch {$service task} t]} { set t "" }
-      if {$t != $task || [llength [$service codels]] == 0} {
-         continue
-      } '>
 /* --- Service <"[language hfill "[$service name] " - 59]"> */
 <'    foreach codel [$service codels] { '>
-
 
 /** Codel <"[$codel name]"> of service <"[$service name]">.
  *

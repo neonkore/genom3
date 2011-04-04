@@ -127,12 +127,12 @@ namespace eval engine {
 	    }
 
 	    variable $m
-	    if {([set $m] && !$v) || (![set $m] && $v)} {
-		set $m $v
-		puts "$m mode $v"
-	    }
-	    switch -- $m {
-		verbose { dotgen genom stdout [set $m] }
+            if {([set $m] && !$v) || (![set $m] && $v)} {
+              set $m $v
+              switch -- $m {
+                verbose { dotgen genom stdout $v }
+                default { puts "$m mode $v" }
+              }
 	    }
 	}
     }

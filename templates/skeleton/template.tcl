@@ -41,13 +41,18 @@ template usage {*}{
     "Supported options:\n"
     "  -l, --language=lang\tset codels source code language\n"
     "  -C, --directory=dir\toutput files in dir instead of source directory\n"
+    "  -m, --merge=tool\tmerge conflicting files with tool\n"
+    "  -i\t\t\tinteractively merge conflicting files, alias for\n"
+    "\t\t\t-m interactive\n"
+    "  -u\t\t\tautomatically merge conflicting files, alias for\n"
+    "\t\t\t-m auto\n"
     "  -f, --force\t\toverwrite existing files (use with caution)\n"
     "  -h, --help\t\tprint usage summary (this text)"
 }
 
 # defaults: no file overwrite, C interface, C source and output in "codel"
 # subdir.
-engine mode -overwrite
+engine mode -overwrite -merge-if-change
 if {[catch {[dotgen component] lang} iface]} {
     set iface c
 }
@@ -56,10 +61,19 @@ set outdir [dotgen input dir]
 
 # parse options
 template options {
-    -l - --language	{ set lang [template arg] }
-    -C - --directory	{ set outdir [template arg] }
-    -f - --force	{ engine mode +overwrite }
-    -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
+  -l - --language	{ set lang [template arg] }
+  -C - --directory	{ set outdir [template arg] }
+  -m - --merge		{
+    engine merge-tool [template arg]; engine mode +merge-if-change
+  }
+  -i			{
+    engine merge-tool interactive; engine mode +merge-if-change
+  }
+  -u			{
+    engine merge-tool auto; engine mode +merge-if-change
+  }
+  -f - --force		{ engine mode +overwrite }
+  -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
 }
 
 # check options consistency

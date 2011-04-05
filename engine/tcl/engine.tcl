@@ -34,11 +34,17 @@ namespace eval engine {
     # overwrite existing files
     variable overwrite		off
 
-    # move-if-change files
+    # move-if-change files (takes precedence over 'overwrite')
     variable move-if-change	on
 
+    # merge-if-change files (takes precedence over 'overwrite')
+    variable merge-if-change	off
+
     # available engine modes
-    variable modes {verbose overwrite move-if-change debug}
+    variable modes {verbose overwrite move-if-change merge-if-change debug}
+
+    # default merge tool (builtin interactive)
+    variable merge-tool	{interactive}
 
     # default output directory
     variable outdir	{}
@@ -97,10 +103,10 @@ namespace eval engine {
     # \item[Example:] {\tt engine mode -overwrite +move-if-change}
     # \end{description}
     # \arg modespec	A mode specification string. Supported modes are
-    #		{\tt verbose}, {\tt overwrite}, {\tt move-if-change} and {\tt
-    #		debug}. If {\em mode} string is prefixed with a dash (-),
-    #		it is turned off. If mode is prefixed with a plus (+) or
-    #		nothing, it is turned on.
+    #		{\tt verbose}, {\tt overwrite}, {\tt move-if-change} {\tt
+    #		merge-if-change} and {\tt debug}. If {\em mode} string is
+    #		prefixed with a dash (-), it is turned off. If mode is prefixed
+    #		with a plus (+) or nothing, it is turned on.
     # \return	When called without arguments, the command returs the current
     #		configuration of all engine modes.
     #
@@ -137,6 +143,26 @@ namespace eval engine {
 	}
     }
     namespace export mode
+
+
+    # --- merge-tool -------------------------------------------------------
+
+    # \proc engine merge-tool {\em tool}
+    # \index engine merge-tool
+    #
+    # Change the engine merge tool. When the engine is in 'merge-if-change'
+    # mode, a merge tool is inkoked with the two conflicting versions of a
+    # file. If the merge tools exits successfuly, the generated file is
+    # replaced by the (manually) merged version.
+    #
+    # \arg tool	The path to the merge tool, or builtin keywords 'interactive'
+    #	or 'auto'.
+    #
+    proc merge-tool { tool } {
+      variable merge-tool
+      set merge-tool $tool
+    }
+    namespace export merge-tool
 
 
     # --- chdir ------------------------------------------------------------
@@ -243,6 +269,8 @@ namespace eval engine {
 	variable moc
 	variable overwrite
 	variable move-if-change
+	variable merge-if-change
+	variable merge-tool
 
 	::close $channel
 	if {![dict exists $moc $channel]} return
@@ -264,6 +292,25 @@ namespace eval engine {
 	    }
 	    ::close $t; ::close $d
 	}
+
+        if {${merge-if-change} && [file exists $dst]} {
+          template message "merging $dst"
+          if {[switch ${merge-tool} {
+            interactive	{ merge::auto $tmp $dst on}
+            auto	{ merge::auto $tmp $dst off}
+            default	{
+              merge::custom ${merge-tool} $tmp $dst
+            }
+          }]} {
+            template fatal "could not merge $dst"
+            return
+          }
+
+          if {[llength $perm]} {
+            file attributes $dst -permissions $perm
+          }
+          return
+        }
 
 	if {!$overwrite && [file exists $dst]} {
 	    template fatal "file $dst would be overwritten"

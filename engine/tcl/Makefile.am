@@ -26,7 +26,9 @@ dist_systcl_DATA=\
 	language.tcl		\
 	language-c.tcl		\
 	language-c++.tcl	\
-	engine.tcl
+	engine.tcl		\
+	merge.tcl		\
+	lcs.tcl
 
 nodist_systcl_DATA=\
 	version.tcl		\

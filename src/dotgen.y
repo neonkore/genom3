@@ -137,10 +137,9 @@
 %type <hash>	event_list identifier_list
 %type <vlist>	string_list
 
- /* 2 shift/reduce, shifting ok:
-  * scoped_name: extra :: depends on whether we have an identifier next
+ /* 1 shift/reduce, shifting ok:
   * port_member: extra [ may be a port index or an array element (impossible) */
-%expect 2
+%expect 1
 %%
 
 start: /* empty */ | spec;
@@ -659,7 +658,7 @@ initializer_list:
 
 initializer:
   initializer_value
-  | COLONCOLON string_literals
+  | ':' string_literals
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     if ($2) {
@@ -668,7 +667,7 @@ initializer:
     } else
       $$ = NULL;
   }
-  | initializer_value COLONCOLON string_literals
+  | initializer_value ':' string_literals
   {
     $$ = $1; if (!$1 || !$3) break;
     (void)initer_setdoc($1, $3);

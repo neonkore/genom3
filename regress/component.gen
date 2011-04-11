@@ -1,7 +1,7 @@
 /* GenoM objects parsing test */
 
 /*/
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -54,7 +54,7 @@ ids {
   sequence<long,128> h;
 };
 
-attribute a = 0 :: "first attribute", b;
+attribute a = 0:"first attribute", b;
 attribute d = "none";
 
 inport data<long> a;
@@ -82,14 +82,15 @@ service s1() {
 };
 
 service s2(
-	   in ::p1 = { .a = 2 ::"long doc", {
+	   in ::p1 = { .a = 2:"long doc", {
 	       [2] = { .b = 2, .a = 4, .c = { 2 } }
-	     }, ee1} :: "also doc",
-	   in a = 2 :: "long doc",
-	   in b[2].c.d::b = :: "long doc",
-	   in d = "test string" :: "a string",
+	     }, ee1} : "also doc",
+	   in a =:"long doc",
+	   in b[2].c.d::b =:"long doc",
+	   in c = ee1 : "long doc",
+	   in d = "test string" :"an input string" ,
 	   in f, in g,
-	   out e, out c, out f::outf, out h) {
+	   out e, out f::outf, out h) {
   doc: "service s2";
   task: t1;
 

@@ -119,7 +119,7 @@ namespace eval merge {
                   incr conflicts
                   break
                 }
-                q { close $f; return 0 }
+                q { engine mode $verb; close $f; return 0 }
                 default {
                   puts $patch
                   puts "y - apply this patch"

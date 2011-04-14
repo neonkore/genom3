@@ -602,10 +602,6 @@ namespace eval language::c++ {
 		codel	{
                   set object [$object name]
 		}
-
-		default {
-		    template fatal "unsupported object class '$class'"
-		}
 	    }
 	}
 

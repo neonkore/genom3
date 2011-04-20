@@ -175,7 +175,6 @@ AC_CONFIG_FILES([
 	runtime/genom3/c++/Makefile
 	templates/interactive/Makefile
 	templates/example/Makefile
-	templates/libcodels/Makefile
 	templates/mappings/Makefile
 	templates/skeleton/Makefile
 	doc/Makefile

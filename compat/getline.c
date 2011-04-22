@@ -45,7 +45,7 @@
 ssize_t
 getline(char **__restrict buf, size_t *__restrict buflen, FILE *__restrict fp)
 {
-	unsigned char *p;
+	char *p;
 	size_t len, off, newlen;
 	char *newb;
 

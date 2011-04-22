@@ -207,13 +207,20 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   s = Tcl_EvalFile(interp, path);
   if (s != TCL_OK) goto error;
 
-  return 0;
+  s = 0;
+done:
+  /* make sure to restore stdout */
+  Tcl_Eval(interp, "::engine mode -verbose");
+  Tcl_DeleteInterp(interp);
+  return s;
+
 error:
   if (runopt.verbose)
     fprintf(stderr, "%s\n", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
   else
     fprintf(stderr, "%s\n", Tcl_GetStringResult(interp));
-  return 2;
+  s = 2;
+  goto done;
 }
 
 

@@ -46,16 +46,9 @@
   extern char *dotgentext;
 %}
 
-%name-prefix "dotgen"
-%define api.pure
+%name-prefix="dotgen"
+%pure-parser
 %locations
-
-%code provides {
-  extern YYLTYPE curloc;
-
-  extern int dotgenlex(YYSTYPE *lvalp, YYLTYPE *llocp);
-  extern void dotgenerror(const char *msg);
-}
 
 %union {
   int		i;
@@ -76,6 +69,13 @@
   dcl_s		dcl;
   idltype_s	type;
 }
+
+%{
+  extern YYLTYPE curloc;
+
+  extern int dotgenlex(YYSTYPE *lvalp, YYLTYPE *llocp);
+  extern void dotgenerror(const char *msg);
+%}
 
 %token <i>	COLONCOLON SL SR
 %token <i>	MODULE

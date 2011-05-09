@@ -221,8 +221,9 @@ else
   summary=["${summary}
     yacc to text:		"]
   if test x"$Y2L" = x:; then
-    summary=["${summary}no"]
-    summary=["${summary}: see http://www.alchar.org/~aedil/Projects/y2l.html"]
+    summary=["${summary}no: missing y2l"]
+    summary=["${summary}
+	see http://www.alchar.org/~aedil/Projects/y2l.html"]
   else
     summary=["${summary}yes
 	(with ${Y2L})"]
@@ -230,8 +231,10 @@ else
   summary=["$summary
     pdf:			"]
   if test x"$Y2L" = x: -o x"$PDFLATEX" = x:; then
-    summary=["${summary}no"]
-    summary=["${summary}: see http://www.tug.org/texlive/"]
+    summary=["${summary}no: missing"]
+    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
+    test ! x"$PDFLATEX" = x: || summary=["${summary} pdflatex
+	see http://www.tug.org/texlive/"]
   else
     summary=["${summary}yes
 	(with ${PDFLATEX})"]
@@ -239,8 +242,11 @@ else
   summary=["$summary
     html:			"]
   if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x:; then
-    summary=["${summary}no"]
-    summary=["${summary}: see http://hutchinson.belmont.ma.us/tth/"]
+    summary=["${summary}no: missing"]
+    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
+    test ! x"$PDFLATEX" = x: || summary=["${summary} pdflatex"]
+    test ! x"$TTH" = x: || summary=["${summary} tth
+	see http://hutchinson.belmont.ma.us/tth/"]
   else
     summary=["${summary}yes
 	(with ${TTH})"]
@@ -248,8 +254,12 @@ else
   summary=["$summary
     text:			"]
   if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x: -o x"$W3M" = x:; then
-    summary=["${summary}no"]
-    summary=["${summary}: see http://w3m.sourceforge.net/"]
+    summary=["${summary}no: missing"]
+    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
+    test ! x"$PDFLATEX" = x: || summary=["${summary} pdflatex"]
+    test ! x"$TTH" = x: || summary=["${summary} tth"]
+    test ! x"$W3M" = x: || summary=["${summary} w3m
+	see http://w3m.sourceforge.net/"]
   else
     summary=["${summary}yes
 	(with ${W3M})"]

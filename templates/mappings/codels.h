@@ -32,18 +32,19 @@
 # check arguments
 if {[llength $argv] != 2} { error "expected arguments: component lang" }
 lassign $argv component l
+lang $l
 '>
 
-<"[language comment $l " Codel functions signatures"]">
+<"[comment " Codel functions signatures"]">
 
 <'foreach t [$component tasks] { foreach c [$t codels] {'>
-<"[language signature $l $c " " 1]">;
+<"[$c signature " " 1]">;
 <'} }'>
 
 <'foreach s [$component services] { foreach c [$s validate] {'>
-<"[language signature $l $c " " 1]">;
+<"[$c signature " " 1]">;
 <'} }'>
 
 <'foreach s [$component services] { foreach c [$s codels] {'>
-<"[language signature $l $c " " 1]">;
+<"[$c signature " " 1]">;
 <'} }'>

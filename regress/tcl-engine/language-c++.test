@@ -9,32 +9,35 @@ mkdir -p run.t
 
 # --- language fileext c++ -------------------------------------------------
 #
-testing '[language fileext c++]'
+testing '[fileext]'
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
-puts [language fileext c++]
-puts [language fileext c++ source]
-puts [language fileext c++ header]
+lang c++
+puts [fileext]
+puts [fileext source]
+puts [fileext header]
 EOF
 expect out '/^\.cc|\.h$/ {next}; {exit 2}'
 
 
 # --- language comment c++ -------------------------------------------------
 #
-testing '[language comment c++]'
+testing '[comment]'
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
-puts [language comment c++ comment]
+lang c++
+puts [comment comment]
 EOF
-expect out '/^\/\/comment$/ {next}; {exit 2}'
+expect out '/^\/\/ comment$/ {next}; {exit 2}'
 
 
 # --- language mapping c++ -------------------------------------------------
 #
-testing '[language mapping c++]'
+testing '[language mapping]'
 
 run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
-puts [language mapping c++]
+lang c++
+puts [language mapping]
 puts "int main() { return 0; }\n"
 EOF
 expect out ''
@@ -44,12 +47,13 @@ run 0 ${CXX} -I"${0%${0##*/}}../../runtime" run.t/mapping.cc
 
 # --- language declarator c++ ----------------------------------------------
 #
-testing '[language declarator c++]'
+testing '[language declarator]'
 
 run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
-puts [language declarator c++ [dotgen type ::xlong] a]
-puts [language declarator c++ [dotgen type ::xlongarray] a]
-puts [language declarator c++ [dotgen type ::xbstring] a]
+lang c++
+puts [[dotgen type ::xlong] declarator a]
+puts [[dotgen type ::xlongarray] declarator a]
+puts [[dotgen type ::xbstring] declarator a]
 EOF
 expect out '
 	/^xlong a$/ {next}
@@ -61,7 +65,7 @@ expect out '
 
 # --- language member c++ --------------------------------------------------
 #
-testing '[language member c++]'
+testing '[language member]'
 
 cat >run.gen <<'EOF'
 component c;
@@ -74,8 +78,9 @@ service s(in a[1].a);
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+lang c++
 set p [[[dotgen component] service] parameter]
-puts [language member c [$p base] [$p member]]
+puts [$p member]
 EOF
 expect out '
 	/^.a\[1\]\.a$/ {next}
@@ -85,7 +90,7 @@ expect out '
 
 # --- language cname c++ ---------------------------------------------------
 #
-testing '[language cname c++]'
+testing '[cname]'
 
 cat >run.gen <<'EOF'
 struct s {
@@ -104,9 +109,10 @@ service s() {
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
-puts 1,[language cname c++ [[dotgen type ::s::ss::a] fullname]]
-puts 2,[language cname c++ [[lindex [[dotgen component] task] 0] codel]]
-puts 3,[language cname c++ [[[dotgen component] service] codel]]
+lang c++
+puts 1,[cname [[dotgen type ::s::ss::a] fullname]]
+puts 2,[cname [[lindex [[dotgen component] task] 0] codel]]
+puts 3,[cname [[[dotgen component] service] codel]]
 EOF
 expect out '
 	/^1,s::ss::a$/ {next}
@@ -118,7 +124,7 @@ expect out '
 
 # --- language signature c++ -----------------------------------------------
 #
-testing '[language signature c++]'
+testing '[language signature]'
 
 cat >run.gen <<'EOF'
 component c;
@@ -127,8 +133,9 @@ service s() {
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+lang c++
 set c [[[dotgen component] service] validate]
-puts [language signature c++ $c -sep-]
+puts [$c signature -sep-]
 EOF
 expect out '
 	/^c::event-sep-codel\(void\)$/ {next}
@@ -138,7 +145,7 @@ expect out '
 
 # --- language invoke c++ --------------------------------------------------
 #
-testing '[language invoke c++]'
+testing '[language invoke]'
 
 cat >run.gen <<'EOF'
 component c;
@@ -147,8 +154,9 @@ service s() {
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+lang c++
 set c [[[dotgen component] service] validate]
-puts [language invoke c++ $c {}]
+puts [$c invoke {}]
 EOF
 expect out '
 	/^codel\(\)$/ {next}

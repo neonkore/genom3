@@ -242,7 +242,7 @@ engine_createcmd(Tcl_Interp *interp, Tcl_Interp *slave, const char *cmd,
   if (!Tcl_CreateObjCommand(interp, cmd, proc, data, NULL))
     return errno = EINVAL;
   if (slave) {
-    if (Tcl_CreateAliasObj(slave, cmd, interp, cmd, 0, NULL) != TCL_OK) {
+    if (!Tcl_CreateObjCommand(slave, cmd, proc, data, NULL)) {
       Tcl_DeleteCommand(interp, cmd);
       return errno = EINVAL;
     }

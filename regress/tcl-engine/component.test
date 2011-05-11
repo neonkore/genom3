@@ -21,6 +21,7 @@ EOF
 testing '[$component attribute]'
 
 run 0 ${GENOM_BIN} interactive -b ${thisdir}../component.gen <<'EOF'
+lang c
 set i 0
 foreach a [[dotgen component] attribute] {
   puts "$i,[$a name],[$a dir],[$a member]"
@@ -28,8 +29,8 @@ foreach a [[dotgen component] attribute] {
 }
 EOF
 expect out '
-	/^0,a,inout,a$/ {next}
-	/^1,b,inout,b$/ {next}
-	/^2,d,inout,d$/ {next}
+	/^0,a,inout,.a$/ {next}
+	/^1,b,inout,.b$/ {next}
+	/^2,d,inout,.d$/ {next}
 	{exit 2}
 '

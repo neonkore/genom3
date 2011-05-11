@@ -39,68 +39,88 @@ namespace eval language::c {
     # Return a string that is a valid comment in C.
     #
     proc comment { text } {
-	regsub -all "\n(?=.)" "/*${text}" "\n *" text
-	set text "${text} */"
-	return $text
+      return [concat "/*" [join [split $text "\n"] "\n *"] "*/"]
+    }
+
+
+    # --- iter -------------------------------------------------------------
+
+    # Return a C loop construct for 'type'. 'part' may be set to begin, end or
+    # var.
+    #
+    proc iter { type part {level 0} {max {}} } {
+      switch -- $part {
+        begin {
+          set v [iter $type var $level]
+          if {[llength $max] == 0} {
+            if {[catch {format "$v < [$type length]"} max]} {
+              set max {}
+            }
+          } else {
+            set max "$v < $max"
+          }
+          switch -- [$type kind] {
+            {array} - {sequence} {
+              lappend code "\{" ++ "unsigned int ${v};"
+              lappend code "for(${v} = 0; ${max}; ${v}++) \{" ++
+            }
+
+            default {
+              template fatal "type '[$type kind]' cannot be iterated"
+            }
+          }
+        }
+
+        end {
+          lappend code -- "\}" -- "\}"
+        }
+
+        var {
+          lappend code "_genomi${level}"
+        }
+      }
+
+      return $code
     }
 
 
     # --- mapping ----------------------------------------------------------
 
-    # Generate and return the C mapping of types matching the glob pattern
-    #
-    proc mapping { pattern } {
-	set m ""
-	foreach t [dotgen types $pattern] {
-	    append m [gentype $t]
-	}
-
-	set p ""
-	if {[regexp {u?int(8|16|32|64)_t} $m]} {
-	    append p "#include <stdint.h>\n"
-	}
-	if {[regexp {bool} $m]} {
-	    append p "#include <stdbool.h>\n"
-	}
-	if {[regexp {sequence} $m]} {
-	    append p "#include <genom3/c/idlsequence.h>\n"
-	}
-
-	return $p$m
-    }
-
-
-    # --- gentype-prolog ---------------------------------------------------
-
-    # Return the required C includes for mappings
-    #
-    proc gentype-prolog { } {
-	return "\n#include <stdbool.h>\n#include <stdint.h>\n"
-    }
-
-
-    # --- gentype -----------------------------------------------------------
-
     # Return the C mapping of type.
     #
-    proc gentype { type } {
-	switch -- [$type kind] {
-	    {const}		{ return [genconst $type] }
-	    {enum}		{ return [genenum $type] }
-	    {struct}		{ return [genstruct $type] }
-	    {union}		{ return [genunion $type] }
-	    {typedef}		{ return [gentypedef $type] }
+    proc mapping { type } {
+      switch -- [$type kind] {
+        {const}		{ append m [genconst $type] }
+        {enum}		{ append m [genenum $type] }
+        {struct}	{ append m [genstruct $type] }
+        {union}		{ append m [genunion $type] }
+        {typedef}	{ append m [gentypedef $type] }
 
-	    {forward struct}	-
-	    {forward union}	{ return [genforward $type] }
+        {forward struct} -
+        {forward union}	{ append m [genforward $type] }
 
-	    {enumerator}	-
-	    {struct member}	-
-	    {union member}	{ return "" }
-	}
+        {enumerator}	-
+        {struct member}	-
+        {union member}	{ append m "" }
 
-	template fatal \
-	    "internal error: unhandled type '[$type kind]' at top-level"
+        default {
+          template fatal \
+              "internal error: unhandled type '[$type kind]' at top-level"
+        }
+      }
+
+      set p ""
+      if {[regexp {u?int(8|16|32|64)_t} $m]} {
+        append p "#include <stdint.h>\n"
+      }
+      if {[regexp {bool} $m]} {
+        append p "#include <stdbool.h>\n"
+      }
+      if {[regexp {sequence} $m]} {
+        append p "#include <genom3/c/idlsequence.h>\n"
+      }
+
+      return $p$m
     }
 
 
@@ -207,11 +227,11 @@ namespace eval language::c {
     }
 
 
-    # --- parameter --------------------------------------------------------
+    # --- argument ---------------------------------------------------------
 
     # Return the C mapping for declaring a parameter.
     #
-    proc parameter { kind type {var {}} } {
+    proc argument { type kind {var {}} } {
       switch -- $kind {
 	{value}		{
 	   switch -- [[$type final] kind] {
@@ -247,11 +267,11 @@ namespace eval language::c {
     }
 
 
-    # --- argument ---------------------------------------------------------
+    # --- pass -------------------------------------------------------------
 
     # Return the C mapping for passing a variable.
     #
-    proc argument { kind type {var {}} } {
+    proc pass { type kind {var {}} } {
       switch -- $kind {
 	{value}		{
 	  return [address $type $var]
@@ -291,10 +311,10 @@ namespace eval language::c {
 	    set a ""
 	    switch -- [$p dir] {
 		"in" - "inport"	{
-		  append a [parameter value [$p type] [$p name]]
+		  append a [[$p type] argument value [$p name]]
 		}
 		default	{
-		  append a [parameter reference [$p type] [$p name]]
+		  append a [[$p type] argument reference [$p name]]
 		}
 	    }
 	    lappend arg $a
@@ -314,71 +334,65 @@ namespace eval language::c {
 
     # Return the C construction to access members of type
     #
-    proc member { type members } {
-	if {[llength $members] == 0} return ""
-	set members [lassign $members member]
+    proc member { type mlist } {
+      if {[llength $mlist] == 0} return ""
+      set mlist [lassign $mlist member]
 
-	switch -- [$type kind] {
-	    {boolean}				-
-	    {unsigned short} - {short}		-
-	    {unsigned long} - {long}		-
-	    {unsigned long long} - {long long}	-
-	    {float} - {double}			-
-	    {char} - {octet}			-
-	    {enum} - {enumerator} - {string} {
-		# basic types: no member
-		template fatal "[$type kind] has no member"
-	    }
+      switch -- [$type kind] {
+        {boolean}				-
+        {unsigned short} - {short}		-
+        {unsigned long} - {long}		-
+        {unsigned long long} - {long long}	-
+        {float} - {double}			-
+        {char} - {octet}			-
+        {enum} - {enumerator} - {string} {
+          # basic types: no member
+          template fatal "[$type kind] has no member"
+        }
 
-	    {array} {
-		if {![string is digit [string index $member 0]]} {
-		    template fatal "[$type kind] has no member $member"
-		}
-		append access "\[$member\]"
-		set type [$type type]
-	    }
+        {array} {
+          append access "\[$member\]"
+          set type [$type type]
+        }
 
-	    {sequence} {
-		if {![string is digit [string index $member 0]]} {
-		    template fatal "[$type kind] has no member $member"
-		}
-		append access "._buffer\[$member\]"
-		set type [$type type]
-	    }
+        {sequence} {
+          append access "._buffer\[$member\]"
+          set type [$type type]
+        }
 
-	    {struct} {
-		set m [$type members $member]
-		if {[llength $m] == 0} {
-		    template fatal "[$type kind] has no member $member"
-		}
-		append access ".$member"
-		set type $m
-	    }
+        {struct} {
+          set m [$type members $member]
+          if {[llength $m] == 0} {
+            template fatal "[$type kind] has no member $member"
+          }
+          append access ".$member"
+          set type $m
+        }
 
-	    {union} {
-		set m [$type members $member]
-		if {[llength $m] == 0} {
-		    template fatal "[$type kind] has no member $member"
-		}
-		append access "._u.$member"
-		set type $m
-	    }
+        {union} {
+          set m [$type members $member]
+          if {[llength $m] == 0} {
+            template fatal "[$type kind] has no member $member"
+          }
+          append access "._u.$member"
+          set type $m
+        }
 
-	    {forward struct} - {forward union}	-
-	    {struct member} - {union member}	-
-	    {typedef} {
-		set type [$type type]
-		set members [concat $member $members]
-	    }
+        {forward struct} - {forward union}	-
+        {struct member} - {union member}	-
+        {typedef} {
+          set type [$type type]
+          set mlist [concat $member $mlist]
+        }
 
-	    default { error "internal error: unhandled type '[$type kind]'" }
-	}
+        default { error "internal error: unhandled type '[$type kind]'" }
+      }
 
-	if {[llength $members] > 0} {
-	    append access [member $type $members]
-	}
+      if {[llength $mlist] > 0} {
+        append access [member $type $mlist]
+      }
 
-	return $access
+      return $access
     }
 
 

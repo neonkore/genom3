@@ -334,20 +334,21 @@ namespace eval template {
     # location as reported by [info frame].
     #
     proc fatal { args } {
-	set info [info frame -1]
-	set l ""
-	if {[dict exists $info file]} {
-	    append l "[file tail [dict get $info file]]:"
-	    if {[dict exists $info line]} {
-		append l "[dict get $info line]:"
-	    }
-	    append l " "
-	}
-	if {[dict exists $info proc]} {
-	    append l "in [dict get $info proc]"
-	}
-	return -code error -level 2 -errorinfo "[join $args]\n    $l" \
-	    [join $args]
+      set info [info frame -1]
+      set l ""
+      if {[dict exists $info file]} {
+        append l "(file \"[file tail [dict get $info file]]\""
+        if {[dict exists $info line]} {
+          append l " line [dict get $info line]"
+        }
+        append l ")"
+      }
+      if {[dict exists $info proc]} {
+        append l " in [dict get $info proc]"
+      }
+
+      return -code error -level 2 \
+          -errorinfo "error: [join $args]\n    $l" "error: [join $args]"
     }
     namespace export fatal
 

@@ -91,16 +91,16 @@ engine chdir $outdir
 
 # generate codel files
 #
-foreach c [dotgen components] {
-    set ext [language fileext $lang]
-    set src [language fileext $iface]
+set src [lang $iface; fileext]
+set ext [lang $lang; fileext]
 
-    # one source file for each task
-    foreach t [$c tasks] {
-	template parse					\
-	    args [list $c $t] file codels.codel$src	\
-	    file codels/[$c name]_[$t name]_codels$ext
-    }
+foreach c [dotgen components] {
+  # one source file for each task
+  foreach t [$c tasks] {
+    template parse					\
+        args [list $c $t] file codels.codel$src		\
+        file codels/[$c name]_[$t name]_codels$ext
+  }
 
     # and one file for codels with no associated task
     template parse					\

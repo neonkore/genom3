@@ -46,7 +46,7 @@ engine_la_SOURCES=\
 	task.c		\
 	parameter.c	\
 	codel.c		\
-	object.c
+	idltype.c
 
 engine_la_CPPFLAGS=	-I$(top_srcdir)/src $(TCL_INCLUDE_SPEC)
 engine_la_LIBADD=	$(TCL_LIB_SPEC)

@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -28,19 +28,23 @@ if {[llength $argv] != 1} { error "expected argument: lang" }
 lassign $argv lang
 
 # generate copyright notice (if any)
-catch {puts [language comment shell [dotgen input notice]]}
+if {![catch {dotgen input notice} notice]} {
+  puts [comment "-# " $notice]
+}
+
+lang $lang
 '>
 <'set built_sources [list]
-  foreach c [dotgen components] {
+foreach c [dotgen components] {
+
   # compute list of source
-  set ext [language fileext $lang]
-  set sources "[$c name]_codels$ext"
+  set sources "[$c name]_codels[fileext]"
   foreach t [$c tasks] {
-    lappend sources "[$c name]_[$t name]_codels$ext"
+    lappend sources "[$c name]_[$t name]_codels[fileext]"
   }
 
   # types header
-  set h [$c name]_[language cname $lang $lang]_types[language fileext $lang header]
+  set h [$c name]_[cname $lang]_types[fileext header]
   lappend sources $h
   lappend built_sources $h
 '>

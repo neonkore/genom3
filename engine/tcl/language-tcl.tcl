@@ -30,7 +30,7 @@ namespace eval language::tcl {
   # Return a string that is a valid comment in TCL.
   #
   proc comment { text } {
-    return [regsub -all {#[ ]+\n} #[join [split $text "\n"] "\n# "] "#\n"]
+    return [regsub -all {\#[ ]+\n} #[join [split $text "\n"] "\n# "] "#\n"]
   }
 
   # --- iter -------------------------------------------------------------
@@ -70,5 +70,24 @@ namespace eval language::tcl {
     }
 
     return $code
+  }
+
+  # --- cname --------------------------------------------------------------
+
+  # Cannonical name of an object or string in TCL.
+  # Remove leading :: and map other :: to _
+  #
+  proc cname { object } {
+    if {![catch {$object class} class]} {
+      switch -- $class {
+        codel { set object [$object name] }
+      }
+    }
+
+    if { [string first :: $object] == 0 } {
+      set object [string range $object 2 end]
+    }
+
+    return [string map {:: _ { } _ + x} $object]
   }
 }

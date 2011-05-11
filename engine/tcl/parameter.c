@@ -87,15 +87,30 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case paramidx_member: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("language::member", -1),
+        Tcl_NewStringObj(type_genref(param_base(p)), -1),
+        Tcl_NewListObj(0, NULL)
+      };
       clist_s l = param_member(p);
       citer i;
 
-      r = Tcl_NewListObj(0, NULL);
       if (!l) break;
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      Tcl_IncrRefCount(argv[2]);
+
       for(clist_first(l, &i); i.current; clist_next(&i)) {
 	Tcl_ListObjAppendElement(
-	  interp, r, Tcl_NewStringObj(const_strval(*i.value), -1));
+	  interp, argv[2], Tcl_NewStringObj(const_strval(*i.value), -1));
       }
+
+      s = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[0]);
+      Tcl_DecrRefCount(argv[1]);
+      Tcl_DecrRefCount(argv[2]);
+      if (s != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
       break;
     }
 

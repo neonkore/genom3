@@ -46,14 +46,15 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum codelidx {
     codelidx_name, codelidx_return, codelidx_params, codelidx_yields,
-    codelidx_triggers, codelidx_task, codelidx_service, codelidx_loc,
-    codelidx_class
+    codelidx_triggers, codelidx_task, codelidx_service, codelidx_signature,
+    codelidx_invoke, codelidx_loc, codelidx_class
   };
   static const char *args[] = {
     [codelidx_name] = "name", [codelidx_return] = "return",
     [codelidx_params] = "parameters", [codelidx_yields] = "yields",
     [codelidx_triggers] = "triggers", [codelidx_task] = "task",
-    [codelidx_service] = "service", [codelidx_loc] = "loc",
+    [codelidx_service] = "service", [codelidx_signature] = "signature",
+    [codelidx_invoke] = "invoke", [codelidx_loc] = "loc",
     [codelidx_class] = "class", NULL
   };
   codel_s c = v;
@@ -69,6 +70,16 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   if (i == codelidx_params) {
     if (objc > 3) {
       Tcl_WrongNumArgs(interp, 0, objv, "$codel parameters ?direction?");
+      return TCL_ERROR;
+    }
+  } else if (i == codelidx_signature) {
+    if (objc > 4) {
+      Tcl_WrongNumArgs(interp, 2, objv, "?separator? ?location?");
+      return TCL_ERROR;
+    }
+  } else if (i == codelidx_invoke) {
+    if (objc != 3) {
+      Tcl_WrongNumArgs(interp, 2, objv, "params");
       return TCL_ERROR;
     }
   } else {
@@ -127,6 +138,24 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       if (*codel_service(c))
 	r = Tcl_NewStringObj(service_genref(*codel_service(c)), -1);
       break;
+
+    case codelidx_signature:
+    case codelidx_invoke: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("language::", -1),
+        objv[0],
+        objc>2?objv[2]:NULL,
+        objc>3?objv[3]:NULL
+      };
+
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_AppendStringsToObj(argv[0], args[i], NULL);
+      s = Tcl_EvalObjv(interp, objc, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[0]);
+      if (s != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
+      break;
+    }
 
     case codelidx_loc: {
       Tcl_Obj *l[3] = {

@@ -66,11 +66,6 @@ namespace eval engine {
     slave alias puts slave invokehidden puts
     slave alias dotgen dotgen
     slave alias language language
-    # the object foreach cannot easily be aliased, because it runs uplevel
-    # scripts that must run in the slave's context. The easiest is to create
-    # the object::* procedures in that slave interpreter
-    slave invokehidden source \
-	[file join [dotgen template sysdir] tcl object.tcl]
 
 
     # --- mode -------------------------------------------------------------

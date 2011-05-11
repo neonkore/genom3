@@ -36,14 +36,16 @@ proc map {lambda list} {
     }
     return $result
 }
+
+lang c++
 '>
 
-#include "<"[$component name]_[language cname c++ c++]">_types.h"
+#include "<"[$component name]_[cname c++]">_types.h"
 <'# --- Task codels --------------------------------------------------------
 if {$task ne ""} {'>
 
 
-/* --- Task <"[language hfill "[$task name] " - 62]"> */
+/* <"[--- Task [$task name] ---------------------------------------------]"> */
 <' foreach codel [$task codels] { '>
 
 
@@ -53,10 +55,10 @@ if {$task ne ""} {'>
  * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
  * Throws <"[join [map {e {return [$e name]}} [$task throws]] {, }]">.
  */
-<"[language signature c++ $codel \n]">
+<"[$codel signature \n]">
 {
   /* insert your code */
-  return <"[language declarator c++ [lindex [$codel yields] 0]]">;
+  return <"[[lindex [$codel yields] 0] declarator]">;
 }
 <' } '>
 <'}
@@ -69,7 +71,7 @@ if {$task eq ""} {
     if {[llength [$service validate]] == 0} continue'>
 
 
-/* --- Service <"[language hfill "[$service name] " - 59]"> */
+/* <"[--- Service [$service name] ---------------------------------------]"> */
 <'       foreach codel [$service validate] { '>
 
 /** Validation codel <"[$codel name]"> of service <"[$service name]">.
@@ -77,10 +79,10 @@ if {$task eq ""} {
  * Returns <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
  * Throws <"[join [map {e {return [$e name]}} [$service throws]] {, }]">.
  */
-<"[language signature c++ $codel \n]">
+<"[$codel signature \n]">
 {
   /* insert your code */
-  return <"[language declarator c++ [lindex [$codel yields] 0]]">;
+  return <"[[lindex [$codel yields] 0] declarator]">;
 }
 <'       } '>
 <'    } '>
@@ -95,7 +97,7 @@ foreach service [$component services] {
   } '>
 
 
-/* --- Service <"[language hfill "[$service name] " - 59]"> */
+/* <"[--- Service [$service name] ---------------------------------------]"> */
 <'    foreach codel [$service codels] { '>
 
 /** Codel <"[$codel name]"> of service <"[$service name]">.
@@ -104,10 +106,10 @@ foreach service [$component services] {
  * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
  * Throws <"[join [map {e {return [$e name]}} [$service throws]] {, }]">.
  */
-<"[language signature c++ $codel \n]">
+<"[$codel signature \n]">
 {
   /* insert your code */
-  return <"[language declarator c++ [lindex [$codel yields] 0]]">;
+  return <"[[lindex [$codel yields] 0] declarator]">;
 }
 <'    } '>
 <' } '>

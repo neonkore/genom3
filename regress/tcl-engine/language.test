@@ -1,0 +1,26 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+# minimalistic .gen file
+>run.gen
+mkdir -p run.t
+
+
+# --- --- ------------------------------------------------------------------
+#
+testing '[---]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+puts [--- -9 a b]
+EOF
+expect out '/^bbb a bbb$/ {next}; {exit 2}'
+
+
+# --- --- ------------------------------------------------------------------
+#
+testing '[comment]'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+puts [comment -x a]
+EOF
+expect out '/^xa$/ {next}; {exit 2}'

@@ -24,322 +24,374 @@
 
 namespace eval language {
 
-    # --- fileext ----------------------------------------------------------
+  # --- iter ---------------------------------------------------------------
 
-    # \proc language fileext lang [kind]
-    # \index language fileext
-    #
-    # Return the cannonical file extension for the given language.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg kind	Must be one of the strings {\tt source} or {\tt header}.
-    #
-    proc fileext { lang {kind source}} {
-	return [[support $lang]::fileext $kind]
+  # Return a loop construct for 'type'. 'part' may be set to begin, end or
+  # var.
+  #
+  proc iter { type part {level 0} {max {}} } {
+    variable current
+    return [${current}::iter $type $part $level $max]
+  }
+  slave alias language::iter language::iter
+
+
+  # --- mapping ------------------------------------------------------------
+
+  # \proc language mapping ?{\em type}?
+  # \index language mapping
+  #
+  # Generate and return the mapping of {\em type} for the current language, or
+  # all types if no argument is given.
+  # The returned string is a valid source code for the language.
+  #
+  # \arg type	A 'type' object.
+  #
+  proc mapping { args } {
+    variable current
+    if {![llength $args]} { set args [dotgen types] }
+    foreach type $args {
+      append m [${current}::mapping $type]
     }
-    namespace export fileext
+    return $m
+  }
+  namespace export mapping
 
 
-    # --- comment ----------------------------------------------------------
+  # --- declarator ---------------------------------------------------------
 
-    # \proc language comment lang text
-    # \index language comment
-    #
-    # Return a string that is a valid comment in the given language.
-    #
-    # \arg lang	The language name. Must be {\tt c}, {\tt c++} or {\tt shell}.
-    # \arg text	The string to be commented.
-    #
-    proc comment { lang text } {
-	switch -nocase -- $lang {
-	    shell {
-		regsub -all "\n(?=.)" "${text}" "\n#" text
-		return $text
-	    }
-	}
+  # \proc language declarator {\em type} [{\em var}]
+  # \index language declarator
+  #
+  # Return the abstract declarator for {\em type} or for a variable {\em var}
+  # of that type, in the current language.
+  #
+  # \arg type	A type object.
+  # \arg var	A string representing the name of a variable of type {\em
+  #		type}.
+  #
+  proc declarator { type {var {}} } {
+    variable current
+    return [${current}::declarator $type $var]
+  }
+  slave alias language::declarator language::declarator
+  namespace export declarator
 
-	set lns [support $lang]
-	return [${lns}::comment $text]
+
+  # --- address ------------------------------------------------------------
+
+  # \proc language address {\em type} [{\em var}]
+  # \index language address
+  #
+  # Return an expression evaluating to the address of a variable in the current
+  # language.
+  #
+  # \arg type	A type object.
+  # \arg var	A string representing the name of a variable of type {\em
+  #		type}.
+  #
+  proc address { type {var {}} } {
+    variable current
+    return [${current}::address $type $var]
+  }
+  slave alias language::address language::address
+  namespace export address
+
+
+  # --- dereference --------------------------------------------------------
+
+  # \proc language dereference {\em type} [{\em var}]
+  # \index language dereference
+  #
+  # Return an expression dereferencing a pointer on a variable in the current
+  # language.
+  #
+  # \arg type	A type object.
+  # \arg var	A string representing the name of a variable of type {\em
+  #		type}.
+  #
+  proc dereference { type {var {}} } {
+    variable current
+    return [${current}::dereference $type $var]
+  }
+  slave alias language::dereference language::dereference
+  namespace export dereference
+
+
+  # --- argument -----------------------------------------------------------
+
+  # \proc language argument {\em type} {\em kind} [{\em var}]
+  # \index language argument
+  #
+  # Return an expression that declares a parameter {\em var} of type {\em
+  # type}, passed by value or reference according to {\em kind}.
+  #
+  # \arg type	A type object.
+  # \arg kind	Must be "value" or "reference".
+  # \arg var	A string representing the name of a variable of type {\em
+  #		type}.
+  #
+  proc argument { type kind {var {}} } {
+    variable current
+    return [${current}::argument $type $kind $var]
+  }
+  slave alias language::argument language::argument
+  namespace export argument
+
+
+  # --- pass ---------------------------------------------------------------
+
+  # \proc language pass {\em type} {\em kind} [{\em var}]
+  # \index language pass
+  #
+  # Return an expression that passes {\em var} of type {\em type} as a
+  # parameter, by value or reference according to {\em kind}.
+  #
+  # \arg type	A type object.
+  # \arg kind	Must be "value" or "reference".
+  # \arg var	A string representing the name of a variable of type {\em
+  #		type}.
+  #
+  proc pass { type kind {var {}} } {
+    variable current
+    return [${current}::pass $type $kind $var]
+  }
+  slave alias language::pass language::pass
+  namespace export pass
+
+
+  # --- member -----------------------------------------------------------
+
+  # \proc language member {\em type} {\em mlist}
+  # \index language member
+  #
+  # Return the language construction to access a member of a {\em type}.
+  # {\em mlist} is a list interpreted as follow: if it starts with a letter,
+  # {\em type} should be an aggregate type (like {\tt struct}); if it starts
+  # with a numeric digit, {\em type} should be an array type (like {\tt
+  # sequence}).
+  #
+  # \arg type		A type object
+  # \arg mlist		A list of hierachical members to access.
+  #
+  proc member { type mlist } {
+    variable current
+    return [${current}::member $type $mlist]
+  }
+  slave alias language::member language::member
+  namespace export member
+
+
+  # --- signature ----------------------------------------------------------
+
+  # \proc language signature codel [{\em separator} [{\em location}]]
+  # \index language signature
+  #
+  # Return the signature of a codel in the current language. If separator is
+  # given, it is a string that is inserted between the return type of the
+  # codel and the codel name (for instance, a \string\n{} in C so that the
+  # symbol name is guaranteed to be on the first column).
+  #
+  # \arg codel		A codel object.
+  # \arg separator	A string, inserted between the return type and the
+  #			codel symbol name.
+  # \arg location	A boolean indicating whether to generate \#line
+  #			directive corresponding to the codel definition in .gen
+  #			file.
+  #
+  proc signature { codel {symchar { }} {location off}} {
+    variable current
+    return [${current}::signature $codel $symchar $location]
+  }
+  slave alias language::signature language::signature
+  namespace export signature
+
+
+  # --- invoke -------------------------------------------------------------
+
+  # \proc language invoke {\em codel} {\em params}
+  # \index language invoke
+  #
+  # Return a string corresponding to the invocation of a codel in the current
+  # language.
+  #
+  # \arg codel	A codel object.
+  # \arg params	The list of parameters passed to the codel. Each element of
+  #		this list must be a valid string in the current language
+  #		corresponding to each parameter value or reference to be passed
+  #		to the codel.
+  #
+  proc invoke { codel params } {
+    variable current
+
+    if {[llength $params] != [llength [$codel parameters]]} {
+      template fatal "wrong # arguments for codel [$codel name]"
     }
-    namespace export comment
+    return [${current}::invoke $codel $params]
+  }
+  slave alias language::invoke language::invoke
+  namespace export invoke
 
 
-    # --- mapping ----------------------------------------------------------
+  # --- support ------------------------------------------------------------
 
-    # \proc language mapping lang [pattern]
-    # \index language mapping
-    #
-    # Generate and return the mapping of the types matching the glob {\em
-    # pattern} (or all types if no pattern is given), for the given language.
-    # The returned string is a valid source code for the language.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg pattern	A glob pattern to generate the mapping only for those
-    #			type names that match the pattern.
-    #
-    proc mapping { lang {pattern *} } {
-	set lns [support $lang]
-	return [${lns}::mapping $pattern]
+  # Return the namespace for language or raise an error
+  #
+  variable lns [dict create c c c++ c++ tcl tcl]
+  proc support { lang } {
+    variable lns
+
+    if { [catch {dict get $lns $lang} ns] } {
+      template fatal "unsupported language $lang"
     }
-    namespace export mapping
+    return ::language::$ns
+  }
 
+  # current language, default to C
+  variable current [support c]
 
-    # --- declarator -------------------------------------------------------
-
-    # \proc language declarator lang {\em type} [{\em var}]
-    # \index language declarator
-    #
-    # Return the abstract declarator for {\em type} or for a variable {\em var}
-    # of that type, in the given language.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg type	A type object.
-    # \arg var	A string representing the name of a variable of type {\em
-    #		type}.
-    #
-    proc declarator { lang type {var {}} } {
-	return [[support $lang]::declarator $type $var]
-    }
-    namespace export declarator
-
-
-    # --- address ----------------------------------------------------------
-
-    # \proc language address lang {\em type} [{\em var}]
-    # \index language address
-    #
-    # Return an expression evaluating to the address of a variable.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg type	A type object.
-    # \arg var	A string representing the name of a variable of type {\em
-    #		type}.
-    #
-    proc address { lang type {var {}} } {
-	return [[support $lang]::address $type $var]
-    }
-    namespace export address
-
-
-    # --- dereference ------------------------------------------------------
-
-    # \proc language dereference lang {\em type} [{\em var}]
-    # \index language dereference
-    #
-    # Return an expression able to dereference a pointer on a variable.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg type	A type object.
-    # \arg var	A string representing the name of a variable of type {\em
-    #		type}.
-    #
-    proc dereference { lang type {var {}} } {
-	return [[support $lang]::dereference $type $var]
-    }
-    namespace export dereference
-
-
-    # --- parameter --------------------------------------------------------
-
-    # \proc language parameter lang {\em kind} {\em type} [{\em var}]
-    # \index language parameter
-    #
-    # Return an expression that declares a parameter {\em var} of type {\em
-    # type}, passed by value or reference according to {\em kind}.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg kind	Must be "value" or "reference".
-    # \arg type	A type object.
-    # \arg var	A string representing the name of a variable of type {\em
-    #		type}.
-    #
-    proc parameter { lang kind type {var {}} } {
-	return [[support $lang]::parameter $kind $type $var]
-    }
-    namespace export parameter
-
-
-    # --- argument ---------------------------------------------------------
-
-    # \proc language argument lang {\em kind} {\em type} [{\em var}]
-    # \index language argument
-    #
-    # Return an expression that passes {\em var} of type {\em type} as a
-    # parameter, by value or reference according to {\em kind}.
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg kind	Must be "value" or "reference".
-    # \arg type	A type object.
-    # \arg var	A string representing the name of a variable of type {\em
-    #		type}.
-    #
-    proc argument { lang kind type {var {}} } {
-	return [[support $lang]::argument $kind $type $var]
-    }
-    namespace export argument
-
-
-    # --- member -----------------------------------------------------------
-
-    # \proc language member {\em lang} {\em type} {\em members}
-    # \index language member
-    #
-    # Return the language construction to access a member of a {\em type}. If
-    # {\em members} is a list, it is interpreted as a hierachy. Each element of
-    # {\em members} is interpreted as follow: if it starts with a letter, {\em
-    # type} should be an aggregate type (like {\tt struct}); if it starts with
-    # a numeric digit, {\em type} should be an array type (like {\tt
-    # sequence}).
-    #
-    # This procedure can typically be used with parameters objects, for which
-    # the 'member' subcommand returns a compatible {\em members} list.
-    #
-    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
-    # \arg type		A type object
-    # \arg members	A member name, or a list of hierachical members to
-    #			access.
-    #
-    proc member { lang type members } {
-	return [[support $lang]::member $type $members]
-    }
-    namespace export member
-
-
-    # --- cname ------------------------------------------------------------
-
-    # \proc language cname {\em lang} \{{\em string}|{\em object}\}
-    # \index language cname
-    #
-    # Return the cannonical name of the {\em string} or the \GenoM{} {\em
-    # object}, according to the language {\em lang}.
-    #
-    # If a regular string is given, this procedure typically maps IDL :: scope
-    # separator into the native symbol in the given language.
-    # If a codel object is given, this procedure returns the symbol name of the
-    # codel in the given language.
-    #
-    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
-    # \arg string	The name to convert.
-    # \arg object	A \GenoM{} object. Only class {\tt codel} is supported
-    #			at the moment.
-    #
-    proc cname { lang object } {
-	return [[support $lang]::cname $object]
-    }
-    namespace export cname
-
-
-    # --- signature --------------------------------------------------------
-
-    # \proc language signature lang codel [{\em separator} [{\em location}]]
-    # \index language signature
-    #
-    # Return the signature of a codel in the given language. If separator is
-    # given, it is a string that is inserted between the return type of the
-    # codel and the codel name (for instance, a \string\n{} in C so that the
-    # symbol name is guaranteed to be on the first column).
-    #
-    # \arg lang	The language name. Must be {\tt c} or {\tt c++}.
-    # \arg codel	A codel object.
-    # \arg separator	A string, inserted between the return type and the
-    #			codel symbol name.
-    # \arg location	A boolean indicating whether to generate \#line directive
-    #			corresponding to the codel definition in .gen file.
-    #
-    proc signature { lang codel {symchar { }} {location off}} {
-	return [[support $lang]::signature $codel $symchar $location]
-    }
-    namespace export signature
-
-
-    # --- arguments --------------------------------------------------------
-
-    # \proc language arguments {\em lang} {\em codel} {\em base}
-    # \index language arguments
-    #
-    # Return a list of strings corresponding to each parameter of a codel fetch
-    # from the given {\em base}.
-    #
-    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
-    # \arg codel	A codel object.
-    # \arg base		A string from which parameters are fetched.
-    #
-    proc arguments { lang codel base } {
-      set plist [list]
-      set cparam [$codel parameters]
-      foreach p $cparam {
-	set member "$base[language member $lang [$p base] [$p member]]"
-	switch -- [$p dir] {
-	  "in" - "inport" {
-	    lappend plist [argument $lang value [$p type] $member]
-	  }
-	  default {
-	    lappend plist [argument $lang reference [$p type] $member]
-	  }
-	}
-      }
-      return $plist
-    }
-    namespace export arguments
-
-
-    # --- invoke -----------------------------------------------------------
-
-    # \proc language invoke {\em lang} {\em codel} {\em params}
-    # \index language invoke
-    #
-    # Return a string corresponding to the invocation of a codel in the given
-    # language.
-    #
-    # \arg lang		The language name. Must be {\tt c} or {\tt c++}.
-    # \arg codel	A codel object.
-    # \arg params	The list of parameters passed to the codel. Each
-    #			element of this list must be a valid string in
-    #			the {\em lang} language corresponding to each parameter
-    #			value or reference to be passed to the codel.
-    proc invoke { lang codel params } {
-	if {[llength $params] != [llength [$codel parameters]]} {
-	    template fatal "wrong # arguments for codel [$codel name]"
-	}
-
-	return [[support $lang]::invoke $codel $params]
-    }
-    namespace export invoke
-
-
-    # --- hfill ------------------------------------------------------------
-
-    # \proc language hfill text [filler] [column]
-    # \index language hfill
-    #
-    # Return a string of length {\em column} (by default 80), starting with
-    # {\em text} and filled with the {\em filler} character (by default -).
-    #
-    # \arg text		The text to fill.
-    # \arg filler	The filler character (by default -).
-    # \arg column	The desired length of the returned string.
-    #
-    proc hfill { text { filler - } { column 80 } } {
-	return \
-	    "$text[string repeat $filler \
-		[expr {$column-[string length $text]}]]"
-    }
-    namespace export hfill
-
-
-    # --- support ----------------------------------------------------------
-
-    # Return the namespace for language or raise an error
-    #
-    variable lns [dict create c c c++ c++ tcl tcl]
-    proc support { lang } {
-	variable lns
-
-	if { [catch {dict get $lns $lang} ns] } {
-	    template fatal "unsupported language $lang"
-	}
-	return $ns
-    }
-
-    namespace ensemble create
+  namespace ensemble create
 }
+
+
+# --- lang -----------------------------------------------------------------
+
+# \proc lang language
+# \index lang
+#
+# Set the current language for procedures that output a language dependent
+# string
+#
+# \arg language		The language name. Must be {\tt c} or {\tt c++}.
+#
+proc lang { language } {
+  set language::current [language::support $language]
+}
+slave alias lang lang
+
+
+# --- cname ----------------------------------------------------------------
+
+# \proc cname \{{\em string}|{\em object}\}
+# \index cname
+#
+# Return the cannonical name of the {\em string} or the \GenoM{} {\em
+# object}, according to the current language.
+#
+# If a regular string is given, this procedure typically maps IDL :: scope
+# separator into the native symbol in the given language.
+# If a codel object is given, this procedure returns the symbol name of the
+# codel in the given language.
+#
+# \arg string	The name to convert.
+# \arg object	A \GenoM{} object. Only class {\tt codel} is supported
+#		at the moment.
+#
+proc cname { object } {
+  return [${language::current}::cname $object]
+}
+slave alias cname cname
+
+
+# --- indent ---------------------------------------------------------------
+
+# \proc indent [\#n\string|++\string|-{}-] {\em ?text...?}
+# \index indent
+#
+# Output {\em text}, indented to the current indent level. Each {\em text}
+# argument is followed by a newline.
+# Indent level can be changed by passing an absolute level with \#n, or
+# incremented or decremented with ++ or -{}-.
+#
+# \arg text	The string to output.
+#
+proc indent { args } {
+  global _ilevel
+
+  foreach text $args {
+    switch -glob -- $text {
+      #* {
+        set _ilevel [string range $text 1 end]
+        if {![string is digit $_ilevel]} {
+          error "bad indentation \"#$_ilevel\""
+        }
+      }
+      ++ { incr _ilevel 2 }
+      -- { incr _ilevel -2 }
+
+      default {
+        catch { set text "[string repeat " " $_ilevel]$text" }
+        puts $text
+      }
+    }
+  }
+}
+slave eval [list proc indent [info args indent] [info body indent]]
+
+
+# --- comment --------------------------------------------------------------
+
+# \proc comment [-c] text
+# \index comment
+#
+# Return a string that is a valid comment in the current language.
+#
+# \arg c	The string to use as a comment character (overriding current
+#		language).
+# \arg text	The string to be commented.
+#
+proc comment { args } {
+  if {[string index [lindex $args 0] 0] == "-" } {
+    set args [lassign $args c]
+    set c [string range $c 1 end]
+    return $c[join [split [join $args]] "\n$c"]
+  }
+  return [${language::current}::comment [join $args]]
+}
+slave alias comment comment
+
+
+# --- fileext --------------------------------------------------------------
+
+# \proc fileext [kind]
+# \index fileext
+#
+# Return the cannonical file extension for the current language.
+#
+# \arg kind	Must be one of the strings {\tt source} or {\tt header}.
+#
+proc fileext { {kind source} } {
+  return [${language::current}::fileext $kind]
+}
+slave alias fileext fileext
+
+
+# --- --- ------------------------------------------------------------------
+
+# \proc -{}-{}- [-{\em column}] {\em text} {\em ?text...?} {\em filler}
+# \index -{}-{}-
+#
+# Print a string of length {\em column} (70 by default), starting with
+# {\em text} and filled with the last character of the {\em filler} string.
+#
+# \arg text	The text to fill.
+# \arg filler	The filler character
+# \arg column	The desired length of the returned string.
+#
+proc --- { args } {
+  set column 70
+  if {[string index [lindex $args 0] 0] == "-" } {
+    set args [lassign $args column]
+    set column [string range $column 1 end]
+    if {![string is digit $column]} {
+      template fatal "bad column \"-$column\""
+    }
+  }
+  incr column -5
+  set filler [string index [lindex $args end] end]
+  set text [join [lrange $args 0 end-1] { }]
+  set pre [string repeat $filler 3]
+  set post [string repeat $filler [expr {$column-[string length $text]}]]
+  return "$pre $text $post"
+}
+slave alias --- ---

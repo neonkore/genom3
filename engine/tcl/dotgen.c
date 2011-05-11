@@ -133,6 +133,7 @@ dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
     return TCL_OK;
 
   eng_swapfd(stdfd[1][1], 1);
+  eng_swapfd(stdfd[2][1], 2);
 
   verbose = v;
   return TCL_OK;

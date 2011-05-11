@@ -307,67 +307,6 @@ namespace eval language {
     namespace export invoke
 
 
-    # --- sizeof -----------------------------------------------------------
-
-    # Return binary size of type, in bytes
-    #
-    proc sizeof { type } {
-	switch -- [$type kind] {
-	    {boolean}		{ return 1 }
-	    {unsigned short}	-
-	    {short}		{ return 2 }
-	    {unsigned long}	-
-	    {long}		{ return 4 }
-	    {float}		{ return 4 }
-	    {double}		{ return 8 }
-	    {char}		-
-	    {octet}		{ return 1 }
-	    {string}		{
-		if {[catch {$type length} l]} {
-		    error "attempt to compute the size of an unbounded string"
-		}
-		return l
-	    }
-	    {any}		{ error "type any not supported yet" }
-
-	    {const}		{ return [sizeof [$type type]] }
-	    {enum}		{ return 4 }
-	    {enumerator}	{ return 4 }
-
-	    {struct}		{
-		set s 0
-		foreach e [$type members] {
-		    # account for padding
-		    incr s [expr int(ceil([sizeof $e]/4.))]
-		}
-	    }
-
-	    {union}		-
-	    {typedef}		{ set d [cname [$type fullname]] }
-
-	    {struct member}	-
-	    {union member}	-
-	    {forward struct}	-
-	    {forward union}	{ set d [declarator [$type type]] }
-
-	    {array}		{
-		if {[catch { $type length } l]} { set l {} }
-		set d "[declarator [$type type]]\[$l\]"
-	    }
-
-	    {sequence}		{
-		set d "struct { unsigned long _maximum, _length;"
-		append d " [declarator [$type type]] *_buffer; }"
-	    }
-
-	    default		{
-		template fatal "internal error: unhandled type '[$type kind]'"
-	    }
-	}
-    }
-    namespace export sizeof
-
-
     # --- hfill ------------------------------------------------------------
 
     # \proc language hfill text [filler] [column]

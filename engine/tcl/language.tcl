@@ -331,7 +331,7 @@ namespace eval language {
 
     # Return the namespace for language or raise an error
     #
-    variable lns [dict create c c c++ c++]
+    variable lns [dict create c c c++ c++ tcl tcl]
     proc support { lang } {
 	variable lns
 

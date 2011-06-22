@@ -192,7 +192,7 @@ dotgen_clkratedefault(comp_s c)
       trate = type_constvalue(prop_value(tp));
       if (const_convert(&trate, CST_FLOAT)) assert(0);
 
-      a = period;	b = trate.f * 1e6;
+      a = period;	b = trate.f * 1e6 + 0.5;
       while(1) {
 	r = a % b;
 	if (r == 0) { period = b; break; }

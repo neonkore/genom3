@@ -67,6 +67,7 @@ AC_CONFIG_LIBOBJ_DIR([compat])
 AC_REPLACE_FUNCS([strlcpy strlcat getline])
 AC_CHECK_FUNCS([asprintf vasprintf])
 AC_SEARCH_LIBS([dlopen], [dl])
+AC_HEADER_SYS_WAIT
 
 # documentation (re)generation
 AC_ARG_ENABLE(docgen,
@@ -112,6 +113,18 @@ if test x"${ac_cv_genom_cpp_gen}" = "xwith -xc"; then
 fi
 
 AC_DEFINE_UNQUOTED([CPP],["$gencpp"],[Configured CPP program])
+
+# C compiler features
+AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
+  AC_COMPILE_IFELSE([
+        #define macro(...) func(__VA_ARGS__)
+        int func(int a, ...);
+        int test() { return macro(1, 2, 3); }
+        ], [ ac_cv_have_variadic=yes ], [ ac_cv_have_variadic=no ])])
+if test $ac_cv_have_variadic = yes ; then
+  AC_DEFINE([HAVE_CPP_VARARG_MACRO_GCC], 1,
+    [Define to 1 if your compiler supports C99 variadic macros])
+fi
 
 # tcl configuration
 if test x"$use_tcl" = xyes; then
@@ -178,6 +191,7 @@ AC_CONFIG_FILES([
 	templates/mappings/Makefile
 	templates/skeleton/Makefile
 	doc/Makefile
+	pcpp/Makefile
 	regress/Makefile
 ])
 AC_OUTPUT

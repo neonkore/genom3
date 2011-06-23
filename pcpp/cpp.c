@@ -59,8 +59,8 @@ static usch	sbf[SBSIZE];
 /* C command */
 
 int tflag;	/* traditional cpp syntax */
-#ifdef CPP_DEBUG
 int dflag;	/* debug printouts */
+#ifdef CPP_DEBUG
 #define	DPRINT(x) if (dflag) printf x
 #define	DDPRINT(x) if (dflag > 1) printf x
 #else

@@ -51,6 +51,7 @@ extern struct runopt_s {
 } runopt;
 
 void	xwarnx(const char *fmt, ...);
+void	xwarnx_verbosity(int verbose);
 void	xmsg(const char *pfix, const char *fmt, ...);
 
 int	cpp_optappend(const char *opt, int index);

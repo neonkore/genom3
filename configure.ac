@@ -182,6 +182,7 @@ fi
 AC_CONFIG_FILES([
 	genom3.pc
 	Makefile
+	compat/Makefile
 	src/Makefile
 	engine/tcl/Makefile
 	runtime/genom3/c/Makefile

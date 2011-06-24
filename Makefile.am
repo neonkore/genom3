@@ -31,6 +31,7 @@ if WITH_TCL
 endif
 
 SUBDIRS=\
+	compat			\
 	src			\
 	$(TCLDIR)		\
 	runtime/genom3/c	\
@@ -38,11 +39,6 @@ SUBDIRS=\
 	pcpp			\
 	doc			\
 	regress
-
-EXTRA_DIST=\
-	compat/getline.c	\
-	compat/strlcat.c	\
-	compat/strlcpy.c
 
 
 # distcheck configuration

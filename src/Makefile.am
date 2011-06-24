@@ -45,7 +45,7 @@ genom3_SOURCES=\
 
 genom3_YFLAGS= -v -d
 genom3_CFLAGS = $(PTHREAD_CFLAGS)
-genom3_LDADD = libmain.a $(PTHREAD_LIBS) $(LIBOBJS)
+genom3_LDADD = ../compat/libcompat.a libmain.a $(PTHREAD_LIBS)
 genom3_LDFLAGS=	-export-dynamic
 
 # emulate per-file CPPFLAGS

@@ -80,6 +80,7 @@ main(int argc, char *argv[])
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
 
+  xwarnx_verbosity(0);
   runopt.verbose = 0;
   runopt.debug = 0;
   runopt.preproc = 0;
@@ -166,7 +167,7 @@ main(int argc, char *argv[])
 	runopt.preproc = 1;
 	break;
 
-      case 'v': runopt.verbose = 1; break;
+      case 'v': runopt.verbose = 1; xwarnx_verbosity(1); break;
       case 'd': {
 #ifndef NDEBUG
 	extern int dotgendebug;
@@ -295,24 +296,6 @@ done:
   else
     rmrfdir(runopt.tmpdir);
   return status;
-}
-
-
-/* --- xwarnx -------------------------------------------------------------- */
-
-/** warnx() if verbose option was given
- */
-
-void
-xwarnx(const char *fmt, ...)
-{
-  va_list va;
-
-  if (!runopt.verbose) return;
-
-  va_start(va, fmt);
-  vwarnx(fmt, va);
-  va_end(va);
 }
 
 

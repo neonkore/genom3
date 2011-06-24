@@ -1,4 +1,4 @@
-/*	$Id: token.c,v 1.48.2.2 2011/03/12 17:08:26 ragge Exp $	*/
+/*	$Id: token.c 2011/06/23 15:43:37 mallet $	*/
 
 /*
  * Copyright (c) 2004,2009 Anders Magnusson. All rights reserved.
@@ -40,7 +40,7 @@
  *	- unch() pushes back a character to the input stream.
  */
 
-#include "config.h"
+#include "acgenom.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -51,9 +51,9 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "compat.h"
+#include "genom.h"
 #include "cpp.h"
-#include "y.tab.h"
+#include "genom_pcpp-cpy.h"
 
 static void cvtdig(int rad);
 static int charcon(usch *);

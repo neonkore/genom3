@@ -1,4 +1,4 @@
-/*	$Id: cpp.h,v 1.47.2.1 2011/02/26 06:36:40 ragge Exp $	*/
+/*	$Id: cpp.h 2011/06/23 14:58:09 mallet $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -28,7 +28,7 @@
 #include <stdio.h> /* for obuf */
 #include <stdlib.h>
 
-#include "config.h"
+#include "acgenom.h"
 
 typedef unsigned char usch;
 extern usch yytext[];

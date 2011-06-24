@@ -1,4 +1,4 @@
-/*	$Id: cpp.c,v 1.124.2.2 2011/03/27 13:17:19 ragge Exp $	*/
+/*	$Id: cpp.c 2011/06/23 15:43:15 mallet $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -31,7 +31,7 @@
  * from V7 cpp, and at last ansi/c99 support.
  */
 
-#include "config.h"
+#include "acgenom.h"
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -49,9 +49,9 @@
 #include <time.h>
 #include <ctype.h>
 
-#include "compat.h"
+#include "genom.h"
 #include "cpp.h"
-#include "y.tab.h"
+#include "genom_pcpp-cpy.h"
 
 #define	SBSIZE	1000000
 
@@ -190,7 +190,7 @@ main(int argc, char **argv)
 			break;
 #endif
 		case 'v':
-			printf("cpp: %s\n", VERSSTR);
+			printf("genom-pcpp: %s\n", PACKAGE_VERSION);
 			break;
 		case 'd':
 			if (optarg[0] == 'M') {

@@ -44,6 +44,7 @@ extern struct runopt_s {
   char sysdir[PATH_MAX];/** system files directory */
   char tmpdir[PATH_MAX];/** temporary directory */
   int cppdotgen;	/** cpp accepts .gen file extension */
+  char cpppath[PATH_MAX];/** genom cpp preprocessor */
 
   const char *genom;	/** Executable path */
   const char *cmdline;	/** Relevant options to genom to register */

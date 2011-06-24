@@ -38,9 +38,6 @@
 
 /* --- local data ---------------------------------------------------------- */
 
-static const char *	cpp_execpath(void);
-
-
 /** options array to pass to cpp */
 static char **cppopts = NULL;
 
@@ -89,7 +86,7 @@ cpp_invoke(const char *in, int out)
   int s, n;
 
   /* get cpp executable */
-  cpp = strdup(cpp_execpath());
+  cpp = strdup(runopt.cpppath);
   if (!cpp || cpp[0] == '\0') {
     warnx("memory exhausted, cannot run cpp");
     return ENOMEM;
@@ -289,21 +286,4 @@ cpp_wait()
 
   xwarnx("cpp process exited with code %d", WEXITSTATUS(status));
   return 0;
-}
-
-
-/* --- cpp_execpath -------------------------------------------------------- */
-
-/** Return the path to the CPP executable.
- *
- * If CPP is defined in the environment, return that. Otherwise, use
- * compile-time default.
- */
-static const char *
-cpp_execpath()
-{
-  const char *p = getenv("CPP");
-  if (p) return p;
-
-  return CPP;
 }

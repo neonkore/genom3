@@ -14,6 +14,10 @@ AM_INIT_AUTOMAKE([foreign no-define subdir-objects])
 # define the genom executable name
 AC_SUBST(GENOM_TOOL, [genom${PACKAGE_VERSION}])
 
+# define the genom-pcpp path
+cpppath='${libexecdir}/genom-pcpp'
+AC_SUBST(cpppath)
+
 # define a temporary directory
 AC_DEFINE([TMPDIR],["/tmp"],[Default temporary directory])
 
@@ -42,7 +46,6 @@ AM_CONDITIONAL([WITH_TCL], [test "$use_tcl" = yes])
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CXX
-AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
@@ -86,33 +89,6 @@ AM_CONDITIONAL([REGEN_DOC_HTML],
 AM_CONDITIONAL([REGEN_DOC_TXT],
   [test "$enable_docgen" = yes -a \
 	"$Y2L" != ":" -a "$PDFLATEX" != ":" -a "$TTH" != ":" -a "$W3M" != ":"])
-
-
-# test that cpp accepts .gen files, maybe with -xc
-AC_CACHE_CHECK([whether ${CPP} accepts .gen file extension],
-  ac_cv_genom_cpp_gen,
-  [
-    echo TEST >conftest.gen
-    if ${CPP} -DTEST=yes conftest.gen 2>&1 | grep yes >/dev/null; then
-      ac_cv_genom_cpp_gen=yes
-    elif ${CPP} -xc -DTEST=yes conftest.gen 2>&1 | grep yes >/dev/null; then
-      ac_cv_genom_cpp_gen="with -xc"
-    else
-      ac_cv_genom_cpp_gen=no
-    fi
-    rm -f conftest.gen
-  ]
-)
-
-gencpp=$CPP
-if test x"${ac_cv_genom_cpp_gen}" != xno; then
-  AC_DEFINE([CPP_DOTGEN],[1],[Whether CPP accepts .gen file extension])
-fi
-if test x"${ac_cv_genom_cpp_gen}" = "xwith -xc"; then
-  gencpp="$gencpp -xc"
-fi
-
-AC_DEFINE_UNQUOTED([CPP],["$gencpp"],[Configured CPP program])
 
 # C compiler features
 AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
@@ -202,9 +178,6 @@ AC_OUTPUT
 summary=["
 ----------------------------------------------------------------------------
 Summary of build options:
-
-Cpp program:			$CPP
-    cpp handles .gen extension:	$ac_cv_genom_cpp_gen
 
 Tcl generator engine:		$use_tcl"]
 

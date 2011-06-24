@@ -6,7 +6,7 @@ cat >run.gen <<EOF
 # define PREPROCESS_TEST	hello
 # include "run.gen"
 #else
-PREPROCESS_TEST  __GENOM__ CMDLINE_MACRO
+PREPROCESS_TEST __GENOM__ CMDLINE_MACRO
 #endif
 EOF
 

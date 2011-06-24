@@ -80,6 +80,9 @@ main(int argc, char *argv[])
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
 
+  optarg = getenv("CPP");
+  strlcpy(runopt.cpppath, optarg?optarg:CPPPATH, sizeof(runopt.cpppath));
+
   xwarnx_verbosity(0);
   runopt.verbose = 0;
   runopt.debug = 0;
@@ -90,11 +93,7 @@ main(int argc, char *argv[])
   runopt.cmdline = string("");
   runopt.notice = NULL;
 
-#ifdef CPP_DOTGEN
   runopt.cppdotgen = getenv("CPP")?0:1;
-#else
-  runopt.cppdotgen = 0;
-#endif
   s = cpp_optappend("-D__GENOM__=" PACKAGE_VERSION, -1);
   if (s < 0) {
     warnx("cannot set default cpp options");

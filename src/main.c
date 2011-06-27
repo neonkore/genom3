@@ -93,7 +93,7 @@ main(int argc, char *argv[])
   runopt.cmdline = string("");
   runopt.notice = NULL;
 
-  runopt.cppdotgen = getenv("CPP")?0:1;
+  runopt.cppdotgen = 1;
   s = cpp_optappend("-D__GENOM__=" PACKAGE_VERSION, -1);
   if (s < 0) {
     warnx("cannot set default cpp options");
@@ -141,11 +141,6 @@ main(int argc, char *argv[])
       case 'r':
 	runopt.cppdotgen = 0;
 	runopt.cmdline = strings(runopt.cmdline, " -r", NULL);
-	break;
-
-      case -'r':
-	runopt.cppdotgen = 1;
-	runopt.cmdline = strings(runopt.cmdline, " --no-rename", NULL);
 	break;
 
       case 'l':

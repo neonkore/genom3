@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -155,19 +155,11 @@ options will only affect the template behaviour.
      also the environment variable \tt TMPDIR\rm.
 
 \arg r rename
-     always invoke cpp with a .c file linked to input file
+     always invoke cpp with a .c file linked to the input file
 
      Some \tt cpp\rm programs cannot handle correctly files with a \tt .gen\rm
      extension. This option will make genom call cpp with an input file ending
      in \tt .c\rm, linked to the real input file.
-
-\arg -'r' no-rename
-     pass input file directly to cpp (opposite of -r)
-
-     This option is the opposite of \tt -r\rm: it forces genom to invoke \tt
-     cpp\rm directly with the \tt .gen\rm input file. This is the default
-     behaviour. If you are using GNU cpp, it might be necessary to pass it the
-     additional \tt -xc\rm option, to force it to handle the file as C source.
 
 \arg v verbose
      produce verbose output

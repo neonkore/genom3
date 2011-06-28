@@ -367,6 +367,7 @@ typedef struct service_s *service_s;
 typedef struct param_s *param_s;
 
 comp_s		comp_active(void);
+void		comp_setactive(comp_s c);
 comp_s		comp_first(void);
 comp_s		comp_next(comp_s c);
 comp_s		comp_get(const char *name);

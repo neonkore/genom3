@@ -18,6 +18,7 @@
 #
 TESTS=	basics/cpp.test
 TESTS+=	basics/parser.test
+TESTS+=	basics/require.test
 
 if WITH_TCL
   TESTS+=	templates/mappings.test
@@ -48,6 +49,7 @@ export AWK
 export CPP=${top_builddir}/pcpp/genom-pcpp
 export CC
 export CXX
+export PKG_CONFIG
 export GENOM_BIN=${top_builddir}/src/genom3 \
 		-s ${top_builddir}/engine -t ${top_srcdir}/templates
 

@@ -30,6 +30,7 @@
 %{
 #include "acgenom.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <string.h>
 #include <err.h>
@@ -40,6 +41,7 @@
 
    static size_t	dotgen_read(char *buffer, size_t max_size);
    static void		dotgen_parsehash(char *buffer);
+   static void		dotgen_parsepragmarequire(char *buffer);
 
 #define YY_INPUT(buf, result, max) ((result) = dotgen_read(buf, max))
 
@@ -77,6 +79,16 @@ chartext	([^\'])|(\\.)
 
 ^[ \t]*#[ \t]*[0-9]+[ \t]*\n {
   dotgen_parsehash(yytext);
+}
+
+^[ \t]*#[ \t]*pragma[ \t]+require[ \t].*\n {
+  dotgen_parsepragmarequire(yytext);
+  curloc.line++; curloc.col = 0; *yylloc_param = curloc;
+}
+
+^[ \t]*#.*\n {
+  /* ignore unknown directives */
+  curloc.line++; curloc.col = 0; *yylloc_param = curloc;
 }
 
  /* ignore whitespace, as in any decent language. */
@@ -335,4 +347,72 @@ dotgen_parsehash(char *buffer)
   curloc.file = string(file);
   curloc.line = line;
   curloc.col = 1;
+}
+
+
+/* --- dotgen_parsepragmarequire ------------------------------------------- */
+
+static hash_s hrequire;
+
+
+/** Parse #pragma require directives
+ */
+static void
+dotgen_parsepragmarequire(char *buffer)
+{
+  const char *delim;
+  char *p, *arg;
+  hash_s h;
+  prop_s prop;
+  clist_s cl;
+  cval cv;
+
+  p = strstr(buffer, "require");
+  assert(p);
+  p+=7;
+
+  cl = NULL;
+  while(*p) {
+    p += strspn(p, " \t\n");
+    if (*p == 0) break;
+
+    if (*p == 'L' && p[1] == '\"') p++;
+    if (*p == '\"') { p++; delim = "\""; } else delim = " \t\n";
+    arg = p;
+    do {
+      p += strspn(p, delim);
+      p += strcspn(p, delim);
+    } while (p[-1] == '\\');
+    if (*p) *p++ = 0;
+
+    xwarnx("creating global require property '%s'", arg);
+    cv.k = CST_STRING;
+    cv.s = string(arg);
+    cl = clist_append(cl, cv, 0);
+  }
+
+  /* create a new hash of REQUIRE properties */
+  h = hash_create("pragma require", 1);
+  if (!h) {
+    parserror(curloc, "dropped #pragma require");
+    return;
+  }
+
+  prop = prop_newrequire(curloc, PROP_REQUIRE, cl);
+  if (hash_insert(h, prop_name(prop), prop, (hrelease_f)prop_destroy)) {
+    parserror(curloc, "dropped #pragma require");
+    return;
+  }
+
+  if (!hrequire) { hrequire = h; return; }
+
+  if (prop_merge(hrequire, h))
+    parserror(curloc, "dropped #pragma require");
+  hash_destroy(h, 1);
+}
+
+hash_s
+dotgen_hrequire()
+{
+  return hrequire;
 }

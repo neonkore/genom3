@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -67,6 +67,25 @@ expect() {
 	echo no output produced
     fi
     echo expecting "$@"
+    echo test failed
+    return 2
+}
+
+# cmp stdin with the speficied file
+require() {
+    file=$1; shift
+    cat >run.data
+    if test -s run.$file; then
+	if cmp run.data run.$file; then
+	    return 0
+	fi
+	echo wrong output produced:
+	cat run.$file
+    else
+	echo no output produced
+    fi
+    echo expecting:
+    cat run.data
     echo test failed
     return 2
 }

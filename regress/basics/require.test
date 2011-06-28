@@ -1,0 +1,39 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+cat >run.gen <<EOF
+#pragma require x "x > 0"
+
+component a;
+component b { require: "x"; };
+component c { require: "x > 0"; };
+EOF
+
+mkdir -p run.t
+cat >run.t/x.pc <<EOF
+Name: x
+Description:
+Version: 1
+EOF
+
+testing '#pragma require'
+run 0 env PKG_CONFIG_PATH=run.t ${GENOM_BIN} -N run.gen
+require out <<EOF
+component a {
+  require:
+    "x",
+    "x > 0";
+};
+
+component b {
+  require:
+    "x",
+    "x > 0";
+};
+
+component c {
+  require:
+    "x > 0",
+    "x";
+};
+EOF

@@ -64,6 +64,8 @@ int	cpp_wait(void);
 
 /* --- parsers ------------------------------------------------------------- */
 
+typedef struct hash_s *hash_s;
+
 typedef struct tloc {
   char *file;
   int line, col;
@@ -77,6 +79,8 @@ typedef enum dotgen_input_kind {
 void	dotgen_input(dotgen_input_kind k, ...);
 int	dotgenparse(void);
 int	dotgen_consolidate(void);
+hash_s	dotgen_hrequire(void);
+
 void	parserror(tloc l, const char *fmt, ...);
 void	parsenoerror(tloc l, const char *fmt, ...);
 void	parsewarning(tloc l, const char *fmt, ...);
@@ -84,7 +88,6 @@ void	parsewarning(tloc l, const char *fmt, ...);
 
 /* --- hash tables --------------------------------------------------------- */
 
-typedef struct hash_s *hash_s;
 typedef struct hentry_s *hentry_s;
 typedef void (*hrelease_f)(void *);
 typedef struct hiter {

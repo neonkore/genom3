@@ -45,6 +45,7 @@ static int dotgen_clkratedefault(comp_s c);
 int
 dotgen_consolidate()
 {
+  hash_s hrequire;
   hash_s types = type_all();
   comp_s c;
   prop_s p;
@@ -68,6 +69,16 @@ dotgen_consolidate()
 
 	default: break;
       }
+    }
+  }
+
+  /* apply #pragma require declarations */
+  hrequire = dotgen_hrequire();
+  if (hrequire) {
+    for(c = comp_first(); c; c = comp_next(c)) {
+      xwarnx("merging global require property in component '%s'", comp_name(c));
+      comp_setactive(c);
+      e |= prop_merge(comp_props(c), hrequire);
     }
   }
 

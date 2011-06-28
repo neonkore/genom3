@@ -385,6 +385,18 @@ prop_merge(hash_s p, hash_s m)
 	  break;
 	}
 
+	case PROP_REQUIRE: {
+          clist_s n, l = prop_list(q); assert(l);
+          citer k;
+          for(clist_first(prop_list(i.value), &k); k.current; clist_next(&k)) {
+            n = clist_append(l, *k.value, 1);
+            if (n) l = n;
+          }
+          q->clist = l;
+          e = 0;
+          break;
+        }
+
 	case PROP_IDS: /* handled above */
 	case PROP_ATTRIBUTE: e = 0; break;
 

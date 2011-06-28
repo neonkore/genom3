@@ -1,0 +1,16 @@
+
+# 1 "<stdin>"
+
+#pragma require x "x < 2"
+
+# 1 "<stdin>"
+
+1
+2
+"3"
+
+# 1 "../pcpp/data100"
+data100
+
+# 5 "<stdin>"
+

@@ -1,4 +1,4 @@
-/*	$Id: cpp.h 2011/06/23 14:58:09 mallet $	*/
+/*	$Id: cpp.h 2011/06/28 14:27:46 mallet $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -182,3 +182,7 @@ void xerror(usch *);
 #endif
 int cinput(void);
 void getcmnt(void);
+
+void addpkgidir(char *idir);
+void addpkgdef(char *def);
+void pragmaimpl(usch *p);

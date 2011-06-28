@@ -1,0 +1,4 @@
+Name: x
+Description: genom-pcpp #pragma require regression test
+Version: 1.0
+Cflags: -I.. -DC1 -DC2=2 -DC3='"3"'

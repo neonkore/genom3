@@ -24,7 +24,8 @@ genom_pcpp_SOURCES=\
 	cpp.c		\
 	cpp.h		\
 	cpy.y		\
-	token.c
+	token.c		\
+	pragma.c
 
 genom_pcpp_YFLAGS=	-v -d
 genom_pcpp_CPPFLAGS=	-I$(top_srcdir)/src
@@ -32,7 +33,7 @@ genom_pcpp_LDADD=	../compat/libcompat.a
 
 genom_pcpp-token.o genom_pcpp-cpp.o: genom_pcpp-cpy.h
 
-# regression tests
+# regression tests - from vendor pcc
 TESTS=	tests/test1 tests/test2 tests/test3 tests/test4	tests/test5 tests/test6
 TESTS+=	tests/test7 tests/test8 tests/test9 tests/test10 tests/test11
 TESTS+=	tests/test12 tests/test13
@@ -45,10 +46,27 @@ EXTRA_DIST+=	tests/res11 tests/res12 tests/res13
 CLEANFILES=	run1 run2 run3 run4 run5 run6 run7 run8 run9 run10 run11 run12
 CLEANFILES+=	run13
 
+# regression tests - for specific additions
+TESTS+=		tests/test100 tests/test101 tests/test102
+XFAIL_TESTS=	tests/test101 tests/test102
+
+EXTRA_DIST+=	tests/res100
+EXTRA_DIST+=	tests/x.pc
+
+CLEANFILES+=	run100 data100 run101 run102
+
+tests/test100: data100
+data100:
+	echo $@>$@
+
+# running the tests
 TEST_IN=	$$0
 TEST_OUT=	./run$${0\#\#*test}
 TEST_RES=	$${0%test*}res$${0\#\#*test}
 TEST_RUN=	./genom-pcpp <${TEST_IN} >${TEST_OUT}
 TEST_CMP=	cmp ${TEST_OUT} ${TEST_RES}
 
-TESTS_ENVIRONMENT=	$(SHELL) -c '${TEST_RUN} && ${TEST_CMP}'
+TESTS_ENVIRONMENT=	env
+TESTS_ENVIRONMENT+=	PKG_CONFIG=$(PKG_CONFIG)
+TESTS_ENVIRONMENT+=	PKG_CONFIG_PATH=$(srcdir)/tests
+TESTS_ENVIRONMENT+=	$(SHELL) -c '${TEST_RUN} && ${TEST_CMP}'

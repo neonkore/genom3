@@ -1,4 +1,4 @@
-/*	$Id: token.c 2011/06/23 15:43:37 mallet $	*/
+/*	$Id: token.c 2011/06/28 15:08:32 mallet $	*/
 
 /*
  * Copyright (c) 2004,2009 Anders Magnusson. All rights reserved.
@@ -1194,18 +1194,28 @@ static void
 pragmastmt(void)
 {
 	int c;
+	usch *cp;
 
 	if (sloscan() != WSPACE)
 		error("bad pragma");
 	if (!flslvl)
 		putstr((const usch *)"\n#pragma ");
+
+	cp = stringbuf;
 	do {
 		c = inch();
 		if (!flslvl)
 			putch(c);	/* Do arg expansion instead? */
+		savch(c);
 	} while (c && c != '\n');
-	if (c == '\n')
+	savch(0);
+	if (c == '\n') {
 		unch(c);
+		--stringbuf;
+		stringbuf[-1] = 0;
+	}
+	if (!flslvl)
+		pragmaimpl(cp);
 	prtline();
 }
 

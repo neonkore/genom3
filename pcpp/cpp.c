@@ -1,4 +1,4 @@
-/*	$Id: cpp.c 2011/06/23 15:43:15 mallet $	*/
+/*	$Id: cpp.c 2011/06/28 14:59:48 mallet $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -988,6 +988,7 @@ static void
 pragoper(void)
 {
 	usch *s;
+	usch *cp;
 	int t;
 
 	while ((t = sloscan()) != '(')
@@ -998,6 +999,7 @@ pragoper(void)
 	if (t != STRING)
 		error("pragma must have string argument");
 	savstr((const usch *)"\n#pragma ");
+        cp = stringbuf;
 	s = (usch *)yytext;
 	if (*s == 'L')
 		s++;
@@ -1008,6 +1010,8 @@ pragoper(void)
 			s++;
 		savch(*s);
 	}
+	savch(0);
+	pragmaimpl(cp);
 	sheap("\n# %d \"%s\"\n", ifiles->lineno, ifiles->fname);
 	while ((t = sloscan()) == WSPACE)
 		;
@@ -1968,4 +1972,37 @@ xstrdup(const usch *str)
 		error("xstrdup: out of mem");
 	strlcpy((char *)rv, (const char *)str, len);
 	return rv;
+}
+
+
+void
+addpkgidir(char *idir)
+{
+  addidir(strdup(idir), &incdir[INCINC]);
+}
+
+void
+addpkgdef(char *def)
+{
+  struct symtab *nl;
+  char *eq, *s, *qu;
+
+  eq = strchr(def, '=');
+  if (eq) {
+    *eq = 0;
+    for(s = qu = eq+1; *s; s++) {
+      if (*s == '\\' && s[1] != '\\') continue;
+      *qu++ = *s;
+    }
+    *qu = 0;
+  }
+
+  nl = lookup((usch *)def, ENTER);
+  savch(0);
+  if (eq) {
+    savstr((const usch *)eq+1);
+  } else
+    savch('1');
+  savch(OBJCT);
+  nl->value = stringbuf-1;
 }

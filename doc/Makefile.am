@@ -27,7 +27,8 @@
 dist_doc_DATA=\
 	genom.pdf		\
 	genom.html		\
-	genom.txt
+	genom.txt		\
+	$(top_srcdir)/COPYING
 
 # Manuals are always regenerated (no fancy dependency for those).
 #

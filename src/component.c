@@ -171,7 +171,7 @@ tmpl_create(tloc l, const char *name, hash_s props)
 static comp_s
 comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
 {
-  comp_s c;
+  comp_s c, t;
   prop_s p;
   hiter i;
   int e;
@@ -258,8 +258,11 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
   }
 
   /* link component to others */
-  c->next = clist;
-  clist = c;
+  c->next = NULL;
+  if (!clist) clist = c; else {
+    for(t = clist; t->next; t = t->next) /* empty body */;
+    t->next = c;
+  }
   comp_setactive(c);
 
   /* define internal event type */
@@ -979,4 +982,100 @@ comp_applytmpl()
   }
 
   return e;
+}
+
+
+/* --- comp_dumpall -------------------------------------------------------- */
+
+/** Dump all components as a dotgen specification.
+ */
+int
+comp_dumpall(FILE *out)
+{
+  comp_s c;
+  for(c = clist; c; c = c->next) {
+    comp_dump(c, stdout);
+    if (c->next) fputs("\n", out);
+  }
+
+  return 0;
+}
+
+
+/* --- comp_dump ----------------------------------------------------------- */
+
+/** Dump component description as a dotgen specification.
+ */
+int
+comp_dump(comp_s c, FILE *out)
+{
+  const char *indent = "  ";
+  const char *brace = " {\n";
+  const char *colon = NULL;
+
+  hash_s props;
+  hiter i, j;
+  citer k;
+  cval v;
+
+  fprintf(out, "%s %s",
+          comp_kind(c) == COMP_REG ? "component":"template", comp_name(c));
+
+#define poptbrace                                                       \
+  do { if (brace) { fputs(brace, out); brace = NULL; } } while(0)
+
+  props = comp_props(c);
+  if (props)
+    for(hash_first(props, &i); i.current; hash_next(&i)) {
+      switch(prop_kind(i.value)) {
+	case PROP_DOC:
+        case PROP_VERSION:
+	case PROP_LANG:
+        case PROP_EMAIL:
+          poptbrace;
+          fprintf(out, "%s%s:\t\"%s\";\n", indent,
+                  prop_strkind(prop_kind(i.value)), prop_text(i.value));
+          break;
+
+        case PROP_REQUIRE:
+	case PROP_BUILD_REQUIRE:
+          poptbrace;
+          fprintf(out, "%s%s:\n", indent, prop_strkind(prop_kind(i.value)));
+          colon = NULL;
+          for(clist_first(prop_list(i.value), &k); k.current; clist_next(&k)) {
+            if (colon) fputs(colon, out);
+            fprintf(out, "%1$s%1$s\"%2$s\"", indent, k.value->s);
+            colon = ",\n";
+          }
+          fputs(";\n", out);
+          break;
+
+        case PROP_THROWS:
+          poptbrace;
+          fprintf(out, "%s%s:\n", indent, prop_strkind(prop_kind(i.value)));
+          colon = NULL;
+          for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
+            if (colon) fputs(colon, out);
+            fprintf(out, "%1$s%1$s\"%2$s\"", indent, j.key);
+            colon = ",\n";
+          }
+          fputs(";\n", out);
+          break;
+
+        case PROP_CLOCKRATE:
+          poptbrace;
+          v = type_constvalue(prop_value(i.value));
+          if (const_convert(&v, CST_FLOAT)) break;
+          fprintf(out, "%s%s:\t%gs\n", indent,
+                  prop_strkind(prop_kind(i.value)), v.f);
+	  break;
+
+        default: break;
+      }
+    }
+#undef poptbrace
+
+  if (!brace) fputs("}", out);
+  fprintf(out, ";\n");
+  return 0;
 }

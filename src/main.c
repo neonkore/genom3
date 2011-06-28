@@ -150,9 +150,15 @@ main(int argc, char *argv[])
 	break;
 
       case 'n':
-	if (runopt.list || runopt.preproc)
+	if (runopt.list || runopt.preproc || runopt.parse > 1)
 	  errx(2, "mutually exclusive options near '%s'", argv[optind-1]);
 	runopt.parse = 1;
+	break;
+
+      case 'N':
+	if (runopt.list || runopt.preproc || runopt.parse == 1)
+	  errx(2, "mutually exclusive options near '%s'", argv[optind-1]);
+	runopt.parse = 2;
 	break;
 
       case 'E':
@@ -272,6 +278,7 @@ main(int argc, char *argv[])
   }
 
   if (status) goto done;
+  if (runopt.parse > 1) status = comp_dumpall(stdout);
   if (runopt.parse) goto done;
 
   /* invoke template */

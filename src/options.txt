@@ -116,6 +116,15 @@ options will only affect the template behaviour.
      or warning are reported and genom exits with a non-zero status if there
      are errors.
 
+\arg N dump
+     stop after parsing stage and dump specification
+
+     Stop after the input file parsing stage, do not invoke any template and
+     dump the parsed specification in dotgen format. This is mostly useful for
+     debugging genom itself or to view the actual specification built by genom
+     from a complex (set of) file(s). Any errors or warning are reported and
+     genom exits with a non-zero status if there are errors.
+
 \arg l list
      list available templates
 

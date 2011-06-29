@@ -385,7 +385,7 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
       case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
       case PROP_CODEL: case PROP_DOC: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
       case PROP_TASK: case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
       case PROP_AFTER:
 	break;
@@ -449,7 +449,7 @@ engine_gentask(Tcl_Interp *interp, Tcl_Interp *slave, task_s t)
 
       case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
       case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
-      case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE: case PROP_SCHEDULING:
+      case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE: case PROP_SCHEDULING:
       case PROP_TASK: case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
       case PROP_AFTER:
 	break;
@@ -520,7 +520,7 @@ engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave, service_s s)
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
       case PROP_SCHEDULING: case PROP_STACK: case PROP_DOC: case PROP_IDS:
       case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-      case PROP_REQUIRE: case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
+      case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
       case PROP_TASK: case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
       case PROP_AFTER:
 	break;

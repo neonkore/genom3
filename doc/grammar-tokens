@@ -3,7 +3,7 @@ ANY		any
 ATTRIBUTE	attribute
 BEFORE		before
 BOOLEAN		boolean
-BUILDREQUIRE	build-require
+CODELSREQUIRE	codels-require
 CASE		case
 CHAR		char
 CHAR_LIT	<char_literal>

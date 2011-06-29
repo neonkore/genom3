@@ -105,7 +105,7 @@ dotgen_consolidate()
 	  case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
 	  case PROP_SCHEDULING: case PROP_STACK: case PROP_DOC: case PROP_IDS:
 	  case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
-	  case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+	  case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
 	  case PROP_CLOCKRATE: case PROP_TASK: case PROP_VALIDATE:
 	  case PROP_CODEL: case PROP_THROWS:
 	    break;

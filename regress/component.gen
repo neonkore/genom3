@@ -34,7 +34,7 @@ component c {
   lang:		"c";
 
   require:	"a", "b", "c";
-  build-require:"d", "e";
+  codels-require:"d", "e";
 };
 
 ids {

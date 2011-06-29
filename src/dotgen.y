@@ -92,7 +92,7 @@
 %token <s>	S MS US K M REAL_TIME
 %token <s>	TEMPLATE COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT
 %token <s>	INOUT IDS ATTRIBUTE INPUT OUTPUT EVENT DATA VERSION LANG EMAIL
-%token <s>	REQUIRE BUILDREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
+%token <s>	REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
 %token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 
 %type <i>	start spec idlspec statement idlstatement genomstatement
@@ -373,10 +373,10 @@ attr:
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newrequire(@1, PROP_REQUIRE, $3);
   }
-  | BUILDREQUIRE ':' string_list
+  | CODELSREQUIRE ':' string_list
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newrequire(@1, PROP_BUILD_REQUIRE, $3);
+    $$ = prop_newrequire(@1, PROP_CODELS_REQUIRE, $3);
   }
   | CLOCKRATE ':' const_expr time_unit
   {
@@ -1557,7 +1557,7 @@ size_unit:
 identifier:
   IDENTIFIER | S | MS | US | K | M | REAL_TIME
   | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
-  | BUILDREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
+  | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
   | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
   | AFTER | EVENT | DATA | INPORT | OUTPORT | IN | OUT | INOUT
   | error

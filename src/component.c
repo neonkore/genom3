@@ -205,7 +205,7 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
       switch(prop_kind(i.value)) {
 	case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
 	case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE: case PROP_THROWS:
-	case PROP_BUILD_REQUIRE: case PROP_CLOCKRATE:
+	case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
 	  break;
 
 	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
@@ -532,7 +532,7 @@ comp_addtask(tloc l, const char *name, hash_s props)
 	break;
 
       case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
       case PROP_CLOCKRATE: case PROP_TASK: case PROP_VALIDATE:
       case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
 	parserror(prop_loc(i.value), "property %s is not suitable for tasks",
@@ -664,7 +664,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	break;
 
       case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_BUILD_REQUIRE:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
       case PROP_CLOCKRATE: case PROP_PERIOD: case PROP_DELAY:
       case PROP_PRIORITY: case PROP_SCHEDULING: case PROP_STACK:
 	parserror(prop_loc(i.value), "property %s is not suitable for services",
@@ -1038,7 +1038,7 @@ comp_dump(comp_s c, FILE *out)
           break;
 
         case PROP_REQUIRE:
-	case PROP_BUILD_REQUIRE:
+	case PROP_CODELS_REQUIRE:
           poptbrace;
           fprintf(out, "%s%s:\n", indent, prop_strkind(prop_kind(i.value)));
           colon = NULL;

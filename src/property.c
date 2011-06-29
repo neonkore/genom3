@@ -42,7 +42,7 @@ struct prop_s {
   union {
     idltype_s type;	/**< IDS */
     const char *text;	/**< doc, version, e-mail, lang */
-    clist_s clist;	/**< require, build-require */
+    clist_s clist;	/**< require, codels-require */
     idltype_s value;	/**< clock-rate, period, delay, priority, stack */
     codel_s codel;	/**< codel */
     hash_s hash;	/**< attribute, throws */
@@ -245,7 +245,7 @@ clist_s
 prop_list(prop_s p)
 {
   assert(p);
-  assert(p->kind == PROP_REQUIRE || p->kind == PROP_BUILD_REQUIRE);
+  assert(p->kind == PROP_REQUIRE || p->kind == PROP_CODELS_REQUIRE);
   return p->clist;
 }
 
@@ -430,7 +430,7 @@ prop_strkind(propkind k)
     case PROP_LANG:		return "language";
     case PROP_EMAIL:		return "e-mail";
     case PROP_REQUIRE:		return "require";
-    case PROP_BUILD_REQUIRE:	return "build-require";
+    case PROP_CODELS_REQUIRE:	return "codels-require";
     case PROP_CLOCKRATE:	return "clock-rate";
     case PROP_PERIOD:		return "period";
     case PROP_DELAY:		return "delay";

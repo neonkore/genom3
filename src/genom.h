@@ -318,7 +318,7 @@ typedef enum propkind {
   PROP_EMAIL,		/**< support e-mail */
 
   PROP_REQUIRE,		/**< run-time requirements */
-  PROP_BUILD_REQUIRE,	/**< build requirements */
+  PROP_CODELS_REQUIRE,	/**< codels requirements */
 
   PROP_CLOCKRATE,	/**< clock rate */
   PROP_PERIOD,		/**< period */

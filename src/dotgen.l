@@ -162,7 +162,7 @@ chartext	([^\'])|(\\.)
 "lang"		{ yylval->s = string(yytext); return LANG; }
 "email"		{ yylval->s = string(yytext); return EMAIL; }
 "require"	{ yylval->s = string(yytext); return REQUIRE; }
-"build-require"	{ yylval->s = string(yytext); return BUILDREQUIRE; }
+"codels-require" { yylval->s = string(yytext); return CODELSREQUIRE; }
 "clock-rate"	{ yylval->s = string(yytext); return CLOCKRATE; }
 "period"	{ yylval->s = string(yytext); return PERIOD; }
 "delay"		{ yylval->s = string(yytext); return DELAY; }

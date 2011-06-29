@@ -10,5 +10,5 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-GENOM_TOOL=${exec_prefix}/@GENOM_TOOL@
+GENOM_TOOL=${exec_prefix}/bin/@GENOM_TOOL@
 Cflags: -I${includedir}

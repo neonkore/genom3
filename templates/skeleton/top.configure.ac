@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -40,8 +40,8 @@ if {![catch {dotgen input notice} text]} {
 AC_PREREQ(2.59)
 
 AC_INIT([<"[$c name] codels">],[<"$version">],[<"$email">])
-AC_CONFIG_MACRO_DIR([build-aux])
-AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([autoconf])
+AC_CONFIG_AUX_DIR([autoconf])
 AM_INIT_AUTOMAKE([foreign no-define])
 
 
@@ -64,6 +64,18 @@ foreach l [lsort -unique $lang] {
 
 dnl External packages
 PKG_CHECK_MODULES(genom3, [genom3 >= 2.99.4])
+_PKG_CONFIG(genom3, [variable=GENOM_TOOL], [genom3 >= 2.99.4])
+AC_SUBST(genom3, [$pkg_cv_genom3])
+
+<'
+foreach c [dotgen components] {
+  foreach r [concat [$c require] [$c codels-require]] {
+    set pkg [string map {- _} [lindex $r 0]]
+'>
+PKG_CHECK_MODULES(<"$pkg">, [<"$r">])
+<'  }
+}
+'>
 
 
 dnl Output

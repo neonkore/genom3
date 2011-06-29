@@ -24,9 +24,12 @@
 #
 
 # generate copyright notice (if any)
-catch {puts [language comment shell [dotgen input notice]]}
+if {![catch {dotgen input notice} text]} {
+  puts #[join [split $text "\n"] "\n#"]
+}
 '>
-ACLOCAL_AMFLAGS=	-I build-aux
+
+ACLOCAL_AMFLAGS=	-I autoconf
 SUBDIRS=		codels
 
 <'set sources [list]
@@ -35,6 +38,6 @@ SUBDIRS=		codels
     lappend sources "lib[$c name]_codels.pc"
   }
 '>
-pkgconfigdir=   $(libdir)/pkgconfig
+pkgconfigdir=	$(libdir)/pkgconfig
 pkgconfig_DATA=\
 	<"[join $sources "\t\\\n\t"]">

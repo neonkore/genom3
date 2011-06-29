@@ -116,8 +116,8 @@ foreach c [dotgen components] {
 # generate user build files fragment
 #
 template parse perm a+x					\
-    string "mkdir -p build-aux\nautoreconf -vi\n"	\
-    file autogen.sh
+    string "#!/bin/sh\nmkdir -p autoconf\nautoreconf -vi\n"	\
+    file bootstrap.sh
 template parse						\
     args [list $lang] file top.configure.ac		\
     file configure.ac

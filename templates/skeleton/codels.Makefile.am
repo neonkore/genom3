@@ -28,8 +28,8 @@ if {[llength $argv] != 1} { error "expected argument: lang" }
 lassign $argv lang
 
 # generate copyright notice (if any)
-if {![catch {dotgen input notice} notice]} {
-  puts [comment "-# " $notice]
+if {![catch {dotgen input notice} text]} {
+  puts #[join [split $text "\n"] "\n#"]
 }
 
 lang $lang
@@ -54,14 +54,20 @@ lib_LTLIBRARIES = lib<"[$c name]">_codels.la
 lib<"[$c name]">_codels_la_SOURCES=\
 	<"[join $sources "\t\\\n\t"]">
 <'}'>
-lib<"[$c name]">_codels_la_CPPFLAGS=$(genom3_CFLAGS)
-lib<"[$c name]">_codels_la_LDFLAGS=-release $(PACKAGE_VERSION)
 
+lib<"[$c name]">_codels_la_CPPFLAGS=	$(genom3_CFLAGS)
+lib<"[$c name]">_codels_la_LDFLAGS=	-release $(PACKAGE_VERSION)
+
+<'foreach r [concat [$c require] [$c codels-require]] {
+  set pkg [string map {- _} [lindex $r 0]] '>
+lib<"[$c name]">_codels_la_CPPFLAGS+=	$(<"$pkg">_CFLAGS)
+lib<"[$c name]">_codels_la_LDFLAGS+=	$(<"$pkg">_LIBS)
+
+<'}'>
 BUILT_SOURCES=\
 	<"[join $built_sources "\t\\\n\t"]">
 
 <'foreach m $built_sources {'>
-<"$m">: <"[dotgen input file]">
-	<"[dotgen genom program][dotgen genom cmdline] \
-		mappings --signature -l $lang [dotgen input file]">
+<"$m">: $(top_srcdir)/<"[dotgen input base]">
+	$(genom3) <"[dotgen genom cmdline]"> mappings --signature -l <"$lang"> $<
 <'}'>

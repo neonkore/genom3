@@ -1,6 +1,61 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2011 LAAS/CNRS
 
+			    Changes in genom 2.99.6
+
+Released on June 29th, 2011
+
+ . Renamed 'build-require' property into 'codels-require'. This is hopefully
+   clearer and this also corresponds to the original GenoM2 syntax.
+
+ . Service parameters should now be documented with ':' instead of '::'. The
+   later was sometimes ambiguous when the default value of a parameter was an
+   enum with a namespace prefix. For instance, a parameter specification may
+   look like: enumtype x = ns::value : "doc".
+
+ . Codel names are not automatically prefixed anymore: the symbol defined in a
+   dotgen specification is left unchanged. This allows using codels defined in
+   an external library if they are directly compatible.
+
+ . Added and interactive and/or automatic merging strategy in the TCL generator
+   engine. This is used by the skeleton template (-i and -u options) to update
+   generated files that may have been already modified. An external merge tool
+   (-m option) can also be defined, should the automatic strategy fail.
+
+ . Completely rewrote the TCL engine [language ...] procedures. The TCL engine
+   now has a [lang ?language?] procedure that configures the current
+   programming language once for all, and all other [language ...] procedures
+   have been converted to object oriented methods that work with genom objects
+   (codels, types, etc.) and directly output string in the configured language.
+
+ . According to the above, [object::foreach] was renamed to [$type foreach]
+   (for any $type object). It is now able to generate the loop constructs
+   (according to the current language) that are required to process sequences
+   and arrays. This is less generic, but more useful in practice.
+
+ . Imported the C preprocessor from the pcc project, and make it the default C
+   preprocessor for dotgen files. It is installed as libexec/genom-pcpp.
+
+ . Implemented the '#pragma require <pkg>' directive in genom-pcpp. This is
+   required to solve the chicken-egg problem raised by 'require' directives of
+   components: the C preprocessor needs to #include files from path that are
+   found in the require'd .pc files. When a '#pragma require' directive is
+   present, genom-pcpp forks a pkg-config and dynamically adds -I/-D
+   directives. '#pragma require' packages are merged into the 'require'
+   property of all the components of a specification.
+
+ . Added -N option to genom. This options makes genom simply parse a
+   specification (like -n) and then dump it in dotgen language. This is useful
+   mostly for debugging, and the dump is not complete yet (only components and
+   components properties are dumped at the moment).
+
+ . Fixed the dotgen lexer so that it handles # cpp directives anywhere (not
+   just between valid statements).
+
+ . Fixed compilation on MacOS 10.5 with older bison 2.3 (removed too recent
+   bison declarations).
+
+
 			    Changes in genom 2.99.5
 
 Released on March 18th, 2011

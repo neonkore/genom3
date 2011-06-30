@@ -95,7 +95,10 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       clist_s l = param_member(p);
       citer i;
 
-      if (!l) break;
+      if (!l) {
+        r = Tcl_NewStringObj("", -1);
+        break;
+      }
       Tcl_IncrRefCount(argv[0]);
       Tcl_IncrRefCount(argv[1]);
       Tcl_IncrRefCount(argv[2]);

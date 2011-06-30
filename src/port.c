@@ -121,7 +121,7 @@ port_destroy(port_s p)
 const char *
 port_strkind(portkind k)
 {
-  switch(k) {
+  switch((unsigned int)k) {
     case PORT_IN|PORT_DATA|PORT_STATIC:		return "data in";
     case PORT_IN|PORT_EVENT|PORT_STATIC:	return "event in";
     case PORT_OUT|PORT_DATA|PORT_STATIC:	return "data out";

@@ -25,9 +25,6 @@
 if {[llength $argv] != 2} { error "expected arguments: component task" }
 lassign $argv component task
 
-# generate copyright notice (if any)
-catch {puts [language comment c++ [dotgen input notice]]}
-
 # mapcar-like proc
 proc map {lambda list} {
     set result {}
@@ -38,6 +35,11 @@ proc map {lambda list} {
 }
 
 lang c++
+
+# generate copyright notice (if any)
+if {![catch {dotgen input notice} text]} {
+  puts [comment $text]
+}
 '>
 
 #include "<"[$component name]_[cname c++]">_types.h"

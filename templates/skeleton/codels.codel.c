@@ -42,6 +42,7 @@ if {![catch {dotgen input notice} text]} {
 }
 
 '>
+#include "ac<"[$component name]">.h"
 
 #include "<"[$component name]_[cname c]">_types.h"
 <'

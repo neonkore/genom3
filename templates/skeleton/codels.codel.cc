@@ -41,6 +41,7 @@ if {![catch {dotgen input notice} text]} {
   puts [comment $text]
 }
 '>
+#include "ac<"[$component name]">.h"
 
 #include "<"[$component name]_[cname c++]">_types.h"
 <'# --- Task codels --------------------------------------------------------

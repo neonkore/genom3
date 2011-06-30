@@ -42,6 +42,7 @@ AC_PREREQ(2.59)
 AC_INIT([<"[$c name] codels">],[<"$version">],[<"$email">])
 AC_CONFIG_MACRO_DIR([autoconf])
 AC_CONFIG_AUX_DIR([autoconf])
+AC_CONFIG_HEADERS([autoconf/ac<"[$c name]">.h])
 AM_INIT_AUTOMAKE([foreign no-define])
 
 

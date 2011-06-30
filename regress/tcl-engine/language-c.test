@@ -28,7 +28,7 @@ run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
 lang c
 puts [comment comment]
 EOF
-expect out '/^\/\* comment \*\/$/ {next}; {exit 2}'
+expect out '/^\/\*comment\*\/$/ {next}; {exit 2}'
 
 
 # --- language mapping c ---------------------------------------------------

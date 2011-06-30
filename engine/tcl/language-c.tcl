@@ -39,7 +39,7 @@ namespace eval language::c {
     # Return a string that is a valid comment in C.
     #
     proc comment { text } {
-      return [concat "/*" [join [split $text "\n"] "\n *"] "*/"]
+      return [string map {**/ */} /*[join [split $text "\n"] "\n *"]*/]
     }
 
 

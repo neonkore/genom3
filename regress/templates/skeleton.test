@@ -13,8 +13,8 @@ run 0 ls -R -1 run.t
 expect out '
 	/^run.t:$/ {next}
 	/^run.t\/codels:$/ {next}
+	/^bootstrap.sh$/ {next}
 	/^codels$/ {next}
-	/^autogen.sh$/ {next}
 	/^configure.ac$/ {next}
 	/^Makefile.am$/ {next}
 	/^libc_codels.pc.in$/ {next}

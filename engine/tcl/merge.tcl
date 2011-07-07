@@ -53,7 +53,7 @@ namespace eval merge {
 
     # set engine verbose mode and backup previous setting
     set verb [engine mode]
-    set verb [lindex $verb [lsearch -glob $verb {?verbose}]]
+    set verb [lindex $verb [lsearch -regexp $verb {-?verbose}]]
     engine mode +verbose
 
     # iterate over the common sequence between the two files

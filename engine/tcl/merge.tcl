@@ -67,40 +67,40 @@ namespace eval merge {
         set post [lrange $ldst $jdst [expr {$jdst+2}]]
 
         # lines only in dst
-        set odst [list]
-        set nodst 0
+        set dstonly [list]
+        set ndstonly 0
         while { $idst < $jdst } {
           set l [lindex $ldst $idst]
           if {[string trim $l] != "" && ![regexp {insert your code} $l]} {
-            incr nodst
+            incr ndstonly
           }
-          lappend odst $l
+          lappend dstonly $l
           incr idst
         }
 
         # lines only in src
-        set osrc [list]
-        set nosrc 0
+        set srconly [list]
+        set nsrconly 0
         while { $isrc < $jsrc } {
           set l [lindex $lsrc $isrc]
           if {[string trim $l] != "" && ![regexp {insert your code} $l]} {
-            incr nosrc
+            incr nsrconly
           }
-          lappend osrc $l
+          lappend srconly $l
           incr isrc
         }
 
         # automatic merge
-        if {$nosrc && $nodst} {
+        if {$nsrconly && $ndstonly} {
           if {$interactive} {
-            set dline [expr $idst - [llength $odst]]
-            set slen [expr [llength $pre] + [llength $post] + [llength $osrc]]
-            set dlen [expr [llength $pre] + [llength $post] + [llength $odst]]
+            set dline [expr $idst - [llength $dstonly]]
+            set slen [expr [llength $pre]+[llength $post]+[llength $srconly]]
+            set dlen [expr [llength $pre]+[llength $post]+[llength $dstonly]]
             set patch $header
             append patch "@@ -$dline,$dlen +$dline,$slen @@\n"
             append patch \ [join $pre "\n "]\n
-            append patch -[join $odst "\n-"]\n
-            append patch +[join $osrc "\n+"]\n
+            append patch -[join $dstonly "\n-"]\n
+            append patch +[join $srconly "\n+"]\n
             append patch \ [join $post "\n "]
             puts $patch
             while 1 {
@@ -108,13 +108,13 @@ namespace eval merge {
               flush stdout
               if {[gets stdin act] < 0} { set act q }
               switch -- $act {
-                y { puts $f [join $osrc "\n"]; break }
-                n { puts $f [join $odst "\n"]; break }
+                y { puts $f [join $srconly "\n"]; break }
+                n { puts $f [join $dstonly "\n"]; break }
                 c {
                   puts $f "<<<<<<< user version"
-                  puts $f [join $odst "\n"]
+                  puts $f [join $dstonly "\n"]
                   puts $f "======="
-                  puts $f [join $osrc "\n"]
+                  puts $f [join $srconly "\n"]
                   puts $f ">>>>>>> template version"
                   incr conflicts
                   break
@@ -132,17 +132,17 @@ namespace eval merge {
             }
           } else {
             puts $f "<<<<<<< user version"
-            puts $f [join $odst "\n"]
+            puts $f [join $dstonly "\n"]
             puts $f "======="
-            puts $f [join $osrc "\n"]
+            puts $f [join $srconly "\n"]
             puts $f ">>>>>>> template version"
             incr conflicts
           }
-        } elseif {$nosrc} {
-          puts $f [join $osrc "\n"]
-        } elseif {[llength $odst]} {
+        } elseif {$nsrconly} {
+          puts $f [join $srconly "\n"]
+        } elseif {[llength $dstonly]} {
           if {$idst < [llength $ldst]} {
-            puts $f [join $odst "\n"]
+            puts $f [join $dstonly "\n"]
           }
         }
 

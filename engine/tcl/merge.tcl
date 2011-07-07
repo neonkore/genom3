@@ -34,10 +34,10 @@ namespace eval merge {
 
     # read the two files
     set f [open $src r]
-    set lsrc [split [read $f] \n]
+    set lsrc [split [read -nonewline $f] \n]
     close $f
     set f [open $dst r]
-    set ldst [split [read $f] \n]
+    set ldst [split [read -nonewline $f] \n]
     close $f
 
     # open temp destination
@@ -141,9 +141,7 @@ namespace eval merge {
         } elseif {$nsrconly} {
           puts $f [join $srconly "\n"]
         } elseif {[llength $dstonly]} {
-          if {$idst < [llength $ldst]} {
-            puts $f [join $dstonly "\n"]
-          }
+          puts $f [join $dstonly "\n"]
         }
 
         if {$idst < [llength $ldst]} {

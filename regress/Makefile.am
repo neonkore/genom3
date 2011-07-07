@@ -25,6 +25,7 @@ if WITH_TCL
   TESTS+=	templates/skeleton.test
 
   TESTS+=	tcl-engine/engine.test
+  TESTS+=	tcl-engine/merge.test
   TESTS+=	tcl-engine/dotgen.test
   TESTS+=	tcl-engine/type.test
   TESTS+=	tcl-engine/service.test

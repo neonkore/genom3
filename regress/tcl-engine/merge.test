@@ -1,0 +1,92 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+# minimalistic .gen file
+>run.gen
+mkdir -p run.t
+cat >run.t/run.src <<'EOF'
+common1
+line1
+common2
+line2
+EOF
+
+# Avoid putting real conflict markers in this file: this can confuse some git
+# pre-commit hooks. We cheat by putting them after an empty variable ref, which
+# is enough to fool git's is_conflict_marker().
+empty=
+cat >run.t/run.conflict <<EOF
+common1
+${empty}<<<<<<< user version
+line1
+${empty}=======
+other1
+${empty}>>>>>>> template version
+common2
+${empty}<<<<<<< user version
+line2
+${empty}=======
+other2
+${empty}>>>>>>> template version
+EOF
+
+
+# --- engine merge-tool auto -----------------------------------------------
+#
+testing '[engine merge-tool auto] with new content only'
+
+echo common1 >run.t/run.dst
+echo common2 >>run.t/run.dst
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+engine merge-tool auto
+engine mode +merge-if-change
+set c [engine::open file run.t/run.dst write]
+puts $c common1
+puts $c line1
+puts $c common2
+puts $c line2
+engine::close $c
+EOF
+cmp run.t/run.src run.t/run.dst || {
+    echo wrong output produced:; cat run.t/run.dst
+    echo expecting:; cat run.t/run.src
+    exit 2;
+}
+
+
+testing '[engine merge-tool auto] with old content only'
+
+cp run.t/run.src run.t/run.dst
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+engine merge-tool auto
+engine mode +merge-if-change
+set c [engine::open file run.t/run.dst write]
+puts $c common1
+puts $c common2
+engine::close $c
+EOF
+cmp run.t/run.src run.t/run.dst || {
+    echo wrong output produced:; cat run.t/run.dst
+    echo expecting:; cat run.t/run.src
+    exit 2;
+}
+
+
+testing '[engine merge-tool auto] with conflicting content'
+
+cp run.t/run.src run.t/run.dst
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+engine merge-tool auto
+engine mode +merge-if-change
+set c [engine::open file run.t/run.dst write]
+puts $c common1
+puts $c other1
+puts $c common2
+puts $c other2
+engine::close $c
+EOF
+cmp run.t/run.conflict run.t/run.dst || {
+    echo wrong output produced:; cat run.t/run.dst
+    echo expecting:; cat run.t/run.conflict
+    exit 2;
+}

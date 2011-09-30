@@ -71,6 +71,12 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
     return NULL;
   }
 
+  /* refuse anonymous types */
+  if (t && !type_name(t)) {
+    parserror(l, "anonymous types are not allowed for port %s", name);
+    return NULL;
+  }
+
   /* create */
   p = malloc(sizeof(*p));
   if (!p) {

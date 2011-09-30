@@ -58,7 +58,8 @@ if {$task ne ""} {'>
  *
  * Triggered by <"[join [map {e {return [$e name]}} [$codel triggers]] {, }]">.
  * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
- * Throws <"[join [map {e {return [$e name]}} [$task throws]] {, }]">.
+<'   set throws [join [map {e {return [$e name]}} [$task throws]] {, }]'>
+<"[wrap " * Throws $throws." { * }]">
  */
 <"[$codel signature \n]">
 {
@@ -82,7 +83,8 @@ if {$task eq ""} {
 /** Validation codel <"[$codel name]"> of service <"[$service name]">.
  *
  * Returns <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
- * Throws <"[join [map {e {return [$e name]}} [$service throws]] {, }]">.
+<'   set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
+<"[wrap " * Throws $throws." { * }]">
  */
 <"[$codel signature \n]">
 {
@@ -109,7 +111,8 @@ foreach service [$component services] {
  *
  * Triggered by <"[join [map {e {return [$e name]}} [$codel triggers]] {, }]">.
  * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
- * Throws <"[join [map {e {return [$e name]}} [$service throws]] {, }]">.
+<'   set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
+<"[wrap " * Throws $throws." { * }]">
  */
 <"[$codel signature \n]">
 {

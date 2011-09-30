@@ -325,7 +325,9 @@ namespace eval language::c {
         if {$location} {
 	  append m [genloc $codel]\n
 	}
-        append m [join [list $ret ${sym}([join $arg {, }])] $symchar]
+        set p [string repeat " " [string length "${sym}("]]
+        set sig [wrap "${sym}([join $arg {, }])" $p]
+        append m [join [list $ret $sig] $symchar]
 	return $m
     }
 

@@ -395,3 +395,39 @@ proc --- { args } {
   return "$pre $text $post"
 }
 slave alias --- ---
+
+
+# --- wrap -----------------------------------------------------------------
+
+# \proc wrap [-{\em column}] {\em text} {\em ?prefix?}
+# \index wrap
+#
+# Chop a string into lines of length {\em column} (70 by default), prefixed
+# with {\em prefix} (empty by default).
+#
+# \arg text	The text to fill.
+# \arg prefix	A string prefixed to each line
+# \arg column	The desired maximum length of each line
+#
+proc wrap { args } {
+  set column 70
+  if {[string index [lindex $args 0] 0] == "-" } {
+    set args [lassign $args column]
+    set column [string range $column 1 end]
+    if {![string is digit $column]} {
+      template fatal "bad column \"-$column\""
+    }
+  }
+  set prefix [lindex $args 1]
+  set text [lindex $args 0]
+
+  for {set result {}} {[string length $text] > $column} {
+    set text $prefix[string range $text [expr {$brk+1}] end]
+  } {
+    set brk [string last " " $text $column]
+    if { $brk < 0 } {set brk [string length $text]}
+    append result [string range $text 0 [expr {$brk-1}]] \n
+  }
+  return $result$text
+}
+slave alias wrap wrap

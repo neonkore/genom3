@@ -220,7 +220,8 @@ port:
   {
     if (!$6) { parserror(@1, "dropped port"); break; }
     if (!$4 && $2 == PORT_DATA) {
-      parserror(@1, "%s port '%s' port cannot be void", port_strkind($1), $6);
+      parserror(@1, "%s port '%s' port cannot be void",
+                port_strkind($1|$2|$7), $6);
       break;
     }
     if (!port_new(@1, $1|$2|$7, $6, $4))

@@ -489,7 +489,7 @@ comp_addtask(tloc l, const char *name, hash_s props)
   p = hash_find(props, prop_strkind(PROP_PERIOD));
   if (p) {
     cval c = type_constvalue(prop_value(p));
-    if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
+    if (const_convert(&c, CST_FLOAT) ||	c.f <= 0.) {
       parserror(prop_loc(p),
 		"invalid numeric value for %s", prop_strkind(PROP_PERIOD));
       e = 1;

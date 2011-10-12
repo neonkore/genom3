@@ -499,6 +499,10 @@ comp_addtask(tloc l, const char *name, hash_s props)
   d = hash_find(props, prop_strkind(PROP_DELAY));
   if (d) {
     cval c = type_constvalue(prop_value(d));
+    if (!p) {
+      parserror(prop_loc(d), "delay without period is not allowed");
+      e = 1;
+    }
     if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
       parserror(prop_loc(d),
 		"invalid numeric value for %s", prop_strkind(PROP_DELAY));

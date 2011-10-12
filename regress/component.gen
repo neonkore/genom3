@@ -27,6 +27,7 @@
 enum e1 { ee1, ee2, ee3 };
 
 typedef sequence<string<28>, 10> x;
+typedef long long_type;
 
 component c {
   version:	"1.0";
@@ -57,7 +58,7 @@ ids {
 attribute a = 0:"first attribute", b;
 attribute d = "none";
 
-inport data<long> a;
+inport data<long_type> a;
 outport data<c::ids::str> b;
 inport event<> c;
 

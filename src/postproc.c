@@ -204,6 +204,7 @@ dotgen_clkratedefault(comp_s c)
       if (const_convert(&trate, CST_FLOAT)) assert(0);
 
       a = period;	b = trate.f * 1e6 + 0.5;
+      if (b == 0) continue;
       while(1) {
 	r = a % b;
 	if (r == 0) { period = b; break; }

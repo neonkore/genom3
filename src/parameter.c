@@ -43,7 +43,6 @@ struct param_s {
   idltype_s type;	/**< member type */
 
   port_s port;		/**< in/out port (for port only) */
-  param_s index;	/**< port index (for array port only) */
 
   initer_s init;	/**< initial value (or NULL) */
 };
@@ -56,11 +55,6 @@ idltype_s	param_base(param_s p) { assert(p); return p->base; }
 idltype_s	param_type(param_s p) { assert(p); return p->type; }
 port_s		param_port(param_s p) {
   assert(p && (p->dir == P_INPORT || p->dir == P_OUTPORT)); return p->port;
-}
-param_s		param_index(param_s p) {
-  assert(p && (p->dir == P_INPORT || p->dir == P_OUTPORT));
-  assert(p->port && (port_kind(p->port) & PORT_ARRAY));
-  return p->index;
 }
 initer_s	param_initer(param_s p) { assert(p); return p->init; }
 
@@ -91,7 +85,6 @@ param_new(tloc l, const char *name, idltype_s base)
   p->type = base;
 
   p->port = NULL;
-  p->index = NULL;
   p->init = NULL;
 
   return p;
@@ -124,7 +117,7 @@ param_newids(tloc l, const char *name, const char *member)
 }
 
 param_s
-param_newport(tloc l, const char *name, param_s index)
+param_newport(tloc l, const char *name)
 {
   param_s p;
   comp_s c;
@@ -137,45 +130,10 @@ param_newport(tloc l, const char *name, param_s index)
     parserror(l, "unknown port '%s'", name);
     errno = EINVAL; return NULL;
   }
-  if (index && !(port_kind(port) & PORT_ARRAY)) {
-    parserror(l, "port '%s' is not a dynamic array", name);
-    parsenoerror(port_loc(port), " port '%s' declared here", port_name(port));
-    errno = EINVAL; return NULL;
-  } else if (!index && (port_kind(port) & PORT_ARRAY)) {
-    parserror(l, "missing index for dynamic array port '%s'", name);
-    parsenoerror(port_loc(port), " port '%s' declared here", port_name(port));
-    errno = EINVAL; return NULL;
-  }
-
-  /* check index is scalar */
-  if (index) {
-    idltype_s i = type_final(param_type(index));
-    switch(type_kind(i)) {
-      case IDL_BOOL: case IDL_USHORT: case  IDL_SHORT: case  IDL_ULONG:
-      case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
-      case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
-      case IDL_ENUM:
-	/* valid index */
-	break;
-
-      case IDL_ANY: case IDL_CONST: case IDL_ENUMERATOR: case IDL_ARRAY:
-      case IDL_SEQUENCE: case IDL_STRUCT: case IDL_MEMBER: case IDL_UNION:
-      case IDL_CASE: case IDL_TYPEDEF: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION:
-	parserror(l, "invalid %s %s for port %s index",
-		  type_strkind(type_kind(i)),
-		  type_fullname(i)?type_fullname(i):"type", name);
-	parsenoerror(type_loc(i), " %s %s declared here",
-		     type_strkind(type_kind(i)),
-		     type_fullname(i)?type_fullname(i):"type");
-	errno = EINVAL; return NULL;
-    }
-  }
 
   p = param_new(l, name, port_type(port));
   if (p) {
     p->port = port;
-    p->index = index;
     xwarnx("created port parameter %s", p->name);
   }
   return p;
@@ -189,7 +147,7 @@ param_newport(tloc l, const char *name, param_s index)
 param_s
 param_clone(param_s param)
 {
-  param_s p, idx;
+  param_s p;
   citer i;
   int s;
   assert(param);
@@ -200,11 +158,7 @@ param_clone(param_s param)
       break;
 
     case P_INPORT: case P_OUTPORT:
-      if (port_kind(param_port(param)) & PORT_ARRAY) {
-	idx = param_clone(param_index(param));
-	if (!idx) return NULL;
-      } else idx = NULL;
-      p = param_newport(param_loc(param), param_name(param), idx);
+      p = param_newport(param_loc(param), param_name(param));
       break;
 
     default: assert(0);

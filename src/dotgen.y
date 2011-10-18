@@ -91,15 +91,14 @@
 
 %token <s>	S MS US K M REAL_TIME
 %token <s>	TEMPLATE COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT
-%token <s>	INOUT IDS ATTRIBUTE INPUT OUTPUT EVENT DATA VERSION LANG EMAIL
-%token <s>	REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE YIELD
-%token <s>	THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
+%token <s>	INOUT IDS ATTRIBUTE INPUT OUTPUT DATA HANDLE VERSION LANG EMAIL
+%token <s>	REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
+%token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 
 %type <i>	start spec idlspec statement idlstatement genomstatement
 
 %type <i>	template component ids attribute port task service
 %type <pkind>	port_dir port_kind port_array
-%type <type>	port_type
 %type <prop>	attr
 %type <hash>	attr_list param_list inited_ids_member_list
 %type <initer>	initializer_value initializer initializer_list
@@ -137,12 +136,10 @@
 %type <hash>	event_list identifier_list
 %type <vlist>	string_list
 
- /* 1 shift/reduce, shifting ok:
-  * port_member: extra [ may be a port index or an array element (impossible) */
-%expect 1
+%expect 0
 %%
 
-start: /* empty */ | spec;
+start: /* empty */ { $$ = 0; } | spec;
 
 spec: statement | spec statement;
 
@@ -216,20 +213,14 @@ component:
 ;
 
 port:
-  port_dir port_kind '<' port_type '>' identifier port_array
+  port_dir port_kind '<' type_spec '>' identifier port_array
   {
     if (!$6) { parserror(@1, "dropped port"); break; }
-    if (!$4 && $2 == PORT_DATA) {
-      parserror(@1, "%s port '%s' port cannot be void",
-                port_strkind($1|$2|$7), $6);
-      break;
-    }
+    if (!$4) { parserror(@1, "dropped '%s' port", $6); break; }
     if (!port_new(@1, $1|$2|$7, $6, $4))
       parserror(@1, "dropped '%s' port", $6);
   }
 ;
-
-port_type: type_spec | /* empty */ { $$ = NULL; };
 
 port_dir:
     INPORT	{ $$ = PORT_IN; }
@@ -242,8 +233,8 @@ port_array:
 ;
 
 port_kind:
-    DATA	{ $$ = PORT_DATA; }
-  | EVENT	{ $$ = PORT_EVENT; }
+  /* empty */	{ $$ = PORT_DATA; }
+  | HANDLE	{ $$ = PORT_HANDLE; }
 ;
 
 ids:
@@ -608,11 +599,7 @@ named_port_member:
 port_member:
   identifier
   {
-    $$ = $1 ? param_newport(@1, $1, NULL) : NULL;
-  }
-  | identifier '[' ids_member ']'
-  {
-    $$ = $1 ? param_newport(@1, $1, $3) : NULL;
+    $$ = $1 ? param_newport(@1, $1) : NULL;
   }
   | port_member param_member
   {
@@ -1560,7 +1547,7 @@ identifier:
   | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
   | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
   | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
-  | AFTER | EVENT | DATA | INPORT | OUTPORT | IN | OUT | INOUT
+  | AFTER | DATA | HANDLE | INPORT | OUTPORT | IN | OUT | INOUT
   | error
   {
     parserror(@1, "expected identifier but got '%s'", dotgentext);

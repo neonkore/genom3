@@ -152,8 +152,8 @@ chartext	([^\'])|(\\.)
 "codel"		{ yylval->s = string(yytext); return CODEL; }
 "inport"	{ yylval->s = string(yytext); return INPORT; }
 "outport"	{ yylval->s = string(yytext); return OUTPORT; }
-"event"		{ yylval->s = string(yytext); return EVENT; }
 "data"		{ yylval->s = string(yytext); return DATA; }
+"handle"	{ yylval->s = string(yytext); return HANDLE; }
 
 "doc"		{ yylval->s = string(yytext); return DOC; }
 "ids"		{ yylval->s = string(yytext); return IDS; }

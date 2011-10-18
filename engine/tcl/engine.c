@@ -577,13 +577,6 @@ engine_genparam(Tcl_Interp *interp, Tcl_Interp *slave, param_s p)
   } else
     printf("exported parameter %s\n", param_name(p));
 
-  /* port index */
-  if (param_dir(p) ==  P_INPORT || param_dir(p) ==  P_OUTPORT)
-    if (port_kind(param_port(p)) & PORT_ARRAY) {
-      s = engine_genparam(interp, slave, param_index(p));
-      if (s) return s;
-    }
-
   /* initializer */
   i = param_initer(p);
   if (i) {

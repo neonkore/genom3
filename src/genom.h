@@ -426,7 +426,7 @@ typedef enum portkind {
   PORT_DIRMSK =	0xf,
 
   PORT_DATA =	0x10,
-  PORT_EVENT =	0x20,
+  PORT_HANDLE =	0x20,
   PORT_CATMSK =	0xf0,
 
   PORT_STATIC =	0x100,
@@ -477,7 +477,6 @@ clist_s		param_member(param_s p);
 idltype_s	param_base(param_s p);
 idltype_s	param_type(param_s p);
 port_s		param_port(param_s p);
-param_s		param_index(param_s p);
 initer_s	param_initer(param_s p);
 
 unsigned int	initer_index(initer_s i);
@@ -493,7 +492,7 @@ codel_s		codel_clone(codel_s codel);
 hash_s		codel_fsmcreate(tloc l, hash_s props);
 
 param_s		param_newids(tloc l, const char *name, const char *member);
-param_s		param_newport(tloc l, const char *name, param_s index);
+param_s		param_newport(tloc l, const char *name);
 param_s		param_clone(param_s param);
 void		param_destroy(param_s p);
 int		param_setname(param_s p, const char *name);

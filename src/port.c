@@ -77,6 +77,12 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
     return NULL;
   }
 
+  /* accept array type for handle ports only */
+  if (k & PORT_ARRAY && (k & PORT_CATMSK) != PORT_HANDLE) {
+    parserror(l, "%s port %s is not supported", port_strkind(k), name);
+    return NULL;
+  }
+
   /* create */
   p = malloc(sizeof(*p));
   if (!p) {
@@ -129,14 +135,14 @@ port_strkind(portkind k)
 {
   switch((unsigned int)k) {
     case PORT_IN|PORT_DATA|PORT_STATIC:		return "data in";
-    case PORT_IN|PORT_EVENT|PORT_STATIC:	return "event in";
+    case PORT_IN|PORT_HANDLE|PORT_STATIC:	return "handle in";
     case PORT_OUT|PORT_DATA|PORT_STATIC:	return "data out";
-    case PORT_OUT|PORT_EVENT|PORT_STATIC:	return "event out";
+    case PORT_OUT|PORT_HANDLE|PORT_STATIC:	return "handle out";
 
     case PORT_IN|PORT_DATA|PORT_ARRAY:		return "data in array";
-    case PORT_IN|PORT_EVENT|PORT_ARRAY:		return "event in array";
+    case PORT_IN|PORT_HANDLE|PORT_ARRAY:	return "handle in array";
     case PORT_OUT|PORT_DATA|PORT_ARRAY:		return "data out array";
-    case PORT_OUT|PORT_EVENT|PORT_ARRAY:	return "event out array";
+    case PORT_OUT|PORT_HANDLE|PORT_ARRAY:	return "handle out array";
 
     default: break;
   }

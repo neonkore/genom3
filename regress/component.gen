@@ -58,9 +58,9 @@ ids {
 attribute a = 0:"first attribute", b;
 attribute d = "none";
 
-inport data<long_type> a;
-outport data<c::ids::str> b;
-inport event<> c;
+inport<long_type> a;
+outport<c::ids::str> b;
+outport handle<long_type> c[];
 
 task t1;
 

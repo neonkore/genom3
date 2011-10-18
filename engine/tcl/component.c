@@ -201,7 +201,7 @@ port_list(Tcl_Interp *interp, comp_s c, Tcl_Obj * const dfilter[],
 {
   static const struct { char *opt; portkind k; } dirarg[] = {
     { "in", PORT_IN },	{ "out", PORT_OUT },
-    { "data", PORT_DATA }, { "event", PORT_EVENT },
+    { "data", PORT_DATA }, { "handle", PORT_HANDLE },
     { "static", PORT_STATIC }, { "array", PORT_ARRAY },
     { NULL }
   };

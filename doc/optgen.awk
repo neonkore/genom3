@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010-2011 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -227,7 +227,9 @@ function output_tex() {
     print "\\begin{description}";
     k = split(envs, key);
     for (i = 1; i <= k; i++) {
-	print "\\item[{" gensub(/[_]/, "\\\\&", "g", key[i]) "}]";
+        s = key[i]
+        s = gsub(/[_]/, "\\\\&", s)
+	print "\\item[{" s "}]";
 	gsub(/[#_]/, "\\\\&", envdesc[key[i]]);
 	gsub(/\\name/, "\\GenoM{}", envdesc[key[i]]);
 	gsub(/\\em/, "{\\em", envdesc[key[i]]);

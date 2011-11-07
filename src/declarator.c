@@ -123,7 +123,7 @@ dcl_settype(dcl_s dcl, idltype_s t)
   assert(dcl && t);
 
   /* for arrays, create intermediate anon array types */
-  for(dcl_inner(dcl, &i); i.value != -1UL; dcl_next(&i)) {
+  for(dcl_inner(dcl, &i); i.value != -1U; dcl_next(&i)) {
     t = type_newarray(dcl->l, NULL, t, i.value);
     if (!t) break;
   }
@@ -146,7 +146,7 @@ dcl_inner(dcl_s d, dcliter *i)
 
   i->d = d;
   i->current = 0;
-  i->value = i->current>=d->dims?-1UL:d->dim[i->current];
+  i->value = i->current>=d->dims?-1U:d->dim[i->current];
 
   return i->current>=d->dims?ENOENT:0;
 }
@@ -157,7 +157,7 @@ dcl_next(dcliter *i)
   assert(i);
 
   i->current++;
-  i->value = i->current>=i->d->dims?-1UL:i->d->dim[i->current];
+  i->value = i->current>=i->d->dims?-1U:i->d->dim[i->current];
 
   return i->current>=i->d->dims?ENOENT:0;
 }

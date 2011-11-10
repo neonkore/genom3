@@ -46,7 +46,7 @@ struct idltype_s {
       idltype_s type;		/**< sequence, const, enumerator, typedef,
 				 * member, case, union, array, forward dcls */
       union {
-	unsigned long length;	/**< string, sequence, array */
+	uint32_t length;	/**< string, sequence, array */
 	cval value;		/**< const */
 	clist_s values;		/**< case */
 	scope_s elems;		/**< struct, union */
@@ -189,7 +189,7 @@ type_newforward(tloc l, const char *name, idlkind k)
 }
 
 idltype_s
-type_newstring(tloc l, const char *name, unsigned long len)
+type_newstring(tloc l, const char *name, uint32_t len)
 {
   idltype_s t = type_new(l, IDL_STRING, name);
   if (!t) return NULL;
@@ -199,7 +199,7 @@ type_newstring(tloc l, const char *name, unsigned long len)
 }
 
 idltype_s
-type_newsequence(tloc l, const char *name, idltype_s t, unsigned long len)
+type_newsequence(tloc l, const char *name, idltype_s t, uint32_t len)
 {
   idltype_s c = type_new(l, IDL_SEQUENCE, name);
   if (!c) return NULL;
@@ -276,7 +276,7 @@ error:
 }
 
 idltype_s
-type_newarray(tloc l, const char *name, idltype_s t, unsigned long len)
+type_newarray(tloc l, const char *name, idltype_s t, uint32_t len)
 {
   idltype_s c = type_new(l, IDL_ARRAY, name);
   if (!c) return NULL;
@@ -633,7 +633,7 @@ type_final(idltype_s t)
 
 /** For strings, array, sequences, return the length (-1U if no length)
  */
-unsigned long
+uint32_t
 type_length(idltype_s t)
 {
   assert(t);

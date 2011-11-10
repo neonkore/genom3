@@ -307,7 +307,7 @@ param_destroy(param_s p)
 int
 param_setmember(param_s p, cval m)
 {
-  unsigned long d;
+  uint32_t d;
   idltype_s t;
 
   assert(p);

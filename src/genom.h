@@ -208,7 +208,7 @@ idltype_s	dcl_type(dcl_s d);
 int		dcl_isarray(dcl_s d);
 
 dcl_s		dcl_create(tloc l, const char *name);
-dcl_s		dcl_adddim(dcl_s dcl, unsigned long dim);
+dcl_s		dcl_adddim(dcl_s dcl, uint32_t dim);
 idltype_s	dcl_settype(dcl_s dcl, idltype_s t);
 void		dcl_destroy(dcl_s d);
 
@@ -258,7 +258,7 @@ idlkind		type_kind(idltype_s t);
 scope_s		type_scope(idltype_s t);
 cval		type_constvalue(idltype_s t);
 idltype_s	type_type(idltype_s t);
-unsigned long	type_length(idltype_s t);
+uint32_t	type_length(idltype_s t);
 idltype_s	type_discriminator(idltype_s t);
 clist_s		type_casevalues(idltype_s t);
 hash_s		type_members(idltype_s t);
@@ -266,15 +266,15 @@ scope_s		type_membersscope(idltype_s t);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
 idltype_s	type_newforward(tloc l, const char *name, idlkind k);
-idltype_s	type_newstring(tloc l, const char *name, unsigned long len);
+idltype_s	type_newstring(tloc l, const char *name, uint32_t len);
 idltype_s	type_newsequence(tloc l, const char *name, idltype_s t,
-			unsigned long len);
+			uint32_t len);
 idltype_s	type_newconst(tloc l, const char *name, idltype_s t, cval v);
 idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
 idltype_s	type_newenumerator(tloc l, const char *name);
 idltype_s	type_addenumerator(tloc l, idltype_s e, const char *name);
 idltype_s	type_newarray(tloc l, const char *name, idltype_s t,
-			unsigned long len);
+			uint32_t len);
 idltype_s	type_newstruct(tloc l, const char *name, scope_s s);
 idltype_s	type_newmember(tloc l, const char *name, idltype_s t);
 idltype_s	type_newunion(tloc l, const char *name, idltype_s t, scope_s s);

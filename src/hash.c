@@ -62,8 +62,8 @@ struct hash_s {
 #define hash_maxload	(2.)
 
 
-static int		hash_expand(hash_s h);
-static unsigned long	hstring(const char *key);
+static int	hash_expand(hash_s h);
+static uint32_t	hstring(const char *key);
 
 
 /* --- hash_create --------------------------------------------------------- */
@@ -131,7 +131,7 @@ hash_destroy(hash_s h, int release)
 int
 hash_insert(hash_s h, const char *key, void *value, hrelease_f release)
 {
-  unsigned long index;
+  uint32_t index;
   hentry_s e;
 
   assert(h); assert(key);
@@ -183,7 +183,7 @@ hash_insert(hash_s h, const char *key, void *value, hrelease_f release)
 int
 hash_set(hash_s h, const char *key, void *value)
 {
-  unsigned long index;
+  uint32_t index;
   hentry_s e;
 
   assert(h); assert(key);
@@ -207,7 +207,7 @@ hash_set(hash_s h, const char *key, void *value)
 int
 hash_rename(hash_s h, const char *key, const char *new)
 {
-  unsigned long index;
+  uint32_t index;
   hentry_s e, n;
 
   assert(h && key && new);
@@ -251,7 +251,7 @@ hash_rename(hash_s h, const char *key, const char *new)
 int
 hash_remove(hash_s h, const char *key, int release)
 {
-  unsigned long index;
+  uint32_t index;
   hentry_s e, n;
 
   assert(h); assert(key);
@@ -299,7 +299,7 @@ hash_remove(hash_s h, const char *key, int release)
 void *
 hash_find(hash_s h, const char *key)
 {
-  unsigned long index;
+  uint32_t index;
   hentry_s e;
 
   assert(h); assert(key);
@@ -424,10 +424,10 @@ hash_expand(hash_s h)
 
 /** A supposedly good hash function for strings.
  */
-static unsigned long
+static uint32_t
 hstring(const char *key)
 {
-  unsigned long hash = 0;
+  uint32_t hash = 0;
   if (!key) return 0;
 
   while(*key) {

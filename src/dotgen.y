@@ -1033,7 +1033,7 @@ string_type:
   }
   | STRING
   {
-    $$ = type_newstring(@1, NULL, -1UL);
+    $$ = type_newstring(@1, NULL, -1U);
   }
 ;
 
@@ -1045,7 +1045,7 @@ sequence_type:
   }
   | SEQUENCE '<' simple_type_spec '>'
   {
-    $$ = $3 ? type_newsequence(@1, NULL, $3, -1UL) : NULL;
+    $$ = $3 ? type_newsequence(@1, NULL, $3, -1U) : NULL;
   }
 ;
 

@@ -39,7 +39,7 @@ struct dcl_s {
   const char *name;
 
   unsigned int dims;
-  unsigned long dim[0];
+  uint32_t dim[0];
 
   idltype_s type;
 };
@@ -93,7 +93,7 @@ dcl_destroy(dcl_s d)
 /** Add a new dimension to a declarator
  */
 dcl_s
-dcl_adddim(dcl_s dcl, unsigned long dim)
+dcl_adddim(dcl_s dcl, uint32_t dim)
 {
   dcl_s d;
   assert(dcl);

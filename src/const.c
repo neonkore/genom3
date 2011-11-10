@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 LAAS/CNRS
+ * Copyright (c) 2009-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -24,6 +24,7 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -405,8 +406,8 @@ const_strval(cval v)
   switch(v.k) {
     case CST_VOID:	buf[0] = '\0'; break;
     case CST_BOOL:	snprintf(buf, sizeof(buf), "%d", v.b); break;
-    case CST_UINT:	snprintf(buf, sizeof(buf), "%llu", v.u); break;
-    case CST_INT:	snprintf(buf, sizeof(buf), "%lld", v.i); break;
+    case CST_UINT:	snprintf(buf, sizeof(buf), "%" PRIu64, v.u); break;
+    case CST_INT:	snprintf(buf, sizeof(buf), "%" PRId64, v.i); break;
     case CST_FLOAT:	snprintf(buf, sizeof(buf), "%g", v.f); break;
     case CST_CHAR:	snprintf(buf, sizeof(buf), "%c", v.c); break;
     case CST_STRING:	return v.s;

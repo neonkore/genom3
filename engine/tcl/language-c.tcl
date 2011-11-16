@@ -326,7 +326,7 @@ namespace eval language::c {
 	  append m [genloc $codel]\n
 	}
         set p [string repeat " " [string length "${sym}("]]
-        set sig [wrap "${sym}([join $arg {, }])" $p]
+        set sig [wrap "${sym}([join $arg {, }])" $p ,]
         append m [join [list $ret $sig] $symchar]
 	return $m
     }

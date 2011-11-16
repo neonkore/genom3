@@ -399,14 +399,16 @@ slave alias --- ---
 
 # --- wrap -----------------------------------------------------------------
 
-# \proc wrap [-{\em column}] {\em text} {\em ?prefix?}
+# \proc wrap [-{\em column}] {\em text} {\em ?prefix?} {\em ?sep?}
 # \index wrap
 #
 # Chop a string into lines of length {\em column} (70 by default), prefixed
-# with {\em prefix} (empty by default).
+# with {\em prefix} (empty by default). The string is split at spaces by
+# default, or {\em sep} if given.
 #
 # \arg text	The text to fill.
 # \arg prefix	A string prefixed to each line
+# \arg sep	The separator for breaking text
 # \arg column	The desired maximum length of each line
 #
 proc wrap { args } {
@@ -418,13 +420,19 @@ proc wrap { args } {
       template fatal "bad column \"-$column\""
     }
   }
+  if {[llength $args] > 2} {
+    set sep [lindex $args 2]
+  } else {
+    set sep " "
+  }
   set prefix [lindex $args 1]
   set text [lindex $args 0]
 
   for {set result {}} {[string length $text] > $column} {
     set text $prefix[string range $text [expr {$brk+1}] end]
   } {
-    set brk [string last " " $text $column]
+    set brk [string last $sep $text $column]
+    if { ![string is space $sep] } { incr brk }
     if { $brk < 0 } {set brk [string length $text]}
     append result [string range $text 0 [expr {$brk-1}]] \n
   }

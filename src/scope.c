@@ -319,14 +319,29 @@ scope_detach(scope_s s)
 int
 scope_pushglobal()
 {
+  tloc l = (tloc){ .file=NULL, .line = 1, .col = 1 };
+  idltype_s t, h, hs;
+
   assert(!global);
-  global = scope_new((tloc){ .file=NULL, .line = 1, .col = 1 }, "", NULL);
+  global = scope_new(l, "", NULL);
   if (!global) return ENOMEM;
 
   global->parent = NULL;
   current = global;
 
   xwarnx("pushed global scope");
+
+  /* create std types */
+  t = type_newbasic(l, NULL, IDL_ULONG);
+  if (!t) return errno;
+  h = type_newalias(l, G3PORT_HANDLE_NAME, t);
+  if (!h) return errno;
+  t = type_newsequence(l, NULL, h, -1U);
+  if (!t) return errno;
+  hs = type_newalias(l, G3PORT_HANDLE_SET_NAME, t);
+  if (!hs) return errno;
+
+  xwarnx("created standard types");
   return 0;
 }
 

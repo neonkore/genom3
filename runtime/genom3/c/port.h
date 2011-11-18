@@ -33,12 +33,30 @@
 #define H_GENOM3_C_PORT
 
 #include <stdint.h>
+#include <genom3/c/idlsequence.h>
 
+#ifndef _g3port_handle_type
+# define _g3port_handle_type
 typedef uint32_t g3port_handle;
+#endif /* _g3port_handle_type */
+
+#ifndef _sequence_g3port_handle_type
+# define _sequence_g3port_handle_type
+typedef struct sequence_g3port_handle {
+  uint32_t _maximum, _length;
+  g3port_handle *_buffer;
+  void (*_release)(void *_buffer);
+} sequence_g3port_handle;
+#endif /* _sequence_g3port_handle_type */
+
+#ifndef _g3port_handle_set_type
+# define _g3port_handle_set_type
+typedef sequence_g3port_handle g3port_handle_set;
+#endif /* _g3port_handle_set_type */
 
 struct g3port_pollhandle {
   g3port_handle fd;		/* port handle */
-  uint16_t events;		/*  events to look for */
+  uint16_t events;		/* events to look for */
   uint16_t revents;		/* events returned */
 };
 

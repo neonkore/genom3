@@ -420,6 +420,9 @@ void		service_destroy(service_s s);
 
 /* --- port ---------------------------------------------------------------- */
 
+#define G3PORT_HANDLE_NAME		"g3port_handle"
+#define G3PORT_HANDLE_SET_NAME		"g3port_handle_set"
+
 typedef enum portkind {
   PORT_IN =	0x1,
   PORT_OUT =	0x2,

@@ -44,6 +44,37 @@ if {![catch {dotgen input notice} text]} {
 '>
 #include "ac<"[$component name]">.h"
 
+<' # determine if genom3/c/port.h header is required
+set portheader 0
+set codels [list]
+if {$task eq ""} {
+  foreach service [$component services] {
+    if {[llength [$service validate]] == 0} continue
+    set codels [concat $codels [$service validate]]
+  }
+} else {
+  set codels [$task codels]
+  foreach service [$component services] {
+    if {[catch {$service task} t]} continue
+    if {$t != $task || [llength [$service codels]] == 0} continue
+    set codels [concat $codels [$service codels]]
+  }
+}
+
+foreach codel $codels {
+  foreach p [$codel parameters] {
+    switch [$p dir] {
+      "inport" - "outport" {
+        if {[string first handle [[$p port] kind]] >= 0} {
+          set portheader 1
+        }
+      }
+    }
+  }
+}
+if {$portheader} {'>
+#include "genom3/c/port.h"
+<'}'>
 #include "<"[$component name]_[cname c]">_types.h"
 <'
 # --- Task codels --------------------------------------------------------

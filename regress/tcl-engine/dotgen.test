@@ -116,12 +116,6 @@ expect out '/^ notice$/ {next}; {exit 2}'
 #
 testing '[dotgen types]'
 
->run.gen
-run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
-puts [dotgen types]
-EOF
-expect out '/^$/ {next}; {exit 2}'
-
 cat >run.gen <<EOF
 typedef long a;
 typedef long b;
@@ -131,7 +125,10 @@ run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 foreach t [dotgen types] { lappend l [$t fullname] }
 puts $l
 EOF
-expect out '/^::a ::b ::b1$/ {next}; {exit 2}'
+expect out '
+	/^::g3port_handle ::g3port_handle_set ::a ::b ::b1$/ {next}
+	{exit 2}
+'
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 foreach t [dotgen types *b*] { lappend l [$t fullname] }

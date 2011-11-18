@@ -1,6 +1,21 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2011 LAAS/CNRS
 
+			    Changes in genom 2.99.7
+
+Released on November 18th, 2011
+
+ . Deleted 'in/outport event' kind of inports. This will not be in 3.0.
+ . Added 'in/outport handle' for components that require dynamic port
+   creation/access or custom serialization etc. This introduces the notion of a
+   port API provided by genom that every template must implement.
+ . Improved skeleton template so that it's more readily useful (fixed a bunch
+   of small issues).
+ . Fixed the .gen parser in corner cases (e.g. nul delay, delay without period,
+   etc.)
+ . Fixed LP64 bugs
+
+
 			    Changes in genom 2.99.6
 
 Released on June 29th, 2011

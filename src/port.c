@@ -40,6 +40,7 @@ struct port_s {
   const char *name;
   comp_s component;
   idltype_s type;
+  idltype_s datatype;
 };
 
 tloc		port_loc(port_s p) { assert(p); return p->loc; }
@@ -47,6 +48,7 @@ const char *	port_name(port_s p) { assert(p); return p->name; }
 portkind	port_kind(port_s p) { assert(p); return p->kind; }
 comp_s		port_comp(port_s p) { assert(p); return p->component; }
 idltype_s	port_type(port_s p) { assert(p); return p->type; }
+idltype_s	port_datatype(port_s p) { assert(p); return p->datatype; }
 
 
 /* --- port_new ------------------------------------------------------------ */
@@ -58,6 +60,7 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
 {
   comp_s c;
   port_s p;
+  idltype_s h;
   int e;
   assert(name);
 
@@ -90,11 +93,23 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
     return NULL;
   }
 
+  if (k & PORT_HANDLE) {
+    if (k & PORT_STATIC)
+      h = type_find("::" G3PORT_HANDLE_NAME);
+    else if (k & PORT_ARRAY)
+      h = type_find("::" G3PORT_HANDLE_SET_NAME);
+    else assert(0);
+    assert(h);
+  } else if (k & PORT_DATA) {
+    h = t;
+  } else assert(0);
+
   p->loc = l;
   p->kind = k;
   p->name = string(name);
   p->component = c;
-  p->type = t;
+  p->type = h;
+  p->datatype = t;
 
   e = hash_insert(comp_ports(c), p->name, p, (hrelease_f)port_destroy);
   switch(e) {

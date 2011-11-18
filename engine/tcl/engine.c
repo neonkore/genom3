@@ -482,6 +482,10 @@ engine_genport(Tcl_Interp *interp, Tcl_Interp *slave, port_s p)
     s = engine_gentype(interp, slave, port_type(p));
     if (s) return s;
   }
+  if (port_datatype(p)) {
+    s = engine_gentype(interp, slave, port_datatype(p));
+    if (s) return s;
+  }
 
   return 0;
 }

@@ -448,6 +448,7 @@ portkind	port_kind(port_s p);
 #define		port_flag(p)	(port_kind(p) & PORT_FLGMSK)
 comp_s		port_comp(port_s p);
 idltype_s	port_type(port_s p);
+idltype_s	port_datatype(port_s p);
 const char *	port_strkind(portkind k);
 
 

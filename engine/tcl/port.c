@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010-2011 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -42,14 +42,14 @@ int
 port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum portidx {
-    portidx_name, portidx_kind, portidx_comp, portidx_type, portidx_loc,
-    portidx_class
+    portidx_name, portidx_kind, portidx_comp, portidx_type, portidx_datatype,
+    portidx_loc, portidx_class
   };
   static const char *args[] = {
     [portidx_name] = "name", [portidx_kind] = "kind",
     [portidx_comp] = "component", [portidx_type] = "type",
-    [portidx_loc] = "loc", [portidx_class] = "class",
-    NULL
+    [portidx_datatype] = "datatype", [portidx_loc] = "loc",
+    [portidx_class] = "class", NULL
   };
   port_s p = v;
   Tcl_Obj *r;
@@ -80,6 +80,11 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case portidx_type:
       r = port_type(p)? Tcl_NewStringObj(type_genref(port_type(p)), -1) : NULL;
+      break;
+
+    case portidx_datatype:
+      r = port_datatype(p)?
+        Tcl_NewStringObj(type_genref(port_datatype(p)), -1) : NULL;
       break;
 
     case portidx_loc: {

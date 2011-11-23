@@ -80,6 +80,7 @@ void	dotgen_input(dotgen_input_kind k, ...);
 int	dotgenparse(void);
 int	dotgen_consolidate(void);
 hash_s	dotgen_hrequire(void);
+hash_s	dotgen_hnative(void);
 
 void	parserror(tloc l, const char *fmt, ...);
 void	parsenoerror(tloc l, const char *fmt, ...);

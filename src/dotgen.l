@@ -42,6 +42,7 @@
    static size_t	dotgen_read(char *buffer, size_t max_size);
    static void		dotgen_parsehash(char *buffer);
    static void		dotgen_parsepragmarequire(char *buffer);
+   static void		dotgen_parsepragmanative(char *buffer);
 
 #define YY_INPUT(buf, result, max) ((result) = dotgen_read(buf, max))
 
@@ -83,6 +84,11 @@ chartext	([^\'])|(\\.)
 
 ^[ \t]*#[ \t]*pragma[ \t]+require[ \t].*\n {
   dotgen_parsepragmarequire(yytext);
+  curloc.line++; curloc.col = 0; *yylloc_param = curloc;
+}
+
+^[ \t]*#[ \t]*pragma[ \t]+native[ \t].*\n {
+  dotgen_parsepragmanative(yytext);
   curloc.line++; curloc.col = 0; *yylloc_param = curloc;
 }
 
@@ -134,7 +140,6 @@ chartext	([^\'])|(\\.)
 "property"	{ return PROPERTY; }
 
 "const"		{ return CONST; }
-"native"	{ return NATIVE; }
 "enum"		{ return ENUM; }
 "union"		{ return UNION; }
 "switch"	{ return SWITCH; }
@@ -415,4 +420,103 @@ hash_s
 dotgen_hrequire()
 {
   return hrequire;
+}
+
+
+/* --- dotgen_parsepragmanative -------------------------------------------- */
+
+static hash_s hnative;
+
+/** Parse #pragma native directives
+ */
+static void
+dotgen_parsepragmanative(char *buffer)
+{
+  const char *delim;
+  const char *args[3];
+  idltype_s type;
+  char *p, *arg;
+  hash_s h;
+  int n, s;
+
+  p = strstr(buffer, "native");
+  assert(p);
+  p+=6;
+
+  /* split input into 3 args: template type native */
+  n = 0;
+  while(*p) {
+    p += strspn(p, " \t\n");
+    if (*p == 0) break;
+
+    if (*p == 'L' && p[1] == '\"') p++;
+    if (*p == '\"') { p++; delim = "\""; } else delim = " \t\n";
+    arg = p;
+    do {
+      p += strspn(p, delim);
+      p += strcspn(p, delim);
+    } while (p[-1] == '\\');
+    if (*p) *p++ = 0;
+
+    args[n++] = string(arg);
+    if (n > 3) break;
+  }
+
+  if (n != 3) {
+    parserror(curloc,
+              "syntax error for #pragma native <template> <type> <string>");
+    return;
+  }
+
+  /* resolve type */
+  type = type_find(args[1]);
+  if (!type) {
+    parserror(curloc, "unknown type '%s' in #pragma native", args[1]);
+    return;
+  }
+
+  /* create a new hash */
+  if (!hnative) {
+    hnative = hash_create("pragma native", 1);
+    if (!hnative) {
+      parserror(curloc, "dropped #pragma native");
+      return;
+    }
+  }
+
+  /* get hash for template */
+  h = hash_find(hnative, args[0]);
+  if (!h) {
+    h = hash_create("pragma native", 1);
+    if (!h) {
+      parserror(curloc, "dropped #pragma native");
+      return;
+    }
+    if (hash_insert(hnative, args[0], h, NULL)) {
+      parserror(curloc, "dropped #pragma native");
+      return;
+    }
+  }
+
+  /* insert native for type */
+  s = hash_insert(h, type_fullname(type), (void *)args[2], NULL);
+  switch(s) {
+    case 0: break;
+
+    case EEXIST:
+      parserror(curloc, "duplicate #pragma native for type '%s'",
+                type_fullname(type));
+      /*FALLTHROUGH*/
+    default:
+      parserror(curloc, "dropped #pragma native");
+      return;
+  }
+
+  xwarnx("#pragma native for '%s' on '%s'", args[0], type_fullname(type));
+}
+
+hash_s
+dotgen_hnative()
+{
+  return hnative;
 }

@@ -24,6 +24,8 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <libgen.h>
+#include <string.h>
 
 #include <tcl.h>
 
@@ -49,7 +51,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     typeidx_type, typeidx_length, typeidx_value, typeidx_valuekind,
     typeidx_members, typeidx_discriminator, typeidx_mapping,
     typeidx_declarator, typeidx_address, typeidx_deref, typeidx_argument,
-    typeidx_pass, typeidx_foreach, typeidx_with, typeidx_loc, typeidx_class
+    typeidx_pass, typeidx_foreach, typeidx_native, typeidx_loc, typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
@@ -61,8 +63,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
     [typeidx_address] = "address", [typeidx_deref] = "dereference",
     [typeidx_argument] = "argument", [typeidx_pass] = "pass",
-    [typeidx_foreach] = "foreach", [typeidx_loc] = "loc",
-    [typeidx_class] = "class", NULL
+    [typeidx_foreach] = "foreach", [typeidx_native] = "native",
+    [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r = NULL;
@@ -83,9 +85,15 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   } else if (i == typeidx_declarator || i == typeidx_address ||
              i == typeidx_deref) {
     /* 'declarator', 'address' and 'deref' subcommands can have one additional
-     * * parameter */
+     * parameter */
     if (objc > 3) {
       Tcl_WrongNumArgs(interp, 2, objv, "?var?");
+      return TCL_ERROR;
+    }
+  } else if (i == typeidx_native) {
+    /* 'native' subcommand can have one additional parameter */
+    if (objc > 3) {
+      Tcl_WrongNumArgs(interp, 2, objv, "?template?");
       return TCL_ERROR;
     }
   } else if (i == typeidx_argument || i == typeidx_pass) {
@@ -260,6 +268,35 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_DecrRefCount(argv[0]);
       if (s != TCL_OK) return TCL_ERROR;
       r = Tcl_GetObjResult(interp);
+      break;
+    }
+
+    case typeidx_native: {
+      hash_s h;
+      char *tmpl;
+      char *native;
+
+      if (!type_fullname(t)) break;
+
+      h = dotgen_hnative();
+      if (!h) break;
+
+      if (objc < 3) {
+        char name[PATH_MAX];
+
+        strlcpy(name, runopt.tmpl, sizeof(name));
+        tmpl = basename(name);
+      } else
+        tmpl = Tcl_GetString(objv[2]);
+      if (!tmpl) break;
+
+      h = hash_find(h, tmpl);
+      if (!h) break;
+
+      native = hash_find(h, type_fullname(t));
+      if (!native) break;
+
+      r = Tcl_NewStringObj(native, -1);
       break;
     }
 

@@ -95,9 +95,9 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
 
   if (k & PORT_HANDLE) {
     if (k & PORT_STATIC)
-      h = type_find("::" G3PORT_HANDLE_NAME);
+      h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_NAME);
     else if (k & PORT_ARRAY)
-      h = type_find("::" G3PORT_HANDLE_SET_NAME);
+      h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_SET_NAME);
     else assert(0);
     assert(h);
   } else if (k & PORT_DATA) {

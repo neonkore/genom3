@@ -114,6 +114,8 @@ void	hash_pstat(hash_s h);
 
 /* --- scopes -------------------------------------------------------------- */
 
+#define GENOM_NAMESPACE		"genom"
+
 typedef struct scope_s *scope_s;
 typedef struct idltype_s *idltype_s;
 typedef enum scopekind {
@@ -421,8 +423,8 @@ void		service_destroy(service_s s);
 
 /* --- port ---------------------------------------------------------------- */
 
-#define G3PORT_HANDLE_NAME		"g3port_handle"
-#define G3PORT_HANDLE_SET_NAME		"g3port_handle_set"
+#define PORT_HANDLE_NAME		"port_handle"
+#define PORT_HANDLE_SET_NAME		"port_handle_set"
 
 typedef enum portkind {
   PORT_IN =	0x1,

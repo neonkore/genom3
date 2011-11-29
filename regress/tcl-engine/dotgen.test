@@ -126,7 +126,7 @@ foreach t [dotgen types] { lappend l [$t fullname] }
 puts $l
 EOF
 expect out '
-	/^::g3port_handle ::g3port_handle_set ::a ::b ::b1$/ {next}
+	/^::genom::port_handle ::genom::port_handle_set ::a ::b ::b1$/ {next}
 	{exit 2}
 '
 

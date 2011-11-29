@@ -59,8 +59,8 @@ namespace eval template {
 	puts "sourcing $src"
 
 	if {[catch {
-	    source $src
-	    slave invokehidden source $src
+          uplevel #0 source $src
+          slave invokehidden source $src
 	} m]} {
 	    template fatal "$m"
 	}

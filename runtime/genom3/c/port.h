@@ -35,45 +35,46 @@
 #include <stdint.h>
 #include <genom3/c/idlsequence.h>
 
-#ifndef _g3port_handle_type
-# define _g3port_handle_type
-typedef uint32_t g3port_handle;
-#endif /* _g3port_handle_type */
+#ifndef _genom_port_handle_type
+# define _genom_port_handle_type
+typedef uint32_t genom_port_handle;
+#endif /* _genom_port_handle_type */
 
-#ifndef _sequence_g3port_handle_type
-# define _sequence_g3port_handle_type
-typedef struct sequence_g3port_handle {
+#ifndef _sequence_genom_port_handle_type
+# define _sequence_genom_port_handle_type
+typedef struct sequence_genom_port_handle {
   uint32_t _maximum, _length;
-  g3port_handle *_buffer;
+  genom_port_handle *_buffer;
   void (*_release)(void *_buffer);
-} sequence_g3port_handle;
-#endif /* _sequence_g3port_handle_type */
+} sequence_genom_port_handle;
+#endif /* _sequence_genom_port_handle_type */
 
-#ifndef _g3port_handle_set_type
-# define _g3port_handle_set_type
-typedef sequence_g3port_handle g3port_handle_set;
-#endif /* _g3port_handle_set_type */
+#ifndef _genom_port_handle_set_type
+# define _genom_port_handle_set_type
+typedef sequence_genom_port_handle genom_port_handle_set;
+#endif /* _genom_port_handle_set_type */
 
-struct g3port_pollhandle {
-  g3port_handle fd;		/* port handle */
+struct genom_port_pollhandle {
+  genom_port_handle fd;		/* port handle */
   uint16_t events;		/* events to look for */
   uint16_t revents;		/* events returned */
 };
 
-#define G3PORT_POLLIN	0x1	/* data may be read without blocking */
-#define G3PORT_POLLOUT	0x2	/* data may be written without blocking */
+#define GENOM_PORT_POLLIN	0x1	/* data may be read without blocking */
+#define GENOM_PORT_POLLOUT	0x2	/*          written without blocking */
 
-g3port_handle	g3port_open(const char *path, int mode);
-int		g3port_close(g3port_handle h);
+genom_port_handle	genom_port_open(const char *path, int mode);
+int			genom_port_close(genom_port_handle h);
 
-ssize_t		g3port_read(g3port_handle h, void *buf, size_t size);
-ssize_t		g3port_pread(g3port_handle h, void *buf, size_t size,
+ssize_t		genom_port_read(genom_port_handle h, void *buf, size_t size);
+ssize_t		genom_port_pread(genom_port_handle h, void *buf, size_t size,
 			size_t off);
-ssize_t		g3port_write(g3port_handle h, const void *buf, size_t size);
-ssize_t		g3port_pwrite(g3port_handle h, void *buf, size_t size,
+ssize_t		genom_port_write(genom_port_handle h, const void *buf,
+			size_t size);
+ssize_t		genom_port_pwrite(genom_port_handle h, void *buf, size_t size,
 			size_t off);
 
-int		g3port_poll(struct g3port_pollhandle *hs, int nfds,
+int		genom_port_poll(struct genom_port_pollhandle *hs, int nfds,
 			int timeout);
 
 #endif /* H_GENOM3_C_PORT */

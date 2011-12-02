@@ -116,7 +116,7 @@ namespace eval language::c++ {
 	}
 
 	foreach s [$type scope] {
-	    append m "\n\}"
+	    append m "\n\}\n"
 	}
 
 	set p ""

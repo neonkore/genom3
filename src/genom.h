@@ -367,6 +367,11 @@ const char *	prop_strkind(propkind k);
 
 /* --- component ----------------------------------------------------------- */
 
+#define COMPONENT_PROP_DEFAULTS {               \
+    { PROP_LANG,	"c" },                  \
+    { PROP_VERSION,	"0" },                  \
+}
+
 typedef struct comp_s *comp_s;
 typedef struct port_s *port_s;
 typedef struct service_s *service_s;

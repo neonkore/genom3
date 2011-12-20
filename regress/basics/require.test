@@ -23,17 +23,23 @@ component a {
   require:
     "x",
     "x > 0";
+  lang:	"c";
+  version:	"0";
 };
 
 component b {
   require:
     "x",
     "x > 0";
+  lang:	"c";
+  version:	"0";
 };
 
 component c {
   require:
     "x > 0",
     "x";
+  lang:	"c";
+  version:	"0";
 };
 EOF

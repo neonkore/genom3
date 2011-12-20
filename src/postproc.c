@@ -45,11 +45,17 @@ static int dotgen_clkratedefault(comp_s c);
 int
 dotgen_consolidate()
 {
+  static const struct {
+    propkind p;
+    const char *v;
+  } cpdef[] = COMPONENT_PROP_DEFAULTS;
+
   hash_s hrequire;
   hash_s types = type_all();
   comp_s c;
   prop_s p;
   hiter i, j;
+  int k;
 
   int e = 0;
 
@@ -85,13 +91,30 @@ dotgen_consolidate()
   /* apply templates declarations */
   e |= comp_applytmpl();
 
-  /* check clock-rate or compute default value if not specified */
+  /* set default values */
   for(c = comp_first(); c; c = comp_next(c)) {
+    /* compute default clock-rate if not specified */
     p = hash_find(comp_props(c), prop_strkind(PROP_CLOCKRATE));
     if (p)
       e |= dotgen_clkratechk(c, p);
     else
       e |= dotgen_clkratedefault(c);
+
+    /* set other default properties */
+    for(k=0; k<sizeof(cpdef)/sizeof(cpdef[0]); k++) {
+      p = hash_find(comp_props(c), prop_strkind(cpdef[k].p));
+      if (!p) {
+        p = prop_newstring(comp_loc(c), cpdef[k].p, cpdef[k].v);
+        if (!p ||
+            hash_insert(comp_props(c),
+                        prop_name(p), p, (hrelease_f)prop_destroy)) {
+          if (p) prop_destroy(p);
+          parserror(comp_loc(c), "unable to set a default %s",
+                    prop_strkind(cpdef[k].p));
+          e |= 1;
+        }
+      }
+    }
   }
 
 

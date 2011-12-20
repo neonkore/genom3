@@ -37,6 +37,10 @@ lang $l
 
 <"[comment " Codel functions signatures"]">
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 <'foreach t [$component tasks] { foreach c [$t codels] {'>
 <"[$c signature " " 1]">;
 <'} }'>
@@ -48,3 +52,7 @@ lang $l
 <'foreach s [$component services] { foreach c [$s codels] {'>
 <"[$c signature " " 1]">;
 <'} }'>
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -298,6 +298,8 @@ param_setmember(param_s p, cval m)
 		     type_strkind(type_kind(p->type)), type_fullname(p->type));
 	return errno = ENOENT;
       }
+      if (type_kind(t) == IDL_MEMBER || type_kind(t) == IDL_CASE)
+        t = type_type(t);
       break;
 
     default:

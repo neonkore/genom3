@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -427,7 +427,7 @@ prop_strkind(propkind k)
     case PROP_IDS:		return "ids";
     case PROP_ATTRIBUTE:	return "attribute";
     case PROP_VERSION:		return "version";
-    case PROP_LANG:		return "language";
+    case PROP_LANG:		return "lang";
     case PROP_EMAIL:		return "e-mail";
     case PROP_REQUIRE:		return "require";
     case PROP_CODELS_REQUIRE:	return "codels-require";

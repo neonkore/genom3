@@ -5,10 +5,15 @@ Name: genom3
 Description: Generator of robotic Modules
 Version: @VERSION@
 
+PACKAGE_NAME=@PACKAGE_NAME@
+
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
+datarootdir=@datarootdir@
+datadir=@datadir@
+sitetmpldir=@sitetmpldir@
 
 GENOM_TOOL=${exec_prefix}/bin/@GENOM_TOOL@
 Cflags: -I${includedir}

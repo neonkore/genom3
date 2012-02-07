@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -64,6 +64,7 @@ int stdfd[3][2];
 
 
 static char *	eng_findentry(const char *dir);
+static int	eng_listtmpldir(const char *base, const char *dir);
 static int	eng_printpipe(int fd, FILE *out, const char *bol,
 			int *firstline);
 int		eng_swapfd(int from, int to);
@@ -119,53 +120,71 @@ eng_findtmpl(const char *tmpl)
 int
 eng_listtmpl()
 {
-  char path[PATH_MAX];
   char *dirs, *dir;
-  struct dirent de, *r;
-  struct stat sb;
-  DIR *d;
-  char *name;
-
   int n = 0;
 
   /* iterate over components of tmplpath */
   dirs = strdup(runopt.tmplpath);
   if (!dirs) return ENOMEM;
   for (dir = strtok(dirs, ":"); dir; dir = strtok(NULL, ":")) {
-
-    /* look for template.xxx entries */
-    xwarnx("searching template directory '%s'", dir);
-    d = opendir(dir);
-    if (!d) continue;
-
-    /* must use readdir_r() here because eng_findentry() also readdir() */
-    while(!readdir_r(d, &de, &r) && r) {
-      if (!(de.d_type & DT_DIR) && de.d_type != DT_UNKNOWN) continue;
-
-      strlcpy(path, dir, sizeof(path));
-      strlcat(path, "/", sizeof(path));
-      strlcat(path, de.d_name, sizeof(path));
-      if (stat(path, &sb)) continue;
-      if (!(sb.st_mode & S_IFDIR)) continue;
-
-      xwarnx("looking for template in '%s'", de.d_name);
-      name = eng_findentry(path);
-      if (name) {
-	if (strlen(de.d_name) >= 68) {
-	  de.d_name[68] = '\0';
-	  de.d_name[67] = de.d_name[66] = de.d_name[65] = '.';
-	}
-	name += strlen(TMPL_SPECIAL_FILE);
-	printf("%-70s %s\n", de.d_name, name);
-	n++;
-      }
-    }
-    closedir(d);
+    n += eng_listtmpldir("", dir);
   }
 
   free(dirs);
   if (!n) { warnx("no template found!"); return ENOENT; }
   return 0;
+}
+
+static int
+eng_listtmpldir(const char *base, const char *dir)
+{
+  char path[PATH_MAX];
+  char ent[PATH_MAX];
+  struct dirent de, *r;
+  struct stat sb;
+  DIR *d;
+  char *name, *prefix;
+
+  int n = 0;
+
+  /* look for template.xxx entries */
+  xwarnx("searching template directory '%s'", dir);
+
+  prefix = ent + strlcpy(ent, base, sizeof(ent));
+  if (base[0]) prefix = ent + strlcat(ent, "/", sizeof(ent));
+
+  d = opendir(dir);
+  if (!d) return 0;
+
+  /* must use readdir_r() here because eng_findentry() also readdir() */
+  while(!readdir_r(d, &de, &r) && r) {
+    if (!(de.d_type & DT_DIR) && de.d_type != DT_UNKNOWN) continue;
+
+    strlcpy(path, dir, sizeof(path));
+    strlcat(path, "/", sizeof(path));
+    strlcat(path, de.d_name, sizeof(path));
+    if (stat(path, &sb)) continue;
+    if (!(sb.st_mode & S_IFDIR)) continue;
+    if (!strcmp(de.d_name, ".") || !strcmp(de.d_name, "..")) continue;
+
+    *prefix = 0;
+    strlcat(ent, de.d_name, sizeof(ent));
+    n += eng_listtmpldir(ent, path);
+
+    xwarnx("looking for template in '%s'", de.d_name);
+    name = eng_findentry(path);
+    if (name) {
+      if (strlen(ent) >= 68) {
+        ent[68] = '\0';
+        ent[67] = ent[66] = ent[65] = '.';
+      }
+      name += strlen(TMPL_SPECIAL_FILE);
+      printf("%-70s %s\n", ent, name);
+      n++;
+    }
+  }
+  closedir(d);
+  return n;
 }
 
 

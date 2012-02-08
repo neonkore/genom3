@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -425,7 +425,7 @@ namespace eval language::c {
 	}
 
 	append m [genloc $type]
-	append m "\n# define $n ((const $t)($v))"
+	append m "\nstatic const $t $n = $v;"
 	return [guard $m $n]
     }
 
@@ -441,8 +441,8 @@ namespace eval language::c {
 	append m "\ntypedef uint32_t $n;"
 	set v -1
 	foreach e [$type members] {
-	    append m [genloc $e]
-	    append m "\n# define [cname [$e fullname]]\t([incr v])"
+          append m [genloc $e]
+          append m "\nstatic const $n [cname [$e fullname]] =\t[incr v];"
 	}
 	return [guard $m $n]
     }

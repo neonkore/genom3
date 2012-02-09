@@ -435,16 +435,21 @@ namespace eval language::c {
     # Return the C mapping of an enum.
     #
     proc genenum { type } {
-	set n [cname [$type fullname]]
+      set n [cname [$type fullname]]
 
-	append m [genloc $type]
-	append m "\ntypedef uint32_t $n;"
-	set v -1
-	foreach e [$type members] {
-          append m [genloc $e]
-          append m "\nstatic const $n [cname [$e fullname]] =\t[incr v];"
-	}
-	return [guard $m $n]
+      append m [genloc $type]
+      append m "\ntypedef uint32_t $n;"
+      append m "\nenum {"
+      set v -1
+      set comma {}
+      foreach e [$type members] {
+        append m "${comma}"
+        append m [genloc $e]
+        append m "\n  [cname [$e fullname]] =\t[incr v]"
+        set comma ,
+      }
+      append m "\n};"
+      return [guard $m $n]
     }
 
 

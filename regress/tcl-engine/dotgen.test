@@ -119,14 +119,22 @@ testing '[dotgen types]'
 cat >run.gen <<EOF
 typedef long a;
 typedef long b;
-typedef long b1;
+struct b1 { long b; };
+component c;
+outport handle<b1> p[];
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
-foreach t [dotgen types] { lappend l [$t fullname] }
-puts $l
+foreach t [dotgen types] { puts [$t fullname] }
 EOF
 expect out '
-	/^::genom::port_handle ::genom::port_handle_set ::a ::b ::b1$/ {next}
+	/^::[ab]$/ {next}
+	/^::b1$/ {next}
+	/^::b1::b$/ {next}
+	/^::c::event$/ {next}
+	/^::c::(ok|error|ether|start|stop|sleep)$/ {next}
+	/^::genom::port_handle$/ {next}
+	/^::genom::port_handle::id$/ {next}
+	/^::genom::port_handle_set$/ {next}
 	{exit 2}
 '
 
@@ -134,7 +142,7 @@ run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 foreach t [dotgen types *b*] { lappend l [$t fullname] }
 puts $l
 EOF
-expect out '/^::b ::b1$/ {next}; {exit 2}'
+expect out '/^::b ::b1::b ::b1$/ {next}; {exit 2}'
 
 
 # --- dotgen components ----------------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 LAAS/CNRS
+ * Copyright (c) 2011-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -32,49 +32,151 @@
 #ifndef H_GENOM3_C_PORT
 #define H_GENOM3_C_PORT
 
+#include <errno.h>
 #include <stdint.h>
 #include <genom3/c/idlsequence.h>
 
-#ifndef _genom_port_handle_type
-# define _genom_port_handle_type
-typedef uint32_t genom_port_handle;
-#endif /* _genom_port_handle_type */
+struct genom_port_handle;
+struct sequence_genom_port_handle;
 
-#ifndef _sequence_genom_port_handle_type
-# define _sequence_genom_port_handle_type
-typedef struct sequence_genom_port_handle {
-  uint32_t _maximum, _length;
-  genom_port_handle *_buffer;
-  void (*_release)(void *_buffer);
-} sequence_genom_port_handle;
-#endif /* _sequence_genom_port_handle_type */
-
-#ifndef _genom_port_handle_set_type
-# define _genom_port_handle_set_type
-typedef sequence_genom_port_handle genom_port_handle_set;
-#endif /* _genom_port_handle_set_type */
+enum {
+  GENOM_PORT_CLOSED =	0x0,	/* closed handle */
+  GENOM_PORT_OPEN =	0x1,	/* open handle */
+  GENOM_PORT_IN =	0x10,	/* inport handle */
+  GENOM_PORT_OUT =	0x20	/* outport handle */
+};
 
 struct genom_port_pollhandle {
-  genom_port_handle fd;		/* port handle */
-  uint16_t events;		/* events to look for */
-  uint16_t revents;		/* events returned */
+  struct genom_port_handle *h;	/**< port handle */
+  uint16_t events;		/**< events to look for */
+  uint16_t revents;		/**< events returned */
 };
 
 #define GENOM_PORT_POLLIN	0x1	/* data may be read without blocking */
 #define GENOM_PORT_POLLOUT	0x2	/*          written without blocking */
 
-genom_port_handle	genom_port_open(const char *path, int mode);
-int			genom_port_close(genom_port_handle h);
 
-ssize_t		genom_port_read(genom_port_handle h, void *buf, size_t size);
-ssize_t		genom_port_pread(genom_port_handle h, void *buf, size_t size,
-			size_t off);
-ssize_t		genom_port_write(genom_port_handle h, const void *buf,
-			size_t size);
-ssize_t		genom_port_pwrite(genom_port_handle h, void *buf, size_t size,
-			size_t off);
+/* --- port handle codel API ----------------------------------------------- */
 
-int		genom_port_poll(struct genom_port_pollhandle *hs, int nfds,
-			int timeout);
+/*
+ * Define weak aliases for the genom_port_* functions when possible. This is
+ * done for two reasons, the first one being the most important:
+ *
+ *  - Force the genom_port_* symbols to appear in the codels DSO, even if the
+ *    codels do not use the functions. This ensures that codels DSO can always
+ *    be recompiled without re-linking the final executable. (otherwise an
+ *    executable linked with codels not using the API initially must be
+ *    recompiled whenever the codels change and decide to make use of the API).
+ *
+ *  - Provide a nice fallback if the codels are linked outside a genom module
+ *    or with a template not implementing the full port handle API. This is
+ *    mostly cosmetic, though.
+ *
+ * If weak aliases are not available, this code still works as expected but
+ * without the features mentionned above: a component may have to be relinked
+ * if codels use/do not use the port API. (stubs are not defined in this case,
+ * to prevent 'defined but not used' warnings).
+ *
+ * The macro GENOM_PORT_IMPL_ must be defined by the template implementation,
+ * so that the API symbols are defined as regular (strong) ones.
+ */
+
+#ifndef GENOM_PORT_IMPL_
+# if defined(__GNUC__)
+#  define GENOM_PORT_WANTS_STUB_
+#  define genom_weak_alias(x) __attribute__ ((weak, alias( #x )))
+# else
+#  define genom_weak_alias(x)
+# endif
+#else
+#  define genom_weak_alias(x)
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+  genom_weak_alias(genom_port_open_stub)
+  int	genom_port_open(struct genom_port_handle *h, const char *port,
+		const char *path);
+  genom_weak_alias(genom_port_close_stub)
+  int	genom_port_close(struct genom_port_handle *h);
+  genom_weak_alias(genom_port_status_stub)
+  int	genom_port_status(struct genom_port_handle *h);
+
+  genom_weak_alias(genom_port_rdlock_stub)
+  const void *	genom_port_rdlock(const struct genom_port_handle *h);
+  genom_weak_alias(genom_port_wrlock_stub)
+  void *	genom_port_wrlock(const struct genom_port_handle *h);
+  genom_weak_alias(genom_port_unlock_stub)
+  int		genom_port_unlock(const struct genom_port_handle *h);
+
+  genom_weak_alias(genom_port_poll_stub)
+  int	genom_port_poll(struct genom_port_pollhandle *hs, int nfds,
+		int timeout);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/* --- stub implementation ------------------------------------------------- */
+
+#ifdef GENOM_PORT_WANTS_STUB_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+  static int
+  genom_port_open_stub(struct genom_port_handle *h, const char *port,
+                       const char *path)
+  {
+    return ENXIO;
+  }
+
+  static int
+  genom_port_close_stub(struct genom_port_handle *h)
+  {
+    return ENXIO;
+  }
+
+  static int
+  genom_port_status_stub(struct genom_port_handle *h)
+  {
+    return GENOM_PORT_CLOSED;
+  }
+
+  static const void *
+  genom_port_rdlock_stub(const struct genom_port_handle *h)
+  {
+    return NULL;
+  }
+
+  static void *
+  genom_port_wrlock_stub(const struct genom_port_handle *h)
+  {
+    return NULL;
+  }
+
+  static int
+  genom_port_unlock_stub(const struct genom_port_handle *h)
+  {
+    return ENXIO;
+  }
+
+  static int
+  genom_port_poll_stub(struct genom_port_pollhandle *hs, int nfds,
+                       int timeout)
+  {
+    return ENXIO;
+  }
+
+#ifdef __cplusplus
+}
+#endif
+
+#undef GENOM_PORT_WANTS_STUB_
+#endif /* GENOM_PORT_WANTS_STUB_ */
 
 #endif /* H_GENOM3_C_PORT */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -320,8 +320,6 @@ int
 scope_pushglobal()
 {
   tloc l = (tloc){ .file=NULL, .line = 1, .col = 1 };
-  idltype_s t, h, hs;
-  scope_s s;
 
   assert(!global);
   global = scope_new(l, "", NULL);
@@ -331,23 +329,6 @@ scope_pushglobal()
   current = global;
 
   xwarnx("pushed global scope");
-
-  /* create std types */
-  s = scope_push(l, GENOM_NAMESPACE, SCOPE_MODULE);
-  if (!s) return errno;
-
-  t = type_newbasic(l, NULL, IDL_ULONG);
-  if (!t) return errno;
-  h = type_newalias(l, PORT_HANDLE_NAME, t);
-  if (!h) return errno;
-  t = type_newsequence(l, NULL, h, -1U);
-  if (!t) return errno;
-  hs = type_newalias(l, PORT_HANDLE_SET_NAME, t);
-  if (!hs) return errno;
-
-  scope_pop();
-
-  xwarnx("created standard types");
   return 0;
 }
 

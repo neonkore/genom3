@@ -119,6 +119,9 @@ namespace eval language::c {
       if {[regexp {sequence} $m]} {
         append p "#include <genom3/c/idlsequence.h>\n"
       }
+      if {[regexp {genom_port_handle} $m]} {
+        append p "#include <genom3/c/port.h>\n"
+      }
 
       return $p$m
     }

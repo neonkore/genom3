@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 LAAS/CNRS
+ * Copyright (c) 2011-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -50,6 +50,10 @@ comp_s		port_comp(port_s p) { assert(p); return p->component; }
 idltype_s	port_type(port_s p) { assert(p); return p->type; }
 idltype_s	port_datatype(port_s p) { assert(p); return p->datatype; }
 
+static int		port_mkbuiltins(tloc l);
+static idltype_s	port_handle_type(tloc l);
+static idltype_s	port_handleset_type(tloc l);
+
 
 /* --- port_new ------------------------------------------------------------ */
 
@@ -95,11 +99,10 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
 
   if (k & PORT_HANDLE) {
     if (k & PORT_STATIC)
-      h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_NAME);
+      h = port_handle_type(l);
     else if (k & PORT_ARRAY)
-      h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_SET_NAME);
+      h = port_handleset_type(l);
     else assert(0);
-    assert(h);
   } else if (k & PORT_DATA) {
     h = t;
   } else assert(0);
@@ -139,6 +142,89 @@ port_destroy(port_s p)
 {
   if (p) free(p);
 }
+
+
+/* --- port_mkbuiltins ----------------------------------------------------- */
+
+/** create port builtin types
+ */
+static int
+port_mkbuiltins(tloc l)
+{
+  idltype_s t, h;
+  scope_s s;
+  assert(scope_current() == scope_global());
+
+  s = scope_push(l, GENOM_NAMESPACE, SCOPE_MODULE);
+  if (!s) return errno;
+
+  /* port handle */
+  s = scope_push(l, PORT_HANDLE_NAME, SCOPE_STRUCT);
+  if (!s) return errno;
+  t = type_newbasic(l, NULL, IDL_ULONG);
+  if (!t) return errno;
+  t = type_newmember(l, "id", t);
+  if (!t) return errno;
+  scope_detach(scope_pop());
+  h = type_newstruct(l, PORT_HANDLE_NAME, s);
+  if (!h) return errno;
+
+  /* port handle sequence */
+  t = type_newsequence(l, NULL, h, -1U);
+  if (!t) return errno;
+  t = type_newalias(l, PORT_HANDLE_SET_NAME, t);
+  if (!t) return errno;
+
+  scope_pop();
+
+  assert(scope_current() == scope_global());
+  xwarnx("created builtin port handle types");
+  return 0;
+}
+
+
+/* --- port_handle_type ---------------------------------------------------- */
+
+/** get port handle builtin type
+ */
+static idltype_s
+port_handle_type(tloc l)
+{
+  idltype_s h;
+  int s;
+
+  h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_NAME);
+  if (!h) {
+    s = port_mkbuiltins(l);
+    assert(!s);
+    h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_NAME);
+  }
+
+  assert(h);
+  return h;
+};
+
+
+/* --- port_handleset_type ------------------------------------------------- */
+
+/** get port handle set builtin type
+ */
+static idltype_s
+port_handleset_type(tloc l)
+{
+  idltype_s h;
+  int s;
+
+  h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_SET_NAME);
+  if (!h) {
+    s = port_mkbuiltins(l);
+    assert(!s);
+    h = type_find("::" GENOM_NAMESPACE "::" PORT_HANDLE_SET_NAME);
+  }
+
+  assert(h);
+  return h;
+};
 
 
 /* --- port_strkind -------------------------------------------------------- */

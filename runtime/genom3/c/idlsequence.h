@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -49,18 +49,22 @@ _genom3_resize_buffer(uint32_t length, size_t esize,
     if (!buffer) return -1;
 
     *_maximum = length;
-    if (length < *_length) *_length = length;
+    if (length < *_length)
+      *_length = length;
+    else if (length > *_length)
+      memset((char *)buffer + *_length * esize, 0, (length - *_length) * esize);
+
     *_buffer = buffer;
     return 0;
   }
 
-  buffer = malloc(length * esize);
+  buffer = calloc(length, esize);
   if (!buffer) return -1;
 
   *_maximum = length;
   if (length < *_length) *_length = length;
   if (*_length > 0 && *_buffer) memcpy(buffer, *_buffer, *_length * esize);
-  if (*_release) (*_release)(*_buffer);
+  if (*_release && *_buffer) (*_release)(*_buffer);
   *_buffer = buffer;
   *_release = free;
 

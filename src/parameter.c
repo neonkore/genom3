@@ -267,6 +267,15 @@ param_setmember(param_s p, cval m)
   assert(p);
   assert(p->type);
 
+  /* consistency checks */
+  if (p->port && port_kind(p->port) & PORT_HANDLE) {
+    parserror(p->loc, "cannot access members of %s port %s",
+              port_strkind(port_kind(p->port)), param_name(p));
+    parsenoerror(port_loc(p->port), " %s port %s declared here",
+                 port_strkind(port_kind(p->port)), port_name(p->port));
+    return errno = EINVAL;
+  }
+
   switch(m.k) {
     case CST_UINT: /* array element */
       switch(type_kind(type_final(p->type))) {

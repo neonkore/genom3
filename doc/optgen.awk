@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -200,10 +200,11 @@ function output_tex() {
 	    printf "\\item[{";
 	    if (key[j] ~ /^-/)
 		s = "";
-	    else
+	    else {
 		s = "-" key[j];
-	    if (argopt[cat[i],key[j]])
-		s = s " {\\em " argopt[cat[i],key[j]] "}";
+                if (argopt[cat[i],key[j]])
+                    s = s " {\\em " argopt[cat[i],key[j]] "}";
+            }
 	    if (arglong[cat[i],key[j]] != "-") {
 		if (key[j] !~ /^-/)
 		    s = s ", ";
@@ -228,7 +229,7 @@ function output_tex() {
     k = split(envs, key);
     for (i = 1; i <= k; i++) {
         s = key[i]
-        s = gsub(/[_]/, "\\\\&", s)
+        gsub(/[_]/, "\\\\&", s)
 	print "\\item[{" s "}]";
 	gsub(/[#_]/, "\\\\&", envdesc[key[i]]);
 	gsub(/\\name/, "\\GenoM{}", envdesc[key[i]]);
@@ -259,10 +260,11 @@ function output_mdoc() {
 	printf ".It ";
 	if (key[j] ~ /^-/)
 	  s = "";
-	else
+	else {
 	  s = "Fl " key[j];
-	if (argopt[cat[i],key[j]])
-	  s = s " Em " argopt[cat[i],key[j]];
+          if (argopt[cat[i],key[j]])
+              s = s " Em " argopt[cat[i],key[j]];
+        }
 	if (arglong[cat[i],key[j]] != "-") {
 	  if (key[j] !~ /^-/)
 	    s = s " ,";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -79,6 +79,7 @@ typedef enum dotgen_input_kind {
 void	dotgen_input(dotgen_input_kind k, ...);
 int	dotgenparse(void);
 int	dotgen_consolidate(void);
+hash_s	dotgen_hdeps(void);
 hash_s	dotgen_hrequire(void);
 hash_s	dotgen_hnative(void);
 

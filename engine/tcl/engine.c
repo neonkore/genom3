@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -75,6 +75,7 @@ static const struct dgcmd {
   { "::" DOTGEN_NS "::" INPUT_CMD "::base", dg_input_base },
   { "::" DOTGEN_NS "::" INPUT_CMD "::dir", dg_input_dir },
   { "::" DOTGEN_NS "::" INPUT_CMD "::notice", dg_input_notice },
+  { "::" DOTGEN_NS "::" INPUT_CMD "::deps", dg_input_deps },
   { "::" DOTGEN_NS "::" PARSE_CMD, dg_parse },
   { "::" DOTGEN_NS "::" TYPES_CMD, dg_types },
   { "::" DOTGEN_NS "::" COMPONENTS_CMD, dg_components },

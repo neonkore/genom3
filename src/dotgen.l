@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -329,6 +329,9 @@ dotgen_read(char *buffer, size_t max_size)
 
 /* --- dotgen_parsehash ---------------------------------------------------- */
 
+static hash_s hdeps;
+
+
 /** Parse cpp # line directives
  */
 static void
@@ -352,6 +355,25 @@ dotgen_parsehash(char *buffer)
   curloc.file = string(file);
   curloc.line = line;
   curloc.col = 1;
+
+  /* create dependencies hash */
+  if (!hdeps) {
+    hdeps = hash_create("input files", 2);
+    if (!hdeps) {
+      parserror(curloc, "dropped dependency %s", curloc.file);
+      return;
+    }
+  }
+
+  /* insert dependency */
+  if (hash_insert(hdeps, curloc.file, curloc.file, NULL))
+    return;
+}
+
+hash_s
+dotgen_hdeps()
+{
+  return hdeps;
 }
 
 

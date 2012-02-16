@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -275,6 +275,31 @@ dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
   }
 
   Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.notice, -1));
+  return TCL_OK;
+}
+
+/* \proc dotgen input deps
+ * \index dotgen input deps
+ *
+ * Return the comprehensive list of input files processed so far. This includes
+ * the input .gen file itself, plus any other file required, directly or
+ * indirectly, via a {\tt \#include} directive. This list is typically used to
+ * generate dependency information in a Makefile.
+ */
+int
+dg_input_deps(ClientData v, Tcl_Interp *interp, int objc,
+              Tcl_Obj *const objv[])
+{
+  Tcl_Obj *d;
+  hiter i;
+
+  d = Tcl_NewListObj(0, NULL);
+  if (dotgen_hdeps()) {
+    for(hash_first(dotgen_hdeps(), &i); i.current; hash_next(&i)) {
+      Tcl_ListObjAppendElement(interp, d, Tcl_NewStringObj(i.value, -1));
+    }
+  }
+  Tcl_SetObjResult(interp, d);
   return TCL_OK;
 }
 

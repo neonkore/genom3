@@ -68,6 +68,11 @@ BUILT_SOURCES=\
 	<"[join $built_sources "\t\\\n\t"]">
 
 <'foreach m $built_sources {'>
-<"$m">: $(top_srcdir)/<"[dotgen input base]">
-	$(genom3) <"[dotgen genom cmdline]"> mappings --signature -l <"$lang"> $<
+<"$m">: .deps/<"$m">.d
+
+.deps/<"$m">.d: ${top_srcdir}/<"[dotgen input base]">
+	${genom3} <"[dotgen genom cmdline]"> mappings \
+		-MD -MF $@ -MT $@ --signature -l <"$lang"> $<
+
+-include .deps/<"$m">.d
 <'}'>

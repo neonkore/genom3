@@ -39,7 +39,11 @@ template usage {*}{
     "Supported options:\n"
     "  -l, --language=lang\tgenerate mappings for language\n"
     "  -s, --suffix=string\tset output file name suffix\n"
-    "  --signature\tgenerate codel signatures in addition to the types mappings\n"
+    "  --signature\t\tgenerate codel signatures and types mappings\n"
+    "  -MD\t\t\tgenerate dependency information (in out.d)\n"
+    "  -MF=file\t\tgenerate dependency in file instead of out.d\n"
+    "  -MT=target\t\tchange the target of the dependency rules\n"
+    "  -C, --directory=dir\toutput files in dir instead of current directory\n"
     "  -C, --directory=dir\toutput files in dir instead of current directory\n"
     "  -p, --preserve\tdo not overwrite existing files\n"
     "  -m, --modify\t\toverwrite files even if they did not change\n"
@@ -47,9 +51,12 @@ template usage {*}{
 }
 
 # defaults
-variable dir	.
-variable suffix _types
-variable sign [list]
+variable dir		.
+variable suffix		_types
+variable sign		[list]
+variable deps		off
+variable dfile		"out.d"
+variable dtarget	""
 engine mode +overwrite +move-if-change
 
 # parse options
@@ -57,6 +64,9 @@ template options {
 	 --signature	{ set sign [list file codels.h] }
     -s - --suffix	{ set suffix [template arg] }
     -l - --language	{ lappend lang [template arg] }
+    -MD			{ set deps on }
+    -MF			{ set dfile [template arg] }
+    -MT			{ set dtarget [template arg] }
     -C - --directory	{ set dir [template arg] }
     -p - --preserve	{ engine mode -overwrite }
     -m - --modify	{ engine mode -move-if-change }
@@ -77,16 +87,29 @@ if {![catch {dotgen input notice} notice]} {
 }
 
 # generate types definitions
+set out [list]
 foreach c [dotgen components] {
     if {[info exists lang]} { set l $lang } else { set l [$c language] }
     foreach l $l {
       lang $l
-      set safel [cname $l]
       template parse					\
           args [list $c $l]				\
           raw [comment $header]\n			\
           string [language mapping]			\
           {*}$sign					\
-          file "[$c name]_$safel$suffix[fileext header]"
+          file "[$c name]_[cname $l]$suffix[fileext header]"
+      lappend out "[$c name]_[cname $l]$suffix[fileext header]"
     }
+}
+
+# dependencies
+if {$dtarget == ""} { set dtarget $out }
+if {$deps} {
+  set deps [list]
+  foreach d [concat [dotgen input deps] [template deps]] {
+    lappend deps "$dtarget: $d"
+    lappend deps "$d:"
+  }
+  engine mode +overwrite -move-if-change
+  template parse raw [join $deps "\n"]\n file $dfile
 }

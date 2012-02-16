@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -202,9 +202,10 @@ main(int argc, char *argv[])
 
   /* if a template is required (not -E or -n), configure template arguments */
   if (!runopt.parse && !runopt.preproc) {
-    if (argc < 2) {
+    if (argc < 1) {
       usage(stderr, argv0);
-      exit(1);
+      status = 1;
+      goto done;
     }
 
     const char *p = eng_findtmpl(argv[0]);
@@ -218,25 +219,32 @@ main(int argc, char *argv[])
     argc--;
     argv++;
 
-    while(argc > 1) {
+    while(argc > 0) {
       if (!strcmp(argv[0], "--")) break;
-      if (argv[0][0] != '-' && argv[1][0] != '-') {
-	/* treat any argument preceeding something that looks like an option as
-	 * an option itself */
+      /* treat any argument no looking like an option but preceeding something
+       that looks like an option as an option itself */
+      if (argv[0][0] != '-' && (argc == 1 || argv[1][0] != '-')) {
+        /* treat any argument that is not an existing file as an option,
+         * except if it's the last argument */
 	struct stat sb;
 	s = stat(argv[0], &sb);
 	if (!s && S_ISREG(sb.st_mode)) break;
-      /* treat any argument that is not an existing file as an option */
+        if (argc == 1) break;
       }
 
       eng_optappend(argv[0], -1);
       argc--; argv++;
     }
-    if (!strcmp(argv[0], "--")) { argc--; argv++; }
+    if (argc > 0 && !strcmp(argv[0], "--")) { argc--; argv++; }
   }
 
   /* configure input files */
-  if (argc != 1) errx(2, "wrong number of arguments near '%s'", argv[0]);
+  if ((runopt.parse || runopt.preproc) && argc < 1) {
+    usage(stderr, argv0);
+    status = 1;
+    goto done;
+  }
+  if (argc < 1) goto generate;
 
   s = open(argv[0], O_RDONLY, 0);
   if (s < 0) {
@@ -282,6 +290,7 @@ main(int argc, char *argv[])
   if (runopt.parse) goto done;
 
   /* invoke template */
+generate:
   status = eng_invoke();
   if (status) { goto done; }
 

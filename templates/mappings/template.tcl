@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -61,6 +61,11 @@ template options {
     -p - --preserve	{ engine mode -overwrite }
     -m - --modify	{ engine mode -move-if-change }
     -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
+}
+
+# check input
+if {![llength [dotgen input file]]} {
+  engine mode +verbose; puts [template usage]; exit 0
 }
 engine chdir $dir
 

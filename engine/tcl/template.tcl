@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -40,6 +40,9 @@ namespace eval template {
     # save template options
     variable args [set ::argv]
 
+    # save template processed files (dependencies)
+    variable deps [list]
+
 
     # --- require ----------------------------------------------------------
 
@@ -55,6 +58,8 @@ namespace eval template {
     #		made available to the template files.
     #
     proc require { src } {
+        variable deps
+
 	set src [file join [dotgen template dir] $src]
 	puts "sourcing $src"
 
@@ -64,6 +69,11 @@ namespace eval template {
 	} m]} {
 	    template fatal "$m"
 	}
+
+        set src [file normalize $src]
+        if {$src ni $deps} {
+          lappend deps $src
+        }
     }
     namespace export require
 
@@ -130,6 +140,8 @@ namespace eval template {
     #		be set for the created file.
     #
     proc parse { args } {
+        variable deps
+
 	if {[llength $args] < 4 || [llength $args] % 2} {
 	    template fatal "wrong # args"
 	}
@@ -165,6 +177,13 @@ namespace eval template {
 			exit 2
 		    }
 		    engine::close $in
+
+                    if {$stype == "file"} {
+                      set src [file join [dotgen template dir] $src]
+                      if {$src ni $deps} {
+                        lappend deps [file normalize $src]
+                      }
+                    }
 		}
 
 		default {
@@ -193,9 +212,15 @@ namespace eval template {
     # directory. Absolute file name can be given to override this behaviour.
     #
     proc link { src dst } {
+        variable deps
+
 	set src [file join [dotgen template dir] $src]
 	set dst [file join [engine pwd] $dst]
 	if {[file normalize $src] == [file normalize $dst]} return
+
+        if {[file normalize $src] ni $deps} {
+          lappend deps [file normalize $src]
+        }
 
 	if {[file exists $dst]} {
 	    if {[lsearch [engine mode] move-if-change] >= 0} {
@@ -262,6 +287,29 @@ namespace eval template {
 	getopt
     }
     namespace export options
+
+
+    # --- deps -------------------------------------------------------------
+
+    # \proc template deps
+    # \index template deps
+    #
+    # Return the comprehensive list of template files processed so far. This
+    # includes files processed via {\tt template require}, {\tt template parse}
+    # and {\tt template link}. This list is typically used to generate
+    # dependency information in a Makefile.
+    #
+    proc deps { } {
+      variable deps
+
+      # add main template file to the list
+      set src [file join [dotgen template dir] template.tcl]
+      if {$src ni $deps} {
+        lappend deps $src
+      }
+      return $deps
+    }
+    namespace export deps
 
 
     # --- arg --------------------------------------------------------------

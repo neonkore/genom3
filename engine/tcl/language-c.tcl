@@ -313,8 +313,15 @@ namespace eval language::c {
 	foreach p [$codel parameters] {
 	    set a ""
 	    switch -- [$p dir] {
-		"in" - "inport"	{
+		"in" {
 		  append a [[$p type] argument value [$p name]]
+		}
+		"inport" {
+                  if {"handle" in [[$p port] kind]} {
+                    append a [[$p type] argument reference [$p name]]
+                  } else {
+                    append a [[$p type] argument value [$p name]]
+                  }
 		}
 		default	{
 		  append a [[$p type] argument reference [$p name]]

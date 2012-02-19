@@ -285,8 +285,15 @@ namespace eval language::c++ {
 	foreach p [$codel parameters] {
 	    set a ""
 	    switch -- [$p dir] {
-		"in" - "inport"	{
+		"in" {
 		  append a [parameter value [$p type] [$p name]]
+		}
+		"inport" {
+                  if {"handle" in [[$p port] kind]} {
+                    append a [parameter reference [$p type] [$p name]]
+                  } else {
+                    append a [parameter value [$p type] [$p name]]
+                  }
 		}
 		default	{
 		  append a [parameter reference [$p type] [$p name]]

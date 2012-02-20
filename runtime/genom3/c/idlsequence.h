@@ -37,6 +37,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static __inline__ int
 _genom3_resize_buffer(uint32_t length, size_t esize,
 		      uint32_t *_length, uint32_t *_maximum, void **_buffer,
@@ -70,6 +74,10 @@ _genom3_resize_buffer(uint32_t length, size_t esize,
 
   return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #define genom3_sequence_resize(sequence, length)			\
   _genom3_resize_buffer(						\

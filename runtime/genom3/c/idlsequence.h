@@ -42,9 +42,9 @@ extern "C" {
 #endif
 
 static __inline__ int
-_genom3_resize_buffer(uint32_t length, size_t esize,
-		      uint32_t *_length, uint32_t *_maximum, void **_buffer,
-		      void (**_release)(void *))
+_genom_resize_buffer(uint32_t length, size_t esize,
+                     uint32_t *_length, uint32_t *_maximum, void **_buffer,
+                     void (**_release)(void *))
 {
   void *buffer;
 
@@ -79,8 +79,8 @@ _genom3_resize_buffer(uint32_t length, size_t esize,
 }
 #endif
 
-#define genom3_sequence_resize(sequence, length)			\
-  _genom3_resize_buffer(						\
+#define genom_sequence_reserve(sequence, length)                        \
+  _genom_resize_buffer(                                                 \
     length, sizeof(*(sequence)->_buffer),				\
     &(sequence)->_length, &(sequence)->_maximum,			\
     (void **)&(sequence)->_buffer, &(sequence)->_release)

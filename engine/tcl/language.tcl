@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -432,8 +432,11 @@ proc wrap { args } {
     set text $prefix[string range $text [expr {$brk+1}] end]
   } {
     set brk [string last $sep $text $column]
+    if { $brk < 0 } {
+      set brk [string first $sep $text]
+      if { $brk < 0 } break
+    }
     if { ![string is space $sep] } { incr brk }
-    if { $brk < 0 } {set brk [string length $text]}
     append result [string range $text 0 [expr {$brk-1}]] \n
   }
   return $result$text

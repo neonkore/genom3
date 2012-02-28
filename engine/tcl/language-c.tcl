@@ -281,15 +281,28 @@ namespace eval language::c {
     # Return the C mapping for passing a variable.
     #
     proc pass { type kind {var {}} } {
+      set ftype [$type final]
       switch -- $kind {
 	{value}		{
-	  return [address $type $var]
+          switch -- [$ftype kind] {
+            array {
+              switch -- [[[$ftype type] final] kind] {
+                array - string {
+                  # need explicit cast to const type **.
+                  # see http://c-faq.com/ansi/constmismatch.html
+                  set const "const [[$ftype type] declarator (*)]"
+                  return "(($const)[address $type $var])"
+                }
+              }
+            }
+          }
+          return [address $type $var]
 	}
 	{reference}	{
-	  switch -- [[$type final] kind] {
+	  switch -- [$ftype kind] {
 	    {string} -
 	    {array} {
-	      if {[catch { [$type final] length }]} {
+	      if {[catch { $ftype length }]} {
 		return "&($var)"
 	      } else {
 		return $var

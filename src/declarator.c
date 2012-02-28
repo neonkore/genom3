@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009,2011 LAAS/CNRS
+ * Copyright (c) 2009,2011-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -37,11 +37,10 @@
 struct dcl_s {
   tloc l;
   const char *name;
+  idltype_s type;
 
   unsigned int dims;
-  uint32_t dim[0];
-
-  idltype_s type;
+  uint32_t dim[];
 };
 
 const char *	dcl_name(dcl_s d) { assert(d); return d->name; }

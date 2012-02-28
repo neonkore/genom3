@@ -144,10 +144,10 @@ dcl_inner(dcl_s d, dcliter *i)
   assert(d); assert(i);
 
   i->d = d;
-  i->current = 0;
-  i->value = i->current>=d->dims?-1U:d->dim[i->current];
+  i->current = d->dims;
+  i->value = i->current>0?d->dim[i->current-1]:-1U;
 
-  return i->current>=d->dims?ENOENT:0;
+  return i->current>0?0:ENOENT;
 }
 
 int
@@ -155,8 +155,8 @@ dcl_next(dcliter *i)
 {
   assert(i);
 
-  i->current++;
-  i->value = i->current>=i->d->dims?-1U:i->d->dim[i->current];
+  i->current--;
+  i->value = i->current>0?i->d->dim[i->current-1]:-1U;
 
-  return i->current>=i->d->dims?ENOENT:0;
+  return i->current>0?0:ENOENT;
 }

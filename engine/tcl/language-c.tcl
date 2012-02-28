@@ -168,7 +168,13 @@ namespace eval language::c {
 
 	    {array} {
 		if {[catch { $type length } l]} { set l {} }
-		set d "[declarator [$type type]]\[$l\]"
+		set d "[declarator [$type type]]"
+                set b [string first \[ $d]
+                if {$b < 0} {
+                  append d "\[$l\]"
+                } else {
+                  set d "[string range $d 0 $b-1]\[$l\][string range $d $b end]"
+                }
 	    }
 
 	    {sequence} {

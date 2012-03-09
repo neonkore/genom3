@@ -389,7 +389,6 @@ dotgen_parsepragmarequire(char *buffer)
 {
   const char *delim;
   char *p, *arg;
-  hash_s h;
   prop_s prop;
   clist_s cl;
   cval cv;
@@ -419,23 +418,22 @@ dotgen_parsepragmarequire(char *buffer)
   }
 
   /* create a new hash of REQUIRE properties */
-  h = hash_create("pragma require", 1);
-  if (!h) {
-    parserror(curloc, "dropped #pragma require");
-    return;
+  if (!hrequire) {
+    hrequire = hash_create("pragma require", 1);
+    if (!hrequire) {
+      parserror(curloc, "dropped #pragma require");
+      return;
+    }
   }
 
   prop = prop_newrequire(curloc, PROP_REQUIRE, cl);
-  if (hash_insert(h, prop_name(prop), prop, (hrelease_f)prop_destroy)) {
-    parserror(curloc, "dropped #pragma require");
-    return;
+  if (hash_insert(hrequire, prop_name(prop), prop, (hrelease_f)prop_destroy)) {
+    if (prop_merge(hrequire, prop)) {
+      parserror(curloc, "dropped #pragma require");
+      return;
+    }
+    prop_destroy(prop);
   }
-
-  if (!hrequire) { hrequire = h; return; }
-
-  if (prop_merge(hrequire, h))
-    parserror(curloc, "dropped #pragma require");
-  hash_destroy(h, 1);
 }
 
 hash_s

@@ -313,101 +313,117 @@ prop_destroy(prop_s p)
 }
 
 
+/* --- prop_merge_list ----------------------------------------------------- */
+
+/** Merge two lists of properties into the first one.
+ */
+int
+prop_merge_list(hash_s p, hash_s m)
+{
+  hiter i;
+  int e;
+
+  if (!m) return 0;
+
+  for(hash_first(m, &i); i.current; hash_next(&i)) {
+    e = prop_merge(p, i.value);
+    if (e) return e;
+  }
+
+  return 0;
+}
+
+
 /* --- prop_merge ---------------------------------------------------------- */
 
 /** Merge two lists of properties into the first one.
  */
 int
-prop_merge(hash_s p, hash_s m)
+prop_merge(hash_s p, prop_s i)
 {
-  hiter i, j;
+  hiter j;
   hash_s iev;
   prop_s q;
   param_s attr;
   int e = 0;
 
-  if (!m) return 0;
-  assert(p);
+  assert(p && i);
 
-  for(hash_first(m, &i); i.current; hash_next(&i)) {
-    /* some properties must be recreated for current component */
-    switch (prop_kind(i.value)) {
-      case PROP_THROWS:
-	iev = hash_create("enumerator list", 0);
-	if (!iev) { e = errno; break; }
+  /* some properties must be recreated for current component */
+  switch (prop_kind(i)) {
+    case PROP_THROWS:
+      iev = hash_create("enumerator list", 0);
+      if (!iev) { e = errno; break; }
 
-	for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
-	  e = hash_insert(iev, j.key, string(j.key), NULL);
-	  if (e) break;
-	}
-	if (comp_addievs(prop_loc(i.value), iev))
-	  e = errno;
-	else
-	  ((prop_s)i.value)->hash = iev;
-	break;
-
-      case PROP_IDS:
-	if (!comp_addids(type_loc(prop_type(i.value)),
-			 type_membersscope(prop_type(i.value))))
-	  e |= errno;
-	break;
-
-      case PROP_ATTRIBUTE:
-	for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
-	  attr = param_clone(j.value);
-	  if (!attr || comp_addattr(prop_loc(i.value), attr)) {
-	    e = errno; break;
-	  }
-	}
-	break;
-
-      case PROP_VALIDATE:
-      case PROP_CODEL:
-	((prop_s)i.value)->codel = codel_clone(prop_codel(i.value));
-	if (!((prop_s)i.value)->codel) e = errno;
-	break;
-
-      default: break;
-    }
-    if (e) break;
-
-    e = hash_insert(p, i.key, i.value, NULL);
-    /* property might already exist */
-    if (e == EEXIST) {
-      q = hash_find(p, i.key); assert(q);
-      /* some properties can be merged */
-      switch(prop_kind(i.value)) {
-	case PROP_THROWS: {
-	  for(hash_first(iev, &j); j.current; hash_next(&j)) {
-	    e = hash_insert(prop_hash(q), j.key, j.value, NULL);
-	    if (e && e != EEXIST) break; else e = 0;
-	  }
-	  break;
-	}
-
-	case PROP_REQUIRE: {
-          clist_s n, l = prop_list(q); assert(l);
-          citer k;
-          for(clist_first(prop_list(i.value), &k); k.current; clist_next(&k)) {
-            n = clist_append(l, *k.value, 1);
-            if (n) l = n;
-          }
-          q->clist = l;
-          e = 0;
-          break;
-        }
-
-	case PROP_IDS: /* handled above */
-	case PROP_ATTRIBUTE: e = 0; break;
-
-	default:
-	  parserror(prop_loc(i.value), "duplicate attribute '%s'", i.key);
-	  parsenoerror(prop_loc(q), " %s declared here", prop_name(q));
-	  break;
+      for(hash_first(prop_hash(i), &j); j.current; hash_next(&j)) {
+        e = hash_insert(iev, j.key, string(j.key), NULL);
+        if (e) break;
       }
-    }
+      if (comp_addievs(prop_loc(i), iev))
+        e = errno;
+      else
+        i->hash = iev;
+      break;
 
-    if (e) break;
+    case PROP_IDS:
+      if (!comp_addids(type_loc(prop_type(i)),
+                       type_membersscope(prop_type(i))))
+        e |= errno;
+      break;
+
+    case PROP_ATTRIBUTE:
+      for(hash_first(prop_hash(i), &j); j.current; hash_next(&j)) {
+        attr = param_clone(j.value);
+        if (!attr || comp_addattr(prop_loc(i), attr)) {
+          e = errno; break;
+        }
+      }
+      break;
+
+    case PROP_VALIDATE:
+    case PROP_CODEL:
+      i->codel = codel_clone(prop_codel(i));
+      if (!i->codel) e = errno;
+      break;
+
+    default: break;
+  }
+  if (e) return e;
+
+  e = hash_insert(p, prop_name(i), i, NULL);
+  /* property might already exist */
+  if (e == EEXIST) {
+    q = hash_find(p, prop_name(i)); assert(q);
+    /* some properties can be merged */
+    switch(prop_kind(i)) {
+      case PROP_THROWS: {
+        for(hash_first(iev, &j); j.current; hash_next(&j)) {
+          e = hash_insert(prop_hash(q), j.key, j.value, NULL);
+          if (e && e != EEXIST) break; else e = 0;
+        }
+        break;
+      }
+
+      case PROP_REQUIRE: {
+        clist_s n, l = prop_list(q); assert(l);
+        citer k;
+        for(clist_first(prop_list(i), &k); k.current; clist_next(&k)) {
+          n = clist_append(l, *k.value, 1);
+          if (n) l = n;
+        }
+        q->clist = l;
+        e = 0;
+        break;
+      }
+
+      case PROP_IDS: /* handled above */
+      case PROP_ATTRIBUTE: e = 0; break;
+
+      default:
+        parserror(prop_loc(i), "duplicate %s declaration", prop_name(i));
+        parsenoerror(prop_loc(q), " %s declared here", prop_name(q));
+        break;
+    }
   }
 
   return e;

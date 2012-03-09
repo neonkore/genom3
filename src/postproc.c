@@ -84,7 +84,7 @@ dotgen_consolidate()
     for(c = comp_first(); c; c = comp_next(c)) {
       xwarnx("merging global require property in component '%s'", comp_name(c));
       comp_setactive(c);
-      e |= prop_merge(comp_props(c), hrequire);
+      e |= prop_merge_list(comp_props(c), hrequire);
     }
   }
 

@@ -221,7 +221,7 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
 
   /* merge properties when component already exists */
   if (c) {
-    e = prop_merge(comp_props(c), props);
+    e = prop_merge_list(comp_props(c), props);
     hash_destroy(props, 0/*do not destroy properties (now referenced)*/);
     return e?NULL:c;
   }
@@ -936,7 +936,7 @@ comp_applytmpl()
 
     for(c = comp_first(); c; c = comp_next(c)) {
       comp_setactive(c);
-      e = prop_merge(comp_props(c), comp_props(t));
+      e = prop_merge_list(comp_props(c), comp_props(t));
 
       for(hash_first(comp_ports(t), &i); i.current; hash_next(&i)) {
 	if (!port_new(port_loc(i.value), port_kind(i.value),
@@ -946,7 +946,7 @@ comp_applytmpl()
       for(hash_first(comp_tasks(t), &i); i.current; hash_next(&i)) {
 	task = comp_addtask(task_loc(i.value), task_name(i.value), NULL);
 	if (task) {
-	  e |= prop_merge(task_props(task), task_props(i.value));
+	  e |= prop_merge_list(task_props(task), task_props(i.value));
 	  hash_destroy(task->fsm, 1);
 	  task->fsm = codel_fsmcreate(task_loc(task), task_props(task));
 	}
@@ -969,7 +969,7 @@ comp_applytmpl()
 	svc = comp_addservice(service_loc(i.value), service_name(i.value),
 			      h, NULL);
 	if (svc) {
-	  e |= prop_merge(service_props(svc), service_props(i.value));
+	  e |= prop_merge_list(service_props(svc), service_props(i.value));
 	  hash_destroy(svc->fsm, 1);
 	  svc->fsm = codel_fsmcreate(service_loc(svc), service_props(svc));
 	}

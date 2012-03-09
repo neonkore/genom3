@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -330,11 +330,14 @@ attr_list:
     if (!$$ || !$2) break;
     if (hash_insert($$, prop_name($2), $2, (hrelease_f)prop_destroy)) {
       if (errno == EEXIST) {
-	prop_s p = hash_find($$, prop_name($2)); assert(p);
-	parserror(@2, "duplicate %s declaration", prop_name($2));
-	parsenoerror(prop_loc(p), " %s declared here", prop_name(p));
+        if (prop_merge($1, $2)) {
+          parserror(@2, "dropped %s declaration", prop_name($2));
+          prop_destroy($2);
+        }
+      } else {
+        parserror(@2, "dropped %s declaration", prop_name($2));
+        prop_destroy($2);
       }
-      prop_destroy($2);
     }
   }
 ;

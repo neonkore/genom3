@@ -440,7 +440,7 @@ prop_strkind(propkind k)
     case PROP_TASK:		return "task";
     case PROP_VALIDATE:		return "validate";
     case PROP_CODEL:		return "codel";
-    case PROP_THROWS:		return "throws";
+    case PROP_THROWS:		return "throw";
     case PROP_INTERRUPTS:	return "interrupts";
     case PROP_BEFORE:		return "before";
     case PROP_AFTER:		return "after";

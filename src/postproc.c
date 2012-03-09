@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -179,7 +179,7 @@ dotgen_clkratechk(comp_s c, prop_s prop)
       if (const_convert(&trate, CST_FLOAT)) assert(0);
 
       ticks = trate.f/rate.f;
-      if (fabs(ticks - (int)ticks) > 1e-6) {
+      if (fabs(ticks - (int)(ticks+0.5)) > 1e-6) {
 	parserror(prop_loc(tp),
 		  "task %s %s is not a multiple of %s",
 		  task_name(i.value), prop_strkind(props[p]),

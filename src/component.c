@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -860,6 +860,7 @@ comp_addievs(tloc l, hash_s h)
   int r;
   assert(h);
 
+  if (!comp_active()) return 0;
   iev = comp_eventtype(comp_active()); assert(iev);
 
   s = scope_push(l, comp_name(comp_active()), SCOPE_MODULE);
@@ -867,13 +868,13 @@ comp_addievs(tloc l, hash_s h)
 
   r = 0;
   for(hash_first(h, &i); i.current; hash_next(&i)) {
-    e = scope_findtype(s, i.value);
+    e = scope_findtype(s, i.key);
     if (!e || type_kind(e) != IDL_ENUMERATOR) {
-      e = type_addenumerator(l, iev, i.value);
+      e = type_addenumerator(l, iev, i.key);
       if (e)
 	xwarnx("added component internal event %s", type_name(e));
       else {
-	parserror(l, "failed to create component internal event '%s'", i.value);
+	parserror(l, "failed to create component internal event '%s'", i.key);
 	r = r?r:EINVAL;
       }
     }

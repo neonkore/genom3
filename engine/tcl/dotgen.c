@@ -356,12 +356,16 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
   }
 
+  nerrors = nwarnings = 0;
   s = dotgenparse();
   if (!s) s = dotgen_consolidate();
 
   if (k == parseidx_file) close(fd);
-  if (s) {
-    Tcl_AppendResult(interp, "parse errors", NULL);
+  if (s || nerrors) {
+    char msg[128];
+    snprintf(msg, sizeof(msg),
+             s?"fatal errors":"%d error%s", nerrors, nerrors>1?"s":"");
+    Tcl_AppendResult(interp, msg, NULL);
     return TCL_ERROR;
   }
 

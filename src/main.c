@@ -53,7 +53,7 @@ static int		rmrfdir(const char *path);
 struct runopt_s runopt;
 
 /** number of errors and warnings */
-static int nerrors, nwarnings;
+int nerrors, nwarnings;
 
 
 /* --- main ---------------------------------------------------------------- */

@@ -76,6 +76,9 @@ typedef enum dotgen_input_kind {
   DG_INPUT_BUFFER
 } dotgen_input_kind;
 
+extern int nerrors;
+extern int nwarnings;
+
 void	dotgen_input(dotgen_input_kind k, ...);
 int	dotgenparse(void);
 int	dotgen_consolidate(void);

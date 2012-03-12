@@ -1,5 +1,51 @@
 GenoM3 - Generator of robotic component
-Copyright (c) 2009-2011 LAAS/CNRS
+Copyright (c) 2009-2012 LAAS/CNRS
+
+			    Changes in genom 2.99.8
+
+Released on March 12th, 2012
+
+ . Implemented '#pragma native <template> <type> <string>'. This attaches
+   <string> data to an IDL <type>, for a specific <template>. It can be
+   retrieved from the backend and used in a template for doing any specific
+   action. The intended use is to bind ros standard messages to an IDL type,
+   but the genom specification does not define this further.
+
+ . Changed the IDL->C mapping for enums so that the sizeof is guaranteed to be
+   4 and the enumerated constants can be used anywhere in C code.
+
+ . Renamed port handle IDL type to genom::port_handle and
+   genom::port_handle_set and simplified the codels API. There are now 4 main
+   functions: genom_port_open/close and genom_port_rdlock/wrlock. Access to
+   individual port handle members is disallowed in dotgen specification.
+
+ . Fixed multidimensional array declarators in dotgen parser as well as in the
+   [$type declarator] tcl backend procedure. Fixed passing multidimensional
+   array by value according to C obfuscation in this domain.
+
+ . Allow fusionable properties to be declared at several places in a dotgen
+   specification (e.g. multiple throw lines for codels).
+
+ . Added default values for component properties: lang (c), version (0).
+
+ . The C helper macro for resizing sequences has been renamed to
+   genom_sequence_reserve. It also initializes resized data to 0.
+
+ . Made the template search function recursive, so that templates can define
+   'sub-templates' in subdirectories (e.g. pocolibs/server and
+   pocolibs/client).
+
+ . Updated mappings and skeleton builtin templates so that they generate
+   Makefiles that can track input dependency and automatic regeneration.
+
+ . Added tcl backend procedures: [dotgen input deps] and [template deps]. They
+   both return a list of files suitable for make(1) dependency generation.
+
+ . Fixed minor bugs in the following tcl backend procedures: [template
+   require], [wrap], [dotgen parse].
+
+ . Export site-template directory in genom3.pc
+
 
 			    Changes in genom 2.99.7
 

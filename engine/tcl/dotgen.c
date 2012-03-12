@@ -328,6 +328,7 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   };
   int fd;
   int k, s;
+  Tcl_Obj *path;
 
   if (objc != 3) {
     Tcl_WrongNumArgs(interp, 1, objv, "file|string data");
@@ -340,14 +341,29 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch(k) {
     case parseidx_file: {
       extern tloc curloc;
-      fd = open(Tcl_GetString(objv[2]), O_RDONLY);
+
+      path = Tcl_DuplicateObj(objv[2]);
+      Tcl_IncrRefCount(path);
+      if (Tcl_FSGetPathType(path) != TCL_PATH_ABSOLUTE) {
+        Tcl_Obj *l = Tcl_NewListObj(0, NULL);
+        Tcl_IncrRefCount(l);
+        Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(runopt.tmpl, -1));
+        Tcl_ListObjAppendElement(interp, l, path);
+        Tcl_DecrRefCount(path);
+        path = Tcl_FSJoinPath(l, 2);
+        Tcl_IncrRefCount(path);
+        Tcl_DecrRefCount(l);
+      }
+      fd = open(Tcl_GetString(path), O_RDONLY);
       if (fd < 0) {
-	Tcl_AppendResult(interp, "unable to open \"", Tcl_GetString(objv[2]),
+	Tcl_AppendResult(interp, "unable to open \"", Tcl_GetString(path),
 			 "\": ", strerror(errno), NULL);
+        Tcl_DecrRefCount(path);
 	return TCL_ERROR;
       }
       dotgen_input(DG_INPUT_FILE, fd);
-      curloc.file = Tcl_GetString(objv[2]);
+      curloc.file = string(Tcl_GetString(path));
+      Tcl_DecrRefCount(path);
       break;
     }
 

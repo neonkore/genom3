@@ -24,7 +24,7 @@
 
 %option prefix="dotgen"
 %option outfile="lex.yy.c"
-%option noyywrap noinput nounput
+%option noyywrap nounput
 %option bison-locations
 
 %{
@@ -40,6 +40,7 @@
 #include "genom.h"
 
    static size_t	dotgen_read(char *buffer, size_t max_size);
+   static void		dotgen_parsecomment(void);
    static void		dotgen_parsehash(char *buffer);
    static void		dotgen_parsepragmarequire(char *buffer);
    static void		dotgen_parsepragmanative(char *buffer);
@@ -100,6 +101,10 @@ chartext	([^\'])|(\\.)
  /* ignore whitespace, as in any decent language. */
 "\n"		{ curloc.line++; curloc.col = 0; *yylloc_param = curloc; }
 [\t\f\v\r ]+	{ *yylloc_param = curloc;  }
+
+ /* ignore comments (normally eaten by cpp). */
+"/*"		{ dotgen_parsecomment(); *yylloc_param = curloc; }
+[/][/].*\n	{ curloc.line++; curloc.col = 0; *yylloc_param = curloc; }
 
  /* special characters */
 [\{\}\[\]\(\)\;\:\?\.\+\-\*\/\%\^\&\|\~\!\=\<\>\,] { return yytext[0]; }
@@ -324,6 +329,27 @@ dotgen_read(char *buffer, size_t max_size)
   }
 
   return r;
+}
+
+
+/* --- dotgen_parsecomment ------------------------------------------------- */
+
+static void
+dotgen_parsecomment(void)
+{
+  int c1, c2;
+  YYLTYPE l = curloc;
+
+  c1 = input();
+  c2 = input();
+  while (c2 != EOF && !(c1 == '*' && c2 == '/')) {
+    if (c1 == '\n') {
+      curloc.line++; curloc.col = 0;
+    }
+    c1 = c2;
+    c2 = input();
+  }
+  if (c2 == EOF) parserror(l, "unterminated comment");
 }
 
 

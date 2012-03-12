@@ -15,5 +15,5 @@ datarootdir=@datarootdir@
 datadir=@datadir@
 sitetmpldir=@sitetmpldir@
 
-GENOM_TOOL=${exec_prefix}/bin/@GENOM_TOOL@
+GENOM_TOOL=${exec_prefix}/bin/genom3
 Cflags: -I${includedir}

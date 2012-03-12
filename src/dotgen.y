@@ -1553,7 +1553,8 @@ identifier:
   | AFTER | DATA | HANDLE | INPORT | OUTPORT | IN | OUT | INOUT
   | error
   {
-    parserror(@1, "expected identifier but got '%s'", dotgentext);
+    if (*dotgentext)
+      parserror(@1, "expected identifier but got '%s'", dotgentext);
     YYABORT;
   }
 ;
@@ -1582,5 +1583,9 @@ identifier_list:
 void
 dotgenerror(const char *msg)
 {
+  if (!*dotgentext) {
+    parserror(curloc, "premature end-of-file");
+    return;
+  }
   parserror(curloc, "%s at `%s' (near column %d)", msg, dotgentext, curloc.col);
 }

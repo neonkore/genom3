@@ -39,21 +39,22 @@
 
 #include "genom.h"
 
+#define YYLTYPE	tloc
+
    static size_t	dotgen_read(char *buffer, size_t max_size);
-   static void		dotgen_parsecomment(void);
-   static void		dotgen_parsehash(char *buffer);
-   static void		dotgen_parsepragmarequire(char *buffer);
-   static void		dotgen_parsepragmanative(char *buffer);
+   static void		dotgen_parsecomment(YYLTYPE *yylloc);
+   static void		dotgen_parsehash(char *buffer, YYLTYPE *yylloc);
+   static void		dotgen_parsepragmarequire(char *buffer,
+				YYLTYPE *yylloc);
+   static void		dotgen_parsepragmanative(char *buffer, YYLTYPE *yylloc);
 
 #define YY_INPUT(buf, result, max) ((result) = dotgen_read(buf, max))
-
-#define YYLTYPE	tloc
 
 #include "genom3-dotgen.h"
 
    YYLTYPE curloc = { .file = NULL, .line = 1, .col = 0 };
 
-#define YY_USER_ACTION  curloc.col += yyleng;
+#define YY_USER_ACTION  yylloc->col += yyleng; curloc = *yylloc;
 %}
 
 intsuffix	([uU][lL]?)|([lL][uU]?)
@@ -72,39 +73,39 @@ chartext	([^\'])|(\\.)
 
  /* cpp directives */
 ^[ \t]*#[ \t]*[0-9]+[ \t]+\"{stringtext}*\"[ \t]+[0-9]+[ \t]*\n {
-  dotgen_parsehash(yytext);
+  dotgen_parsehash(yytext, yylloc);
 }
 
 ^[ \t]*#[ \t]*[0-9]+[ \t]+\"{stringtext}*\"[ \t]*\n {
-  dotgen_parsehash(yytext);
+  dotgen_parsehash(yytext, yylloc);
 }
 
 ^[ \t]*#[ \t]*[0-9]+[ \t]*\n {
-  dotgen_parsehash(yytext);
+  dotgen_parsehash(yytext, yylloc);
 }
 
 ^[ \t]*#[ \t]*pragma[ \t]+require[ \t].*\n {
-  dotgen_parsepragmarequire(yytext);
-  curloc.line++; curloc.col = 0; *yylloc_param = curloc;
+  dotgen_parsepragmarequire(yytext, yylloc);
+  yylloc->line++; yylloc->col = 0;
 }
 
 ^[ \t]*#[ \t]*pragma[ \t]+native[ \t].*\n {
-  dotgen_parsepragmanative(yytext);
-  curloc.line++; curloc.col = 0; *yylloc_param = curloc;
+  dotgen_parsepragmanative(yytext, yylloc);
+  yylloc->line++; yylloc->col = 0;
 }
 
 ^[ \t]*#.*\n {
   /* ignore unknown directives */
-  curloc.line++; curloc.col = 0; *yylloc_param = curloc;
+  yylloc->line++; yylloc->col = 0;
 }
 
  /* ignore whitespace, as in any decent language. */
-"\n"		{ curloc.line++; curloc.col = 0; *yylloc_param = curloc; }
-[\t\f\v\r ]+	{ *yylloc_param = curloc;  }
+"\n"		{ yylloc->line++; yylloc->col = 0; }
+[\t\f\v\r ]+	{ }
 
  /* ignore comments (normally eaten by cpp). */
-"/*"		{ dotgen_parsecomment(); *yylloc_param = curloc; }
-[/][/].*\n	{ curloc.line++; curloc.col = 0; *yylloc_param = curloc; }
+"/*"		{ dotgen_parsecomment(yylloc); }
+[/][/].*\n	{ yylloc->line++; yylloc->col = 0; }
 
  /* special characters */
 [\{\}\[\]\(\)\;\:\?\.\+\-\*\/\%\^\&\|\~\!\=\<\>\,] { return yytext[0]; }
@@ -257,9 +258,8 @@ chartext	([^\'])|(\\.)
 
  /* errors */
 . {
-  parserror(curloc, "stray `%c', column %d",
-	    yytext[0], curloc.col);
-  *yylloc_param = curloc;
+  parserror(*yylloc, "stray `%c', column %d",
+	    yytext[0], yylloc->col);
 }
 
 %%
@@ -335,21 +335,20 @@ dotgen_read(char *buffer, size_t max_size)
 /* --- dotgen_parsecomment ------------------------------------------------- */
 
 static void
-dotgen_parsecomment(void)
+dotgen_parsecomment(YYLTYPE *yylloc)
 {
   int c1, c2;
-  YYLTYPE l = curloc;
 
   c1 = input();
   c2 = input();
   while (c2 != EOF && !(c1 == '*' && c2 == '/')) {
     if (c1 == '\n') {
-      curloc.line++; curloc.col = 0;
+      yylloc->line++; yylloc->col = 0;
     }
     c1 = c2;
     c2 = input();
   }
-  if (c2 == EOF) parserror(l, "unterminated comment");
+  if (c2 == EOF) parserror(*yylloc, "unterminated comment");
 }
 
 
@@ -361,7 +360,7 @@ static hash_s hdeps;
 /** Parse cpp # line directives
  */
 static void
-dotgen_parsehash(char *buffer)
+dotgen_parsehash(char *buffer, YYLTYPE *yylloc)
 {
   char file[PATH_MAX];
   struct stat s, si;
@@ -370,7 +369,7 @@ dotgen_parsehash(char *buffer)
 
   n = sscanf(buffer, "# %d \"%[^\"]\" %d", &line, file, &flag);
   if (n < 1) return;
-  if (n < 2) { curloc.line = line; return; }
+  if (n < 2) { yylloc->line = line; return; }
 
   if (!runopt.cppdotgen) {
     if (!stat(file, &s) && !stat(runopt.input, &si))
@@ -378,21 +377,21 @@ dotgen_parsehash(char *buffer)
         strncpy(file, runopt.input, sizeof(file));
   }
 
-  curloc.file = string(file);
-  curloc.line = line;
-  curloc.col = 1;
+  yylloc->file = string(file);
+  yylloc->line = line;
+  yylloc->col = 1;
 
   /* create dependencies hash */
   if (!hdeps) {
     hdeps = hash_create("input files", 2);
     if (!hdeps) {
-      parserror(curloc, "dropped dependency %s", curloc.file);
+      parserror(*yylloc, "dropped dependency %s", yylloc->file);
       return;
     }
   }
 
   /* insert dependency */
-  if (hash_insert(hdeps, curloc.file, curloc.file, NULL))
+  if (hash_insert(hdeps, yylloc->file, yylloc->file, NULL))
     return;
 }
 
@@ -411,7 +410,7 @@ static hash_s hrequire;
 /** Parse #pragma require directives
  */
 static void
-dotgen_parsepragmarequire(char *buffer)
+dotgen_parsepragmarequire(char *buffer, YYLTYPE *yylloc)
 {
   const char *delim;
   char *p, *arg;
@@ -447,15 +446,15 @@ dotgen_parsepragmarequire(char *buffer)
   if (!hrequire) {
     hrequire = hash_create("pragma require", 1);
     if (!hrequire) {
-      parserror(curloc, "dropped #pragma require");
+      parserror(*yylloc, "dropped #pragma require");
       return;
     }
   }
 
-  prop = prop_newrequire(curloc, PROP_REQUIRE, cl);
+  prop = prop_newrequire(*yylloc, PROP_REQUIRE, cl);
   if (hash_insert(hrequire, prop_name(prop), prop, (hrelease_f)prop_destroy)) {
     if (prop_merge(hrequire, prop)) {
-      parserror(curloc, "dropped #pragma require");
+      parserror(*yylloc, "dropped #pragma require");
       return;
     }
     prop_destroy(prop);
@@ -476,7 +475,7 @@ static hash_s hnative;
 /** Parse #pragma native directives
  */
 static void
-dotgen_parsepragmanative(char *buffer)
+dotgen_parsepragmanative(char *buffer, YYLTYPE *yylloc)
 {
   const char *delim;
   const char *args[3];
@@ -509,7 +508,7 @@ dotgen_parsepragmanative(char *buffer)
   }
 
   if (n != 3) {
-    parserror(curloc,
+    parserror(*yylloc,
               "syntax error for #pragma native <template> <type> <string>");
     return;
   }
@@ -517,7 +516,7 @@ dotgen_parsepragmanative(char *buffer)
   /* resolve type */
   type = type_find(args[1]);
   if (!type) {
-    parserror(curloc, "unknown type '%s' in #pragma native", args[1]);
+    parserror(*yylloc, "unknown type '%s' in #pragma native", args[1]);
     return;
   }
 
@@ -525,7 +524,7 @@ dotgen_parsepragmanative(char *buffer)
   if (!hnative) {
     hnative = hash_create("pragma native", 1);
     if (!hnative) {
-      parserror(curloc, "dropped #pragma native");
+      parserror(*yylloc, "dropped #pragma native");
       return;
     }
   }
@@ -535,11 +534,11 @@ dotgen_parsepragmanative(char *buffer)
   if (!h) {
     h = hash_create("pragma native", 1);
     if (!h) {
-      parserror(curloc, "dropped #pragma native");
+      parserror(*yylloc, "dropped #pragma native");
       return;
     }
     if (hash_insert(hnative, args[0], h, NULL)) {
-      parserror(curloc, "dropped #pragma native");
+      parserror(*yylloc, "dropped #pragma native");
       return;
     }
   }
@@ -550,11 +549,11 @@ dotgen_parsepragmanative(char *buffer)
     case 0: break;
 
     case EEXIST:
-      parserror(curloc, "duplicate #pragma native for type '%s'",
+      parserror(*yylloc, "duplicate #pragma native for type '%s'",
                 type_fullname(type));
       /*FALLTHROUGH*/
     default:
-      parserror(curloc, "dropped #pragma native");
+      parserror(*yylloc, "dropped #pragma native");
       return;
   }
 

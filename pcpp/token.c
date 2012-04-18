@@ -1,4 +1,4 @@
-/*	$Id: token.c 2011/06/28 15:08:32 mallet $	*/
+/*	$Id: token.c 2012/04/19 00:16:42 tho $	*/
 
 /*
  * Copyright (c) 2004,2009 Anders Magnusson. All rights reserved.
@@ -182,7 +182,7 @@ static void
 fastscan(void)
 {
 	struct symtab *nl;
-	int ch, i, ccnt, onemore;
+	int ch, i, ccnt;
 	usch *cp;
 
 	goto run;
@@ -356,7 +356,7 @@ con:			PUTCH(ch);
 					ch = NXTCH();
 				goto xloop;
 			}
-			onemore = i = ccnt = 0;
+			i = ccnt = 0;
 			do {
 				yytext[i++] = (usch)ch;
 				ch = NXTCH();

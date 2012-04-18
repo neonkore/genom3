@@ -1,4 +1,4 @@
-/*	$Id: cpp.c 2011/06/28 14:59:48 mallet $	*/
+/*	$Id: cpp.c 2012/04/19 00:12:22 tho $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -402,7 +402,7 @@ include()
 	struct symtab *nl;
 	usch *osp;
 	usch *fn, *safefn;
-	int c, it;
+	int c;
 
 	if (flslvl)
 		return;
@@ -436,7 +436,6 @@ include()
 			;
 		if (c != '\n')
 			goto bad;
-		it = SYSINC;
 		safefn = fn;
 	} else {
 		usch *nm = stringbuf;
@@ -879,6 +878,7 @@ xwarning(usch *s)
 	}
 	dummy = write (2, s, strlen((char *)s));
 	dummy = write (2, "\n", 1);
+	if (dummy) /*yay*/;
 	stringbuf = sb;
 }
 
@@ -896,6 +896,7 @@ xerror(usch *s)
 	}
 	dummy = write (2, s, strlen((char *)s));
 	dummy = write (2, "\n", 1);
+	if (dummy) /*yay*/;
 	exit(1);
 }
 
@@ -1866,7 +1867,7 @@ lookup(const usch *key, int enterf)
 	struct symtab *sp;
 	struct tree *w, *new, *last;
 	int len, cix, bit, fbit, svbit, ix, bitno;
-	const usch *k, *m, *sm;
+	const usch *k, *m;
 
 	/* Count full string length */
 	for (k = key, len = 0; *k; k++, len++)
@@ -1901,7 +1902,6 @@ lookup(const usch *key, int enterf)
 
 	sp = (struct symtab *)w;
 
-	sm = m = sp->namep;
 	k = key;
 
 	/* Check for correct string and return */

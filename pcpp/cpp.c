@@ -1,4 +1,4 @@
-/*	$Id: cpp.c 2012/04/19 00:12:22 tho $	*/
+/*	$Id: cpp.c 2012/04/19 11:52:03 mallet $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -1902,6 +1902,7 @@ lookup(const usch *key, int enterf)
 
 	sp = (struct symtab *)w;
 
+	m = sp->namep;
 	k = key;
 
 	/* Check for correct string and return */

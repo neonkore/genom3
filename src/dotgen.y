@@ -628,6 +628,13 @@ ids_param_dir:
     IN		{ $$ = P_IN; }
   | OUT		{ $$ = P_OUT; }
   | INOUT	{ $$ = P_INOUT; }
+  | error
+  {
+    parserror(@1, "expected parameter direction: "
+              "in, out, inout, inport or outport");
+    $$ = P_NODIR;
+    yyerrok;
+  }
 ;
 
 port_param_dir:

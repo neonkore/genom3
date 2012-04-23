@@ -13,6 +13,9 @@ includedir=@includedir@
 Name: lib<"[$c name]">_codels
 Description: <"[$c name]"> codels library
 Version: @PACKAGE_VERSION@
-Requires: <"[join [concat [$c require] [$c codels-require]] {, }]">
+<'set requires [join [concat [$c require] [$c codels-require]] {, }]'>
+<'if [llength $requires] {'>
+Requires: <"$requires">
+<'}'>
 Cflags: -I${includedir}
 Libs: -L${libdir} -l<"[$c name]">_codels

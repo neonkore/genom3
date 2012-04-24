@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011 LAAS/CNRS
+# Copyright (c) 2011-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -165,6 +165,8 @@ namespace eval merge {
   }
 
   proc custom { tool src dst } {
-    return [catch {exec $tool $src $dst}]
+    set r [catch {exec $tool $src $dst >@stdout 2>@stderr} m]
+    if {$r} { template message "$tool: $m" }
+    return $r
   }
 }

@@ -116,13 +116,18 @@ foreach c [dotgen components] {
     template parse					\
 	args [list $c] file libcodels.pc.in		\
 	file lib[$c name]_codels.pc.in
+    template parse					\
+	args [list $c] file libcodels-uninstalled.pc.in	\
+	file lib[$c name]_codels-uninstalled.pc.in
 }
 
 # generate user build files fragment
 #
 template parse perm a+x					\
-    string "#!/bin/sh\nmkdir -p autoconf\nautoreconf -vi\n"	\
+    string "#!/bin/sh\nautoreconf -vi\n"		\
     file bootstrap.sh
+template parse						\
+    file ag_templates.m4 file autoconf/ag_templates.m4
 template parse						\
     args [list $lang] file top.configure.ac		\
     file configure.ac

@@ -28,16 +28,30 @@ if {![catch {dotgen input notice} text]} {
   puts #[join [split $text "\n"] "\n#"]
 }
 '>
-
 ACLOCAL_AMFLAGS=	-I autoconf
-SUBDIRS=		codels
 
-<'set sources [list]
-  foreach c [dotgen components] {
-    # compute list of pkg-config files
-    lappend sources "lib[$c name]_codels.pc"
-  }
-'>
 pkgconfigdir=	$(libdir)/pkgconfig
-pkgconfig_DATA=\
-	<"[join $sources "\t\\\n\t"]">
+pkgconfig_DATA=
+<'foreach c [dotgen components] {'>
+pkgconfig_DATA+= <"lib[$c name]_codels.pc">
+pkgconfig_DATA+= <"lib[$c name]_codels-uninstalled.pc">
+<'}'>
+
+# we don't want generated templates in the distribution
+#
+DIST_SUBDIRS=		codels
+SUBDIRS=		${DIST_SUBDIRS}
+
+# recursion into templates directories configured with --with-templates
+#
+SUBDIRS+=		${AG_TEMPLATES_SUBDIRS}
+
+distclean-local:
+	-rm -rf ${AG_TEMPLATES_SUBDIRS}
+
+# a rule to invoke skeleton merge mode
+#
+merge: merge-interactive
+merge-%:
+	cd ${top_srcdir} && ${genom3} <"[dotgen genom cmdline]"> \
+		skeleton -m $* <"[dotgen input base]">

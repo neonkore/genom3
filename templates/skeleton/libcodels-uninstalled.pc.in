@@ -3,12 +3,11 @@
 if {[llength $argv] != 1} { error "expected argument: component" }
 lassign $argv c
 '>
-# pkg-config file for <"[$c name]"> codels
+# pkg-config file for uninstalled <"[$c name]"> codels
 #
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix=@abs_top_builddir@
+libdir=${prefix}/codels
+includedir=${prefix}/codels
 
 Name: lib<"[$c name]">_codels
 Description: <"[$c name]"> codels library
@@ -17,4 +16,4 @@ Version: @PACKAGE_VERSION@
 <'if [llength $requires] {'>
 Requires: <"$requires">
 <'}'>
-Libs: -L${libdir} -l<"[$c name]">_codels
+Libs: ${libdir}/lib<"[$c name]">_codels.la

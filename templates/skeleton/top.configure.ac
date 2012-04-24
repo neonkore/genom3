@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -45,7 +45,6 @@ AC_CONFIG_AUX_DIR([autoconf])
 AC_CONFIG_HEADERS([autoconf/ac<"[$c name]">.h])
 AM_INIT_AUTOMAKE([foreign no-define])
 
-
 dnl Compilers
 dnl
 LT_INIT
@@ -79,12 +78,19 @@ PKG_CHECK_MODULES(<"$pkg">, [<"$r">])
 '>
 
 
+dnl --with-templates option
+AG_OPT_TEMPLATES([$genom3 <"[dotgen genom cmdline]">],
+    [$srcdir/<"[dotgen input base]">])
+
+
 dnl Output
 AC_CONFIG_FILES([
 <'foreach c [dotgen components] {'>
 	lib<"[$c name]">_codels.pc
+	lib<"[$c name]">_codels-uninstalled.pc
 <'}'>
 	Makefile
 	codels/Makefile
 ])
 AC_OUTPUT
+AG_OUTPUT_TEMPLATES

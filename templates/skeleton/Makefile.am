@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -24,6 +24,8 @@ dist_skel_DATA=		\
 	codels.codel.c			\
 	codels.codel.cc			\
 	top.configure.ac		\
+	ag_templates.m4			\
 	top.Makefile.am			\
 	libcodels.pc.in			\
+	libcodels-uninstalled.pc.in	\
 	template.tcl

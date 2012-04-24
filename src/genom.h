@@ -541,7 +541,7 @@ typedef struct engdescr {
 } engdescr;
 
 const char *	eng_findtmpl(const char *tmpl);
-int		eng_listtmpl(void);
+int		eng_listtmpl(char ***list);
 int		eng_seteng(const char *tmpl);
 int		eng_optappend(const char *opt, int index);
 int		eng_optrm(int index);

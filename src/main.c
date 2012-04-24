@@ -191,8 +191,15 @@ main(int argc, char *argv[])
 
   /* just list templates */
   if (runopt.list) {
+    char **list, **t;
+
     if (argc != 0) errx(2, "wrong number of arguments");
-    exit(eng_listtmpl());
+    s = eng_listtmpl(&list);
+    if (s) exit(s);
+
+    for(t = list; t && *t; t++) { printf("%s\n", *t); free(*t); }
+    free(list);
+    exit(0);
   }
 
   /* create a temporary directory */

@@ -64,7 +64,8 @@ int stdfd[3][2];
 
 
 static char *	eng_findentry(const char *dir);
-static int	eng_listtmpldir(const char *base, const char *dir);
+static void	eng_listtmpldir(const char *base, const char *dir,
+			char ***list, int *n);
 static int	eng_printpipe(int fd, FILE *out, const char *bol,
 			int *firstline);
 int		eng_swapfd(int from, int to);
@@ -115,28 +116,30 @@ eng_findtmpl(const char *tmpl)
 
 /* --- eng_listtmpl -------------------------------------------------------- */
 
-/** List available templates
+/** Return a null terminated array of strings containing all available
+ * templates.
  */
 int
-eng_listtmpl()
+eng_listtmpl(char ***list)
 {
   char *dirs, *dir;
   int n = 0;
+  assert(list);
+  *list = NULL;
 
   /* iterate over components of tmplpath */
   dirs = strdup(runopt.tmplpath);
   if (!dirs) return ENOMEM;
-  for (dir = strtok(dirs, ":"); dir; dir = strtok(NULL, ":")) {
-    n += eng_listtmpldir("", dir);
-  }
+  for (dir = strtok(dirs, ":"); dir; dir = strtok(NULL, ":"))
+    eng_listtmpldir("", dir, list, &n);
 
   free(dirs);
   if (!n) { warnx("no template found!"); return ENOENT; }
   return 0;
 }
 
-static int
-eng_listtmpldir(const char *base, const char *dir)
+static void
+eng_listtmpldir(const char *base, const char *dir, char ***list, int *n)
 {
   char path[PATH_MAX];
   char ent[PATH_MAX];
@@ -145,8 +148,6 @@ eng_listtmpldir(const char *base, const char *dir)
   DIR *d;
   char *name, *prefix;
 
-  int n = 0;
-
   /* look for template.xxx entries */
   xwarnx("searching template directory '%s'", dir);
 
@@ -154,7 +155,7 @@ eng_listtmpldir(const char *base, const char *dir)
   if (base[0]) prefix = ent + strlcat(ent, "/", sizeof(ent));
 
   d = opendir(dir);
-  if (!d) return 0;
+  if (!d) return;
 
   /* must use readdir_r() here because eng_findentry() also readdir() */
   while(!readdir_r(d, &de, &r) && r) {
@@ -169,22 +170,21 @@ eng_listtmpldir(const char *base, const char *dir)
 
     *prefix = 0;
     strlcat(ent, de.d_name, sizeof(ent));
-    n += eng_listtmpldir(ent, path);
+    eng_listtmpldir(ent, path, list, n);
 
     xwarnx("looking for template in '%s'", de.d_name);
     name = eng_findentry(path);
     if (name) {
-      if (strlen(ent) >= 68) {
-        ent[68] = '\0';
-        ent[67] = ent[66] = ent[65] = '.';
+      char **r = realloc(*list, (*n+2)*sizeof(char *));
+      if (r) {
+        r[*n] = strdup(ent);
+        r[*n+1] = NULL;
+        *list = r;
+        if (r[*n]) (*n)++;
       }
-      name += strlen(TMPL_SPECIAL_FILE);
-      printf("%-70s %s\n", ent, name);
-      n++;
     }
   }
   closedir(d);
-  return n;
 }
 
 

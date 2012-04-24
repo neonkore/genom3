@@ -216,7 +216,7 @@ main(int argc, char *argv[])
     }
 
     const char *p = eng_findtmpl(argv[0]);
-    if (!p) goto done;
+    if (!p) { status = ENOENT; goto done; }
     strlcpy(runopt.tmpl, abspath(p), sizeof(runopt.tmpl));
     xwarnx("template path `%s'", runopt.tmpl);
 

@@ -42,6 +42,8 @@ int	dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
+int	dg_genom_templates(ClientData v, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[]);
 int	dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,

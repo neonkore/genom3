@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <libgen.h>
+#include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 
@@ -82,6 +83,36 @@ dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
 		 Tcl_Obj *const objv[])
 {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(PACKAGE_STRING, -1));
+  return TCL_OK;
+}
+
+/* \proc dotgen genom templates
+ * \index dotgen genom templates
+ *
+ * Return the list of all currently available templates name.
+ */
+int
+dg_genom_templates(ClientData v, Tcl_Interp *interp, int objc,
+                   Tcl_Obj *const objv[])
+{
+  Tcl_Obj *l;
+  char **list, **t;
+  int s;
+
+  s = eng_listtmpl(&list);
+  if (s) {
+    Tcl_AppendResult(interp, strerror(s), NULL);
+    return TCL_ERROR;
+  }
+
+  l = Tcl_NewListObj(0, NULL);
+  for(t = list; t && *t; t++) {
+    Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(*t, -1));
+    free(*t);
+  }
+  free(list);
+
+  Tcl_SetObjResult(interp, l);
   return TCL_OK;
 }
 

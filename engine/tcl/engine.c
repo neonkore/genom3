@@ -65,6 +65,7 @@ static const struct dgcmd {
   { "::" DOTGEN_NS "::" GENOM_CMD "::program", dg_genom_program },
   { "::" DOTGEN_NS "::" GENOM_CMD "::cmdline", dg_genom_cmdline },
   { "::" DOTGEN_NS "::" GENOM_CMD "::version", dg_genom_version },
+  { "::" DOTGEN_NS "::" GENOM_CMD "::templates", dg_genom_templates },
   { "::" DOTGEN_NS "::" GENOM_CMD "::debug", dg_genom_debug },
   { "::" DOTGEN_NS "::" GENOM_CMD "::stdout", dg_genom_stdout },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::name", dg_template_name },

@@ -89,8 +89,10 @@ if {$task ne ""} {'>
  *
  * Triggered by <"[join [map {e {return [$e name]}} [$codel triggers]] {, }]">.
  * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
-<'   set throws [join [map {e {return [$e name]}} [$task throws]] {, }]'>
+<'   if [llength [$task throws]] {'>
+<'     set throws [join [map {e {return [$e name]}} [$task throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
+<'   }'>
  */
 <"[$codel signature \n]">
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -37,6 +37,7 @@
 struct codel_s {
   tloc loc;
   const char *name;
+  codelkind kind;
 
   hash_s params;	/**< parameter list */
   hash_s yields;	/**< transitions */
@@ -48,11 +49,14 @@ struct codel_s {
 
 tloc		codel_loc(codel_s c) { assert(c); return c->loc; }
 const char *	codel_name(codel_s c) { assert(c); return c->name; }
+codelkind	codel_kind(codel_s c) { assert(c); return c->kind; }
 hash_s		codel_params(codel_s c) { assert(c); return c->params; }
 hash_s		codel_triggers(codel_s c) { assert(c); return c->triggers; }
 hash_s		codel_yields(codel_s c) { assert(c); return c->yields; }
 task_s *	codel_task(codel_s c) { assert(c); return &c->task; }
 service_s *	codel_service(codel_s c) { assert(c); return &c->service; }
+
+void	codel_setkind(codel_s c, codelkind k) { assert(c); c->kind = k; }
 
 
 /* --- codel_create -------------------------------------------------------- */
@@ -60,8 +64,8 @@ service_s *	codel_service(codel_s c) { assert(c); return &c->service; }
 /** create new codel
  */
 codel_s
-codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
-	     hash_s params)
+codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
+             hash_s yields, hash_s params)
 {
   codel_s c;
   assert(name && params);
@@ -73,6 +77,7 @@ codel_create(tloc l, const char *name, hash_s triggers, hash_s yields,
   }
   c->loc = l;
   c->name = string(name);
+  c->kind = kind;
 
   c->params = params;
   c->yields = yields ? yields : hash_create("yields list", 0);
@@ -117,6 +122,7 @@ codel_clone(codel_s codel)
   }
   c->loc = codel_loc(codel);
   c->name = codel_name(codel);
+  c->kind = codel_kind(codel);
 
   c->params = hash_create("parameter list", 0);
   if (!c->params) { free(c); return NULL; }
@@ -213,4 +219,21 @@ codel_fsmcreate(tloc l, hash_s props)
     }
 
   return h;
+}
+
+
+/* --- codel_strkind ------------------------------------------------------- */
+
+/** Return a codel kind as a string
+ */
+const char *
+codel_strkind(codelkind k)
+{
+  switch(k) {
+    case CODEL_SYNC:		return "sync";
+    case CODEL_ASYNC:		return "async";
+  }
+
+  assert(0);
+  return NULL;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 LAAS/CNRS
+ * Copyright (c) 2011-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -45,17 +45,17 @@ int
 codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum codelidx {
-    codelidx_name, codelidx_return, codelidx_params, codelidx_yields,
-    codelidx_triggers, codelidx_task, codelidx_service, codelidx_signature,
-    codelidx_invoke, codelidx_loc, codelidx_class
+    codelidx_name, codelidx_kind, codelidx_return, codelidx_params,
+    codelidx_yields, codelidx_triggers, codelidx_task, codelidx_service,
+    codelidx_signature, codelidx_invoke, codelidx_loc, codelidx_class
   };
   static const char *args[] = {
-    [codelidx_name] = "name", [codelidx_return] = "return",
-    [codelidx_params] = "parameters", [codelidx_yields] = "yields",
-    [codelidx_triggers] = "triggers", [codelidx_task] = "task",
-    [codelidx_service] = "service", [codelidx_signature] = "signature",
-    [codelidx_invoke] = "invoke", [codelidx_loc] = "loc",
-    [codelidx_class] = "class", NULL
+    [codelidx_name] = "name", [codelidx_kind] = "kind",
+    [codelidx_return] = "return", [codelidx_params] = "parameters",
+    [codelidx_yields] = "yields", [codelidx_triggers] = "triggers",
+    [codelidx_task] = "task", [codelidx_service] = "service",
+    [codelidx_signature] = "signature", [codelidx_invoke] = "invoke",
+    [codelidx_loc] = "loc", [codelidx_class] = "class", NULL
   };
   codel_s c = v;
   Tcl_Obj *r = NULL;
@@ -91,6 +91,10 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch(i) {
     case codelidx_name:
       r = Tcl_NewStringObj(codel_name(c), -1);
+      break;
+
+    case codelidx_kind:
+      r = Tcl_NewStringObj(codel_strkind(codel_kind(c)), -1);
       break;
 
     case codelidx_return:

@@ -186,6 +186,7 @@ chartext	([^\'])|(\\.)
 "interrupts"	{ yylval->s = string(yytext); return INTERRUPTS; }
 "before"	{ yylval->s = string(yytext); return BEFORE; }
 "after"		{ yylval->s = string(yytext); return AFTER; }
+"async"		{ yylval->s = string(yytext); return ASYNC; }
 
 "in"		{ yylval->s = string(yytext); return IN; }
 "out"		{ yylval->s = string(yytext); return OUT; }

@@ -94,6 +94,7 @@
 %token <s>	INOUT IDS ATTRIBUTE INPUT OUTPUT DATA HANDLE VERSION LANG EMAIL
 %token <s>	REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
+%token <s>	ASYNC
 
 %type <i>	start spec idlspec statement idlstatement genomstatement
 
@@ -441,6 +442,11 @@ attr:
   {
     $$ = $3 ? prop_newcodel(@1, PROP_VALIDATE, $3) : NULL;
   }
+  | ASYNC CODEL codel
+  {
+    if ($3) codel_setkind($3, CODEL_ASYNC);
+    $$ = $3 ? prop_newcodel(@1, PROP_CODEL, $3) : NULL;
+  }
   | CODEL codel
   {
     $$ = $2 ? prop_newcodel(@1, PROP_CODEL, $2) : NULL;
@@ -457,7 +463,7 @@ attr:
 validate:
   identifier '(' param_list ')'
   {
-    $$ = codel_create(@1, $1, NULL, NULL, $3);
+    $$ = codel_create(@1, $1, CODEL_SYNC, NULL, NULL, $3);
   }
 ;
 
@@ -467,7 +473,7 @@ codel:
     if (!$1 || !$8) {
       parserror(@1, "dropped codel '%s'", $3); $$ = NULL; break;
     }
-    $$ = codel_create(@3, $3, $1, $8, $5);
+    $$ = codel_create(@3, $3, CODEL_SYNC, $1, $8, $5);
   }
   | event_list ':' identifier '(' param_list ')' error
   {
@@ -1557,7 +1563,7 @@ identifier:
   | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
   | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
   | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
-  | AFTER | DATA | HANDLE | INPORT | OUTPORT | IN | OUT | INOUT
+  | AFTER | DATA | HANDLE | INPORT | OUTPORT | IN | OUT | INOUT | ASYNC
   | error
   {
     if (*dotgentext)

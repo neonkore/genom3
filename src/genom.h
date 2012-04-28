@@ -479,13 +479,20 @@ typedef enum pdir {
   P_OUTPORT
 } pdir;
 
+typedef enum codelkind {
+  CODEL_SYNC,
+  CODEL_ASYNC
+} codelkind;
+
 tloc		codel_loc(codel_s c);
 const char *	codel_name(codel_s c);
+codelkind	codel_kind(codel_s c);
 hash_s		codel_params(codel_s c);
 hash_s		codel_triggers(codel_s c);
 hash_s		codel_yields(codel_s c);
 task_s *	codel_task(codel_s c);
 service_s *	codel_service(codel_s c);
+void		codel_setkind(codel_s c, codelkind k);
 
 tloc		param_loc(param_s p);
 const char *	param_name(param_s p);
@@ -503,10 +510,11 @@ cval		initer_value(initer_s i);
 initer_s	initer_compound(initer_s i);
 initer_s	initer_next(initer_s i);
 
-codel_s		codel_create(tloc l, const char *name, hash_s triggers,
-			hash_s yields, hash_s params);
+codel_s		codel_create(tloc l, const char *name, codelkind kind,
+			hash_s triggers, hash_s yields, hash_s params);
 codel_s		codel_clone(codel_s codel);
 hash_s		codel_fsmcreate(tloc l, hash_s props);
+const char *	codel_strkind(codelkind k);
 
 param_s		param_newids(tloc l, const char *name, const char *member);
 param_s		param_newport(tloc l, const char *name);

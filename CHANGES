@@ -1,6 +1,26 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2012 LAAS/CNRS
 
+			    Changes in genom 2.99.10
+
+Released on April 30th, 2012
+
+ . Added an "asynchronous" style of codels. Those codels are allowed to block
+   their execution context (typically waiting for an internal event). Other
+   execution contexts can run in parallel.
+ . Added a generic C client interface to the runtime headers. This interface
+   may be implemented by templates to provide a middleware-independant C
+   client.
+ . Added a tcl backend procedure returning the list of available templates.
+ . Improved the skeleton template so that it generates a configure script that
+   is able to handle a list of templates to compile with the codels. This
+   simplifies component development and testing.
+ . Improved a few syntax error messages in the .gen parser.
+ . Miscelanous minor fixes in the tcl backend procedures.
+ . Minor fixes for building with gcc-4.6 -Werror.
+ . Minor cosmetic improments in the skeleton template.
+
+
 			    Changes in genom 2.99.8
 
 Released on March 12th, 2012

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010,2012 LAAS/CNRS
 #
 # eltclsh autoconf file
 #
@@ -18,7 +18,8 @@ AC_DEFUN([AC_ELTCLSH], [
   elif test x"$use_eltclsh" = x; then
     :
   else
-    PKG_CONFIG_PATH="$use_eltclsh"
+    ppath="$use_eltclsh/lib/pkgconfig"
+    PKG_CONFIG_PATH="$ppath${PKG_CONFIG_PATH+:}$PKG_CONFIG_PATH"
   fi
 
   # call pkg-config

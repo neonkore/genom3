@@ -12,11 +12,15 @@ run 0 ${GENOM_BIN} skeleton -C run.t ${thisdir}../component.gen
 run 0 ls -R -1 run.t
 expect out '
 	/^run.t:$/ {next}
+	/^run.t\/autoconf:$/ {next}
 	/^run.t\/codels:$/ {next}
+	/^ag_templates.m4$/ {next}
+	/^autoconf$/ {next}
 	/^bootstrap.sh$/ {next}
 	/^codels$/ {next}
 	/^configure.ac$/ {next}
 	/^Makefile.am$/ {next}
+	/^libc_codels-uninstalled.pc.in$/ {next}
 	/^libc_codels.pc.in$/ {next}
 	/^c_t[12]_codels\.c$/ {next}
 	/^c_codels\.c$/ {next}

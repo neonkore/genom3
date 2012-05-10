@@ -71,7 +71,7 @@ namespace eval merge {
         set ndstonly 0
         while { $idst < $jdst } {
           set l [lindex $ldst $idst]
-          if {[string trim $l] != "" && ![regexp {insert your code} $l]} {
+          if {[string trim $l] != "" && ![regexp {skeleton sample} $l]} {
             incr ndstonly
           }
           lappend dstonly $l
@@ -83,7 +83,7 @@ namespace eval merge {
         set nsrconly 0
         while { $isrc < $jsrc } {
           set l [lindex $lsrc $isrc]
-          if {[string trim $l] != "" && ![regexp {insert your code} $l]} {
+          if {[string trim $l] != "" && ![regexp {skeleton sample} $l]} {
             incr nsrconly
           }
           lappend srconly $l

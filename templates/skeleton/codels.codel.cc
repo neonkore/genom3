@@ -60,8 +60,8 @@ if {$task ne ""} {'>
  */
 <"[$codel signature \n]">
 {
-  /* insert your code */
-  return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample: insert your code */
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
 }
 <' } '>
 <'}
@@ -84,8 +84,8 @@ if {$task eq ""} {
  */
 <"[$codel signature \n]">
 {
-  /* insert your code */
-  return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample: insert your code */
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
 }
 <'       } '>
 <'    } '>
@@ -111,8 +111,8 @@ foreach service [$component services] {
  */
 <"[$codel signature \n]">
 {
-  /* insert your code */
-  return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample: insert your code */
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
 }
 <'    } '>
 <' } '>

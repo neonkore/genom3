@@ -1,13 +1,6 @@
 #
 # Autoconf macros processing a --with-templates option for genom components
 #
-<'
-# retrieve available templates, omit those who are known not to be suitable
-# for recursive invocation.
-set tlist [lsearch -inline -all -not -regexp	\
-               [dotgen genom templates]		\
-               {^(example|interactive|mappings|skeleton)$}]
-'>
 
 # --- AG_OPT_TEMPLATES(genom, input.gen) -----------------------------------
 #
@@ -21,8 +14,8 @@ AC_DEFUN([AG_OPT_TEMPLATES],
     # enable --with-templates option
     AC_ARG_WITH(templates,
         AC_HELP_STRING([--with-templates], [comma separated list of templates.
-            Valid choices include: "<"[join $tlist {", "}]">"]. Passing a
-            complete path to a template is also supported.),
+            See genom3 -l for a list of valid choices. Passing a complete path to
+            a template is also supported]),
         [ag_templates="$withval"])
 
     if test -n "$ag_templates"; then

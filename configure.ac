@@ -106,15 +106,6 @@ fi
 if test x"$use_tcl" = xyes; then
   # look for tclConfig.sh
   SC_PATH_TCLCONFIG
-  SC_LOAD_TCLCONFIG
-
-  # require >=8.5
-  AC_MSG_CHECKING([for tcl version])
-  AC_MSG_RESULT([$TCL_VERSION])
-  case ${TCL_VERSION} in
-       8.[[5-9]]*) ;;
-       *)	 AC_MSG_ERROR([Tcl >= 8.5 is required. Use --with-tcl option.]);;
-  esac
   AC_MSG_CHECKING([for threaded tcl])
   if test "$TCL_THREADS" = 1; then
     AC_MSG_RESULT([yes])

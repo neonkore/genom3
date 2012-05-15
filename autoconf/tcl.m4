@@ -49,32 +49,19 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 			fi ;;
 		esac
 		if test -f "${with_tclconfig}/tclConfig.sh" ; then
-		    ac_cv_c_tclconfig="`(cd "${with_tclconfig}"; pwd)`"
+                   TCL_BIN_DIR="`(cd "${with_tclconfig}"; pwd)`"
+                   AC_MSG_RESULT([found ${TCL_BIN_DIR}/tclConfig.sh])
+                   SC_LOAD_TCLCONFIG
+                   case ${TCL_VERSION} in
+                        8.[[5-9]]*)
+                                ac_cv_c_tclconfig="${TCL_BIN_DIR}"
+                                break;;
+                        *)
+                        AC_MSG_ERROR([rejecting version ${TCL_VERSION}])
+                   esac
 		else
 		    AC_MSG_ERROR([${with_tclconfig} directory doesn't contain tclConfig.sh])
 		fi
-	    fi
-
-	    # then check for a private Tcl installation
-	    if test x"${ac_cv_c_tclconfig}" = x ; then
-		for i in \
-			../tcl \
-			`ls -dr ../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../tcl[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../tcl \
-			`ls -dr ../../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../tcl[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../../tcl \
-			`ls -dr ../../../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../../tcl[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tclConfig.sh" ; then
-			ac_cv_c_tclconfig="`(cd $i/unix; pwd)`"
-			break
-		    fi
-		done
 	    fi
 
 	    # on Darwin, check in Framework installation locations
@@ -85,8 +72,17 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 			`ls -d /System/Library/Frameworks 2>/dev/null` \
 			; do
 		    if test -f "$i/Tcl.framework/tclConfig.sh" ; then
-			ac_cv_c_tclconfig="`(cd $i/Tcl.framework; pwd)`"
-			break
+                        TCL_BIN_DIR="`(cd $i/Tcl.framework; pwd)`"
+                        AC_MSG_RESULT([found ${TCL_BIN_DIR}/tclConfig.sh])
+                        SC_LOAD_TCLCONFIG
+                        case ${TCL_VERSION} in
+                             8.[[5-9]]*)
+                                ac_cv_c_tclconfig="${TCL_BIN_DIR}"
+                                break;;
+                             *)
+                                AC_MSG_WARN([rejecting version ${TCL_VERSION}])
+                                AC_MSG_CHECKING([for Tcl configuration]);;
+                        esac
 		    fi
 		done
 	    fi
@@ -96,28 +92,25 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 		for i in `ls -d ${libdir} 2>/dev/null` \
 			`ls -d ${exec_prefix}/lib 2>/dev/null` \
 			`ls -d ${prefix}/lib 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl[[8-9]].[[0-9]] 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/lib/tcl[[8-9]].[[0-9]] 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			; do
 		    if test -f "$i/tclConfig.sh" ; then
-			ac_cv_c_tclconfig="`(cd $i; pwd)`"
-			break
+                        TCL_BIN_DIR="`(cd $i; pwd)`"
+                        AC_MSG_RESULT([found ${TCL_BIN_DIR}/tclConfig.sh])
+                        SC_LOAD_TCLCONFIG
+                        case ${TCL_VERSION} in
+                             8.[[5-9]]*)
+                                ac_cv_c_tclconfig="${TCL_BIN_DIR}"
+                                break;;
+                             *)
+                                AC_MSG_WARN([rejecting version ${TCL_VERSION}])
+                                AC_MSG_CHECKING([for Tcl configuration]);;
+                        esac
 		    fi
-		done
-	    fi
-
-	    # check in a few other private locations
-	    if test x"${ac_cv_c_tclconfig}" = x ; then
-		for i in \
-			${srcdir}/../tcl \
-			`ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tclConfig.sh" ; then
-		    ac_cv_c_tclconfig="`(cd $i/unix; pwd)`"
-		    break
-		fi
 		done
 	    fi
 	])
@@ -128,8 +121,6 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
 	    exit 0
 	else
 	    no_tcl=
-	    TCL_BIN_DIR="${ac_cv_c_tclconfig}"
-	    AC_MSG_RESULT([found ${TCL_BIN_DIR}/tclConfig.sh])
 	fi
     fi
 ])

@@ -46,6 +46,7 @@ AC_DEFUN([AG_OPT_TEMPLATES],
 AC_DEFUN([AG_OUTPUT_TEMPLATES],
 [
     echo "$ag_templates" | tr , '\n' | while read t; do
+        if test "x$t" = x; then continue; fi
         tdir="./${t#/}"
         AC_MSG_NOTICE([configuring for $t])
 

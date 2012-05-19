@@ -1,6 +1,7 @@
 AFTER		after
 ANY		any
 ATTRIBUTE	attribute
+ASYNC           async
 BEFORE		before
 BOOLEAN		boolean
 CODELSREQUIRE	codels-require
@@ -25,6 +26,7 @@ FIXED		fixed
 FIXED_LIT	<fixed_literal>
 FLOAT		float
 FLOAT_LIT	<float_literal>
+HANDLE		handle
 IDENTIFIER	[A-Za-z_][A-Za-z0-9_]*
 IDS		ids
 IN		in
@@ -56,6 +58,7 @@ STRING		string
 STRUCT		struct
 SWITCH		switch
 TASK		task
+TEMPLATE	template
 THROWS		throw
 TRUE		TRUE
 TYPEDEF		typedef

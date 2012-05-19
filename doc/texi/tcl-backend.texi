@@ -1,0 +1,87 @@
+@c
+@c Copyright (c) 2009-2012 LAAS/CNRS
+@c All rights reserved.
+@c
+@c Permission to use, copy, modify,  and distribute this software for any
+@c purpose with or without fee is hereby granted, provided that the above
+@c copyright notice and this permission notice appear in all copies.
+@c
+@c THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+@c WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+@c WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+@c AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+@c DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+@c PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+@c TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+@c PERFORMANCE OF THIS SOFTWARE.
+@c
+@c                                      Anthony Mallet on Fri May 28 2010
+@c
+@node TCL Backend
+@section The TCL backend
+
+@menu
+* template::		@htmd Runtime template information
+* engine::		@htmd Backend configuration
+* dotgen::		@htmd Input file information
+* language::		@htmd Language dependent code generation
+@end menu
+
+@node template
+@subsection Runtime template information
+@menu
+* template require::	@htmd Source additional template code
+* template parse::	@htmd Generate template content
+* template link::	@htmd Create symbolic links
+* template options::	@htmd Define template options
+* template deps::	@htmd Template dependencies
+* template arg::	@htmd Retrieve options passed to templates
+* template usage::	@htmd Define template help string
+* template message::	@htmd Print runtime information
+* template fatal::	@htmd Abort template processing
+@end menu
+@include template.tcl.texi
+
+@node engine
+@subsection Backend configuration
+@menu
+* engine mode::		@htmd Engine output configuration
+* engine merge-tool::	@htmd Automatic merge of generated content
+* engine chdir::	@htmd Change output directory
+* engine pwd::		@htmd Get current output directory
+@end menu
+@include engine.tcl.texi
+
+@node dotgen
+@subsection Input file information
+@menu
+* dotgen genom::	@htmd genom program and command line
+* dotgen template::	@htmd Template path and directories
+* dotgen input::	@htmd Input file name and path
+* dotgen parse::	@htmd Process additional input
+* dotgen types::	@htmd Data type definitions from the specification
+* dotgen components::	@htmd Components definitions from the specification
+@end menu
+@include dotgen.c.texi
+
+@node language
+@subsection Language dependent code generation
+@menu
+* lang::		@htmd Target programming language
+* cname::		@htmd Cannonical object name
+* comment::		@htmd Generate comment strings
+* fileext::		@htmd Cannonical file extension
+* indent::		@htmd Generate indented text
+* ---::			@htmd Generate filler string
+* wrap::		@htmd Chop blocks of text
+* language mapping::	@htmd IDL type language mapping
+* language declarator::	@htmd Code for type declarations
+* language address::	@htmd Code for variable addresses
+* language dereference::@htmd Code for dereferencing variables
+* language argument::	@htmd Code for declaring functions arguments
+* language pass::	@htmd Code for passing functions arguments
+* language member::	@htmd Code for accessing structure members
+* language signature::	@htmd Code for declaring codel signatures
+* language invoke::	@htmd Code for calling codels
+@end menu
+@include language.tcl.texi

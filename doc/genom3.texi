@@ -1,0 +1,175 @@
+\input texinfo
+@c
+@c Copyright (c) 2012 LAAS/CNRS
+@c All rights reserved.
+@c
+@c Permission to use, copy, modify,  and distribute this software for any
+@c purpose with or without fee is hereby granted, provided that the above
+@c copyright notice and this permission notice appear in all copies.
+@c
+@c THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+@c WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+@c WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+@c AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+@c DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+@c PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+@c TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+@c PERFORMANCE OF THIS SOFTWARE.
+@c
+@c                                      Anthony Mallet on Mon May 13 2012
+@c
+@c %**start of header
+@setfilename genom3.info
+@settitle GenoM Manual
+@afourpaper
+@c %**end of header
+@include sty/genom.texi
+@include meta.texi
+
+@copying
+@quotation
+@genom{3} is copyright @copyright{} 2009-@value{YEAR} LAAS/CNRS.
+All rights reserved.
+
+Permission to use, copy, modify, and distribute this software for any purpose
+with or without fee is hereby granted, provided that the above copyright
+notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+@end quotation
+@
+@
+@quotation
+@code{pcpp} is copyright @copyright{} 2004,2010 Anders Magnusson
+(@email{ragge@@ludd.luth.se}).
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+@enumerate
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+@end enumerate
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@end quotation
+@end copying
+
+@dircategory Openrobots documentation
+@direntry
+* genom3: (genom3).             The GenoM3 generator of components
+@end direntry
+
+@titlepage
+@title @genom{} Manual
+@subtitle For @genom{} version 3
+@subtitle Revision @value{VERSION}, updated @value{MONTH} @value{YEAR}
+@author Sara Fleury
+@author Matthieu Herrb @email{matthieu.herrb@@laas.fr}
+@author Anthony Mallet @email{anthony.mallet@@laas.fr}
+@author Cédric Pasteur
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@contents
+@end titlepage
+
+@ifnottex
+@node Top
+@top @genom{} manual
+
+@flushright
+For @genom{@r{ version 3}}
+Revision @value{VERSION}, updated @value{MONTH} @value{YEAR}
+@end flushright
+
+@ifnotinfo
+@majorheading Summary
+@end ifnotinfo
+
+@menu
+* Copying::		@htmd Your rights.
+* Introduction::	@htmd ...
+* Component model::	@htmd ...
+* GenoM overview::	@htmd ...
+* A minimal example::	@htmd ...
+* Input file format::	@htmd ...
+* GenoM IDL mappings::	@htmd ...
+* Running genom::	@htmd ...
+* Templates::		@htmd ...
+* Indices::		@htmd Indices of concepts and functions.
+@end menu
+
+@contents
+
+@node Copying
+@unnumbered Copying
+@insertcopying
+@end ifnottex
+
+@node Introduction
+@chapter Introduction
+
+@node Component model
+@chapter Component model
+
+@node GenoM overview
+@chapter @genom{} overview
+
+@node A minimal example
+@chapter A minimal example
+
+@node Input file format
+@chapter Input file format
+@include texi/dotgen-grammar.texi
+
+@node GenoM IDL mappings
+@chapter @genom{} IDL mappings
+@include texi/mappings.texi
+
+@node Running genom
+@chapter Running genom
+@include texi/running.texi
+
+@node Templates
+@chapter Templates
+@include texi/templates.texi
+
+@node Indices
+@unnumbered Indices
+
+@menu
+* Concept Index::		@htmd Index of concepts
+* TCL Backend Index::		@htmd Index of TCL backend procedures
+@end menu
+
+@node Concept Index
+@unnumberedsec Index of concepts
+@printindex cp
+
+@node TCL Backend Index
+@unnumberedsec Index of TCL backend procedures
+@printindex fn
+
+@bye

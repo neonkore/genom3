@@ -1,0 +1,246 @@
+@c
+@c Copyright (c) 2009-2012 LAAS/CNRS
+@c All rights reserved.
+@c
+@c Permission to use, copy, modify,  and distribute this software for any
+@c purpose with or without fee is hereby granted, provided that the above
+@c copyright notice and this permission notice appear in all copies.
+@c
+@c THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+@c WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+@c WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+@c AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+@c DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+@c PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+@c TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+@c PERFORMANCE OF THIS SOFTWARE.
+@c
+@c                                      Anthony Mallet on Fri Jun 25 2010
+@c
+
+@node C Scoped name
+@subsection Scoped names
+
+The @code{C} mappings always use the  global name for a type or a constant.  The
+@code{C} global  name corresponding to a @genom{} IDL global  name is derived by
+converting  occurrences of  "::" to  "_" (an  underscore) and  eliminating the
+leading underscore.
+
+
+@node C Constant
+@subsection Mapping for constants
+
+In @code{C}, constants defined in dotgen are mapped to a @code{C}
+constant. For instance, the following IDL:
+@verbatim
+      const long longint = 1;
+      const string str = "string example";
+@end verbatim
+
+would map into
+@verbatim
+      const uint32_t longint = 1;
+      const char *str = "string example";
+@end verbatim
+
+The  identifier can  be referenced  at any  point in  the user's  code  where a
+literal of that type is legal.
+
+
+@node C Basic type
+@subsection Mapping for basic data types
+
+The basic data types have the mappings shown in the table below.
+Integer types use the @code{C99} fixed size integer types as provided
+by the @code{stdint.h} standard header. Users do not have to include
+this header: the template mapping generation procedure output the
+appropriate @code{#include} directive along with the mappings for the
+integer types.
+
+@float Table
+@multitable @columnfractions 0.4 0.4
+@headitem @code{IDL}
+@tab @code{C}
+@item @code{boolean}
+@tab @code{bool}
+@item @code{unsigned short}
+@tab @code{uint16_t}
+@item @code{short}
+@tab @code{int16_t}
+@item @code{unsigned long}
+@tab @code{uint32_t}
+@item @code{long}
+@tab @code{int32_t}
+@item @code{unsigned long long}
+@tab @code{uint64_t}
+@item @code{long long}
+@tab @code{int64_t}
+@item @code{float}
+@tab @code{float}
+@item @code{double}
+@tab @code{double}
+@item @code{char}
+@tab @code{char}
+@item @code{octet}
+@tab @code{uint8_t}
+@item @code{any}
+@tab type any not implemented yet
+@end multitable
+@caption{Basic data types mappings in C}
+@end float
+
+
+@node C Enumerated type
+@subsection Mapping for enumerated types
+
+The C mapping of an IDL @code{enum} type is an unsigned, 32 bits wide
+integer.  Each enumerator in an enum is defined in an anonymous
+@code{enum} with an appropriate unsigned integer value conforming to
+the ordering constraints.
+
+For instance, the following IDL:
+@verbatim
+      module m {
+        enum e {
+          value1,
+          value2
+        };
+      };
+@end verbatim
+
+would map, according to the scoped names rules, into
+@verbatim
+      typedef uint32_t m_e;
+      enum {
+        m_value1 = 0
+        m_value2 = 1
+      };
+@end verbatim
+
+
+@node C String
+@subsection Mapping for strings
+
+@genom{}  IDL bounded  strings are  mapped to  nul terminated  character arrays
+(i.e., C strings). Unbounded strings are mapped to a pointer on such a
+character array.
+
+For instance, the following OMG IDL declarations:
+@verbatim
+      typedef string unbounded;
+      typedef string<16> bounded;
+@end verbatim
+
+would map into
+@verbatim
+      typedef char *unbounded;
+      typedef char bounded[16];
+@end verbatim
+
+
+@node C Array
+@subsection Mapping for arrays
+
+@genom{} IDL arrays map directly to C arrays. All array indices run from 0 to
+@code{size-1}.
+
+For instance, the following IDL:
+@verbatim
+      typedef long array[4][16];
+@end verbatim
+
+would map into
+@verbatim
+      typedef int32_t array[4][16];
+@end verbatim
+
+
+@node C Struct
+@subsection Mapping for structure types
+
+@genom{}  IDL structures map  directly onto  C @code{ struct}s. Note  that these
+structures  may  potentially  include  padding.
+
+For instance, the following IDL:
+@verbatim
+      struct s {
+         long a;
+         long b;
+      };
+@end verbatim
+
+would map into
+@verbatim
+      typedef struct {
+         int32_t a;
+         int32_t b;
+      } s;
+@end verbatim
+
+
+@node C Union
+@subsection Mapping for union types
+
+@genom{}  IDL unions map onto  C @code{ struct}s. The discriminator in the enum
+is referred to as @code{_d}, the union itself is referred to as @code{_u}.
+
+For instance, the following IDL:
+@verbatim
+      union u switch(long) {
+         case 1: long a;
+         case 2: float b;
+         default: char c;
+      };
+@end verbatim
+
+would map into
+@verbatim
+      typedef struct {
+         int32_t _d;
+         union {
+            int32_t a;
+            float b;
+            char c;
+         } _u;
+      } u;
+@end verbatim
+
+
+@node C Sequence
+@subsection Mapping for sequence types
+
+@genom{}  IDL  sequences  mapping  differ  slightly  for  bounded  or  unbouded
+variations of the sequence. Both types maps  onto a C @code{struct},
+with a @code{_maximum}, @code{_length} and @code{_buffer} members.
+
+For unbounded sequences, @code{buffer} points to a buffer of at most
+@code{_maximum} elements and containing @code{_length} valid
+elements. An additional member @code{ _release} is a function pointer
+that can be used to release the storage associated to the @code{
+_buffer} and reallocate it.  It is the responsibility of the user to
+maintain the consistency between those members.
+
+For bounded  sequences, @code{ buffer} is  an array of  at most  @code{_maximum}
+elements and containing @code{_length}  valid elements. Since @code{_buffer} is
+an array, no memory management is necessary for this data type.
+
+For instance, the following IDL:
+@verbatim
+      typedef sequence<long> unbounded;
+      typedef sequence<long,16> bounded;
+@end verbatim
+
+would map into
+@verbatim
+      typedef struct {
+         uint32_t _maximum, _length;
+         int32_t *_buffer;
+         void (*release)(void *_buffer);
+      } unbounded;
+
+      typedef struct {
+         const uint32_t _maximum;
+         uint32_t _length;
+         int32_t _buffer[16];
+      } bounded;
+@end verbatim

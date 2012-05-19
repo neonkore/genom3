@@ -96,7 +96,7 @@
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 %token <s>	ASYNC
 
-%type <i>	start spec idlspec statement idlstatement genomstatement
+%type <i>	start spec idl_statements statement idl_statement genomstatement
 
 %type <i>	template component ids attribute port task service
 %type <pkind>	port_dir port_kind port_array
@@ -110,7 +110,7 @@
 %type <v>	param_member
 %type <pdir>	ids_param_dir port_param_dir
 
-%type <i>	module
+%type <i>	module module_body
 %type <type>	const_dcl const_type
 %type <type>	type_dcl constructed_type forward_dcl
 %type <dcl>	declarator simple_declarator array_declarator
@@ -139,15 +139,44 @@
 
 %expect 0
 %%
-
+/*/ @node Specification
+ * @section Elements of a @genom{3} specification
+ * @cindex specification
+ * @cindex @genom{3}, specification
+ * @cindex @code{dotgen}, specification
+ *
+ * A dotgen specification consists of one or more statements. Statements are
+ * either IDL statements, @genom{} statements or @command{cpp} line
+ * directives. The syntax is:
+ *
+ * @ruleinclude start
+ * @ruleinclude spec
+ * @ruleinclude statement
+ * @ruleinclude idl_statement
+ * @ruleinclude genomstatement
+ *
+ * Definitions are named by the mean of identifiers, @pxref{Reserved keywords}.
+ *
+ * An @acronym{IDL} statement defines types (@pxref{Type declaration}),
+ * constants (@pxref{Constant declaration}) or @acronym{IDL} modules containing
+ * types and constants (@pxref{Module declaration}).  The syntax follows
+ * closely the subset the @acronym{OMG} @acronym{IDL} specification
+ * corresponding to type and constants definitions (see Part I, chapter 7 of
+ * @cite{CORBA specification, Object Management Group, version 3.1. Part I:
+ * CORBA interfaces}).  Note that this subset of the dogten grammar is not in
+ * any manner tied to OMG IDL and may diverge from future OMG specifications.
+ *
+ * A @genom{} statement defines components, communication ports, services and
+ * execution contexts called tasks.
+ */
 start: /* empty */ { $$ = 0; } | spec;
 
 spec: statement | spec statement;
 
-statement: idlstatement | genomstatement;
+statement: idl_statement | genomstatement;
 
-idlstatement:
-  module ';'
+idl_statement:
+  module
   | const_dcl ';'
   {
     $$ = 0;
@@ -713,10 +742,24 @@ initializer_value:
 
 /* --- IDL modules --------------------------------------------------------- */
 
-/** modules are IDL namespaces */
-
+/*/ @node Module declaration
+ * @section Module declaration
+ * @cindex module, declaration
+ *
+ * A module definition satisfies the following syntax:
+ *
+ * @ruleinclude module
+ * @ruleinclude module_name
+ * @ruleinclude module_body
+ * @ruleinclude idl_statements
+ *
+ * The only effect of a module is to scope @acronym{IDL} identifiers. It is
+ * similar to a @acronym{C++} or Java namespace; it is considered good practice
+ * to enclose your type definitions inside a module definition to prevent name
+ * clashes between components.
+ */
 module:
-  MODULE module_name '{' idlspec '}'
+  MODULE module_name '{' module_body '}' ';'
   {
     scope_s s = scope_pop();
 
@@ -726,11 +769,6 @@ module:
       parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
       scope_destroy(s);
     }
-  }
-  | MODULE module_name '{' '}'
-  {
-    scope_s s = scope_pop();
-    assert(s == $2);
   }
 ;
 
@@ -747,12 +785,18 @@ module_name: identifier
   }
 ;
 
-idlspec: idlstatement | idlspec idlstatement;
+module_body: /* empty */ { $$ = 0; } | idl_statements;
+idl_statements: idl_statement | idl_statements idl_statement;
 
 
 /* --- constant definition ------------------------------------------------- */
 
-/* these rules handle the `const' keyword. */
+/*/ @node Constant declaration
+ * @section Constant declaration
+ * @cindex Constant, declaration
+ *
+ * @ruleinclude const_dcl
+ */
 
 const_dcl:
   CONST const_type identifier '=' const_expr
@@ -800,8 +844,19 @@ const_type:
 
 /* --- IDL type definitions ------------------------------------------------ */
 
-/* These rules cover the `typedef' token, but also `struct', `enum' and
- * `union'. */
+/*/ @node Type declaration
+ * @section Type declaration
+ * @cindex Type, declaration
+ *
+ * Type declarations define new data types and associate a name (an identifier)
+ * with it. The @code{typedef} keyword can be used to name an existing
+ * type. The constructed types @code{struct}, @code{union} and @code{enum} also
+ * name the type they define. The syntax is the following:
+ *
+ * @ruleinclude type_dcl
+ * @ruleinclude constructed_type
+ * @ruleinclude alias_list
+ */
 
 type_dcl:
   constructed_type
@@ -969,6 +1024,24 @@ fixed_array_size: '[' positive_int_const ']'
 
 
 /* --- type specification -------------------------------------------------- */
+
+/*/ @node Type specification
+ * @section Type specification
+ * @cindex Type, specification
+ *
+ * A type specification is the description of a type. It can be used in a
+ * @code{typedef} construct or anywhere a typed value is expected.
+ *
+ * @ruleinclude type_spec
+ * @ruleinclude simple_type_spec
+ * @ruleinclude base_type_spec
+ * @ruleinclude template_type_spec
+ * @ruleinclude constructed_type_spec
+ * @ruleinclude named_type
+ * @ruleinclude scoped_name
+ * @ruleinclude declarator
+ * @ruleinclude simple_declarator
+ */
 
 type_spec: simple_type_spec
   {
@@ -1556,8 +1629,20 @@ size_unit:
 
 /* --- identifiers --------------------------------------------------------- */
 
-/* when the context allows it, identifiers can be GenoM special keywords */
-
+/*/ @node Reserved keywords
+ * @section Identifiers and reserved keywords
+ * @cindex Dotgen, identifier
+ *
+ * An @I{identifier} is a sequence of @acronym{ASCII} alphabetic, digit, and
+ * underscore (@code{_}) characters.  The first character must be an
+ * @acronym{ASCII} alphabetic character.
+ *
+ * @ruleinclude identifier
+ * @ruleinclude identifier_list
+ *
+ * Words that are reserved keywords in the dotgen language are valid
+ * identifiers where their use is not ambiguous.
+ */
 identifier:
   IDENTIFIER | S | MS | US | K | M | REAL_TIME
   | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE

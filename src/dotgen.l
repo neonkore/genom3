@@ -71,7 +71,22 @@ chartext	([^\'])|(\\.)
   *yylloc_param = curloc;
 %}
 
- /* cpp directives */
+ /*/ @node Line directives
+  * @section Line directives
+  *
+  * Line directives are normally not used.  They are inserted by @command{cpp},
+  * as a result of preprocessing the input file. They can be used mostly to
+  * achieve special effects on error reporting or similar.
+  *
+  * A line directive starts with the @code{#} sign, followed by the  current
+  * line number and file name of the source file,  optionally  followed by  a
+  * numeric flag. The  flag  is  never used  by @genom{}.  Its meaning depends
+  * on the  C preprocessor  used.
+  *
+  * The file  name and  line number  replace the current  value kept  internally
+  * by @genom{}  and are  used in  error reporting  messages as  well as  a  few
+  * other places.
+  */
 ^[ \t]*#[ \t]*[0-9]+[ \t]+\"{stringtext}*\"[ \t]+[0-9]+[ \t]*\n {
   dotgen_parsehash(yytext, yylloc);
 }
@@ -84,6 +99,7 @@ chartext	([^\'])|(\\.)
   dotgen_parsehash(yytext, yylloc);
 }
 
+ /* pragmas */
 ^[ \t]*#[ \t]*pragma[ \t]+require[ \t].*\n {
   dotgen_parsepragmarequire(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;

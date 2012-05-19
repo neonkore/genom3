@@ -25,7 +25,7 @@ BEGIN {
 	if (ARGV[i] ~ /^-c/)
 	    output = "c";
 	else if (ARGV[i] ~ /^-t/)
-	    output = "tex";
+	    output = "texi";
 	else if (ARGV[i] ~ /^-m/)
 	    output = "mdoc";
 	else if (ARGV[i] ~ /^-./) {
@@ -105,8 +105,8 @@ END {
 
     if (output == "c")
 	output_c();
-    if (output == "tex")
-	output_tex();
+    if (output == "texi")
+	output_texi();
     if (output == "mdoc")
 	output_mdoc();
 }
@@ -183,62 +183,62 @@ function output_c() {
 }
 
 
-function output_tex() {
-    print "\\section{Description}";
-    gsub(/\\name/, "\\GenoM{}", desc);
-    gsub(/\\em/, "{\\em",  desc);
-    gsub(/\\tt/, "{\\tt",  desc);
-    gsub(/\\rm/, "}",  desc);
+function output_texi() {
+    print "@node Description";
+    print "@section Description";
+    gsub(/\\name/, "@code{genom3}", desc);
+    gsub(/\\em[ \t]*/, "@i{",  desc);
+    gsub(/\\tt[ \t]*/, "@code{",  desc);
+    gsub(/[ \t]*\\rm/, "}",  desc);
     print desc;
 
     c = split(arglist, cat);
     for (i = 1; i <= c; i++) {
-	print "\\section{" args[cat[i]] "}";
-	print "\\begin{description}";
+	print "@node " args[cat[i]];
+	print "@section " args[cat[i]]
+	print "@table @code";
 	k = split(argkeys[cat[i]], key);
 	for (j = 1; j <= k; j++) {
-	    printf "\\item[{";
+	    printf "@item ";
 	    if (key[j] ~ /^-/)
 		s = "";
 	    else {
 		s = "-" key[j];
                 if (argopt[cat[i],key[j]])
-                    s = s " {\\em " argopt[cat[i],key[j]] "}";
+                    s = s " @i{" argopt[cat[i],key[j]] "}";
             }
 	    if (arglong[cat[i],key[j]] != "-") {
 		if (key[j] !~ /^-/)
-		    s = s ", ";
-		s = s "-{}-" arglong[cat[i],key[j]];
+		    s = s "\n@itemx ";
+		s = s "--" arglong[cat[i],key[j]];
 		if (argopt[cat[i],key[j]])
-		    s = s "={\\em " argopt[cat[i],key[j]] "}";
+		    s = s "=@i{" argopt[cat[i],key[j]] "}";
 	    }
-	    print s "}]";
+	    print s;
 
-	    gsub(/[#_]/, "\\\\&", argdesc[cat[i],key[j]]);
-	    gsub(/\\em/, "{\\em", argdesc[cat[i],key[j]]);
-	    gsub(/\\tt/, "{\\tt", argdesc[cat[i],key[j]]);
-	    gsub(/\\rm/, "}", argdesc[cat[i],key[j]]);
+	    gsub(/\\em[ \t]*/, "@var{", argdesc[cat[i],key[j]]);
+	    gsub(/\\tt[ \t]*/, "@code{", argdesc[cat[i],key[j]]);
+	    gsub(/[ \t]*\\rm/, "}", argdesc[cat[i],key[j]]);
 	    print argdesc[cat[i],key[j]];
 	    print "";
 	}
-	print "\\end{description}";
+	print "@end table";
     }
 
-    print "\\section{Environment variables}";
-    print "\\begin{description}";
+    print "@node Environment variables";
+    print "@section Environment variables";
+    print "@table @code";
     k = split(envs, key);
     for (i = 1; i <= k; i++) {
         s = key[i]
-        gsub(/[_]/, "\\\\&", s)
-	print "\\item[{" s "}]";
-	gsub(/[#_]/, "\\\\&", envdesc[key[i]]);
-	gsub(/\\name/, "\\GenoM{}", envdesc[key[i]]);
-	gsub(/\\em/, "{\\em", envdesc[key[i]]);
-	gsub(/\\tt/, "{\\tt", envdesc[key[i]]);
-	gsub(/\\rm/, "}", envdesc[key[i]]);
+	print "@item " s "";
+	gsub(/\\name/, "@genom{}", envdesc[key[i]]);
+	gsub(/\\em[ \t]*/, "@env{", envdesc[key[i]]);
+	gsub(/\\tt[ \t]*/, "@code{", envdesc[key[i]]);
+	gsub(/[ \t]*\\rm/, "}", envdesc[key[i]]);
 	print envdesc[key[i]];
     }
-    print "\\end{description}";
+    print "@end table";
 }
 
 function output_mdoc() {

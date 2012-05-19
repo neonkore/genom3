@@ -1,0 +1,262 @@
+@c
+@c Copyright (c) 2009-2012 LAAS/CNRS
+@c All rights reserved.
+@c
+@c Permission to use, copy, modify,  and distribute this software for any
+@c purpose with or without fee is hereby granted, provided that the above
+@c copyright notice and this permission notice appear in all copies.
+@c
+@c THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+@c WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+@c WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+@c AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+@c DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+@c PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+@c TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+@c PERFORMANCE OF THIS SOFTWARE.
+@c
+@c                                      Anthony Mallet on Fri Jun 25 2010
+@c
+
+@node C++ Scoped name
+@subsection Scoped names
+
+The @code{C++} mappings for scoped names use C++ scopes.  IDL
+@code{module}s are mapped to @code{namespace}s. For instance, the
+following IDL:
+@verbatim
+      module m {
+         const string str = "scoped string";
+      };
+@end verbatim
+
+would map into
+@verbatim
+      namespace m {
+         const std::string str = "scoped string";
+      }
+@end verbatim
+
+
+@node C++ Constant
+@subsection Mapping for constants
+
+@genom{} IDL constants are mapped to a @code{C++} constant. For
+instance, the following @acronym{IDL}:
+@verbatim
+   const long longint = 1;
+   const string str = "string example";
+@end verbatim
+
+would map into
+@verbatim
+   const int32_t longint = 1;
+   const std::string str = "string example";
+@end verbatim
+
+
+@node C++ Basic type
+@subsection Mapping for basic data types
+
+The basic data types have the mappings shown in the table below.
+Integer types use the @code{C99} fixed size integer types as provided
+by the @code{stdint.h} standard header (since the C++ @code{cstdint}
+header is not part of the C++ at the time of writing this document).
+Users do not have to include this header: the template mapping
+generation procedure output the appropriate @code{#include} directive
+along with the mappings for the integer types.
+
+@float Table
+@multitable @columnfractions 0.4 0.4
+@headitem @code{IDL}
+@tab @code{C++}
+@item @code{boolean}
+@tab @code{bool}
+@item @code{unsigned short}
+@tab @code{uint16_t}
+@item @code{short}
+@tab @code{int16_t}
+@item @code{unsigned long}
+@tab @code{uint32_t}
+@item @code{long}
+@tab @code{int32_t}
+@item @code{unsigned long long}
+@tab @code{uint64_t}
+@item @code{long long}
+@tab @code{int64_t}
+@item @code{float}
+@tab @code{float}
+@item @code{double}
+@tab @code{double}
+@item @code{char}
+@tab @code{char}
+@item @code{octet}
+@tab @code{uint8_t}
+@item @code{any}
+@tab type any not implemented yet
+@end multitable
+@caption{Basic data types mappings in C++}
+@end float
+
+
+@node C++ Enumerated type
+@subsection Mapping for enumerated types
+
+The C++ mapping of an IDL @code{enum} type is the corresponding C++
+@code{enum}. An additional constant is generated to guarantee that the
+type occupies a 32 bits wide integer.
+
+For instance, the following IDL:
+@verbatim
+      enum e {
+         value1,
+         value2
+      };
+@end verbatim
+
+would map, according to the scoped names rules, into
+@verbatim
+      enum e {
+         value1,
+         value2,
+         _unused = 0xffffffff,
+      };
+@end verbatim
+
+@node C++ String
+@subsection Mapping for strings
+
+@genom{}  IDL bounded  strings are  mapped to  nul terminated  character arrays
+(i.e.,  C strings)  wrapped  inside the  specific @code{genom::bounded_string}
+class. Unbounded strings are mapped to @code{std::string} provided by the C++
+standard.
+
+For instance, the following OMG IDL declarations:
+@verbatim
+      typedef string unbounded;
+      typedef string<16> bounded;
+@end verbatim
+
+would map into
+@verbatim
+      typedef std::string unbounded;
+      typedef genom::bounded_string<16> bounded;
+@end verbatim
+
+The @code{genom::bounded_string} provides the following interface:
+@verbatim
+      namespace genom3 {
+         template<std::size_t L> struct bounded_string {
+            char c[L];
+         };
+      }
+@end verbatim
+
+This minimalistic definition will be refined before the official 3.0 @genom{}
+release.
+
+
+@node C++ Array
+@subsection Mapping for arrays
+
+@genom{} IDL arrays map directly to C++ arrays. All array indices run from 0 to
+@code{size-1}.
+
+For instance, the following IDL:
+@verbatim
+      typedef long array[4][16];
+@end verbatim
+
+would map into
+@verbatim
+      typedef int32_t array[4][16];
+@end verbatim
+
+@node C++ Struct
+@subsection Mapping for structure types
+
+@genom{} IDL  structures map directly onto  C++ @code{struct}s.  Note that these
+structures may potentially include padding.
+
+For instance, the following IDL:
+@verbatim
+      struct s {
+         long a;
+         long b;
+      };
+@end verbatim
+
+would map into
+@verbatim
+      struct s {
+         int32_t a;
+         int32_t b;
+      };
+@end verbatim
+
+
+@node C++ Union
+@subsection Mapping for union types
+
+@genom{} IDL unions map onto C  @code{struct}s. The discriminator in the enum is
+referred to as  @code{_d}, the union  itself is referred to as  @code{_u}.
+
+For instance, the following IDL:
+@verbatim
+      union u switch(long) {
+         case 1: long a;
+         case 2: float b;
+         default: char c;
+      };
+@end verbatim
+
+would map into
+@verbatim
+      struct u {
+         int32_t _d;
+         union {
+            int32_t a;
+            float b;
+            char c;
+         } _u;
+      };
+@end verbatim
+
+Note that the C++ standard does not allow union members that have a
+non-trivial constructor.  Consequently, the C++ mapping for such kind
+of unions is not allowed in @genom{} either. This concerns
+@code{sequence}s and @code{string}s, and structures or unions that
+contain such a type. You should thus avoid to define such datatypes in
+@genom{} IDL in order to maximize the portability of your definitions.
+
+@node C++ Sequence
+@subsection Mapping for sequence types
+
+@genom{} IDL sequences mapping differ for bounded or unbouded
+variations of the sequence. The unbounded sequence maps onto a C++
+@code{std::vector} provided by the C++ standard.  The bounded
+sequences maps onto the specific @code{genom3::bounded_vector} class.
+
+For instance, the following IDL:
+@verbatim
+      typedef sequence<long> unbounded;
+      typedef sequence<long,16> bounded;
+@end verbatim
+
+would map into
+@verbatim
+      typedef std::vector<int32_t> unbounded;
+      typedef genom3::bounded_vector<int32_t, 16> bounded;
+@end verbatim
+
+The @code{genom::bounded_vector} provides the following interface:
+@verbatim
+      namespace genom3 {
+         template<typename T, std::size_t L> struct bounded_vector {
+            T e[L];
+         };
+      }
+@end verbatim
+
+This minimalistic definition will be refined before the official 3.0 @genom{}
+release.

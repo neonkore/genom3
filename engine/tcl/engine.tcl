@@ -71,40 +71,58 @@ namespace eval engine {
 
     # --- mode -------------------------------------------------------------
 
-    # \proc engine mode [ [+-]{\em modespec} ... ]
-    # \index engine mode
+    #/ @nodebeproc{engine mode, Engine output configuration}
+    # @deffn {TCL Backend} {engine mode} [[+-]@var{modespec}]@dots{}
     #
-    # Set miscellaneous engine operating mode. The command can be invoked
-    # without argument to retrieve the current settings for all supported
-    # modes. The command can also be invoked with one or more mode
-    # specification to set these modes (see modespec argument below).
+    # Configures various engine operating modes. @code{engine mode} can be
+    # invoked without argument to retrieve the current settings for all
+    # supported modes. The command can also be invoked with one or more mode
+    # specification to set these modes (see @var{modespec} argument below).
     #
-    # The list of supported modes is the following:
-    # \begin{itemize}
-    # \item {\tt verbose}: turns on or off the verbosity of the engine.
-    # \item {\tt overwrite}: when turned on, newly generated files will
-    #	overwrite existing files without warning. When turned off, the engine
-    #   will stop with an error if a newly generated file would overwrite an
-    #   existing file. {\tt overwrite} is by default off.
-    # \item {\tt move-if-change}: when turned on, an existing file with the
-    #	same content as a newly generated file will not be modified (preserving
-    #	the last modification timestamp). When off, files are systematically
-    #	updated. {\tt move-if-change} is on by default.
-    # \item {\tt debug}: when on, this mode preserves temporary files and
-    #	tcl programs generated in the temporary directory. Useful only for
-    #	debugging the template.
-    # \end{itemize}
+    # @@args
+    # @item modespec
+    # A mode specification string. If @code{mode} string is prefixed with a
+    # dash (@code{-}), it is turned off. If mode is prefixed with a plus
+    # (@code{+}) or not prefixed, it is turned on. Supported @var{modespec}
+    # are:
+    #   @table @code
+    #   @item verbose
+    #   turns on or off the verbosity of the engine.
     #
-    # \begin{description}
-    # \item[Example:] {\tt engine mode -overwrite +move-if-change}
-    # \end{description}
-    # \arg modespec	A mode specification string. Supported modes are
-    #		{\tt verbose}, {\tt overwrite}, {\tt move-if-change} {\tt
-    #		merge-if-change} and {\tt debug}. If {\em mode} string is
-    #		prefixed with a dash (-), it is turned off. If mode is prefixed
-    #		with a plus (+) or nothing, it is turned on.
-    # \return	When called without arguments, the command returs the current
-    #		configuration of all engine modes.
+    #   @item overwrite
+    #   when turned on, newly generated files will overwrite existing files
+    #   without warning. When turned off, the engine will stop with an error
+    #   if a newly generated file would overwrite an existing
+    #   file. @code{overwrite} is by default off.
+    #
+    #   @item move-if-change
+    #   when turned on, an existing file with the same content as a newly
+    #   generated file will not be modified (preserving the last modification
+    #   timestamp). When off, files are systematically
+    #   updated. @code{move-if-change} is on by default.
+    #
+    #	@item merge-if-change
+    #   when turned on, existing destination files will be merged with new
+    #   content by the engine, instead of being overwritten (@pxref{engine
+    #   merge-tool}). @code{merge-if-change} is off by default.
+    #
+    #   @item debug
+    #   when on, this mode preserves temporary files and tcl programs
+    #   generated in the temporary directory. Useful only for debugging the
+    #   template.
+    #   @end table
+    # @@end args
+    #
+    # @@returns
+    # When called without arguments, the command returs the current
+    # configuration of all engine modes.
+    # @@end returns
+    #
+    # @b{Example:}
+    # @example
+    # engine mode -overwrite +move-if-change
+    # @end example
+    # @end deffn
     #
     proc mode { args } {
 	variable modes
@@ -143,16 +161,28 @@ namespace eval engine {
 
     # --- merge-tool -------------------------------------------------------
 
-    # \proc engine merge-tool {\em tool}
-    # \index engine merge-tool
+    #/ @nodebeproc{engine merge-tool, Automatic merge of generated content}
+    # @deffn {TCL Backend} {engine merge-tool} @var{tool}
     #
-    # Change the engine merge tool. When the engine is in 'merge-if-change'
-    # mode, a merge tool is inkoked with the two conflicting versions of a
-    # file. If the merge tools exits successfuly, the generated file is
-    # replaced by the (manually) merged version.
+    # Changes the engine merge tool. When the engine is in 'merge-if-change'
+    # mode (see @pxref{engine mode}), a merge tool is inkoked with the two
+    # conflicting versions of the destination file. If the merge tools exits
+    # successfuly, the generated file is replaced by the merged version.
     #
-    # \arg tool	The path to the merge tool, or builtin keywords 'interactive'
-    #	or 'auto'.
+    # There are two builtin tools: @code{interactive} and
+    # @code{auto}. @code{interactive} interactively prompts the user for each
+    # patch to be applied to merge the final destination. The user can accept
+    # or reject the patch, or leave the destination file unchanged. The
+    # @code{auto} builtin tool automatically merges the two files and places
+    # conflict markers (@code{<<<<<<<} and @code{>>>>>>>}) were appropriate in
+    # the destination file.
+    #
+    # @@args
+    # @item tool
+    # The path to the merge tool executable (e.g. @command{meld}), or one of
+    # the builtin keywords @code{interactive} or @code{auto}.
+    # @@end args
+    # @end deffn
     #
     proc merge-tool { tool } {
       variable merge-tool
@@ -163,15 +193,19 @@ namespace eval engine {
 
     # --- chdir ------------------------------------------------------------
 
-    # \proc engine chdir {\em dir}
-    # \index engine chdir
+    #/ @nodebeproc{engine chdir, Change output directory}
+    # @deffn {TCL Backend} {engine chdir} @var{dir}
     #
     # Change the engine output directory. By default, files are generated in
     # the current directory. This command can be used to generate output in
     # any other directory.
     #
-    # \arg dir	The new output directory, absolute or relative to the current
-    #	working directory.
+    # @@args
+    # @item dir
+    # The new output directory, absolute or relative to the current working
+    # directory.
+    # @@end args
+    # @end deffn
     #
     proc chdir { d } {
 	variable outdir
@@ -185,10 +219,13 @@ namespace eval engine {
 
     # --- pwd --------------------------------------------------------------
 
-    # \proc engine pwd
-    # \index engine pwd
+    #/ @nodebeproc{engine pwd, Get current output directory}
+    # @deffn {TCL Backend} {engine pwd}
     #
-    # Return the current engine output directory.
+    # @@returns
+    # The current engine output directory.
+    # @@end returns
+    # @end deffn
     #
     proc pwd { } {
 	variable outdir

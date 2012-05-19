@@ -1,0 +1,111 @@
+@c  -*-texinfo-*-, , Top, Top
+@c Copyright (c) 2012 LAAS/CNRS
+@c All rights reserved.
+@c
+@c Permission to use, copy, modify, and distribute this software for any purpose
+@c with or without   fee is hereby granted, provided   that the above  copyright
+@c notice and this permission notice appear in all copies.
+@c
+@c THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+@c REGARD TO THIS  SOFTWARE INCLUDING ALL  IMPLIED WARRANTIES OF MERCHANTABILITY
+@c AND FITNESS. IN NO EVENT SHALL THE AUTHOR  BE LIABLE FOR ANY SPECIAL, DIRECT,
+@c INDIRECT, OR CONSEQUENTIAL DAMAGES OR  ANY DAMAGES WHATSOEVER RESULTING  FROM
+@c LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+@c OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
+@c PERFORMANCE OF THIS SOFTWARE.
+@c
+@c                                             Anthony Mallet on Sat May 12 2012
+@c
+@documentencoding ISO-8859-1
+@setchapternewpage odd
+
+@c --- @genom ------------------------------------------------------
+@c
+@c The TeX macro is defined in texinfo.tex. Here are the definitions
+@c for other formats.
+@c
+@ifnothtml
+@ifnottex
+@macro genom {v}
+@sansserif{GenoM\v\}
+@end macro
+@end ifnottex
+@end ifnothtml
+
+@ifhtml
+@macro genom {v}
+@html
+<span class="sansserif">G<span class="raise">en</span>oM\v\</span>
+@end html
+
+@end macro
+@end ifhtml
+
+
+@c --- @infoorurl -------------------------------------------------
+@c
+@macro infoorurl {title, node, info, url}
+see @cite{@uref{\url\, \title\}}
+@end macro
+
+@ifinfo
+@ifnotplaintext
+@unmacro infoorurl
+@macro infoorurl {title, node, info, url}
+@xref{\node\, \title\,,\info\}, (also at @uref{\url\}),
+@end macro
+@end ifnotplaintext
+@end ifinfo
+
+@iftex
+@unmacro infoorurl
+@macro infoorurl {title, node, info, url}
+see @cite{@uref{\url\, \title\}}@footnote{@url{\url\}}
+@end macro
+@end iftex
+
+
+@c --- @htmd ------------------------------------------------------
+@c
+@ifhtml
+@macro htmd {x}
+
+@html
+<div class="cell">
+@end html
+\x\
+@html
+</div>
+@end html
+
+@end macro
+@end ifhtml
+
+@ifnothtml
+@macro htmd {x}
+\x\
+@end macro
+@end ifnothtml
+
+
+@c --- @I ---------------------------------------------------------
+@c
+@macro I {t}
+@cindex \t\
+\t\
+@end macro
+
+
+@c --- @ruleinclude -----------------------------------------------
+@c
+@macro ruleinclude {f}
+@include dotgen-rule-\f\.texi
+@end macro
+
+
+@c --- sectionning ------------------------------------------------
+@c
+@macro nodebeproc {p, d}
+@node \p\
+@unnumberedsubsubsec \d\
+@end macro

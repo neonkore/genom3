@@ -1,8 +1,0 @@
-page_compositor		"."
-headings_flag		1
-heading_prefix		"\n  \\item {\\indexheading{"
-heading_suffix		"}} \\hfill \\ "
-symhead_positive	"Symboles"
-delim_0			"\\xdotfill"
-delim_1			"\\xdotfill"
-delim_2			"\\xdotfill"

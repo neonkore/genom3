@@ -1,0 +1,43 @@
+@c
+@c Copyright (c) 2010-2012 LAAS/CNRS
+@c All rights reserved.
+@c
+@c Permission to use, copy, modify,  and distribute this software for any
+@c purpose with or without fee is hereby granted, provided that the above
+@c copyright notice and this permission notice appear in all copies.
+@c
+@c THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+@c WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+@c WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+@c AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+@c DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+@c PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+@c TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+@c PERFORMANCE OF THIS SOFTWARE.
+@c
+@c                                      Anthony Mallet on Sun Jun  6 2010
+@c
+
+@genom{} is invoked by using one of the three following command lines:
+
+@verbatim
+genom3 [-l] [-h] [--version]
+genom3 [-I dir] [-D macro[=value]] [-E|-n] [-v] [-d] file.gen
+genom3 [general options] template [template options] file.gen
+@end verbatim
+
+The following sections give an overview of the general behaviour
+(@pxref{Description}) and detail the options affecting the @genom{}
+program itself (@pxref{General options}) as well as options that can
+be passed to templates (@pxref{Template options}). A list of
+recognized environment variables is also given (@pxref{Environment
+variables}).
+
+@menu
+* Description::			@htmd General description
+* General options::		@htmd Options for genom
+* Template options::		@htmd Options for templates
+* Environment variables::	@htmd Recognized environment variables
+@end menu
+
+@include genom-options.texi

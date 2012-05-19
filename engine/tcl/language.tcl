@@ -22,235 +22,20 @@
 #                                           Anthony Mallet on Fri Jan 15 2010
 #
 
-namespace eval language {
-
-  # --- mapping ------------------------------------------------------------
-
-  # \proc language mapping ?{\em type}?
-  # \index language mapping
-  #
-  # Generate and return the mapping of {\em type} for the current language, or
-  # all types if no argument is given.
-  # The returned string is a valid source code for the language.
-  #
-  # \arg type	A 'type' object.
-  #
-  proc mapping { args } {
-    variable current
-    if {![llength $args]} { set args [dotgen types] }
-    foreach type $args {
-      append m [${current}::mapping $type]
-    }
-    return $m
-  }
-  namespace export mapping
-
-
-  # --- declarator ---------------------------------------------------------
-
-  # \proc language declarator {\em type} [{\em var}]
-  # \index language declarator
-  #
-  # Return the abstract declarator for {\em type} or for a variable {\em var}
-  # of that type, in the current language.
-  #
-  # \arg type	A type object.
-  # \arg var	A string representing the name of a variable of type {\em
-  #		type}.
-  #
-  proc declarator { type {var {}} } {
-    variable current
-    return [${current}::declarator $type $var]
-  }
-  slave alias language::declarator language::declarator
-  namespace export declarator
-
-
-  # --- address ------------------------------------------------------------
-
-  # \proc language address {\em type} [{\em var}]
-  # \index language address
-  #
-  # Return an expression evaluating to the address of a variable in the current
-  # language.
-  #
-  # \arg type	A type object.
-  # \arg var	A string representing the name of a variable of type {\em
-  #		type}.
-  #
-  proc address { type {var {}} } {
-    variable current
-    return [${current}::address $type $var]
-  }
-  slave alias language::address language::address
-  namespace export address
-
-
-  # --- dereference --------------------------------------------------------
-
-  # \proc language dereference {\em type} [{\em var}]
-  # \index language dereference
-  #
-  # Return an expression dereferencing a pointer on a variable in the current
-  # language.
-  #
-  # \arg type	A type object.
-  # \arg var	A string representing the name of a variable of type {\em
-  #		type}.
-  #
-  proc dereference { type {var {}} } {
-    variable current
-    return [${current}::dereference $type $var]
-  }
-  slave alias language::dereference language::dereference
-  namespace export dereference
-
-
-  # --- argument -----------------------------------------------------------
-
-  # \proc language argument {\em type} {\em kind} [{\em var}]
-  # \index language argument
-  #
-  # Return an expression that declares a parameter {\em var} of type {\em
-  # type}, passed by value or reference according to {\em kind}.
-  #
-  # \arg type	A type object.
-  # \arg kind	Must be "value" or "reference".
-  # \arg var	A string representing the name of a variable of type {\em
-  #		type}.
-  #
-  proc argument { type kind {var {}} } {
-    variable current
-    return [${current}::argument $type $kind $var]
-  }
-  slave alias language::argument language::argument
-  namespace export argument
-
-
-  # --- pass ---------------------------------------------------------------
-
-  # \proc language pass {\em type} {\em kind} [{\em var}]
-  # \index language pass
-  #
-  # Return an expression that passes {\em var} of type {\em type} as a
-  # parameter, by value or reference according to {\em kind}.
-  #
-  # \arg type	A type object.
-  # \arg kind	Must be "value" or "reference".
-  # \arg var	A string representing the name of a variable of type {\em
-  #		type}.
-  #
-  proc pass { type kind {var {}} } {
-    variable current
-    return [${current}::pass $type $kind $var]
-  }
-  slave alias language::pass language::pass
-  namespace export pass
-
-
-  # --- member -----------------------------------------------------------
-
-  # \proc language member {\em type} {\em mlist}
-  # \index language member
-  #
-  # Return the language construction to access a member of a {\em type}.
-  # {\em mlist} is a list interpreted as follow: if it starts with a letter,
-  # {\em type} should be an aggregate type (like {\tt struct}); if it starts
-  # with a numeric digit, {\em type} should be an array type (like {\tt
-  # sequence}).
-  #
-  # \arg type		A type object
-  # \arg mlist		A list of hierachical members to access.
-  #
-  proc member { type mlist } {
-    variable current
-    return [${current}::member $type $mlist]
-  }
-  slave alias language::member language::member
-  namespace export member
-
-
-  # --- signature ----------------------------------------------------------
-
-  # \proc language signature codel [{\em separator} [{\em location}]]
-  # \index language signature
-  #
-  # Return the signature of a codel in the current language. If separator is
-  # given, it is a string that is inserted between the return type of the
-  # codel and the codel name (for instance, a \string\n{} in C so that the
-  # symbol name is guaranteed to be on the first column).
-  #
-  # \arg codel		A codel object.
-  # \arg separator	A string, inserted between the return type and the
-  #			codel symbol name.
-  # \arg location	A boolean indicating whether to generate \#line
-  #			directive corresponding to the codel definition in .gen
-  #			file.
-  #
-  proc signature { codel {symchar { }} {location off}} {
-    variable current
-    return [${current}::signature $codel $symchar $location]
-  }
-  slave alias language::signature language::signature
-  namespace export signature
-
-
-  # --- invoke -------------------------------------------------------------
-
-  # \proc language invoke {\em codel} {\em params}
-  # \index language invoke
-  #
-  # Return a string corresponding to the invocation of a codel in the current
-  # language.
-  #
-  # \arg codel	A codel object.
-  # \arg params	The list of parameters passed to the codel. Each element of
-  #		this list must be a valid string in the current language
-  #		corresponding to each parameter value or reference to be passed
-  #		to the codel.
-  #
-  proc invoke { codel params } {
-    variable current
-
-    if {[llength $params] != [llength [$codel parameters]]} {
-      template fatal "wrong # arguments for codel [$codel name]"
-    }
-    return [${current}::invoke $codel $params]
-  }
-  slave alias language::invoke language::invoke
-  namespace export invoke
-
-
-  # --- support ------------------------------------------------------------
-
-  # Return the namespace for language or raise an error
-  #
-  variable lns [dict create c c c++ c++ tcl tcl]
-  proc support { lang } {
-    variable lns
-
-    if { [catch {dict get $lns $lang} ns] } {
-      template fatal "unsupported language $lang"
-    }
-    return ::language::$ns
-  }
-
-  # current language, default to C
-  variable current [support c]
-
-  namespace ensemble create
-}
-
 
 # --- lang -----------------------------------------------------------------
 
-# \proc lang language
-# \index lang
+#/ @nodebeproc{lang, Target programming language}
+# @deffn {TCL Backend} {lang} @var{language}
 #
 # Set the current language for procedures that output a language dependent
 # string
 #
-# \arg language		The language name. Must be {\tt c} or {\tt c++}.
+# @@args
+# @item @var{language}
+# The language name. Must be one of @code{c} or @code{c++}.
+# @@end args
+# @end deffn
 #
 proc lang { language } {
   set language::current [language::support $language]
@@ -260,20 +45,24 @@ slave alias lang lang
 
 # --- cname ----------------------------------------------------------------
 
-# \proc cname \{{\em string}|{\em object}\}
-# \index cname
+#/ @nodebeproc{cname, Cannonical object name}
+# @deffn {TCL Backend} {cname} @var{string|object}
 #
-# Return the cannonical name of the {\em string} or the \GenoM{} {\em
-# object}, according to the current language.
+# Return the cannonical name of the @var{string} or the @genom{} @var{object},
+# according to the current language.
 #
 # If a regular string is given, this procedure typically maps IDL :: scope
-# separator into the native symbol in the given language.
+# separator into the native scope separator symbol for the current language.
 # If a codel object is given, this procedure returns the symbol name of the
-# codel in the given language.
+# codel for the current language.
 #
-# \arg string	The name to convert.
-# \arg object	A \GenoM{} object. Only class {\tt codel} is supported
-#		at the moment.
+# @@args
+# @item @var{string}
+# The name to convert.
+# @item @var{object}
+# A @genom{} object. Only class @code{codel} is supported at the moment.
+# @@end args
+# @end deffn
 #
 proc cname { object } {
   return [${language::current}::cname $object]
@@ -281,17 +70,67 @@ proc cname { object } {
 slave alias cname cname
 
 
+# --- comment --------------------------------------------------------------
+
+#/ @nodebeproc{comment, Generate comment strings}
+# @deffn {TCL Backend} {comment} [-@var{c}] @var{text}
+#
+# Return a string that is a valid comment in the current language.
+#
+# @@args
+# @item @var{c}
+# The string to use as a comment character (overriding current language).
+# @item @var{test}
+# The string to be commented.
+# @@end args
+# @end deffn
+#
+proc comment { args } {
+  if {[string index [lindex $args 0] 0] == "-" } {
+    set args [lassign $args c]
+    set c [string range $c 1 end]
+    return $c[join [split [join $args]] "\n$c"]
+  }
+  return [${language::current}::comment [join $args]]
+}
+slave alias comment comment
+
+
+# --- fileext --------------------------------------------------------------
+
+#/ @nodebeproc{fileext, Cannonical file extension}
+# @deffn {TCL Backend} {fileext} [-@var{kind}]
+#
+# Return the cannonical file extension for the current language.
+#
+#
+# @@args
+# @item @var{kind}
+# Must be one of the strings @code{source} or @code{header}.
+# @@end args
+# @end deffn
+#
+proc fileext { {kind source} } {
+  return [${language::current}::fileext $kind]
+}
+slave alias fileext fileext
+
+
 # --- indent ---------------------------------------------------------------
 
-# \proc indent [\#n\string|++\string|-{}-] {\em ?text...?}
-# \index indent
+#/ @nodebeproc{indent, Generate indented text}
+# @deffn {TCL Backend} {indent} [#@var{n}|@b{++}|@b{--}] [@var{text} @dots{}]
 #
-# Output {\em text}, indented to the current indent level. Each {\em text}
+# Output @var{text}, indented to the current indent level. Each @var{text}
 # argument is followed by a newline.
-# Indent level can be changed by passing an absolute level with \#n, or
-# incremented or decremented with ++ or -{}-.
+# Indent level can be changed by passing an absolute level with #@var{n}, or
+# incremented or decremented with @code{++} or @code{--}.
 #
-# \arg text	The string to output.
+# @@args
+# @item @var{test}
+# The string to output indented.
+# @@end args
+# @end deffn
 #
 proc indent { args } {
   global _ilevel
@@ -317,54 +156,24 @@ proc indent { args } {
 slave eval [list proc indent [info args indent] [info body indent]]
 
 
-# --- comment --------------------------------------------------------------
-
-# \proc comment [-c] text
-# \index comment
-#
-# Return a string that is a valid comment in the current language.
-#
-# \arg c	The string to use as a comment character (overriding current
-#		language).
-# \arg text	The string to be commented.
-#
-proc comment { args } {
-  if {[string index [lindex $args 0] 0] == "-" } {
-    set args [lassign $args c]
-    set c [string range $c 1 end]
-    return $c[join [split [join $args]] "\n$c"]
-  }
-  return [${language::current}::comment [join $args]]
-}
-slave alias comment comment
-
-
-# --- fileext --------------------------------------------------------------
-
-# \proc fileext [kind]
-# \index fileext
-#
-# Return the cannonical file extension for the current language.
-#
-# \arg kind	Must be one of the strings {\tt source} or {\tt header}.
-#
-proc fileext { {kind source} } {
-  return [${language::current}::fileext $kind]
-}
-slave alias fileext fileext
-
-
 # --- --- ------------------------------------------------------------------
 
-# \proc -{}-{}- [-{\em column}] {\em text} {\em ?text...?} {\em filler}
-# \index -{}-{}-
+#/ @nodebeproc{---, Generate filler string}
+# @deffn {TCL Backend} {---} [-@var{column}] @var{text} @dots{} @var{filler}
 #
-# Print a string of length {\em column} (70 by default), starting with
-# {\em text} and filled with the last character of the {\em filler} string.
+# This command, spelled with 3 dashes (@code{-}), return a string of length
+# @var{column} (70 by default), starting with @var{text} and filled with the
+# last character of the @var{filler} string.
 #
-# \arg text	The text to fill.
-# \arg filler	The filler character
-# \arg column	The desired length of the returned string.
+# @@args
+# @item @var{text}
+# The text to fill.
+# @item @var{filler}
+# The filler character.
+# @item @var{column}
+# The desired length of the returned string.
+# @@end args
+# @end deffn
 #
 proc --- { args } {
   set column 70
@@ -387,17 +196,25 @@ slave alias --- ---
 
 # --- wrap -----------------------------------------------------------------
 
-# \proc wrap [-{\em column}] {\em text} {\em ?prefix?} {\em ?sep?}
-# \index wrap
+#/ @nodebeproc{wrap, Chop blocks of text}
+# @deffn {TCL Backend} {wrap} [-@var{column}] @var{text} [@var{prefix}] @
+# [@var{sep}]
 #
-# Chop a string into lines of length {\em column} (70 by default), prefixed
-# with {\em prefix} (empty by default). The string is split at spaces by
-# default, or {\em sep} if given.
+# Chop a string into lines of length @var{column} (70 by default), prefixed
+# with @var{prefix} (empty by default). The string is split at spaces by
+# default, or at @var{sep} if given.
 #
-# \arg text	The text to fill.
-# \arg prefix	A string prefixed to each line
-# \arg sep	The separator for breaking text
-# \arg column	The desired maximum length of each line
+# @@args
+# @item @var{text}
+# The text to fill.
+# @item @var{prefix}
+# A string prefixed to each line.
+# @item @var{sep}
+# The separator for breaking text.
+# @item @var{column}
+# The desired maximum length of each line
+# @@end args
+# @end deffn
 #
 proc wrap { args } {
   set column 70
@@ -430,3 +247,263 @@ proc wrap { args } {
   return $result$text
 }
 slave alias wrap wrap
+
+
+namespace eval language {
+
+  # --- mapping ------------------------------------------------------------
+
+  #/ @nodebeproc{language mapping, IDL type language mapping}
+  # @deffn {TCL Backend} {language mapping} [@var{type}]
+  #
+  # Generate and return a string containing the mapping of @var{type} for the
+  # current language, or of all types if no argument is given.
+  # The returned string is a valid source code for the language.
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @@end args
+  # @end deffn
+  #
+  proc mapping { args } {
+    variable current
+    if {![llength $args]} { set args [dotgen types] }
+    foreach type $args {
+      append m [${current}::mapping $type]
+    }
+    return $m
+  }
+  namespace export mapping
+
+
+  # --- declarator ---------------------------------------------------------
+
+  #/ @nodebeproc{language declarator, Code for type declarations}
+  # @deffn {TCL Backend} {language declarator} @var{type} [@var{var}]
+  #
+  # Return the abstract declarator for @var{type} or for a variable @var{var}
+  # of that type, in the current language.
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @item @var{var}
+  # A string representing the name of a variable of type @var{type}.
+  # @@end args
+  # @end deffn
+  #
+  proc declarator { type {var {}} } {
+    variable current
+    return [${current}::declarator $type $var]
+  }
+  slave alias language::declarator language::declarator
+  namespace export declarator
+
+
+  # --- address ------------------------------------------------------------
+
+  #/ @nodebeproc{language address, Code for variable addresses}
+  # @deffn {TCL Backend} {language address} @var{type} [@var{var}]
+  #
+  # Return an expression evaluating to the address of a variable in the current
+  # language.
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @item @var{var}
+  # A string representing the name of a variable of type @var{type}.
+  # @@end args
+  # @end deffn
+  #
+  proc address { type {var {}} } {
+    variable current
+    return [${current}::address $type $var]
+  }
+  slave alias language::address language::address
+  namespace export address
+
+
+  # --- dereference --------------------------------------------------------
+
+  #/ @nodebeproc{language dereference, Code for dereferencing variables}
+  # @deffn {TCL Backend} {language dereference} @var{type} [@var{var}]
+  #
+  # Return an expression dereferencing the address of a variable in the current
+  # language.
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @item @var{var}
+  # A string representing the name of a variable of type @var{type}.
+  # @@end args
+  # @end deffn
+  #
+  proc dereference { type {var {}} } {
+    variable current
+    return [${current}::dereference $type $var]
+  }
+  slave alias language::dereference language::dereference
+  namespace export dereference
+
+
+  # --- argument -----------------------------------------------------------
+
+  #/ @nodebeproc{language argument, Code for declaring functions arguments}
+  # @deffn {TCL Backend} {language argument} @var{type} @var{kind} [@var{var}]
+  #
+  # Return an expression that declares a parameter @var{var} of type
+  # @var{type}, passed by value or reference according to @var{kind}.
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @item @var{kind}
+  # Must be @code{value} or @code{reference}.
+  # @item @var{var}
+  # A string representing the name of a variable of type @var{type}.
+  # @@end args
+  # @end deffn
+  #
+  proc argument { type kind {var {}} } {
+    variable current
+    return [${current}::argument $type $kind $var]
+  }
+  slave alias language::argument language::argument
+  namespace export argument
+
+
+  # --- pass ---------------------------------------------------------------
+
+  #/ @nodebeproc{language pass, Code for passing functions arguments}
+  # @deffn {TCL Backend} {language pass} @var{type} @var{kind} [@var{var}]
+  #
+  # Return an expression that passes @var{var} of type @var{type} as a
+  # parameter, by value or reference according to @var{kind}.
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @item @var{kind}
+  # Must be @code{value} or @code{reference}.
+  # @item @var{var}
+  # A string representing the name of a variable of type @var{type}.
+  # @@end args
+  # @end deffn
+  #
+  proc pass { type kind {var {}} } {
+    variable current
+    return [${current}::pass $type $kind $var]
+  }
+  slave alias language::pass language::pass
+  namespace export pass
+
+
+  # --- member -----------------------------------------------------------
+
+  #/ @nodebeproc{language member, Code for accessing structure members}
+  # @deffn {TCL Backend} {language member} @var{type} @var{mlist}
+  #
+  # Return the language construction to access a member of a @var{type}.
+  # @var{mlist} is a list interpreted as follow: if it starts with a letter,
+  # @var{type} should be an aggregate type (like @code{struct}); if it starts
+  # with a numeric digit, @var{type} should be an array type (like
+  # @code{sequence}).
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @item @var{mlist}
+  # A list of hierachical members to access.
+  # @@end args
+  # @end deffn
+  #
+  proc member { type mlist } {
+    variable current
+    return [${current}::member $type $mlist]
+  }
+  slave alias language::member language::member
+  namespace export member
+
+
+  # --- signature ----------------------------------------------------------
+
+  #/ @nodebeproc{language signature, Code for declaring codel signatures}
+  # @deffn {TCL Backend} {language signature} @var{codel} [@var{separator}] @
+  # [@var{location}]
+  #
+  # Return the signature of a codel in the current language. If separator is
+  # given, it is a string that is inserted between the return type of the
+  # codel and the codel name (for instance, a @code{\n} in C so that the
+  # symbol name is guaranteed to be on the first column).
+  #
+  # @@args
+  # @item @var{code}
+  # A 'codel' object.
+  # @item @var{separator}
+  # A string, inserted between the return type and the codel symbol name.
+  # @item @var{location}
+  # A boolean indicating whether to generate @code{#line} directives
+  # corresponding to the codel location in @code{.gen} file.
+  # @@end args
+  # @end deffn
+  #
+  proc signature { codel {symchar { }} {location off}} {
+    variable current
+    return [${current}::signature $codel $symchar $location]
+  }
+  slave alias language::signature language::signature
+  namespace export signature
+
+
+  # --- invoke -------------------------------------------------------------
+
+  #/ @nodebeproc{language invoke, Code for calling codels}
+  # @deffn {TCL Backend} {language invoke} @var{codel} @var{params}
+  #
+  # Return a string corresponding to the invocation of a codel in the current
+  # language.
+  #
+  # @@args
+  # @item @var{code}
+  # A 'codel' object.
+  # @item @var{params}
+  # The list of parameters passed to the codel. Each element of this list must
+  # be a valid string in the current language corresponding to each parameter
+  # value or reference to be passed to the codel (@pxref{language pass}).
+  # @@end args
+  # @end deffn
+  #
+  proc invoke { codel params } {
+    variable current
+
+    if {[llength $params] != [llength [$codel parameters]]} {
+      template fatal "wrong # arguments for codel [$codel name]"
+    }
+    return [${current}::invoke $codel $params]
+  }
+  slave alias language::invoke language::invoke
+  namespace export invoke
+
+
+  # --- support ------------------------------------------------------------
+
+  # Return the namespace for language or raise an error
+  #
+  variable lns [dict create c c c++ c++ tcl tcl]
+  proc support { lang } {
+    variable lns
+
+    if { [catch {dict get $lns $lang} ns] } {
+      template fatal "unsupported language $lang"
+    }
+    return ::language::$ns
+  }
+
+  # current language, default to C
+  variable current [support c]
+
+  namespace ensemble create
+}

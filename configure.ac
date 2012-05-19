@@ -59,9 +59,8 @@ if test x"$YACC" = x:; then
    AC_MSG_FAILURE([required yacc/bison program could not be found on your system.])
 fi
 
-AC_PATH_PROG(PDFLATEX, [pdflatex], [:])
-AC_PATH_PROG(TTH, [tth], [:])
-AC_PATH_PROG(W3M, [w3m], [:])
+AC_PATH_PROG(TEXI2DVI, [texi2dvi], [:])
+AC_PATH_PROG(MAKEINFO, [makeinfo], [:])
 AC_PATH_PROG(Y2L, [y2l], [:])
 
 
@@ -77,18 +76,14 @@ AC_ARG_ENABLE(docgen,
 	AS_HELP_STRING([--enable-docgen], [regenerate documentation]),
 	[enable_docgen=$enableval],[enable_docgen=no])
 
-AM_CONDITIONAL([REGEN_DOC_YACC],
-  [test "$enable_docgen" = yes -a	\
-	"$Y2L" != ":"])
-AM_CONDITIONAL([REGEN_DOC_PDF],
-  [test "$enable_docgen" = yes -a \
-	"$Y2L" != ":" -a "$PDFLATEX" != ":"])
-AM_CONDITIONAL([REGEN_DOC_HTML],
-  [test "$enable_docgen" = yes -a \
-	"$Y2L" != ":" -a "$PDFLATEX" != ":" -a "$TTH" != ":"])
+AM_CONDITIONAL([REGEN_DOC_INFO],
+  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$MAKEINFO" != ":"])
 AM_CONDITIONAL([REGEN_DOC_TXT],
-  [test "$enable_docgen" = yes -a \
-	"$Y2L" != ":" -a "$PDFLATEX" != ":" -a "$TTH" != ":" -a "$W3M" != ":"])
+  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$MAKEINFO" != ":"])
+AM_CONDITIONAL([REGEN_DOC_PDF],
+  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$TEXI2PDF" != ":"])
+AM_CONDITIONAL([REGEN_DOC_HTML],
+  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$MAKEINFO" != ":"])
 
 # C compiler features
 AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
@@ -191,12 +186,12 @@ summary=["$summary
 
 Documentation generation:"]
 if test x"$enable_docgen" = xno; then
-  if test -f "$srcdir/doc/genom.pdf"; then
-    summary=["${summary}	static"]
+  if test -f "$srcdir/doc/genom3.pdf"; then
+    summary=["${summary}	bundled"]
   else
     summary=["${summary}	no"]
   fi
-  summary=["${summary} (use --enable-docgen to regen)"]
+  summary=["${summary} (use --enable-docgen to regenerate)"]
 else
   summary=["${summary}
     yacc to text:		"]
@@ -209,40 +204,44 @@ else
 	(with ${Y2L})"]
   fi
   summary=["$summary
-    pdf:			"]
-  if test x"$Y2L" = x: -o x"$PDFLATEX" = x:; then
+    info:			"]
+  if test x"$Y2L" = x: -o x"$MAKEINFO" = x:; then
     summary=["${summary}no: missing"]
     test ! x"$Y2L" = x: || summary=["${summary} y2l"]
-    test ! x"$PDFLATEX" = x: || summary=["${summary} pdflatex
-	see http://www.tug.org/texlive/"]
+    test ! x"$MAKEINFO" = x: || summary=["${summary} makeinfo"]
   else
     summary=["${summary}yes
-	(with ${PDFLATEX})"]
+	(with ${MAKEINFO})"]
+  fi
+  summary=["$summary
+    pdf:			"]
+  if test x"$Y2L" = x: -o x"$TEXI2DVI" = x:; then
+    summary=["${summary}no: missing"]
+    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
+    test ! x"$TEXI2DVI" = x: || summary=["${summary} texi2dvi"]
+  else
+    summary=["${summary}yes
+	(with ${TEXI2DVI})"]
   fi
   summary=["$summary
     html:			"]
-  if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x:; then
+  if test x"$Y2L" = x: -o x"$MAKEINFO" = x:; then
     summary=["${summary}no: missing"]
     test ! x"$Y2L" = x: || summary=["${summary} y2l"]
-    test ! x"$PDFLATEX" = x: || summary=["${summary} pdflatex"]
-    test ! x"$TTH" = x: || summary=["${summary} tth
-	see http://hutchinson.belmont.ma.us/tth/"]
+    test ! x"$MAKEINFO" = x: || summary=["${summary} makeinfo"]
   else
     summary=["${summary}yes
-	(with ${TTH})"]
+	(with ${MAKEINFO})"]
   fi
   summary=["$summary
     text:			"]
-  if test x"$Y2L" = x: -o x"$PDFLATEX" = x: -o x"$TTH" = x: -o x"$W3M" = x:; then
+  if test x"$Y2L" = x: -o x"$MAKEINFO" = x:; then
     summary=["${summary}no: missing"]
     test ! x"$Y2L" = x: || summary=["${summary} y2l"]
-    test ! x"$PDFLATEX" = x: || summary=["${summary} pdflatex"]
-    test ! x"$TTH" = x: || summary=["${summary} tth"]
-    test ! x"$W3M" = x: || summary=["${summary} w3m
-	see http://w3m.sourceforge.net/"]
+    test ! x"$MAKEINFO" = x: || summary=["${summary} makeinfo"]
   else
     summary=["${summary}yes
-	(with ${W3M})"]
+	(with ${MAKEINFO})"]
   fi
 fi
 

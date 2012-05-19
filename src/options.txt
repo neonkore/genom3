@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -26,10 +26,10 @@
 # compatible with getopt_long(3) or LaTeX(1) and roff(7) documentations.
 #
 \desc
-The \name program is a \em source code generator \rm that is used to generate
-software components from a formal description file.
+\name generates the source code of the software components described in
+the formal description \em file.gen\rm input file.
 
-The input \em file \rm is expected to contain the description of the
+The input \em file.gen \rm is expected to contain the description of the
 services, input and output ports, data types definitions and execution contexts
 of a software component, written in the \em dotgen \rm language.
 

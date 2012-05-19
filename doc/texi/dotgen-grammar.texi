@@ -1,0 +1,116 @@
+@c
+@c Copyright (c) 2009-2012 LAAS/CNRS
+@c All rights reserved.
+@c
+@c Permission to use, copy, modify,  and distribute this software for any
+@c purpose with or without fee is hereby granted, provided that the above
+@c copyright notice and this permission notice appear in all copies.
+@c
+@c THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+@c WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+@c WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+@c AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+@c DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+@c PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+@c TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+@c PERFORMANCE OF THIS SOFTWARE.
+@c
+@c                                      Anthony Mallet on Mon May 31 2010
+@c
+
+@cindex Input, file format
+
+This chapter describes the @genom{3} Input File Format (@code{dotgen})
+semantics and gives the syntax for @code{dotgen} grammatical
+constructs. @I{dotgen} is the language used to formally describe a
+@genom{} component in terms of services and data types it provides.  A
+description written in dotgen completely defines the interface and the
+internals of a component.
+
+A description of the dotgen preprocessing is presented in
+@ref{Preprocessing}.  The grammar is presented in @ref{Grammar
+reference}. Associated semantics is described in the rest of this
+chapter either in place or through references to other sub sections of
+this chapter.
+
+A source file containing a dotgen component specification must have a
+@file{.gen} extension. The description of the dotgen grammar uses a
+syntax notation that is similar to @acronym{EBNF, Extended Backus-Naur
+Format}.  The following table lists the symbols used in this format
+and their meaning.
+
+@float Table,tab/iff/ebnf
+@multitable @columnfractions 0.2 0.7
+@headitem @center Symbol
+@tab Meaning
+@item @center @code{::=}
+@tab Definition.
+@item @center @code{|}
+@tab Alternation.
+@item @center @code{text}
+@tab Nonterminals.
+@item @center @code{"text"}
+@tab Terminals.
+@item @center @code{( ... )}
+@tab Grouping.
+@item @center @code{@{ ... @}}
+@tab Repetition: may occur zero or any number of times.
+@item @center @code{[ ... ]}
+@tab Option: may occur zero or one time.
+@end multitable
+@caption{@code{dotgen} @acronym{EBNF} symbols}
+@end float
+
+@menu
+* Preprocessing::	@htmd Inclusion of definitions from other specifications
+* Specification::	@htmd Basic elements of a @genom{3} specification
+* Module declaration::	@htmd Scope type definitions
+* Constant declaration::@htmd Define constant values
+* Type declaration::	@htmd Naming new types
+* Type specification::	@htmd Defining new types
+* Reserved keywords::	@htmd Words with a special meaning
+* Grammar reference::	@htmd Extensive @genom{3} EBNF grammar reference
+@end menu
+
+@node Preprocessing
+@section Preprocessing
+@cindex preprocessing
+@cindex input, preprocessing
+@cindex dotgen, preprocessing
+
+A @code{dotgen} specification consists of one or more files that are
+preprocessed. The preprocessing performs file inclusion and macro
+substitution and is controlled by directives introduced by lines
+having @code{#} as the first character other than white space.  The
+preprocessing is done by the C preprocessor available on the host
+system and configured during the build of @genom{}. It is invoked as a
+separate process.
+
+Preprocessor directives beginning with @code{#} have their own syntax
+(namely, the C preprocessor syntax), independent of the @code{dotgen}
+language and not described in this document.  For instance,
+@infoorurl{The C preprocessor, Top, cpp,
+http://gcc.gnu.org/onlinedocs/cpp/} for a documentation.  Directives
+may appear anywhere in the source file but are not seen nor
+interpreted by @genom{}.  The primary use of the preprocessing
+facilities is to include definitions (especially type definitions)
+from other dotgen specifications.  Text in files included with a
+@code{#include} directive is treated as if it appeared in the
+including file.
+
+@menu
+* Line directives:: ...
+@end menu
+@lowersections
+@include dotgen.l.texi
+@raisesections
+
+@include dotgen.y.texi
+
+@node Grammar reference
+@section Grammar reference
+@cindex grammar
+@cindex input, grammar
+@cindex @code{dotgen}, grammar
+@cindex @genom{3}, grammar
+@include dotgen-rules.texi

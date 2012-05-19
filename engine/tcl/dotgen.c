@@ -37,17 +37,17 @@
 
 /* --- genom --------------------------------------------------------------- */
 
-/* \section dotgen genom
- * \index dotgen genom
+/*/ @nodebeproc{dotgen genom, Genom program path and command line}
+ * @findex dotgen genom
  *
  * Those commands implement access to genom program parameters or general
  * information.
  */
 
-/* \proc dotgen genom program
- * \index dotgen genom program
+/*/ @deffn {TCL Backend} {dotgen genom program}
  *
- * Returns the absolute path to the GenoM executable currently running.
+ * Return the absolute path to the GenoM executable currently running.
+ * @end deffn
  */
 int
 dg_genom_program(ClientData d, Tcl_Interp *interp, int objc,
@@ -60,10 +60,10 @@ dg_genom_program(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen genom cmdline
- * \index dotgen genom cmdline
+/*/ @deffn {TCL Backend} {dotgen genom cmdline}
  *
- * Returns a string containing the options passed to the GenoM program.
+ * Returns a string containing the options passed to the @genom{} program.
+ * @end deffn
  */
 int
 dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
@@ -73,10 +73,10 @@ dg_genom_cmdline(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen genom version
- * \index dotgen genom version
+/*/ @deffn {TCL Backend} {dotgen genom version}
  *
- * Returns the full version string of the GenoM program.
+ * Returns the full version string of the @genom{} program.
+ * @end deffn
  */
 int
 dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
@@ -86,10 +86,10 @@ dg_genom_version(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen genom templates
- * \index dotgen genom templates
+/*/ @deffn {TCL Backend} {dotgen genom templates}
  *
  * Return the list of all currently available templates name.
+ * @end deffn
  */
 int
 dg_genom_templates(ClientData v, Tcl_Interp *interp, int objc,
@@ -116,11 +116,11 @@ dg_genom_templates(ClientData v, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen genom debug
- * \index dotgen genom debug
+/*/ @deffn {TCL Backend} {dotgen genom debug}
  *
  * Returns a boolean indicating whether genom was invoked in debugging mode or
  * not.
+ * @end deffn
  */
 int
 dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc,
@@ -130,18 +130,24 @@ dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen genom stdout [on]
- * \index dotgen genom stdout
+/*/ @deffn {TCL Backend} {dotgen genom stdout} [@var{onoff}]
  *
- * With optional boolean argument {\em on}, turns on or off the standard output
- * channel of the template engine.
+ * With optional boolean argument @var{onoff}, turns on or off the standard
+ * output channel of the template engine.
  *
  * Without argument, the procedure returns the current activation status of the
  * standard output channel.
  *
- * \arg		[on] Turn on/off standard output channel.
- * \return	When called without argument, returns a boolean indicating the
- *		current status (on/off) of the standard output channel.
+ * @@args
+ * @item @var{onoff}
+ * Optional argument to turn on or off the standard output channel.
+ * @@end args
+ *
+ * @@returns
+ * When called without argument, returns a boolean indicating the current
+ * status (on/off) of the standard output channel.
+ * @@end returns
+ * @end deffn
  */
 int
 dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
@@ -173,16 +179,16 @@ dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
 
 /* --- template ------------------------------------------------------------ */
 
-/* \section dotgen template
- * \index dotgen template
+/*/ @nodebeproc{dotgen template, Template path and directories}
+ * @findex dotgen template
  *
  * Those commands return information about the template currently being parsed.
  */
 
-/* \proc dotgen template name
- * \index dotgen template name
+/*/ @deffn {TCL Backend} {dotgen template name}
  *
  * Return the current template name.
+ * @end deffn
  */
 int
 dg_template_name(ClientData v, Tcl_Interp *interp, int objc,
@@ -195,11 +201,11 @@ dg_template_name(ClientData v, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen template dir
- * \index dotgen template dir
+/*/ @deffn {TCL Backend} {dotgen template dir}
  *
- * Return a path to the current template directory (the directory holding the
+ * Return a path to the template source directory (the directory holding the
  * template.tcl file).
+ * @end deffn
  */
 int
 dg_template_dir(ClientData v, Tcl_Interp *interp, int objc,
@@ -209,10 +215,10 @@ dg_template_dir(ClientData v, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen template builtindir
- * \index dotgen template builtindir
+/*/ @deffn {TCL Backend} {dotgen template builtindir}
  *
- * Return a path to the genom builtin templates directory.
+ * Return a path to the genom builtin templates source directory.
+ * @end deffn
  */
 int
 dg_template_builtindir(ClientData v, Tcl_Interp *interp, int objc,
@@ -222,11 +228,11 @@ dg_template_builtindir(ClientData v, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen template tmpdir
- * \index dotgen template tmpdir
+/*/ @deffn {TCL Backend} {dotgen template tmpdir}
  *
  * Return a path to the temporary directory where the template engine writes
  * its temporary files.
+ * @end deffn
  */
 int
 dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc,
@@ -239,17 +245,17 @@ dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc,
 
 /* --- input --------------------------------------------------------------- */
 
-/* \section dotgen input
- * \index dotgen input
+/*/ @nodebeproc{dotgen input, Input file name and path}
+ * @findex dotgen input
  *
  * Those commands return information about the current genom input file (.gen
  * file).
  */
 
-/* \proc dotgen input file
- * \index dotgen input file
+/*/ @deffn {TCL Backend} {dotgen input file}
  *
- * Return the full path to the current .gen file.
+ * Return the full path to the current .gen input file.
+ * @end deffn
  */
 int
 dg_input_file(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -258,11 +264,11 @@ dg_input_file(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   return TCL_OK;
 }
 
-/* \proc dotgen input base
- * \index dotgen input base
+/*/ @deffn {TCL Backend} {dotgen input base}
  *
  * Return the base name of the current .gen file, i.e. the file name with all
  * directories stripped out.
+ * @end deffn
  */
 int
 dg_input_base(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -274,10 +280,10 @@ dg_input_base(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   return TCL_OK;
 }
 
-/* \proc dotgen input dir
- * \index dotgen input dir
+/*/ @deffn {TCL Backend} {dotgen input dir}
  *
- * Return the directory name of the current .gen file.
+ * Return the directory part of the current .gen file.
+ * @end deffn
  */
 int
 dg_input_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -289,12 +295,13 @@ dg_input_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   return TCL_OK;
 }
 
-/* \proc dotgen input notice
- * \index dotgen input notice
+/*/ @deffn {TCL Backend} {dotgen input notice}
  *
  * Return the copyright notice (as text) found in the .gen file. This notice
  * can actually be any text and is the content of the special comment starting
- * with the three caracters '/' '*' '/', near the beginning of the .gen file.
+ * with the three caracters @code{/} @code{*} @code{/}, near the beginning of
+ * the .gen file.
+ * @end deffn
  */
 int
 dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
@@ -309,13 +316,13 @@ dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen input deps
- * \index dotgen input deps
+/*/ @deffn {TCL Backend} {dotgen input deps}
  *
  * Return the comprehensive list of input files processed so far. This includes
- * the input .gen file itself, plus any other file required, directly or
- * indirectly, via a {\tt \#include} directive. This list is typically used to
+ * the input @code{.gen} file itself, plus any other file required, directly or
+ * indirectly, via a @code{#include} directive. This list is typically used to
  * generate dependency information in a Makefile.
+ * @end deffn
  */
 int
 dg_input_deps(ClientData v, Tcl_Interp *interp, int objc,
@@ -337,18 +344,21 @@ dg_input_deps(ClientData v, Tcl_Interp *interp, int objc,
 
 /* --- parse --------------------------------------------------------------- */
 
-/* \section dotgen parse
- * \proc dotgen parse file\string|string data
- * \index dotgen parse
+/*/ @nodebeproc{dotgen parse, Process additional input}
+ * @deffn {TCL Backend} {dotgen parse} @b{file|string} @var{data}
  *
- * Parse .gen data either from a file or from a string. When parsing is
- * successful, the corresponding objects are exported to the engine.
+ * Parse additional @code{.gen} data either from a file or from a string. When
+ * parsing is successful, the corresponding objects are exported to the
+ * backend.
  *
- * \arg file\string|string	Specify if parsing from a file or from a
- *				string.
- * \arg data			When parsing from a file, data is the file
- *				name. When parsing from a string, data is the
- *				data to be parsed.
+ * @@args
+ * @item @b{file|string}
+ * Specify if parsing from a file or from a string.
+ * @item @var{data}
+ * When parsing from a file, data is the file name. When parsing from a string,
+ * data is the string to be parsed.
+ * @@end args
+ * @end deffn
  */
 int
 dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -426,24 +436,25 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 /* --- types --------------------------------------------------------------- */
 
-/* \section dotgen types
- *
- * This command return information about the type definitions in the .gen
- * file.
- */
-
-/* \proc dotgen types [pattern]
- * \index dotgen types
+/*/ @nodebeproc{dotgen types, Data type definitions from the specification}
+ * @deffn {TCL Backend} {dotgen types} [@var{pattern}]
  *
  * This command returns the list of type objects that are defined in the
- * current .gen file. This list may be filtered with the optional {\em pattern}
- * argument. Each element of the returned list is a type command that can be
- * used to access detailed information about that particular type object.
+ * current @code{.gen} file. This list may be filtered with the optional
+ * @var{pattern} argument. Each element of the returned list is a type command
+ * that can be used to access detailed information about that particular type
+ * object.
  *
- * \arg		[pattern] Filter on the type names. The filter may contain a
- *		glob-like pattern (with * or ? wildcards). Only the types
- *		whose name match the pattern will be returned.
- * \return	A list of type objects.
+ * @@args
+ * @item @var{pattern}
+ * Filter the type names with @var{pattern}. The filter may contain a glob-like
+ * pattern (with @code{*} or @code{?} wildcards). Only the types whose name
+ * match the pattern will be returned.
+ * @@end args
+ * @@returns
+ * A list of type objects of class @code{type}.
+ * @@end returns
+ * @end deffn
  */
 int
 dg_types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -476,25 +487,25 @@ dg_types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 /* --- components ----------------------------------------------------------- */
 
-/* \section dotgen components
- *
- * This command return information about the components definitions in the .gen
- * file.
- */
-
-/* \proc dotgen components [pattern]
- * \index dotgen components
+/*/ @nodebeproc{dotgen components,Components definitions from the specification}
+ * @deffn {TCL Backend} {dotgen components} [@var{pattern}]
  *
  * This command returns the list of components that are defined in the current
- * .gen file (normally just one). This list may be filtered with the optional
- * {\em pattern} argument. Each element of the returned list is a component
- * command that can be used to access detailed information about each
- * particular component object.
+ * @code{.gen} file. This list may be filtered with the optional @var{pattern}
+ * argument. Each element of the returned list is a component command that can
+ * be used to access detailed information about each particular component
+ * object.
  *
- * \arg		[pattern] Filter on the component name. The filter may contain
- *		a glob-like pattern (with * or ? wildcards). Only the components
- *		whose name match the pattern will be returned.
- * \return	A list of component objects.
+ * @@args
+ * @item @var{pattern}
+ * Filter the component name. The filter may contain a glob-like pattern (with
+ * @code{*} or @code{?} wildcards). Only the components whose name match the
+ * pattern will be returned.
+ * @@end args
+ * @@returns
+ * A list of component objects of class @code{component}.
+ * @@end returns
+ * @end deffn
  */
 int
 dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])

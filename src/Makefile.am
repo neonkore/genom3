@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2011 LAAS/CNRS
+# Copyright (c) 2009-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -64,8 +64,11 @@ options.c: Makefile $(top_srcdir)/doc/optgen.awk
 options.c: options.txt
 	$(AWK) -f $(top_srcdir)/doc/optgen.awk -- -c $< >$@
 
-# install a versionned copy of genom3
+# install a versioned copy of genom3
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) &&				\
 	mv -f genom3$(EXEEXT) $(GENOM_TOOL)$(EXEEXT) &&		\
 	$(LN_S) $(GENOM_TOOL)$(EXEEXT) genom3$(EXEEXT)
+
+uninstall-hook:
+	rm -f $(DESTDIR)$(bindir)/$(GENOM_TOOL)

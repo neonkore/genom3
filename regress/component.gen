@@ -99,7 +99,7 @@ service s2(
 
   codel start: a(inport a, outport b.b::port) yield sleep, ether;
   codel main: b(in b[2].c.d::input, inout b[0].a::inout, out ::ids) yield ether;
-  codel other: c(in f, out f::outf) yield ether;
+  codel other: e(in f, out f::outf) yield ether;
   codel stop: d(in g, out h) yield ether;
 
   throw:	ERR3;

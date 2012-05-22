@@ -51,7 +51,7 @@ if {$task ne ""} {'>
 
 
 /* <"[--- Task [$task name] ----------------------------------------------]"> */
-<' foreach codel [$task codels] { '>
+<'  foreach codel [$task codels] {'>
 
 
 /** Codel <"[$codel name]"> of task <"[$task name]">.
@@ -63,6 +63,13 @@ if {$task ne ""} {'>
 <"[wrap " * Throws $throws." { * }]">
 <'   }'>
  */
+<'
+    if {![catch {dict get $generated_codels [$codel name]} prev]} {
+      puts "\n/* already defined in $prev */"
+      continue
+    }
+    dict set generated_codels [$codel name] "task [$task name]"
+'>
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
@@ -80,7 +87,7 @@ if {$task eq ""} {
 
 
 /* <"[--- Service [$service name] ---------------------------------------]"> */
-<'       foreach codel [$service validate] { '>
+<'    foreach codel [$service validate] {'>
 
 /** Validation codel <"[$codel name]"> of service <"[$service name]">.
  *
@@ -88,6 +95,13 @@ if {$task eq ""} {
 <'   set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
  */
+<'
+      if {![catch {dict get $generated_codels [$codel name]} prev]} {
+        puts "\n/* already defined in $prev */"
+        continue
+      }
+      dict set generated_codels [$codel name] "service [$service name] validation"
+'>
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
@@ -107,7 +121,7 @@ foreach service [$component services] {
 
 
 /* <"[--- Service [$service name] ---------------------------------------]"> */
-<'    foreach codel [$service codels] { '>
+<' foreach codel [$service codels] {'>
 
 /** Codel <"[$codel name]"> of service <"[$service name]">.
  *
@@ -116,6 +130,13 @@ foreach service [$component services] {
 <'   set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
  */
+<'
+   if {![catch {dict get $generated_codels [$codel name]} prev]} {
+     puts "\n/* already defined in $prev */"
+     continue
+   }
+   dict set generated_codels [$codel name] "service [$service name]"
+'>
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */

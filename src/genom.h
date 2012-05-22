@@ -526,6 +526,8 @@ int		param_setdir(param_s p, pdir dir);
 int		param_setinitv(tloc l, param_s p, initer_s i);
 initer_s	param_typeiniter(param_s p, idltype_s t);
 
+int		param_equal(param_s p, param_s q);
+int		param_list_equal(hash_s l, hash_s m);
 const char *	param_strdir(pdir d);
 
 initer_s	initer_create(unsigned int index, const char *member,

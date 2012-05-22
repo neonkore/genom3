@@ -178,6 +178,36 @@ param_clone(param_s param)
 }
 
 
+/* --- param_equal --------------------------------------------------------- */
+
+/** compare two parameters
+ */
+int
+param_equal(param_s p, param_s q)
+{
+  if (!p || !q) return 0;
+  if (param_base(p) != param_base(q)) return 0;
+
+  return type_equal(param_type(p), param_type(q));
+}
+
+
+/** compare two lists of parameters
+ */
+int
+param_list_equal(hash_s l, hash_s m)
+{
+  hiter i, j;
+
+  for(hash_first(l, &i), hash_first(m, &j);
+      i.value && j.value; hash_next(&i), hash_next(&j)) {
+    if (!param_equal(i.value, j.value)) return 0;
+  }
+  if (i.value || j.value) return 0;
+  return 1;
+}
+
+
 /* --- param_setname ------------------------------------------------------- */
 
 /** rename parameter.

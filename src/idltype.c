@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -458,7 +458,19 @@ type_equal(idltype_s a, idltype_s b)
       return strcmp(a->fullname, b->fullname)?0:1;
 
     case IDL_ARRAY: case IDL_SEQUENCE:
-    case IDL_STRUCT: case IDL_UNION:
+      if (a->length != b->length) return 0;
+      return type_equal(type_type(a), type_type(b));
+
+    case IDL_STRUCT: case IDL_UNION: {
+      idltype_s t, u;
+      hiter i, j;
+
+      for(t = type_first(a, &i), u = type_first(b, &j);
+          t && u; t = type_next(&i), u = type_next(&j))
+        if (!type_equal(t, u)) return 0;
+      if (t || u) return 0;
+      return 1;
+    }
 
     case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       /* not a valid return from type_final() */

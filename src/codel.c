@@ -58,6 +58,8 @@ service_s *	codel_service(codel_s c) { assert(c); return &c->service; }
 
 void	codel_setkind(codel_s c, codelkind k) { assert(c); c->kind = k; }
 
+static codel_s	codel_find(const char *name);
+
 
 /* --- codel_create -------------------------------------------------------- */
 
@@ -70,6 +72,17 @@ codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
   codel_s c;
   assert(name && params);
 
+  /* prevent duplicates */
+  c = codel_find(name);
+  if (c) {
+    if (!param_list_equal(codel_params(c), params)) {
+      parserror(l, "conflicting types for codel %s", name);
+      parsenoerror(codel_loc(c), " codel %s declared here", name);
+      return NULL;
+    }
+  }
+
+  /* create data structure */
   c = malloc(sizeof(*c));
   if (!c) {
     warnx("memory exhausted, cannot create codel '%s'", name);
@@ -168,6 +181,43 @@ codel_clone(codel_s codel)
 
   xwarnx("created codel %s", c->name);
   return c;
+}
+
+
+/* --- codel_find ---------------------------------------------------------- */
+
+static codel_s
+codel_find(const char *name)
+{
+  comp_s c;
+  codel_s codel;
+  hiter i, j;
+
+  for(c = comp_first(); c; c = comp_next(c)) {
+    /* look for tasks codels */
+    for(hash_first(comp_tasks(c), &i); i.value; hash_next(&i)) {
+      for(hash_first(task_props(i.value), &j); j.value; hash_next(&j)) {
+        if (prop_kind(j.value) != PROP_CODEL &&
+            prop_kind(j.value) != PROP_VALIDATE)
+          continue;
+        codel = prop_codel(j.value);
+        if (!strcmp(name, codel_name(codel))) return codel;
+      }
+    }
+
+    /* look for service codels */
+    for(hash_first(comp_services(c), &i); i.value; hash_next(&i)) {
+      for(hash_first(service_props(i.value), &j); j.value; hash_next(&j)) {
+        if (prop_kind(j.value) != PROP_CODEL &&
+            prop_kind(j.value) != PROP_VALIDATE)
+          continue;
+        codel = prop_codel(j.value);
+        if (!strcmp(name, codel_name(codel))) return codel;
+      }
+    }
+  }
+
+  return NULL;
 }
 
 

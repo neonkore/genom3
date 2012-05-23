@@ -97,23 +97,46 @@ extern "C" {
 #endif
 
   genom_weak_alias(genom_port_open_stub)
-  int	genom_port_open(struct genom_port_handle *h, const char *port,
-		const char *path);
+  int	genom_port_open(struct genom_port_handle *h);
+  genom_weak_alias(genom_port_set_open_stub)
+  int	genom_port_set_open(struct sequence_genom_port_handle *hs,
+		uint32_t index, const char *path);
   genom_weak_alias(genom_port_close_stub)
   int	genom_port_close(struct genom_port_handle *h);
+  genom_weak_alias(genom_port_set_close_stub)
+  int	genom_port_set_close(struct sequence_genom_port_handle *hs,
+		uint32_t index);
   genom_weak_alias(genom_port_status_stub)
   int	genom_port_status(struct genom_port_handle *h);
+  genom_weak_alias(genom_port_set_status_stub)
+  int	genom_port_set_status(struct sequence_genom_port_handle *hs,
+		uint32_t index);
 
   genom_weak_alias(genom_port_rdlock_stub)
   const void *	genom_port_rdlock(const struct genom_port_handle *h);
+  genom_weak_alias(genom_port_set_rdlock_stub)
+  const void *	genom_port_set_rdlock(
+			const struct sequence_genom_port_handle *hs,
+			uint32_t index);
   genom_weak_alias(genom_port_wrlock_stub)
   void *	genom_port_wrlock(const struct genom_port_handle *h);
+  genom_weak_alias(genom_port_set_wrlock_stub)
+  void *	genom_port_set_wrlock(
+			const struct sequence_genom_port_handle *hs,
+			uint32_t index);
   genom_weak_alias(genom_port_unlock_stub)
   int		genom_port_unlock(const struct genom_port_handle *h);
+  genom_weak_alias(genom_port_set_unlock_stub)
+  int		genom_port_set_unlock(
+			const struct sequence_genom_port_handle *hs,
+			uint32_t index);
 
   genom_weak_alias(genom_port_poll_stub)
   int	genom_port_poll(struct genom_port_pollhandle *hs, int nfds,
 		int timeout);
+  genom_weak_alias(genom_port_set_poll_stub)
+  int	genom_port_set_poll(struct sequence_genom_port_handle *hs,
+		uint32_t index, int nfds, int timeout);
 
 #ifdef __cplusplus
 }
@@ -129,8 +152,14 @@ extern "C" {
 #endif
 
   static int
-  genom_port_open_stub(struct genom_port_handle *h, const char *port,
-                       const char *path)
+  genom_port_open_stub(struct genom_port_handle *h)
+  {
+    return ENXIO;
+  }
+
+  static int
+  genom_port_set_open_stub(struct sequence_genom_port_handle *hs,
+                           uint32_t index, const char *path)
   {
     return ENXIO;
   }
@@ -142,7 +171,21 @@ extern "C" {
   }
 
   static int
+  genom_port_set_close_stub(struct sequence_genom_port_handle *hs,
+                            uint32_t index)
+  {
+    return ENXIO;
+  }
+
+  static int
   genom_port_status_stub(struct genom_port_handle *h)
+  {
+    return GENOM_PORT_CLOSED;
+  }
+
+  static int
+  genom_port_set_status_stub(struct sequence_genom_port_handle *hs,
+                             uint32_t index)
   {
     return GENOM_PORT_CLOSED;
   }
@@ -153,8 +196,22 @@ extern "C" {
     return NULL;
   }
 
+  static const void *
+  genom_port_set_rdlock_stub(const struct sequence_genom_port_handle *hs,
+                             uint32_t index)
+  {
+    return NULL;
+  }
+
   static void *
   genom_port_wrlock_stub(const struct genom_port_handle *h)
+  {
+    return NULL;
+  }
+
+  static void *
+  genom_port_set_wrlock_stub(const struct sequence_genom_port_handle *hs,
+                             uint32_t index)
   {
     return NULL;
   }
@@ -166,8 +223,22 @@ extern "C" {
   }
 
   static int
+  genom_port_set_unlock_stub(const struct sequence_genom_port_handle *hs,
+                             uint32_t index)
+  {
+    return ENXIO;
+  }
+
+  static int
   genom_port_poll_stub(struct genom_port_pollhandle *hs, int nfds,
                        int timeout)
+  {
+    return ENXIO;
+  }
+
+  static int
+  genom_port_set_poll_stub(struct sequence_genom_port_handle *hs,
+                           uint32_t index, int nfds, int timeout)
   {
     return ENXIO;
   }

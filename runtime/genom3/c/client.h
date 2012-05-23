@@ -21,6 +21,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define GENOM_CLIENT_DLSYM		"genom_client_info"
+
 enum { genom_client_protocol = 20120523 };
 
 typedef struct genom_client *genom_client;

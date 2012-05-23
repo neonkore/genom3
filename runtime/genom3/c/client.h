@@ -21,6 +21,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+enum { genom_client_protocol = 20120523 };
+
 typedef struct genom_client *genom_client;
 
 typedef void (*genom_request_cb)(
@@ -32,7 +34,7 @@ typedef int (*genom_request_sendfn)(
   int *activity);
 
 typedef int (*genom_port_readfn)(genom_client h, void *data);
-typedef int (*genom_port_handle_readfn)(genom_client h,
+typedef int (*genom_port_set_readfn)(genom_client h,
   const char *name, void *data);
 
 typedef void (*genom_initfn)(void *data);
@@ -56,21 +58,22 @@ struct genom_request_info {
 };
 
 struct genom_port_info {
-  unsigned int dynamic;
   const char *name;
   const char *data;
   const char *meta;
   genom_initfn init_data;
   genom_finifn fini_data;
   genom_json_printfn json_print;
+  unsigned int regular;
   union {
-    genom_port_readfn s;
-    genom_port_handle_readfn d;
+    genom_port_readfn regular;
+    genom_port_set_readfn set;
   } read;
   size_t data_size;
 };
 
 struct genom_client_info {
+  const uint32_t protocol;
   const char *name;
 
   genom_client (*init)(int argc, char *argv[]);

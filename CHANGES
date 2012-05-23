@@ -1,6 +1,29 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2012 LAAS/CNRS
 
+			    Changes in genom 2.99.11
+
+Released on May 29th, 2012
+
+ . Defined a generic genom.gen that defines two standard services
+   (abort_activity and connect_input) as well as a standard outport
+   (genom_state). Templates can use this to implement those standard services
+   and ports, but this is not a requirement.
+ . Updated codel port handle API by making a clear distinction between regular
+   port handles and port handles sets.
+ . Updated generic c/client.h API with better names for the two kinds of ports
+   (regular and sets). Added a protocol number to deal with future breakage of
+   this API.
+ . Added detection of conflicting codels, i.e. codels with the same name but
+   different prototypes. This is questionnable for C++ codels, but since this
+   is not supported yet ...
+ . Improved automatic merge of user code with newer version of the skeleton.
+ . Added a utility procedure in the TCL backend for computing the MD5 digest of
+   a component's interface: [$component digest].
+ . Deleted unsued and obscure [$type foreach] procedure in the TCL backend.
+ . Fixed a few bugs related to the dotgen "template" object processing.
+
+
 			    Changes in genom 2.99.10
 
 Released on April 30th, 2012

@@ -1,0 +1,51 @@
+/*
+ * Copyright (c) 2012 LAAS/CNRS
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software for any purpose
+ * with or without   fee is hereby granted, provided   that the above  copyright
+ * notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS  SOFTWARE INCLUDING ALL  IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS. IN NO EVENT SHALL THE AUTHOR  BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR  ANY DAMAGES WHATSOEVER RESULTING  FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION,   ARISING OUT OF OR IN    CONNECTION WITH THE USE   OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ *
+ *                                             Anthony Mallet on Thu May 24 2012
+ */
+
+module genom {
+  struct connect_inport {
+    string<128> inport;
+    string<128> outport;
+  };
+
+  struct state {
+    string<33> digest;
+    string<31> date;
+    string<32> version;
+  };
+};
+
+template genom;
+
+ids {
+  unsigned long abort_activity_input;
+  genom::connect_inport connect_inport_input;
+};
+
+outport<genom::state> genom_state;
+
+service abort_activity(in abort_activity_input) {
+  doc: "Abort an activity";
+};
+
+service connect_inport(in connect_inport_input) {
+  doc: "Connect two ports";
+  validate: genom_connect_validate(in connect_inport_input);
+
+  throw: no_such_inport, no_such_outport, port_io;
+};

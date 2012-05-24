@@ -70,7 +70,7 @@ static const struct dgcmd {
   { "::" DOTGEN_NS "::" GENOM_CMD "::stdout", dg_genom_stdout },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::name", dg_template_name },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::dir", dg_template_dir },
-  { "::" DOTGEN_NS "::" TEMPLATE_CMD "::sysdir", dg_template_sysdir },
+  { "::" DOTGEN_NS "::" TEMPLATE_CMD "::builtindir", dg_template_builtindir },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::tmpdir", dg_template_tmpdir },
   { "::" DOTGEN_NS "::" INPUT_CMD "::file", dg_input_file },
   { "::" DOTGEN_NS "::" INPUT_CMD "::base", dg_input_base },

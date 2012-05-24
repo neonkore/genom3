@@ -209,16 +209,16 @@ dg_template_dir(ClientData v, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/* \proc dotgen template sysdir
- * \index dotgen template sysdir
+/* \proc dotgen template builtindir
+ * \index dotgen template builtindir
  *
- * Return a path to the genom system directory.
+ * Return a path to the genom builtin templates directory.
  */
 int
-dg_template_sysdir(ClientData v, Tcl_Interp *interp, int objc,
-		   Tcl_Obj *const objv[])
+dg_template_builtindir(ClientData v, Tcl_Interp *interp, int objc,
+                       Tcl_Obj *const objv[])
 {
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.sysdir, -1));
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(TMPLDIR, -1));
   return TCL_OK;
 }
 

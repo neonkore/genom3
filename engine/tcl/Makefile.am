@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -49,6 +49,7 @@ engine_la_SOURCES=\
 	idltype.c
 
 engine_la_CPPFLAGS=	-I$(top_srcdir)/src $(TCL_INCLUDE_SPEC)
+engine_la_CPPFLAGS+=	-DTMPLDIR='"$(tmpldir)"'
 engine_la_LIBADD=	$(TCL_LIB_SPEC)
 engine_la_LDFLAGS=	-module -release $(PACKAGE_VERSION)
 

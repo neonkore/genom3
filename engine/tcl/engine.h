@@ -52,7 +52,7 @@ int	dg_template_name(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_template_dir(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
-int	dg_template_sysdir(ClientData v, Tcl_Interp *interp, int objc,
+int	dg_template_builtindir(ClientData v, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_template_tmpdir(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);

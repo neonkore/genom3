@@ -983,6 +983,16 @@ comp_applytmpl()
     }
   }
 
+  /* unlink templates now they've been applied */
+  while(clist && comp_kind(clist) == COMP_TMPL)
+    clist = clist->next;
+  if (clist)
+    for(t = clist; t->next;)
+      if (comp_kind(t->next) == COMP_TMPL)
+        t->next = t->next->next;
+      else
+        t = t->next;
+
   return e;
 }
 

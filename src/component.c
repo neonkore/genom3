@@ -981,9 +981,6 @@ comp_applytmpl()
 	xwarnx("applied template %s to component %s",
 	       comp_name(t), comp_name(c));
     }
-
-    type_destroy(comp_eventtype(t));
-    type_destroy(comp_ids(t));
   }
 
   return e;

@@ -357,7 +357,7 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   static const char *args[] = {
     [parseidx_file] = "file", [parseidx_string] = "string", NULL
   };
-  int fd;
+  int pipefd[2];
   int k, s;
   Tcl_Obj *path;
 
@@ -385,15 +385,16 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
         Tcl_IncrRefCount(path);
         Tcl_DecrRefCount(l);
       }
-      fd = open(Tcl_GetString(path), O_RDONLY);
-      if (fd < 0) {
-	Tcl_AppendResult(interp, "unable to open \"", Tcl_GetString(path),
-			 "\": ", strerror(errno), NULL);
+
+      if (pipe(pipefd) < 0) {
+        Tcl_AppendResult(interp,
+                         "cannot create a pipe to cpp:", strerror(errno), NULL);
         Tcl_DecrRefCount(path);
-	return TCL_ERROR;
+        return TCL_ERROR;
       }
-      dotgen_input(DG_INPUT_FILE, fd);
+      dotgen_input(DG_INPUT_FILE, pipefd[0]);
       curloc.file = string(Tcl_GetString(path));
+      cpp_invoke(Tcl_GetString(path), pipefd[1]);
       Tcl_DecrRefCount(path);
       break;
     }
@@ -405,9 +406,11 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   nerrors = nwarnings = 0;
   s = dotgenparse();
+  if (k == parseidx_file) {
+    if (cpp_wait()) s = 2;
+  }
   if (!s) s = dotgen_consolidate();
 
-  if (k == parseidx_file) close(fd);
   if (s || nerrors) {
     char msg[128];
     snprintf(msg, sizeof(msg),

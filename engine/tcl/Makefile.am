@@ -29,7 +29,8 @@ dist_systcl_DATA=\
 	language-tcl.tcl	\
 	engine.tcl		\
 	merge.tcl		\
-	lcs.tcl
+	lcs.tcl			\
+	md5.tcl
 
 nodist_systcl_DATA=\
 	version.tcl		\

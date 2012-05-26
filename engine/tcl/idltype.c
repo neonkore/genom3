@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -51,7 +51,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     typeidx_type, typeidx_length, typeidx_value, typeidx_valuekind,
     typeidx_members, typeidx_discriminator, typeidx_mapping,
     typeidx_declarator, typeidx_address, typeidx_deref, typeidx_argument,
-    typeidx_pass, typeidx_foreach, typeidx_native, typeidx_loc, typeidx_class
+    typeidx_pass, typeidx_digest, typeidx_foreach, typeidx_native, typeidx_loc,
+    typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
@@ -63,8 +64,9 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
     [typeidx_address] = "address", [typeidx_deref] = "dereference",
     [typeidx_argument] = "argument", [typeidx_pass] = "pass",
-    [typeidx_foreach] = "foreach", [typeidx_native] = "native",
-    [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
+    [typeidx_digest] = "digest", [typeidx_foreach] = "foreach",
+    [typeidx_native] = "native", [typeidx_loc] = "loc",
+    [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r = NULL;
@@ -247,6 +249,23 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_IncrRefCount(argv[0]);
       Tcl_AppendStringsToObj(argv[0], args[i], NULL);
       s = Tcl_EvalObjv(interp, objc, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[0]);
+      if (s != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
+      break;
+    }
+
+    case typeidx_digest: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("object", -1),
+        Tcl_NewStringObj("digest", -1),
+        objv[0],
+      };
+
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      s = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[1]);
       Tcl_DecrRefCount(argv[0]);
       if (s != TCL_OK) return TCL_ERROR;
       r = Tcl_GetObjResult(interp);

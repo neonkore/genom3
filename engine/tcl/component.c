@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -50,7 +50,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     compidx_name, compidx_doc, compidx_ids, compidx_attr, compidx_iev,
     compidx_version, compidx_lang, compidx_email, compidx_require,
     compidx_crequire, compidx_clockrate, compidx_tasks, compidx_ports,
-    compidx_services, compidx_loc, compidx_class
+    compidx_services, compidx_digest, compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
@@ -59,8 +59,8 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [compidx_email] = "email", [compidx_require] = "require",
     [compidx_crequire] = "codels-require", [compidx_clockrate] = "clock-rate",
     [compidx_tasks] = "tasks", [compidx_ports] = "ports",
-    [compidx_services] = "services", [compidx_loc] = "loc",
-    [compidx_class] = "class", NULL
+    [compidx_services] = "services", [compidx_digest] = "digest",
+    [compidx_loc] = "loc", [compidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [compidx_doc] = PROP_DOC, [compidx_version] = PROP_VERSION,
@@ -163,6 +163,23 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	Tcl_ListObjAppendElement(
 	  interp, r, Tcl_NewStringObj(service_genref(i.value), -1));
       }
+      break;
+    }
+
+    case compidx_digest: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("object", -1),
+        Tcl_NewStringObj("digest", -1),
+        objv[0]
+      };
+
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      s = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[1]);
+      Tcl_DecrRefCount(argv[0]);
+      if (s != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
       break;
     }
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -23,6 +23,89 @@
 #
 
 namespace eval object {
+
+  # --- digest -------------------------------------------------------------
+
+  # Compute a md5 hash of a genom object.
+  #
+  proc digest { object } {
+    if {[catch {$object class} class]} { error "not a genom object" }
+
+    md5::init
+    switch $class {
+      component - type { $class-digest $object }
+    }
+    return [md5::final]
+  }
+  namespace export digest
+
+
+  # --- component-digest ---------------------------------------------------
+
+  # Compute a md5 hash of the public interface of a component (must be called
+  # from digest).
+  #
+  proc component-digest { component } {
+    md5::update events
+    type-digest [$component event]
+
+    foreach p [$component ports] {
+      md5::update port
+      md5::update [$p kind]
+      md5::update [$p name]
+      type-digest [$p datatype]
+    }
+
+    foreach s [$component services] {
+      md5::update service
+      md5::update [$s name]
+      foreach p [$s parameters] {
+        md5::update [$p dir]
+        md5::update [$p name]
+        type-digest [$p type]
+      }
+    }
+  }
+
+
+  # --- type-digest --------------------------------------------------------
+
+  # Compute a md5 hash of a type (must be called from digest).
+  #
+  proc type-digest { type } {
+    switch -- [$type kind] {
+      string {
+        md5::update string
+        if {![catch {$type length} l]} {
+          md5::update $l
+        }
+      }
+
+      const - typedef - {forward struct} - {forward union} - {struct member} {
+        type-digest [$type type]
+      }
+
+      array - sequence {
+        md5::update [$type kind]
+        if {![catch { $type length } l]} {
+          md5::update $l
+        }
+        type-digest [$type type]
+      }
+
+      enum - struct - union {
+        foreach e [$type members] {
+          md5::update [$e name]
+          type-digest $e
+        }
+      }
+
+      default {
+        md5::update [$type kind]
+      }
+    }
+  }
+
 
   # --- type-iter ----------------------------------------------------------
 
@@ -212,4 +295,6 @@ namespace eval object {
         [list namespace eval object \
              [list proc $p [info args $p] [info body $p]]]
   }
+
+  namespace ensemble create
 }

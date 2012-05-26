@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -66,6 +66,7 @@ namespace eval engine {
     slave alias puts slave invokehidden puts
     slave alias dotgen dotgen
     slave alias language language
+    slave alias object object
 
 
     # --- mode -------------------------------------------------------------

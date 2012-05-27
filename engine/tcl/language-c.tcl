@@ -43,47 +43,6 @@ namespace eval language::c {
     }
 
 
-    # --- iter -------------------------------------------------------------
-
-    # Return a C loop construct for 'type'. 'part' may be set to begin, end or
-    # var.
-    #
-    proc iter { type part {level 0} {max {}} } {
-      switch -- $part {
-        begin {
-          set v [iter $type var $level]
-          if {[llength $max] == 0} {
-            if {[catch {format "$v < [$type length]"} max]} {
-              set max {}
-            }
-          } else {
-            set max "$v < $max"
-          }
-          switch -- [$type kind] {
-            {array} - {sequence} {
-              lappend code "\{" ++ "unsigned int ${v};"
-              lappend code "for(${v} = 0; ${max}; ${v}++) \{" ++
-            }
-
-            default {
-              template fatal "type '[$type kind]' cannot be iterated"
-            }
-          }
-        }
-
-        end {
-          lappend code -- "\}" -- "\}"
-        }
-
-        var {
-          lappend code "_genomi${level}"
-        }
-      }
-
-      return $code
-    }
-
-
     # --- mapping ----------------------------------------------------------
 
     # Return the C mapping of type.

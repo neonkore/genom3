@@ -24,18 +24,6 @@
 
 namespace eval language {
 
-  # --- iter ---------------------------------------------------------------
-
-  # Return a loop construct for 'type'. 'part' may be set to begin, end or
-  # var.
-  #
-  proc iter { type part {level 0} {max {}} } {
-    variable current
-    return [${current}::iter $type $part $level $max]
-  }
-  slave alias language::iter language::iter
-
-
   # --- mapping ------------------------------------------------------------
 
   # \proc language mapping ?{\em type}?

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2011 LAAS/CNRS
+# Copyright (c) 2009-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -30,7 +30,6 @@ if WITH_TCL
   TESTS+=	tcl-engine/type.test
   TESTS+=	tcl-engine/service.test
   TESTS+=	tcl-engine/component.test
-  TESTS+=	tcl-engine/object.test
   TESTS+=	tcl-engine/template.test
   TESTS+=	tcl-engine/language.test
   TESTS+=	tcl-engine/language-c.test

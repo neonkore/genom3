@@ -51,8 +51,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     typeidx_type, typeidx_length, typeidx_value, typeidx_valuekind,
     typeidx_members, typeidx_discriminator, typeidx_mapping,
     typeidx_declarator, typeidx_address, typeidx_deref, typeidx_argument,
-    typeidx_pass, typeidx_digest, typeidx_foreach, typeidx_native, typeidx_loc,
-    typeidx_class
+    typeidx_pass, typeidx_digest, typeidx_native, typeidx_loc, typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
@@ -64,9 +63,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
     [typeidx_address] = "address", [typeidx_deref] = "dereference",
     [typeidx_argument] = "argument", [typeidx_pass] = "pass",
-    [typeidx_digest] = "digest", [typeidx_foreach] = "foreach",
-    [typeidx_native] = "native", [typeidx_loc] = "loc",
-    [typeidx_class] = "class", NULL
+    [typeidx_digest] = "digest", [typeidx_native] = "native",
+    [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r = NULL;
@@ -102,12 +100,6 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     /* 'argument' and 'pass' subcommands can have two additional parameters */
     if (objc < 3 || objc > 4) {
       Tcl_WrongNumArgs(interp, 2, objv, "kind ?var?");
-      return TCL_ERROR;
-    }
-  } else if (i == typeidx_foreach) {
-    /* 'foreach' subcommand has two additional parameters */
-    if (objc != 4 && objc != 6) {
-      Tcl_WrongNumArgs(interp, 2, objv, "vars ?with prefix? body");
       return TCL_ERROR;
     }
   } else {
@@ -266,24 +258,6 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_IncrRefCount(argv[1]);
       s = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
       Tcl_DecrRefCount(argv[1]);
-      Tcl_DecrRefCount(argv[0]);
-      if (s != TCL_OK) return TCL_ERROR;
-      r = Tcl_GetObjResult(interp);
-      break;
-    }
-
-    case typeidx_foreach: {
-      Tcl_Obj *argv[] = {
-        Tcl_NewStringObj("object::type-foreach", -1),
-        objv[0],
-        objv[2],
-        objv[3],
-        objc==6?objv[4]:NULL,
-        objc==6?objv[5]:NULL,
-      };
-
-      Tcl_IncrRefCount(argv[0]);
-      s = Tcl_EvalObjv(interp, objc, argv, 0);
       Tcl_DecrRefCount(argv[0]);
       if (s != TCL_OK) return TCL_ERROR;
       r = Tcl_GetObjResult(interp);

@@ -55,9 +55,9 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
                    case ${TCL_VERSION} in
                         8.[[5-9]]*)
                                 ac_cv_c_tclconfig="${TCL_BIN_DIR}"
-                                break;;
+                                ;;
                         *)
-                        AC_MSG_ERROR([rejecting version ${TCL_VERSION}])
+                        AC_MSG_ERROR([rejecting version ${TCL_VERSION} (need 8.5+)])
                    esac
 		else
 		    AC_MSG_ERROR([${with_tclconfig} directory doesn't contain tclConfig.sh])
@@ -78,9 +78,9 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
                         case ${TCL_VERSION} in
                              8.[[5-9]]*)
                                 ac_cv_c_tclconfig="${TCL_BIN_DIR}"
-                                break;;
+                                ;;
                              *)
-                                AC_MSG_WARN([rejecting version ${TCL_VERSION}])
+                                AC_MSG_WARN([rejecting version ${TCL_VERSION} (need 8.5+)])
                                 AC_MSG_CHECKING([for Tcl configuration]);;
                         esac
 		    fi
@@ -107,7 +107,7 @@ AC_DEFUN([SC_PATH_TCLCONFIG], [
                                 ac_cv_c_tclconfig="${TCL_BIN_DIR}"
                                 break;;
                              *)
-                                AC_MSG_WARN([rejecting version ${TCL_VERSION}])
+                                AC_MSG_WARN([rejecting version ${TCL_VERSION} (need 8.5+)])
                                 AC_MSG_CHECKING([for Tcl configuration]);;
                         esac
 		    fi

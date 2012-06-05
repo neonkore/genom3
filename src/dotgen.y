@@ -96,7 +96,8 @@
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 %token <s>	ASYNC
 
-%type <i>	start spec idl_statements statement idl_statement genomstatement
+%type <i>	start spec statement
+%type <i>	idl_statements idl_statement genom_statement
 
 %type <i>	template component ids attribute port task service
 %type <pkind>	port_dir port_kind port_array
@@ -147,16 +148,20 @@
  * @cindex @code{dotgen}, specification
  *
  * A dotgen specification consists of one or more statements. Statements are
- * either IDL statements, @genom{} statements or @command{cpp} line
- * directives. The syntax is:
+ * either @genom{} statements, IDL statements or @command{cpp} directives
+ * (@pxref{Preprocessing}). The syntax is:
  *
  * @ruleinclude start
  * @ruleinclude spec
  * @ruleinclude statement
+ * @sp 1
+ * @ruleinclude genom_statement
  * @ruleinclude idl_statement
- * @ruleinclude genomstatement
  *
  * Definitions are named by the mean of identifiers, @pxref{Reserved keywords}.
+ *
+ * A @genom{} statement defines components (@pxref{Component declaration}),
+ * communication ports, services and execution contexts called tasks.
  *
  * An @acronym{IDL} statement defines types (@pxref{Type declaration}),
  * constants (@pxref{Constant declaration}) or @acronym{IDL} modules containing
@@ -166,15 +171,22 @@
  * @cite{CORBA specification, Object Management Group, version 3.1. Part I:
  * CORBA interfaces}).  Note that this subset of the dogten grammar is not in
  * any manner tied to OMG IDL and may diverge from future OMG specifications.
- *
- * A @genom{} statement defines components, communication ports, services and
- * execution contexts called tasks.
  */
 start: /* empty */ { $$ = 0; } | spec;
 
 spec: statement | spec statement;
 
-statement: idl_statement | genomstatement;
+statement: genom_statement | idl_statement;
+
+genom_statement:
+  template ';'
+  | component
+  | ids ';'
+  | attribute ';'
+  | port ';'
+  | task ';'
+  | service ';'
+;
 
 idl_statement:
   module
@@ -198,34 +210,8 @@ idl_statement:
   }
 ;
 
-genomstatement:
-  template ';'
-  | component
-  | ids ';'
-  | attribute ';'
-  | port ';'
-  | task ';'
-  | service ';'
-;
-
 
 /* --- GenoM objects ------------------------------------------------------- */
-
-template:
-  TEMPLATE identifier '{' properties '}'
-  {
-    if (!$2 || !$4) {
-      if ($2) parserror(@1, "dropped '%s' component", $2);
-      if ($4) hash_destroy($4, 1);
-      break;
-    }
-    if (!tmpl_create(@1, $2, $4)) YYABORT;
-  }
-  | TEMPLATE identifier
-  {
-    if (!tmpl_create(@1, $2, NULL)) YYABORT;
-  }
-;
 
 /*/ @node Component declaration
  * @section Component declaration
@@ -245,6 +231,22 @@ component:
   {
     if (!$2) { parserror(@1, "dropped component"); break; }
     if (!comp_create(@1, $2, $3)) YYABORT;
+  }
+;
+
+template:
+  TEMPLATE identifier '{' properties '}'
+  {
+    if (!$2 || !$4) {
+      if ($2) parserror(@1, "dropped '%s' component", $2);
+      if ($4) hash_destroy($4, 1);
+      break;
+    }
+    if (!tmpl_create(@1, $2, $4)) YYABORT;
+  }
+  | TEMPLATE identifier
+  {
+    if (!tmpl_create(@1, $2, NULL)) YYABORT;
   }
 ;
 

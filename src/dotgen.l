@@ -71,21 +71,25 @@ chartext	([^\'])|(\\.)
   *yylloc_param = curloc;
 %}
 
- /*/ @node Line directives
-  * @section Line directives
+ /*/ @node #line
+  * @section @code{#line} directives
   *
-  * Line directives are normally not used.  They are inserted by @command{cpp},
-  * as a result of preprocessing the input file. They can be used mostly to
-  * achieve special effects on error reporting or similar.
+  * Line directives are inserted by the @code{C} preprocessor. They inform the
+  * @genom{} parser about the line number and file name where each token was
+  * defined. Line directives can also be inserted manually to achieve special
+  * effect on error reporting or similar.
   *
-  * A line directive starts with the @code{#} sign, followed by the  current
-  * line number and file name of the source file,  optionally  followed by  a
-  * numeric flag. The  flag  is  never used  by @genom{}.  Its meaning depends
-  * on the  C preprocessor  used.
+  * A line directive starts with the @code{#line} token, followed by the
+  * current line number, the file name of the source file and an optional
+  * numeric flag. The numeric flag is never used by @genom{}. Its meaning
+  * depends on the @code{C} preprocessor used.
   *
-  * The file  name and  line number  replace the current  value kept  internally
-  * by @genom{}  and are  used in  error reporting  messages as  well as  a  few
-  * other places.
+  * @example
+  * @      #line linenum [ "filename" [flag] ]
+  * @end example
+  *
+  * The file name and line number replace the current location information.
+  * Line number is automatically incremented after each @code{\n}.
   */
 ^[ \t]*#[ \t]*[0-9]+[ \t]+\"{stringtext}*\"[ \t]+[0-9]+[ \t]*\n {
   dotgen_parsehash(yytext, yylloc);
@@ -99,12 +103,45 @@ chartext	([^\'])|(\\.)
   dotgen_parsehash(yytext, yylloc);
 }
 
- /* pragmas */
+ /*/ @node #pragma require
+  * @section @code{#pragma require} directives
+  * @cindex @code{#pragma}
+  * @cindex @code{#pragma require}
+  * @cindex @code{pkg-config}
+  * @cindex @env{PKG_CONFIG}
+  * @cindex dependency
+  * @cindex require
+  * @cindex package, dependency
+  *
+  * @code{#pragma require} is recognized by @emph{both} the @code{genom-pcpp}
+  * preprocessor and @genom{}. This can be used to indicate an external
+  * dependency on a package using the @code{pkg-config} utility (see
+  * @uref{http://www.freedesktop.org/wiki/Software/pkg-config}).
+  *
+  * @example
+  * @      #pragma require "package [ >= version ]"
+  * @end example
+  *
+  * @code{#pragma require} accepts a string argument in the form @code{package
+  * [>= version]}. @code{genom-pcpp} interprets it by running @code{pkg-config
+  * --cflags} on the string argument. It then adds the resulting @code{-I} and
+  * @code{-D} flags as if they had been passed on the command line
+  * (@pxref{General options}). Note that the flags are added @emph{at the
+  * current processing location}, so they do not influence already preprocessed
+  * input. The @code{pkg-config} utility is found in @env{PATH}, or via the
+  * @env{PKG_CONFIG} environment variable if defined (@pxref{Environment
+  * variables}).
+  *
+  * @genom{} also recognizes @code{#pragma require}. It handles it by adding
+  * the string argument to the @code{require:} property of @emph{all} the
+  * components defined in a specification (@pxref{Objects properties}).
+  */
 ^[ \t]*#[ \t]*pragma[ \t]+require[ \t].*\n {
   dotgen_parsepragmarequire(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;
 }
 
+ /* pragmas */
 ^[ \t]*#[ \t]*pragma[ \t]+native[ \t].*\n {
   dotgen_parsepragmanative(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;

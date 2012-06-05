@@ -106,9 +106,10 @@ genom3.1: roff/genom.mdoc
 		-e 's/@version@/$(PACKAGE_VERSION)/'			\
 		-e 's|@[p]refix@|$(prefix)|'				\
 		-e 's|@[d]ocdir@|$(docdir)|'				\
+		-e 's|@[i]nfodir@|$(infodir)|'				\
 		-e 's|@[t]mpldir@|$(tmpldir)|'				\
 		-e 's|@[s]itetmpldir@|$(sitetmpldir)|'			\
-		-e 's|@[C]PP@|$(CPP)|'					\
+		-e 's|@[C]PP@|$(libexecdir)/genom-pcpp|'		\
 		-e 's/[ 	]*$$//'
 
 genom-options.mdoc: Makefile $(srcdir)/optgen.awk

@@ -206,11 +206,17 @@ options will only affect the template behaviour.
 \env CPP
      C preprocessor program
 
-     Define the C preprocessor program to use. The default depends on the value
-     configured during the genom build process, but it is most often
-     \tt gcc -E -xc\rm on Linux systems.
+     Define the C preprocessor program to use. The default is \tt
+     libexec/genom-pcpp\rm. The \tt CPP\rm program must recognize \tt -I\rm and
+     \tt -D\rm arguments.
 
-     The \tt CPP\rmprogram must recognize \tt -I\rm and \tt -D\rm arguments.
+\env PKG_CONFIG
+     pkg-config utility
+
+     Define the path to the \tt pkg-config(1)\rm program.\tt pkg-config(1)\rm
+     may be spawned by \tt genom-pcpp\rm for handling the \tt #pragma
+     require\rm directive. The default is to search in the \tt PATH\rm
+     variable.
 
 \env GENOM_TMPL_PATH
      template search path

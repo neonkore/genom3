@@ -46,7 +46,7 @@ PERFORMANCE OF THIS SOFTWARE.
 @
 @
 @quotation
-@code{pcpp} is copyright @copyright{} 2004,2010 Anders Magnusson
+@code{genom-pcpp} is copyright @copyright{} 2004,2010 Anders Magnusson
 (@email{ragge@@ludd.luth.se}).
 All rights reserved.
 

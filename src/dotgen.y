@@ -345,6 +345,15 @@ service:
 
 /* --- GenoM object properties --------------------------------------------- */
 
+/*/ @node Objects properties
+ * @section @genom{3} object properties
+ * @cindex properties
+ * @cindex object, properties
+ *
+ * @ruleinclude attr_list
+ * @ruleinclude attr
+ */
+
 attr_list:
   attr ';'
   {

@@ -100,8 +100,9 @@
 
 %type <i>	template component ids attribute port task service
 %type <pkind>	port_dir port_kind port_array
-%type <prop>	attr
-%type <hash>	attr_list param_list inited_ids_member_list
+%type <prop>	component_property task_property service_property fsm_property
+%type <prop>	property
+%type <hash>	opt_properties properties param_list inited_ids_member_list
 %type <initer>	initializer_value initializer initializer_list
 %type <codel>	validate codel
 %type <param>	param
@@ -199,7 +200,7 @@ idl_statement:
 
 genomstatement:
   template ';'
-  | component ';'
+  | component
   | ids ';'
   | attribute ';'
   | port ';'
@@ -211,7 +212,7 @@ genomstatement:
 /* --- GenoM objects ------------------------------------------------------- */
 
 template:
-  TEMPLATE identifier '{' attr_list '}'
+  TEMPLATE identifier '{' properties '}'
   {
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' component", $2);
@@ -226,19 +227,24 @@ template:
   }
 ;
 
+/*/ @node Component declaration
+ * @section Component declaration
+ * @cindex component, declaration
+ * @cindex declaration, component
+ *
+ * @ruleinclude component
+ * @sp 1
+ * @ruleinclude opt_properties
+ * @ruleinclude properties
+ * @ruleinclude property
+ * @sp 1
+ * @ruleinclude component_property
+ */
 component:
-  COMPONENT identifier '{' attr_list '}'
+  COMPONENT identifier opt_properties ';'
   {
-    if (!$2 || !$4) {
-      if ($2) parserror(@1, "dropped '%s' component", $2);
-      if ($4) hash_destroy($4, 1);
-      break;
-    }
-    if (!comp_create(@1, $2, $4)) YYABORT;
-  }
-  | COMPONENT identifier
-  {
-    if (!comp_create(@1, $2, NULL)) YYABORT;
+    if (!$2) { parserror(@1, "dropped component"); break; }
+    if (!comp_create(@1, $2, $3)) YYABORT;
   }
 ;
 
@@ -294,7 +300,7 @@ attribute:
 ;
 
 task:
-  TASK identifier '{' attr_list '}'
+  TASK identifier '{' properties '}'
   {
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' task", $2);
@@ -314,7 +320,7 @@ task:
 ;
 
 service:
-  SERVICE identifier '(' param_list ')' '{' attr_list '}'
+  SERVICE identifier '(' param_list ')' '{' properties '}'
   {
     if (!$2 || !$4 || !$7) {
       if ($2) parserror(@1, "dropped '%s' service", $2);
@@ -345,35 +351,28 @@ service:
 
 /* --- GenoM object properties --------------------------------------------- */
 
-/*/ @node Objects properties
- * @section @genom{3} object properties
- * @cindex properties
- * @cindex object, properties
- *
- * @ruleinclude attr_list
- * @ruleinclude attr
- */
+opt_properties:
+  /* empty */
+  {
+    $$ = NULL;
+  }
+  | '{' properties '}'
+  {
+    $$ = $2;
+  }
+;
 
-attr_list:
-  attr ';'
+properties:
+  /* empty */
   {
     $$ = hash_create("property list", 5);
-    if (!$$ || !$1) break;
-
-    if (hash_insert($$, prop_name($1), $1, (hrelease_f)prop_destroy))
-      prop_destroy($1);
   }
-  | attr_list attr ';'
+  | properties property ';'
   {
     $$ = $1;
     if (!$$ || !$2) break;
     if (hash_insert($$, prop_name($2), $2, (hrelease_f)prop_destroy)) {
-      if (errno == EEXIST) {
-        if (prop_merge($1, $2)) {
-          parserror(@2, "dropped %s declaration", prop_name($2));
-          prop_destroy($2);
-        }
-      } else {
+      if (errno != EEXIST || prop_merge($1, $2)) {
         parserror(@2, "dropped %s declaration", prop_name($2));
         prop_destroy($2);
       }
@@ -381,7 +380,9 @@ attr_list:
   }
 ;
 
-attr:
+property: component_property | task_property | service_property | fsm_property;
+
+component_property:
   DOC ':' string_literals
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
@@ -420,7 +421,10 @@ attr:
     }
     $$ = prop_newvalue(@1, PROP_CLOCKRATE, $3);
   }
-  | PERIOD ':' const_expr time_unit
+;
+
+task_property:
+  PERIOD ':' const_expr time_unit
   {
     if (const_binaryop(&$3, '*', $4)) {
       parserror(@3, "invalid numeric constant");
@@ -452,11 +456,10 @@ attr:
     }
     $$ = prop_newvalue(@1, PROP_STACK, $3);
   }
-  | THROWS ':' event_list
-  {
-    $$ = $3 ? prop_newhash(@1, PROP_THROWS, $3) : NULL;
-  }
-  | TASK ':' identifier
+;
+
+service_property:
+  TASK ':' identifier
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newtask(@1, $3);
@@ -479,6 +482,13 @@ attr:
   | VALIDATE ':' validate
   {
     $$ = $3 ? prop_newcodel(@1, PROP_VALIDATE, $3) : NULL;
+  }
+;
+
+fsm_property:
+  THROWS ':' event_list
+  {
+    $$ = $3 ? prop_newhash(@1, PROP_THROWS, $3) : NULL;
   }
   | ASYNC CODEL codel
   {

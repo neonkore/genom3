@@ -64,7 +64,7 @@ and their meaning.
 @menu
 * Preprocessing::	@htmd Inclusion of definitions from other specifications
 * Specification::	@htmd Basic elements of a @genom{3} specification
-* Objects properties::	@htmd @genom{3} object properties
+* Component declaration::@htmd Component declaration
 * Module declaration::	@htmd Scope type definitions
 * Constant declaration::@htmd Define constant values
 * Type declaration::	@htmd Naming new types

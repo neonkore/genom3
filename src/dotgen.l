@@ -134,7 +134,7 @@ chartext	([^\'])|(\\.)
   *
   * @genom{} also recognizes @code{#pragma require}. It handles it by adding
   * the string argument to the @code{require:} property of @emph{all} the
-  * components defined in a specification (@pxref{Objects properties}).
+  * components defined in a specification (@pxref{Component declaration}).
   */
 ^[ \t]*#[ \t]*pragma[ \t]+require[ \t].*\n {
   dotgen_parsepragmarequire(yytext, yylloc);

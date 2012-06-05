@@ -96,7 +96,7 @@
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 %token <s>	ASYNC
 
-%type <i>	start spec statement
+%type <i>	specification statement
 %type <i>	idl_statements idl_statement genom_statement
 
 %type <i>	template component ids attribute port task service
@@ -148,11 +148,11 @@
  * @cindex @code{dotgen}, specification
  *
  * A dotgen specification consists of one or more statements. Statements are
- * either @genom{} statements, IDL statements or @command{cpp} directives
- * (@pxref{Preprocessing}). The syntax is:
+ * either @genom{} statements, IDL statements. @command{cpp} directives
+ * (@pxref{Preprocessing}) are handled at the lexical level and do not
+ * interfere with the specification grammar.
  *
- * @ruleinclude start
- * @ruleinclude spec
+ * @ruleinclude specification
  * @ruleinclude statement
  * @sp 1
  * @ruleinclude genom_statement
@@ -167,14 +167,13 @@
  * constants (@pxref{Constant declaration}) or @acronym{IDL} modules containing
  * types and constants (@pxref{Module declaration}).  The syntax follows
  * closely the subset the @acronym{OMG} @acronym{IDL} specification
- * corresponding to type and constants definitions (see Part I, chapter 7 of
+ * corresponding to type and constants definitions (see Chapter 7 of
  * @cite{CORBA specification, Object Management Group, version 3.1. Part I:
  * CORBA interfaces}).  Note that this subset of the dogten grammar is not in
  * any manner tied to OMG IDL and may diverge from future OMG specifications.
  */
-start: /* empty */ { $$ = 0; } | spec;
 
-spec: statement | spec statement;
+specification: /* empty */ { $$ = 0; } | specification statement;
 
 statement: genom_statement | idl_statement;
 

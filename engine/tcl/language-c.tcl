@@ -284,20 +284,17 @@ namespace eval language::c {
 	set arg [list]
 	foreach p [$codel parameters] {
 	    set a ""
-	    switch -- [$p dir] {
-		"in" {
-		  append a [[$p type] argument value [$p name]]
-		}
-		"inport" {
-                  if {"handle" in [[$p port] kind]} {
-                    append a [[$p type] argument reference [$p name]]
-                  } else {
-                    append a [[$p type] argument value [$p name]]
-                  }
-		}
-		default	{
-		  append a [[$p type] argument reference [$p name]]
-		}
+            switch -- [$p dir] {
+              "in" {
+                if {[$p src] == "port" && "handle" in [[$p port] kind]} {
+                  append a [[$p type] argument reference [$p name]]
+                } else {
+                  append a [[$p type] argument value [$p name]]
+                }
+              }
+              default	{
+                append a [[$p type] argument reference [$p name]]
+              }
 	    }
 	    lappend arg $a
 	}

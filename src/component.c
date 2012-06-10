@@ -642,11 +642,11 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
       case PROP_VALIDATE:
 	c = prop_codel(i.value);
 	for(hash_first(codel_params(c), &j); j.current; hash_next(&j)) {
-	  switch(param_dir(j.value)) {
-	    case P_NODIR: case P_IN: case P_OUT: case P_INOUT:
-	      break;
+	  switch(param_src(j.value)) {
+            case P_NOSRC: assert(0);
+            case P_IDS: case P_SERVICE: break;
 
-	    case P_INPORT: case P_OUTPORT:
+            case P_PORT:
 	      parserror(prop_loc(j.value),
 			"port %s is not allowed in validate codel %s",
 			port_name(param_port(j.value)), codel_name(c));
@@ -678,15 +678,9 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   /* check parameters */
   for(hash_first(params, &i); i.current; hash_next(&i)) {
-    switch(param_dir(i.value)) {
-      case P_NODIR: case P_IN: case P_OUT: case P_INOUT:
-	break;
-      case P_INPORT: case P_OUTPORT:
-	parserror(param_loc(i.value),
-		  "%s parameter %s is not allowed in service %s",
-		  param_strdir(param_dir(i.value)), param_name(i.value),
-		  param_dir(i.value) == P_INPORT ? "input":"output");
-	e = 1; break;
+    switch(param_src(i.value)) {
+      case P_NOSRC: case P_IDS: case P_PORT: assert(0);
+      case P_SERVICE: break;
     }
   }
   if (e) return NULL;

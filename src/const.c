@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -443,6 +443,33 @@ clist_append(clist_s l, cval v, int unique)
 
   i->next = e;
   return l;
+}
+
+
+/* --- clist_prepend ------------------------------------------------------- */
+
+/** Create a list element or prepend to existing
+ */
+
+clist_s
+clist_prepend(clist_s l, cval v, int unique)
+{
+  clist_s i;
+  clist_s e = malloc(sizeof(*e));
+  if (!e) {
+    warnx("memory exhausted, cannot create list");
+    return l;
+  }
+  e->v = v;
+  e->next = l;
+
+  /* filter duplicates */
+  if (unique) {
+    for(i = l; i; i = i->next)
+      if (const_equal(i->v, v)) { free(e); return l; }
+  }
+
+  return e;
 }
 
 

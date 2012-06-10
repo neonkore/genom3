@@ -32,20 +32,15 @@ module genom {
 
 template genom;
 
-ids {
-  unsigned long abort_activity_input;
-  genom::connect_inport connect_inport_input;
-};
+port out genom::state genom_state;
 
-outport<genom::state> genom_state;
-
-service abort_activity(in abort_activity_input) {
+service abort_activity(in unsigned long activity) {
   doc: "Abort an activity";
 };
 
-service connect_inport(in connect_inport_input) {
+service connect_inport(in genom::connect_inport connect) {
   doc: "Connect two ports";
-  validate: genom_connect_validate(in connect_inport_input);
+  validate: genom_connect_validate(in connect);
 
   throw: no_such_inport, no_such_outport, port_io;
 };

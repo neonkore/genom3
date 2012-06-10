@@ -583,6 +583,10 @@ engine_genparam(Tcl_Interp *interp, Tcl_Interp *slave, param_s p)
   } else
     printf("exported parameter %s\n", param_name(p));
 
+  /* types */
+  s = engine_gentype(interp, slave, param_type(p));
+  if (s) return s;
+
   /* initializer */
   i = param_initer(p);
   if (i) {

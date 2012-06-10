@@ -10,10 +10,9 @@ testing '[$service parameter]'
 
 cat >run.gen <<EOF
 component c;
-ids { struct ss { long a; } a[2]; };
-service s(in a, inout a[1]::b);
+service s(in long a, inout long b[2]);
 EOF
-run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
 foreach p [[[dotgen component] service] parameter] {
   puts -nonewline "[$p name] "
 }

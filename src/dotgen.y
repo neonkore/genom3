@@ -56,6 +56,7 @@
   char		c;
   char *	s;
   cval		v;
+  psrc		psrc;
   pdir		pdir;
   portkind	pkind;
   clist_s	vlist;
@@ -90,8 +91,8 @@
 %token <s>	string_literal IDENTIFIER
 
 %token <s>	S MS US K M REAL_TIME
-%token <s>	TEMPLATE COMPONENT TASK SERVICE CODEL INPORT OUTPORT IN OUT
-%token <s>	INOUT IDS ATTRIBUTE INPUT OUTPUT DATA HANDLE VERSION LANG EMAIL
+%token <s>	TEMPLATE COMPONENT TASK SERVICE CODEL PORT IN OUT INOUT LOCAL
+%token <s>	IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG EMAIL
 %token <s>	REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 %token <s>	ASYNC
@@ -100,17 +101,17 @@
 %type <i>	idl_statements idl_statement genom_statement
 
 %type <i>	template component ids attribute port task service
-%type <pkind>	port_dir port_kind port_array
+%type <pkind>	port_dir opt_handle opt_array
 %type <prop>	component_property task_property service_property fsm_property
 %type <prop>	property
-%type <hash>	opt_properties properties param_list inited_ids_member_list
-%type <initer>	initializer_value initializer initializer_list
+%type <hash>	opt_properties properties
+%type <hash>	service_parameters codel_parameters
+%type <initer>	opt_initializer initializer_value initializer initializers
 %type <codel>	validate codel
-%type <param>	param
-%type <param>	inited_ids_member named_ids_member ids_member
-%type <param>	inited_port_member named_port_member port_member
-%type <v>	param_member
-%type <pdir>	ids_param_dir port_param_dir
+%type <param>	attribute_parameter service_parameter codel_parameter
+%type <vlist>	parameter_variable
+%type <psrc>	opt_parameter_src
+%type <pdir>	parameter_dir
 
 %type <i>	module module_body
 %type <type>	const_dcl const_type
@@ -175,16 +176,25 @@
 
 specification: /* empty */ { $$ = 0; } | specification statement;
 
-statement: genom_statement | idl_statement;
+statement:
+  genom_statement
+  | idl_statement
+  | error ';'
+  | error
+  {
+    parserror(@1, "maybe a missing ';'");
+    YYABORT;
+  }
+;
 
 genom_statement:
   template ';'
   | component
   | ids ';'
-  | attribute ';'
+  | attribute
   | port ';'
   | task ';'
-  | service ';'
+  | service
 ;
 
 idl_statement:
@@ -196,16 +206,6 @@ idl_statement:
   | type_dcl ';'
   {
     $$ = 0;
-  }
-  | error ';'
-  {
-    parserror(@1, "syntax error");
-    YYABORT;
-  }
-  | error
-  {
-    parserror(@1, "maybe a missing ';'");
-    YYABORT;
   }
 ;
 
@@ -250,26 +250,26 @@ template:
 ;
 
 port:
-  port_dir port_kind '<' type_spec '>' identifier port_array
+  PORT opt_handle port_dir type_spec identifier opt_array
   {
-    if (!$6) { parserror(@1, "dropped port"); break; }
-    if (!$4) { parserror(@1, "dropped '%s' port", $6); break; }
-    if (!port_new(@1, $1|$2|$7, $6, $4))
-      parserror(@1, "dropped '%s' port", $6);
+    if (!$5) { parserror(@1, "dropped port"); break; }
+    if (!$4) { parserror(@1, "dropped '%s' port", $5); break; }
+    if (!port_new(@1, $2|$3|$6, $5, $4))
+      parserror(@1, "dropped '%s' port", $5);
   }
 ;
 
 port_dir:
-    INPORT	{ $$ = PORT_IN; }
-  | OUTPORT	{ $$ = PORT_OUT; }
+    IN	{ $$ = PORT_IN; }
+  | OUT	{ $$ = PORT_OUT; }
 ;
 
-port_array:
+opt_array:
   /* empty */	{ $$ = PORT_STATIC; }
   | '[' ']'	{ $$ = PORT_ARRAY; }
 ;
 
-port_kind:
+opt_handle:
   /* empty */	{ $$ = PORT_DATA; }
   | HANDLE	{ $$ = PORT_HANDLE; }
 ;
@@ -283,20 +283,13 @@ ids:
     if (!comp_addids(@1, s))
       parserror(@1, "dropping ids declaration");
   }
+;
 
 attribute:
-  ATTRIBUTE inited_ids_member_list
+  ATTRIBUTE attribute_parameter ';'
   {
-    hiter i;
-
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); break; } else {
-      for (hash_first($2, &i); i.current; hash_next(&i)) {
-	param_setdir(i.value, P_INOUT);
-	if (comp_addattr(@2, i.value))
-	  parserror(@1, "dropping '%s' attribute", param_name(i.value));
-      }
-      hash_destroy($2, 0);
-    }
+    if (!$2) break;
+    if (comp_addattr(@2, $2)) param_destroy($2);
   }
 ;
 
@@ -321,31 +314,25 @@ task:
 ;
 
 service:
-  SERVICE identifier '(' param_list ')' '{' properties '}'
+  SERVICE identifier '(' service_parameters ')' opt_properties ';'
   {
-    if (!$2 || !$4 || !$7) {
-      if ($2) parserror(@1, "dropped '%s' service", $2);
-      if ($4) hash_destroy($4, 1);
-      if ($7) hash_destroy($7, 1);
-      break;
-    }
-    if (!comp_addservice(@1, $2, $4, $7)) {
-      parserror(@1, "dropped '%s' service", $2);
-      hash_destroy($4, 1);
-      hash_destroy($7, 1);
-    }
-  }
-  | SERVICE identifier '(' param_list ')'
-  {
+    param_setlocals(NULL);
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' service", $2);
       if ($4) hash_destroy($4, 1);
+      if ($6) hash_destroy($6, 1);
       break;
     }
-    if (!comp_addservice(@1, $2, $4, NULL)) {
+    if (!comp_addservice(@1, $2, $4, $6)) {
       parserror(@1, "dropped '%s' service", $2);
       hash_destroy($4, 1);
+      if ($6) hash_destroy($6, 1);
     }
+  }
+  | SERVICE identifier '(' error ')' opt_properties ';'
+  {
+    param_setlocals(NULL);
+    parserror(@1, "dropped '%s' service", $2);
   }
 ;
 
@@ -378,6 +365,10 @@ properties:
         prop_destroy($2);
       }
     }
+  }
+  | properties error ';'
+  {
+    $$ = $1;
   }
 ;
 
@@ -500,31 +491,27 @@ fsm_property:
   {
     $$ = $2 ? prop_newcodel(@1, PROP_CODEL, $2) : NULL;
   }
-  | error
-  {
-    $$ = NULL;
-  }
 ;
 
 
 /* --- codels -------------------------------------------------------------- */
 
 validate:
-  identifier '(' param_list ')'
+  identifier '(' codel_parameters ')'
   {
     $$ = codel_create(@1, $1, CODEL_SYNC, NULL, NULL, $3);
   }
 ;
 
 codel:
-  event_list ':' identifier '(' param_list ')' YIELD event_list
+  event_list ':' identifier '(' codel_parameters ')' YIELD event_list
   {
     if (!$1 || !$8) {
       parserror(@1, "dropped codel '%s'", $3); $$ = NULL; break;
     }
     $$ = codel_create(@3, $3, CODEL_SYNC, $1, $8, $5);
   }
-  | event_list ':' identifier '(' param_list ')' error
+  | event_list ':' identifier '(' codel_parameters ')' error
   {
     $$ = NULL;
     parserror(@1, "missing 'yield' values for codel %s", $3);
@@ -535,23 +522,71 @@ codel:
 
 event_list: identifier_list;
 
-param_list:
+
+/* --- parameters ---------------------------------------------------------- */
+
+attribute_parameter:
+  parameter_dir parameter_variable opt_initializer
+  {
+    if (!$2) { $$ = NULL; break; }
+    $$ = param_newids(@2, $1, NULL, $2, $3);
+  }
+;
+
+service_parameters:
+  /* empty */
+  {
+    $$ = hash_create("parameter list", 0);
+    param_setlocals($$);
+  }
+  | service_parameter
+  {
+    $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
+    if (hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
+      param_destroy($1); break;
+    }
+    param_setlocals($$);
+  }
+  | service_parameters ',' service_parameter
+  {
+    $$ = $1; if (!$3) break;
+    switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
+      case 0: break;
+      case EEXIST:
+	parserror(@3, "duplicate parameter '%s'", param_name($3));
+	/*FALLTHROUGH*/
+      default: param_destroy($3); break;
+    }
+  }
+;
+
+service_parameter:
+  parameter_dir type_spec declarator opt_initializer
+  {
+    clist_s m;
+    cval n;
+    if (!$2 || !$3) { $$ = NULL; break; }
+    if (!dcl_settype($3, $2)) { $$ = NULL; break; }
+    n.k = CST_STRING;
+    n.s = dcl_name($3);
+    m = clist_append(NULL, n, 0);
+    $$ = param_newlocal(@3, $1, NULL, m, dcl_type($3), $4);
+  }
+;
+
+codel_parameters:
   /* empty */
   {
     $$ = hash_create("parameter list", 0);
   }
-  | param
+  | codel_parameter
   {
     $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
-    switch(hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
-      case 0: break;
-      case EEXIST:
-	parserror(@1, "duplicate parameter '%s'", param_name($1));
-	/*FALLTHROUGH*/
-      default: param_destroy($1); break;
+    if (hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
+      param_destroy($1); break;
     }
   }
-  | param_list ',' param
+  | codel_parameters ',' codel_parameter
   {
     $$ = $1; if (!$3) break;
     switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
@@ -564,146 +599,69 @@ param_list:
   }
 ;
 
-param:
-  ids_param_dir inited_ids_member
+codel_parameter:
+  opt_parameter_src parameter_dir parameter_variable
   {
-    if ($2 && param_setdir($2, $1)) { $$ = NULL; break; }
-    $$ = $2;
+    $$ = param_newcodel(@3, $1, $2, NULL, $3);
   }
-  | port_param_dir inited_port_member
+  | opt_parameter_src parameter_dir parameter_variable COLONCOLON identifier
   {
-    if ($2 && param_setdir($2, $1)) { $$ = NULL; break; }
-    $$ = $2;
+    $$ = param_newcodel(@3, $1, $2, $5, $3);
   }
-;
-
-inited_ids_member_list:
-  inited_ids_member
+  | opt_parameter_src parameter_dir COLONCOLON identifier
   {
-    $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
-    switch(hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
-      case 0: break;
-      case EEXIST:
-	parserror(@1, "duplicate parameter '%s'", param_name($1));
-	/*FALLTHROUGH*/
-      default: param_destroy($1); break;
-    }
-  }
-  | inited_ids_member_list ',' inited_ids_member
-  {
-    $$ = $1; if (!$3) break;
-    switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
-      case 0: break;
-      case EEXIST:
-	parserror(@3, "duplicate parameter '%s'", param_name($3));
-	/*FALLTHROUGH*/
-      default: param_destroy($3); break;
-    }
+    $$ = param_newcodel(@3, $1, $2, $4, NULL);
   }
 ;
 
-inited_ids_member:
-  named_ids_member
-  | named_ids_member '=' initializer
-  {
-    $$ = $1; if (!$1 || !$3) break;
-    if (param_setinitv(@3, $1, $3)) { $$ = NULL; break; }
-  }
+opt_parameter_src:
+  /* empty */	{ $$ = P_NOSRC; }
+  | IDS		{ $$ = P_IDS; }
+  | SERVICE	{ $$ = P_SERVICE; }
+  | PORT	{ $$ = P_PORT; }
 ;
 
-named_ids_member:
-  ids_member
-  | ids_member COLONCOLON identifier
-  {
-    if (param_setname($1, $3)) { $$ = NULL; break; }
-    $$ = $1;
-  }
-  | COLONCOLON identifier
-  {
-    $$ = param_newids(@1, $2, NULL);
-  }
-;
-
-ids_member:
-  identifier
-  {
-    $$ = param_newids(@1, $1, $1);
-  }
-  | ids_member param_member
-  {
-    $$ = $1;
-    if ($$ && param_setmember($1, $2)) $$ = NULL;
-  }
-;
-
-inited_port_member:
-  named_port_member
-  | named_port_member '=' initializer
-  {
-    $$ = $1; if (!$1 || !$3) break;
-    if (param_setinitv(@3, $1, $3)) { $$ = NULL; break; }
-  }
-;
-
-named_port_member:
-  port_member
-  | port_member COLONCOLON identifier
-  {
-    if ($1 && param_setname($1, $3)) { $$ = NULL; break; }
-    $$ = $1;
-  }
-;
-
-port_member:
-  identifier
-  {
-    $$ = $1 ? param_newport(@1, $1) : NULL;
-  }
-  | port_member param_member
-  {
-    $$ = $1;
-    if ($$ && param_setmember($1, $2)) $$ = NULL;
-  }
-;
-
-param_member:
-  '.' identifier
-  {
-    $$.k = CST_STRING;
-    $$.s = $2;
-  }
-  | '[' positive_int_const ']'
-  {
-    assert($2.k == CST_UINT);
-    $$ = $2;
-  }
-;
-
-ids_param_dir:
+parameter_dir:
     IN		{ $$ = P_IN; }
   | OUT		{ $$ = P_OUT; }
   | INOUT	{ $$ = P_INOUT; }
-  | error
+;
+
+parameter_variable:
+  identifier
   {
-    parserror(@1, "expected parameter direction: "
-              "in, out, inout, inport or outport");
-    $$ = P_NODIR;
-    yyerrok;
+    cval k;
+    k.k = CST_STRING; k.s = $1;
+    $$ = clist_append(NULL, k, 0);
+  }
+  | parameter_variable '.' identifier
+  {
+    cval k;
+    k.k = CST_STRING; k.s = $3;
+    $$ = clist_append($1, k, 0);
+  }
+  | parameter_variable '[' positive_int_const ']'
+  {
+    assert($3.k == CST_UINT);
+    $$ = clist_append($1, $3, 0);
   }
 ;
 
-port_param_dir:
-    INPORT	{ $$ = P_INPORT; }
-  | OUTPORT	{ $$ = P_OUTPORT; }
+
+/* --- initializers -------------------------------------------------------- */
+
+opt_initializer:
+  /* empty */		{ $$ = NULL; }
+  | '=' initializer	{ $$ = $2; }
 ;
 
-initializer_list:
+initializers:
   /* empty */
   {
     $$ = NULL;
   }
   | initializer
-  | initializer_list ',' initializer
+  | initializers ',' initializer
   {
     $$ = $3 ? initer_append($1, $3) : $1;
   }
@@ -732,7 +690,7 @@ initializer_value:
   {
     $$ = initer_create(-1U, NULL, NULL, $1);
   }
-  | '{' initializer_list '}'
+  | '{' initializers '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     $$ = $2 ? initer_create(-1U, NULL, $2, v) : NULL;
@@ -742,7 +700,7 @@ initializer_value:
     assert($2.k == CST_UINT);
     $$ = initer_create($2.u, NULL, NULL, $5);
   }
-  | '[' positive_int_const ']' '=' '{' initializer_list '}'
+  | '[' positive_int_const ']' '=' '{' initializers '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     assert($2.k == CST_UINT);
@@ -752,7 +710,7 @@ initializer_value:
   {
     $$ = initer_create(-1U, $2, NULL, $4);
   }
-  | '.' identifier '=' '{' initializer_list '}'
+  | '.' identifier '=' '{' initializers '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     $$ = initer_create(-1U, $2, $5, v);
@@ -1668,13 +1626,7 @@ identifier:
   | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
   | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
   | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
-  | AFTER | DATA | HANDLE | INPORT | OUTPORT | IN | OUT | INOUT | ASYNC
-  | error
-  {
-    if (*dotgentext)
-      parserror(@1, "expected identifier but got '%s'", dotgentext);
-    YYABORT;
-  }
+  | AFTER | HANDLE | PORT | IN | OUT | INOUT | LOCAL | ASYNC
 ;
 
 identifier_list:

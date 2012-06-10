@@ -195,6 +195,7 @@ const char *	const_strkind(cvalkind k);
 const char *	const_strval(cval v);
 
 clist_s	clist_append(clist_s l, cval v, int unique);
+clist_s	clist_prepend(clist_s l, cval v, int unique);
 cval	clist_pop(clist_s *l);
 void	clist_destroy(clist_s l);
 int	clist_first(clist_s l, citer *i);
@@ -468,15 +469,21 @@ const char *	port_strkind(portkind k);
 /* --- codel --------------------------------------------------------------- */
 
 typedef struct initer_s *initer_s;
+
+typedef enum psrc {
+  P_NOSRC,
+
+  P_IDS,
+  P_SERVICE,
+  P_PORT
+} psrc;
+
 typedef enum pdir {
   P_NODIR,
 
   P_IN,
   P_OUT,
   P_INOUT,
-
-  P_INPORT,
-  P_OUTPORT
 } pdir;
 
 typedef enum codelkind {
@@ -494,8 +501,11 @@ task_s *	codel_task(codel_s c);
 service_s *	codel_service(codel_s c);
 void		codel_setkind(codel_s c, codelkind k);
 
+hash_s		param_locals(void);
+void		param_setlocals(hash_s h);
 tloc		param_loc(param_s p);
 const char *	param_name(param_s p);
+psrc		param_src(param_s p);
 pdir		param_dir(param_s p);
 clist_s		param_member(param_s p);
 idltype_s	param_base(param_s p);
@@ -516,18 +526,23 @@ codel_s		codel_clone(codel_s codel);
 hash_s		codel_fsmcreate(tloc l, hash_s props);
 const char *	codel_strkind(codelkind k);
 
-param_s		param_newids(tloc l, const char *name, const char *member);
-param_s		param_newport(tloc l, const char *name);
+param_s		param_newids(tloc l, pdir dir, const char *name,
+			clist_s member, initer_s initer);
+param_s		param_newlocal(tloc l, pdir dir, const char *name,
+			clist_s member, idltype_s type, initer_s initer);
+param_s		param_newport(tloc l, pdir dir, const char *name,
+			clist_s member);
+param_s		param_newcodel(tloc l, psrc src, pdir dir, const char *name,
+			clist_s member);
 param_s		param_clone(param_s param);
 void		param_destroy(param_s p);
 int		param_setname(param_s p, const char *name);
-int		param_setmember(param_s p, cval m);
 int		param_setdir(param_s p, pdir dir);
-int		param_setinitv(tloc l, param_s p, initer_s i);
 initer_s	param_typeiniter(param_s p, idltype_s t);
 
 int		param_equal(param_s p, param_s q);
 int		param_list_equal(hash_s l, hash_s m);
+const char *	param_strsrc(psrc s);
 const char *	param_strdir(pdir d);
 
 initer_s	initer_create(unsigned int index, const char *member,

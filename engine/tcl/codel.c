@@ -33,8 +33,8 @@
 
 /* --- local data ---------------------------------------------------------- */
 
-static Tcl_Obj *	param_list(Tcl_Interp *interp, codel_s c,
-				Tcl_Obj *dfilter);
+static Tcl_Obj *	param_list(Tcl_Interp *interp, codel_s c, int objc,
+				Tcl_Obj *const dfilter[]);
 
 
 /* --- codel command ------------------------------------------------------- */
@@ -68,10 +68,7 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     if (s != TCL_OK) return s;
   }
   if (i == codelidx_params) {
-    if (objc > 3) {
-      Tcl_WrongNumArgs(interp, 0, objv, "$codel parameters ?direction?");
-      return TCL_ERROR;
-    }
+    /* any number of direction filter arguments */;
   } else if (i == codelidx_signature) {
     if (objc > 4) {
       Tcl_WrongNumArgs(interp, 2, objv, "?separator? ?location?");
@@ -107,7 +104,7 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case codelidx_params:
-      r = param_list(interp, c, objc>2?objv[2]:NULL);
+      r = param_list(interp, c, objc>2?objc-2:0, objv+2);
       if (!r) return TCL_ERROR;
       break;
 
@@ -192,35 +189,56 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 /** return a Tcl list of ports
  */
 static Tcl_Obj *
-param_list(Tcl_Interp *interp, codel_s c, Tcl_Obj *dfilter)
+param_list(Tcl_Interp *interp, codel_s c, int objc, Tcl_Obj *const dfilter[])
 {
-  static const struct { char *opt; pdir d; } dirarg[] = {
-    { "in", P_IN }, { "out", P_OUT }, { "inout", P_INOUT },
-    { "inport", P_INPORT }, { "outport", P_OUTPORT },
-    { NULL }
+  enum pdiridx {
+    pdiridx_in, pdiridx_out, pdiridx_inout,
+    pdiridx_ids, pdiridx_local, pdiridx_port
   };
-
+  static const char *dirarg[] = {
+    [pdiridx_in] = "in", [pdiridx_out] = "out",
+    [pdiridx_inout] = "inout", [pdiridx_ids] = "ids",
+    [pdiridx_local] = "service", [pdiridx_port] = "port",
+    NULL
+  };
+  int e, f, d = -1, sc;
   hiter i;
-  pdir d;
-  int s, f;
-
   Tcl_Obj *r = Tcl_NewListObj(0, NULL);
 
-  if (dfilter) {
-    s = Tcl_GetIndexFromObjStruct(
-      interp, dfilter, dirarg, sizeof(dirarg[0]), "filter", 0, &f);
-    if (s != TCL_OK) return NULL;
-    d = dirarg[f].d;
-  } else
-    d = P_NODIR;
-
+  /* build filtered list of parameters */
   for(hash_first(codel_params(c), &i); i.current; hash_next(&i)) {
-    if (d == P_NODIR ||
-	param_dir(i.value) == d ||
-	(param_dir(i.value) == P_INOUT && (d == P_IN || d == P_OUT))) {
-      Tcl_ListObjAppendElement(
-	interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
+
+    /* iterate over optional direction filters */
+    f = (objc == 0);
+    for(sc = 0; !f && sc < objc; sc++) {
+      e = Tcl_GetIndexFromObj(interp, dfilter[sc], dirarg, "direction", 0, &d);
+      if (e != TCL_OK) return NULL;
+
+      switch(d) {
+        case pdiridx_in:
+          if (param_dir(i.value) == P_IN) f = 1;
+          break;
+        case pdiridx_out:
+          if (param_dir(i.value) == P_OUT) f = 1;
+          break;
+        case pdiridx_inout:
+          if (param_dir(i.value) == P_INOUT) f = 1;
+          break;
+
+        case pdiridx_ids:
+          if (param_src(i.value) == P_IDS) f = 1;
+          break;
+        case pdiridx_local:
+          if (param_src(i.value) == P_SERVICE) f = 1;
+          break;
+        case pdiridx_port:
+          if (param_src(i.value) == P_PORT) f = 1;
+          break;
+      }
     }
+    if (f)
+      Tcl_ListObjAppendElement(
+        interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
   }
 
   return r;

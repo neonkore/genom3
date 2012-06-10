@@ -74,12 +74,12 @@ ids {
     long a;
   } a[2];
 };
-service s(in a[1].a);
+service s() { validate: c(in a[1].a); };
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 lang c++
-set p [[[dotgen component] service] parameter]
+set p [[[[dotgen component] service] validate] parameter]
 puts [$p member]
 EOF
 expect out '

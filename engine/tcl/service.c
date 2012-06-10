@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010,2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -155,12 +155,14 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case serviceidx_params: {
-      static const char *dirarg[] = {
-	[P_NODIR] = "none", [P_IN] = "in", [P_OUT] = "out",
-	[P_INOUT] = "inout", [P_INPORT] = "inport", [P_OUTPORT] = "outport",
-	NULL
+      enum servicepdiridx {
+        svcpdiridx_in, svcpdiridx_out, svcpdiridx_inout
       };
-      int d = -1, sc;
+      static const char *dirarg[] = {
+        [svcpdiridx_in] = "in", [svcpdiridx_out] = "out",
+        [svcpdiridx_inout] = "inout", NULL
+      };
+      int f, d = -1, sc;
       hiter i;
 
       /* initialize output list to the empty list */
@@ -170,19 +172,26 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       for(hash_first(service_params(s), &i); i.current; hash_next(&i)) {
 
 	/* iterate over optional direction filters */
-	if (objc < 3) {
-	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
-	} else for(sc = 2; sc < objc; sc++) {
-	  e = Tcl_GetIndexFromObj(interp, objv[sc], dirarg, "direction", 0, &d);
-	  if (e != TCL_OK) return e;
+        f = (objc < 3);
+	for(sc = 2; !f && sc < objc; sc++) {
+          e = Tcl_GetIndexFromObj(interp, objv[sc], dirarg, "direction", 0, &d);
+          if (e != TCL_OK) return e;
 
-	  if (d == param_dir(i.value)) {
-	    Tcl_ListObjAppendElement(
-	      interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
-	    break;
-	  }
-	}
+          switch(d) {
+            case svcpdiridx_in:
+              if (param_dir(i.value) == P_IN) f = 1;
+              break;
+            case svcpdiridx_out:
+              if (param_dir(i.value) == P_OUT) f = 1;
+              break;
+            case svcpdiridx_inout:
+              if (param_dir(i.value) == P_INOUT) f = 1;
+              break;
+          }
+        }
+        if (f)
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
       }
       break;
     }

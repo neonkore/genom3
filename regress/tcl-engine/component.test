@@ -30,7 +30,7 @@ foreach a [[dotgen component] attribute] {
 EOF
 expect out '
 	/^0,a,inout,.a$/ {next}
-	/^1,b,inout,.b$/ {next}
-	/^2,d,inout,.d$/ {next}
+	/^1,b,in,.b$/ {next}
+	/^2,d,out,.d$/ {next}
 	{exit 2}
 '

@@ -13,7 +13,6 @@ CODEL		codel
 COLONCOLON	::
 COMPONENT	component
 CONST		const
-DATA		data
 DEFAULT		default
 DELAY		delay
 DOC		doc
@@ -31,7 +30,7 @@ IDENTIFIER	[A-Za-z_][A-Za-z0-9_]*
 IDS		ids
 IN		in
 INOUT		inout
-INPORT		inport
+LOCAL		local
 INTERRUPTS	interrupts
 K		k
 LANG		lang
@@ -41,8 +40,8 @@ MODULE		module
 MS		ms
 OCTET		octet
 OUT		out
-OUTPORT		outport
 PERIOD		period
+PORT		port
 PRIORITY	priority
 REAL_TIME	real-time
 REQUIRE		require

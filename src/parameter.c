@@ -36,10 +36,11 @@
 
 struct param_s {
   tloc loc;
+  psrc src;
   pdir dir;
   const char *name;
-  idltype_s base;	/**< base type (ids or port) */
-  clist_s member;	/**< ids or port member */
+  idltype_s base;	/**< base type (ids, port or local type) */
+  clist_s member;	/**< base type member */
   idltype_s type;	/**< member type */
 
   port_s port;		/**< in/out port (for port only) */
@@ -48,18 +49,28 @@ struct param_s {
 };
 
 tloc		param_loc(param_s p) { assert(p); return p->loc; }
+psrc		param_src(param_s p) { assert(p); return p->src; }
 pdir		param_dir(param_s p) { assert(p); return p->dir; }
 const char *	param_name(param_s p) { assert(p); return p->name; }
 clist_s		param_member(param_s p) { assert(p); return p->member; }
 idltype_s	param_base(param_s p) { assert(p); return p->base; }
 idltype_s	param_type(param_s p) { assert(p); return p->type; }
 port_s		param_port(param_s p) {
-  assert(p && (p->dir == P_INPORT || p->dir == P_OUTPORT)); return p->port;
+  assert(p && p->src == P_PORT); return p->port;
 }
 initer_s	param_initer(param_s p) { assert(p); return p->init; }
 
 
-static param_s	param_new(tloc l, const char *name, idltype_s base);
+static param_s	param_new(tloc l, psrc src, pdir dir, const char *name,
+			idltype_s base, clist_s member, initer_s initer);
+static int	param_setmember(param_s p, cval m);
+
+
+/** the active local parameters */
+static hash_s locals = NULL;
+
+hash_s	param_locals() { return locals; }
+void	param_setlocals(hash_s h) { locals = h; }
 
 
 /* --- param_new ----------------------------------------------------------- */
@@ -67,8 +78,10 @@ static param_s	param_new(tloc l, const char *name, idltype_s base);
 /** create new parameter
  */
 static param_s
-param_new(tloc l, const char *name, idltype_s base)
+param_new(tloc l, psrc src, pdir dir, const char *name, idltype_s base,
+          clist_s member, initer_s initer)
 {
+  citer i;
   param_s p;
   assert(name && base);
 
@@ -78,26 +91,37 @@ param_new(tloc l, const char *name, idltype_s base)
     return NULL;
   }
   p->loc = l;
-  p->dir = P_NODIR;
+  p->src = src;
+  p->dir = dir;
   p->name = string(name);
   p->base = base;
-  p->member = NULL;
+  p->member = member;
   p->type = base;
 
   p->port = NULL;
-  p->init = NULL;
+  p->init = initer;
+
+  for(clist_first(member, &i); i.value; clist_next(&i))
+    if (param_setmember(p, *i.value)) { free(p); return NULL; }
+
+  if (initer)
+    if (initer_matchtype(l, p->type, initer)) { free(p); return NULL; }
 
   return p;
 }
 
 param_s
-param_newids(tloc l, const char *name, const char *member)
+param_newids(tloc l, pdir dir, const char *name, clist_s member,
+             initer_s initer)
 {
   param_s p;
+  citer i;
   comp_s c;
   idltype_s ids;
 
-  assert(name);
+  if (dir == P_NODIR) return NULL;
+
+  assert(name || member);
   c = comp_active(); assert(c);
   ids = comp_ids(c);
   if (!ids) {
@@ -105,37 +129,215 @@ param_newids(tloc l, const char *name, const char *member)
     errno = EINVAL; return NULL;
   }
 
-  p = param_new(l, name, ids);
-  if (p) {
-    xwarnx("created ids parameter %s", p->name);
-    if (member) {
-      cval m = { .k = CST_STRING, { .s = member } };
-      if (param_setmember(p, m)) { free(p); return NULL; }
-    }
+  /* unnamed parameters are named after the last string member */
+  if (!name)
+    for(clist_first(member, &i); i.value; clist_next(&i))
+      if (i.value->k == CST_STRING)
+        name = i.value->s;
+  assert(name);
+
+  /* create param */
+  p = param_new(l, P_IDS, dir, name, ids, member, initer);
+  if (!p) {
+    parserror(l, "dropped parameter '%s'", name);
+    return NULL;
   }
+
+  if (type_fullname(p->type))
+    xwarnx("created ids parameter %s %s %s",
+           type_strkind(type_kind(p->type)), type_fullname(p->type), p->name);
+  else
+    xwarnx("created ids parameter %s %s",
+           type_strkind(type_kind(p->type)), p->name);
   return p;
 }
 
 param_s
-param_newport(tloc l, const char *name)
+param_newlocal(tloc l, pdir dir, const char *name, clist_s member,
+               idltype_s type, initer_s initer)
+{
+  param_s p;
+  comp_s c;
+  citer i;
+
+  if (dir == P_NODIR) return NULL;
+
+  assert(member);
+  c = comp_active(); assert(c);
+
+  clist_first(member, &i);
+  assert(i.value->k == CST_STRING);
+  if (!name) name = i.value->s;
+  assert(name);
+
+  /* lookup type */
+  if (!type && param_locals()) {
+    hiter j;
+    for(hash_first(param_locals(), &j); j.current; hash_next(&j))
+      if (!strcmp(param_name(j.value), i.value->s)) {
+        type = param_type(j.value);
+        break;
+      }
+  }
+  if (!type) {
+    parserror(l, "no such service parameter '%s'", i.value->s);
+    return NULL;
+  }
+  assert(type);
+
+  /* create param */
+  clist_next(&i);
+  p = param_new(l, P_SERVICE, dir, name, type, i.current, initer);
+  if (!p) {
+    parserror(l, "dropped parameter '%s'", name);
+    return NULL;
+  }
+
+  if (type_fullname(p->type))
+    xwarnx("created service parameter %s %s %s",
+           type_strkind(type_kind(p->type)), type_fullname(p->type), p->name);
+  else
+    xwarnx("created service parameter %s %s",
+           type_strkind(type_kind(p->type)), p->name);
+
+  return p;
+}
+
+param_s
+param_newport(tloc l, pdir dir, const char *name, clist_s member)
 {
   param_s p;
   comp_s c;
   port_s port;
+  citer i;
 
+  if (dir == P_NODIR) return NULL;
+
+  clist_first(member, &i);
+  assert(i.value->k == CST_STRING);
+
+  if (!name) name = i.value->s;
   assert(name);
+
   c = comp_active(); assert(c);
-  port = comp_port(c, name);
+  port = comp_port(c, i.value->s);
   if (!port) {
-    parserror(l, "unknown port '%s'", name);
+    parserror(l, "unknown port '%s'", i.value->s);
+    errno = EINVAL; return NULL;
+  }
+  if (dir == P_OUT && port_dir(port) == PORT_IN) {
+    parserror(l, "read-only port '%s'", i.value->s);
+    parsenoerror(port_loc(port), " %s port %s declared here",
+                 port_strkind(port_kind(port)), port_name(port));
     errno = EINVAL; return NULL;
   }
 
-  p = param_new(l, name, port_type(port));
-  if (p) {
-    p->port = port;
-    xwarnx("created port parameter %s", p->name);
+  clist_next(&i);
+
+  if (i.current && (port_kind(port) & PORT_HANDLE)) {
+    parserror(l, "cannot access members of %s port handle %s",
+              port_strkind(port_kind(port)), port_name(port));
+    parsenoerror(port_loc(port), " %s port %s declared here",
+                 port_strkind(port_kind(port)), port_name(port));
+    errno = EINVAL; return NULL;
   }
+
+  p = param_new(l, P_PORT, dir, name, port_type(port), i.current, NULL);
+  if (!p) {
+    parserror(l, "dropped parameter '%s'", name);
+    return NULL;
+  }
+
+  p->port = port;
+  xwarnx("created port parameter %s", p->name);
+  return p;
+}
+
+param_s
+param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
+{
+  param_s p = NULL;
+
+  if (dir == P_NODIR) return NULL;
+
+  while (src == P_NOSRC) {
+    citer i;
+    comp_s c;
+    port_s port;
+    param_s local;
+    idltype_s ids, idsmember;
+
+    if (!member) { src = P_IDS; break; }
+
+    c = comp_active(); assert(c);
+    ids = comp_ids(c);
+
+    /* lookup all kind of parameters */
+    clist_first(member, &i);
+    assert(i.value->k == CST_STRING);
+
+    idsmember = NULL;
+    local = NULL;
+    port = comp_port(c, i.value->s);
+    if (ids) idsmember = type_member(ids, i.value->s);
+    if (param_locals()) {
+      hiter j;
+      for(hash_first(param_locals(), &j); j.current; hash_next(&j))
+        if (!strcmp(param_name(j.value), i.value->s)) {
+          local = j.value;
+          break;
+        }
+    }
+
+    /* prevent ambiguity - must add loads of () for gcc... */
+    if ((idsmember && local) || (local && port) || (port && idsmember)) {
+      parserror(l, "missing ids, port or service qualifier for parameter '%s'",
+                i.value->s);
+      if (idsmember)
+        parsenoerror(type_loc(idsmember),
+                     " ids member %s declared here", i.value->s);
+      if (local)
+        parsenoerror(param_loc(local),
+                     " service parameter %s declared here", i.value->s);
+      if (port)
+        parsenoerror(port_loc(port), " port %s %s declared here",
+                     port_strkind(port_kind(port)), i.value->s);
+      return NULL;
+    }
+
+    if (idsmember) src = P_IDS;
+    else if (local) src = P_SERVICE;
+    else if (port) src = P_PORT;
+    else {
+      parserror(l, "no such parameter '%s'", i.value->s);
+      return NULL;
+    }
+  }
+
+  switch(src) {
+    case P_IDS:
+      p = param_newids(l, dir, name, member, NULL);
+      break;
+
+    case P_SERVICE:
+      if (!member) {
+        parserror(l, "unnamed service parameter '%s'", name);
+        return NULL;
+      }
+      p = param_newlocal(l, dir, name, member, NULL, NULL);
+      break;
+
+    case P_PORT:
+      if (!member) {
+        parserror(l, "unnamed port parameter '%s'", name);
+        return NULL;
+      }
+      p = param_newport(l, dir, name, member);
+      break;
+
+    case P_NOSRC: assert(0);
+  }
+
   return p;
 }
 
@@ -147,33 +349,36 @@ param_newport(tloc l, const char *name)
 param_s
 param_clone(param_s param)
 {
-  param_s p;
-  citer i;
-  int s;
+  param_s p = NULL;
+  clist_s m;
+  cval k;
+
   assert(param);
-
-  switch (param_dir(param)) {
-    case P_IN: case P_OUT: case P_INOUT:
-      p = param_newids(param_loc(param), param_name(param), NULL);
+  switch (param_src(param)) {
+    case P_IDS:
+      p = param_newids(param_loc(param), param_dir(param), param_name(param),
+                       param_member(param), param_initer(param));
       break;
 
-    case P_INPORT: case P_OUTPORT:
-      p = param_newport(param_loc(param), param_name(param));
+    case P_SERVICE:
+      m = param_member(param);
+      k.k = CST_STRING; k.s = param_name(param);
+      m = clist_prepend(m, k, 0);
+      p = param_newlocal(param_loc(param), param_dir(param), param_name(param),
+                         m, param_type(param), param_initer(param));
       break;
 
-    default: assert(0);
+    case P_PORT:
+      m = param_member(param);
+      k.k = CST_STRING; k.s = port_name(param_port(param));
+      m = clist_prepend(m, k, 0);
+      p = param_newport(param_loc(param), param_dir(param), param_name(param),
+                        m);
+      break;
+
+    case P_NOSRC: assert(0);
   }
-  if (!p) return NULL;
 
-  for(clist_first(param_member(param), &i); i.value; clist_next(&i)) {
-    s = param_setmember(p, *i.value);
-    if (s) { free(p); return NULL; }
-  }
-
-  if (param_setdir(p, param_dir(param))) return NULL;
-  if (param_setinitv(param_loc(param), p, param_initer(param))) return NULL;
-
-  xwarnx("created parameter %s", p->name);
   return p;
 }
 
@@ -186,8 +391,8 @@ int
 param_equal(param_s p, param_s q)
 {
   if (!p || !q) return 0;
-  if (param_base(p) != param_base(q)) return 0;
 
+  if (param_dir(p) != param_dir(q)) return 0;
   return type_equal(param_type(p), param_type(q));
 }
 
@@ -236,25 +441,6 @@ param_setdir(param_s p, pdir dir)
 }
 
 
-/* --- param_setinitv ------------------------------------------------------ */
-
-/** set parameter default value
- */
-int
-param_setinitv(tloc l, param_s p, initer_s i)
-{
-  int s;
-  assert(p && !p->init);
-  if (!i) return 0;
-
-  s = initer_matchtype(l, p->type, i);
-  if (s) return s;
-
-  p->init = i;
-  return 0;
-}
-
-
 /* --- param_typeiniter ---------------------------------------------------- */
 
 /** return initializer for type, which must be a member of the type of the
@@ -277,7 +463,6 @@ void
 param_destroy(param_s p)
 {
   if (p) {
-    xwarnx("destroyed parameter %s", p->name);
     if (p->init) initer_destroy(p->init);
     free(p);
   }
@@ -288,7 +473,7 @@ param_destroy(param_s p)
 
 /** update parameter to become a member of its current type
  */
-int
+static int
 param_setmember(param_s p, cval m)
 {
   uint32_t d;
@@ -296,15 +481,6 @@ param_setmember(param_s p, cval m)
 
   assert(p);
   assert(p->type);
-
-  /* consistency checks */
-  if (p->port && port_kind(p->port) & PORT_HANDLE) {
-    parserror(p->loc, "cannot access members of %s port %s",
-              port_strkind(port_kind(p->port)), param_name(p));
-    parsenoerror(port_loc(p->port), " %s port %s declared here",
-                 port_strkind(port_kind(p->port)), port_name(p->port));
-    return errno = EINVAL;
-  }
 
   switch(m.k) {
     case CST_UINT: /* array element */
@@ -346,11 +522,28 @@ param_setmember(param_s p, cval m)
   }
 
   p->type = t;
-  p->member = clist_append(p->member, m, 0/*!unique*/);
-
-  xwarnx("set parameter %s to %s %s", p->name,
-	 type_strkind(type_kind(p->type)), type_fullname(p->type));
   return 0;
+}
+
+
+/* --- param_strsrc -------------------------------------------------------- */
+
+/** Return a parameter source as a string
+ */
+
+const char *
+param_strsrc(psrc s)
+{
+  switch(s) {
+    case P_NOSRC:		return "sourceless";
+
+    case P_IDS:			return "ids";
+    case P_SERVICE:		return "service";
+    case P_PORT:		return "port";
+  }
+
+  assert(0);
+  return NULL;
 }
 
 
@@ -364,11 +557,10 @@ param_strdir(pdir d)
 {
   switch(d) {
     case P_NODIR:		return "directionless";
+
     case P_IN:			return "in";
     case P_OUT:			return "out";
     case P_INOUT:		return "inout";
-    case P_INPORT:		return "inport";
-    case P_OUTPORT:		return "outport";
   }
 
   assert(0);

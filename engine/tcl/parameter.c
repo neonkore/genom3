@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 LAAS/CNRS
+ * Copyright (c) 2010-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -42,15 +42,15 @@ int
 param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum paramidx {
-    paramidx_name, paramidx_dir, paramidx_member, paramidx_base, paramidx_type,
-    paramidx_port, paramidx_initer, paramidx_loc, paramidx_class
+    paramidx_name, paramidx_src, paramidx_dir, paramidx_member, paramidx_base,
+    paramidx_type, paramidx_port, paramidx_initer, paramidx_loc, paramidx_class
   };
   static const char *args[] = {
-    [paramidx_name] = "name", [paramidx_dir] = "direction",
-    [paramidx_member] = "member", [paramidx_base] = "base",
-    [paramidx_type] = "type", [paramidx_port] = "port",
-    [paramidx_initer] = "initializer", [paramidx_loc] = "loc",
-    [paramidx_class] = "class", NULL
+    [paramidx_name] = "name", [paramidx_src] = "src",
+    [paramidx_dir] = "direction", [paramidx_member] = "member",
+    [paramidx_base] = "base", [paramidx_type] = "type",
+    [paramidx_port] = "port", [paramidx_initer] = "initializer",
+    [paramidx_loc] = "loc", [paramidx_class] = "class", NULL
   };
   param_s p = v;
   Tcl_Obj *r;
@@ -80,6 +80,10 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch(i) {
     case paramidx_name:
       r = Tcl_NewStringObj(param_name(p), -1);
+      break;
+
+    case paramidx_src:
+      r = Tcl_NewStringObj(param_strsrc(param_src(p)), -1);
       break;
 
     case paramidx_dir:
@@ -126,8 +130,8 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case paramidx_port:
-      switch(param_dir(p)) {
-	case P_INPORT: case P_OUTPORT:
+      switch(param_src(p)) {
+	case P_PORT:
 	  r = Tcl_NewStringObj(port_genref(param_port(p)), -1);
 	  break;
 

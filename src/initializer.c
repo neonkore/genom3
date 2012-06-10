@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010,2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -135,7 +135,7 @@ initer_matchtype(tloc l, idltype_s t, initer_s i)
 	errno = initer_matchcomp(l, t, i->sub);
 	break;
       default:
-	parserror(l, "%s%s%s is not a compound type",
+	parserror(l, "compound initializer cannot initialize %s%s%s",
 		  type_strkind(type_kind(t)), type_name(t)?" ":"",
 		  type_name(t)?type_fullname(t):"");
 	return errno = EINVAL;
@@ -147,7 +147,7 @@ initer_matchtype(tloc l, idltype_s t, initer_s i)
   if (i->value.k != CST_VOID && !i->sub) {
     switch(type_kind(type_final(t))) {
       case IDL_ARRAY: case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
-	parserror(l, "%s%s%s is a compound type",
+	parserror(l, "cannot initialize %s%s%s with a scalar",
 		  type_strkind(type_kind(t)), type_name(t)?" ":"",
 		  type_name(t)?type_fullname(t):"");
 	return errno = EINVAL;

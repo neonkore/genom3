@@ -74,12 +74,12 @@ ids {
     long a;
   } a[2];
 };
-service s(in a[1].a);
+service s() { validate: c(in a[1].a); };
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 lang c
-set p [[[dotgen component] service] parameter]
+set p [[[[dotgen component] service] validate] parameter]
 puts [$p member]
 EOF
 expect out '
@@ -127,18 +127,40 @@ expect out '
 testing '[language signature]'
 
 cat >run.gen <<'EOF'
-component c;
-service s() {
-  validate: codel();
+component comp;
+task t;
+ids { short a, b; };
+port in comp::ids a;
+port out comp::ids b;
+port handle in comp::ids ah;
+port handle out comp::ids bh;
+port handle in comp::ids aha[];
+port handle out comp::ids bha[];
+service s(in long a, out long b) {
+  task: t;
+  codel c: c(service in a, service out b) yield d;
+  codel d: d(ids in a::a1, ids out b::b1) yield e;
+  codel e: e(port in a::a2, port out b::b2) yield f;
+  codel f: f(port in ah::a3) yield g;
+  codel g: g(port out bh::b3) yield h;
+  codel h: h(port in aha::a4) yield i;
+  codel i: i(port out bha::b4) yield c;
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 lang c
-set c [[[dotgen component] service] validate]
-puts [$c signature -sep-]
+foreach c [[[dotgen component] service] codels] {
+  puts [$c signature -sep-]
+}
 EOF
 expect out '
-	/^c_event-sep-codel\(void\)$/ {next}
+	/^comp_event-sep-c\(const int32_t \*a, int32_t \*b\)$/ {next}
+	/^comp_event-sep-d\(const int16_t \*a1, int16_t \*b1\)$/ {next}
+	/^comp_event-sep-e\(const comp_ids \*a2, comp_ids \*b2\)$/ {next}
+	/^comp_event-sep-f\(genom_port_handle \*a3\)$/ {next}
+	/^comp_event-sep-g\(genom_port_handle \*b3\)$/ {next}
+	/^comp_event-sep-h\(genom_port_handle_set \*a4\)$/ {next}
+	/^comp_event-sep-i\(genom_port_handle_set \*b4\)$/ {next}
 	{exit 2}
 '
 

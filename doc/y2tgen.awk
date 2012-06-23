@@ -25,7 +25,7 @@
 }
 
 /^[ \t]+\|/ {
-    rule = rule "\n      " $0; next
+    rule = rule "\n" $0; next
 }
 
 {
@@ -37,10 +37,10 @@ END { printdef(n, name, rule) }
 function printdef(n, name, rule) {
     out = "dotgen-rule-" name ".texi"
     print "@include " out
-    printf "@verbatim\n%5s ", "(" n ")" > out
     gsub(/_/, "-", rule)
     c = split(rule, l, "\n")
-    for (i = 1; i <= c; i++) { print wrap(l[i]) >> out }
+    printf "@verbatim\n%5s " wrap(l[1]) "\n", "(" n ")" > out
+    for (i = 2; i <= c; i++) { print "      " wrap(l[i]) >> out }
     print "@end verbatim" >> out
 }
 

@@ -320,7 +320,6 @@ typedef struct prop_s *prop_s;
 typedef enum propkind {
   PROP_DOC,		/**< doc string */
   PROP_IDS,		/**< internal data structure */
-  PROP_ATTRIBUTE,	/**< component attributes */
   PROP_VERSION,		/**< component version */
   PROP_LANG,		/**< codels language */
   PROP_EMAIL,		/**< support e-mail */
@@ -378,6 +377,10 @@ const char *	prop_strkind(propkind k);
     { PROP_VERSION,	"0" },                  \
 }
 
+typedef enum svckind {
+  S_ATTRIBUTE,
+  S_SERVICE
+} svckind;
 typedef struct comp_s *comp_s;
 typedef struct port_s *port_s;
 typedef struct service_s *service_s;
@@ -412,18 +415,19 @@ hash_s		task_fsm(task_s t);
 
 tloc		service_loc(service_s s);
 const char *	service_name(service_s s);
+svckind		service_kind(service_s s);
 comp_s		service_comp(service_s s);
 hash_s		service_props(service_s s);
 hash_s		service_params(service_s s);
 hash_s		service_fsm(service_s s);
+const char *	service_strkind(svckind k);
 
 comp_s		tmpl_create(tloc l, const char *name, hash_s props);
 comp_s		comp_create(tloc l, const char *name, hash_s props);
 idltype_s	comp_addids(tloc l, scope_s s);
-int		comp_addattr(tloc l, param_s attr);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
-service_s	comp_addservice(tloc l, const char *name, hash_s params,
-			hash_s props);
+service_s	comp_addservice(tloc l, svckind kind, const char *name,
+			hash_s params, hash_s props);
 int		comp_addievs(tloc l, hash_s h);
 int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
 int		comp_applytmpl(void);

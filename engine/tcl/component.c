@@ -47,20 +47,20 @@ int
 comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum compidx {
-    compidx_name, compidx_doc, compidx_ids, compidx_attr, compidx_iev,
-    compidx_version, compidx_lang, compidx_email, compidx_require,
-    compidx_crequire, compidx_clockrate, compidx_tasks, compidx_ports,
-    compidx_services, compidx_digest, compidx_loc, compidx_class
+    compidx_name, compidx_doc, compidx_ids, compidx_iev, compidx_version,
+    compidx_lang, compidx_email, compidx_require, compidx_crequire,
+    compidx_clockrate, compidx_tasks, compidx_ports, compidx_services,
+    compidx_digest, compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
-    [compidx_attr] = "attributes", [compidx_iev] = "event-type",
-    [compidx_version] = "version", [compidx_lang] = "language",
-    [compidx_email] = "email", [compidx_require] = "require",
-    [compidx_crequire] = "codels-require", [compidx_clockrate] = "clock-rate",
-    [compidx_tasks] = "tasks", [compidx_ports] = "ports",
-    [compidx_services] = "services", [compidx_digest] = "digest",
-    [compidx_loc] = "loc", [compidx_class] = "class", NULL
+    [compidx_iev] = "event-type", [compidx_version] = "version",
+    [compidx_lang] = "language", [compidx_email] = "email",
+    [compidx_require] = "require", [compidx_crequire] = "codels-require",
+    [compidx_clockrate] = "clock-rate", [compidx_tasks] = "tasks",
+    [compidx_ports] = "ports", [compidx_services] = "services",
+    [compidx_digest] = "digest", [compidx_loc] = "loc",
+    [compidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [compidx_doc] = PROP_DOC, [compidx_version] = PROP_VERSION,
@@ -107,18 +107,6 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       p = hash_find(comp_props(c), prop_strkind(PROP_IDS));
       if (p) r = Tcl_NewStringObj(type_genref(prop_type(p)), -1);
       break;
-
-    case compidx_attr: {
-      hiter h;
-
-      p = hash_find(comp_props(c), prop_strkind(PROP_ATTRIBUTE));
-      r = Tcl_NewListObj(0, NULL);
-      if (p) for(hash_first(prop_hash(p), &h); h.current; hash_next(&h)) {
-	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(param_genref(h.value), -1));
-	}
-      break;
-    }
 
     case compidx_iev:
       r = Tcl_NewStringObj(type_genref(comp_eventtype(c)), -1);

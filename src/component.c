@@ -86,6 +86,7 @@ hash_s		task_fsm(task_s t) { assert(t); return t->fsm; }
 struct service_s {
   tloc loc;
   const char *name;
+  svckind kind;
   comp_s component;
 
   hash_s props;
@@ -95,6 +96,7 @@ struct service_s {
 
 tloc		service_loc(service_s s) { assert(s); return s->loc; }
 const char *	service_name(service_s s) { assert(s); return s->name; }
+svckind		service_kind(service_s s) { assert(s); return s->kind; }
 comp_s		service_comp(service_s s) { assert(s); return s->component; }
 hash_s		service_props(service_s s) { assert(s); return s->props; }
 hash_s		service_params(service_s s) { assert(s); return s->params; }
@@ -159,8 +161,8 @@ comp_create(tloc l, const char *name, hash_s props)
 
 /** create a template.
  * Templates are stored as regular components with a special kind. Tasks,
- * services, ids, ports and attributes created for this template are applied to
- * all existing components.
+ * services, ids and ports created for this template are applied to all
+ * existing components.
  */
 comp_s
 tmpl_create(tloc l, const char *name, hash_s props)
@@ -203,9 +205,9 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
   if (props)
     for(hash_first(props, &i); i.current; hash_next(&i))
       switch(prop_kind(i.value)) {
-	case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
-	case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE: case PROP_THROWS:
-	case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
+	case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
+        case PROP_EMAIL: case PROP_REQUIRE: case PROP_THROWS:
+        case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
 	  break;
 
 	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
@@ -407,56 +409,6 @@ comp_addids(tloc l, scope_s s)
 }
 
 
-/* --- comp_addattr -------------------------------------------------------- */
-
-/** create an attribute for component
- */
-int
-comp_addattr(tloc l, param_s attr)
-{
-  comp_s c;
-  param_s param;
-  hash_s h;
-  prop_s p;
-  assert(attr);
-
-  /* a component must exist */
-  c = comp_active();
-  if (!c) {
-    parserror(l, "missing component declaration before attribute");
-    return errno = EINVAL;
-  }
-
-  /* get or create component's attributes hash */
-  p = hash_find(c->props, prop_strkind(PROP_ATTRIBUTE));
-  if (p) {
-    h = prop_hash(p);
-  } else {
-    h = hash_create("attribute list", 3);
-    if (!h) return errno;
-    p = prop_newhash(l, PROP_ATTRIBUTE, h);
-    if (!p) { hash_destroy(h, 1); return errno; }
-
-    if (hash_insert(c->props, prop_name(p), p, (hrelease_f)prop_destroy))
-      return errno;
-  }
-
-  /* insert attribute in hash */
-  if (hash_insert(h, param_name(attr), attr, (hrelease_f)param_destroy)) {
-    if (errno == EEXIST) {
-      param = hash_find(h, param_name(attr)); assert(param);
-      parserror(l, "duplicate attribute '%s' declaration", param_name(attr));
-      parsenoerror(param_loc(param), " %s declared here", param_name(param));
-    } else
-      parserror(l, "dropped attribute '%s' declaration", param_name(attr));
-    return errno;
-  }
-
-  xwarnx("created attribute '%s'", param_name(attr));
-  return 0;
-}
-
-
 /* --- comp_addtask -------------------------------------------------------- */
 
 /** create a task in component
@@ -535,10 +487,10 @@ comp_addtask(tloc l, const char *name, hash_s props)
       case PROP_SCHEDULING: case PROP_STACK: case PROP_CODEL:
 	break;
 
-      case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
-      case PROP_CLOCKRATE: case PROP_TASK: case PROP_VALIDATE:
-      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
+      case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
+      case PROP_TASK: case PROP_VALIDATE: case PROP_INTERRUPTS:
+      case PROP_BEFORE: case PROP_AFTER:
 	parserror(prop_loc(i.value), "property %s is not suitable for tasks",
 		  prop_strkind(prop_kind(i.value)));
 	e = 1; break;
@@ -597,7 +549,8 @@ comp_addtask(tloc l, const char *name, hash_s props)
 /** create a service in component
  */
 service_s
-comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
+comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
+                hash_s props)
 {
   comp_s comp;
   hiter i, j;
@@ -610,14 +563,15 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   /* all is a reserved name */
   if (!strcmp(name, ALL_SERVICE_NAME)) {
-    parserror(l, "'%s' is a reserved service name", name);
+    parserror(l, "'%s' is a reserved %s name", service_strkind(kind), name);
     return NULL;
   }
 
   /* a component must exist */
   comp = comp_active();
   if (!comp) {
-    parserror(l, "missing component declaration before service %s", name);
+    parserror(l, "missing component declaration before %s %s",
+              service_strkind(kind), name);
     return NULL;
   }
   e = 0;
@@ -656,31 +610,59 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 	break;
 
       case PROP_CODEL:
-	if (!t) {
-	  parserror(prop_loc(i.value),
-		    "service %s with no task cannot have codels", name);
-	  e = 1; break;
-	}
-	break;
+        switch(kind) {
+          case S_ATTRIBUTE:
+            if (t) {
+              parserror(prop_loc(i.value), "%s %s cannot have codels",
+                        service_strkind(kind), name);
+              e = 1;
+            }
+            break;
+
+          case S_SERVICE:
+            if (!t) {
+              parserror(prop_loc(i.value),
+                        "%s %s with no task cannot have codels",
+                        service_strkind(kind), name);
+              e = 1;
+            }
+            break;
+        }
+        break;
+
+      case PROP_TASK:
+        switch(kind) {
+          case S_ATTRIBUTE:
+            parserror(prop_loc(i.value),
+                      "task declaration not allowed in %s %s",
+                      service_strkind(kind), name);
+            e = 1;
+            break;
+
+          case S_SERVICE:
+            break;
+        }
+        break;
 
       case PROP_DOC: case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
-      case PROP_TASK:
-	break;
+        /* ok */
+        break;
 
-      case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
-      case PROP_CLOCKRATE: case PROP_PERIOD: case PROP_DELAY:
-      case PROP_PRIORITY: case PROP_SCHEDULING: case PROP_STACK:
-	parserror(prop_loc(i.value), "property %s is not suitable for services",
-		  prop_strkind(prop_kind(i.value)));
+      case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
+      case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
+      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
+      case PROP_SCHEDULING: case PROP_STACK:
+	parserror(prop_loc(i.value), "property %s is not suitable for %ss",
+                  service_strkind(kind), prop_strkind(prop_kind(i.value)));
 	e = 1; break;
     }
 
   /* check parameters */
   for(hash_first(params, &i); i.current; hash_next(&i)) {
     switch(param_src(i.value)) {
-      case P_NOSRC: case P_IDS: case P_PORT: assert(0);
-      case P_SERVICE: break;
+      case P_NOSRC: case P_PORT: assert(0);
+      case P_IDS: if (kind == S_ATTRIBUTE) break; else assert(0);
+      case P_SERVICE: if (kind == S_SERVICE) break; else assert(0);
     }
   }
   if (e) return NULL;
@@ -694,6 +676,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
 
   s->loc = l;
   s->name = string(name);
+  s->kind = kind;
   s->component = comp;
   s->props = props;
   s->params = params;
@@ -704,9 +687,10 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
     case 0: break;
 
     case EEXIST:
-      parserror(l, "duplicate service %s", s->name);
+      parserror(l, "duplicate %s %s", service_strkind(kind), s->name);
       service_s u = hash_find(comp->services, name);
-      if (u) parserror(u->loc, " service %s declared here", u->name);
+      if (u) parserror(u->loc, " %s %s declared here",
+                       service_strkind(service_kind(u)), u->name);
       /*FALLTHROUGH*/
     default:
       free(s);
@@ -738,7 +722,7 @@ comp_addservice(tloc l, const char *name, hash_s params, hash_s props)
       default: break;
     }
 
-  xwarnx("created service %s", s->name);
+  xwarnx("created %s %s", service_strkind(kind), s->name);
   return s;
 }
 
@@ -754,6 +738,24 @@ comp_strkind(compkind k)
   switch(k) {
     case COMP_REG:		return "component";
     case COMP_TMPL:		return "template";
+  }
+
+  assert(0);
+  return NULL;
+}
+
+
+/* --- service_strkind ----------------------------------------------------- */
+
+/** Return a service kind as a string
+ */
+
+const char *
+service_strkind(svckind k)
+{
+  switch(k) {
+    case S_ATTRIBUTE:		return "attribute";
+    case S_SERVICE:		return "service";
   }
 
   assert(0);
@@ -960,8 +962,9 @@ comp_applytmpl()
 	}
 	if (e) break;
 
-	svc = comp_addservice(service_loc(i.value), service_name(i.value),
-			      h, NULL);
+	svc = comp_addservice(
+          service_loc(i.value), service_kind(i.value), service_name(i.value),
+          h, NULL);
 	if (svc) {
 	  e |= prop_merge_list(service_props(svc), service_props(i.value));
 	  hash_destroy(svc->fsm, 1);

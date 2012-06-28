@@ -292,9 +292,8 @@ hash_s
 prop_hash(prop_s p)
 {
   assert(p);
-  assert(p->kind == PROP_ATTRIBUTE || p->kind == PROP_THROWS ||
-	 p->kind == PROP_INTERRUPTS || p->kind == PROP_BEFORE ||
-	 p->kind == PROP_AFTER);
+  assert(p->kind == PROP_THROWS || p->kind == PROP_INTERRUPTS ||
+         p->kind == PROP_BEFORE || p->kind == PROP_AFTER);
   return p->hash;
 }
 
@@ -344,7 +343,6 @@ prop_merge(hash_s p, prop_s i)
   hiter j;
   hash_s iev;
   prop_s q;
-  param_s attr;
   int e = 0;
 
   assert(p && i);
@@ -369,15 +367,6 @@ prop_merge(hash_s p, prop_s i)
       if (!comp_addids(type_loc(prop_type(i)),
                        type_membersscope(prop_type(i))))
         e |= errno;
-      break;
-
-    case PROP_ATTRIBUTE:
-      for(hash_first(prop_hash(i), &j); j.current; hash_next(&j)) {
-        attr = param_clone(j.value);
-        if (!attr || comp_addattr(prop_loc(i), attr)) {
-          e = errno; break;
-        }
-      }
       break;
 
     case PROP_VALIDATE:
@@ -417,7 +406,7 @@ prop_merge(hash_s p, prop_s i)
       }
 
       case PROP_IDS: /* handled above */
-      case PROP_ATTRIBUTE: e = 0; break;
+        e = 0; break;
 
       default:
         parserror(prop_loc(i), "duplicate %s declaration", prop_name(i));
@@ -441,7 +430,6 @@ prop_strkind(propkind k)
   switch(k) {
     case PROP_DOC:		return "doc";
     case PROP_IDS:		return "ids";
-    case PROP_ATTRIBUTE:	return "attribute";
     case PROP_VERSION:		return "version";
     case PROP_LANG:		return "lang";
     case PROP_EMAIL:		return "e-mail";

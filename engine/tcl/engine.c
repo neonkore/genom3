@@ -353,7 +353,7 @@ static int
 engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
 {
   const char *key = comp_genref(c);
-  hiter i, p;
+  hiter i;
   int s;
 
   /* create the command if needed */
@@ -371,13 +371,6 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
     switch(prop_kind(i.value)) {
       case PROP_IDS:
 	s = engine_gentype(interp, slave, prop_type(i.value));
-	break;
-
-      case PROP_ATTRIBUTE:
-	for(hash_first(prop_hash(i.value), &p); p.current; hash_next(&p)) {
-	  s = engine_genparam(interp, slave, p.value);
-	  if (s) break;
-	}
 	break;
 
       case PROP_CLOCKRATE:
@@ -449,10 +442,10 @@ engine_gentask(Tcl_Interp *interp, Tcl_Interp *slave, task_s t)
 	s = engine_gencodel(interp, slave, prop_codel(i.value));
 	break;
 
-      case PROP_DOC: case PROP_IDS: case PROP_ATTRIBUTE: case PROP_VERSION:
-      case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
-      case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE: case PROP_SCHEDULING:
-      case PROP_TASK: case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
+      case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
+      case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
+      case PROP_CLOCKRATE: case PROP_SCHEDULING: case PROP_TASK:
+      case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
       case PROP_AFTER:
 	break;
     }
@@ -525,9 +518,9 @@ engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave, service_s s)
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
       case PROP_SCHEDULING: case PROP_STACK: case PROP_DOC: case PROP_IDS:
-      case PROP_ATTRIBUTE: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-      case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
-      case PROP_TASK: case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
+      case PROP_VERSION: case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+      case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE: case PROP_TASK:
+      case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
       case PROP_AFTER:
 	break;
     }

@@ -55,9 +55,9 @@ ids {
   sequence<long,128> h;
 };
 
-attribute inout a = 0:"first attribute";
-attribute in b = { { 0 } }:"first attribute";
-attribute out d = "none";
+attribute a(inout a = 0:"first attribute");
+attribute set_b(in b = { { 0 } }:"second attribute");
+attribute get_d(out d = "none");
 
 port in long_type a;
 port out c::ids::str b;

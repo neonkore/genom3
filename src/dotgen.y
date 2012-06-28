@@ -105,7 +105,7 @@
 %type <prop>	component_property task_property service_property fsm_property
 %type <prop>	property
 %type <hash>	opt_properties properties
-%type <hash>	service_parameters codel_parameters
+%type <hash>	attribute_parameters service_parameters codel_parameters
 %type <initer>	opt_initializer initializer_value initializer initializers
 %type <codel>	validate codel
 %type <param>	attribute_parameter service_parameter codel_parameter
@@ -179,7 +179,7 @@ specification: /* empty */ { $$ = 0; } | specification statement;
 statement:
   genom_statement
   | idl_statement
-  | error ';'
+  | error ';' {}
   | error
   {
     parserror(@1, "maybe a missing ';'");
@@ -285,14 +285,6 @@ ids:
   }
 ;
 
-attribute:
-  ATTRIBUTE attribute_parameter ';'
-  {
-    if (!$2) break;
-    if (comp_addattr(@2, $2)) param_destroy($2);
-  }
-;
-
 task:
   TASK identifier '{' properties '}'
   {
@@ -313,6 +305,29 @@ task:
   }
 ;
 
+attribute:
+  ATTRIBUTE identifier '(' attribute_parameters ')' opt_properties ';'
+  {
+    param_setlocals(NULL);
+    if (!$2 || !$4) {
+      if ($2) parserror(@1, "dropped '%s' attribute", $2);
+      if ($4) hash_destroy($4, 1);
+      if ($6) hash_destroy($6, 1);
+      break;
+    }
+    if (!comp_addservice(@1, S_ATTRIBUTE, $2, $4, $6)) {
+      parserror(@1, "dropped '%s' attribute", $2);
+      hash_destroy($4, 1);
+      if ($6) hash_destroy($6, 1);
+    }
+  }
+  | ATTRIBUTE identifier '(' error ')' opt_properties ';'
+  {
+    param_setlocals(NULL);
+    parserror(@1, "dropped '%s' attribute", $2);
+  }
+;
+
 service:
   SERVICE identifier '(' service_parameters ')' opt_properties ';'
   {
@@ -323,7 +338,7 @@ service:
       if ($6) hash_destroy($6, 1);
       break;
     }
-    if (!comp_addservice(@1, $2, $4, $6)) {
+    if (!comp_addservice(@1, S_SERVICE, $2, $4, $6)) {
       parserror(@1, "dropped '%s' service", $2);
       hash_destroy($4, 1);
       if ($6) hash_destroy($6, 1);
@@ -524,6 +539,33 @@ event_list: identifier_list;
 
 
 /* --- parameters ---------------------------------------------------------- */
+
+attribute_parameters:
+  /* empty */
+  {
+    $$ = hash_create("parameter list", 0);
+    param_setlocals($$);
+  }
+  | attribute_parameter
+  {
+    $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
+    if (hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
+      param_destroy($1); break;
+    }
+    param_setlocals($$);
+  }
+  | attribute_parameters ',' attribute_parameter
+  {
+    $$ = $1; if (!$3) break;
+    switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
+      case 0: break;
+      case EEXIST:
+	parserror(@3, "duplicate parameter '%s'", param_name($3));
+	/*FALLTHROUGH*/
+      default: param_destroy($3); break;
+    }
+  }
+;
 
 attribute_parameter:
   parameter_dir parameter_variable opt_initializer

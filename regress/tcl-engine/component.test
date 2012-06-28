@@ -14,23 +14,3 @@ EOF
 run 2 ${GENOM_BIN} interactive -b run.gen <<EOF
 puts [[dotgen component] ids]
 EOF
-
-
-# --- component attribute ---------------------------------------------------
-#
-testing '[$component attribute]'
-
-run 0 ${GENOM_BIN} interactive -b ${thisdir}../component.gen <<'EOF'
-lang c
-set i 0
-foreach a [[dotgen component] attribute] {
-  puts "$i,[$a name],[$a dir],[$a member]"
-  incr i
-}
-EOF
-expect out '
-	/^0,a,inout,.a$/ {next}
-	/^1,b,in,.b$/ {next}
-	/^2,d,out,.d$/ {next}
-	{exit 2}
-'

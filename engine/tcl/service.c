@@ -40,19 +40,20 @@ int
 service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum serviceidx {
-    serviceidx_name, serviceidx_comp, serviceidx_doc, serviceidx_task,
-    serviceidx_validate, serviceidx_codels, serviceidx_params, serviceidx_fsm,
-    serviceidx_throws, serviceidx_interrupts, serviceidx_before,
-    serviceidx_after, serviceidx_loc, serviceidx_class
+    serviceidx_name, serviceidx_kind, serviceidx_comp, serviceidx_doc,
+    serviceidx_task, serviceidx_validate, serviceidx_codels, serviceidx_params,
+    serviceidx_fsm, serviceidx_throws, serviceidx_interrupts,
+    serviceidx_before, serviceidx_after, serviceidx_loc, serviceidx_class
   };
   static const char *args[] = {
-    [serviceidx_name] = "name", [serviceidx_comp] = "component",
-    [serviceidx_doc] = "doc", [serviceidx_task] = "task",
-    [serviceidx_validate] = "validate", [serviceidx_codels] = "codels",
-    [serviceidx_params] = "parameters", [serviceidx_fsm] = "fsm",
-    [serviceidx_throws] = "throws", [serviceidx_interrupts] = "interrupts",
-    [serviceidx_before] = "before", [serviceidx_after] = "after",
-    [serviceidx_loc] = "loc", [serviceidx_class] = "class", NULL
+    [serviceidx_name] = "name", [serviceidx_kind] = "kind",
+    [serviceidx_comp] = "component", [serviceidx_doc] = "doc",
+    [serviceidx_task] = "task", [serviceidx_validate] = "validate",
+    [serviceidx_codels] = "codels", [serviceidx_params] = "parameters",
+    [serviceidx_fsm] = "fsm", [serviceidx_throws] = "throws",
+    [serviceidx_interrupts] = "interrupts", [serviceidx_before] = "before",
+    [serviceidx_after] = "after", [serviceidx_loc] = "loc",
+    [serviceidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [serviceidx_codels] = PROP_CODEL, [serviceidx_validate] = PROP_VALIDATE,
@@ -86,6 +87,10 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch(i) {
     case serviceidx_name:
       r = Tcl_NewStringObj(service_name(s), -1);
+      break;
+
+    case serviceidx_kind:
+      r = Tcl_NewStringObj(service_strkind(service_kind(s)), -1);
       break;
 
     case serviceidx_comp:

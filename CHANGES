@@ -1,6 +1,26 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2012 LAAS/CNRS
 
+			    Changes in genom 2.99.12
+
+Released on July 2nd, 2012
+
+ . Updated the dotgen grammar in an incompatible way: each service parameter
+   now defines a variable local to each instance of the running service. Codels
+   must now explicitly declare their parameters as coming from the service. For
+   symmetry, 'inport' and 'outport' keywords have been replaced by 'port in'
+   and 'port out' (2 words), and the syntax of port declarations updated.
+ . Updated the semantics of 'attributes' so that it is possible to continue
+   writing IDS accessors in a simple manner. Attributes are declared with the
+   same syntax as services, except that they take their parameters from the
+   IDS. They can only have 'validate' codels (i.e no task, no state machine).
+ . Switched documentation to texinfo, and provide HTML, PDF, info(1) and ASCII
+   documents. The goal was to provide a better (split) HTML output. Also, an
+   info(1) file is a useful reference while coding.
+ . Updated documentation for the available preprocessing directives (#pragma)
+   and improved the naming/description of a few grammar rules.
+
+
 			    Changes in genom 2.99.11
 
 Released on May 29th, 2012

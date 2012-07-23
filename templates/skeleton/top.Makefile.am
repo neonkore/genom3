@@ -34,7 +34,6 @@ pkgconfigdir=	$(libdir)/pkgconfig
 pkgconfig_DATA=
 <'foreach c [dotgen components] {'>
 pkgconfig_DATA+= <"lib[$c name]_codels.pc">
-pkgconfig_DATA+= <"lib[$c name]_codels-uninstalled.pc">
 <'}'>
 
 # we don't want generated templates in the distribution

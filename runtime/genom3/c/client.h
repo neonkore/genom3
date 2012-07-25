@@ -23,17 +23,17 @@
 
 #define GENOM_CLIENT_DLSYM		"genom_client_info"
 
-enum { genom_client_protocol = 20120523 };
+enum { genom_client_protocol = 20120725 };
 
-typedef struct genom_client *genom_client;
+typedef struct genom_client_s *genom_client;
 
 typedef void (*genom_request_cb)(
-  genom_client h, int activtiy, int error, uint32_t report, void *output,
+  genom_client h, int rqstid, int error, uint32_t report, void *output,
   void *cb_data);
 typedef int (*genom_request_sendfn)(
   genom_client h, const void *in,
   genom_request_cb sentcb, genom_request_cb donecb, void *cb_data,
-  int *activity);
+  int *rqstid);
 
 typedef int (*genom_port_readfn)(genom_client h, void *data);
 typedef int (*genom_port_set_readfn)(genom_client h,
@@ -45,7 +45,7 @@ typedef void (*genom_finifn)(void *data);
 typedef int (*genom_json_scanfn)(void *in, const char *json, char **endptr);
 typedef int (*genom_json_printfn)(char **json, void *out);
 
-struct genom_request_info {
+struct genom_service_info {
   const char *name;
   const char *input;
   const char *output;
@@ -82,15 +82,15 @@ struct genom_client_info {
   void (*fini)(genom_client h);
   const char *(*instance)(genom_client h);
   int (*eventfd)(genom_client h);
-  const struct genom_request_info *(*actinfo)(genom_client h, int activity);
-  int (*done)(genom_client h, int activity);
-  int (*wait)(genom_client h, int activity);
-  int (*clean)(genom_client h, int activity);
+  const struct genom_service_info *(*service_info)(genom_client h, int rqstid);
+  int (*done)(genom_client h, int rqstid);
+  int (*wait)(genom_client h, int rqstid);
+  int (*clean)(genom_client h, int rqstid);
   int (*doevents)(genom_client h);
   const char *(*strerror)(genom_client h);
 
-  int nrequests;
-  const struct genom_request_info *requests;
+  int nservices;
+  const struct genom_service_info *services;
 
   int nports;
   const struct genom_port_info *ports;

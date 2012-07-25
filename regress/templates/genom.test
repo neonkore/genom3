@@ -1,0 +1,11 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+mkdir -p run.t
+
+
+# --- genom commons --------------------------------------------------------
+#
+testing 'common genom template definitions'
+
+run 0 ${GENOM_BIN} -n ${thisdir}../../templates/common/genom.gen

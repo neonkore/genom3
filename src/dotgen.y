@@ -58,7 +58,9 @@
   cval		v;
   psrc		psrc;
   pdir		pdir;
+  svckind	skind;
   portkind	pkind;
+  codelkind	ckind;
   clist_s	vlist;
   prop_s	prop;
   codel_s	codel;
@@ -91,9 +93,9 @@
 %token <s>	string_literal IDENTIFIER
 
 %token <s>	S MS US K M REAL_TIME
-%token <s>	TEMPLATE COMPONENT TASK SERVICE CODEL PORT IN OUT INOUT LOCAL
-%token <s>	IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG EMAIL
-%token <s>	REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
+%token <s>	TEMPLATE COMPONENT TASK FUNCTION ACTIVITY CODEL PORT IN OUT
+%token <s>	INOUT SERVICE IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
+%token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 %token <s>	ASYNC
 
@@ -101,13 +103,15 @@
 %type <i>	idl_statements idl_statement genom_statement
 
 %type <i>	template component ids attribute port task service
+%type <skind>	service_kind
 %type <pkind>	port_dir opt_handle opt_array
 %type <prop>	component_property task_property service_property fsm_property
 %type <prop>	property
 %type <hash>	opt_properties properties
 %type <hash>	attribute_parameters service_parameters codel_parameters
 %type <initer>	opt_initializer initializer_value initializer initializers
-%type <codel>	validate codel
+%type <codel>	codel fsm_codel
+%type <ckind>	opt_async
 %type <param>	attribute_parameter service_parameter codel_parameter
 %type <vlist>	parameter_variable
 %type <psrc>	opt_parameter_src
@@ -329,26 +333,31 @@ attribute:
 ;
 
 service:
-  SERVICE identifier '(' service_parameters ')' opt_properties ';'
+  service_kind identifier '(' service_parameters ')' opt_properties ';'
   {
     param_setlocals(NULL);
     if (!$2 || !$4) {
-      if ($2) parserror(@1, "dropped '%s' service", $2);
+      if ($2) parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
       if ($4) hash_destroy($4, 1);
       if ($6) hash_destroy($6, 1);
       break;
     }
-    if (!comp_addservice(@1, S_SERVICE, $2, $4, $6)) {
-      parserror(@1, "dropped '%s' service", $2);
+    if (!comp_addservice(@1, $1, $2, $4, $6)) {
+      parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
       hash_destroy($4, 1);
       if ($6) hash_destroy($6, 1);
     }
   }
-  | SERVICE identifier '(' error ')' opt_properties ';'
+  | service_kind identifier '(' error ')' opt_properties ';'
   {
     param_setlocals(NULL);
-    parserror(@1, "dropped '%s' service", $2);
+    parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
   }
+;
+
+service_kind:
+  FUNCTION	{ $$ = S_FUNCTION; }
+  | ACTIVITY	{ $$ = S_ACTIVITY; }
 ;
 
 
@@ -383,6 +392,7 @@ properties:
   }
   | properties error ';'
   {
+    parserror(@2, "invalid property");
     $$ = $1;
   }
 ;
@@ -486,9 +496,14 @@ service_property:
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_AFTER, $3);
   }
-  | VALIDATE ':' validate
+  | VALIDATE ':' codel
   {
     $$ = $3 ? prop_newcodel(@1, PROP_VALIDATE, $3) : NULL;
+  }
+  | opt_async CODEL ':' codel
+  {
+    if ($4) codel_setkind($4, $1);
+    $$ = $4 ? prop_newcodel(@1, PROP_SIMPLE_CODEL, $4) : NULL;
   }
 ;
 
@@ -497,28 +512,24 @@ fsm_property:
   {
     $$ = $3 ? prop_newhash(@1, PROP_THROWS, $3) : NULL;
   }
-  | ASYNC CODEL codel
+  | opt_async CODEL fsm_codel
   {
-    if ($3) codel_setkind($3, CODEL_ASYNC);
-    $$ = $3 ? prop_newcodel(@1, PROP_CODEL, $3) : NULL;
-  }
-  | CODEL codel
-  {
-    $$ = $2 ? prop_newcodel(@1, PROP_CODEL, $2) : NULL;
+    if ($3) codel_setkind($3, $1);
+    $$ = $3 ? prop_newcodel(@1, PROP_FSM_CODEL, $3) : NULL;
   }
 ;
 
 
 /* --- codels -------------------------------------------------------------- */
 
-validate:
+codel:
   identifier '(' codel_parameters ')'
   {
     $$ = codel_create(@1, $1, CODEL_SYNC, NULL, NULL, $3);
   }
 ;
 
-codel:
+fsm_codel:
   event_list ':' identifier '(' codel_parameters ')' YIELD event_list
   {
     if (!$1 || !$8) {
@@ -533,6 +544,11 @@ codel:
     if ($1) hash_destroy($1, 1);
     if ($5) hash_destroy($5, 1);
   }
+;
+
+opt_async:
+  /* empty */	{ $$ = CODEL_SYNC; }
+  | ASYNC	{ $$ = CODEL_ASYNC; }
 ;
 
 event_list: identifier_list;
@@ -1675,10 +1691,11 @@ size_unit:
  */
 identifier:
   IDENTIFIER | S | MS | US | K | M | REAL_TIME
-  | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | VERSION | LANG | EMAIL | REQUIRE
-  | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY | PRIORITY | SCHEDULING
-  | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC | INTERRUPTS | BEFORE
-  | AFTER | HANDLE | PORT | IN | OUT | INOUT | LOCAL | ASYNC
+  | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | FUNCTION | ACTIVITY | VERSION
+  | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY
+  | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC
+  | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT | SERVICE
+  | ASYNC
 ;
 
 identifier_list:

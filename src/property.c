@@ -184,12 +184,12 @@ prop_s
 prop_newcodel(tloc l, propkind k, codel_s c)
 {
   prop_s p;
-  assert(k == PROP_VALIDATE || k == PROP_CODEL);
+  assert(k == PROP_VALIDATE || k == PROP_SIMPLE_CODEL || k == PROP_FSM_CODEL);
 
-  /* always build the property name as "codel xxx" even for validation
-   * codels to avoid name clashes */
+  /* always build the property name as "codel xxx" for validation/bare
+   * codels/fsm codels to avoid name clashes */
   p = prop_new(
-    l, k, strings(prop_strkind(PROP_CODEL), " ", codel_name(c), NULL));
+    l, k, strings(prop_strkind(PROP_SIMPLE_CODEL), " ", codel_name(c), NULL));
   if (!p) return NULL;
 
   p->codel = c;
@@ -281,7 +281,8 @@ codel_s
 prop_codel(prop_s p)
 {
   assert(p);
-  assert(p->kind == PROP_VALIDATE || p->kind == PROP_CODEL);
+  assert(p->kind == PROP_VALIDATE || p->kind == PROP_SIMPLE_CODEL ||
+         p->kind == PROP_FSM_CODEL);
   return p->codel;
 }
 
@@ -370,7 +371,8 @@ prop_merge(hash_s p, prop_s i)
       break;
 
     case PROP_VALIDATE:
-    case PROP_CODEL:
+    case PROP_SIMPLE_CODEL:
+    case PROP_FSM_CODEL:
       i->codel = codel_clone(prop_codel(i));
       if (!i->codel) e = errno;
       break;
@@ -443,7 +445,8 @@ prop_strkind(propkind k)
     case PROP_STACK:		return "stack";
     case PROP_TASK:		return "task";
     case PROP_VALIDATE:		return "validate";
-    case PROP_CODEL:		return "codel";
+    case PROP_SIMPLE_CODEL:	return "codel";
+    case PROP_FSM_CODEL:	return "codel";
     case PROP_THROWS:		return "throw";
     case PROP_INTERRUPTS:	return "interrupts";
     case PROP_BEFORE:		return "before";

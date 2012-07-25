@@ -56,7 +56,6 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [serviceidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
-    [serviceidx_codels] = PROP_CODEL, [serviceidx_validate] = PROP_VALIDATE,
     [serviceidx_interrupts] = PROP_INTERRUPTS,
     [serviceidx_before] = PROP_BEFORE, [serviceidx_after] = PROP_AFTER
   };
@@ -74,6 +73,11 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   if (i == serviceidx_fsm) {
     if (objc > 3) {
       Tcl_WrongNumArgs(interp, 0, objv, "$service fsm ?event?");
+      return TCL_ERROR;
+    }
+  } else if (i == serviceidx_codels) {
+    if (objc > 3) {
+      Tcl_WrongNumArgs(interp, 0, objv, "$service codel ?simple|fsm?");
       return TCL_ERROR;
     }
   } else if (i != serviceidx_params) {
@@ -146,15 +150,53 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
-    case serviceidx_validate:
-    case serviceidx_codels: {
+    case serviceidx_validate: {
       hiter j;
 
       r = Tcl_NewListObj(0, NULL);
       for(hash_first(service_props(s), &j); j.current; hash_next(&j)) {
-	if (prop_kind(j.value) != argkind[i]) continue;
+	if (prop_kind(j.value) != PROP_VALIDATE) continue;
 	Tcl_ListObjAppendElement(
 	  interp, r, Tcl_NewStringObj(codel_genref(prop_codel(j.value)), -1));
+      }
+      break;
+    }
+
+    case serviceidx_codels: {
+      enum ckindidx {
+        ckindidx_simple, ckindidx_fsm
+      };
+      static const char *ckindarg[] = {
+        [ckindidx_simple] = "simple", [ckindidx_fsm] = "fsm",
+        NULL
+      };
+      int f, d, sc;
+      hiter j;
+
+      r = Tcl_NewListObj(0, NULL);
+
+      for(hash_first(service_props(s), &j); j.current; hash_next(&j)) {
+        if (prop_kind(j.value) != PROP_SIMPLE_CODEL &&
+            prop_kind(j.value) != PROP_FSM_CODEL) continue;
+
+        /* iterate over optional filters */
+        f = (objc < 3);
+        for(sc = 2; !f && sc < objc; sc++) {
+          e = Tcl_GetIndexFromObj(interp, objv[sc], ckindarg, "kind", 0, &d);
+          if (e != TCL_OK) return e;
+
+          switch(d) {
+            case ckindidx_simple:
+              if (prop_kind(j.value) == PROP_SIMPLE_CODEL) f = 1;
+              break;
+            case ckindidx_fsm:
+              if (prop_kind(j.value) == PROP_FSM_CODEL) f = 1;
+              break;
+          }
+        }
+        if (f)
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(codel_genref(prop_codel(j.value)), -1));
       }
       break;
     }

@@ -212,8 +212,8 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
 
 	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
 	case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
-	case PROP_CODEL: case PROP_TASK: case PROP_INTERRUPTS:
-	case PROP_BEFORE: case PROP_AFTER:
+	case PROP_SIMPLE_CODEL: case PROP_FSM_CODEL: case PROP_TASK:
+        case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
 	  parserror(prop_loc(i.value),
 		    "property %s is not suitable for components",
 		    prop_strkind(prop_kind(i.value)));
@@ -484,8 +484,14 @@ comp_addtask(tloc l, const char *name, hash_s props)
         break;
 
       case PROP_DOC: case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
-      case PROP_SCHEDULING: case PROP_STACK: case PROP_CODEL:
+      case PROP_SCHEDULING: case PROP_STACK: case PROP_FSM_CODEL:
 	break;
+
+      case PROP_SIMPLE_CODEL:
+	parserror(l, "simple codel not allowed in task %s", name);
+	parsenoerror(prop_loc(i.value), " %s declared here",
+                     prop_name(i.value));
+        e = 1; break;
 
       case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
       case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
@@ -533,7 +539,7 @@ comp_addtask(tloc l, const char *name, hash_s props)
 
   /* set codel's parent task and (NULL) service */
   for(hash_first(props, &i); i.current; hash_next(&i))
-    if (prop_kind(i.value) == PROP_CODEL) {
+    if (prop_kind(i.value) == PROP_FSM_CODEL) {
       c = prop_codel(i.value);
       *codel_task(c) = t;
       *codel_service(c) = NULL;
@@ -584,6 +590,21 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
   /* remember task for later use (below) */
   p = hash_find(props, prop_strkind(PROP_TASK));
   t = p ? prop_task(p) : NULL;
+  switch(kind) {
+    case S_ATTRIBUTE:
+    case S_FUNCTION:
+      if (t) {
+        parserror(l, "%s '%s' may not run in a task",
+                  service_strkind(kind), name);
+        parsenoerror(prop_loc(p), " extraneous task '%s' property",
+                     task_name(t));
+        e = 1;
+      }
+      break;
+
+    case S_ACTIVITY:
+      break;
+  }
 
   /* check unwanted properties */
   for(hash_first(props, &i); i.current; hash_next(&i))
@@ -592,6 +613,21 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
         if (comp_addievs(l, prop_hash(i.value), 1)) e = errno;
         break;
 
+      case PROP_SIMPLE_CODEL:
+        switch(kind) {
+          case S_ATTRIBUTE:
+          case S_ACTIVITY:
+            parserror(l, "%s %s cannot have simple codels",
+                      service_strkind(kind), name);
+            parsenoerror(prop_loc(i.value), " %s declared here",
+                         prop_name(i.value));
+            e = 1;
+            break;
+
+          case S_FUNCTION:
+            break;
+        }
+        /*FALLTHROUGH*/
       case PROP_VALIDATE:
 	c = prop_codel(i.value);
 	for(hash_first(codel_params(c), &j); j.current; hash_next(&j)) {
@@ -608,42 +644,31 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
 	}
 	break;
 
-      case PROP_CODEL:
+      case PROP_FSM_CODEL:
         switch(kind) {
           case S_ATTRIBUTE:
-            if (t) {
-              parserror(prop_loc(i.value), "%s %s cannot have codels",
-                        service_strkind(kind), name);
-              e = 1;
-            }
-            break;
-
-          case S_SERVICE:
-            if (!t) {
-              parserror(prop_loc(i.value),
-                        "%s %s with no task cannot have codels",
-                        service_strkind(kind), name);
-              e = 1;
-            }
-            break;
-        }
-        break;
-
-      case PROP_TASK:
-        switch(kind) {
-          case S_ATTRIBUTE:
-            parserror(prop_loc(i.value),
-                      "task declaration not allowed in %s %s",
+          case S_FUNCTION:
+            parserror(l, "%s %s cannot have state machine codels",
                       service_strkind(kind), name);
+            parsenoerror(prop_loc(i.value), " %s declared here",
+                         prop_name(i.value));
             e = 1;
             break;
 
-          case S_SERVICE:
+          case S_ACTIVITY:
+            if (!t) {
+              parserror(prop_loc(i.value),
+                        "%s '%s' with codels must run in a task",
+                        service_strkind(kind), name);
+              parsenoerror(l, " missing task property");
+              e = 1;
+            }
             break;
         }
         break;
 
-      case PROP_DOC: case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      case PROP_TASK: case PROP_DOC: case PROP_INTERRUPTS: case PROP_BEFORE:
+      case PROP_AFTER:
         /* ok */
         break;
 
@@ -661,7 +686,7 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
     switch(param_src(i.value)) {
       case P_NOSRC: case P_PORT: assert(0);
       case P_IDS: if (kind == S_ATTRIBUTE) break; else assert(0);
-      case P_SERVICE: if (kind == S_SERVICE) break; else assert(0);
+      case P_SERVICE: if (kind != S_ATTRIBUTE) break; else assert(0);
     }
   }
   if (e) return NULL;
@@ -706,13 +731,14 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
   /* set codels parent task and service */
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch (prop_kind(i.value)) {
-      case PROP_CODEL:
+      case PROP_FSM_CODEL:
 	c = prop_codel(i.value);
 	*codel_task(c) = t;
 	*codel_service(c) = s;
 	break;
 
       case PROP_VALIDATE:
+      case PROP_SIMPLE_CODEL:
 	c = prop_codel(i.value);
 	*codel_task(c) = NULL;
 	*codel_service(c) = s;
@@ -754,7 +780,8 @@ service_strkind(svckind k)
 {
   switch(k) {
     case S_ATTRIBUTE:		return "attribute";
-    case S_SERVICE:		return "service";
+    case S_FUNCTION:		return "function";
+    case S_ACTIVITY:		return "activity";
   }
 
   assert(0);

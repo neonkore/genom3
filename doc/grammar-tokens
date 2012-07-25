@@ -1,3 +1,4 @@
+ACTIVITY	activity
 AFTER		after
 ANY		any
 ATTRIBUTE	attribute
@@ -25,12 +26,12 @@ FIXED		fixed
 FIXED_LIT	<fixed_literal>
 FLOAT		float
 FLOAT_LIT	<float_literal>
+FUNCTION	function
 HANDLE		handle
 IDENTIFIER	[A-Za-z_][A-Za-z0-9_]*
 IDS		ids
 IN		in
 INOUT		inout
-LOCAL		local
 INTERRUPTS	interrupts
 K		k
 LANG		lang

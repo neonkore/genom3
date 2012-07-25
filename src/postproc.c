@@ -129,8 +129,8 @@ dotgen_consolidate()
 	  case PROP_SCHEDULING: case PROP_STACK: case PROP_DOC: case PROP_IDS:
 	  case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
           case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
-          case PROP_TASK: case PROP_VALIDATE: case PROP_CODEL:
-          case PROP_THROWS:
+          case PROP_TASK: case PROP_VALIDATE: case PROP_SIMPLE_CODEL:
+          case PROP_FSM_CODEL: case PROP_THROWS:
             break;
 
 	  case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:

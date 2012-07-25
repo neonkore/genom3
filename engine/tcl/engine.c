@@ -379,10 +379,10 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
 
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
       case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
-      case PROP_CODEL: case PROP_DOC: case PROP_VERSION: case PROP_LANG:
-      case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
-      case PROP_TASK: case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
-      case PROP_AFTER:
+      case PROP_SIMPLE_CODEL: case PROP_FSM_CODEL: case PROP_DOC:
+      case PROP_VERSION: case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
+      case PROP_CODELS_REQUIRE: case PROP_TASK: case PROP_THROWS:
+      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
 	break;
     }
 
@@ -438,7 +438,7 @@ engine_gentask(Tcl_Interp *interp, Tcl_Interp *slave, task_s t)
 	s = engine_gentype(interp, slave, prop_value(i.value));
 	break;
 
-      case PROP_VALIDATE: case PROP_CODEL:
+      case PROP_VALIDATE: case PROP_SIMPLE_CODEL: case PROP_FSM_CODEL:
 	s = engine_gencodel(interp, slave, prop_codel(i.value));
 	break;
 
@@ -512,7 +512,7 @@ engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave, service_s s)
   /* properties */
   for(hash_first(service_props(s), &i); i.current; hash_next(&i)) {
     switch(prop_kind(i.value)) {
-      case PROP_VALIDATE: case PROP_CODEL:
+      case PROP_VALIDATE: case PROP_SIMPLE_CODEL: case PROP_FSM_CODEL:
 	e = engine_gencodel(interp, slave, prop_codel(i.value));
 	break;
 

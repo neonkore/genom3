@@ -80,20 +80,22 @@ task t2 {
   throw:	ERR1, ERR2;
 };
 
-service s1() {
+function
+s1() {
   doc: "service s1";
 };
 
-service s2(
-	   in c::ids p1 = { .a = 2:"long doc", {
-	       [2] = { .b = 2, .a = 4, .c = { 2 } }
-	     }, ee1} : "also doc",
-	   in long a =:"long doc",
-	   in long b =:"long doc",
-	   in e1 c = ee1 : "long doc",
-	   in string d = "test string" :"an input string" ,
-	   in long f[3], in sequence<sequence<long> >g,
-	   out string<128> e, out long outf[3], out sequence<long,128> h) {
+activity
+s2(
+   in c::ids p1 = { .a = 2:"long doc", {
+       [2] = { .b = 2, .a = 4, .c = { 2 } }
+     }, ee1} : "also doc",
+   in long a =:"long doc",
+   in long b =:"long doc",
+   in e1 c = ee1 : "long doc",
+   in string d = "test string" :"an input string" ,
+   in long f[3], in sequence<sequence<long> >g,
+   out string<128> e, out long outf[3], out sequence<long,128> h) {
   doc: "service s2";
   task: t1;
 

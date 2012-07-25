@@ -18,11 +18,6 @@
  */
 
 module genom {
-  struct connect_inport {
-    string<128> inport;
-    string<128> outport;
-  };
-
   struct state {
     string<33> digest;
     string<31> date;
@@ -34,13 +29,16 @@ template genom;
 
 port out genom::state genom_state;
 
-service abort_activity(in unsigned long activity) {
+function abort_activity(in unsigned long activity) {
   doc: "Abort an activity";
 };
 
-service connect_inport(in genom::connect_inport connect) {
+function
+connect_port(in string<128> local =	:"Local input port",
+             in string<128> remote =	:"Output port to connect to")
+{
   doc: "Connect two ports";
-  validate: genom_connect_validate(in connect);
+  codel: genom_connect_port_codel(service in local, service in remote);
 
   throw: no_such_inport, no_such_outport, port_io;
 };

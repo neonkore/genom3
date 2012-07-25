@@ -198,7 +198,8 @@ codel_find(const char *name)
     /* look for tasks codels */
     for(hash_first(comp_tasks(c), &i); i.value; hash_next(&i)) {
       for(hash_first(task_props(i.value), &j); j.value; hash_next(&j)) {
-        if (prop_kind(j.value) != PROP_CODEL &&
+        if (prop_kind(j.value) != PROP_FSM_CODEL &&
+            prop_kind(j.value) != PROP_SIMPLE_CODEL &&
             prop_kind(j.value) != PROP_VALIDATE)
           continue;
         codel = prop_codel(j.value);
@@ -209,7 +210,8 @@ codel_find(const char *name)
     /* look for service codels */
     for(hash_first(comp_services(c), &i); i.value; hash_next(&i)) {
       for(hash_first(service_props(i.value), &j); j.value; hash_next(&j)) {
-        if (prop_kind(j.value) != PROP_CODEL &&
+        if (prop_kind(j.value) != PROP_FSM_CODEL &&
+            prop_kind(j.value) != PROP_SIMPLE_CODEL &&
             prop_kind(j.value) != PROP_VALIDATE)
           continue;
         codel = prop_codel(j.value);
@@ -243,7 +245,7 @@ codel_fsmcreate(tloc l, hash_s props)
 
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
-      case PROP_CODEL:
+      case PROP_FSM_CODEL:
 	c = prop_codel(i.value);
 	for(hash_first(codel_triggers(c), &j); j.current; hash_next(&j)) {
 	  assert(type_kind(j.value) == IDL_ENUMERATOR);

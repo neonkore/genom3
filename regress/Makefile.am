@@ -20,6 +20,8 @@ TESTS=	basics/cpp.test
 TESTS+=	basics/parser.test
 TESTS+=	basics/require.test
 
+TESTS+=	templates/genom.test
+
 if WITH_TCL
   TESTS+=	templates/mappings.test
   TESTS+=	templates/skeleton.test

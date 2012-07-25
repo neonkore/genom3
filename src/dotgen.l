@@ -212,7 +212,8 @@ chartext	([^\'])|(\\.)
 "template"	{ yylval->s = string(yytext); return TEMPLATE; }
 "component"	{ yylval->s = string(yytext); return COMPONENT; }
 "task"		{ yylval->s = string(yytext); return TASK; }
-"service"	{ yylval->s = string(yytext); return SERVICE; }
+"function"	{ yylval->s = string(yytext); return FUNCTION; }
+"activity"	{ yylval->s = string(yytext); return ACTIVITY; }
 "codel"		{ yylval->s = string(yytext); return CODEL; }
 "port"		{ yylval->s = string(yytext); return PORT; }
 "handle"	{ yylval->s = string(yytext); return HANDLE; }
@@ -242,7 +243,7 @@ chartext	([^\'])|(\\.)
 "in"		{ yylval->s = string(yytext); return IN; }
 "out"		{ yylval->s = string(yytext); return OUT; }
 "inout"		{ yylval->s = string(yytext); return INOUT; }
-"local"		{ yylval->s = string(yytext); return LOCAL; }
+"service"	{ yylval->s = string(yytext); return SERVICE; }
 
 "s"		{ yylval->s = string(yytext); return S; }
 "ms"		{ yylval->s = string(yytext); return MS; }

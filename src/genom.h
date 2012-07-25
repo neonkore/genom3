@@ -336,7 +336,8 @@ typedef enum propkind {
 
   PROP_TASK,		/**< service task */
   PROP_VALIDATE,	/**< validation codels */
-  PROP_CODEL,		/**< codels */
+  PROP_SIMPLE_CODEL,	/**< bare codels */
+  PROP_FSM_CODEL,	/**< codels in a FSM */
   PROP_THROWS,		/**< errors from codels */
   PROP_INTERRUPTS,	/**< interrupted services */
   PROP_BEFORE,		/**< services requirements */
@@ -379,7 +380,8 @@ const char *	prop_strkind(propkind k);
 
 typedef enum svckind {
   S_ATTRIBUTE,
-  S_SERVICE
+  S_FUNCTION,
+  S_ACTIVITY
 } svckind;
 typedef struct comp_s *comp_s;
 typedef struct port_s *port_s;

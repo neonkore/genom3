@@ -74,7 +74,7 @@ ids {
     long a;
   } a[2];
 };
-service s() { validate: c(in a[1].a); };
+attribute s() { validate: c(in a[1].a); };
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
@@ -102,7 +102,7 @@ component c;
 task t {
   codel x: tcodel() yield ether;
 };
-service s() {
+activity s() {
   task: t;
   codel x: scodel() yield ether;
 };
@@ -128,7 +128,7 @@ testing '[language signature]'
 
 cat >run.gen <<'EOF'
 component c;
-service s() {
+attribute s() {
   validate: codel();
 };
 EOF
@@ -149,7 +149,7 @@ testing '[language invoke]'
 
 cat >run.gen <<'EOF'
 component c;
-service s() {
+attribute s() {
   validate: codel();
 };
 EOF

@@ -83,6 +83,8 @@ int	port_cmd(ClientData c, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	service_cmd(ClientData c, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
+int	remote_cmd(ClientData v, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[]);
 int	codel_cmd(ClientData c, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	param_cmd(ClientData c, Tcl_Interp *interp, int objc,
@@ -95,6 +97,7 @@ char *	comp_genref(comp_s c);
 char *	task_genref(task_s t);
 char *	port_genref(port_s p);
 char *	service_genref(service_s s);
+char *	remote_genref(remote_s r);
 char *	codel_genref(codel_s c);
 char *	param_genref(param_s p);
 char *	initer_genref(initer_s p);

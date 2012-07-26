@@ -49,7 +49,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   enum typeidx {
     typeidx_kind, typeidx_name, typeidx_fullname, typeidx_scope, typeidx_final,
     typeidx_type, typeidx_length, typeidx_value, typeidx_valuekind,
-    typeidx_members, typeidx_discriminator, typeidx_mapping,
+    typeidx_members, typeidx_discriminator, typeidx_remote, typeidx_mapping,
     typeidx_declarator, typeidx_address, typeidx_deref, typeidx_argument,
     typeidx_pass, typeidx_digest, typeidx_native, typeidx_loc, typeidx_class
   };
@@ -59,7 +59,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_final] = "final", [typeidx_type] = "type",
     [typeidx_length] = "length", [typeidx_value] = "value",
     [typeidx_valuekind] = "valuekind", [typeidx_members] = "members",
-    [typeidx_discriminator] = "discriminator",
+    [typeidx_discriminator] = "discriminator", [typeidx_remote] = "remote",
     [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
     [typeidx_address] = "address", [typeidx_deref] = "dereference",
     [typeidx_argument] = "argument", [typeidx_pass] = "pass",
@@ -194,6 +194,16 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	  break;
 
 	default: r = NULL; break;
+      }
+      break;
+
+    case typeidx_remote:
+      switch(type_kind(t)) {
+        case IDL_REMOTE:
+          r = Tcl_NewStringObj(remote_genref(type_remote(t)), -1);
+          break;
+
+        default: r = NULL; break;
       }
       break;
 

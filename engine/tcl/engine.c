@@ -43,6 +43,7 @@
 #define TASK_CMD	"task"
 #define PORT_CMD	"port"
 #define SERVICE_CMD	"service"
+#define REMOTE_CMD	"remote"
 #define CODEL_CMD	"codel"
 #define PARAM_CMD	"param"
 #define INITER_CMD	"initer"
@@ -103,6 +104,8 @@ static int	engine_genport(Tcl_Interp *interp, Tcl_Interp *slave,
 			port_s p);
 static int	engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave,
 			service_s s);
+static int	engine_genremote(Tcl_Interp *interp, Tcl_Interp *slave,
+			remote_s r);
 static int	engine_gencodel(Tcl_Interp *interp, Tcl_Interp *slave,
 			codel_s c);
 static int	engine_genparam(Tcl_Interp *interp, Tcl_Interp *slave,
@@ -304,7 +307,7 @@ engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave, idltype_s t)
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
-    case IDL_ENUMERATOR: case IDL_STRING:
+    case IDL_ENUMERATOR: case IDL_STRING: case IDL_REMOTE:
       /* no type reference */
       s = 0;
       break;
@@ -404,6 +407,12 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
   /* services */
   for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
     s = engine_genservice(interp, slave, i.value);
+    if (s) return s;
+  }
+
+  /* remotes */
+  for(hash_first(comp_remotes(c), &i); i.current; hash_next(&i)) {
+    s = engine_genremote(interp, slave, i.value);
     if (s) return s;
   }
 
@@ -527,6 +536,37 @@ engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave, service_s s)
 
     if (e) break;
   }
+
+  return 0;
+}
+
+
+/* --- engine_genremote ---------------------------------------------------- */
+
+/** Generate Tcl remote object.
+ */
+static int
+engine_genremote(Tcl_Interp *interp, Tcl_Interp *slave, remote_s r)
+{
+  const char *key = remote_genref(r);
+  hiter i;
+  int e = 0;
+
+  /* create the command if needed */
+  if (engine_createcmd(interp, slave, key, remote_cmd, r)) {
+    if (errno != EEXIST) return errno;
+  } else
+    printf("exported remote %s\n", remote_name(r));
+
+  /* parameters */
+  for(hash_first(remote_params(r), &i); i.current; hash_next(&i)) {
+    e = engine_genparam(interp, slave, i.value);
+    if (e) return e;
+  }
+
+  /* type */
+  e = engine_gentype(interp, slave, remote_type(r));
+  if (e) return e;
 
   return 0;
 }
@@ -666,6 +706,12 @@ char *
 service_genref(service_s s)
 {
   return genref("::" DOTGEN_NS "::" OBJECT_NS "::" SERVICE_CMD, s);
+}
+
+char *
+remote_genref(remote_s r)
+{
+  return genref("::" DOTGEN_NS "::" OBJECT_NS "::" REMOTE_CMD, r);
 }
 
 char *

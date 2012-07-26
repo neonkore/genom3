@@ -53,6 +53,7 @@ struct idltype_s {
       };
     };
     hash_s members;		/**< enum */
+    remote_s remote;		/**< remote */
   };
 };
 
@@ -386,6 +387,17 @@ type_newalias(tloc l, const char *name, idltype_s t)
   return c;
 }
 
+idltype_s
+type_newremote(tloc l, const char *name, remote_s remote)
+{
+  idltype_s t = type_new(l, IDL_REMOTE, name);
+  if (!t) return NULL;
+  assert(remote);
+
+  t->remote = remote;
+  return t;
+}
+
 
 /* --- type_renew ---------------------------------------------------------- */
 
@@ -453,7 +465,7 @@ type_equal(idltype_s a, idltype_s b)
       return a->length == b->length;
 
     case IDL_ENUMERATOR: case IDL_ENUM:
-    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_REMOTE:
       if (!a->fullname || !b->fullname) return 0;
       return strcmp(a->fullname, b->fullname)?0:1;
 
@@ -626,7 +638,7 @@ type_final(idltype_s t)
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
     case IDL_ANY: case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY:
-    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
+    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION: case IDL_REMOTE:
       return t;
 
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
@@ -758,6 +770,18 @@ type_membersscope(idltype_s t)
 }
 
 
+/* --- type_remote --------------------------------------------------------- */
+
+/** For remote, return the remote object.
+ */
+remote_s
+type_remote(idltype_s t)
+{
+  assert(t && t->kind == IDL_REMOTE);
+  return t->remote;
+}
+
+
 /* --- type_strkind -------------------------------------------------------- */
 
 /** Return a type kind as a string
@@ -795,6 +819,8 @@ type_strkind(idlkind k)
 
     case IDL_FORWARD_STRUCT:	return "forward struct";
     case IDL_FORWARD_UNION:	return "forward union";
+
+    case IDL_REMOTE:		return "remote";
   }
 
   assert(0);

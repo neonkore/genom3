@@ -42,3 +42,13 @@ connect_port(in string<128> local =	:"Local input port",
 
   throw: no_such_inport, no_such_outport, port_io;
 };
+
+function
+connect_remote(in string<128> local =	:"Local remote name",
+               in string<128> remote =	:"Service to connect to")
+{
+  doc: "Connect two remotes";
+  codel: genom_connect_remote_codel(service in local, service in remote);
+
+  throw: no_such_remote, no_such_service, remote_io;
+};

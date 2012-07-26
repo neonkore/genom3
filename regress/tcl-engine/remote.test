@@ -1,0 +1,35 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+mkdir -p run.t
+
+
+# --- remote parameter -----------------------------------------------------
+#
+testing '[$remote parameter]'
+
+cat >run.gen <<EOF
+component c;
+remote r(in long a, inout long b[2]);
+EOF
+run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach p [[[dotgen component] remote] parameter] {
+  puts -nonewline "[$p name] "
+}
+puts ""
+EOF
+expect out '
+	/^a b $/ {next}
+	{exit 2}
+'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach p [[[dotgen component] remote] parameter in] {
+  puts -nonewline "[$p name] "
+}
+puts ""
+EOF
+expect out '
+	/^a $/ {next}
+	{exit 2}
+'

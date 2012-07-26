@@ -59,6 +59,8 @@ namespace eval language::c {
         {forward struct} -
         {forward union}	{ append m [genforward $type] }
 
+        {remote}	{ append m [genremote $type] }
+
         default		{ return "" }
       }
 
@@ -104,7 +106,8 @@ namespace eval language::c {
 	    {enumerator}		-
 	    {struct}			-
 	    {union}			-
-	    {typedef}			{ set d [cname [$type fullname]] }
+	    {typedef}			-
+            {remote}			{ set d [cname [$type fullname]] }
 
 	    {struct member}		-
 	    {union member}		-
@@ -524,6 +527,39 @@ namespace eval language::c {
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
 	return [guard $m $n]
+    }
+
+
+    # --- genremote --------------------------------------------------------
+
+    # Return the C mapping of a remote.
+    #
+    proc genremote { type } {
+      set n [declarator $type]
+      set r [$type remote]
+
+      set f ""
+      set arg [list]
+      foreach p [$r parameters] {
+        switch -- [$p dir] {
+          in		{ set a [[$p type] argument value [$p name]] }
+          out - inout	{ set a [[$p type] argument reference [$p name]] }
+          default	{ template fatal "invalid parameter direction" }
+        }
+        lappend arg $a
+
+        if {[[$p type] kind] eq "sequence"} {
+          append f [gensequence [$p type]]
+        }
+      }
+      if {[llength $arg]} { set arg [join $arg {, }] } else { set arg "void" }
+
+      append m [genloc $type]
+      append m "\ntypedef struct $n {"
+      append m "\n  uint32_t (*call)($arg);"
+      append m "\n  const char *(*strerror)(uint32_t status);"
+      append m "\n} $n;"
+      return $f[guard $m $n]
     }
 
 

@@ -63,6 +63,10 @@ port in long_type a;
 port out c::ids::str b;
 port handle out long_type c[];
 
+remote r1(in long_type a = 0:"first parameter",
+          inout struct param { long x; } b[3]  = { { 0 } }:"second parameter",
+          out string d = "none");
+
 task t1;
 
 task t2 {

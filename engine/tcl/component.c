@@ -50,7 +50,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     compidx_name, compidx_doc, compidx_ids, compidx_iev, compidx_version,
     compidx_lang, compidx_email, compidx_require, compidx_crequire,
     compidx_clockrate, compidx_tasks, compidx_ports, compidx_services,
-    compidx_digest, compidx_loc, compidx_class
+    compidx_remotes, compidx_digest, compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
@@ -59,8 +59,8 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [compidx_require] = "require", [compidx_crequire] = "codels-require",
     [compidx_clockrate] = "clock-rate", [compidx_tasks] = "tasks",
     [compidx_ports] = "ports", [compidx_services] = "services",
-    [compidx_digest] = "digest", [compidx_loc] = "loc",
-    [compidx_class] = "class", NULL
+    [compidx_remotes] = "remotes", [compidx_digest] = "digest",
+    [compidx_loc] = "loc", [compidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [compidx_doc] = PROP_DOC, [compidx_version] = PROP_VERSION,
@@ -150,6 +150,17 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
 	Tcl_ListObjAppendElement(
 	  interp, r, Tcl_NewStringObj(service_genref(i.value), -1));
+      }
+      break;
+    }
+
+    case compidx_remotes: {
+      hiter i;
+
+      r = Tcl_NewListObj(0, NULL);
+      for(hash_first(comp_remotes(c), &i); i.current; hash_next(&i)) {
+        Tcl_ListObjAppendElement(
+          interp, r, Tcl_NewStringObj(remote_genref(i.value), -1));
       }
       break;
     }

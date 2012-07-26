@@ -42,6 +42,7 @@ engine_la_SOURCES=\
 	dotgen.c	\
 	component.c	\
 	service.c	\
+	remote.c	\
 	port.c		\
 	task.c		\
 	parameter.c	\

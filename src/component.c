@@ -49,6 +49,7 @@ struct comp_s {
   hash_s tasks;
   hash_s ports;
   hash_s services;
+  hash_s remotes;
 
   comp_s next;
 };
@@ -61,6 +62,7 @@ hash_s		comp_props(comp_s c) { assert(c); return c->props; }
 hash_s		comp_tasks(comp_s c) { assert(c); return c->tasks; }
 hash_s		comp_ports(comp_s c) { assert(c); return c->ports; }
 hash_s		comp_services(comp_s c) { assert(c); return c->services; }
+hash_s		comp_remotes(comp_s c) { assert(c); return c->remotes; }
 
 static comp_s		comp_get_kind(const char *name, compkind kind);
 static comp_s		comp_create_kind(tloc l, const char *name,
@@ -101,6 +103,21 @@ comp_s		service_comp(service_s s) { assert(s); return s->component; }
 hash_s		service_props(service_s s) { assert(s); return s->props; }
 hash_s		service_params(service_s s) { assert(s); return s->params; }
 hash_s		service_fsm(service_s s) { assert(s); return s->fsm; }
+
+struct remote_s {
+  tloc loc;
+  const char *name;
+  comp_s component;
+
+  hash_s params;
+  idltype_s type;
+};
+
+tloc		remote_loc(remote_s r) { assert(r); return r->loc; }
+const char *	remote_name(remote_s r) { assert(r); return r->name; }
+comp_s		remote_comp(remote_s r) { assert(r); return r->component; }
+idltype_s	remote_type(remote_s r) { assert(r); return r->type; }
+hash_s		remote_params(remote_s r) { assert(r); return r->params; }
 
 
 /** the components of a dotgen file */
@@ -241,20 +258,14 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
   c->events = NULL;
   c->props = props ? props : hash_create("property list", 0);
   c->tasks = hash_create(strings(name, " tasks", NULL), 2);
-  if (!c->tasks) {
-    free(c);
-    return NULL;
-  }
   c->ports = hash_create(strings(name, " ports", NULL), 2);
-  if (!c->ports) {
-    hash_destroy(c->tasks, 1);
-    free(c);
-    return NULL;
-  }
   c->services = hash_create(strings(name, " services", NULL), 2);
-  if (!c->services) {
-    hash_destroy(c->tasks, 1);
-    hash_destroy(c->ports, 1);
+  c->remotes = hash_create(strings(name, " remotes", NULL), 2);
+  if (!c->tasks || !c->ports || !c->services || !c->remotes) {
+    if (c->tasks) hash_destroy(c->tasks, 1);
+    if (c->ports) hash_destroy(c->ports, 1);
+    if (c->services) hash_destroy(c->services, 1);
+    if (c->remotes) hash_destroy(c->remotes, 1);
     free(c);
     return NULL;
   }
@@ -334,6 +345,18 @@ comp_service(comp_s c, const char *name)
 {
   assert(c && name);
   return hash_find(c->services, name);
+}
+
+
+/* --- comp_remote --------------------------------------------------------- */
+
+/** return component's remote
+ */
+remote_s
+comp_remote(comp_s c, const char *name)
+{
+  assert(c && name);
+  return hash_find(c->remotes, name);
 }
 
 
@@ -752,6 +775,74 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
 }
 
 
+
+
+/* --- comp_addremote ------------------------------------------------------ */
+
+/** create a remote in component
+ */
+remote_s
+comp_addremote(tloc l, const char *name, hash_s params)
+{
+  scope_s s, p;
+  comp_s comp;
+  remote_s r;
+  int e;
+  assert(name && params);
+
+  /* a component must exist */
+  comp = comp_active();
+  if (!comp) {
+    parserror(l, "missing component declaration before remote %s", name);
+    return NULL;
+  }
+
+  /* create */
+  r = malloc(sizeof(*r));
+  if (!r) {
+    warnx("memory exhausted, cannot create remote");
+    return NULL;
+  }
+
+  r->loc = l;
+  r->name = string(name);
+  r->component = comp;
+  r->params = params;
+
+  e = hash_insert(comp->remotes, r->name, r, (hrelease_f)remote_destroy);
+  switch(e) {
+    case 0: break;
+
+    case EEXIST:
+      parserror(l, "duplicate remote %s", r->name);
+      remote_s u = hash_find(comp->remotes, name);
+      if (u) parserror(u->loc, " remote %s declared here", u->name);
+      /*FALLTHROUGH*/
+    default:
+      free(r);
+      return NULL;
+  }
+
+  /* create underlying type */
+  assert(scope_current() == scope_global());
+  s = scope_push(l, comp_name(comp), SCOPE_MODULE);
+  if (!s) {
+    parserror(l, "the scope '::%1$s' is reserved for component '%1$s'", name);
+    remote_destroy(r);
+    return NULL;
+  }
+
+  r->type = type_newremote(l, name, r);
+
+  p = scope_pop();
+  assert(p == s);
+  if (!r->type) { remote_destroy(r); return NULL; }
+
+  xwarnx("created remote %s", r->name);
+  return r;
+}
+
+
 /* --- comp_strkind -------------------------------------------------------- */
 
 /** Return a component kind as a string
@@ -814,6 +905,21 @@ service_destroy(service_s s)
     hash_destroy(s->props, 1);
     hash_destroy(s->params, 1);
     free(s);
+  }
+}
+
+
+/* --- remote_destroy ------------------------------------------------------ */
+
+/** destroy remote
+ */
+void
+remote_destroy(remote_s r)
+{
+  if (r) {
+    hash_destroy(r->params, 1);
+    type_destroy(r->type);
+    free(r);
   }
 }
 
@@ -1009,6 +1115,21 @@ comp_applytmpl()
 	}
 	else
 	  e = 1;
+      }
+
+      for(hash_first(comp_remotes(t), &i); i.current; hash_next(&i)) {
+	h = hash_create("parameter list", 0);
+	for(hash_first(remote_params(i.value), &j); j.current; hash_next(&j)) {
+	  param = param_clone(j.value);
+	  if (!param) { e = 1; break; }
+	  if (hash_insert(h, j.key, param, (hrelease_f)param_destroy)) {
+	    e = 1; break;
+	  }
+	}
+	if (e) break;
+
+        if (!comp_addremote(remote_loc(i.value), remote_name(i.value), h))
+          e = 1;
       }
 
       if (!e)

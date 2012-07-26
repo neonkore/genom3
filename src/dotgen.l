@@ -219,6 +219,7 @@ chartext	([^\'])|(\\.)
 "handle"	{ yylval->s = string(yytext); return HANDLE; }
 "ids"		{ yylval->s = string(yytext); return IDS; }
 "attribute"	{ yylval->s = string(yytext); return ATTRIBUTE; }
+"remote"	{ yylval->s = string(yytext); return REMOTE; }
 
 "doc"		{ yylval->s = string(yytext); return DOC; }
 "version"	{ yylval->s = string(yytext); return VERSION; }

@@ -226,6 +226,8 @@ int		dcl_next(dcliter *i);
 
 /* --- IDL types ----------------------------------------------------------- */
 
+typedef struct remote_s *remote_s;
+
 typedef enum idlkind {
   IDL_BOOL,		/**< boolean */
   IDL_USHORT,		/**< unsigned short */
@@ -254,7 +256,9 @@ typedef enum idlkind {
   IDL_TYPEDEF,		/**< typedef */
 
   IDL_FORWARD_STRUCT,	/**< forward struct declaration */
-  IDL_FORWARD_UNION	/**< forward union declaration */
+  IDL_FORWARD_UNION,	/**< forward union declaration */
+
+  IDL_REMOTE		/**< rpc object */
 } idlkind;
 
 hash_s		type_all(void);
@@ -271,6 +275,7 @@ idltype_s	type_discriminator(idltype_s t);
 clist_s		type_casevalues(idltype_s t);
 hash_s		type_members(idltype_s t);
 scope_s		type_membersscope(idltype_s t);
+remote_s	type_remote(idltype_s t);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
 idltype_s	type_newforward(tloc l, const char *name, idlkind k);
@@ -288,6 +293,7 @@ idltype_s	type_newmember(tloc l, const char *name, idltype_s t);
 idltype_s	type_newunion(tloc l, const char *name, idltype_s t, scope_s s);
 idltype_s	type_newcase(tloc l, const char *name, idltype_s t, clist_s c);
 idltype_s	type_newalias(tloc l, const char *name, idltype_s t);
+idltype_s	type_newremote(tloc l, const char *name, remote_s r);
 int		type_renew(idltype_s t);
 void		type_destroy(idltype_s t);
 
@@ -402,9 +408,11 @@ hash_s		comp_props(comp_s c);
 hash_s		comp_tasks(comp_s c);
 hash_s		comp_ports(comp_s c);
 hash_s		comp_services(comp_s c);
+hash_s		comp_remotes(comp_s c);
 port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
 service_s	comp_service(comp_s c, const char *name);
+remote_s	comp_remote(comp_s c, const char *name);
 
 int		comp_dumpall(FILE *out);
 int		comp_dump(comp_s c, FILE *out);
@@ -424,18 +432,26 @@ hash_s		service_params(service_s s);
 hash_s		service_fsm(service_s s);
 const char *	service_strkind(svckind k);
 
+tloc		remote_loc(remote_s r);
+const char *	remote_name(remote_s r);
+comp_s		remote_comp(remote_s r);
+idltype_s	remote_type(remote_s r);
+hash_s		remote_params(remote_s r);
+
 comp_s		tmpl_create(tloc l, const char *name, hash_s props);
 comp_s		comp_create(tloc l, const char *name, hash_s props);
 idltype_s	comp_addids(tloc l, scope_s s);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
 service_s	comp_addservice(tloc l, svckind kind, const char *name,
 			hash_s params, hash_s props);
+remote_s	comp_addremote(tloc l, const char *name, hash_s params);
 int		comp_addievs(tloc l, hash_s h, int nostd);
 int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
 int		comp_applytmpl(void);
 
 void		task_destroy(task_s t);
 void		service_destroy(service_s s);
+void		remote_destroy(remote_s r);
 
 
 /* --- port ---------------------------------------------------------------- */

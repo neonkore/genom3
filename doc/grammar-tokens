@@ -45,6 +45,7 @@ PERIOD		period
 PORT		port
 PRIORITY	priority
 REAL_TIME	real-time
+REMOTE		remote
 REQUIRE		require
 S		s
 SCHEDULING	scheduling

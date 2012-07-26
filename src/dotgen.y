@@ -97,12 +97,12 @@
 %token <s>	INOUT SERVICE IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
-%token <s>	ASYNC
+%token <s>	ASYNC REMOTE
 
 %type <i>	specification statement
 %type <i>	idl_statements idl_statement genom_statement
 
-%type <i>	template component ids attribute port task service
+%type <i>	template component ids attribute port task service remote
 %type <skind>	service_kind
 %type <pkind>	port_dir opt_handle opt_array
 %type <prop>	component_property task_property service_property fsm_property
@@ -199,6 +199,7 @@ genom_statement:
   | port ';'
   | task ';'
   | service
+  | remote
 ;
 
 idl_statement:
@@ -352,6 +353,27 @@ service:
   {
     param_setlocals(NULL);
     parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
+  }
+;
+
+remote:
+  REMOTE identifier '(' service_parameters ')' ';'
+  {
+    param_setlocals(NULL);
+    if (!$2 || !$4) {
+      if ($2) parserror(@1, "dropped '%s' remote", $2);
+      if ($4) hash_destroy($4, 1);
+      break;
+    }
+    if (!comp_addremote(@1, $2, $4)) {
+      parserror(@1, "dropped '%s' remote", $2);
+      hash_destroy($4, 1);
+    }
+  }
+  | REMOTE identifier '(' error ')' ';'
+  {
+    param_setlocals(NULL);
+    parserror(@1, "dropped '%s' remote", $2);
   }
 ;
 
@@ -872,7 +894,7 @@ const_type:
 
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
       case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION:
+      case IDL_FORWARD_UNION: case IDL_REMOTE:
 	parserror(@1, "%s %s is not a valid constant type",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -1199,7 +1221,7 @@ switch_type_spec:
       case IDL_FLOAT: case IDL_DOUBLE: case IDL_OCTET: case IDL_STRING:
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
       case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION:
+      case IDL_FORWARD_UNION: case IDL_REMOTE:
 	parserror(@1, "%s %s is not a valid type for union switch",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -1695,7 +1717,7 @@ identifier:
   | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY
   | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC
   | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT | SERVICE
-  | ASYNC
+  | ASYNC | REMOTE
 ;
 
 identifier_list:

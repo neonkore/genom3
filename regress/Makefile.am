@@ -31,6 +31,7 @@ if WITH_TCL
   TESTS+=	tcl-engine/dotgen.test
   TESTS+=	tcl-engine/type.test
   TESTS+=	tcl-engine/service.test
+  TESTS+=	tcl-engine/remote.test
   TESTS+=	tcl-engine/codel.test
   TESTS+=	tcl-engine/component.test
   TESTS+=	tcl-engine/template.test

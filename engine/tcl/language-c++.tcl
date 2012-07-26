@@ -65,6 +65,8 @@ namespace eval language::c++ {
 	    {forward struct}	-
 	    {forward union}	{ append m [genforward $type] }
 
+            {remote}		{ template fatal "fix mapping for remote" }
+
             default		{ return "" }
 	}
 

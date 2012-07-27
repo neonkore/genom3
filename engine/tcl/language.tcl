@@ -89,7 +89,7 @@ proc comment { args } {
   if {[string index [lindex $args 0] 0] == "-" } {
     set args [lassign $args c]
     set c [string range $c 1 end]
-    return $c[join [split [join $args]] "\n$c"]
+    return $c[join [split [join $args] "\n"] "\n$c"]
   }
   return [${language::current}::comment [join $args]]
 }

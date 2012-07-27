@@ -127,7 +127,7 @@ scope_addtype(scope_s s, idltype_s t)
     parserror(type_loc(t),
 	      "declaration of '%s' clashes with name of enclosing module",
 	      type_name(t));
-    parsenoerror(s->loc, "  module '%s' declared here", s->name);
+    parsenoerror(s->loc, "  IDL module '%s' declared here", s->name);
     return errno = EEXIST;
   }
 
@@ -146,7 +146,7 @@ scope_addtype(scope_s s, idltype_s t)
     parserror(type_loc(t),
 	      "declaration of '%s' clashes with existing module name",
 	      type_name(t));
-    parsenoerror(c->loc, "  module '%s' declared here", c->name);
+    parsenoerror(c->loc, "  IDL module '%s' declared here", c->name);
     return errno = EEXIST;
   }
 

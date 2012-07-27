@@ -414,7 +414,7 @@ properties:
   }
   | properties error ';'
   {
-    parserror(@2, "invalid property");
+    parserror(@3, "invalid property");
     $$ = $1;
   }
 ;
@@ -704,6 +704,7 @@ opt_parameter_src:
   | IDS		{ $$ = P_IDS; }
   | SERVICE	{ $$ = P_SERVICE; }
   | PORT	{ $$ = P_PORT; }
+  | REMOTE	{ $$ = P_REMOTE; }
 ;
 
 parameter_dir:

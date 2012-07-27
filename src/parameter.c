@@ -43,7 +43,10 @@ struct param_s {
   clist_s member;	/**< base type member */
   idltype_s type;	/**< member type */
 
-  port_s port;		/**< in/out port (for port only) */
+  union {
+    port_s port;	/**< in/out port (for port only) */
+    remote_s remote;	/**< in/out remote (for remote only) */
+  };
 
   initer_s init;	/**< initial value (or NULL) */
 };
@@ -57,6 +60,9 @@ idltype_s	param_base(param_s p) { assert(p); return p->base; }
 idltype_s	param_type(param_s p) { assert(p); return p->type; }
 port_s		param_port(param_s p) {
   assert(p && p->src == P_PORT); return p->port;
+}
+remote_s	param_remote(param_s p) {
+  assert(p && p->src == P_REMOTE); return p->remote;
 }
 initer_s	param_initer(param_s p) { assert(p); return p->init; }
 
@@ -254,31 +260,79 @@ param_newport(tloc l, pdir dir, const char *name, clist_s member)
 }
 
 param_s
+param_newremote(tloc l, pdir dir, const char *name, clist_s member)
+{
+  param_s p;
+  comp_s c;
+  remote_s remote;
+  citer i;
+
+  if (dir == P_NODIR) return NULL;
+
+  clist_first(member, &i);
+  assert(i.value->k == CST_STRING);
+
+  if (!name) name = i.value->s;
+  assert(name);
+
+  c = comp_active(); assert(c);
+  remote = comp_remote(c, i.value->s);
+  if (!remote) {
+    parserror(l, "unknown remote '%s'", i.value->s);
+    errno = EINVAL; return NULL;
+  }
+
+  clist_next(&i);
+  if (i.current) {
+    parserror(l, "remote %s has no member", remote_name(remote));
+    errno = EINVAL; return NULL;
+  }
+
+  if (dir != P_IN) {
+    parserror(l, "remote %s is read-only and may not be an %s parameter",
+              remote_name(remote), param_strdir(dir));
+    errno = EINVAL; return NULL;
+  }
+
+  p = param_new(l, P_REMOTE, dir, name, remote_type(remote), NULL, NULL);
+  if (!p) {
+    parserror(l, "dropped parameter '%s'", name);
+    return NULL;
+  }
+
+  p->remote = remote;
+  xwarnx("created remote parameter %s", p->name);
+  return p;
+}
+
+param_s
 param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
 {
   param_s p = NULL;
 
   if (dir == P_NODIR) return NULL;
 
+  /* resolve implicit sources */
   while (src == P_NOSRC) {
     citer i;
     comp_s c;
     port_s port;
     param_s local;
+    remote_s remote;
     idltype_s ids, idsmember;
 
     if (!member) { src = P_IDS; break; }
-
-    c = comp_active(); assert(c);
-    ids = comp_ids(c);
 
     /* lookup all kind of parameters */
     clist_first(member, &i);
     assert(i.value->k == CST_STRING);
 
+    c = comp_active(); assert(c);
     idsmember = NULL;
     local = NULL;
     port = comp_port(c, i.value->s);
+    remote = comp_remote(c, i.value->s);
+    ids = comp_ids(c);
     if (ids) idsmember = type_member(ids, i.value->s);
     if (param_locals()) {
       hiter j;
@@ -289,10 +343,9 @@ param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
         }
     }
 
-    /* prevent ambiguity - must add loads of () for gcc... */
-    if ((idsmember && local) || (local && port) || (port && idsmember)) {
-      parserror(l, "missing ids, port or service qualifier for parameter '%s'",
-                i.value->s);
+    /* raise an error in case of ambiguity */
+    if (!!idsmember + !!local + !!port + !!remote > 1) {
+      parserror(l, "missing source qualifier for parameter '%s'", i.value->s);
       if (idsmember)
         parsenoerror(type_loc(idsmember),
                      " ids member %s declared here", i.value->s);
@@ -302,12 +355,16 @@ param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
       if (port)
         parsenoerror(port_loc(port), " port %s %s declared here",
                      port_strkind(port_kind(port)), i.value->s);
+      if (remote)
+        parsenoerror(remote_loc(remote),
+                     " remote %s declared here", i.value->s);
       return NULL;
     }
 
     if (idsmember) src = P_IDS;
     else if (local) src = P_SERVICE;
     else if (port) src = P_PORT;
+    else if (remote) src = P_REMOTE;
     else {
       parserror(l, "no such parameter '%s'", i.value->s);
       return NULL;
@@ -333,6 +390,14 @@ param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
         return NULL;
       }
       p = param_newport(l, dir, name, member);
+      break;
+
+    case P_REMOTE:
+      if (!member) {
+        parserror(l, "unnamed remote parameter '%s'", name);
+        return NULL;
+      }
+      p = param_newremote(l, dir, name, member);
       break;
 
     case P_NOSRC: assert(0);
@@ -373,6 +438,13 @@ param_clone(param_s param)
       k.k = CST_STRING; k.s = port_name(param_port(param));
       m = clist_prepend(m, k, 0);
       p = param_newport(param_loc(param), param_dir(param), param_name(param),
+                        m);
+      break;
+
+    case P_REMOTE:
+      k.k = CST_STRING; k.s = remote_name(param_remote(param));
+      m = clist_prepend(NULL, k, 0);
+      p = param_newremote(param_loc(param), param_dir(param), param_name(param),
                         m);
       break;
 
@@ -540,6 +612,7 @@ param_strsrc(psrc s)
     case P_IDS:			return "ids";
     case P_SERVICE:		return "service";
     case P_PORT:		return "port";
+    case P_REMOTE:		return "remote";
   }
 
   assert(0);

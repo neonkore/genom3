@@ -658,10 +658,11 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
             case P_NOSRC: assert(0);
             case P_IDS: case P_SERVICE: break;
 
-            case P_PORT:
+            case P_PORT: case P_REMOTE:
 	      parserror(prop_loc(j.value),
-			"port %s is not allowed in validate codel %s",
-			port_name(param_port(j.value)), codel_name(c));
+                        "%s %s is not allowed in validate codel %s",
+                        param_strsrc(param_src(j.value)),
+                        port_name(param_port(j.value)), codel_name(c));
 	      e = 1; break;
 	  }
 	}
@@ -707,7 +708,7 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
   /* check parameters */
   for(hash_first(params, &i); i.current; hash_next(&i)) {
     switch(param_src(i.value)) {
-      case P_NOSRC: case P_PORT: assert(0);
+      case P_NOSRC: case P_PORT: case P_REMOTE: assert(0);
       case P_IDS: if (kind == S_ATTRIBUTE) break; else assert(0);
       case P_SERVICE: if (kind != S_ATTRIBUTE) break; else assert(0);
     }

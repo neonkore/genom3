@@ -497,7 +497,8 @@ typedef enum psrc {
 
   P_IDS,
   P_SERVICE,
-  P_PORT
+  P_PORT,
+  P_REMOTE
 } psrc;
 
 typedef enum pdir {
@@ -533,6 +534,7 @@ clist_s		param_member(param_s p);
 idltype_s	param_base(param_s p);
 idltype_s	param_type(param_s p);
 port_s		param_port(param_s p);
+remote_s	param_remote(param_s p);
 initer_s	param_initer(param_s p);
 
 unsigned int	initer_index(initer_s i);
@@ -553,6 +555,8 @@ param_s		param_newids(tloc l, pdir dir, const char *name,
 param_s		param_newlocal(tloc l, pdir dir, const char *name,
 			clist_s member, idltype_s type, initer_s initer);
 param_s		param_newport(tloc l, pdir dir, const char *name,
+			clist_s member);
+param_s		param_newremote(tloc l, pdir dir, const char *name,
 			clist_s member);
 param_s		param_newcodel(tloc l, psrc src, pdir dir, const char *name,
 			clist_s member);

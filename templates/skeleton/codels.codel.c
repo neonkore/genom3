@@ -56,12 +56,15 @@ if {$task ne ""} {'>
 
 /** Codel <"[$codel name]"> of task <"[$task name]">.
  *
- * Triggered by <"[join [map {e {return [$e name]}} [$codel triggers]] {, }]">.
+<'    if {[llength [$codel triggers]]} {'>
+<'      set triggers [join [map {e {return [$e name]}} [$codel triggers]] {, }]'>
+<"[wrap " * Triggered by $triggers." { * }]">
+<'    }'>
  * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
-<'   if [llength [$task throws]] {'>
-<'     set throws [join [map {e {return [$e name]}} [$task throws]] {, }]'>
+<'    if {[llength [$task throws]]} {'>
+<'      set throws [join [map {e {return [$e name]}} [$task throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
-<'   }'>
+<'    }'>
  */
 <'
     if {![catch {dict get $generated_codels [$codel name]} prev]} {
@@ -86,10 +89,10 @@ if {$task eq ""} {
     if {[llength [$service validate]] == 0} continue'>
 
 
-/* <"[--- Service [$service name] ---------------------------------------]"> */
+/* <"[--- [string toupper [$service kind] 0] [$service name] ------------]"> */
 <'    foreach codel [$service validate] {'>
 
-/** Validation codel <"[$codel name]"> of service <"[$service name]">.
+/** Validation codel <"[$codel name]"> of <"[$service kind]"> <"[$service name]">.
  *
  * Returns <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
 <'   set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
@@ -120,15 +123,20 @@ foreach service [$component services] {
   } '>
 
 
-/* <"[--- Service [$service name] ---------------------------------------]"> */
+/* <"[--- [string toupper [$service kind] 0] [$service name] ------------]"> */
 <' foreach codel [$service codels] {'>
 
-/** Codel <"[$codel name]"> of service <"[$service name]">.
+/** Codel <"[$codel name]"> of <"[$service kind]"> <"[$service name]">.
  *
- * Triggered by <"[join [map {e {return [$e name]}} [$codel triggers]] {, }]">.
+<'   if {[llength [$codel triggers]]} {'>
+<'     set triggers [join [map {e {return [$e name]}} [$codel triggers]] {, }]'>
+<"[wrap " * Triggered by $triggers." { * }]">
+<'   }'>
  * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
-<'   set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
+<'   if {[llength [$service throws]]} {'>
+<'     set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
+<'   }'>
  */
 <'
    if {![catch {dict get $generated_codels [$codel name]} prev]} {

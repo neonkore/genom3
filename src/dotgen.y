@@ -573,6 +573,11 @@ attribute_parameter:
     if (!$2) { $$ = NULL; break; }
     $$ = param_newids(@2, $1, NULL, $2, $3);
   }
+  | parameter_dir error
+  {
+    parserror(@2, "expected ids member");
+    $$ = NULL;
+  }
 ;
 
 service_parameters:
@@ -667,6 +672,11 @@ parameter_dir:
     IN		{ $$ = P_IN; }
   | OUT		{ $$ = P_OUT; }
   | INOUT	{ $$ = P_INOUT; }
+  | error
+  {
+    $$ = P_NODIR;
+    parserror(@1, "expected 'in', 'out' or 'inout'");
+  }
 ;
 
 parameter_variable:

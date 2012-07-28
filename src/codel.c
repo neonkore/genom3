@@ -106,7 +106,7 @@ codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
   }
 
   /* register internal events */
-  if (comp_addievs(l, c->yields) || comp_addievs(l, c->triggers)) {
+  if (comp_addievs(l, c->yields, 0) || comp_addievs(l, c->triggers, 0)) {
     free(c);
     return NULL;
   }
@@ -174,7 +174,8 @@ codel_clone(codel_s codel)
     c->service = NULL;
 
   /* register internal events */
-  if (comp_addievs(c->loc, c->yields) || comp_addievs(c->loc, c->triggers)) {
+  if (comp_addievs(c->loc, c->yields, 0) ||
+      comp_addievs(c->loc, c->triggers, 0)) {
     free(c);
     return NULL;
   }

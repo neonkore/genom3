@@ -357,7 +357,7 @@ prop_merge(hash_s p, prop_s i)
         e = hash_insert(iev, j.key, string(j.key), NULL);
         if (e) break;
       }
-      if (comp_addievs(prop_loc(i), iev))
+      if (comp_addievs(prop_loc(i), iev, 0))
         e = errno;
       else
         i->hash = iev;

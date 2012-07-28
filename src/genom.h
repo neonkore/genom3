@@ -428,7 +428,7 @@ idltype_s	comp_addids(tloc l, scope_s s);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
 service_s	comp_addservice(tloc l, svckind kind, const char *name,
 			hash_s params, hash_s props);
-int		comp_addievs(tloc l, hash_s h);
+int		comp_addievs(tloc l, hash_s h, int nostd);
 int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
 int		comp_applytmpl(void);
 

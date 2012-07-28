@@ -276,7 +276,7 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
   p = hash_find(c->props, prop_strkind(PROP_THROWS));
   if (p) {
     /* register internal events */
-    if (comp_addievs(l, prop_hash(p))) {
+    if (comp_addievs(l, prop_hash(p), 1)) {
       comp_setactive(clist = c->next);
       return NULL;
     }
@@ -479,9 +479,9 @@ comp_addtask(tloc l, const char *name, hash_s props)
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
       case PROP_THROWS:
-	/* register internal events */
-	if (comp_addievs(l, prop_hash(i.value))) e = errno;
-	break;
+        /* register internal events */
+        if (comp_addievs(l, prop_hash(i.value), 1)) e = errno;
+        break;
 
       case PROP_DOC: case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
       case PROP_SCHEDULING: case PROP_STACK: case PROP_CODEL:
@@ -589,9 +589,8 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
       case PROP_THROWS:
-	/* register internal events */
-	if (comp_addievs(l, prop_hash(i.value))) e = errno;
-	break;
+        if (comp_addievs(l, prop_hash(i.value), 1)) e = errno;
+        break;
 
       case PROP_VALIDATE:
 	c = prop_codel(i.value);
@@ -848,12 +847,13 @@ error:
 /** Add internal event to component
  */
 int
-comp_addievs(tloc l, hash_s h)
+comp_addievs(tloc l, hash_s h, int nostd)
 {
+  const char *stdev[] = COMPONENT_EVENT_STD_NAMES;
   idltype_s iev, e;
   scope_s s, p;
   hiter i;
-  int r;
+  int r, v;
   assert(h);
 
   if (!comp_active()) return 0;
@@ -864,6 +864,16 @@ comp_addievs(tloc l, hash_s h)
 
   r = 0;
   for(hash_first(h, &i); i.current; hash_next(&i)) {
+
+    if (nostd) {
+      for(v=0; v<sizeof(stdev)/sizeof(stdev[0]); v++)
+        if (!strcmp(i.key, stdev[v])) {
+          parserror(l, "event '%s' is reserved and cannot be thrown", i.key);
+          r = r?r:EINVAL;
+          break;
+        }
+    }
+
     e = scope_findtype(s, i.key);
     if (!e || type_kind(e) != IDL_ENUMERATOR) {
       e = type_addenumerator(l, iev, i.key);

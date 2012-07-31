@@ -582,6 +582,8 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
                 hash_s props)
 {
   comp_s comp;
+  port_s port;
+  remote_s remote;
   hiter i, j;
   service_s s;
   task_s t;
@@ -590,12 +592,6 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
   int e;
   assert(name && params);
 
-  /* all is a reserved name */
-  if (!strcmp(name, ALL_SERVICE_NAME)) {
-    parserror(l, "'%s' is a reserved %s name", service_strkind(kind), name);
-    return NULL;
-  }
-
   /* a component must exist */
   comp = comp_active();
   if (!comp) {
@@ -603,12 +599,30 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
               service_strkind(kind), name);
     return NULL;
   }
-  e = 0;
 
+  /* check for reserved or already used names */
+  if (!strcmp(name, ALL_SERVICE_NAME)) {
+    parserror(l, "'%s' is a reserved %s name", service_strkind(kind), name);
+    return NULL;
+  }
+  port = comp_port(comp, name);
+  remote = comp_remote(comp, name);
+  if (port || remote) {
+    parserror(l, "redefinition of '%s'", name);
+    if (port)
+      parsenoerror(port_loc(port), " port '%s' declared here", port_name(port));
+    if (remote)
+      parsenoerror(remote_loc(remote),
+                   " remote '%s' declared here", remote_name(remote));
+    return NULL;
+  }
+
+  /* create empty property list if none has been defined */
   if (!props) {
     props = hash_create("property list", 0);
     if (!props) return NULL;
   }
+  e = 0;
 
   /* remember task for later use (below) */
   p = hash_find(props, prop_strkind(PROP_TASK));
@@ -787,6 +801,8 @@ comp_addremote(tloc l, const char *name, hash_s params)
 {
   scope_s s, p;
   comp_s comp;
+  port_s port;
+  service_s service;
   remote_s r;
   int e;
   assert(name && params);
@@ -795,6 +811,20 @@ comp_addremote(tloc l, const char *name, hash_s params)
   comp = comp_active();
   if (!comp) {
     parserror(l, "missing component declaration before remote %s", name);
+    return NULL;
+  }
+
+  /* check for already used names */
+  port = comp_port(comp, name);
+  service = comp_service(comp, name);
+  if (port || service) {
+    parserror(l, "redefinition of '%s'", name);
+    if (port)
+      parsenoerror(port_loc(port), " port '%s' declared here", port_name(port));
+    if (service)
+      parsenoerror(service_loc(service), " %s '%s' declared here",
+                   service_strkind(service_kind(service)),
+                   service_name(service));
     return NULL;
   }
 

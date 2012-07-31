@@ -63,6 +63,8 @@ port_s
 port_new(tloc l, portkind k, const char *name, idltype_s t)
 {
   comp_s c;
+  service_s service;
+  remote_s remote;
   port_s p;
   idltype_s h;
   int e;
@@ -75,6 +77,21 @@ port_new(tloc l, portkind k, const char *name, idltype_s t)
   c = comp_active();
   if (!c) {
     parserror(l, "missing component declaration before port %s", name);
+    return NULL;
+  }
+
+  /* check for already used names */
+  service = comp_service(c, name);
+  remote = comp_remote(c, name);
+  if (service || remote) {
+    parserror(l, "redefinition of '%s'", name);
+    if (service)
+      parsenoerror(service_loc(service), " %s '%s' declared here",
+                   service_strkind(service_kind(service)),
+                   service_name(service));
+    if (remote)
+      parsenoerror(remote_loc(remote), " remote '%s' declared here",
+                   remote_name(remote));
     return NULL;
   }
 

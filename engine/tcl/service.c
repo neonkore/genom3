@@ -43,7 +43,8 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     serviceidx_name, serviceidx_kind, serviceidx_comp, serviceidx_doc,
     serviceidx_task, serviceidx_validate, serviceidx_codels, serviceidx_params,
     serviceidx_fsm, serviceidx_throws, serviceidx_interrupts,
-    serviceidx_before, serviceidx_after, serviceidx_loc, serviceidx_class
+    serviceidx_before, serviceidx_after, serviceidx_digest, serviceidx_loc,
+    serviceidx_class
   };
   static const char *args[] = {
     [serviceidx_name] = "name", [serviceidx_kind] = "kind",
@@ -52,8 +53,8 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [serviceidx_codels] = "codels", [serviceidx_params] = "parameters",
     [serviceidx_fsm] = "fsm", [serviceidx_throws] = "throws",
     [serviceidx_interrupts] = "interrupts", [serviceidx_before] = "before",
-    [serviceidx_after] = "after", [serviceidx_loc] = "loc",
-    [serviceidx_class] = "class", NULL
+    [serviceidx_after] = "after", [serviceidx_digest] = "digest",
+    [serviceidx_loc] = "loc", [serviceidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [serviceidx_interrupts] = PROP_INTERRUPTS,
@@ -260,6 +261,23 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	else
 	  r = Tcl_NewListObj(0, NULL);
       }
+      break;
+    }
+
+    case serviceidx_digest: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("object", -1),
+        Tcl_NewStringObj("digest", -1),
+        objv[0]
+      };
+
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      e = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[1]);
+      Tcl_DecrRefCount(argv[0]);
+      if (e != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
       break;
     }
 

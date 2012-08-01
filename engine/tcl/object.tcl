@@ -33,7 +33,7 @@ namespace eval object {
 
     md5::init
     switch $class {
-      component - type { $class-digest $object }
+      component - service - remote - type { $class-digest $object }
     }
     return [md5::final]
   }
@@ -57,13 +57,35 @@ namespace eval object {
     }
 
     foreach s [$component services] {
-      md5::update service
+      md5::update [$s kind]
       md5::update [$s name]
-      foreach p [$s parameters] {
-        md5::update [$p dir]
-        md5::update [$p name]
-        type-digest [$p type]
-      }
+      service-digest $s
+    }
+  }
+
+
+  # --- service-digest -----------------------------------------------------
+
+  # Compute a md5 hash of the interface of a service (must be called from
+  # digest).
+  #
+  proc service-digest { service } {
+    foreach p [$service parameters] {
+      md5::update [$p dir]
+      type-digest [$p type]
+    }
+  }
+
+
+  # --- remote-digest -----------------------------------------------------
+
+  # Compute a md5 hash of the interface of a remote (must be called from
+  # digest).
+  #
+  proc remote-digest { remote } {
+    foreach p [$remote parameters] {
+      md5::update [$p dir]
+      type-digest [$p type]
     }
   }
 

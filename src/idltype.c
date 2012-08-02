@@ -443,6 +443,53 @@ type_destroy(idltype_s t)
 }
 
 
+/* --- type_fixed ---------------------------------------------------------- */
+
+/** Return true if type has a fixed size
+ */
+int
+type_fixed(idltype_s t)
+{
+  assert(t);
+  t = type_final(t);
+  switch(type_kind(t)) {
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
+    case IDL_ENUM: case IDL_ENUMERATOR:
+      return 1;
+
+    case IDL_STRING:
+      if (type_length(t) == -1U) return 0;
+      return 1;
+
+    case IDL_SEQUENCE:
+      if (type_length(t) == -1U) return 0;
+      /*FALLTHROUGH*/
+    case IDL_ARRAY: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      return type_fixed(type_type(t));
+
+    case IDL_STRUCT: case IDL_UNION: {
+      idltype_s e;
+      hiter i;
+
+      for(e = type_first(t, &i); e; e = type_next(&i))
+        if (!type_fixed(e)) return 0;
+      return 1;
+    }
+
+    case IDL_REMOTE:
+      return 1;
+
+    case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
+      assert(0);
+  }
+
+  assert(0);
+  return 0;
+}
+
+
 /* --- type_equal ---------------------------------------------------------- */
 
 /** Return true if types represent the same final type

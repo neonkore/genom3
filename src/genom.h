@@ -297,6 +297,7 @@ idltype_s	type_newremote(tloc l, const char *name, remote_s r);
 int		type_renew(idltype_s t);
 void		type_destroy(idltype_s t);
 
+int		type_fixed(idltype_s t);
 int		type_equal(idltype_s a, idltype_s b);
 idltype_s	type_find(const char *name);
 idltype_s	type_member(idltype_s t, const char *name);

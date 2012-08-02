@@ -274,6 +274,7 @@ namespace eval language {
     }
     return $m
   }
+  slave alias language::mapping language::mapping
   namespace export mapping
 
 

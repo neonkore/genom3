@@ -32,6 +32,7 @@ IDENTIFIER	[A-Za-z_][A-Za-z0-9_]*
 IDS		ids
 IN		in
 INOUT		inout
+INTERFACE	interface
 INTERRUPTS	interrupts
 K		k
 LANG		lang
@@ -59,7 +60,6 @@ STRING		string
 STRUCT		struct
 SWITCH		switch
 TASK		task
-TEMPLATE	template
 THROWS		throw
 TRUE		TRUE
 TYPEDEF		typedef

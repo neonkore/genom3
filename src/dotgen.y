@@ -68,6 +68,7 @@
   param_s	param;
   initer_s	initer;
   hash_s	hash;
+  comp_s	comp;
   scope_s	scope;
   dcl_s		dcl;
   idltype_s	type;
@@ -83,7 +84,7 @@
 %token <i>	COLONCOLON SL SR
 %token <i>	MODULE
 %token <i>	UNSIGNED SHORT LONG FIXED FLOAT DOUBLE CHAR WCHAR STRING
-%token <i>	WSTRING BOOLEAN OCTET OBJECT ANY VOID PROPERTY
+%token <i>	WSTRING BOOLEAN OCTET OBJECT ANY VOID
 %token <i>	CONST ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 %token <i>	TYPEDEF
 %token <i>	FALSE TRUE
@@ -93,16 +94,17 @@
 %token <s>	string_literal IDENTIFIER
 
 %token <s>	S MS US K M REAL_TIME
-%token <s>	TEMPLATE COMPONENT TASK FUNCTION ACTIVITY CODEL PORT IN OUT
+%token <s>	INTERFACE COMPONENT TASK FUNCTION ACTIVITY CODEL PORT IN OUT
 %token <s>	INOUT SERVICE IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 %token <s>	ASYNC REMOTE
 
-%type <i>	specification statement
-%type <i>	idl_statements idl_statement genom_statement
+%type <i>	specification statement idl_statements idl_statement
+%type <i>	exports export
 
-%type <i>	template component ids attribute port task service remote
+%type <comp>	component_name interface_name
+%type <i>	interface component ids attribute port task service remote
 %type <skind>	service_kind
 %type <pkind>	port_dir opt_handle opt_array
 %type <prop>	component_property task_property service_property fsm_property
@@ -134,7 +136,7 @@
 %type <hash>	enumerator_list
 %type <v>	case_label
 %type <vlist>	case_label_list
-%type <scope>	module_name scope_push_struct scope_push_union scope_push_ids
+%type <scope>	module_name scope_push_struct scope_push_union ids_name
 
 %type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
@@ -160,13 +162,12 @@
  * @ruleinclude specification
  * @ruleinclude statement
  * @sp 1
- * @ruleinclude genom_statement
  * @ruleinclude idl_statement
  *
  * Definitions are named by the mean of identifiers, @pxref{Reserved keywords}.
  *
- * A @genom{} statement defines components (@pxref{Component declaration}),
- * communication ports, services and execution contexts called tasks.
+ * A @genom{} statement defines components (@pxref{Component declaration}) or
+ * interfaces.
  *
  * An @acronym{IDL} statement defines types (@pxref{Type declaration}),
  * constants (@pxref{Constant declaration}) or @acronym{IDL} modules containing
@@ -181,27 +182,22 @@
 specification: /* empty */ { $$ = 0; } | specification statement;
 
 statement:
-  genom_statement
+    component
+  | interface
   | idl_statement
-  | error ';' {}
+  | error ';'
+  {
+    parserror(@1, "expected `component', `interface' or IDL definition");
+  }
   | error
   {
-    parserror(@1, "maybe a missing ';'");
+    parserror(@1, "expected `component', `interface' or IDL definition");
+    parsenoerror(@1, "maybe a missing ';'");
     YYABORT;
   }
 ;
 
-genom_statement:
-  template ';'
-  | component
-  | ids ';'
-  | attribute
-  | port ';'
-  | task ';'
-  | service
-  | remote
-;
-
+idl_statements: idl_statement | idl_statements idl_statement;
 idl_statement:
   module
   | const_dcl ';'
@@ -223,39 +219,72 @@ idl_statement:
  * @cindex declaration, component
  *
  * @ruleinclude component
+ * @ruleinclude component_name
+ * @ruleinclude component_body
  * @sp 1
- * @ruleinclude opt_properties
- * @ruleinclude properties
- * @ruleinclude property
- * @sp 1
- * @ruleinclude component_property
+ * @ruleinclude exports
+ * @ruleinclude export
  */
-component:
-  COMPONENT identifier opt_properties ';'
+component: COMPONENT component_name component_body ';'
   {
-    if (!$2) { parserror(@1, "dropped component"); break; }
-    if (!comp_create(@1, $2, $3)) YYABORT;
+    comp_s c = comp_pop();
+    if (c) assert(c == $2);
   }
 ;
 
-template:
-  TEMPLATE identifier '{' properties '}'
+component_name: identifier
   {
-    if (!$2 || !$4) {
-      if ($2) parserror(@1, "dropped '%s' component", $2);
-      if ($4) hash_destroy($4, 1);
-      break;
+    if (!$1) { parserror(@1, "dropped component"); YYABORT; }
+    $$ = comp_push(@1, $1, COMP_REGULAR);
+    if (!$$) {
+      parserror(@1, "dropped component '%s'", $1);
+      YYABORT;
     }
-    if (!tmpl_create(@1, $2, $4)) YYABORT;
   }
-  | TEMPLATE identifier
+;
+
+interface: INTERFACE interface_name component_body ';'
   {
-    if (!tmpl_create(@1, $2, NULL)) YYABORT;
+    comp_s c = comp_pop();
+    if (c) assert(c == $2);
   }
+;
+
+interface_name: identifier
+  {
+    if (!$1) { parserror(@1, "dropped interface"); YYABORT; }
+    $$ = comp_push(@1, $1, COMP_IFACE);
+    if (!$$) {
+      parserror(@1, "dropped interface '%s'", $1);
+      YYABORT;
+    }
+  }
+;
+
+component_body: /* empty */ | '{' exports '}';
+
+exports: /* empty */ { $$ = 0; } | exports export;
+
+export:
+  property
+  {
+    $$ = 0; if (!$1) break;
+    if (comp_addprop(@1, $1)) {
+      parserror(@1, "dropped %s declaration", prop_name($1));
+      prop_destroy($1);
+    }
+  }
+  | ids
+  | attribute
+  | port
+  | task
+  | service
+  | remote
+  | idl_statement
 ;
 
 port:
-  PORT opt_handle port_dir type_spec identifier opt_array
+  PORT opt_handle port_dir type_spec identifier opt_array ';'
   {
     if (!$5) { parserror(@1, "dropped port"); break; }
     if (!$4) { parserror(@1, "dropped '%s' port", $5); break; }
@@ -280,33 +309,38 @@ opt_handle:
 ;
 
 ids:
-  scope_push_ids '{' member_list '}'
+  ids_name '{' member_list '}' ';'
   {
-    scope_s s = scope_set(scope_global());
-    assert(s == $1);
-
-    if (!comp_addids(@1, s))
-      parserror(@1, "dropping ids declaration");
+    scope_s s = scope_pop(); assert(s == $1);
+    if (!comp_addids(@1, s)) parserror(@1, "dropped ids declaration");
+  }
+  | ids_name error ';'
+  {
+    scope_s s = scope_pop(); assert(s == $1);
+    parserror(@1, "dropped ids declaration");
+  }
+  | ids_name error
+  {
+    scope_s s = scope_pop(); assert(s == $1);
+    parsenoerror(@1, "maybe a missing ';'");
+    parserror(@1, "dropped ids declaration");
   }
 ;
 
+ids_name: IDS
+  {
+    $$ = comp_idsscope(comp_active());
+    scope_set($$);
+  };
+
 task:
-  TASK identifier '{' properties '}'
+  TASK identifier opt_properties ';'
   {
-    if (!$2 || !$4) {
-      if ($2) parserror(@1, "dropped '%s' task", $2);
-      if ($4) hash_destroy($4, 1);
-      break;
-    }
-    if (!comp_addtask(@1, $2, $4)) {
+    if (!$2) { parserror(@1, "dropped task"); break; }
+    if (!comp_addtask(@1, $2, $3)) {
       parserror(@1, "dropped '%s' task", $2);
-      hash_destroy($4, 1);
+      if ($3) hash_destroy($3, 1);
     }
-  }
-  | TASK identifier
-  {
-    if (!comp_addtask(@1, $2, NULL))
-      parserror(@1, "dropped '%s' task", $2);
   }
 ;
 
@@ -385,23 +419,14 @@ service_kind:
 
 /* --- GenoM object properties --------------------------------------------- */
 
-opt_properties:
-  /* empty */
-  {
-    $$ = NULL;
-  }
-  | '{' properties '}'
-  {
-    $$ = $2;
-  }
-;
+opt_properties: /* empty */ { $$ = 0; } | '{' properties '}' { $$ = $2; }
 
 properties:
   /* empty */
   {
     $$ = hash_create("property list", 5);
   }
-  | properties property ';'
+  | properties property
   {
     $$ = $1;
     if (!$$ || !$2) break;
@@ -412,47 +437,48 @@ properties:
       }
     }
   }
-  | properties error ';'
+;
+
+property: component_property | task_property | service_property | fsm_property
+  | error ';'
   {
-    parserror(@3, "invalid property");
-    $$ = $1;
+    parserror(@1, "invalid property");
+    $$ = NULL;
   }
 ;
 
-property: component_property | task_property | service_property | fsm_property;
-
 component_property:
-  DOC ':' string_literals
+  DOC ':' string_literals ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_DOC, $3);
   }
-  | VERSION ':' string_literals
+  | VERSION ':' string_literals ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_VERSION, $3);
   }
-  | LANG ':' string_literals
+  | LANG ':' string_literals ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_LANG, $3);
   }
-  | EMAIL ':' string_literals
+  | EMAIL ':' string_literals ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_EMAIL, $3);
   }
-  | REQUIRE ':' string_list
+  | REQUIRE ':' string_list ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newrequire(@1, PROP_REQUIRE, $3);
   }
-  | CODELSREQUIRE ':' string_list
+  | CODELSREQUIRE ':' string_list ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newrequire(@1, PROP_CODELS_REQUIRE, $3);
   }
-  | CLOCKRATE ':' const_expr time_unit
+  | CLOCKRATE ':' const_expr time_unit ';'
   {
     if (const_binaryop(&$3, '*', $4)) {
       parserror(@3, "invalid numeric constant");
@@ -463,7 +489,7 @@ component_property:
 ;
 
 task_property:
-  PERIOD ':' const_expr time_unit
+  PERIOD ':' const_expr time_unit ';'
   {
     if (const_binaryop(&$3, '*', $4)) {
       parserror(@3, "invalid numeric constant");
@@ -471,7 +497,7 @@ task_property:
     }
     $$ = prop_newvalue(@1, PROP_PERIOD, $3);
   }
-  | DELAY ':' const_expr time_unit
+  | DELAY ':' const_expr time_unit ';'
   {
     if (const_binaryop(&$3, '*', $4)) {
       parserror(@3, "invalid numeric constant");
@@ -479,15 +505,15 @@ task_property:
     }
     $$ = prop_newvalue(@1, PROP_DELAY, $3);
   }
-  | PRIORITY ':' positive_int_const
+  | PRIORITY ':' positive_int_const ';'
   {
     $$ = prop_newvalue(@1, PROP_PRIORITY, $3);
   }
-  | SCHEDULING ':' REAL_TIME
+  | SCHEDULING ':' REAL_TIME ';'
   {
     $$ = prop_newstring(@1, PROP_SCHEDULING, $3);
   }
-  | STACK ':' positive_int_const size_unit
+  | STACK ':' positive_int_const size_unit ';'
   {
     if (const_binaryop(&$3, '*', $4)) {
       parserror(@3, "invalid numeric constant");
@@ -498,31 +524,31 @@ task_property:
 ;
 
 service_property:
-  TASK ':' identifier
+  TASK ':' identifier ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newtask(@1, $3);
   }
-  | INTERRUPTS ':' identifier_list
+  | INTERRUPTS ':' identifier_list ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_INTERRUPTS, $3);
   }
-  | BEFORE ':' identifier_list
+  | BEFORE ':' identifier_list ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_BEFORE, $3);
   }
-  | AFTER ':' identifier_list
+  | AFTER ':' identifier_list ';'
   {
     if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_AFTER, $3);
   }
-  | VALIDATE ':' codel
+  | VALIDATE ':' codel ';'
   {
     $$ = $3 ? prop_newcodel(@1, PROP_VALIDATE, $3) : NULL;
   }
-  | opt_async CODEL ':' codel
+  | opt_async CODEL ':' codel ';'
   {
     if ($4) codel_setkind($4, $1);
     $$ = $4 ? prop_newcodel(@1, PROP_SIMPLE_CODEL, $4) : NULL;
@@ -530,11 +556,11 @@ service_property:
 ;
 
 fsm_property:
-  THROWS ':' event_list
+  THROWS ':' event_list ';'
   {
     $$ = $3 ? prop_newhash(@1, PROP_THROWS, $3) : NULL;
   }
-  | opt_async CODEL fsm_codel
+  | opt_async CODEL fsm_codel ';'
   {
     if ($3) codel_setkind($3, $1);
     $$ = $3 ? prop_newcodel(@1, PROP_FSM_CODEL, $3) : NULL;
@@ -855,7 +881,6 @@ module_name: identifier
 ;
 
 module_body: /* empty */ { $$ = 0; } | idl_statements;
-idl_statements: idl_statement | idl_statements idl_statement;
 
 
 /* --- constant definition ------------------------------------------------- */
@@ -1343,7 +1368,7 @@ enumerator: identifier
 /* --- scopes -------------------------------------------------------------- */
 
 /* scopes are created as a side effect of certain declarations (modules,
- * interfaces, ...) or types (structures, unions, ...) */
+ * components, interfaces, ...) or types (structures, unions, ...) */
 
 scope_push_struct: identifier
   {
@@ -1365,33 +1390,6 @@ scope_push_union: identifier
       /* on error, still create a scope to continue the parsing
        * but with a special name -- it will be deleted afterwards */
       $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_UNION);
-      if (!$$) { /* still failed, just resign */ YYABORT; }
-    }
-  }
-;
-
-scope_push_ids: IDS
-  {
-    comp_s c = comp_active();
-    if (c) {
-      idltype_s ids = comp_ids(c);
-      if (ids) {
-	$$ = type_membersscope(ids);
-	scope_set($$);
-      } else {
-	$$ = scope_push(@1, comp_name(c), SCOPE_MODULE);
-	if ($$) {
-	  $$ = scope_push(@1, "ids", SCOPE_STRUCT);
-	  if ($$) scope_detach($$);
-	}
-      }
-    } else
-      $$ = NULL;
-    if (!$$) {
-      /* on error, still create a scope to continue the parsing
-       * but with a special name -- it will be deleted afterwards */
-      scope_set(scope_global());
-      $$ = scope_push(@1, "&ids", SCOPE_STRUCT);
       if (!$$) { /* still failed, just resign */ YYABORT; }
     }
   }
@@ -1714,7 +1712,7 @@ size_unit:
  */
 identifier:
   IDENTIFIER | S | MS | US | K | M | REAL_TIME
-  | TEMPLATE | COMPONENT | IDS | ATTRIBUTE | FUNCTION | ACTIVITY | VERSION
+  | INTERFACE | COMPONENT | IDS | ATTRIBUTE | FUNCTION | ACTIVITY | VERSION
   | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY
   | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC
   | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT | SERVICE

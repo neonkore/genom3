@@ -127,20 +127,21 @@ param_newids(tloc l, pdir dir, const char *name, clist_s member,
 
   if (dir == P_NODIR) return NULL;
 
-  assert(name || member);
-  c = comp_active(); assert(c);
-  ids = comp_ids(c);
-  if (!ids) {
-    parserror(l, "component %s has no ids", comp_name(c));
-    errno = EINVAL; return NULL;
-  }
-
   /* unnamed parameters are named after the last string member */
   if (!name)
     for(clist_first(member, &i); i.value; clist_next(&i))
       if (i.value->k == CST_STRING)
         name = i.value->s;
   assert(name);
+
+  /* sanity checks */
+  c = comp_active(); assert(c);
+  ids = comp_ids(c);
+  if (!ids) {
+    parserror(l, "component %s has no ids", comp_name(c));
+    parsenoerror(l, "dropped parameter '%s'", name);
+    errno = EINVAL; return NULL;
+  }
 
   /* create param */
   p = param_new(l, P_IDS, dir, name, ids, member, initer);
@@ -366,7 +367,7 @@ param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
     else if (port) src = P_PORT;
     else if (remote) src = P_REMOTE;
     else {
-      parserror(l, "no such parameter '%s'", i.value->s);
+      parserror(l, "unknown source for parameter '%s'", i.value->s);
       return NULL;
     }
   }

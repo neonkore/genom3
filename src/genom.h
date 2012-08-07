@@ -385,6 +385,11 @@ const char *	prop_strkind(propkind k);
     { PROP_VERSION,	"0" },                  \
 }
 
+typedef enum compkind {
+  COMP_REGULAR,		/* regular component */
+  COMP_IFACE,		/* interface */
+} compkind;
+
 typedef enum svckind {
   S_ATTRIBUTE,
   S_FUNCTION,
@@ -396,13 +401,14 @@ typedef struct service_s *service_s;
 typedef struct param_s *param_s;
 
 comp_s		comp_active(void);
-void		comp_setactive(comp_s c);
 comp_s		comp_first(void);
 comp_s		comp_next(comp_s c);
-comp_s		comp_get(const char *name);
 
 tloc		comp_loc(comp_s c);
+compkind	comp_kind(comp_s c);
 const char *	comp_name(comp_s c);
+scope_s		comp_scope(comp_s c);
+scope_s		comp_idsscope(comp_s c);
 idltype_s	comp_ids(comp_s c);
 idltype_s	comp_eventtype(comp_s c);
 hash_s		comp_props(comp_s c);
@@ -414,6 +420,7 @@ port_s		comp_port(comp_s c, const char *name);
 task_s		comp_task(comp_s c, const char *name);
 service_s	comp_service(comp_s c, const char *name);
 remote_s	comp_remote(comp_s c, const char *name);
+const char *	comp_strkind(compkind k);
 
 int		comp_dumpall(FILE *out);
 int		comp_dump(comp_s c, FILE *out);
@@ -439,8 +446,9 @@ comp_s		remote_comp(remote_s r);
 idltype_s	remote_type(remote_s r);
 hash_s		remote_params(remote_s r);
 
-comp_s		tmpl_create(tloc l, const char *name, hash_s props);
-comp_s		comp_create(tloc l, const char *name, hash_s props);
+comp_s		comp_push(tloc l, const char *name, compkind kind);
+comp_s		comp_pop(void);
+int		comp_addprop(tloc l, prop_s p);
 idltype_s	comp_addids(tloc l, scope_s s);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
 service_s	comp_addservice(tloc l, svckind kind, const char *name,

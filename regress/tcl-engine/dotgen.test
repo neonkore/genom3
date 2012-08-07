@@ -120,8 +120,9 @@ cat >run.gen <<EOF
 typedef long a;
 typedef long b;
 struct b1 { long b; };
-component c;
-port handle out b1 p[];
+component c {
+  port handle out b1 p[];
+};
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 foreach t [dotgen types] { puts [$t fullname] }

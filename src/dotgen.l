@@ -196,7 +196,6 @@ chartext	([^\'])|(\\.)
 "object"	{ return OBJECT; }
 "any"		{ return ANY; }
 "void"		{ return VOID; }
-"property"	{ return PROPERTY; }
 
 "const"		{ return CONST; }
 "enum"		{ return ENUM; }
@@ -209,7 +208,7 @@ chartext	([^\'])|(\\.)
 "typedef"	{ return TYPEDEF; }
 
  /* GenoM keywords (can be identifiers as well depending on the context) */
-"template"	{ yylval->s = string(yytext); return TEMPLATE; }
+"interface"	{ yylval->s = string(yytext); return INTERFACE; }
 "component"	{ yylval->s = string(yytext); return COMPONENT; }
 "task"		{ yylval->s = string(yytext); return TASK; }
 "function"	{ yylval->s = string(yytext); return FUNCTION; }

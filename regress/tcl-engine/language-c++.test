@@ -68,13 +68,14 @@ expect out '
 testing '[language member]'
 
 cat >run.gen <<'EOF'
-component c;
-ids {
-  struct ss {
-    long a;
-  } a[2];
+component c {
+  ids {
+    struct ss {
+      long a;
+    } a[2];
+  };
+  attribute s() { validate: c(in a[1].a); };
 };
-attribute s() { validate: c(in a[1].a); };
 EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
@@ -98,13 +99,14 @@ struct s {
     long a;
   } a;
 };
-component c;
-task t {
-  codel x: tcodel() yield ether;
-};
-activity s() {
-  task: t;
-  codel x: scodel() yield ether;
+component c {
+  task t {
+    codel x: tcodel() yield ether;
+  };
+  activity s() {
+    task: t;
+    codel x: scodel() yield ether;
+  };
 };
 EOF
 
@@ -127,9 +129,10 @@ expect out '
 testing '[language signature]'
 
 cat >run.gen <<'EOF'
-component c;
-attribute s() {
-  validate: codel();
+component c {
+  attribute s() {
+    validate: codel();
+  };
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
@@ -148,9 +151,10 @@ expect out '
 testing '[language invoke]'
 
 cat >run.gen <<'EOF'
-component c;
-attribute s() {
-  validate: codel();
+component c {
+  attribute s() {
+    validate: codel();
+  };
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'

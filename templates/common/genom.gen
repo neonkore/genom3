@@ -17,38 +17,36 @@
  *                                             Anthony Mallet on Thu May 24 2012
  */
 
-module genom {
+interface genom {
   struct state {
     string<33> digest;
     string<31> date;
     string<32> version;
   };
-};
 
-template genom;
+  port out state genom_state;
 
-port out genom::state genom_state;
+  function abort_activity(in unsigned long activity) {
+    doc: "Abort an activity";
+  };
 
-function abort_activity(in unsigned long activity) {
-  doc: "Abort an activity";
-};
+  function
+  connect_port(in string<128> local =	:"Local input port",
+               in string<128> remote =	:"Output port to connect to")
+  {
+    doc: "Connect two ports";
+    codel: genom_connect_port_codel(service in local, service in remote);
 
-function
-connect_port(in string<128> local =	:"Local input port",
-             in string<128> remote =	:"Output port to connect to")
-{
-  doc: "Connect two ports";
-  codel: genom_connect_port_codel(service in local, service in remote);
+    throw: no_such_inport, no_such_outport, port_io;
+  };
 
-  throw: no_such_inport, no_such_outport, port_io;
-};
+  function
+  connect_remote(in string<128> local =	:"Local remote name",
+                 in string<128> remote =	:"Service to connect to")
+  {
+    doc: "Connect two remotes";
+    codel: genom_connect_remote_codel(service in local, service in remote);
 
-function
-connect_remote(in string<128> local =	:"Local remote name",
-               in string<128> remote =	:"Service to connect to")
-{
-  doc: "Connect two remotes";
-  codel: genom_connect_remote_codel(service in local, service in remote);
-
-  throw: no_such_remote, no_such_service, remote_io;
+    throw: no_such_remote, no_such_service, remote_io;
+  };
 };

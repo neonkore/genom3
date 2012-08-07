@@ -155,6 +155,15 @@ prop_newvalue(tloc l, propkind k, cval c)
   idlkind tk;
   prop_s p;
 
+  /* check consitency */
+  if (k == PROP_CLOCKRATE) {
+    if (const_convert(&c, CST_FLOAT) || c.f < 0.) {
+      parserror(l, "invalid numeric value for %s",
+                prop_strkind(PROP_CLOCKRATE));
+      return NULL;
+    }
+  }
+
   switch(c.k) {
     case CST_VOID:
       parserror(l, "invalid %s value", const_strkind(c.k));
@@ -168,6 +177,7 @@ prop_newvalue(tloc l, propkind k, cval c)
     case CST_STRING:	tk = IDL_STRING; break;
     case CST_ENUM:	tk = IDL_ENUM; break;
   }
+
   /* create anon const type */
   t = type_newbasic(l, NULL, tk);
   if (!t) return NULL;
@@ -359,7 +369,7 @@ prop_merge(hash_s p, prop_s i)
         e = hash_insert(iev, j.key, string(j.key), NULL);
         if (e) break;
       }
-      if (comp_addievs(prop_loc(i), iev, 0))
+      if (comp_addievs(prop_loc(i), iev, 1/*nostd*/))
         e = errno;
       else
         i->hash = iev;

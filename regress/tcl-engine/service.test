@@ -9,41 +9,47 @@ mkdir -p run.t
 testing '[$service kind]'
 
 cat >run.gen <<EOF
-component c;
-attribute s();
+component c {
+  attribute s();
+};
 EOF
 run 0 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
-component c;
-task t;
-attribute s() { task: t; };
+component c {
+  task t;
+  attribute s() { task: t; };
+};
 EOF
 run 2 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
-component c;
-function s();
+component c {
+  function s();
+};
 EOF
 run 0 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
-component c;
-task t;
-function s() { task: t; };
+component c {
+  task t;
+  function s() { task: t; };
+};
 EOF
 run 2 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
-component c;
-activity s();
+component c {
+  activity s();
+};
 EOF
 run 0 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
-component c;
-task t;
-activity s() { task: t; };
+component c {
+  task t;
+  activity s() { task: t; };
+};
 EOF
 run 0 ${GENOM_BIN} -n run.gen
 
@@ -53,8 +59,9 @@ run 0 ${GENOM_BIN} -n run.gen
 testing '[$service parameter]'
 
 cat >run.gen <<EOF
-component c;
-function s(in long a, inout long b[2]);
+component c {
+  function s(in long a, inout long b[2]);
+};
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 foreach p [[[dotgen component] service] parameter] {
@@ -84,8 +91,9 @@ expect out '
 testing '[$service codels]'
 
 cat >run.gen <<EOF
-component c;
-function s() { codel: s(); };
+component c {
+  function s() { codel: s(); };
+};
 EOF
 run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
 foreach c [[[dotgen component] service] codels] {
@@ -99,11 +107,12 @@ expect out '
 '
 
 cat >run.gen <<EOF
-component c;
-task t;
-activity s() {
-  task: t;
-  codel start: s1() yield next; codel next: s2() yield ether;
+component c {
+  task t;
+  activity s() {
+    task: t;
+    codel start: s1() yield next; codel next: s2() yield ether;
+  };
 };
 EOF
 run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'

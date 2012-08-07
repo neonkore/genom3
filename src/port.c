@@ -169,8 +169,10 @@ static int
 port_mkbuiltins(tloc l)
 {
   idltype_s t, h;
-  scope_s s;
-  assert(scope_current() == scope_global());
+  scope_s s, p;
+
+  p = scope_current();
+  scope_set(scope_global());
 
   s = scope_push(l, GENOM_NAMESPACE, SCOPE_MODULE);
   if (!s) return errno;
@@ -192,9 +194,7 @@ port_mkbuiltins(tloc l)
   t = type_newalias(l, PORT_HANDLE_SET_NAME, t);
   if (!t) return errno;
 
-  scope_pop();
-
-  assert(scope_current() == scope_global());
+  scope_set(p);
   xwarnx("created builtin port handle types");
   return 0;
 }

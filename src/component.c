@@ -34,15 +34,12 @@
 
 /* --- local data ---------------------------------------------------------- */
 
-typedef enum compkind {
-  COMP_REG,		/* regular component */
-  COMP_TMPL,		/* template */
-} compkind;
-
 struct comp_s {
   tloc loc;
   const char *name;
   compkind kind;
+  scope_s scope;
+  scope_s idsscope;
 
   idltype_s events;
   hash_s props;
@@ -57,6 +54,8 @@ struct comp_s {
 tloc		comp_loc(comp_s c) { assert(c); return c->loc; }
 const char *	comp_name(comp_s c) { assert(c); return c->name; }
 compkind	comp_kind(comp_s c) { assert(c); return c->kind; }
+scope_s		comp_scope(comp_s c) { assert(c); return c->scope; }
+scope_s		comp_idsscope(comp_s c) { assert(c); return c->idsscope; }
 idltype_s	comp_eventtype(comp_s c) { assert(c); return c->events; }
 hash_s		comp_props(comp_s c) { assert(c); return c->props; }
 hash_s		comp_tasks(comp_s c) { assert(c); return c->tasks; }
@@ -64,11 +63,7 @@ hash_s		comp_ports(comp_s c) { assert(c); return c->ports; }
 hash_s		comp_services(comp_s c) { assert(c); return c->services; }
 hash_s		comp_remotes(comp_s c) { assert(c); return c->remotes; }
 
-static comp_s		comp_get_kind(const char *name, compkind kind);
-static comp_s		comp_create_kind(tloc l, const char *name,
-				hash_s props, compkind kind);
 static idltype_s	comp_ievcreate(tloc l, const char *name);
-static const char *	comp_strkind(compkind k);
 
 struct task_s {
   tloc loc;
@@ -120,25 +115,24 @@ idltype_s	remote_type(remote_s r) { assert(r); return r->type; }
 hash_s		remote_params(remote_s r) { assert(r); return r->params; }
 
 
-/** the components of a dotgen file */
+/** the components and interfaces of a dotgen file */
 static comp_s clist = NULL;
 
 /** the current active component */
 static comp_s active = NULL;
 
-comp_s	comp_active() { return active; }
-void	comp_setactive(comp_s c) { if (c) active = c; }
+comp_s	comp_active(void) { return active; }
 
 comp_s
 comp_first()
 {
-  if (clist && comp_kind(clist) != COMP_REG) return comp_next(clist);
+  if (clist && comp_kind(clist) != COMP_REGULAR) return comp_next(clist);
   return clist;
 }
 
 comp_s
 comp_next(comp_s c) {
-  if (c) for(c = c->next; c && comp_kind(c) != COMP_REG; c = c->next);
+  if (c) for(c = c->next; c && comp_kind(c) != COMP_REGULAR; c = c->next);
   return c;
 }
 
@@ -147,127 +141,76 @@ comp_next(comp_s c) {
 
 /** Return a component of that name
  */
-comp_s
+static comp_s
 comp_get(const char *name)
 {
-  return comp_get_kind(name, COMP_REG);
-}
-
-static comp_s
-comp_get_kind(const char *name, compkind kind)
-{
   comp_s c;
-
-  for(c = comp_first(); c; c = comp_next(c))
-    if (!strcmp(comp_name(c), name) && c->kind == kind)
-      return c;
-
+  for(c = clist; c; c = c->next) if (!strcmp(comp_name(c), name)) return c;
   return NULL;
 }
 
 
-/* --- comp_create --------------------------------------------------------- */
+/* --- comp_push ----------------------------------------------------------- */
 
-/** create a component
+/** create or reopen a component
  */
 comp_s
-comp_create(tloc l, const char *name, hash_s props)
-{
-  return comp_create_kind(l, name, props, COMP_REG);
-}
-
-/** create a template.
- * Templates are stored as regular components with a special kind. Tasks,
- * services, ids and ports created for this template are applied to all
- * existing components.
- */
-comp_s
-tmpl_create(tloc l, const char *name, hash_s props)
-{
-  return comp_create_kind(l, name, props, COMP_TMPL);
-}
-
-static comp_s
-comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
+comp_push(tloc l, const char *name, compkind kind)
 {
   comp_s c, t;
-  prop_s p;
-  hiter i;
-  int e;
+  scope_s scomp, spop, sids;
   assert(name);
 
+  /* push component scope */
+  assert(scope_current() == scope_global());
+  scomp = scope_push(l, name, SCOPE_MODULE);
+  if (!scomp) return NULL;
+
   /* get an existing component, or NULL if not yet created */
-  c = comp_get_kind(name, kind);
+  c = comp_get(name);
   if (c) {
-    xwarnx("reopened %s %s", comp_strkind(kind), c->name);
-    comp_setactive(c);
-  }
-
-  e = 0;
-
-  /* check consitency of some properties */
-  if (props) {
-    p = hash_find(props, prop_strkind(PROP_CLOCKRATE));
-    if (p) {
-      cval c = type_constvalue(prop_value(p));
-      if (const_convert(&c, CST_FLOAT) || c.f < 0.) {
-	parserror(prop_loc(p), "invalid numeric value for %s",
-		  prop_strkind(PROP_CLOCKRATE));
-	e = 1;
-      }
+    if (c->kind != kind) {
+      parserror(l, "conflicting types for %s %s", comp_strkind(kind), name);
+      parsenoerror(comp_loc(c), " %s %s declared here",
+                   comp_strkind(c->kind), name);
+      return NULL;
     }
+
+    xwarnx("reopened %s %s", comp_strkind(kind), c->name);
+    return active = c;
   }
 
-  /* check unwanted properties */
-  if (props)
-    for(hash_first(props, &i); i.current; hash_next(&i))
-      switch(prop_kind(i.value)) {
-	case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
-        case PROP_EMAIL: case PROP_REQUIRE: case PROP_THROWS:
-        case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
-	  break;
-
-	case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
-	case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
-	case PROP_SIMPLE_CODEL: case PROP_FSM_CODEL: case PROP_TASK:
-        case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
-	  parserror(prop_loc(i.value),
-		    "property %s is not suitable for components",
-		    prop_strkind(prop_kind(i.value)));
-	  e = 1; break;
-      }
-  if (e) return NULL;
-
-  /* merge properties when component already exists */
-  if (c) {
-    e = prop_merge_list(comp_props(c), props);
-    hash_destroy(props, 0/*do not destroy properties (now referenced)*/);
-    return e?NULL:c;
-  }
+  /* create ids scope */
+  sids = scope_push(l, prop_strkind(PROP_IDS), SCOPE_STRUCT);
+  if (!sids) return NULL;
+  scope_detach(sids);
+  scope_pop();
 
   /* create new component */
   c = malloc(sizeof(*c));
   if (!c) {
     warnx("memory exhausted, cannot create component");
-    return NULL;
+    goto error;
   }
 
   c->loc = l;
   c->name = string(name);
   c->kind = kind;
-  c->events = NULL;
-  c->props = props ? props : hash_create("property list", 0);
-  c->tasks = hash_create(strings(name, " tasks", NULL), 2);
-  c->ports = hash_create(strings(name, " ports", NULL), 2);
+  c->scope = scomp;
+  c->idsscope = sids;
+  c->events = comp_ievcreate(l, name);
+  c->props = hash_create(strings(name, " property list", NULL), 2);
+  c->tasks = hash_create(strings(name, " tasks", NULL), 1);
+  c->ports = hash_create(strings(name, " ports", NULL), 1);
   c->services = hash_create(strings(name, " services", NULL), 2);
-  c->remotes = hash_create(strings(name, " remotes", NULL), 2);
-  if (!c->tasks || !c->ports || !c->services || !c->remotes) {
+  c->remotes = hash_create(strings(name, " remotes", NULL), 1);
+  if (!c->events || !c->tasks || !c->ports || !c->services || !c->remotes) {
     if (c->tasks) hash_destroy(c->tasks, 1);
     if (c->ports) hash_destroy(c->ports, 1);
     if (c->services) hash_destroy(c->services, 1);
     if (c->remotes) hash_destroy(c->remotes, 1);
     free(c);
-    return NULL;
+    goto error;
   }
 
   /* link component to others */
@@ -276,24 +219,28 @@ comp_create_kind(tloc l, const char *name, hash_s props, compkind kind)
     for(t = clist; t->next; t = t->next) /* empty body */;
     t->next = c;
   }
-  comp_setactive(c);
-
-  /* define internal event type */
-  c->events = comp_ievcreate(l, name);
-  if (!c->events) {
-    comp_setactive(clist = c->next);
-    return NULL;
-  }
-  p = hash_find(c->props, prop_strkind(PROP_THROWS));
-  if (p) {
-    /* register internal events */
-    if (comp_addievs(l, prop_hash(p), 1)) {
-      comp_setactive(clist = c->next);
-      return NULL;
-    }
-  }
 
   xwarnx("created %s %s", comp_strkind(kind), c->name);
+  return active = c;
+
+error:
+  spop = scope_pop();
+  assert(spop == scomp);
+  return NULL;
+}
+
+
+/* --- comp_pop ------------------------------------------------------------ */
+
+comp_s
+comp_pop(void)
+{
+  scope_s s;
+  comp_s c = active;
+  assert(active);
+  s = scope_pop();
+  assert(s == c->scope);
+  active = NULL;
   return c;
 }
 
@@ -360,6 +307,37 @@ comp_remote(comp_s c, const char *name)
 }
 
 
+/* --- comp_addprop -------------------------------------------------------- */
+
+/** add a property in a component
+ */
+int
+comp_addprop(tloc l, prop_s p)
+{
+  comp_s c = comp_active();
+  assert(c);
+
+  /* check unwanted properties */
+  switch(prop_kind(p)) {
+    case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
+    case PROP_EMAIL: case PROP_REQUIRE: case PROP_THROWS:
+    case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
+      break;
+
+    case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
+    case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
+    case PROP_SIMPLE_CODEL: case PROP_FSM_CODEL: case PROP_TASK:
+    case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+      parserror(l, "property %s may not be defined for components",
+                prop_strkind(prop_kind(p)));
+      return errno = EINVAL;
+  }
+
+  /* merge property */
+  return prop_merge(comp_props(c), p);
+}
+
+
 /* --- comp_addids --------------------------------------------------------- */
 
 /** add IDS members in a component
@@ -369,65 +347,38 @@ comp_addids(tloc l, scope_s s)
 {
   comp_s c = comp_active();
   idltype_s ids, t, m;
-  scope_s p, cs;
   hiter it;
-  prop_s idsp;
-  assert(s);
+  assert(c && s);
 
-  /* a component must exist */
-  if (!c) {
-    scope_destroy(s);
-    parserror(l, "missing component declaration before ids");
-    errno = EINVAL;
-    return NULL;
-  }
-
-  /* get the ids type */
+  /* create the ids type if needed */
   ids = comp_ids(c);
-
-  /* if the ids scope was not created in the component, create it. This happens
-   * when the ids is declared in a template context */
-  p = scope_push(l, comp_name(c), SCOPE_MODULE);
-  if (!p) return NULL;
-  if (scope_parent(s) != p) {
-    if (!ids) {
-      cs = scope_push(l, "ids", SCOPE_STRUCT);
-      if (!cs) { scope_set(scope_global()); return NULL; }
-      scope_detach(cs);
-      scope_pop();
-    } else
-      cs = type_membersscope(ids);
-  } else
-    cs = s;
-
-  /* create the ids type */
   if (!ids) {
-    ids = type_newstruct(l, "ids", cs);
-    if (!ids) { scope_set(scope_global()); return NULL; }
+    ids = type_newstruct(l, prop_strkind(PROP_IDS), c->idsscope);
+    if (!ids) return NULL;
 
-    idsp = prop_newids(l, ids);
-    hash_insert(c->props, prop_name(idsp), idsp, (hrelease_f)prop_destroy);
+    hash_insert(c->props, prop_strkind(PROP_IDS), prop_newids(l, ids),
+                (hrelease_f)prop_destroy);
   }
 
-  /* create new ids members */
-  if (cs != s) {
-    scope_set(cs);
+  /* create new ids members if needed */
+  if (s != c->idsscope) {
+    scope_set(c->idsscope);
     for(t = scope_firstype(s, &it); t; t = scope_nextype(&it)) {
       if (type_kind(t) != IDL_MEMBER) continue;
-      m = scope_findtype(cs, type_name(t));
+      m = scope_findtype(type_membersscope(ids), type_name(t));
       if (m && type_type(m) == type_type(t)) continue;
 
       m = type_newmember(type_loc(t), type_name(t), type_type(t));
-      if (!m) { scope_set(scope_global()); return NULL; }
+      if (!m) return NULL;
     }
+    scope_pop();
+    assert(scope_current() == c->scope);
   }
 
   /* recreate ids type, so that it always appears to be declared at this
    * point. This is important if the ids declares other nested types,
    * because the later have to always appear before the main type. */
   type_renew(ids);
-  scope_set(scope_global());
-
   return ids;
 }
 
@@ -581,7 +532,7 @@ service_s
 comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
                 hash_s props)
 {
-  comp_s comp;
+  comp_s comp = comp_active();
   port_s port;
   remote_s remote;
   hiter i, j;
@@ -590,15 +541,7 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
   codel_s c;
   prop_s p;
   int e;
-  assert(name && params);
-
-  /* a component must exist */
-  comp = comp_active();
-  if (!comp) {
-    parserror(l, "missing component declaration before %s %s",
-              service_strkind(kind), name);
-    return NULL;
-  }
+  assert(comp && name && params);
 
   /* check for reserved or already used names */
   if (!strcmp(name, ALL_SERVICE_NAME)) {
@@ -799,7 +742,6 @@ comp_addservice(tloc l, svckind kind, const char *name, hash_s params,
 remote_s
 comp_addremote(tloc l, const char *name, hash_s params)
 {
-  scope_s s, p;
   comp_s comp;
   port_s port;
   service_s service;
@@ -855,18 +797,8 @@ comp_addremote(tloc l, const char *name, hash_s params)
   }
 
   /* create underlying type */
-  assert(scope_current() == scope_global());
-  s = scope_push(l, comp_name(comp), SCOPE_MODULE);
-  if (!s) {
-    parserror(l, "the scope '::%1$s' is reserved for component '%1$s'", name);
-    remote_destroy(r);
-    return NULL;
-  }
-
+  assert(scope_current() == comp_scope(comp));
   r->type = type_newremote(l, name, r);
-
-  p = scope_pop();
-  assert(p == s);
   if (!r->type) { remote_destroy(r); return NULL; }
 
   xwarnx("created remote %s", r->name);
@@ -879,12 +811,12 @@ comp_addremote(tloc l, const char *name, hash_s params)
 /** Return a component kind as a string
  */
 
-static const char *
+const char *
 comp_strkind(compkind k)
 {
   switch(k) {
-    case COMP_REG:		return "component";
-    case COMP_TMPL:		return "template";
+    case COMP_REGULAR:		return "component";
+    case COMP_IFACE:		return "interface";
   }
 
   assert(0);
@@ -963,17 +895,9 @@ static idltype_s
 comp_ievcreate(tloc l, const char *name)
 {
   const char *stdev[] = COMPONENT_EVENT_STD_NAMES;
-  scope_s s, p;
   idltype_s t, e;
   hash_s h;
   int i;
-
-  assert(scope_current() == scope_global());
-  s = scope_push(l, name, SCOPE_MODULE);
-  if (!s) {
-    parserror(l, "the scope '::%1$s' is reserved for component '%1$s'", name);
-    return NULL;
-  }
 
   /* create standard events */
   h = hash_create("enumerator list", 10);
@@ -990,15 +914,11 @@ comp_ievcreate(tloc l, const char *name)
   t = type_newenum(l, COMPONENT_EVENTTYPE_NAME, h);
   if (!t) goto error;
 
-  p = scope_pop();
-  assert(p == s);
-
   xwarnx("created component internal event type %s %s",
 	 type_strkind(type_kind(t)), type_fullname(t));
   return t;
 
 error:
-  scope_pop();
   parserror(l, "failed to create component internal event type '%s'",
 	    strings(name, "::" COMPONENT_EVENTTYPE_NAME, NULL));
   return NULL;
@@ -1014,17 +934,11 @@ int
 comp_addievs(tloc l, hash_s h, int nostd)
 {
   const char *stdev[] = COMPONENT_EVENT_STD_NAMES;
-  idltype_s iev, e;
-  scope_s s, p;
+  comp_s c = comp_active();
+  idltype_s e;
   hiter i;
   int r, v;
-  assert(h);
-
-  if (!comp_active()) return 0;
-  iev = comp_eventtype(comp_active()); assert(iev);
-
-  s = scope_push(l, comp_name(comp_active()), SCOPE_MODULE);
-  if (!s) return errno;
+  assert(c && h);
 
   r = 0;
   for(hash_first(h, &i); i.current; hash_next(&i)) {
@@ -1038,9 +952,9 @@ comp_addievs(tloc l, hash_s h, int nostd)
         }
     }
 
-    e = scope_findtype(s, i.key);
+    e = scope_findtype(c->scope, i.key);
     if (!e || type_kind(e) != IDL_ENUMERATOR) {
-      e = type_addenumerator(l, iev, i.key);
+      e = type_addenumerator(l, c->events, i.key);
       if (e)
 	xwarnx("added component internal event %s", type_name(e));
       else {
@@ -1051,11 +965,7 @@ comp_addievs(tloc l, hash_s h, int nostd)
     hash_set(h, i.key, e);
   }
 
-  p = scope_pop();
-  assert(p == s);
-
-  if (r) errno = r;
-  return r;
+  return errno = r;
 }
 
 
@@ -1102,10 +1012,13 @@ comp_applytmpl()
   int e = 0;
 
   for(t = clist; t; t = t->next) {
-    if (comp_kind(t) != COMP_TMPL) continue;
+    if (comp_kind(t) != COMP_IFACE) continue;
 
     for(c = comp_first(); c; c = comp_next(c)) {
-      comp_setactive(c);
+      assert(scope_current() == scope_global());
+      active = c;
+      if (!scope_push(c->loc, c->name, SCOPE_MODULE)) continue;
+
       e = prop_merge_list(comp_props(c), comp_props(t));
 
       for(hash_first(comp_ports(t), &i); i.current; hash_next(&i)) {
@@ -1163,6 +1076,9 @@ comp_applytmpl()
           e = 1;
       }
 
+      active = NULL;
+      scope_pop();
+
       if (!e)
 	xwarnx("applied template %s to component %s",
 	       comp_name(t), comp_name(c));
@@ -1170,11 +1086,11 @@ comp_applytmpl()
   }
 
   /* unlink templates now they've been applied */
-  while(clist && comp_kind(clist) == COMP_TMPL)
+  while(clist && comp_kind(clist) == COMP_IFACE)
     clist = clist->next;
   if (clist)
     for(t = clist; t->next;)
-      if (comp_kind(t->next) == COMP_TMPL)
+      if (comp_kind(t->next) == COMP_IFACE)
         t->next = t->next->next;
       else
         t = t->next;
@@ -1216,8 +1132,7 @@ comp_dump(comp_s c, FILE *out)
   citer k;
   cval v;
 
-  fprintf(out, "%s %s",
-          comp_kind(c) == COMP_REG ? "component":"template", comp_name(c));
+  fprintf(out, "%s %s", comp_strkind(comp_kind(c)), comp_name(c));
 
 #define poptbrace                                                       \
   do { if (brace) { fputs(brace, out); brace = NULL; } } while(0)
@@ -1273,7 +1188,6 @@ comp_dump(comp_s c, FILE *out)
     }
 #undef poptbrace
 
-  if (!brace) fputs("}", out);
-  fprintf(out, ";\n");
+  fprintf(out, "%s;\n", brace?"":"}");
   return 0;
 }

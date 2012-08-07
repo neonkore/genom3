@@ -9,13 +9,14 @@ mkdir -p run.t
 testing '[$codel parameter]'
 
 cat >run.gen <<EOF
-component c;
-task t;
-ids { long a; };
-port out c::ids a;
-activity s(in long a) {
-  task: t;
-  codel a: c(service in a, ids in a::b, port out a::c) yield a;
+component c {
+  task t;
+  ids { long a; };
+  port out c::ids a;
+  activity s(in long a) {
+    task: t;
+    codel a: c(service in a, ids in a::b, port out a::c) yield a;
+  };
 };
 EOF
 run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'

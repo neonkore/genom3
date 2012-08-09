@@ -359,7 +359,7 @@ attribute:
       if ($6) hash_destroy($6, 1);
       break;
     }
-    if (!comp_addservice(@1, S_ATTRIBUTE, $2, $4, $6)) {
+    if (!service_create(@1, S_ATTRIBUTE, $2, $4, $6)) {
       parserror(@1, "dropped '%s' attribute", $2);
       hash_destroy($4, 1);
       if ($6) hash_destroy($6, 1);
@@ -384,7 +384,7 @@ service:
       if ($6) hash_destroy($6, 1);
       break;
     }
-    if (!comp_addservice(@1, $1, $2, $4, $6)) {
+    if (!service_create(@1, $1, $2, $4, $6)) {
       parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
       hash_destroy($4, 1);
       if ($6) hash_destroy($6, 1);
@@ -408,7 +408,7 @@ remote:
       if ($4) hash_destroy($4, 1);
       break;
     }
-    if (!comp_addremote(@1, $2, $4)) {
+    if (!remote_create(@1, $2, $4)) {
       parserror(@1, "dropped '%s' remote", $2);
       hash_destroy($4, 1);
     }

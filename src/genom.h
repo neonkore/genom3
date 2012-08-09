@@ -422,6 +422,15 @@ service_s	comp_service(comp_s c, const char *name);
 remote_s	comp_remote(comp_s c, const char *name);
 const char *	comp_strkind(compkind k);
 
+comp_s		comp_push(tloc l, const char *name, compkind kind);
+comp_s		comp_pop(void);
+int		comp_addprop(tloc l, prop_s p);
+idltype_s	comp_addids(tloc l, scope_s s);
+task_s		comp_addtask(tloc l, const char *name, hash_s props);
+int		comp_addievs(tloc l, hash_s h, int nostd);
+int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
+int		comp_applytmpl(void);
+
 int		comp_dumpall(FILE *out);
 int		comp_dump(comp_s c, FILE *out);
 
@@ -430,6 +439,8 @@ const char *	task_name(task_s t);
 comp_s		task_comp(task_s t);
 hash_s		task_props(task_s t);
 hash_s		task_fsm(task_s t);
+
+void		task_destroy(task_s t);
 
 tloc		service_loc(service_s s);
 const char *	service_name(service_s s);
@@ -440,26 +451,19 @@ hash_s		service_params(service_s s);
 hash_s		service_fsm(service_s s);
 const char *	service_strkind(svckind k);
 
+service_s	service_create(tloc l, svckind kind, const char *name,
+                        hash_s params, hash_s props);
+service_s	service_clone(service_s service);
+void		service_destroy(service_s s);
+
 tloc		remote_loc(remote_s r);
 const char *	remote_name(remote_s r);
 comp_s		remote_comp(remote_s r);
 idltype_s	remote_type(remote_s r);
 hash_s		remote_params(remote_s r);
 
-comp_s		comp_push(tloc l, const char *name, compkind kind);
-comp_s		comp_pop(void);
-int		comp_addprop(tloc l, prop_s p);
-idltype_s	comp_addids(tloc l, scope_s s);
-task_s		comp_addtask(tloc l, const char *name, hash_s props);
-service_s	comp_addservice(tloc l, svckind kind, const char *name,
-			hash_s params, hash_s props);
-remote_s	comp_addremote(tloc l, const char *name, hash_s params);
-int		comp_addievs(tloc l, hash_s h, int nostd);
-int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
-int		comp_applytmpl(void);
-
-void		task_destroy(task_s t);
-void		service_destroy(service_s s);
+remote_s	remote_create(tloc l, const char *name, hash_s params);
+remote_s	remote_clone(remote_s remote);
 void		remote_destroy(remote_s r);
 
 

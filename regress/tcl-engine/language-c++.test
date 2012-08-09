@@ -74,7 +74,7 @@ component c {
       long a;
     } a[2];
   };
-  attribute s() { validate: c(in a[1].a); };
+  attribute s() { validate c(in a[1].a); };
 };
 EOF
 
@@ -101,11 +101,11 @@ struct s {
 };
 component c {
   task t {
-    codel x: tcodel() yield ether;
+    codel<x> tcodel() yield ether;
   };
   activity s() {
-    task: t;
-    codel x: scodel() yield ether;
+    task t;
+    codel<x> scodel() yield ether;
   };
 };
 EOF
@@ -131,7 +131,7 @@ testing '[language signature]'
 cat >run.gen <<'EOF'
 component c {
   attribute s() {
-    validate: codel();
+    validate codel();
   };
 };
 EOF
@@ -153,7 +153,7 @@ testing '[language invoke]'
 cat >run.gen <<'EOF'
 component c {
   attribute s() {
-    validate: codel();
+    validate codel();
   };
 };
 EOF

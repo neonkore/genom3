@@ -76,6 +76,7 @@
 
 %{
   extern YYLTYPE curloc;
+  extern int task_p;
 
   extern int dotgenlex(YYSTYPE *lvalp, YYLTYPE *llocp);
   extern void dotgenerror(const char *msg);
@@ -94,8 +95,8 @@
 %token <s>	string_literal IDENTIFIER
 
 %token <s>	S MS US K M REAL_TIME
-%token <s>	INTERFACE COMPONENT TASK FUNCTION ACTIVITY CODEL PORT IN OUT
-%token <s>	INOUT SERVICE IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
+%token <s>	INTERFACE COMPONENT TASK TASK_P FUNCTION ACTIVITY CODEL PORT IN
+%token <s>	OUT INOUT SERVICE IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
 %token <s>	ASYNC REMOTE
@@ -107,8 +108,8 @@
 %type <i>	interface component ids attribute port task service remote
 %type <skind>	service_kind
 %type <pkind>	port_dir opt_handle opt_array
-%type <prop>	component_property task_property service_property fsm_property
-%type <prop>	property
+%type <prop>	component_property task_property service_property codel_property
+%type <prop>	throw_property property
 %type <hash>	opt_properties properties
 %type <hash>	attribute_parameters service_parameters codel_parameters
 %type <initer>	opt_initializer initializer_value initializer initializers
@@ -263,10 +264,20 @@ interface_name: identifier
 
 component_body: /* empty */ | '{' exports '}';
 
-exports: /* empty */ { $$ = 0; } | exports export;
+exports:
+  /* empty */		{ $$ = 0; }
+  | exports export	{ assert(!task_p); }
+;
 
 export:
-  property
+    ids
+  | attribute
+  | port
+  | task
+  | service
+  | remote
+  | idl_statement
+  | property
   {
     $$ = 0; if (!$1) break;
     if (comp_addprop(@1, $1)) {
@@ -274,13 +285,6 @@ export:
       prop_destroy($1);
     }
   }
-  | ids
-  | attribute
-  | port
-  | task
-  | service
-  | remote
-  | idl_statement
 ;
 
 port:
@@ -347,6 +351,7 @@ task:
 attribute:
   ATTRIBUTE identifier '(' attribute_parameters ')' opt_properties ';'
   {
+    task_p = 0;
     param_setlocals(NULL);
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' attribute", $2);
@@ -362,6 +367,7 @@ attribute:
   }
   | ATTRIBUTE identifier '(' error ')' opt_properties ';'
   {
+    task_p = 0;
     param_setlocals(NULL);
     parserror(@1, "dropped '%s' attribute", $2);
   }
@@ -370,6 +376,7 @@ attribute:
 service:
   service_kind identifier '(' service_parameters ')' opt_properties ';'
   {
+    task_p = 0;
     param_setlocals(NULL);
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
@@ -385,6 +392,7 @@ service:
   }
   | service_kind identifier '(' error ')' opt_properties ';'
   {
+    task_p = 0;
     param_setlocals(NULL);
     parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
   }
@@ -393,6 +401,7 @@ service:
 remote:
   REMOTE identifier '(' service_parameters ')' ';'
   {
+    task_p = 0;
     param_setlocals(NULL);
     if (!$2 || !$4) {
       if ($2) parserror(@1, "dropped '%s' remote", $2);
@@ -406,6 +415,7 @@ remote:
   }
   | REMOTE identifier '(' error ')' ';'
   {
+    task_p = 0;
     param_setlocals(NULL);
     parserror(@1, "dropped '%s' remote", $2);
   }
@@ -439,7 +449,9 @@ properties:
   }
 ;
 
-property: component_property | task_property | service_property | fsm_property
+property:
+    component_property | task_property | service_property | codel_property
+  | throw_property
   | error ';'
   {
     parserror(@1, "invalid property");
@@ -448,122 +460,125 @@ property: component_property | task_property | service_property | fsm_property
 ;
 
 component_property:
-  DOC ':' string_literals ';'
+  DOC string_literals ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_DOC, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_DOC, $2);
   }
-  | VERSION ':' string_literals ';'
+  | VERSION string_literals ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_VERSION, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_VERSION, $2);
   }
-  | LANG ':' string_literals ';'
+  | LANG string_literals ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_LANG, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_LANG, $2);
   }
-  | EMAIL ':' string_literals ';'
+  | EMAIL string_literals ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_EMAIL, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_EMAIL, $2);
   }
-  | REQUIRE ':' string_list ';'
+  | REQUIRE string_list ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newrequire(@1, PROP_REQUIRE, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newrequire(@1, PROP_REQUIRE, $2);
   }
-  | CODELSREQUIRE ':' string_list ';'
+  | CODELSREQUIRE string_list ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newrequire(@1, PROP_CODELS_REQUIRE, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newrequire(@1, PROP_CODELS_REQUIRE, $2);
   }
-  | CLOCKRATE ':' const_expr time_unit ';'
+  | CLOCKRATE const_expr time_unit ';'
   {
-    if (const_binaryop(&$3, '*', $4)) {
+    if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
       break;
     }
-    $$ = prop_newvalue(@1, PROP_CLOCKRATE, $3);
+    $$ = prop_newvalue(@1, PROP_CLOCKRATE, $2);
   }
 ;
 
 task_property:
-  PERIOD ':' const_expr time_unit ';'
+  PERIOD const_expr time_unit ';'
   {
-    if (const_binaryop(&$3, '*', $4)) {
+    if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
       break;
     }
-    $$ = prop_newvalue(@1, PROP_PERIOD, $3);
+    $$ = prop_newvalue(@1, PROP_PERIOD, $2);
   }
-  | DELAY ':' const_expr time_unit ';'
+  | DELAY const_expr time_unit ';'
   {
-    if (const_binaryop(&$3, '*', $4)) {
+    if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
       break;
     }
-    $$ = prop_newvalue(@1, PROP_DELAY, $3);
+    $$ = prop_newvalue(@1, PROP_DELAY, $2);
   }
-  | PRIORITY ':' positive_int_const ';'
+  | PRIORITY positive_int_const ';'
   {
-    $$ = prop_newvalue(@1, PROP_PRIORITY, $3);
+    $$ = prop_newvalue(@1, PROP_PRIORITY, $2);
   }
-  | SCHEDULING ':' REAL_TIME ';'
+  | SCHEDULING REAL_TIME ';'
   {
-    $$ = prop_newstring(@1, PROP_SCHEDULING, $3);
+    $$ = prop_newstring(@1, PROP_SCHEDULING, $2);
   }
-  | STACK ':' positive_int_const size_unit ';'
+  | STACK positive_int_const size_unit ';'
   {
-    if (const_binaryop(&$3, '*', $4)) {
+    if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
       break;
     }
-    $$ = prop_newvalue(@1, PROP_STACK, $3);
+    $$ = prop_newvalue(@1, PROP_STACK, $2);
   }
 ;
 
 service_property:
-  TASK ':' identifier ';'
+  TASK_P identifier ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newtask(@1, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newtask(@1, $2);
   }
-  | INTERRUPTS ':' identifier_list ';'
+  | INTERRUPTS identifier_list ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newhash(@1, PROP_INTERRUPTS, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_INTERRUPTS, $2);
   }
-  | BEFORE ':' identifier_list ';'
+  | BEFORE identifier_list ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newhash(@1, PROP_BEFORE, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_BEFORE, $2);
   }
-  | AFTER ':' identifier_list ';'
+  | AFTER identifier_list ';'
   {
-    if (!$3) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newhash(@1, PROP_AFTER, $3);
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_AFTER, $2);
   }
-  | VALIDATE ':' codel ';'
+  | VALIDATE codel ';'
   {
-    $$ = $3 ? prop_newcodel(@1, PROP_VALIDATE, $3) : NULL;
-  }
-  | opt_async CODEL ':' codel ';'
-  {
-    if ($4) codel_setkind($4, $1);
-    $$ = $4 ? prop_newcodel(@1, PROP_SIMPLE_CODEL, $4) : NULL;
+    $$ = $2 ? prop_newcodel(@1, PROP_VALIDATE, $2) : NULL;
   }
 ;
 
-fsm_property:
-  THROWS ':' event_list ';'
+codel_property:
+  opt_async CODEL codel ';'
   {
-    $$ = $3 ? prop_newhash(@1, PROP_THROWS, $3) : NULL;
+    if ($3) codel_setkind($3, $1);
+    $$ = $3 ? prop_newcodel(@1, PROP_SIMPLE_CODEL, $3) : NULL;
   }
   | opt_async CODEL fsm_codel ';'
   {
     if ($3) codel_setkind($3, $1);
     $$ = $3 ? prop_newcodel(@1, PROP_FSM_CODEL, $3) : NULL;
+  }
+;
+
+throw_property:
+  THROWS identifier_list ';'
+  {
+    $$ = $2 ? prop_newhash(@1, PROP_THROWS, $2) : NULL;
   }
 ;
 
@@ -578,19 +593,19 @@ codel:
 ;
 
 fsm_codel:
-  event_list ':' identifier '(' codel_parameters ')' YIELD event_list
+  event_list identifier '(' codel_parameters ')' YIELD identifier_list
   {
-    if (!$1 || !$8) {
-      parserror(@1, "dropped codel '%s'", $3); $$ = NULL; break;
+    if (!$1 || !$7) {
+      parserror(@1, "dropped codel '%s'", $2); $$ = NULL; break;
     }
-    $$ = codel_create(@3, $3, CODEL_SYNC, $1, $8, $5);
+    $$ = codel_create(@3, $2, CODEL_SYNC, $1, $7, $4);
   }
-  | event_list ':' identifier '(' codel_parameters ')' error
+  | event_list identifier '(' codel_parameters ')' error
   {
     $$ = NULL;
-    parserror(@1, "missing 'yield' values for codel %s", $3);
+    parserror(@1, "missing 'yield' values for codel %s", $2);
     if ($1) hash_destroy($1, 1);
-    if ($5) hash_destroy($5, 1);
+    if ($4) hash_destroy($4, 1);
   }
 ;
 
@@ -599,7 +614,12 @@ opt_async:
   | ASYNC	{ $$ = CODEL_ASYNC; }
 ;
 
-event_list: identifier_list;
+event_list:
+  '<' identifier_list '>'
+  {
+    $$ = $2;
+  }
+;
 
 
 /* --- parameters ---------------------------------------------------------- */
@@ -608,6 +628,7 @@ attribute_parameters:
   /* empty */
   {
     $$ = hash_create("parameter list", 0);
+    task_p = 1;
     param_setlocals($$);
   }
   | attribute_parameter
@@ -616,6 +637,7 @@ attribute_parameters:
     if (hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
       param_destroy($1); break;
     }
+    task_p = 1;
     param_setlocals($$);
   }
   | attribute_parameters ',' attribute_parameter
@@ -648,6 +670,7 @@ service_parameters:
   /* empty */
   {
     $$ = hash_create("parameter list", 0);
+    task_p = 1;
     param_setlocals($$);
   }
   | service_parameter
@@ -656,6 +679,7 @@ service_parameters:
     if (hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
       param_destroy($1); break;
     }
+    task_p = 1;
     param_setlocals($$);
   }
   | service_parameters ',' service_parameter
@@ -1713,10 +1737,10 @@ size_unit:
 identifier:
   IDENTIFIER | S | MS | US | K | M | REAL_TIME
   | INTERFACE | COMPONENT | IDS | ATTRIBUTE | FUNCTION | ACTIVITY | VERSION
-  | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | PERIOD | DELAY
-  | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS | DOC
-  | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT | SERVICE
-  | ASYNC | REMOTE
+  | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | TASK_P | PERIOD
+  | DELAY | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS
+  | DOC | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT
+  | SERVICE | ASYNC | REMOTE
 ;
 
 identifier_list:

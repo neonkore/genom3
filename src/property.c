@@ -446,7 +446,7 @@ prop_strkind(propkind k)
     case PROP_VERSION:		return "version";
     case PROP_LANG:		return "lang";
     case PROP_EMAIL:		return "e-mail";
-    case PROP_REQUIRE:		return "require";
+    case PROP_REQUIRE:		return "requires";
     case PROP_CODELS_REQUIRE:	return "codels-require";
     case PROP_CLOCKRATE:	return "clock-rate";
     case PROP_PERIOD:		return "period";
@@ -458,7 +458,7 @@ prop_strkind(propkind k)
     case PROP_VALIDATE:		return "validate";
     case PROP_SIMPLE_CODEL:	return "codel";
     case PROP_FSM_CODEL:	return "codel";
-    case PROP_THROWS:		return "throw";
+    case PROP_THROWS:		return "throws";
     case PROP_INTERRUPTS:	return "interrupts";
     case PROP_BEFORE:		return "before";
     case PROP_AFTER:		return "after";

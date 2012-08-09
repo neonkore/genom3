@@ -47,7 +47,7 @@ PORT		port
 PRIORITY	priority
 REAL_TIME	real-time
 REMOTE		remote
-REQUIRE		require
+REQUIRE		requires
 S		s
 SCHEDULING	scheduling
 SEQUENCE	sequence
@@ -60,7 +60,8 @@ STRING		string
 STRUCT		struct
 SWITCH		switch
 TASK		task
-THROWS		throw
+TASK_P		task
+THROWS		throws
 TRUE		TRUE
 TYPEDEF		typedef
 UNION		union
@@ -68,4 +69,4 @@ UNSIGNED	unsigned
 US		us
 VALIDATE	validate
 VERSION		version
-YIELD		yield
+YIELD		yields

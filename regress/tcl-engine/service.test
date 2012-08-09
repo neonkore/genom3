@@ -18,7 +18,7 @@ run 0 ${GENOM_BIN} -n run.gen
 cat >run.gen <<EOF
 component c {
   task t;
-  attribute s() { task: t; };
+  attribute s() { task t; };
 };
 EOF
 run 2 ${GENOM_BIN} -n run.gen
@@ -33,7 +33,7 @@ run 0 ${GENOM_BIN} -n run.gen
 cat >run.gen <<EOF
 component c {
   task t;
-  function s() { task: t; };
+  function s() { task t; };
 };
 EOF
 run 2 ${GENOM_BIN} -n run.gen
@@ -48,7 +48,7 @@ run 0 ${GENOM_BIN} -n run.gen
 cat >run.gen <<EOF
 component c {
   task t;
-  activity s() { task: t; };
+  activity s() { task t; };
 };
 EOF
 run 0 ${GENOM_BIN} -n run.gen
@@ -92,7 +92,7 @@ testing '[$service codels]'
 
 cat >run.gen <<EOF
 component c {
-  function s() { codel: s(); };
+  function s() { codel s(); };
 };
 EOF
 run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
@@ -110,8 +110,8 @@ cat >run.gen <<EOF
 component c {
   task t;
   activity s() {
-    task: t;
-    codel start: s1() yield next; codel next: s2() yield ether;
+    task t;
+    codel<start> s1() yield next; codel<next> s2() yield ether;
   };
 };
 EOF

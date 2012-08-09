@@ -30,12 +30,12 @@ typedef sequence<string<28>, 10> x;
 typedef long long_type;
 
 component c {
-  version:	"1.0";
-  email:	"null@example.com";
-  lang:		"c";
+  version	"1.0";
+  email		"null@example.com";
+  lang		"c";
 
-  require:	"a", "b", "c";
-  codels-require:"d", "e";
+  require		"a", "b", "c";
+  codels-require	"d", "e";
 
   ids {
     long a;
@@ -69,23 +69,28 @@ component c {
   task t1;
 
   task t2 {
-    period:	5ms;
-    delay:	3ms;
-    priority:	100;
-    scheduling:	real-time;
-    stack:	20k;
+    period	5ms;
+    delay	3ms;
+    priority	100;
+    scheduling	real-time;
+    stack	20k;
 
-    codel start, other: a(port in pa, port out pb.b::port) yield sleep, main;
-    codel main: b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
+    codel<start, other>
+      a(port in pa, port out pb.b::port)
+      yield sleep, main;
+    codel<main>
+      b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
       yield ether;
-    codel stop: c(in d, out e) yield ether;
+    codel<stop>
+      c(in d, out e)
+      yield ether;
 
-    throw:	ERR1, ERR2;
+    throw	ERR1, ERR2;
   };
 
   function
   s1() {
-    doc: "service s1";
+    doc "service s1";
   };
 
   activity
@@ -98,20 +103,25 @@ component c {
      in e1 c = ee1 : "long doc",
      in string d = "test string" :"an input string" ,
      in long f[3], in sequence<sequence<long> >g,
-     out string<128> e, out long outf[3], out sequence<long,128> h) {
-    doc: "service s2";
-    task: t1;
+     out string<128> e, out long outf[3], out sequence<long,128> h)
+  {
+    doc		"service s2";
+    task	t1;
 
-    validate: v(ids in b[0].c::a, service out c);
+    validate	v(ids in b[0].c::a, service out c);
 
-    codel start: a(port in pa, port out pb.b::port) yield sleep, ether;
-    codel main: b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
+    codel<start>
+      a(port in pa, port out pb.b::port) yield sleep, ether;
+    codel<main>
+      b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
       yield ether;
-    codel other: e(service in f, service out f::outf) yield ether;
-    codel stop: d(ids in g, service out h) yield ether;
+    codel<other>
+      e(service in f, service out f::outf) yield ether;
+    codel<stop>
+      d(ids in g, service out h) yield ether;
 
-    throw:	ERR3;
-    interrupts:	all;
-    after:	s1;
+    throw	ERR3;
+    interrupts	all;
+    after	s1;
   };
 };

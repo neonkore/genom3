@@ -1146,14 +1146,14 @@ comp_dump(comp_s c, FILE *out)
 	case PROP_LANG:
         case PROP_EMAIL:
           poptbrace;
-          fprintf(out, "%s%s:\t\"%s\";\n", indent,
+          fprintf(out, "%s%s\t\"%s\";\n", indent,
                   prop_strkind(prop_kind(i.value)), prop_text(i.value));
           break;
 
         case PROP_REQUIRE:
 	case PROP_CODELS_REQUIRE:
           poptbrace;
-          fprintf(out, "%s%s:\n", indent, prop_strkind(prop_kind(i.value)));
+          fprintf(out, "%s%s\n", indent, prop_strkind(prop_kind(i.value)));
           colon = NULL;
           for(clist_first(prop_list(i.value), &k); k.current; clist_next(&k)) {
             if (colon) fputs(colon, out);
@@ -1165,7 +1165,7 @@ comp_dump(comp_s c, FILE *out)
 
         case PROP_THROWS:
           poptbrace;
-          fprintf(out, "%s%s:\n", indent, prop_strkind(prop_kind(i.value)));
+          fprintf(out, "%s%s\n", indent, prop_strkind(prop_kind(i.value)));
           colon = NULL;
           for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
             if (colon) fputs(colon, out);
@@ -1179,7 +1179,7 @@ comp_dump(comp_s c, FILE *out)
           poptbrace;
           v = type_constvalue(prop_value(i.value));
           if (const_convert(&v, CST_FLOAT)) break;
-          fprintf(out, "%s%s:\t%gs\n", indent,
+          fprintf(out, "%s%s\t%gs\n", indent,
                   prop_strkind(prop_kind(i.value)), v.f);
 	  break;
 

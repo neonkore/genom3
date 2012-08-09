@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 LAAS/CNRS
+ * Copyright (c) 2011-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -43,7 +43,7 @@ pragmaimpl(usch *p)
     const char *delim;
     unsigned int n;
 
-    p+=7;
+    p += strcspn((char *)p, " \t");
     /* fill args, starting from index 2 */
     for (n=2; *p;) {
       for(; *p == ' ' || *p == '\t'; p++) /* empty body */;

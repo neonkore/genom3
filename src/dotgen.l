@@ -53,6 +53,7 @@
 #include "genom3-dotgen.h"
 
    YYLTYPE curloc = { .file = NULL, .line = 1, .col = 0 };
+   int task_p = 0;
 
 #define YY_USER_ACTION  yylloc->col += yyleng; curloc = *yylloc;
 %}
@@ -136,7 +137,7 @@ chartext	([^\'])|(\\.)
   * the string argument to the @code{require:} property of @emph{all} the
   * components defined in a specification (@pxref{Component declaration}).
   */
-^[ \t]*#[ \t]*pragma[ \t]+require[ \t].*\n {
+^[ \t]*#[ \t]*pragma[ \t]+requires?[ \t].*\n {
   dotgen_parsepragmarequire(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;
 }
@@ -210,7 +211,7 @@ chartext	([^\'])|(\\.)
  /* GenoM keywords (can be identifiers as well depending on the context) */
 "interface"	{ yylval->s = string(yytext); return INTERFACE; }
 "component"	{ yylval->s = string(yytext); return COMPONENT; }
-"task"		{ yylval->s = string(yytext); return TASK; }
+"task"		{ yylval->s = string(yytext); return task_p?TASK_P:TASK; }
 "function"	{ yylval->s = string(yytext); return FUNCTION; }
 "activity"	{ yylval->s = string(yytext); return ACTIVITY; }
 "codel"		{ yylval->s = string(yytext); return CODEL; }
@@ -224,8 +225,8 @@ chartext	([^\'])|(\\.)
 "version"	{ yylval->s = string(yytext); return VERSION; }
 "lang"		{ yylval->s = string(yytext); return LANG; }
 "email"		{ yylval->s = string(yytext); return EMAIL; }
-"require"	{ yylval->s = string(yytext); return REQUIRE; }
-"codels-require" { yylval->s = string(yytext); return CODELSREQUIRE; }
+"require"s?	{ yylval->s = string(yytext); return REQUIRE; }
+"codels-require"s? { yylval->s = string(yytext); return CODELSREQUIRE; }
 "clock-rate"	{ yylval->s = string(yytext); return CLOCKRATE; }
 "period"	{ yylval->s = string(yytext); return PERIOD; }
 "delay"		{ yylval->s = string(yytext); return DELAY; }
@@ -233,9 +234,9 @@ chartext	([^\'])|(\\.)
 "scheduling"	{ yylval->s = string(yytext); return SCHEDULING; }
 "stack"		{ yylval->s = string(yytext); return STACK; }
 "validate"	{ yylval->s = string(yytext); return VALIDATE; }
-"yield"		{ yylval->s = string(yytext); return YIELD; }
-"throw"		{ yylval->s = string(yytext); return THROWS; }
-"interrupts"	{ yylval->s = string(yytext); return INTERRUPTS; }
+"yield"s?	{ yylval->s = string(yytext); return YIELD; }
+"throw"s?	{ yylval->s = string(yytext); return THROWS; }
+"interrupt"s?	{ yylval->s = string(yytext); return INTERRUPTS; }
 "before"	{ yylval->s = string(yytext); return BEFORE; }
 "after"		{ yylval->s = string(yytext); return AFTER; }
 "async"		{ yylval->s = string(yytext); return ASYNC; }
@@ -474,7 +475,7 @@ dotgen_parsepragmarequire(char *buffer, YYLTYPE *yylloc)
 
   p = strstr(buffer, "require");
   assert(p);
-  p+=7;
+  p+= strcspn(p, " \t");
 
   cl = NULL;
   while(*p) {
@@ -498,9 +499,9 @@ dotgen_parsepragmarequire(char *buffer, YYLTYPE *yylloc)
 
   /* create a new hash of REQUIRE properties */
   if (!hrequire) {
-    hrequire = hash_create("pragma require", 1);
+    hrequire = hash_create("pragma requires", 1);
     if (!hrequire) {
-      parserror(*yylloc, "dropped #pragma require");
+      parserror(*yylloc, "dropped #pragma requires");
       return;
     }
   }
@@ -508,7 +509,7 @@ dotgen_parsepragmarequire(char *buffer, YYLTYPE *yylloc)
   prop = prop_newrequire(*yylloc, PROP_REQUIRE, cl);
   if (hash_insert(hrequire, prop_name(prop), prop, (hrelease_f)prop_destroy)) {
     if (prop_merge(hrequire, prop)) {
-      parserror(*yylloc, "dropped #pragma require");
+      parserror(*yylloc, "dropped #pragma requires");
       return;
     }
     prop_destroy(prop);

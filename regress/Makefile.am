@@ -19,6 +19,7 @@
 TESTS=	basics/cpp.test
 TESTS+=	basics/parser.test
 TESTS+=	basics/require.test
+TESTS+=	basics/extends.test
 
 TESTS+=	templates/genom.test
 

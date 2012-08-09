@@ -242,6 +242,9 @@ chartext	([^\'])|(\\.)
 "before"	{ yylval->s = string(yytext); return BEFORE; }
 "after"		{ yylval->s = string(yytext); return AFTER; }
 "async"		{ yylval->s = string(yytext); return ASYNC; }
+"extend"s?	{ yylval->s = string(yytext); return EXTENDS; }
+"provide"s?	{ yylval->s = string(yytext); return PROVIDES; }
+"use"s?		{ yylval->s = string(yytext); return USES; }
 
 "in"		{ yylval->s = string(yytext); return IN; }
 "out"		{ yylval->s = string(yytext); return OUT; }
@@ -510,7 +513,7 @@ dotgen_parsepragmarequire(char *buffer, YYLTYPE *yylloc)
 
   prop = prop_newrequire(*yylloc, PROP_REQUIRE, cl);
   if (hash_insert(hrequire, prop_name(prop), prop, (hrelease_f)prop_destroy)) {
-    if (prop_merge(hrequire, prop)) {
+    if (prop_merge(hrequire, prop, 0/*ignore_dup*/)) {
       parserror(*yylloc, "dropped #pragma requires");
       return;
     }

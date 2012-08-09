@@ -265,7 +265,8 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
       case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
       case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
       case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
-      case PROP_SCHEDULING: case PROP_STACK:
+      case PROP_SCHEDULING: case PROP_STACK: case PROP_EXTENDS:
+      case PROP_PROVIDES: case PROP_USES:
 	parserror(prop_loc(i.value), "property %s is not suitable for %ss",
                   service_strkind(kind), prop_strkind(prop_kind(i.value)));
 	e = 1; break;
@@ -361,6 +362,7 @@ service_check(service_s service)
       case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
       case PROP_TASK: case PROP_VALIDATE: case PROP_SIMPLE_CODEL:
       case PROP_FSM_CODEL: case PROP_THROWS: case PROP_EXTENDS:
+      case PROP_PROVIDES: case PROP_USES:
         break;
 
       case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
@@ -404,7 +406,7 @@ service_clone(service_s service)
 
   /* clone properties */
   prop = hash_create("property list", 0);
-  if (!prop || prop_merge_list(prop, service_props(service)))
+  if (!prop || prop_merge_list(prop, service_props(service), 0/*ignore_dup*/))
     return NULL;
 
   /* create */
@@ -429,6 +431,24 @@ service_destroy(service_s s)
     hash_destroy(s->params, 1);
     free(s);
   }
+}
+
+/* --- service_strkind ----------------------------------------------------- */
+
+/** Return a service kind as a string
+ */
+
+const char *
+service_strkind(svckind k)
+{
+  switch(k) {
+    case S_ATTRIBUTE:		return "attribute";
+    case S_FUNCTION:		return "function";
+    case S_ACTIVITY:		return "activity";
+  }
+
+  assert(0);
+  return NULL;
 }
 
 

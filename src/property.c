@@ -45,7 +45,7 @@ struct prop_s {
     clist_s clist;	/**< require, codels-require */
     idltype_s value;	/**< clock-rate, period, delay, priority, stack */
     codel_s codel;	/**< codel */
-    hash_s hash;	/**< attribute, throws */
+    hash_s hash;	/**< extends, throws */
     task_s task;	/**< task */
   };
 };
@@ -304,7 +304,9 @@ prop_hash(prop_s p)
 {
   assert(p);
   assert(p->kind == PROP_THROWS || p->kind == PROP_INTERRUPTS ||
-         p->kind == PROP_BEFORE || p->kind == PROP_AFTER);
+         p->kind == PROP_BEFORE || p->kind == PROP_AFTER ||
+         p->kind == PROP_EXTENDS || p->kind == PROP_PROVIDES ||
+         p->kind == PROP_USES);
   return p->hash;
 }
 
@@ -328,7 +330,7 @@ prop_destroy(prop_s p)
 /** Merge two lists of properties into the first one.
  */
 int
-prop_merge_list(hash_s p, hash_s m)
+prop_merge_list(hash_s p, hash_s m, int ignore_dup)
 {
   hiter i;
   int e;
@@ -336,7 +338,7 @@ prop_merge_list(hash_s p, hash_s m)
   if (!m) return 0;
 
   for(hash_first(m, &i); i.current; hash_next(&i)) {
-    e = prop_merge(p, i.value);
+    e = prop_merge(p, i.value, ignore_dup);
     if (e) return e;
   }
 
@@ -349,7 +351,7 @@ prop_merge_list(hash_s p, hash_s m)
 /** Merge two lists of properties into the first one.
  */
 int
-prop_merge(hash_s p, prop_s i)
+prop_merge(hash_s p, prop_s i, int ignore_dup)
 {
   hiter j;
   hash_s iev;
@@ -421,6 +423,7 @@ prop_merge(hash_s p, prop_s i)
         e = 0; break;
 
       default:
+        if (ignore_dup) break;
         parserror(prop_loc(i), "duplicate %s declaration", prop_name(i));
         parsenoerror(prop_loc(q), " %s declared here", prop_name(q));
         break;
@@ -447,6 +450,9 @@ prop_strkind(propkind k)
     case PROP_EMAIL:		return "e-mail";
     case PROP_REQUIRE:		return "requires";
     case PROP_CODELS_REQUIRE:	return "codels-require";
+    case PROP_EXTENDS:		return "extends";
+    case PROP_PROVIDES:		return "provides";
+    case PROP_USES:		return "uses";
     case PROP_CLOCKRATE:	return "clock-rate";
     case PROP_PERIOD:		return "period";
     case PROP_DELAY:		return "delay";

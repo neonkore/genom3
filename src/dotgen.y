@@ -25,8 +25,9 @@
 #include "acgenom.h"
 
 #include <assert.h>
-#include <stddef.h>
 #include <errno.h>
+#include <stddef.h>
+#include <string.h>
 
 #include "genom.h"
 
@@ -99,18 +100,18 @@
 %token <s>	OUT INOUT LOCAL IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
-%token <s>	ASYNC REMOTE MULTIPLE
+%token <s>	ASYNC REMOTE EXTENDS PROVIDES USES MULTIPLE
 
 %type <i>	specification statement idl_statements idl_statement
 %type <i>	exports export
 
-%type <comp>	component_name interface_name
+%type <comp>	component_scope interface_scope interface_name
 %type <i>	interface component ids attribute port task service remote
 %type <skind>	service_kind
 %type <pkind>	port_dir opt_multiple
 %type <prop>	component_property task_property service_property codel_property
 %type <prop>	throw_property property
-%type <hash>	opt_properties properties
+%type <hash>	interface_list opt_properties properties
 %type <hash>	attribute_parameters service_parameters codel_parameters
 %type <initer>	opt_initializer initializer_value initializer initializers
 %type <codel>	codel fsm_codel
@@ -220,20 +221,20 @@ idl_statement:
  * @cindex declaration, component
  *
  * @ruleinclude component
- * @ruleinclude component_name
+ * @ruleinclude component_scope
  * @ruleinclude component_body
  * @sp 1
  * @ruleinclude exports
  * @ruleinclude export
  */
-component: COMPONENT component_name component_body ';'
+component: COMPONENT component_scope component_body ';'
   {
     comp_s c = comp_pop();
     if (c) assert(c == $2);
   }
 ;
 
-component_name: identifier
+component_scope: identifier
   {
     if (!$1) { parserror(@1, "dropped component"); YYABORT; }
     $$ = comp_push(@1, $1, COMP_REGULAR);
@@ -244,14 +245,14 @@ component_name: identifier
   }
 ;
 
-interface: INTERFACE interface_name component_body ';'
+interface: INTERFACE interface_scope component_body ';'
   {
     comp_s c = comp_pop();
     if (c) assert(c == $2);
   }
 ;
 
-interface_name: identifier
+interface_scope: identifier
   {
     if (!$1) { parserror(@1, "dropped interface"); YYABORT; }
     $$ = comp_push(@1, $1, COMP_IFACE);
@@ -261,6 +262,44 @@ interface_name: identifier
     }
   }
 ;
+
+interface_name: identifier
+  {
+    if (!$1) { $$ = NULL; break; }
+    $$ = comp_find($1);
+    if (!$$) { parserror(@1, "no such interface '%s'", $1); break; }
+    if (comp_kind($$) != COMP_IFACE) {
+      parserror(@1, "expected interface but '%s' is a %s",
+                $1, comp_strkind(comp_kind($$)));
+      parsenoerror(comp_loc($$), " %s declared here", $1);
+      $$ = NULL;
+      break;
+    }
+  }
+;
+
+interface_list:
+  interface_name
+  {
+    $$ = hash_create("interface list", 1); if (!$$ || !$1) break;
+    switch(hash_insert($$, comp_name($1), $1, NULL)) {
+      case 0:	break;
+      default:	YYABORT;
+    }
+  }
+  | interface_list ',' interface_name
+  {
+    $$ = $1; if (!$3) break;
+    switch(hash_insert($$, comp_name($3), $3, NULL)) {
+      case 0: break;
+      case EEXIST:
+        parserror(@3, "repeated interface '%s'", comp_name($3));
+        break;
+      default: YYABORT;
+    }
+  }
+;
+
 
 component_body: /* empty */ | '{' exports '}';
 
@@ -436,7 +475,7 @@ properties:
     $$ = $1;
     if (!$$ || !$2) break;
     if (hash_insert($$, prop_name($2), $2, (hrelease_f)prop_destroy)) {
-      if (errno != EEXIST || prop_merge($1, $2)) {
+      if (errno != EEXIST || prop_merge($1, $2, 0/*ignore_dup*/)) {
         parserror(@2, "dropped %s declaration", prop_name($2));
         prop_destroy($2);
       }
@@ -492,6 +531,21 @@ component_property:
       break;
     }
     $$ = prop_newvalue(@1, PROP_CLOCKRATE, $2);
+  }
+  | EXTENDS interface_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_EXTENDS, $2);
+  }
+  | PROVIDES interface_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_PROVIDES, $2);
+  }
+  | USES interface_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_USES, $2);
   }
 ;
 
@@ -1735,7 +1789,7 @@ identifier:
   | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | TASK_P | PERIOD
   | DELAY | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS
   | DOC | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT
-  | LOCAL | ASYNC | REMOTE | MULTIPLE
+  | LOCAL | ASYNC | REMOTE | EXTENDS | PROVIDES | USES | MULTIPLE
 ;
 
 identifier_list:
@@ -1766,5 +1820,6 @@ dotgenerror(const char *msg)
     parserror(curloc, "premature end-of-file");
     return;
   }
-  parserror(curloc, "%s at `%s' (near column %d)", msg, dotgentext, curloc.col);
+  parserror(curloc, "%s at `%s' (near column %d)", msg, dotgentext,
+            curloc.col - strlen(dotgentext));
 }

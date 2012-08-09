@@ -53,19 +53,19 @@ idltype_s	port_type(port_s p) { assert(p); return p->type; }
 idltype_s	port_datatype(port_s p) { assert(p); return p->datatype; }
 
 
-/* --- port_new ------------------------------------------------------------ */
+/* --- port_create --------------------------------------------------------- */
 
 /** create a port in a component
  */
 port_s
 port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
 {
-  comp_s c;
+  comp_s c = comp_active();
   service_s service;
   remote_s remote;
   port_s p;
   int e;
-  assert(name);
+  assert(c && name);
 
   /* check for already used names */
   service = comp_service(c, name);
@@ -127,10 +127,15 @@ port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
 /** clone a port
  */
 port_s
-port_clone(port_s port)
+port_clone(port_s port, int flipdir)
 {
-  return port_create(port->loc, port->dir, port->kind, port->name,
-                     port->datatype);
+  portdir d;
+  switch (port->dir) {
+    case PORT_IN:	d = flipdir?PORT_OUT:PORT_IN; break;
+    case PORT_OUT:	d = flipdir?PORT_IN:PORT_OUT; break;
+  }
+
+  return port_create(port->loc, d, port->kind, port->name, port->datatype);
 }
 
 

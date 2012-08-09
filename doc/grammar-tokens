@@ -21,6 +21,7 @@ DOUBLE		double
 EMAIL		email
 ENUM		enum
 EVENT		event
+EXTENDS		extends
 FALSE		FALSE
 FIXED		fixed
 FIXED_LIT	<fixed_literal>
@@ -47,6 +48,7 @@ OUT		out
 PERIOD		period
 PORT		port
 PRIORITY	priority
+PROVIDES	provides
 REAL_TIME	real-time
 REMOTE		remote
 REQUIRE		requires
@@ -68,6 +70,7 @@ TYPEDEF		typedef
 UNION		union
 UNSIGNED	unsigned
 US		us
+USES		uses
 VALIDATE	validate
 VERSION		version
 YIELD		yields

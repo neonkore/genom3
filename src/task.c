@@ -108,7 +108,8 @@ task_create(tloc l, const char *name, hash_s props)
       case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
       case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
       case PROP_TASK: case PROP_VALIDATE: case PROP_INTERRUPTS:
-      case PROP_BEFORE: case PROP_AFTER: case PROP_EXTENDS:
+      case PROP_BEFORE: case PROP_AFTER: case PROP_EXTENDS: case PROP_PROVIDES:
+      case PROP_USES:
         parserror(prop_loc(i.value), "property %s is not suitable for tasks",
                   prop_strkind(prop_kind(i.value)));
         e = 1; break;
@@ -160,6 +161,29 @@ task_create(tloc l, const char *name, hash_s props)
 
   xwarnx("created task %s in %s %s",
          task_name(t), comp_strkind(comp_kind(comp)), comp_name(comp));
+  return t;
+}
+
+
+/* --- task_clone ---------------------------------------------------------- */
+
+/** clone a task
+ */
+task_s
+task_clone(task_s task)
+{
+  task_s t;
+  hash_s prop;
+
+  /* clone properties */
+  prop = hash_create("property list", 0);
+  if (!prop || prop_merge_list(prop, task->props, 0/*ignore_dup*/))
+    return NULL;
+
+  /* create */
+  t = task_create(task->loc, task->name, prop);
+  if (!t) hash_destroy(prop, 1);
+
   return t;
 }
 

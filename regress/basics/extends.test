@@ -1,0 +1,19 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+cat >run.gen <<EOF
+interface i;
+interface j { extends i; };
+interface j { extends i; };
+EOF
+
+testing 'duplicate extends directives'
+run 1 ${GENOM_BIN} -n run.gen
+
+cat >run.gen <<EOF
+interface i { ids {long a;}; };
+interface j { ids {long a;}; extends i; };
+EOF
+
+testing 'extends directive with ids conflicts'
+run 1 ${GENOM_BIN} -n run.gen

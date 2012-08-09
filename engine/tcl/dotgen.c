@@ -436,6 +436,7 @@ dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
   l = Tcl_NewListObj(0, NULL);
   for(c = comp_first(); c; c = comp_next(c)) {
+    if (comp_kind(c) != COMP_REGULAR) continue;
     if (p && !Tcl_StringMatch(comp_name(c), p)) continue;
 
     Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(comp_genref(c), -1));

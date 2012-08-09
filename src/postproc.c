@@ -77,11 +77,10 @@ dotgen_consolidate()
     }
   }
 
-  /* apply templates declarations */
-  e |= comp_applytmpl();
-
   /* set default values */
   for(c = comp_first(); c; c = comp_next(c)) {
+    if (comp_kind(c) != COMP_REGULAR) continue;
+
     /* compute default clock-rate if not specified */
     p = hash_find(comp_props(c), prop_strkind(PROP_CLOCKRATE));
     if (p)

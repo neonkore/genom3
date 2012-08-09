@@ -65,6 +65,8 @@ hash_s		comp_remotes(comp_s c) { assert(c); return c->remotes; }
 
 static idltype_s	comp_ievcreate(tloc l, const char *name);
 static void		comp_dopragma(comp_s c);
+static int		comp_extends(comp_s c, hash_s e, propkind k);
+static int		comp_merge(comp_s c, comp_s m, propkind k);
 
 /** the components and interfaces of a dotgen file */
 static comp_s clist = NULL;
@@ -72,28 +74,17 @@ static comp_s clist = NULL;
 /** the current active component */
 static comp_s active = NULL;
 
-comp_s	comp_active(void) { return active; }
-
-comp_s
-comp_first()
-{
-  if (clist && comp_kind(clist) != COMP_REGULAR) return comp_next(clist);
-  return clist;
-}
-
-comp_s
-comp_next(comp_s c) {
-  if (c) for(c = c->next; c && comp_kind(c) != COMP_REGULAR; c = c->next);
-  return c;
-}
+comp_s		comp_active(void) { return active; }
+comp_s		comp_first() { return clist; }
+comp_s		comp_next(comp_s c) { assert(c); return c->next; }
 
 
-/* --- comp_get ------------------------------------------------------------ */
+/* --- comp_find ----------------------------------------------------------- */
 
 /** Return a component of that name
  */
-static comp_s
-comp_get(const char *name)
+comp_s
+comp_find(const char *name)
 {
   comp_s c;
   for(c = clist; c; c = c->next) if (!strcmp(comp_name(c), name)) return c;
@@ -118,7 +109,7 @@ comp_push(tloc l, const char *name, compkind kind)
   if (!scomp) return NULL;
 
   /* get an existing component, or NULL if not yet created */
-  c = comp_get(name);
+  c = comp_find(name);
   if (c) {
     if (c->kind != kind) {
       parserror(l, "conflicting types for %s %s", comp_strkind(kind), name);
@@ -194,19 +185,17 @@ comp_pop(void)
   comp_s c = active;
   scope_s s;
   hiter i;
-  int e;
+  int e = 0;
   assert(active);
-
-  /* pop context */
-  s = scope_pop();
-  assert(s == c->scope);
-  active = NULL;
-  e = 0;
 
   /* check services */
   for(hash_first(c->services, &i); i.current; hash_next(&i))
     e |= service_check(i.value);
 
+  /* pop context */
+  s = scope_pop();
+  assert(s == c->scope);
+  active = NULL;
   return c;
 }
 
@@ -281,26 +270,36 @@ int
 comp_addprop(tloc l, prop_s p)
 {
   comp_s c = comp_active();
+  int s;
   assert(c);
 
   /* check unwanted properties */
   switch(prop_kind(p)) {
     case PROP_DOC: case PROP_IDS: case PROP_VERSION: case PROP_LANG:
-    case PROP_EMAIL: case PROP_REQUIRE: case PROP_THROWS:
-    case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
+    case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
+    case PROP_CLOCKRATE: case PROP_THROWS:
+      /* merge property */
+      return prop_merge(comp_props(c), p, 0/*ignore_dup*/);
+
+    case PROP_EXTENDS:
+    case PROP_PROVIDES:
+    case PROP_USES:
+      s = prop_merge(comp_props(c), p, 0/*ignore_dup*/);
+      if (!s) s = comp_extends(c, prop_hash(p), prop_kind(p));
+      return s;
       break;
 
     case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
     case PROP_SCHEDULING: case PROP_STACK: case PROP_VALIDATE:
     case PROP_SIMPLE_CODEL: case PROP_FSM_CODEL: case PROP_TASK:
     case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
-      parserror(l, "property %s may not be defined for components",
-                prop_strkind(prop_kind(p)));
+      parserror(l, "property %s may not be defined for %ss",
+                prop_strkind(prop_kind(p)), comp_strkind(c->kind));
       return errno = EINVAL;
   }
 
-  /* merge property */
-  return prop_merge(comp_props(c), p);
+  assert(0);
+  return errno = EINVAL;
 }
 
 
@@ -319,6 +318,7 @@ comp_addids(tloc l, scope_s s)
   /* create the ids type if needed */
   ids = comp_ids(c);
   if (!ids) {
+    assert(scope_current() == c->scope);
     ids = type_newstruct(l, prop_strkind(PROP_IDS), c->idsscope);
     if (!ids) return NULL;
 
@@ -335,7 +335,7 @@ comp_addids(tloc l, scope_s s)
       if (m && type_type(m) == type_type(t)) continue;
 
       m = type_newmember(type_loc(t), type_name(t), type_type(t));
-      if (!m) return NULL;
+      if (!m) /* error has been recorded/reported already */;
     }
     scope_pop();
     assert(scope_current() == c->scope);
@@ -414,7 +414,7 @@ comp_dopragma(comp_s c)
 
   /* apply #pragma require declarations */
   h = dotgen_hrequire();
-  if (h && prop_merge_list(c->props, h))
+  if (h && prop_merge_list(c->props, h, 0/*ignore_dup*/))
     parserror(c->loc, "dropping #pragma requires directives for %s %s",
               comp_strkind(c->kind), c->name);
 }
@@ -464,71 +464,70 @@ comp_addievs(tloc l, hash_s h, int nostd)
 }
 
 
-/* --- comp_applytmpl ------------------------------------------------------ */
+/* --- comp_extends -------------------------------------------------------- */
 
-/** Apply template declarations to all components.
- */
-int
-comp_applytmpl()
+static int
+comp_extends(comp_s c, hash_s extends, propkind k)
 {
-  comp_s c, t;
-  task_s task;
   hiter i;
-  int e = 0;
+  int s, e = 0;
+  assert(k == PROP_EXTENDS || k == PROP_PROVIDES || k == PROP_USES);
 
-  for(t = clist; t; t = t->next) {
-    if (comp_kind(t) != COMP_IFACE) continue;
+  for(hash_first(extends, &i); i.current; hash_next(&i)) {
+    s = comp_merge(c, i.value, k);
+    if (s && !e) e = s;
+  }
 
-    for(c = comp_first(); c; c = comp_next(c)) {
-      assert(scope_current() == scope_global());
-      active = c;
-      if (!scope_push(c->loc, c->name, SCOPE_MODULE)) continue;
+  return e;
+}
 
-      e = prop_merge_list(comp_props(c), comp_props(t));
 
-      for(hash_first(comp_ports(t), &i); i.current; hash_next(&i)) {
-	if (!port_new(port_loc(i.value), port_kind(i.value),
-		      port_name(i.value), port_type(i.value))) e = 1;
-      }
+/* --- comp_merge ---------------------------------------------------------- */
 
-      for(hash_first(comp_tasks(t), &i); i.current; hash_next(&i)) {
-	task = comp_addtask(task_loc(i.value), task_name(i.value), NULL);
-	if (task) {
-	  e |= prop_merge_list(task_props(task), task_props(i.value));
-	  hash_destroy(task->fsm, 1);
-	  task->fsm = codel_fsmcreate(task_loc(task), task_props(task));
-	}
-	else
-	  e = 1;
-      }
+/** Implement 'extends', 'provides' and 'uses'
+ */
+static int
+comp_merge(comp_s c, comp_s m, propkind k)
+{
+  hiter i;
+  int e;
+  assert(scope_current() == c->scope && active == c);
+  assert(k == PROP_EXTENDS || k == PROP_PROVIDES || k == PROP_USES);
 
-      for(hash_first(comp_services(t), &i); i.current; hash_next(&i)) {
-        if (!service_clone(i.value)) e = 1;
-      }
+  e = prop_merge_list(c->props, m->props, c->kind != COMP_IFACE/*ignore_dup*/);
 
-      for(hash_first(comp_remotes(t), &i); i.current; hash_next(&i)) {
-        if (!remote_clone(i.value)) e = 1;
-      }
+  for(hash_first(m->tasks, &i); i.current; hash_next(&i))
+    if (!task_clone(i.value) && !e) e = errno;
 
-      active = NULL;
-      scope_pop();
+  for(hash_first(m->ports, &i); i.current; hash_next(&i)) {
+    if (!port_clone(i.value, k == PROP_USES /*flipdir*/) && !e) e = errno;
+  }
 
-      if (!e)
-	xwarnx("applied template %s to component %s",
-	       comp_name(t), comp_name(c));
+  for(hash_first(m->services, &i); i.current; hash_next(&i)) {
+    switch(k) {
+      case PROP_EXTENDS: case PROP_PROVIDES:
+        if (!service_clone(i.value)) e = errno;
+        break;
+
+      case PROP_USES:
+        if (!remote_create(service_loc(i.value), service_name(i.value),
+                           service_params(i.value)))
+             e = errno;
+        break;
+
+      default: assert(0);
     }
   }
 
-  /* unlink templates now they've been applied */
-  while(clist && comp_kind(clist) == COMP_IFACE)
-    clist = clist->next;
-  if (clist)
-    for(t = clist; t->next;)
-      if (comp_kind(t->next) == COMP_IFACE)
-        t->next = t->next->next;
-      else
-        t = t->next;
+  for(hash_first(m->remotes, &i); i.current; hash_next(&i)) {
+    if (!remote_clone(i.value)) e = errno;
+  }
 
+  if (!e)
+    xwarnx("%s %s %s into %s %s",
+           k == PROP_EXTENDS?"extended":(k == PROP_PROVIDES?"provided":"used"),
+           comp_strkind(m->kind), m->name,
+           comp_strkind(c->kind), c->name);
   return e;
 }
 

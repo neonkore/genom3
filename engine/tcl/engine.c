@@ -394,7 +394,7 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
   if (engine_createcmd(interp, slave, key, comp_cmd, c)) {
     if (errno != EEXIST) return errno;
   } else
-    xwarnx("exported component %s", comp_name(c));
+    xwarnx("exported %s %s", comp_strkind(comp_kind(c)), comp_name(c));
 
   /* internal event type */
   s = engine_gentype(interp, slave, comp_eventtype(c));
@@ -417,7 +417,8 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
       case PROP_VERSION: case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
       case PROP_CODELS_REQUIRE: case PROP_TASK: case PROP_THROWS:
       case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
-	break;
+      case PROP_EXTENDS: case PROP_PROVIDES: case PROP_USES:
+        break;
     }
 
     if (s) return s;
@@ -486,7 +487,7 @@ engine_gentask(Tcl_Interp *interp, Tcl_Interp *slave, task_s t)
       case PROP_EMAIL: case PROP_REQUIRE: case PROP_CODELS_REQUIRE:
       case PROP_CLOCKRATE: case PROP_SCHEDULING: case PROP_TASK:
       case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
-      case PROP_AFTER:
+      case PROP_AFTER: case PROP_EXTENDS: case PROP_PROVIDES: case PROP_USES:
 	break;
     }
 
@@ -561,7 +562,7 @@ engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave, service_s s)
       case PROP_VERSION: case PROP_LANG: case PROP_EMAIL: case PROP_REQUIRE:
       case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE: case PROP_TASK:
       case PROP_THROWS: case PROP_INTERRUPTS: case PROP_BEFORE:
-      case PROP_AFTER:
+      case PROP_AFTER: case PROP_EXTENDS: case PROP_PROVIDES: case PROP_USES:
 	break;
     }
 

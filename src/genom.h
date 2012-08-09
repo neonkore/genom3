@@ -337,6 +337,10 @@ typedef enum propkind {
   PROP_REQUIRE,		/**< run-time requirements */
   PROP_CODELS_REQUIRE,	/**< codels requirements */
 
+  PROP_EXTENDS,		/**< interface inheritance */
+  PROP_PROVIDES,	/**< interface implementation */
+  PROP_USES,		/**< interface use */
+
   PROP_CLOCKRATE,	/**< clock rate */
   PROP_PERIOD,		/**< period */
   PROP_DELAY,		/**< delay */
@@ -375,8 +379,8 @@ task_s		prop_task(prop_s p);
 codel_s		prop_codel(prop_s p);
 hash_s		prop_hash(prop_s p);
 
-int		prop_merge_list(hash_s p, hash_s m);
-int		prop_merge(hash_s p, prop_s i);
+int		prop_merge_list(hash_s p, hash_s m, int ignore_dup);
+int		prop_merge(hash_s p, prop_s i, int ignore_dup);
 
 const char *	prop_strkind(propkind k);
 
@@ -405,6 +409,7 @@ typedef struct param_s *param_s;
 comp_s		comp_active(void);
 comp_s		comp_first(void);
 comp_s		comp_next(comp_s c);
+comp_s		comp_find(const char *name);
 
 tloc		comp_loc(comp_s c);
 compkind	comp_kind(comp_s c);
@@ -429,7 +434,6 @@ comp_s		comp_pop(void);
 int		comp_addprop(tloc l, prop_s p);
 idltype_s	comp_addids(tloc l, scope_s s);
 int		comp_addievs(tloc l, hash_s h, int nostd);
-int		comp_applytmpl(void);
 
 int		comp_dumpall(FILE *out);
 int		comp_dump(comp_s c, FILE *out);
@@ -441,6 +445,7 @@ hash_s		task_props(task_s t);
 hash_s		task_fsm(task_s t);
 
 task_s		task_create(tloc l, const char *name, hash_s props);
+task_s		task_clone(task_s task);
 void		task_destroy(task_s t);
 
 tloc		service_loc(service_s s);
@@ -486,7 +491,7 @@ typedef enum portkind {
 
 port_s		port_create(tloc l, portdir d, portkind k, const char *name,
                         idltype_s t);
-port_s		port_clone(port_s port);
+port_s		port_clone(port_s port, int flipdir);
 void		port_destroy(port_s p);
 
 tloc		port_loc(port_s p);

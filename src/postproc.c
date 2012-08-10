@@ -53,7 +53,7 @@ dotgen_consolidate()
   hash_s types = type_all();
   comp_s c;
   prop_s p;
-  hiter i, j;
+  hiter i;
   int k;
 
   int e = 0;
@@ -102,30 +102,6 @@ dotgen_consolidate()
                     prop_strkind(cpdef[k].p));
           e |= 1;
         }
-      }
-    }
-  }
-
-
-  /* resolve service names in interrupts, before and after properties */
-  for(c = comp_first(); c; c = comp_next(c)) {
-    hash_s services = comp_services(c);
-
-    for(hash_first(services, &i); i.current; hash_next(&i)) {
-      for(hash_first(service_props(i.value), &j); j.current; hash_next(&j)) {
-	switch(prop_kind(j.value)) {
-	  case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
-	  case PROP_SCHEDULING: case PROP_STACK: case PROP_DOC: case PROP_IDS:
-	  case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-          case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
-          case PROP_TASK: case PROP_VALIDATE: case PROP_SIMPLE_CODEL:
-          case PROP_FSM_CODEL: case PROP_THROWS:
-            break;
-
-	  case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
-	    e |= comp_resolvesvc(prop_loc(j.value), c, prop_hash(j.value));
-	    break;
-	}
       }
     }
   }

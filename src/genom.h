@@ -428,7 +428,6 @@ int		comp_addprop(tloc l, prop_s p);
 idltype_s	comp_addids(tloc l, scope_s s);
 task_s		comp_addtask(tloc l, const char *name, hash_s props);
 int		comp_addievs(tloc l, hash_s h, int nostd);
-int		comp_resolvesvc(tloc l, comp_s c, hash_s h);
 int		comp_applytmpl(void);
 
 int		comp_dumpall(FILE *out);
@@ -453,6 +452,7 @@ const char *	service_strkind(svckind k);
 
 service_s	service_create(tloc l, svckind kind, const char *name,
                         hash_s params, hash_s props);
+int		service_check(service_s service);
 service_s	service_clone(service_s service);
 void		service_destroy(service_s s);
 

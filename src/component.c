@@ -206,12 +206,22 @@ error:
 comp_s
 comp_pop(void)
 {
-  scope_s s;
   comp_s c = active;
+  scope_s s;
+  hiter i;
+  int e;
   assert(active);
+
+  /* pop context */
   s = scope_pop();
   assert(s == c->scope);
   active = NULL;
+  e = 0;
+
+  /* check services */
+  for(hash_first(c->services, &i); i.current; hash_next(&i))
+    e |= service_check(i.value);
+
   return c;
 }
 
@@ -640,33 +650,6 @@ comp_addievs(tloc l, hash_s h, int nostd)
   }
 
   return errno = r;
-}
-
-
-/* --- comp_resolvesvc ----------------------------------------------------- */
-
-/** Resolve service names in given hash.
- */
-int
-comp_resolvesvc(tloc l, comp_s c, hash_s h)
-{
-  hiter i;
-  service_s s;
-  int e;
-  assert(c && h);
-
-  e = 0;
-  for(hash_first(h, &i); i.current; hash_next(&i)) {
-    if (strcmp(i.value, ALL_SERVICE_NAME)) {
-      s = comp_service(c, i.value);
-      if (!s) {
-	parserror(l, "no such service '%s'", i.value);
-	e = 1;
-      }
-    }
-  }
-
-  return e;
 }
 
 

@@ -283,6 +283,42 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
 }
 
 
+/* --- service_check ------------------------------------------------------- */
+
+/** sanity checks for a service
+ */
+int
+service_check(service_s service)
+{
+  hiter i, j;
+  int e = 0;
+
+  /* check service names in interrupts, before and after properties */
+  for(hash_first(service->props, &i); i.current; hash_next(&i)) {
+    switch(prop_kind(i.value)) {
+      case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
+      case PROP_SCHEDULING: case PROP_STACK: case PROP_DOC: case PROP_IDS:
+      case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
+      case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
+      case PROP_TASK: case PROP_VALIDATE: case PROP_SIMPLE_CODEL:
+      case PROP_FSM_CODEL: case PROP_THROWS: case PROP_EXTENDS:
+        break;
+
+      case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
+        for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
+          if (strcmp(j.value, ALL_SERVICE_NAME) &&
+              !comp_service(service->component, j.value)) {
+            parserror(prop_loc(j.value), "no such service '%s'", j.value);
+            e = 1;
+          }
+        }
+        break;
+    }
+  }
+  return e;
+}
+
+
 /* --- service_clone ------------------------------------------------------- */
 
 /** clone a service

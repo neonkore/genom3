@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -62,7 +62,7 @@ expect() {
 	    return 0
 	fi
 	echo wrong output produced:
-	cat run.$file
+	${AWK} '{print NR "\t" $0}' run.$file
     else
 	echo no output produced
     fi
@@ -80,12 +80,12 @@ require() {
 	    return 0
 	fi
 	echo wrong output produced:
-	cat run.$file
+	${AWK} '{print NR "\t" $0}' run.$file
     else
 	echo no output produced
     fi
     echo expecting:
-    cat run.data
+    ${AWK} '{print NR "\t" $0}' run.data
     echo test failed
     return 2
 }

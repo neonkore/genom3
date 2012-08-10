@@ -2,10 +2,9 @@
 . ${0%${0##*/}}../test.sh
 
 cat >run.gen <<EOF
-#pragma requires x "x > 0"
-
 component a;
-component b { require "x"; };
+#pragma requires x "x > 0"
+component b;
 component c { require "x > 0"; };
 EOF
 
@@ -20,9 +19,6 @@ testing '#pragma requires'
 run 0 env PKG_CONFIG_PATH=run.t ${GENOM_BIN} -N run.gen
 require out <<EOF
 component a {
-  requires
-    "x",
-    "x > 0";
   lang	"c";
   version	"0";
 };
@@ -37,8 +33,8 @@ component b {
 
 component c {
   requires
-    "x > 0",
-    "x";
+    "x",
+    "x > 0";
   lang	"c";
   version	"0";
 };

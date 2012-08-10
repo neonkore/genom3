@@ -64,6 +64,7 @@ hash_s		comp_services(comp_s c) { assert(c); return c->services; }
 hash_s		comp_remotes(comp_s c) { assert(c); return c->remotes; }
 
 static idltype_s	comp_ievcreate(tloc l, const char *name);
+static void		comp_dopragma(comp_s c);
 
 struct task_s {
   tloc loc;
@@ -141,6 +142,7 @@ comp_push(tloc l, const char *name, compkind kind)
       return NULL;
     }
 
+    comp_dopragma(c);
     xwarnx("reopened %s %s", comp_strkind(kind), c->name);
     return active = c;
   }
@@ -186,6 +188,10 @@ comp_push(tloc l, const char *name, compkind kind)
   }
 
   xwarnx("created %s %s", comp_strkind(kind), c->name);
+
+  /* apply #pragma directives */
+  comp_dopragma(c);
+
   return active = c;
 
 error:
@@ -575,6 +581,21 @@ error:
   parserror(l, "failed to create component internal event type '%s'",
 	    strings(name, "::" COMPONENT_EVENTTYPE_NAME, NULL));
   return NULL;
+}
+
+
+/* --- comp_dopragma ------------------------------------------------------- */
+
+static void
+comp_dopragma(comp_s c)
+{
+  hash_s h;
+
+  /* apply #pragma require declarations */
+  h = dotgen_hrequire();
+  if (h && prop_merge_list(c->props, h))
+    parserror(c->loc, "dropping #pragma requires directives for %s %s",
+              comp_strkind(c->kind), c->name);
 }
 
 

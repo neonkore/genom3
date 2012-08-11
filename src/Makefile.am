@@ -27,6 +27,7 @@ genom3_SOURCES=\
 	hash.c		\
 	property.c	\
 	component.c	\
+	task.c		\
 	service.c	\
 	port.c		\
 	codel.c		\

@@ -426,7 +426,6 @@ comp_s		comp_push(tloc l, const char *name, compkind kind);
 comp_s		comp_pop(void);
 int		comp_addprop(tloc l, prop_s p);
 idltype_s	comp_addids(tloc l, scope_s s);
-task_s		comp_addtask(tloc l, const char *name, hash_s props);
 int		comp_addievs(tloc l, hash_s h, int nostd);
 int		comp_applytmpl(void);
 
@@ -439,6 +438,7 @@ comp_s		task_comp(task_s t);
 hash_s		task_props(task_s t);
 hash_s		task_fsm(task_s t);
 
+task_s		task_create(tloc l, const char *name, hash_s props);
 void		task_destroy(task_s t);
 
 tloc		service_loc(service_s s);

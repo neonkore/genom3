@@ -66,21 +66,6 @@ hash_s		comp_remotes(comp_s c) { assert(c); return c->remotes; }
 static idltype_s	comp_ievcreate(tloc l, const char *name);
 static void		comp_dopragma(comp_s c);
 
-struct task_s {
-  tloc loc;
-  const char *name;
-  comp_s component;
-
-  hash_s props;
-  hash_s fsm;
-};
-
-tloc		task_loc(task_s t) { assert(t); return t->loc; }
-const char *	task_name(task_s t) { assert(t); return t->name; }
-comp_s		task_comp(task_s t) { assert(t); return t->component; }
-hash_s		task_props(task_s t) { assert(t); return t->props; }
-hash_s		task_fsm(task_s t) { assert(t); return t->fsm; }
-
 /** the components and interfaces of a dotgen file */
 static comp_s clist = NULL;
 
@@ -364,147 +349,6 @@ comp_addids(tloc l, scope_s s)
 }
 
 
-/* --- comp_addtask -------------------------------------------------------- */
-
-/** create a task in component
- */
-task_s
-comp_addtask(tloc l, const char *name, hash_s props)
-{
-  comp_s comp;
-  hiter i;
-  task_s t;
-  codel_s c;
-  prop_s p, d;
-  int e;
-  assert(name);
-
-  /* a component must exist */
-  comp = comp_active();
-  if (!comp) {
-    parserror(l, "missing component declaration before task %s", name);
-    return NULL;
-  }
-  e = 0;
-
-  if (!props) {
-    props = hash_create("property list", 0);
-    if (!props) return NULL;
-  }
-
-  /* check consitency of some properties */
-  p = hash_find(props, prop_strkind(PROP_PERIOD));
-  if (p) {
-    cval c = type_constvalue(prop_value(p));
-    if (const_convert(&c, CST_FLOAT) ||	c.f <= 0.) {
-      parserror(prop_loc(p),
-		"invalid numeric value for %s", prop_strkind(PROP_PERIOD));
-      e = 1;
-    }
-  }
-
-  d = hash_find(props, prop_strkind(PROP_DELAY));
-  if (d) {
-    cval c = type_constvalue(prop_value(d));
-    if (!p) {
-      parserror(prop_loc(d), "delay without period is not allowed");
-      e = 1;
-    }
-    if (const_convert(&c, CST_FLOAT) ||	c.f < 0.) {
-      parserror(prop_loc(d),
-		"invalid numeric value for %s", prop_strkind(PROP_DELAY));
-      e = 1;
-    }
-  }
-
-  if (!e && d && p) {
-    if (type_constvalue(prop_value(d)).f >= type_constvalue(prop_value(p)).f) {
-      parserror(prop_loc(d), "delay must be less than period");
-      parsenoerror(prop_loc(p), " period declared here");
-      e = 1;
-    }
-  }
-  if (!e && d && !p) {
-    parsewarning(
-      prop_loc(d), "ignoring delay in task %s with no period", name);
-    hash_remove(props, prop_strkind(PROP_DELAY), 1/*release*/);
-  }
-
-  /* check unwanted properties */
-  for(hash_first(props, &i); i.current; hash_next(&i))
-    switch(prop_kind(i.value)) {
-      case PROP_THROWS:
-        /* register internal events */
-        if (comp_addievs(l, prop_hash(i.value), 1)) e = errno;
-        break;
-
-      case PROP_DOC: case PROP_PERIOD: case PROP_DELAY: case PROP_PRIORITY:
-      case PROP_SCHEDULING: case PROP_STACK: case PROP_FSM_CODEL:
-	break;
-
-      case PROP_SIMPLE_CODEL:
-	parserror(l, "simple codel not allowed in task %s", name);
-	parsenoerror(prop_loc(i.value), " %s declared here",
-                     prop_name(i.value));
-        e = 1; break;
-
-      case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
-      case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
-      case PROP_TASK: case PROP_VALIDATE: case PROP_INTERRUPTS:
-      case PROP_BEFORE: case PROP_AFTER:
-	parserror(prop_loc(i.value), "property %s is not suitable for tasks",
-		  prop_strkind(prop_kind(i.value)));
-	e = 1; break;
-    }
-  if (e) return NULL;
-
-
-  /* create */
-  t = malloc(sizeof(*t));
-  if (!t) {
-    warnx("memory exhausted, cannot create task");
-    return NULL;
-  }
-
-  t->loc = l;
-  t->name = string(name);
-  t->component = comp;
-  t->props = props;
-
-  e = hash_insert(comp->tasks, t->name, t, (hrelease_f)task_destroy);
-  switch(e) {
-    case 0: break;
-
-    case EEXIST:
-      parserror(l, "duplicate task %s", t->name);
-      task_s u = hash_find(comp->tasks, name);
-      if (u) parserror(u->loc, " task %s declared here", u->name);
-      /*FALLTHROUGH*/
-    default:
-      free(t);
-      return NULL;
-  }
-
-  /* build task's fsm */
-  t->fsm = codel_fsmcreate(l, t->props);
-  if (!t->fsm) {
-    free(t);
-    return NULL;
-  }
-
-  /* set codel's parent task and (NULL) service */
-  for(hash_first(props, &i); i.current; hash_next(&i))
-    if (prop_kind(i.value) == PROP_FSM_CODEL) {
-      c = prop_codel(i.value);
-      *codel_task(c) = t;
-      *codel_service(c) = NULL;
-    }
-
-  xwarnx("created task %s", t->name);
-  return t;
-}
-
-
 /* --- comp_strkind -------------------------------------------------------- */
 
 /** Return a component kind as a string
@@ -520,39 +364,6 @@ comp_strkind(compkind k)
 
   assert(0);
   return NULL;
-}
-
-
-/* --- service_strkind ----------------------------------------------------- */
-
-/** Return a service kind as a string
- */
-
-const char *
-service_strkind(svckind k)
-{
-  switch(k) {
-    case S_ATTRIBUTE:		return "attribute";
-    case S_FUNCTION:		return "function";
-    case S_ACTIVITY:		return "activity";
-  }
-
-  assert(0);
-  return NULL;
-}
-
-
-/* --- task_destroy -------------------------------------------------------- */
-
-/** destroy task
- */
-void
-task_destroy(task_s t)
-{
-  if (t) {
-    hash_destroy(t->props, 1);
-    free(t);
-  }
 }
 
 

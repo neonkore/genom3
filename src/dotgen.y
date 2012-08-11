@@ -281,7 +281,7 @@ export:
   {
     $$ = 0; if (!$1) break;
     if (comp_addprop(@1, $1)) {
-      parserror(@1, "dropped %s declaration", prop_name($1));
+      parsenoerror(@1, "dropped %s declaration", prop_name($1));
       prop_destroy($1);
     }
   }
@@ -341,8 +341,8 @@ task:
   TASK identifier opt_properties ';'
   {
     if (!$2) { parserror(@1, "dropped task"); break; }
-    if (!comp_addtask(@1, $2, $3)) {
-      parserror(@1, "dropped '%s' task", $2);
+    if (!task_create(@1, $2, $3)) {
+      parsenoerror(@1, "dropped '%s' task", $2);
       if ($3) hash_destroy($3, 1);
     }
   }

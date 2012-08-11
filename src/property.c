@@ -156,10 +156,9 @@ prop_newvalue(tloc l, propkind k, cval c)
   prop_s p;
 
   /* check consitency */
-  if (k == PROP_CLOCKRATE) {
+  if (k == PROP_CLOCKRATE || k == PROP_PERIOD || k == PROP_DELAY) {
     if (const_convert(&c, CST_FLOAT) || c.f < 0.) {
-      parserror(l, "invalid numeric value for %s",
-                prop_strkind(PROP_CLOCKRATE));
+      parserror(l, "invalid numeric value for %s", prop_strkind(k));
       return NULL;
     }
   }

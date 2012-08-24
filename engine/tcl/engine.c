@@ -338,7 +338,7 @@ engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave, idltype_s t)
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
-    case IDL_ENUMERATOR: case IDL_STRING: case IDL_REMOTE:
+    case IDL_ENUMERATOR: case IDL_STRING: case IDL_PORT: case IDL_REMOTE:
       /* no type reference */
       s = 0;
       break;

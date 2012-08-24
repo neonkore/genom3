@@ -99,7 +99,7 @@
 %token <s>	OUT INOUT SERVICE IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
-%token <s>	ASYNC REMOTE
+%token <s>	ASYNC REMOTE MULTIPLE
 
 %type <i>	specification statement idl_statements idl_statement
 %type <i>	exports export
@@ -107,7 +107,7 @@
 %type <comp>	component_name interface_name
 %type <i>	interface component ids attribute port task service remote
 %type <skind>	service_kind
-%type <pkind>	port_dir opt_handle opt_array
+%type <pkind>	port_dir opt_multiple
 %type <prop>	component_property task_property service_property codel_property
 %type <prop>	throw_property property
 %type <hash>	opt_properties properties
@@ -288,11 +288,11 @@ export:
 ;
 
 port:
-  PORT opt_handle port_dir type_spec identifier opt_array ';'
+  PORT opt_multiple port_dir type_spec identifier ';'
   {
     if (!$5) { parserror(@1, "dropped port"); break; }
     if (!$4) { parserror(@1, "dropped '%s' port", $5); break; }
-    if (!port_new(@1, $2|$3|$6, $5, $4))
+    if (!port_create(@1, $3, $2, $5, $4))
       parserror(@1, "dropped '%s' port", $5);
   }
 ;
@@ -302,14 +302,9 @@ port_dir:
   | OUT	{ $$ = PORT_OUT; }
 ;
 
-opt_array:
-  /* empty */	{ $$ = PORT_STATIC; }
-  | '[' ']'	{ $$ = PORT_ARRAY; }
-;
-
-opt_handle:
-  /* empty */	{ $$ = PORT_DATA; }
-  | HANDLE	{ $$ = PORT_HANDLE; }
+opt_multiple:
+  /* empty */	{ $$ = PORT_SIMPLE; }
+  | MULTIPLE	{ $$ = PORT_MULTIPLE; }
 ;
 
 ids:
@@ -944,7 +939,7 @@ const_type:
 
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
       case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION: case IDL_REMOTE:
+      case IDL_FORWARD_UNION: case IDL_PORT: case IDL_REMOTE:
 	parserror(@1, "%s %s is not a valid constant type",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -1271,7 +1266,7 @@ switch_type_spec:
       case IDL_FLOAT: case IDL_DOUBLE: case IDL_OCTET: case IDL_STRING:
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
       case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION: case IDL_REMOTE:
+      case IDL_FORWARD_UNION: case IDL_PORT: case IDL_REMOTE:
 	parserror(@1, "%s %s is not a valid type for union switch",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -1740,7 +1735,7 @@ identifier:
   | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | TASK_P | PERIOD
   | DELAY | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS
   | DOC | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT
-  | SERVICE | ASYNC | REMOTE
+  | SERVICE | ASYNC | REMOTE | MULTIPLE
 ;
 
 identifier_list:

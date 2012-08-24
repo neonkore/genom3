@@ -225,6 +225,7 @@ int		dcl_next(dcliter *i);
 
 /* --- IDL types ----------------------------------------------------------- */
 
+typedef struct port_s *port_s;
 typedef struct remote_s *remote_s;
 
 typedef enum idlkind {
@@ -257,6 +258,7 @@ typedef enum idlkind {
   IDL_FORWARD_STRUCT,	/**< forward struct declaration */
   IDL_FORWARD_UNION,	/**< forward union declaration */
 
+  IDL_PORT,		/**< port object */
   IDL_REMOTE		/**< rpc object */
 } idlkind;
 
@@ -274,6 +276,7 @@ idltype_s	type_discriminator(idltype_s t);
 clist_s		type_casevalues(idltype_s t);
 hash_s		type_members(idltype_s t);
 scope_s		type_membersscope(idltype_s t);
+port_s		type_port(idltype_s t);
 remote_s	type_remote(idltype_s t);
 
 idltype_s	type_newbasic(tloc l, const char *name, idlkind k);
@@ -292,6 +295,7 @@ idltype_s	type_newmember(tloc l, const char *name, idltype_s t);
 idltype_s	type_newunion(tloc l, const char *name, idltype_s t, scope_s s);
 idltype_s	type_newcase(tloc l, const char *name, idltype_s t, clist_s c);
 idltype_s	type_newalias(tloc l, const char *name, idltype_s t);
+idltype_s	type_newport(tloc l, const char *name, port_s p);
 idltype_s	type_newremote(tloc l, const char *name, remote_s r);
 int		type_renew(idltype_s t);
 void		type_destroy(idltype_s t);
@@ -395,7 +399,6 @@ typedef enum svckind {
   S_ACTIVITY
 } svckind;
 typedef struct comp_s *comp_s;
-typedef struct port_s *port_s;
 typedef struct service_s *service_s;
 typedef struct param_s *param_s;
 
@@ -471,32 +474,29 @@ void		remote_destroy(remote_s r);
 #define PORT_HANDLE_NAME		"port_handle"
 #define PORT_HANDLE_SET_NAME		"port_handle_set"
 
+typedef enum portdir {
+  PORT_IN,
+  PORT_OUT
+} portdir;
+
 typedef enum portkind {
-  PORT_IN =	0x1,
-  PORT_OUT =	0x2,
-  PORT_DIRMSK =	0xf,
-
-  PORT_DATA =	0x10,
-  PORT_HANDLE =	0x20,
-  PORT_CATMSK =	0xf0,
-
-  PORT_STATIC =	0x100,
-  PORT_ARRAY =	0x200,
-  PORT_FLGMSK =	0xf00
+  PORT_SIMPLE,
+  PORT_MULTIPLE
 } portkind;
 
-port_s		port_new(tloc l, portkind k, const char *name, idltype_s t);
+port_s		port_create(tloc l, portdir d, portkind k, const char *name,
+                        idltype_s t);
+port_s		port_clone(port_s port);
 void		port_destroy(port_s p);
 
 tloc		port_loc(port_s p);
 const char *	port_name(port_s p);
+portdir		port_dir(port_s p);
 portkind	port_kind(port_s p);
-#define		port_dir(p)	(port_kind(p) & PORT_DIRMSK)
-#define		port_cat(p)	(port_kind(p) & PORT_CATMSK)
-#define		port_flag(p)	(port_kind(p) & PORT_FLGMSK)
 comp_s		port_comp(port_s p);
 idltype_s	port_type(port_s p);
 idltype_s	port_datatype(port_s p);
+const char *	port_strdir(portdir d);
 const char *	port_strkind(portkind k);
 
 

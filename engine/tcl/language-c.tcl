@@ -59,6 +59,7 @@ namespace eval language::c {
         {forward struct} -
         {forward union}	{ append m [genforward $type] }
 
+        {port}		{ append m [genport $type] }
         {remote}	{ append m [genremote $type] }
 
         default		{ return "" }
@@ -73,9 +74,6 @@ namespace eval language::c {
       }
       if {[regexp {sequence} $m]} {
         append p "#include <genom3/c/idlsequence.h>\n"
-      }
-      if {[regexp {genom_port_handle} $m]} {
-        append p "#include <genom3/c/port.h>\n"
       }
 
       return $p$m
@@ -107,6 +105,7 @@ namespace eval language::c {
 	    {struct}			-
 	    {union}			-
 	    {typedef}			-
+            {port}			-
             {remote}			{ set d [cname [$type fullname]] }
 
 	    {struct member}		-
@@ -286,20 +285,16 @@ namespace eval language::c {
 	set sym [cname $codel]
 	set arg [list]
 	foreach p [$codel parameters] {
-	    set a ""
-            switch -- [$p dir] {
-              "in" {
-                if {[$p src] == "port" && "handle" in [[$p port] kind]} {
-                  append a [[$p type] argument reference [$p name]]
-                } else {
-                  append a [[$p type] argument value [$p name]]
-                }
-              }
-              default	{
-                append a [[$p type] argument reference [$p name]]
-              }
-	    }
-	    lappend arg $a
+          set a ""
+          switch -glob -- [$p dir]/[$p src] {
+            in/* - */port - */remote {
+              append a [[$p type] argument value [$p name]]
+            }
+            inout/* - out/* {
+              append a [[$p type] argument reference [$p name]]
+            }
+          }
+          lappend arg $a
 	}
         if {[llength $arg] == 0} { set arg "void" }
 
@@ -527,6 +522,52 @@ namespace eval language::c {
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
 	return [guard $m $n]
+    }
+
+
+    # --- genport ----------------------------------------------------------
+
+    # Return the C mapping of a port.
+    #
+    proc genport { type } {
+      set n [declarator $type]
+      set p [$type port]
+      set t [$p datatype]
+
+      set f ""
+      if {[$t kind] eq "sequence"} {
+        append f [gensequence $t]
+      }
+
+      append m [genloc $type]
+      append m "\ntypedef struct $n {"
+      switch -- [$p kind]/[$p dir] {
+        simple/in {
+          append m "\n  [$t argument reference] (*data)(void);"
+          append m "\n  uint32_t (*read)(void);"
+        }
+        simple/out {
+          append m "\n  [$t argument reference] (*data)(void);"
+          append m "\n  uint32_t (*write)(void);"
+        }
+
+        multiple/in {
+          append m "\n  [$t argument reference] (*data)(const char *id);"
+          append m "\n  uint32_t (*read)(const char *id);"
+        }
+
+        multiple/out {
+          append m "\n  [$t argument reference] (*data)(const char *id);"
+          append m "\n  uint32_t (*write)(const char *id);"
+          append m "\n  uint32_t (*open)(const char *id);"
+          append m "\n  uint32_t (*close)(const char *id);"
+        }
+
+        default	{ error "invalid port direction" }
+      }
+      append m "\n  const char *(*strerror)(uint32_t status);"
+      append m "\n} $n;"
+      return $f[guard $m $n]
     }
 
 

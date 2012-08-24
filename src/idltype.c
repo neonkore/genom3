@@ -53,6 +53,7 @@ struct idltype_s {
       };
     };
     hash_s members;		/**< enum */
+    port_s port;		/**< port */
     remote_s remote;		/**< remote */
   };
 };
@@ -388,6 +389,17 @@ type_newalias(tloc l, const char *name, idltype_s t)
 }
 
 idltype_s
+type_newport(tloc l, const char *name, port_s port)
+{
+  idltype_s t = type_new(l, IDL_PORT, name);
+  if (!t) return NULL;
+  assert(port);
+
+  t->port = port;
+  return t;
+}
+
+idltype_s
 type_newremote(tloc l, const char *name, remote_s remote)
 {
   idltype_s t = type_new(l, IDL_REMOTE, name);
@@ -478,6 +490,7 @@ type_fixed(idltype_s t)
       return 1;
     }
 
+    case IDL_PORT:
     case IDL_REMOTE:
       return 1;
 
@@ -512,7 +525,8 @@ type_equal(idltype_s a, idltype_s b)
       return a->length == b->length;
 
     case IDL_ENUMERATOR: case IDL_ENUM:
-    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_REMOTE:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_PORT:
+    case IDL_REMOTE:
       if (!a->fullname || !b->fullname) return 0;
       return strcmp(a->fullname, b->fullname)?0:1;
 
@@ -685,7 +699,8 @@ type_final(idltype_s t)
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
     case IDL_ANY: case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY:
-    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION: case IDL_REMOTE:
+    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION: case IDL_PORT:
+    case IDL_REMOTE:
       return t;
 
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
@@ -817,6 +832,18 @@ type_membersscope(idltype_s t)
 }
 
 
+/* --- type_port ----------------------------------------------------------- */
+
+/** For port, return the port object.
+ */
+port_s
+type_port(idltype_s t)
+{
+  assert(t && t->kind == IDL_PORT);
+  return t->port;
+}
+
+
 /* --- type_remote --------------------------------------------------------- */
 
 /** For remote, return the remote object.
@@ -867,6 +894,7 @@ type_strkind(idlkind k)
     case IDL_FORWARD_STRUCT:	return "forward struct";
     case IDL_FORWARD_UNION:	return "forward union";
 
+    case IDL_PORT:		return "port";
     case IDL_REMOTE:		return "remote";
   }
 

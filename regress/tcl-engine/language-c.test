@@ -134,19 +134,15 @@ component comp {
   ids { short a, b; };
   port in comp::ids a;
   port out comp::ids b;
-  port handle in comp::ids ah;
-  port handle out comp::ids bh;
-  port handle in comp::ids aha[];
-  port handle out comp::ids bha[];
+  port multiple in comp::ids am;
+  port multiple out comp::ids bm;
   activity s(in long a, out long b) {
     task t;
     codel<c> c(service in a, service out b) yield d;
     codel<d> d(ids in a::a1, ids out b::b1) yield e;
     codel<e> e(port in a::a2, port out b::b2) yield f;
-    codel<f> f(port in ah::a3) yield g;
-    codel<g> g(port out bh::b3) yield h;
-    codel<h> h(port in aha::a4) yield i;
-    codel<i> i(port out bha::b4) yield c;
+    codel<f> f(port in am::a3) yield g;
+    codel<g> g(port out bm::b3) yield h;
   };
 };
 EOF
@@ -159,11 +155,9 @@ EOF
 expect out '
 	/^comp_event-sep-c\(const int32_t \*a, int32_t \*b\)$/ {next}
 	/^comp_event-sep-d\(const int16_t \*a1, int16_t \*b1\)$/ {next}
-	/^comp_event-sep-e\(const comp_ids \*a2, comp_ids \*b2\)$/ {next}
-	/^comp_event-sep-f\(genom_port_handle \*a3\)$/ {next}
-	/^comp_event-sep-g\(genom_port_handle \*b3\)$/ {next}
-	/^comp_event-sep-h\(genom_port_handle_set \*a4\)$/ {next}
-	/^comp_event-sep-i\(genom_port_handle_set \*b4\)$/ {next}
+	/^comp_event-sep-e\(const comp_a \*a2, const comp_b \*b2\)$/ {next}
+	/^comp_event-sep-f\(const comp_am \*a3\)$/ {next}
+	/^comp_event-sep-g\(const comp_bm \*b3\)$/ {next}
 	{exit 2}
 '
 

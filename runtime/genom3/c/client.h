@@ -36,7 +36,7 @@ typedef int (*genom_request_sendfn)(
   int *rqstid);
 
 typedef int (*genom_port_readfn)(genom_client h, void *data);
-typedef int (*genom_port_set_readfn)(genom_client h,
+typedef int (*genom_port_multiple_readfn)(genom_client h,
   const char *name, void *data);
 
 typedef void (*genom_initfn)(void *data);
@@ -66,10 +66,10 @@ struct genom_port_info {
   genom_initfn init_data;
   genom_finifn fini_data;
   genom_json_printfn json_print;
-  unsigned int regular;
+  unsigned int simple;
   union {
-    genom_port_readfn regular;
-    genom_port_set_readfn set;
+    genom_port_readfn simple;
+    genom_port_multiple_readfn multiple;
   } read;
   size_t data_size;
 };

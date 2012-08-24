@@ -15,7 +15,7 @@ component c {
   port out c::ids a;
   activity s(in long a) {
     task t;
-    codel<a> c(service in a, ids in a::b, port out a::c) yield a;
+    codel<e> c(service in a, ids in a::b, port out a::c) yield e;
   };
 };
 EOF

@@ -34,8 +34,8 @@
 /* --- local data ---------------------------------------------------------- */
 
 static Tcl_Obj *	port_list(Tcl_Interp *interp, comp_s c,
-				Tcl_Obj *const dfilter[],
-				unsigned int ndfilter);
+                                  Tcl_Obj *const dfilter[],
+                                  unsigned int ndfilter);
 
 
 
@@ -79,14 +79,13 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
     if (s != TCL_OK) return s;
   }
-  if (i != compidx_ports) {
-    /* 'ports' subcommand can have unlimited additional parameters, other
-     * subcommand don't have any. */
-    if (objc > 2) {
+  /* 'ports' subcommand can have additional parameters, other
+   * subcommand don't have any. */
+  if (i != compidx_ports && objc > 2) {
       Tcl_WrongNumArgs(interp, 0, objv, "$component subcommand");
       return TCL_ERROR;
-    }
   }
+
   switch(i) {
     case compidx_name:
       r = Tcl_NewStringObj(comp_name(c), -1);
@@ -212,33 +211,37 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 /** return a Tcl list of ports
  */
 static Tcl_Obj *
-port_list(Tcl_Interp *interp, comp_s c, Tcl_Obj * const dfilter[],
-	  unsigned int ndfilter)
+port_list(Tcl_Interp *interp, comp_s c, Tcl_Obj *const dfilter[],
+          unsigned int ndfilter)
 {
-  static const struct { char *opt; portkind k; } dirarg[] = {
-    { "in", PORT_IN },	{ "out", PORT_OUT },
-    { "data", PORT_DATA }, { "handle", PORT_HANDLE },
-    { "static", PORT_STATIC }, { "array", PORT_ARRAY },
+  static const struct { char *opt; int k; int dir; } parg[] = {
+    { "in", PORT_IN, 1 }, { "out", PORT_OUT, 1 },
+    { "simple", PORT_SIMPLE, 0 }, { "multiple", PORT_MULTIPLE, 0 },
     { NULL }
   };
 
   hiter i;
-  int k, d = -1, f;
-  int s;
+  int d = 0;
+  int k, f, s;
 
   Tcl_Obj *r = Tcl_NewListObj(0, NULL);
 
-  for(f = k = 0; f < ndfilter; f++) {
-    s = Tcl_GetIndexFromObjStruct(
-      interp, dfilter[f], dirarg, sizeof(dirarg[0]), "filter", 0, &d);
-    if (s != TCL_OK) return NULL;
-    k |= dirarg[d].k;
-  }
-
   for(hash_first(comp_ports(c), &i); i.current; hash_next(&i)) {
-    if ((port_kind(i.value) & k) == k) {
+    k = 1;
+    for(f = 0; f < ndfilter; f++) {
+      s = Tcl_GetIndexFromObjStruct(
+        interp, dfilter[f], parg, sizeof(parg[0]), "filter", 0, &d);
+      if (s != TCL_OK) return NULL;
+      if (parg[d].dir) {
+        if (port_dir(i.value) != parg[d].k) k = 0;
+      } else {
+        if (port_kind(i.value) != parg[d].k) k = 0;
+      }
+    }
+
+    if (k) {
       Tcl_ListObjAppendElement(
-	interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
+        interp, r, Tcl_NewStringObj(port_genref(i.value), -1));
     }
   }
 

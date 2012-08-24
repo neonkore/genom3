@@ -60,7 +60,7 @@ component c {
 
   port in long_type pa;
   port out c::ids::str pb;
-  port handle out long_type pc[];
+  port multiple out long_type pc;
 
   remote r1(in long_type a = 0:"first parameter",
             inout struct param { long x; } b[3]  = { { 0 } }:"second parameter",
@@ -76,7 +76,7 @@ component c {
     stack	20k;
 
     codel<start, other>
-      a(port in pa, port out pb.b::port)
+      a(port in pa, port out pb::port)
       yield sleep, main;
     codel<main>
       b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
@@ -111,7 +111,7 @@ component c {
     validate	v(ids in b[0].c::a, service out c);
 
     codel<start>
-      a(port in pa, port out pb.b::port) yield sleep, ether;
+      a(port in pa, port out pb::port) yield sleep, ether;
     codel<main>
       b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
       yield ether;

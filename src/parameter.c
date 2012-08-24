@@ -234,18 +234,15 @@ param_newport(tloc l, pdir dir, const char *name, clist_s member)
   }
   if (dir == P_OUT && port_dir(port) == PORT_IN) {
     parserror(l, "read-only port '%s'", i.value->s);
-    parsenoerror(port_loc(port), " %s port %s declared here",
-                 port_strkind(port_kind(port)), port_name(port));
+    parsenoerror(port_loc(port), " port %s declared here", port_name(port));
     errno = EINVAL; return NULL;
   }
 
   clist_next(&i);
 
-  if (i.current && (port_kind(port) & PORT_HANDLE)) {
-    parserror(l, "cannot access members of %s port handle %s",
-              port_strkind(port_kind(port)), port_name(port));
-    parsenoerror(port_loc(port), " %s port %s declared here",
-                 port_strkind(port_kind(port)), port_name(port));
+  if (i.current) {
+    parserror(l, "cannot access members of port %s", port_name(port));
+    parsenoerror(port_loc(port), " port %s declared here", port_name(port));
     errno = EINVAL; return NULL;
   }
 

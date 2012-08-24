@@ -25,5 +25,4 @@ hdir=	$(includedir)/genom3/c
 
 h_HEADERS=\
 	idlsequence.h	\
-	client.h	\
-	port.h
+	client.h

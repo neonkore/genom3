@@ -40,6 +40,7 @@ LONG		long
 M		m
 MODULE		module
 MS		ms
+MULTIPLE	multiple
 OCTET		octet
 OUT		out
 PERIOD		period

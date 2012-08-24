@@ -247,6 +247,7 @@ chartext	([^\'])|(\\.)
 "out"		{ yylval->s = string(yytext); return OUT; }
 "inout"		{ yylval->s = string(yytext); return INOUT; }
 "service"	{ yylval->s = string(yytext); return SERVICE; }
+"multiple"	{ yylval->s = string(yytext); return MULTIPLE; }
 
 "s"		{ yylval->s = string(yytext); return S; }
 "ms"		{ yylval->s = string(yytext); return MS; }

@@ -101,7 +101,7 @@ typedef long a;
 typedef long b;
 struct b1 { long b; };
 component c {
-  port handle out b1 p[];
+  port multiple out b1 p;
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
@@ -113,9 +113,7 @@ expect out '
 	/^::b1::b$/ {next}
 	/^::c::event$/ {next}
 	/^::c::(ok|error|ether|start|stop|sleep)$/ {next}
-	/^::genom::port_handle$/ {next}
-	/^::genom::port_handle::id$/ {next}
-	/^::genom::port_handle_set$/ {next}
+	/^::c::p$/ {next}
 	{exit 2}
 '
 

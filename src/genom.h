@@ -31,7 +31,6 @@
 
 /** runtime options */
 extern struct runopt_s {
-  char input[PATH_MAX];	/** absolute path name of input file */
   char tmpl[PATH_MAX];	/** name of template file */
 
   int verbose;		/** be verbose */

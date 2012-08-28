@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LAAS/CNRS
+ * Copyright (c) 2009-2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -23,11 +23,13 @@
  */
 #include "acgenom.h"
 
+#include <sys/param.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
+#include <limits.h>
 #include <err.h>
 #include <errno.h>
 #include <signal.h>
@@ -113,16 +115,21 @@ cpp_invoke(const char *in, int out)
 
   /* set input file. link to a .c file if needed */
   if (!runopt.cppdotgen) {
+    char rpath[PATH_MAX];
     char file[PATH_MAX];
 
+    if (!realpath(in, rpath)) {
+      warnx("cannot link input file to `%s'", file); warn(NULL);
+      errno = EIO; goto err;
+    }
     strlcpy(file, runopt.tmpdir, sizeof(file));
     strlcat(file, "/", sizeof(file));
     strlcat(file, basename((char *)in), sizeof(file));
     strlcat(file, ".c", sizeof(file));
-    s = symlink(in, file);
-    xwarnx("linked input file to `%s'", file);
+    s = symlink(rpath, file);
+    xwarnx("linked %s input file to `%s'", in, file);
     if (s) {
-      warnx("cannot link input file to `%s'", file); warn(NULL);
+      warnx("cannot link %s input file to `%s'", in, file); warn(NULL);
       errno = EIO; goto err;
     }
     s = cpp_optappend(file, -1);

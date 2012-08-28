@@ -65,7 +65,7 @@ namespace eval template {
         variable deps
 
 	set src [file join [dotgen template dir] $src]
-	puts "sourcing $src"
+	template message "sourcing $src"
 
 	if {[catch {
           uplevel #0 source $src
@@ -183,8 +183,7 @@ namespace eval template {
 		    if {$stype == "string"} { set src "<string>" }
 		    if {[catch {engine::process $src $in $out} m]} {
 			engine::close $in
-			template message $m
-			exit 2
+			template fatal $m
 		    }
 		    engine::close $in
 
@@ -387,7 +386,9 @@ namespace eval template {
     # @end deffn
     #
     proc message { m } {
-	puts stderr $m
+      if {[dotgen genom verbose]} {
+	puts stderr "[dotgen template name]: $m"
+      }
     }
     namespace export message
 
@@ -435,27 +436,21 @@ namespace eval template {
 
 	# process options
 	while {$argc > 0} {
-	    incr argc -1
 	    set arg [lindex $argv 0]
 	    if {[regexp -- {(--?.+)=(.+)} $arg m o a]} {
 		set arg $o
 		set argv [linsert $argv 1 $a]
 	    }
 
-	    uplevel #0 switch -glob -- $arg [concat $options * "{
+	    uplevel #0 switch -glob -- $arg [concat $options -* "{
 		template fatal \"unknown option $arg\"
-	    }"]
+	    }" * break]
 
+	    incr argc -1
 	    set argv [lrange $argv 1 end]
 	}
 
-	# process extraneous arguments
-	if {$argc > 0} {
-	    message "too many arguments -- $argv"
-	    fatal $usage
-	}
-
-	return
+        return
     }
 
     namespace ensemble create

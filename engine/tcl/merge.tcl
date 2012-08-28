@@ -51,11 +51,6 @@ namespace eval merge {
     append header "+++ $dst\t[clock format $sb(mtime)]\n"
     set conflicts 0
 
-    # set engine verbose mode and backup previous setting
-    set verb [engine mode]
-    set verb [lindex $verb [lsearch -regexp $verb {-?verbose}]]
-    engine mode +verbose
-
     # iterate over the common sequence between the two files
     set isrc 0
     set idst 0
@@ -119,7 +114,7 @@ namespace eval merge {
                   incr conflicts
                   break
                 }
-                q { engine mode $verb; close $f; return 0 }
+                q { close $f; return 0 }
                 default {
                   puts $patch
                   puts "y - apply this patch"
@@ -153,7 +148,6 @@ namespace eval merge {
       }
     }
 
-    engine mode $verb
     close $f
 
     # move to final destination

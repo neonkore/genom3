@@ -23,6 +23,10 @@
 #                                           Anthony Mallet on Tue Jan 11 2011
 #
 
+# check arguments
+if {[llength $argv] != 1} { error "expected argument: input" }
+lassign $argv input
+
 # generate copyright notice (if any)
 if {![catch {dotgen input notice} text]} {
   puts #[join [split $text "\n"] "\n#"]
@@ -53,4 +57,4 @@ distclean-local:
 merge: merge-interactive
 merge-%:
 	cd ${top_srcdir} && ${genom3} <"[dotgen genom cmdline]"> \
-		skeleton -m $* <"[dotgen input base]">
+		skeleton -m $* <"$input">

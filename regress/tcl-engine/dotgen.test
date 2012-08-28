@@ -63,10 +63,10 @@ expect out '/^interactive$/ {next}; {exit 2}'
 testing '[dotgen template dir]'
 
 cat >run.t/template.tcl <<EOF
-template message [dotgen template dir]
+puts [dotgen template dir]
 EOF
 run 0 ${GENOM_BIN} -t . run.t run.gen
-expect err '/\/run.t$/ {next}; {exit 2}'
+expect out '/\/run.t$/ {next}; {exit 2}'
 
 
 # --- dotgen template tmpdir -----------------------------------------------
@@ -77,26 +77,6 @@ run 0 ${GENOM_BIN} -T run.t interactive -b run.gen <<EOF
 puts [dotgen template tmpdir]
 EOF
 expect out '/^run.t\/genom/ {next}; {exit 2}'
-
-
-# --- dotgen input file ----------------------------------------------------
-#
-testing '[dotgen input file]'
-
-run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
-puts [dotgen input file]
-EOF
-expect out '/\/run.gen$/ {next}; {exit 2}'
-
-
-# --- dotgen input base ----------------------------------------------------
-#
-testing '[dotgen input base]'
-
-run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
-puts [dotgen input base]
-EOF
-expect out '/^run.gen$/ {next}; {exit 2}'
 
 
 # --- dotgen input notice --------------------------------------------------

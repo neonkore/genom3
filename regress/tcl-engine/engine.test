@@ -34,16 +34,6 @@ expect out '/^.$/ {next}; /^chdir run.t$/ {next}; {exit 2}'
 #
 testing '[engine mode]'
 
-run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
-engine mode +verbose
-puts yes
-engine mode -verbose
-puts no
-engine mode verbose
-puts yes
-EOF
-expect out '/^yes$/ {next}; /^verbose mode off$/ {next}; {exit 2}'
-
 cat >run.data <<EOF
 overwrite
 EOF
@@ -51,13 +41,13 @@ run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
 engine mode +overwrite
 engine::close [engine::open file run.data write]
 EOF
-expect out '/^overwrite mode on$/ {next}; /run.data/ {next}; {exit 2}'
+expect out '/^(generating|overwriting) run.data/ {next}; {exit 2}'
 
 cat >run.data <<EOF
 overwrite
 EOF
 run 2 ${GENOM_BIN} interactive -b run.gen <<EOF
-engine mode -overwrite
+engine mode -overwrite -move-if-change
 engine::close [engine::open file run.data write]
 EOF
 
@@ -66,4 +56,4 @@ run 0 ${GENOM_BIN} interactive -b run.gen <<EOF
 engine mode -overwrite +move-if-change
 engine::close [engine::open file run.data write]
 EOF
-expect err '/run.data.*up-to-date/ {next}; {exit 2}'
+expect out '/^generating/ {next} /run.data.*up-to-date/ {next}; {exit 2}'

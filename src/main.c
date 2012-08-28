@@ -66,10 +66,9 @@ main(int argc, char *argv[])
   char *argv0 = argv[0];
   int pipefd[2];
   int status;
-  int c, s;
+  int i, c, s;
 
   /* set default options */
-  runopt.input[0] = '\0';
   runopt.tmpl[0] = '\0';
   runopt.engine[0] = '\0';
   strlcpy(runopt.sysdir, SYSDIR, sizeof(runopt.sysdir));
@@ -226,80 +225,51 @@ main(int argc, char *argv[])
     argc--;
     argv++;
 
-    while(argc > 0) {
-      if (!strcmp(argv[0], "--")) break;
-      /* treat any argument no looking like an option but preceeding something
-       that looks like an option as an option itself */
-      if (argv[0][0] != '-' && (argc == 1 || argv[1][0] != '-')) {
-        /* treat any argument that is not an existing file as an option,
-         * except if it's the last argument */
-	struct stat sb;
-	s = stat(argv[0], &sb);
-	if (!s && S_ISREG(sb.st_mode)) break;
-        if (argc == 1) break;
-      }
-
-      eng_optappend(argv[0], -1);
-      argc--; argv++;
-    }
-    if (argc > 0 && !strcmp(argv[0], "--")) { argc--; argv++; }
+    for(i=0; i<argc; i++) eng_optappend(argv[i], -1);
   }
 
-  /* configure input files */
+  /* check for an input file if just parsing/preprocessing */
   if ((runopt.parse || runopt.preproc) && argc < 1) {
     usage(stderr, argv0);
     status = 1;
     goto done;
   }
-  if (argc < 1) goto generate;
-
-  s = open(argv[0], O_RDONLY, 0);
-  if (s < 0) {
-    warnx("cannot open input file `%s'", argv[0]); warn(NULL);
-    exit(2);
-  }
-  close(s);
-
-  strlcpy(runopt.input, abspath(argv[0]), sizeof(runopt.input));
-  xwarnx("absolute path to input file `%s'", runopt.input);
-
 
   /* just preprocess input file */
   if (runopt.preproc) {
-    cpp_invoke(runopt.input, 1);
+    cpp_invoke(argv[0], 1);
     status = cpp_wait();
     goto done;
   }
 
-  /* process input file */
-  if (pipe(pipefd) < 0) {
-    warn("cannot create a pipe to cpp:");
-    status = 2; goto done;
-  }
-  dotgen_input(DG_INPUT_FILE, pipefd[0]);
-
-  runopt.notice = cpp_getnotice(runopt.input);
-  cpp_invoke(runopt.input, pipefd[1]);
-
-  s = scope_pushglobal();
-  if (!s) s = dotgenparse();
-
-  status = cpp_wait();
-  if (!status) status = s;
-  if (!status) status = dotgen_consolidate();
-  if (s || nerrors) {
-    warnx(s?"fatal errors":"%d error%s", nerrors, nerrors>1?"s":"");
-    if (!status) status = s?s:nerrors;
-  }
-
+  /* create parsing context */
+  status = scope_pushglobal();
   if (status) goto done;
-  if (runopt.parse > 1) status = comp_dumpall(stdout);
-  if (runopt.parse) goto done;
+
+  /* just parse input file */
+  if (runopt.parse) {
+    if (pipe(pipefd) < 0) {
+      warn("cannot create a pipe to cpp:");
+      status = 2; goto done;
+    }
+    dotgen_input(DG_INPUT_FILE, pipefd[0]);
+    cpp_invoke(argv[0], pipefd[1]);
+
+    s = dotgenparse();
+    status = cpp_wait();
+    if (!status) status = s;
+    if (!status) status = dotgen_consolidate();
+    if (s || nerrors) {
+      warnx(s?"fatal errors":"%d error%s", nerrors, nerrors>1?"s":"");
+      if (!status) status = s?s:nerrors;
+    }
+    if (runopt.parse > 1) status = comp_dumpall(stdout);
+    goto done;
+  }
 
   /* invoke template */
-generate:
   status = eng_invoke();
-  if (status) { goto done; }
+  if (status) goto done;
 
 done:
   if (runopt.debug) {

@@ -57,7 +57,6 @@ if {[catch {[dotgen component] lang} iface]} {
     set iface c
 }
 set lang $iface
-set outdir [dotgen input dir]
 
 # parse options
 template options {
@@ -73,13 +72,13 @@ template options {
     engine merge-tool auto; engine mode +merge-if-change
   }
   -f - --force		{ engine mode +overwrite }
-  -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
+  -h - --help		{ puts [template usage]; exit 0 }
 }
 
-# check input
-if {![llength [dotgen input file]]} {
-  engine mode +verbose; puts [template usage]; exit 0
-}
+# check/process input files
+if {![llength $argv]} { puts [template usage]; exit 2 }
+foreach f $argv { dotgen parse file $f }
+set input [file tail [lindex $argv 0]]
 
 # check options consistency
 if {$iface ne $lang} {
@@ -92,6 +91,9 @@ if {$iface ne $lang} {
     }
 }
 
+if {![info exists outdir]} {
+  set outdir [file dirname [lindex $argv 0]]
+}
 engine chdir $outdir
 
 # generate codel files
@@ -129,11 +131,11 @@ template parse perm a+x					\
 template parse						\
     file ag_templates.m4 file autoconf/ag_templates.m4
 template parse						\
-    args [list $lang] file top.configure.ac		\
+    args [list $input $lang] file top.configure.ac	\
     file configure.ac
 template parse						\
-    file top.Makefile.am				\
+    args [list $input] file top.Makefile.am		\
     file Makefile.am
 template parse						\
-    args [list $lang] file codels.Makefile.am		\
+    args [list $input $lang] file codels.Makefile.am	\
     file codels/Makefile.am

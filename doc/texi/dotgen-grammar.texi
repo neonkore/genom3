@@ -109,6 +109,7 @@ information, also as @code{#} directives, that are available to
 @menu
 * #line::		@htmd Locations in your source code
 * #pragma require::	@htmd External dependencies
+* #pragma provides::	@htmd Proving interfaces for all components
 @end menu
 @lowersections
 @include dotgen.l.texi

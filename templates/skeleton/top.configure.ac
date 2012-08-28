@@ -24,8 +24,8 @@
 #
 
 # check arguments
-if {[llength $argv] != 1} { error "expected argument: lang" }
-lassign $argv lang
+if {[llength $argv] != 2} { error "expected argument: input lang" }
+lassign $argv input lang
 
 set c [lindex [dotgen component] 0]
 if {[catch {$c version} version]} { set version 0 }
@@ -80,7 +80,7 @@ PKG_CHECK_MODULES(<"$pkg">, [<"$r">])
 
 dnl --with-templates option
 AG_OPT_TEMPLATES([$genom3 <"[dotgen genom cmdline]">],
-    [$srcdir/<"[dotgen input base]">])
+    [$srcdir/<"$input">])
 
 
 dnl Output

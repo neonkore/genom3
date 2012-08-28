@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 LAAS/CNRS
+ * Copyright (c) 2010,2012 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -31,6 +31,7 @@
 #include <time.h>
 #include <dlfcn.h>
 #include <sys/time.h>
+#include <err.h>
 #include <errno.h>
 
 #include "genom.h"
@@ -63,20 +64,20 @@ tcl_invoke(const char *tmpl, int argc, char **argv)
    */
   strlcpy(module, runopt.sysdir, sizeof(module));
   strlcat(module, "/tcl/engine.so", sizeof(module));
-  printf("loading %s engine from '%s'\n", eng_tcl.name, module);
+  xwarnx("loading %s engine from '%s'", eng_tcl.name, module);
   e = dlopen(module, RTLD_LAZY);
   if (!e) {
-    fprintf(stderr, "cannot load '%s'\n", module);
-    fprintf(stderr, "%s\n", dlerror());
+    warnx("cannot load '%s'", module);
+    warnx("%s", dlerror());
     return ENOENT;
   }
 
   /* invoke engine init function */
-  printf("initializing %s engine\n", eng_tcl.name);
+  xwarnx("initializing %s engine", eng_tcl.name);
   invoke = dlsym(e, "engine_invoke");
   if (!invoke) {
-    fprintf(stderr, "cannot execute template\n");
-    fprintf(stderr, "%s\n", dlerror());
+    warnx("cannot execute template");
+    warnx("%s", dlerror());
     return EINVAL;
   }
 

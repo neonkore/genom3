@@ -25,9 +25,6 @@ package require Tcl 8.5
 
 namespace eval engine {
 
-    # make stdout unfiltered
-    variable verbose		off
-
     # debug mode
     variable debug		[dotgen genom debug]
 
@@ -41,7 +38,7 @@ namespace eval engine {
     variable merge-if-change	off
 
     # available engine modes
-    variable modes {verbose overwrite move-if-change merge-if-change debug}
+    variable modes {overwrite move-if-change merge-if-change debug}
 
     # default merge tool (builtin interactive)
     variable merge-tool	{interactive}
@@ -86,9 +83,6 @@ namespace eval engine {
     # (@code{+}) or not prefixed, it is turned on. Supported @var{modespec}
     # are:
     #   @table @code
-    #   @item verbose
-    #   turns on or off the verbosity of the engine.
-    #
     #   @item overwrite
     #   when turned on, newly generated files will overwrite existing files
     #   without warning. When turned off, the engine will stop with an error
@@ -149,10 +143,7 @@ namespace eval engine {
 	    variable $m
             if {([set $m] && !$v) || (![set $m] && $v)} {
               set $m $v
-              switch -- $m {
-                verbose { dotgen genom stdout $v }
-                default { puts "$m mode $v" }
-              }
+              template message "$m mode $v"
 	    }
 	}
     }
@@ -271,7 +262,7 @@ namespace eval engine {
 	    }
 	    file|read {
 		set dst [file join [dotgen template dir] $dst]
-		puts "reading $dst"
+		template message "reading $dst"
 		return [::open $dst r]
 	    }
 	    file|write {
@@ -283,7 +274,7 @@ namespace eval engine {
 		set c [::open $t w]
 		dict set moc $c [list $t [file join $outdir $dst]]
 
-		puts "generating $dst in $t"
+		template message "generating $dst in $t"
 		return $c
 	    }
 	}
@@ -319,7 +310,7 @@ namespace eval engine {
 		    if {[llength $perm]} {
 		      file attributes $dst -permissions $perm
 		    }
-		    template message "$dst is up-to-date"
+		    puts "$dst is up-to-date"
 		    return
 		}
 	    }
@@ -327,7 +318,7 @@ namespace eval engine {
 	}
 
         if {${merge-if-change} && [file exists $dst]} {
-          template message "merging $dst"
+          puts "merging $dst"
           if {[switch ${merge-tool} {
             interactive	{ merge::auto $tmp $dst on}
             auto	{ merge::auto $tmp $dst off}
@@ -351,9 +342,9 @@ namespace eval engine {
 	}
 
 	if {[file exists $dst]} {
-	    template message "overwriting $dst"
+	    puts "overwriting $dst"
 	} else {
-	    template message "creating $dst"
+	    puts "creating $dst"
 	}
 	file mkdir [file dirname $dst]
 	file copy -force $tmp $dst
@@ -516,7 +507,7 @@ namespace eval engine {
 		set line [lindex $s 1]
 		catch {incr line [slave eval {dict get $__ctx -errorline}]}
 		lset s 1 $line
-		if {[dotgen genom stdout]} {
+		if {[dotgen genom verbose]} {
 		    set m "[join $s :]: [slave eval {dict get $__ctx -errorinfo}]"
 		} else {
 		    set m "[join $s :]: [slave eval {set __m}]"

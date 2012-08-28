@@ -32,8 +32,10 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include <err.h>
+#include <sys/param.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 
@@ -418,7 +420,6 @@ static void
 dotgen_parsehash(char *buffer, YYLTYPE *yylloc)
 {
   char file[PATH_MAX];
-  struct stat s, si;
   int line, flag;
   int n;
 
@@ -427,9 +428,9 @@ dotgen_parsehash(char *buffer, YYLTYPE *yylloc)
   if (n < 2) { yylloc->line = line; return; }
 
   if (!runopt.cppdotgen) {
-    if (!stat(file, &s) && !stat(runopt.input, &si))
-      if (si.st_dev == s.st_dev && si.st_ino == s.st_ino)
-        strncpy(file, runopt.input, sizeof(file));
+    char dst[PATH_MAX];
+    realpath(file, dst);
+    strncpy(file, dst, sizeof(file));
   }
 
   yylloc->file = string(file);

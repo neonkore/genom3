@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <string.h>
 #include <libgen.h>
+#include <err.h>
 #include <errno.h>
 
 #include <tcl.h>
@@ -58,6 +59,9 @@
 /* list of extra package paths */
 static const char *extra[] = TCL_EXTRAPKG;
 
+/* exit status */
+static int estatus = 0;
+
 /* list of commands in the dotgen namespace */
 static const struct dgcmd {
   const char *cmd;
@@ -68,14 +72,11 @@ static const struct dgcmd {
   { "::" DOTGEN_NS "::" GENOM_CMD "::version", dg_genom_version },
   { "::" DOTGEN_NS "::" GENOM_CMD "::templates", dg_genom_templates },
   { "::" DOTGEN_NS "::" GENOM_CMD "::debug", dg_genom_debug },
-  { "::" DOTGEN_NS "::" GENOM_CMD "::stdout", dg_genom_stdout },
+  { "::" DOTGEN_NS "::" GENOM_CMD "::verbose", dg_genom_verbose },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::name", dg_template_name },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::dir", dg_template_dir },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::builtindir", dg_template_builtindir },
   { "::" DOTGEN_NS "::" TEMPLATE_CMD "::tmpdir", dg_template_tmpdir },
-  { "::" DOTGEN_NS "::" INPUT_CMD "::file", dg_input_file },
-  { "::" DOTGEN_NS "::" INPUT_CMD "::base", dg_input_base },
-  { "::" DOTGEN_NS "::" INPUT_CMD "::dir", dg_input_dir },
   { "::" DOTGEN_NS "::" INPUT_CMD "::notice", dg_input_notice },
   { "::" DOTGEN_NS "::" INPUT_CMD "::deps", dg_input_deps },
   { "::" DOTGEN_NS "::" PARSE_CMD, dg_parse },
@@ -93,6 +94,9 @@ static const char *nslist[] = {
   NULL
 };
 
+
+static int	engine_exit(ClientData dummy, Tcl_Interp *interp,
+			int objc, Tcl_Obj *const objv[]);
 
 static int	engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave,
 			idltype_s t);
@@ -135,9 +139,10 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   /* create tcl interpreter */
   interp = Tcl_CreateInterp();
   if (!interp) {
-    fprintf(stderr, "cannot create Tcl interpreter\n");
+    warnx("cannot create Tcl interpreter");
     return 127;
   }
+  estatus = 2;
 
   /* make template arguments available in argc/argv variables */
   obj = Tcl_NewIntObj(argc - 1);
@@ -155,6 +160,10 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   /* initialize interpreter */
   if (Tcl_Init(interp) == TCL_ERROR) goto error;
   if (!Tcl_PkgRequire(interp, "Tcl", "8.5", 0))
+    goto error;
+
+  /* redefine exit */
+  if (!Tcl_CreateObjCommand(interp, "exit", engine_exit, NULL, NULL))
     goto error;
 
   /* create a safe slave interpreter for evaluating template files */
@@ -204,7 +213,7 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
     goto error;
 
   /* invoke template */
-  printf("invoking template %s\n", tmpl);
+  xwarnx("invoking template %s", tmpl);
   strlcpy(path, tmpl, sizeof(path));
   strlcat(path, "/", sizeof(path));
   strlcat(path, TMPL_SPECIAL_FILE, sizeof(path));
@@ -212,20 +221,42 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   s = Tcl_EvalFile(interp, path);
   if (s != TCL_OK) goto error;
 
-  s = 0;
+  estatus = 0;
 done:
-  /* make sure to restore stdout */
-  Tcl_Eval(interp, "::engine mode -verbose");
   Tcl_DeleteInterp(interp);
-  return s;
+  return estatus;
 
 error:
+  strlcpy(path, runopt.tmpl, sizeof(path));
   if (runopt.verbose)
-    fprintf(stderr, "%s\n", Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
+    fprintf(stderr, "%s: %s\n",
+            basename(path), Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY));
   else
-    fprintf(stderr, "%s\n", Tcl_GetStringResult(interp));
-  s = 2;
+    fprintf(stderr, "%s: %s\n",
+            basename(path), Tcl_GetStringResult(interp));
   goto done;
+}
+
+
+/* --- engine_exit --------------------------------------------------------- */
+
+/** Redefine tcl "exit" command so that a template cannot terminate genom
+ * by itself */
+static int
+engine_exit(ClientData dummy, Tcl_Interp *interp,
+            int objc, Tcl_Obj *const objv[])
+{
+  char *value;
+
+  if ((objc != 1) && (objc != 2)) {
+    Tcl_WrongNumArgs(interp, 1, objv, "?returnCode?");
+    return TCL_ERROR;
+  }
+
+  value = (objc == 1) ? "0" : Tcl_GetString(objv[1]);
+  Tcl_GetInt(interp, value, &estatus);
+  Tcl_AppendResult(interp, "exit ", value, NULL);
+  return TCL_ERROR;
 }
 
 
@@ -300,7 +331,7 @@ engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave, idltype_s t)
   if (engine_createcmd(interp, slave, key, type_cmd, t)) {
     if (errno != EEXIST) return errno;
   } else if (type_fullname(t))
-    printf("exported %s %s\n", type_strkind(type_kind(t)), type_fullname(t));
+    xwarnx("exported %s %s", type_strkind(type_kind(t)), type_fullname(t));
 
   /* generate type references recursively */
   switch(type_kind(t)) {
@@ -363,7 +394,7 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
   if (engine_createcmd(interp, slave, key, comp_cmd, c)) {
     if (errno != EEXIST) return errno;
   } else
-    printf("exported component %s\n", comp_name(c));
+    xwarnx("exported component %s", comp_name(c));
 
   /* internal event type */
   s = engine_gentype(interp, slave, comp_eventtype(c));
@@ -436,7 +467,7 @@ engine_gentask(Tcl_Interp *interp, Tcl_Interp *slave, task_s t)
   if (engine_createcmd(interp, slave, key, task_cmd, t)) {
     if (errno != EEXIST) return errno;
   } else
-    printf("exported task %s\n", task_name(t));
+    xwarnx("exported task %s", task_name(t));
 
   /* properties */
   s = 0;
@@ -480,7 +511,7 @@ engine_genport(Tcl_Interp *interp, Tcl_Interp *slave, port_s p)
   if (engine_createcmd(interp, slave, key, port_cmd, p)) {
     if (errno != EEXIST) return errno;
   } else
-    printf("exported port %s\n", port_name(p));
+    xwarnx("exported port %s", port_name(p));
 
   if (port_type(p)) {
     s = engine_gentype(interp, slave, port_type(p));
@@ -510,7 +541,7 @@ engine_genservice(Tcl_Interp *interp, Tcl_Interp *slave, service_s s)
   if (engine_createcmd(interp, slave, key, service_cmd, s)) {
     if (errno != EEXIST) return errno;
   } else
-    printf("exported service %s\n", service_name(s));
+    xwarnx("exported service %s", service_name(s));
 
   /* parameters */
   for(hash_first(service_params(s), &i); i.current; hash_next(&i)) {
@@ -556,7 +587,7 @@ engine_genremote(Tcl_Interp *interp, Tcl_Interp *slave, remote_s r)
   if (engine_createcmd(interp, slave, key, remote_cmd, r)) {
     if (errno != EEXIST) return errno;
   } else
-    printf("exported remote %s\n", remote_name(r));
+    xwarnx("exported remote %s", remote_name(r));
 
   /* parameters */
   for(hash_first(remote_params(r), &i); i.current; hash_next(&i)) {
@@ -587,7 +618,7 @@ engine_gencodel(Tcl_Interp *interp, Tcl_Interp *slave, codel_s c)
   if (engine_createcmd(interp, slave, key, codel_cmd, c)) {
     if (errno != EEXIST) return errno;
   } else
-    printf("exported codel %s\n", codel_name(c));
+    xwarnx("exported codel %s", codel_name(c));
 
   /* parameters */
   for(hash_first(codel_params(c), &i); i.current; hash_next(&i)) {
@@ -614,7 +645,7 @@ engine_genparam(Tcl_Interp *interp, Tcl_Interp *slave, param_s p)
   if (engine_createcmd(interp, slave, key, param_cmd, p)) {
     if (errno != EEXIST) return errno;
   } else
-    printf("exported parameter %s\n", param_name(p));
+    xwarnx("exported parameter %s", param_name(p));
 
   /* types */
   s = engine_gentype(interp, slave, param_type(p));

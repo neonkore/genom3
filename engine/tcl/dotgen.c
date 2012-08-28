@@ -130,49 +130,17 @@ dg_genom_debug(ClientData d, Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-/*/ @deffn {TCL Backend} {dotgen genom stdout} [@var{onoff}]
+/*/ @deffn {TCL Backend} {dotgen genom verbose}]
  *
- * With optional boolean argument @var{onoff}, turns on or off the standard
- * output channel of the template engine.
- *
- * Without argument, the procedure returns the current activation status of the
- * standard output channel.
- *
- * @@args
- * @item @var{onoff}
- * Optional argument to turn on or off the standard output channel.
- * @@end args
- *
- * @@returns
- * When called without argument, returns a boolean indicating the current
- * status (on/off) of the standard output channel.
- * @@end returns
+ * Returns a boolean indicating whether genom was invoked in verbose mode or
+ * not.
  * @end deffn
  */
 int
-dg_genom_stdout(ClientData d, Tcl_Interp *interp, int objc,
+dg_genom_verbose(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[])
 {
-  extern int eng_swapfd(int from, int to);
-  extern int stdfd[3][2];
-  static int verbose = 0;
-  int v;
-
-  if (objc == 1) {
-    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(runopt.verbose));
-    return TCL_OK;
-  }
-
-  if (Tcl_GetBooleanFromObj(interp, objv[1], &v) != TCL_OK)
-    return TCL_ERROR;
-
-  if ((v && verbose) || (!v && !verbose))
-    return TCL_OK;
-
-  eng_swapfd(stdfd[1][1], 1);
-  eng_swapfd(stdfd[2][1], 2);
-
-  verbose = v;
+  Tcl_SetObjResult(interp, Tcl_NewBooleanObj(runopt.verbose));
   return TCL_OK;
 }
 
@@ -252,49 +220,6 @@ dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc,
  * file).
  */
 
-/*/ @deffn {TCL Backend} {dotgen input file}
- *
- * Return the full path to the current .gen input file.
- * @end deffn
- */
-int
-dg_input_file(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(runopt.input, -1));
-  return TCL_OK;
-}
-
-/*/ @deffn {TCL Backend} {dotgen input base}
- *
- * Return the base name of the current .gen file, i.e. the file name with all
- * directories stripped out.
- * @end deffn
- */
-int
-dg_input_base(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  char base[PATH_MAX];
-
-  strlcpy(base, runopt.input, sizeof(base));
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(basename(base), -1));
-  return TCL_OK;
-}
-
-/*/ @deffn {TCL Backend} {dotgen input dir}
- *
- * Return the directory part of the current .gen file.
- * @end deffn
- */
-int
-dg_input_dir(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  char dir[PATH_MAX];
-
-  strlcpy(dir, runopt.input, sizeof(dir));
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(dirname(dir), -1));
-  return TCL_OK;
-}
-
 /*/ @deffn {TCL Backend} {dotgen input notice}
  *
  * Return the copyright notice (as text) found in the .gen file. This notice
@@ -369,7 +294,8 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   };
   int pipefd[2];
   int k, s;
-  Tcl_Obj *path;
+  const char *path;
+  const char *notice;
 
   if (objc != 3) {
     Tcl_WrongNumArgs(interp, 1, objv, "file|string data");
@@ -383,29 +309,17 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     case parseidx_file: {
       extern tloc curloc;
 
-      path = Tcl_DuplicateObj(objv[2]);
-      Tcl_IncrRefCount(path);
-      if (Tcl_FSGetPathType(path) != TCL_PATH_ABSOLUTE) {
-        Tcl_Obj *l = Tcl_NewListObj(0, NULL);
-        Tcl_IncrRefCount(l);
-        Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(runopt.tmpl, -1));
-        Tcl_ListObjAppendElement(interp, l, path);
-        Tcl_DecrRefCount(path);
-        path = Tcl_FSJoinPath(l, 2);
-        Tcl_IncrRefCount(path);
-        Tcl_DecrRefCount(l);
-      }
-
+      path = Tcl_GetString(objv[2]);
       if (pipe(pipefd) < 0) {
         Tcl_AppendResult(interp,
                          "cannot create a pipe to cpp:", strerror(errno), NULL);
-        Tcl_DecrRefCount(path);
         return TCL_ERROR;
       }
       dotgen_input(DG_INPUT_FILE, pipefd[0]);
-      curloc.file = string(Tcl_GetString(path));
-      cpp_invoke(Tcl_GetString(path), pipefd[1]);
-      Tcl_DecrRefCount(path);
+      curloc.file = string(path);
+      notice = cpp_getnotice(path);
+      if (notice) bufcat((char **)&runopt.notice, notice);
+      cpp_invoke(path, pipefd[1]);
       break;
     }
 

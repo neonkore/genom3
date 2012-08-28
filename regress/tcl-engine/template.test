@@ -49,7 +49,7 @@ template usage {usage ok}
 puts stderr [template usage]
 EOF
 run 0 ${GENOM_BIN} -t . run.t run.gen
-expect err '/^run.t: usage ok$/ {next}; {exit 2}'
+expect err '/^usage ok$/ {next}; {exit 2}'
 
 
 # --- template fatal -----------------------------------------------------
@@ -68,10 +68,14 @@ expect err '/^run.t: error: fatal ok$/ {exit 0}; {exit 2}'
 testing '[template message]'
 
 cat >run.t/template.tcl <<EOF
+puts stderr {}
 template message {message ok}
 EOF
 run 0 ${GENOM_BIN} -t . run.t run.gen
-expect err '/^run.t: message ok$/ {next}; {exit 2}'
+expect err '/^$/ {next}; {exit 2}'
+
+run 0 ${GENOM_BIN} -v -t . run.t run.gen
+expect err '/^(genom3:|$)/ {next}; /^run.t: message ok$/ {next}; {exit 2}'
 
 
 # --- template require -----------------------------------------------------
@@ -86,7 +90,7 @@ template require file.tcl
 puts stderr [concat $::v slave [slave eval set ::v]]
 EOF
 run 0 ${GENOM_BIN} -t . run.t run.gen
-expect err '/^run.t: require ok slave require ok$/ {next}; {exit 2}'
+expect err '/^require ok slave require ok$/ {next}; {exit 2}'
 
 
 # --- template parse -------------------------------------------------------

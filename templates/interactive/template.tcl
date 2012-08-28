@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 LAAS/CNRS
+# Copyright (c) 2010,2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -38,11 +38,16 @@ template usage {*}{
 
 # defaults
 variable tcl_interactive 1
-engine mode -overwrite verbose
+engine mode -overwrite
 
 template options {
     -b			{ variable tcl_interactive 0 }
-    -h - --help		{ engine mode +verbose; puts [template usage]; exit 0 }
+    -h - --help		{ puts [template usage]; exit 0 }
+}
+
+# process input files
+foreach f $argv {
+  dotgen parse file $f
 }
 
 # provide a default 'interactive' function in case eltclsh cannot be loaded

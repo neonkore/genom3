@@ -50,3 +50,5 @@ interface genom {
     throw no_such_remote, no_such_service, remote_io;
   };
 };
+
+#pragma provides genom

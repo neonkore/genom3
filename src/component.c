@@ -118,9 +118,10 @@ comp_push(tloc l, const char *name, compkind kind)
       return NULL;
     }
 
+    active = c;
     comp_dopragma(c);
     xwarnx("reopened %s %s", comp_strkind(kind), c->name);
-    return active = c;
+    return c;
   }
 
   /* create ids scope */
@@ -163,12 +164,13 @@ comp_push(tloc l, const char *name, compkind kind)
     t->next = c;
   }
 
+  active = c;
   xwarnx("created %s %s", comp_strkind(kind), c->name);
 
   /* apply #pragma directives */
   comp_dopragma(c);
 
-  return active = c;
+  return c;
 
 error:
   spop = scope_pop();
@@ -411,12 +413,25 @@ static void
 comp_dopragma(comp_s c)
 {
   hash_s h;
+  hiter i;
 
   /* apply #pragma require declarations */
   h = dotgen_hrequire();
   if (h && prop_merge_list(c->props, h, 0/*ignore_dup*/))
     parserror(c->loc, "dropping #pragma requires directives for %s %s",
               comp_strkind(c->kind), c->name);
+
+  /* apply #pragma provides declarations */
+  if (c->kind == COMP_REGULAR) {
+    h = dotgen_hprovide();
+    if (h) {
+      for(hash_first(h, &i); i.current; hash_next(&i)) {
+        if (comp_merge(c, i.value))
+          parserror(c->loc, "dropping #pragma provides directives for %s %s",
+                    comp_strkind(c->kind), c->name);
+      }
+    }
+  }
 }
 
 

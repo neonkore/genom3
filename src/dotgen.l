@@ -48,6 +48,8 @@
    static void		dotgen_parsehash(char *buffer, YYLTYPE *yylloc);
    static void		dotgen_parsepragmarequire(char *buffer,
 				YYLTYPE *yylloc);
+   static void		dotgen_parsepragmaprovide(char *buffer,
+				YYLTYPE *yylloc);
    static void		dotgen_parsepragmanative(char *buffer, YYLTYPE *yylloc);
 
 #define YY_INPUT(buf, result, max) ((result) = dotgen_read(buf, max))
@@ -141,6 +143,14 @@ chartext	([^\'])|(\\.)
   */
 ^[ \t]*#[ \t]*pragma[ \t]+requires?[ \t].*\n {
   dotgen_parsepragmarequire(yytext, yylloc);
+  yylloc->line++; yylloc->col = 0;
+}
+
+ /*/ @node #pragma provides
+  * @section @code{#pragma provides} directives
+  */
+^[ \t]*#[ \t]*pragma[ \t]+provides?[ \t].*\n {
+  dotgen_parsepragmaprovide(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;
 }
 
@@ -525,6 +535,65 @@ hash_s
 dotgen_hrequire()
 {
   return hrequire;
+}
+
+
+/* --- dotgen_parsepragmaprovide ------------------------------------------- */
+
+static hash_s hprovide;
+
+/** Parse #pragma provides directives
+ */
+static void
+dotgen_parsepragmaprovide(char *buffer, YYLTYPE *yylloc)
+{
+  char *p, *arg;
+  comp_s c;
+
+  p = strstr(buffer, "provide");
+  assert(p);
+  p+= strcspn(p, " \t");
+
+  /* create a new hash of provided interfaces */
+  if (!hprovide) {
+    hprovide = hash_create("pragma provides", 1);
+    if (!hprovide) {
+      parserror(*yylloc, "dropped #pragma provides");
+      return;
+    }
+  }
+
+  while(*p) {
+    p += strspn(p, " \t\n");
+    if (*p == 0) break;
+    arg = p;
+    do {
+      p += strcspn(p, " \t\n");
+    } while (p[-1] == '\\');
+    if (*p) *p++ = 0;
+
+    c = comp_find(arg);
+    if (!c) {
+      parserror(*yylloc, "no such interface `%s'", arg);
+      parsenoerror(*yylloc, "dropped #pragma requires");
+      continue;
+    }
+    if (comp_kind(c) != COMP_IFACE) {
+      parserror(*yylloc, "`%s' is not an interface", arg);
+      parsenoerror(comp_loc(c), " `%s' declared here", arg);
+      parsenoerror(*yylloc, "dropped #pragma requires");
+      continue;
+    }
+
+    if (!hash_insert(hprovide, arg, c, NULL))
+      xwarnx("creating global provides '%s'", arg);
+  }
+}
+
+hash_s
+dotgen_hprovide()
+{
+  return hprovide;
 }
 
 

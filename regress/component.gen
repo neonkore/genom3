@@ -108,7 +108,7 @@ component c {
     doc		"service s2";
     task	t1;
 
-    validate	v(ids in b[0].c::a, service out c);
+    validate	v(ids in b[0].c::a, local out c);
 
     codel<start>
       a(port in pa, port out pb::port) yield sleep, ether;
@@ -116,9 +116,9 @@ component c {
       b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
       yield ether;
     codel<other>
-      e(service in f, service out f::outf) yield ether;
+      e(local in f, local out f::outf) yield ether;
     codel<stop>
-      d(ids in g, service out h) yield ether;
+      d(ids in g, local out h) yield ether;
 
     throw	ERR3;
     interrupts	all;

@@ -198,7 +198,7 @@ param_list(Tcl_Interp *interp, codel_s c, int objc, Tcl_Obj *const dfilter[])
   static const char *dirarg[] = {
     [pdiridx_in] = "in", [pdiridx_out] = "out",
     [pdiridx_inout] = "inout", [pdiridx_ids] = "ids",
-    [pdiridx_local] = "service", [pdiridx_port] = "port",
+    [pdiridx_local] = "local", [pdiridx_port] = "port",
     [pdiridx_remote] = "remote", NULL
   };
   int e, f, d = -1, sc;
@@ -229,7 +229,7 @@ param_list(Tcl_Interp *interp, codel_s c, int objc, Tcl_Obj *const dfilter[])
           if (param_src(i.value) == P_IDS) f = 1;
           break;
         case pdiridx_local:
-          if (param_src(i.value) == P_SERVICE) f = 1;
+          if (param_src(i.value) == P_LOCAL) f = 1;
           break;
         case pdiridx_port:
           if (param_src(i.value) == P_PORT) f = 1;

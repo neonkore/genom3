@@ -161,7 +161,7 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
 	for(hash_first(codel_params(c), &j); j.current; hash_next(&j)) {
 	  switch(param_src(j.value)) {
             case P_NOSRC: assert(0);
-            case P_IDS: case P_SERVICE: break;
+            case P_IDS: case P_LOCAL: break;
 
             case P_PORT: case P_REMOTE:
 	      parserror(
@@ -217,7 +217,7 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
     switch(param_src(i.value)) {
       case P_NOSRC: case P_PORT: case P_REMOTE: assert(0);
       case P_IDS: if (kind == S_ATTRIBUTE) break; else assert(0);
-      case P_SERVICE: if (kind != S_ATTRIBUTE) break; else assert(0);
+      case P_LOCAL: if (kind != S_ATTRIBUTE) break; else assert(0);
     }
   }
   if (e) return NULL;

@@ -194,7 +194,7 @@ param_newlocal(tloc l, pdir dir, const char *name, clist_s member,
 
   /* create param */
   clist_next(&i);
-  p = param_new(l, P_SERVICE, dir, name, type, i.current, initer);
+  p = param_new(l, P_LOCAL, dir, name, type, i.current, initer);
   if (!p) {
     parserror(l, "dropped parameter '%s'", name);
     return NULL;
@@ -360,7 +360,7 @@ param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
     }
 
     if (idsmember) src = P_IDS;
-    else if (local) src = P_SERVICE;
+    else if (local) src = P_LOCAL;
     else if (port) src = P_PORT;
     else if (remote) src = P_REMOTE;
     else {
@@ -374,9 +374,9 @@ param_newcodel(tloc l, psrc src, pdir dir, const char *name, clist_s member)
       p = param_newids(l, dir, name, member, NULL);
       break;
 
-    case P_SERVICE:
+    case P_LOCAL:
       if (!member) {
-        parserror(l, "unnamed service parameter '%s'", name);
+        parserror(l, "unnamed local parameter '%s'", name);
         return NULL;
       }
       p = param_newlocal(l, dir, name, member, NULL, NULL);
@@ -423,7 +423,7 @@ param_clone(param_s param)
                        param_member(param), param_initer(param));
       break;
 
-    case P_SERVICE:
+    case P_LOCAL:
       m = param_member(param);
       k.k = CST_STRING; k.s = param_name(param);
       m = clist_prepend(m, k, 0);
@@ -608,7 +608,7 @@ param_strsrc(psrc s)
     case P_NOSRC:		return "sourceless";
 
     case P_IDS:			return "ids";
-    case P_SERVICE:		return "service";
+    case P_LOCAL:		return "local";
     case P_PORT:		return "port";
     case P_REMOTE:		return "remote";
   }

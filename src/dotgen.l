@@ -246,7 +246,7 @@ chartext	([^\'])|(\\.)
 "in"		{ yylval->s = string(yytext); return IN; }
 "out"		{ yylval->s = string(yytext); return OUT; }
 "inout"		{ yylval->s = string(yytext); return INOUT; }
-"service"	{ yylval->s = string(yytext); return SERVICE; }
+"local"		{ yylval->s = string(yytext); return LOCAL; }
 "multiple"	{ yylval->s = string(yytext); return MULTIPLE; }
 
 "s"		{ yylval->s = string(yytext); return S; }

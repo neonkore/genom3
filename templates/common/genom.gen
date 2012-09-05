@@ -35,7 +35,7 @@ interface genom {
                in string<128> remote =	:"Output port to connect to")
   {
     doc "Connect two ports";
-    codel genom_connect_port_codel(service in local, service in remote);
+    codel genom_connect_port_codel(local in local, local in remote);
 
     throw no_such_inport, no_such_outport, port_io;
   };
@@ -45,7 +45,7 @@ interface genom {
                  in string<128> remote =	:"Service to connect to")
   {
     doc "Connect two remotes";
-    codel genom_connect_remote_codel(service in local, service in remote);
+    codel genom_connect_remote_codel(local in local, local in remote);
 
     throw no_such_remote, no_such_service, remote_io;
   };

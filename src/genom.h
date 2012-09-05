@@ -508,7 +508,7 @@ typedef enum psrc {
   P_NOSRC,
 
   P_IDS,
-  P_SERVICE,
+  P_LOCAL,
   P_PORT,
   P_REMOTE
 } psrc;

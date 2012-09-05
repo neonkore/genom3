@@ -138,7 +138,7 @@ component comp {
   port multiple out comp::ids bm;
   activity s(in long a, out long b) {
     task t;
-    codel<c> c(service in a, service out b) yield d;
+    codel<c> c(local in a, local out b) yield d;
     codel<d> d(ids in a::a1, ids out b::b1) yield e;
     codel<e> e(port in a::a2, port out b::b2) yield f;
     codel<f> f(port in am::a3) yield g;

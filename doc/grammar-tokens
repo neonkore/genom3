@@ -36,6 +36,7 @@ INTERFACE	interface
 INTERRUPTS	interrupts
 K		k
 LANG		lang
+LOCAL		local
 LONG		long
 M		m
 MODULE		module
@@ -52,7 +53,6 @@ REQUIRE		requires
 S		s
 SCHEDULING	scheduling
 SEQUENCE	sequence
-SERVICE		service
 SHORT		short
 SL		<<
 SR		>>

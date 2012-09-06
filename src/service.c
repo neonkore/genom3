@@ -108,6 +108,65 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
     return NULL;
   }
 
+  /* reopen existing service */
+  s = comp_service(comp, name);
+  if (s) {
+    if (s->kind != kind) {
+      parserror(l, "%s %s conflicts with previous declaration",
+                service_strkind(kind), name);
+      parsenoerror(s->loc, " %s %s first declared here",
+                   service_strkind(s->kind), name);
+      return NULL;
+    }
+
+    /* check parameters */
+    e = 0;
+    for(hash_first(params, &i), hash_first(s->params, &j);
+        i.current && j.current;
+        hash_next(&i), hash_next(&j)) {
+      if (strcmp(param_name(i.value), param_name(j.value))) {
+        parserror(param_loc(i.value), "parameter %s previously declared as %s",
+                  param_name(i.value), param_name(j.value));
+        parsenoerror(param_loc(j.value), " parameter %s first declared here",
+                     param_name(j.value));
+        e = 1;
+        continue;
+      }
+      if (!param_equal(i.value, j.value)) {
+        parserror(param_loc(i.value),
+                  "parameter %s conflicts with previous declaration",
+                  param_name(i.value));
+        parsenoerror(param_loc(j.value), " parameter %s first declared here",
+                     param_name(j.value));
+        e = 1;
+        continue;
+      }
+    }
+    for(;i.current; hash_next(&i)) {
+      parserror(param_loc(i.value), "extraneous parameter %s",
+                param_name(i.value));
+      parsenoerror(service_loc(s), " service %s first declared here",
+                   s->name);
+      e = 1;
+    }
+    for(;j.current; hash_next(&j)) {
+      parserror(param_loc(i.value), "missing parameter %s",
+                param_name(j.value));
+      parsenoerror(service_loc(s), " service %s first declared here",
+                   s->name);
+      e = 1;
+    }
+    if (e) return NULL;
+
+    /* merge properties */
+    if (props) {
+      if (prop_merge_list(s->props, props, 0/*ignore dups*/))
+        return NULL;
+    }
+    props = s->props;
+    hash_destroy(s->fsm, 1);
+  }
+
   /* create empty property list if none has been defined */
   if (!props) {
     props = hash_create("property list", 0);
@@ -223,18 +282,20 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
   if (e) return NULL;
 
   /* create */
-  s = malloc(sizeof(*s));
   if (!s) {
-    warnx("memory exhausted, cannot create service");
-    return NULL;
-  }
+    s = malloc(sizeof(*s));
+    if (!s) {
+      warnx("memory exhausted, cannot create service");
+      return NULL;
+    }
 
-  s->loc = l;
-  s->name = string(name);
-  s->kind = kind;
-  s->component = comp;
-  s->props = props;
-  s->params = params;
+    s->loc = l;
+    s->name = string(name);
+    s->kind = kind;
+    s->component = comp;
+    s->props = props;
+    s->params = params;
+  }
 
   /* build service's fsm */
   s->fsm = codel_fsmcreate(l, s->props);
@@ -265,22 +326,18 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
   /* register */
   e = hash_insert(comp_services(comp), name, s, (hrelease_f)service_destroy);
   switch(e) {
-    case 0: break;
-
+    case 0:
     case EEXIST:
-      parserror(l, "duplicate %s %s", service_strkind(s->kind), name);
-      service_s u = comp_service(comp, name);
-      if (u) parserror(u->loc, " %s %s declared here",
-                       service_strkind(u->kind), u->name);
-      /*FALLTHROUGH*/
+      xwarnx("%s %s %s in %s %s",
+             e?"updated":"created", service_strkind(s->kind), s->name,
+             comp_strkind(comp_kind(comp)), comp_name(comp));
+      break;
+
     default:
       free(s);
       return NULL;
   }
 
-  xwarnx("created %s %s in %s %s",
-         service_strkind(s->kind), s->name,
-         comp_strkind(comp_kind(comp)), comp_name(comp));
   return s;
 }
 

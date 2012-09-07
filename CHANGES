@@ -1,6 +1,49 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2012 LAAS/CNRS
 
+			    Changes in genom 2.99.13
+
+Released on September 7th, 2012
+
+ . Implemented "remote" objects that can be used to invoke remote services from
+   components. Remotes can be passed as parameters to the codels, with an
+   object-like interface (currently, the sole available method is a synchronous
+   call()).
+ . Updated "port" interface so that they are passed to the codels with an
+   object-like interface, which basically consists of data(), read() or write()
+   methods (this corresponds to the former "handle" kind or ports). There are
+   now only two kind of ports : simple or multiple (i.e a dictionary of simple
+   ports).
+ . Implemented "interfaces". Interfaces can define the same objects as regular
+   components. They can be 'provided' or 'used' by components, which means that
+   the component basically inherits of all the objects defined in the
+   interface. This is meant to share service declarations between users and
+   providers of services (the ROS template requires that both sides agree on
+   the parameter naming). Services defined in a interface are declared as
+   "remote" objects when "used" and as regular services when "provided". Ports
+   see their direction swapped.
+ . Split services into 'functions' and 'activity', so that there are now 3 kind
+   of services (with attributes). Functions can only have stateless codels,
+   that are run synchronously by the control task. They are expected to perform
+   only small computations and run in a short amount of time. Activities are
+   complex services, that run in an execution task and define a state
+   machine. They are expected to modify the robot's state or perform heavy
+   computation.
+ . Updated the .gen grammar so that components are defined within a block of
+   braces { }, as for other objects. Also updated properties so that they are
+   now defined without a colon :. Keywords that are verbs can be spelled with
+   or without the final 's'. (e.g. throw or throws). The "service" kind of
+   codel parameters is renamed to "local", which is hopefully more explicit.
+ . Added "#pragma provides" that provide an interface for all components. This
+   is used to implement generic genom services.
+ . Delegated the parsing of input .gen files to the templates. This greatly
+   simplifies option parsing in genom and also let templates define a few
+   common objects (via interfaces) before parsing the input.
+ . Updated the C client interface by renaming some poorly named symbols
+   (e.g. requests -> services).
+ . Improved a few parsing error messages.
+ . Fixed a few bugs in the tcl engine procedures.
+
 			    Changes in genom 2.99.12
 
 Released on July 2nd, 2012

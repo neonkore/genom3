@@ -426,7 +426,7 @@ comp_dopragma(comp_s c)
     h = dotgen_hprovide();
     if (h) {
       for(hash_first(h, &i); i.current; hash_next(&i)) {
-        if (comp_merge(c, i.value))
+        if (comp_merge(c, i.value, PROP_PROVIDES))
           parserror(c->loc, "dropping #pragma provides directives for %s %s",
                     comp_strkind(c->kind), c->name);
       }

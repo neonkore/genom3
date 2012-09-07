@@ -231,7 +231,6 @@ chartext	([^\'])|(\\.)
 "handle"	{ yylval->s = string(yytext); return HANDLE; }
 "ids"		{ yylval->s = string(yytext); return IDS; }
 "attribute"	{ yylval->s = string(yytext); return ATTRIBUTE; }
-"remote"	{ yylval->s = string(yytext); return REMOTE; }
 
 "doc"		{ yylval->s = string(yytext); return DOC; }
 "version"	{ yylval->s = string(yytext); return VERSION; }
@@ -260,6 +259,7 @@ chartext	([^\'])|(\\.)
 "out"		{ yylval->s = string(yytext); return OUT; }
 "inout"		{ yylval->s = string(yytext); return INOUT; }
 "local"		{ yylval->s = string(yytext); return LOCAL; }
+"remote"	{ yylval->s = string(yytext); return REMOTE; }
 "multiple"	{ yylval->s = string(yytext); return MULTIPLE; }
 
 "s"		{ yylval->s = string(yytext); return S; }

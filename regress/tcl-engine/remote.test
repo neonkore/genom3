@@ -9,8 +9,12 @@ mkdir -p run.t
 testing '[$remote parameter]'
 
 cat >run.gen <<EOF
+interface i {
+  function r(in long a, inout long b[2]);
+};
+
 component c {
-  remote r(in long a, inout long b[2]);
+  uses i;
 };
 EOF
 run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'

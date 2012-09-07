@@ -106,7 +106,7 @@
 %type <i>	exports export
 
 %type <comp>	component_scope interface_scope interface_name
-%type <i>	interface component ids attribute port task service remote
+%type <i>	interface component ids attribute port task service
 %type <skind>	service_kind
 %type <pkind>	port_dir opt_multiple
 %type <prop>	component_property task_property service_property codel_property
@@ -314,7 +314,6 @@ export:
   | port
   | task
   | service
-  | remote
   | idl_statement
   | property
   {
@@ -429,29 +428,6 @@ service:
     task_p = 0;
     param_setlocals(NULL);
     parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
-  }
-;
-
-remote:
-  REMOTE identifier '(' service_parameters ')' ';'
-  {
-    task_p = 0;
-    param_setlocals(NULL);
-    if (!$2 || !$4) {
-      if ($2) parserror(@1, "dropped '%s' remote", $2);
-      if ($4) hash_destroy($4, 1);
-      break;
-    }
-    if (!remote_create(@1, $2, $4)) {
-      parserror(@1, "dropped '%s' remote", $2);
-      hash_destroy($4, 1);
-    }
-  }
-  | REMOTE identifier '(' error ')' ';'
-  {
-    task_p = 0;
-    param_setlocals(NULL);
-    parserror(@1, "dropped '%s' remote", $2);
   }
 ;
 

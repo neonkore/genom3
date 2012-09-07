@@ -29,6 +29,12 @@ enum e1 { ee1, ee2, ee3 };
 typedef sequence<string<28>, 10> x;
 typedef long long_type;
 
+interface i {
+  function r1(in long_type a = 0:"first parameter",
+              inout struct param { long x; } b[3] = {{0}}:"second parameter",
+              out string d = "none");
+};
+
 component c {
   version	"1.0";
   email		"null@example.com";
@@ -62,9 +68,7 @@ component c {
   port out c::ids::str pb;
   port multiple out long_type pc;
 
-  remote r1(in long_type a = 0:"first parameter",
-            inout struct param { long x; } b[3]  = { { 0 } }:"second parameter",
-            out string d = "none");
+  uses i;
 
   task t1;
 

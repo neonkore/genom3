@@ -41,16 +41,16 @@
 extern "C" {
 #endif
 
-static __inline__ int
+static __inline__ void *
 _genom_resize_buffer(uint32_t length, size_t esize,
-                     uint32_t *_length, uint32_t *_maximum, void **_buffer,
+                     uint32_t *_length, uint32_t *_maximum, void *_buffer,
                      void (**_release)(void *))
 {
   void *buffer;
 
-  if (*_release == free && *_buffer) {
-    buffer = realloc(*_buffer, length * esize);
-    if (!buffer) return -1;
+  if (*_release == free && _buffer) {
+    buffer = realloc(_buffer, length * esize);
+    if (!buffer) return NULL;
 
     *_maximum = length;
     if (length < *_length)
@@ -58,21 +58,19 @@ _genom_resize_buffer(uint32_t length, size_t esize,
     else if (length > *_length)
       memset((char *)buffer + *_length * esize, 0, (length - *_length) * esize);
 
-    *_buffer = buffer;
-    return 0;
+    return buffer;
   }
 
   buffer = calloc(length, esize);
-  if (!buffer) return -1;
+  if (!buffer) return NULL;
 
   *_maximum = length;
   if (length < *_length) *_length = length;
-  if (*_length > 0 && *_buffer) memcpy(buffer, *_buffer, *_length * esize);
-  if (*_release && *_buffer) (*_release)(*_buffer);
-  *_buffer = buffer;
+  if (*_length > 0 && _buffer) memcpy(buffer, _buffer, *_length * esize);
+  if (*_release && _buffer) (*_release)(_buffer);
   *_release = free;
 
-  return 0;
+  return buffer;
 }
 
 #ifdef __cplusplus
@@ -80,9 +78,9 @@ _genom_resize_buffer(uint32_t length, size_t esize,
 #endif
 
 #define genom_sequence_reserve(sequence, length)                        \
-  _genom_resize_buffer(                                                 \
+  (((sequence)->_buffer = _genom_resize_buffer(				\
     length, sizeof(*(sequence)->_buffer),				\
     &(sequence)->_length, &(sequence)->_maximum,			\
-    (void **)&(sequence)->_buffer, &(sequence)->_release)
+    (sequence)->_buffer, &(sequence)->_release))?0:-1)
 
 #endif /* H_GENOM3_C_IDLSEQUENCE */

@@ -321,6 +321,11 @@ void		type_usage(void);
 #define COMPONENT_EVENT_STD_NAMES {					\
     "ok", "error", "ether", "start", "stop", "sleep"			\
       }
+#define COMPONENT_THROW_STD_NAMES {					\
+    "serialization", "disallowed", "too_many_activities",		\
+      "bad_transition", "port_io", "no_such_inport", "no_such_outport",	\
+      "remote_io", "no_such_remote", "no_such_service"			\
+      }
 
 #define ALL_SERVICE_NAME		"all"
 

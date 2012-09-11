@@ -377,6 +377,7 @@ static idltype_s
 comp_ievcreate(tloc l, const char *name)
 {
   const char *stdev[] = COMPONENT_EVENT_STD_NAMES;
+  const char *stdthrow[] = COMPONENT_THROW_STD_NAMES;
   idltype_s t, e;
   hash_s h;
   int i;
@@ -390,6 +391,13 @@ comp_ievcreate(tloc l, const char *name)
     if (!e) goto error;
     if (hash_insert(h, type_name(e), e, NULL)) goto error;
     xwarnx("created component standard event %s", stdev[i]);
+  }
+
+  for(i=0; i<sizeof(stdthrow)/sizeof(stdthrow[0]); i++) {
+    e = type_newenumerator(l, stdthrow[i]);
+    if (!e) goto error;
+    if (hash_insert(h, type_name(e), e, NULL)) goto error;
+    xwarnx("created component standard event %s", stdthrow[i]);
   }
 
   /* create enum */

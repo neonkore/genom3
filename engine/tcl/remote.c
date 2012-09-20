@@ -40,14 +40,14 @@ int
 remote_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum remoteidx {
-    remoteidx_name, remoteidx_comp, remoteidx_type, remoteidx_params,
-    remoteidx_digest, remoteidx_loc, remoteidx_class
+    remoteidx_name, remoteidx_kind, remoteidx_comp, remoteidx_type,
+    remoteidx_params, remoteidx_digest, remoteidx_loc, remoteidx_class
   };
   static const char *args[] = {
-    [remoteidx_name] = "name", [remoteidx_comp] = "component",
-    [remoteidx_type] = "type", [remoteidx_params] = "parameters",
-    [remoteidx_digest] = "digest", [remoteidx_loc] = "loc",
-    [remoteidx_class] = "class", NULL
+    [remoteidx_name] = "name",  [remoteidx_kind] = "kind",
+    [remoteidx_comp] = "component", [remoteidx_type] = "type",
+    [remoteidx_params] = "parameters", [remoteidx_digest] = "digest",
+    [remoteidx_loc] = "loc", [remoteidx_class] = "class", NULL
   };
   remote_s s = v;
   Tcl_Obj *r = NULL;
@@ -70,6 +70,10 @@ remote_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch(i) {
     case remoteidx_name:
       r = Tcl_NewStringObj(remote_name(s), -1);
+      break;
+
+    case remoteidx_kind:
+      r = Tcl_NewStringObj(service_strkind(remote_kind(s)), -1);
       break;
 
     case remoteidx_comp:

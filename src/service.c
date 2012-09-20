@@ -56,6 +56,7 @@ hash_s		service_fsm(service_s s) { assert(s); return s->fsm; }
 struct remote_s {
   tloc loc;
   const char *name;
+  svckind kind;
   comp_s component;
 
   hash_s params;
@@ -64,6 +65,7 @@ struct remote_s {
 
 tloc		remote_loc(remote_s r) { assert(r); return r->loc; }
 const char *	remote_name(remote_s r) { assert(r); return r->name; }
+svckind		remote_kind(remote_s r) { assert(r); return r->kind; }
 comp_s		remote_comp(remote_s r) { assert(r); return r->component; }
 idltype_s	remote_type(remote_s r) { assert(r); return r->type; }
 hash_s		remote_params(remote_s r) { assert(r); return r->params; }
@@ -457,7 +459,7 @@ service_strkind(svckind k)
 /** create a remote in component
  */
 remote_s
-remote_create(tloc l, const char *name, hash_s params)
+remote_create(tloc l, svckind kind, const char *name, hash_s params)
 {
   comp_s comp = comp_active();
   service_s service;
@@ -490,6 +492,7 @@ remote_create(tloc l, const char *name, hash_s params)
 
   r->loc = l;
   r->name = string(name);
+  r->kind = kind;
   r->component = comp;
   r->params = params;
 
@@ -544,7 +547,7 @@ remote_clone(remote_s remote)
   if (e) return NULL;
 
   /* create */
-  r = remote_create(remote->loc, remote->name, param);
+  r = remote_create(remote->loc, remote->kind, remote->name, param);
   if (!r) hash_destroy(param, 1);
   return r;
 }

@@ -65,6 +65,14 @@ and their meaning.
 * Preprocessing::	@htmd Inclusion of definitions from other specifications
 * Specification::	@htmd Basic elements of a @genom{3} specification
 * Component declaration::@htmd Component declaration
+* Interface declaration::@htmd Interface declaration
+* IDS declaration::	@htmd IDS declaration
+* Task declaration::	@htmd Task declaration
+* Port declaration::	@htmd Port declaration
+* Attribute declaration::@htmd Attribute declaration
+* Service declaration::	@htmd Service declaration
+* Service parameters::	@htmd Service parameters
+* Codel declaration::	@htmd Codel declaration
 * Module declaration::	@htmd Scope type definitions
 * Constant declaration::@htmd Define constant values
 * Type declaration::	@htmd Naming new types
@@ -95,7 +103,7 @@ preprocessor from the @code{pcc} project
 environement variable @env{CPP}, @xref{Environment
 variables}. However, note that if you change the default, you will
 loose some functionalities of the @code{genom-pcpp} program.
-@xref{#pragma require}.
+@xref{#pragma requires}.
 
 The primary use of the preprocessing facility is to include
 definitions (especially type definitions) from other dotgen
@@ -108,7 +116,7 @@ information, also as @code{#} directives, that are available to
 
 @menu
 * #line::		@htmd Locations in your source code
-* #pragma require::	@htmd External dependencies
+* #pragma requires::	@htmd External dependencies
 * #pragma provides::	@htmd Proving interfaces for all components
 @end menu
 @lowersections

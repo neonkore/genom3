@@ -108,26 +108,26 @@ chartext	([^\'])|(\\.)
   dotgen_parsehash(yytext, yylloc);
 }
 
- /*/ @node #pragma require
-  * @section @code{#pragma require} directives
+ /*/ @node #pragma requires
+  * @section @code{#pragma requires} directives
   * @cindex @code{#pragma}
-  * @cindex @code{#pragma require}
+  * @cindex @code{#pragma requires}
   * @cindex @code{pkg-config}
   * @cindex @env{PKG_CONFIG}
   * @cindex dependency
   * @cindex require
   * @cindex package, dependency
   *
-  * @code{#pragma require} is recognized by @emph{both} the @code{genom-pcpp}
+  * @code{#pragma requires} is recognized by @emph{both} the @code{genom-pcpp}
   * preprocessor and @genom{}. This can be used to indicate an external
   * dependency on a package using the @code{pkg-config} utility (see
   * @uref{http://www.freedesktop.org/wiki/Software/pkg-config}).
   *
   * @example
-  * @      #pragma require "package [ >= version ]"
+  * @      #pragma requires "package [ >= version ]"
   * @end example
   *
-  * @code{#pragma require} accepts a string argument in the form @code{package
+  * @code{#pragma requires} accepts a string argument in the form @code{package
   * [>= version]}. @code{genom-pcpp} interprets it by running @code{pkg-config
   * --cflags} on the string argument. It then adds the resulting @code{-I} and
   * @code{-D} flags as if they had been passed on the command line
@@ -137,8 +137,8 @@ chartext	([^\'])|(\\.)
   * @env{PKG_CONFIG} environment variable if defined (@pxref{Environment
   * variables}).
   *
-  * @genom{} also recognizes @code{#pragma require}. It handles it by adding
-  * the string argument to the @code{require:} property of @emph{all} the
+  * @genom{} also recognizes @code{#pragma requires}. It handles it by adding
+  * the string argument to the @code{require} property of @emph{all} the
   * components defined in a specification (@pxref{Component declaration}).
   */
 ^[ \t]*#[ \t]*pragma[ \t]+requires?[ \t].*\n {

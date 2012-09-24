@@ -105,12 +105,12 @@
 %type <i>	specification statement idl_statements idl_statement
 %type <i>	exports export
 
-%type <comp>	component_scope interface_scope interface_name
+%type <comp>	component_name interface_scope interface_name
 %type <i>	interface component ids attribute port task service
 %type <skind>	service_kind
 %type <pkind>	port_dir opt_multiple
-%type <prop>	component_property task_property service_property codel_property
-%type <prop>	throw_property property
+%type <prop>	component_property interface_property task_property
+%type <prop>	service_property codel_property throw_property property
 %type <hash>	interface_list opt_properties properties
 %type <hash>	attribute_parameters service_parameters codel_parameters
 %type <initer>	opt_initializer initializer_value initializer initializers
@@ -169,7 +169,7 @@
  * Definitions are named by the mean of identifiers, @pxref{Reserved keywords}.
  *
  * A @genom{} statement defines components (@pxref{Component declaration}) or
- * interfaces.
+ * interfaces (@pxref{Interface declaration}).
  *
  * An @acronym{IDL} statement defines types (@pxref{Type declaration}),
  * constants (@pxref{Constant declaration}) or @acronym{IDL} modules containing
@@ -221,20 +221,35 @@ idl_statement:
  * @cindex declaration, component
  *
  * @ruleinclude component
- * @ruleinclude component_scope
+ * @ruleinclude component_name
  * @ruleinclude component_body
  * @sp 1
  * @ruleinclude exports
  * @ruleinclude export
+ * @sp 1
+ * @ruleinclude component_property
+ *
+ * A component declaration describes a instance of the @genom{} component
+ * model. It is defined by a unique name (an identifier) that also defines an
+ * IDL scope for any embedded types.
+ *
+ * Components export objects from the @genom{} component model, namely: IDS
+ * (@pxref{IDS declaration}), tasks (@pxref{Task declaration}), ports
+ * (@pxref{Port declaration}), attributes (@pxref{Attribute declaration}) or
+ * services (@pxref{Service declaration}).
+ *
+ * Components may also define new types @emph{via} IDL statements. These types
+ * will be defined within the component scope.
+ *
  */
-component: COMPONENT component_scope component_body ';'
+component: COMPONENT component_name component_body ';'
   {
     comp_s c = comp_pop();
     if (c) assert(c == $2);
   }
 ;
 
-component_scope: identifier
+component_name: identifier
   {
     if (!$1) { parserror(@1, "dropped component"); YYABORT; }
     $$ = comp_push(@1, $1, COMP_REGULAR);
@@ -245,6 +260,118 @@ component_scope: identifier
   }
 ;
 
+/*/
+ * A number of properties can be attached to a component:
+ * @table @code
+ * @item doc
+ * A string that describes the functionality of the component.
+ *
+ * @item version
+ * The component version number, as a string
+ *
+ * @item lang
+ * The programming language of the codels interface.
+ *
+ * @item email
+ * A string containing the e-mail address of the author of the component.
+ *
+ * @item requires
+ * A list of dependencies of the component (@pxref{#pragma requires}). Each
+ * string should contain a package name in @code{pkg-config} format.
+ *
+ * @item codels-requires
+ * A list of dependencies of the codels. Each string should contain a package
+ * name in @code{pkg-config} format.
+ *
+ * @item clock-rate
+ * The period of the internal component clock. It is usually not necessary to
+ * define it explicitly. If the component defines periodic task, the component
+ * clock period will be automatically computed as the greatest common divisor
+ * of the period of all periodic tasks.
+ *
+ * @item provides
+ * A list of interfaces (@pxref{Interface declaration}) that the component
+ * implements. All objects from the interface are imported as-is into
+ * the component description. Ports and services may be further refined
+ * once imported, typically by defining codels (@pxref{Codel declaration}) that
+ * implement the services.
+ *
+ * @item uses
+ * A list of interfaces (@pxref{Interface declaration}) that the component
+ * uses. Ports are imported in the opposite direction (e.g. a @code{port out}
+ * is imported as a @code{port in}. Services are imported as @code{remote}
+ * objects that can be accessed @emph{via} codel parameters (@pxref{Codel
+ * declaration}). Other objects are imported as-is.
+ * @end table
+ */
+component_property:
+  DOC string_literals ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_DOC, $2);
+  }
+  | VERSION string_literals ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_VERSION, $2);
+  }
+  | LANG string_literals ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_LANG, $2);
+  }
+  | EMAIL string_literals ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newstring(@1, PROP_EMAIL, $2);
+  }
+  | REQUIRE string_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newrequire(@1, PROP_REQUIRE, $2);
+  }
+  | CODELSREQUIRE string_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newrequire(@1, PROP_CODELS_REQUIRE, $2);
+  }
+  | CLOCKRATE const_expr time_unit ';'
+  {
+    if (const_binaryop(&$2, '*', $3)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_CLOCKRATE, $2);
+  }
+  | PROVIDES interface_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_PROVIDES, $2);
+  }
+  | USES interface_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_USES, $2);
+  }
+;
+
+
+/*/ @node Interface declaration
+ * @section Interface declaration
+ * @cindex interface, declaration
+ * @cindex declaration, interface
+ *
+ * @ruleinclude interface
+ * @ruleinclude interface_scope
+ * @sp 1
+ * @ruleinclude interface_property
+ *
+ * An interface declaration is basically the same as a component declaration
+ * (@pxref{Component declaration}) but is meant to be shared between several
+ * components. Although any object can be defined in an interface, it will
+ * typically only declare service prototypes and ports that are to be
+ * @code{provide}d or @code{use}d by components.
+ */
 interface: INTERFACE interface_scope component_body ';'
   {
     comp_s c = comp_pop();
@@ -278,6 +405,23 @@ interface_name: identifier
   }
 ;
 
+/*/
+ * In addition to regular component properties, an interface can also define
+ * the following properties:
+ * @table @code
+ * @item extends
+ * A list of interfaces that are imported as-is into the current one. All
+ * objects from the extended interfaces appear as if they had been defined in
+ * the extending interface.
+ * @end table
+ */
+interface_property:
+  EXTENDS interface_list ';'
+  {
+    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
+    $$ = prop_newhash(@1, PROP_EXTENDS, $2);
+  }
+
 interface_list:
   interface_name
   {
@@ -309,12 +453,7 @@ exports:
 ;
 
 export:
-    ids
-  | attribute
-  | port
-  | task
-  | service
-  | idl_statement
+    idl_statement
   | property
   {
     $$ = 0; if (!$1) break;
@@ -323,28 +462,21 @@ export:
       prop_destroy($1);
     }
   }
+  | ids
+  | task
+  | port
+  | attribute
+  | service
 ;
 
-port:
-  PORT opt_multiple port_dir type_spec identifier ';'
-  {
-    if (!$5) { parserror(@1, "dropped port"); break; }
-    if (!$4) { parserror(@1, "dropped '%s' port", $5); break; }
-    if (!port_create(@1, $3, $2, $5, $4))
-      parserror(@1, "dropped '%s' port", $5);
-  }
-;
-
-port_dir:
-    IN	{ $$ = PORT_IN; }
-  | OUT	{ $$ = PORT_OUT; }
-;
-
-opt_multiple:
-  /* empty */	{ $$ = PORT_SIMPLE; }
-  | MULTIPLE	{ $$ = PORT_MULTIPLE; }
-;
-
+/*/ @node IDS declaration
+ * @section IDS declaration
+ * @cindex ids, declaration
+ * @cindex declaration, ids
+ *
+ * @ruleinclude ids
+ * @ruleinclude ids_name
+ */
 ids:
   ids_name '{' member_list '}' ';'
   {
@@ -370,6 +502,24 @@ ids_name: IDS
     scope_set($$);
   };
 
+/*/ @node Task declaration
+ * @section Task declaration
+ * @cindex task, declaration
+ * @cindex declaration, task
+ *
+ * @ruleinclude task
+ * @ruleinclude opt_properties
+ * @ruleinclude properties
+ * @sp 1
+ * @ruleinclude task_property
+ * @ruleinclude codel_property
+ *
+ * Tasks define an execution context suitable for running @emph{activities}
+ * (@pxref{Component declaration}). A task may define a state machine and
+ * associated codels (@pxref{Codel declaration}). The state machine starts in
+ * the @code{start} state when the task is created during component
+ * initialization.
+ */
 task:
   TASK identifier opt_properties ';'
   {
@@ -381,6 +531,117 @@ task:
   }
 ;
 
+/*/
+ * Tasks are named can also define the following properties:
+ *
+ * @table @code
+ * @item period
+ * The granularity of the codel scheduler. Periodic task will sequence the
+ * codels they manage at that frequency.
+ *
+ * @item delay
+ * The delay from the beginning of each period after which codels are run. This
+ * can be used to delay two tasks running at the same period in the same
+ * component.
+ *
+ * @item priority
+ * Can be used to prioritize different tasks whithin the same component.
+ *
+ * @item scheduling real-time
+ * This indicates that the task requires real-time scheduling. This may not be
+ * supported by all templates.
+ *
+ * @item stack
+ * Defines the required stack size for this task. The stack size should be big
+ * enough to run all codels that the task manages.
+ * @end table
+ */
+task_property:
+  PERIOD const_expr time_unit ';'
+  {
+    if (const_binaryop(&$2, '*', $3)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_PERIOD, $2);
+  }
+  | DELAY const_expr time_unit ';'
+  {
+    if (const_binaryop(&$2, '*', $3)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_DELAY, $2);
+  }
+  | PRIORITY positive_int_const ';'
+  {
+    $$ = prop_newvalue(@1, PROP_PRIORITY, $2);
+  }
+  | SCHEDULING REAL_TIME ';'
+  {
+    $$ = prop_newstring(@1, PROP_SCHEDULING, $2);
+  }
+  | STACK positive_int_const size_unit ';'
+  {
+    if (const_binaryop(&$2, '*', $3)) {
+      parserror(@3, "invalid numeric constant");
+      break;
+    }
+    $$ = prop_newvalue(@1, PROP_STACK, $2);
+  }
+;
+
+/*/ @node Port declaration
+ * @section Port declaration
+ * @cindex port, declaration
+ * @cindex declaration, port
+ *
+ * @ruleinclude port
+ * @ruleinclude opt_multiple
+ * @ruleinclude port_dir
+ *
+ * Ports implement the data flow between components as a publish/subscribe
+ * model. Ports have a name and a type and can be either @code{out} (for
+ * publishing data) or @code{in} (for subscribing to a sibling @code{out}
+ * port).
+ *
+ * The optional @code{multiple} qualifier defines a dynamic list of ports of
+ * the given type, indexed by strings. In this case, ports are created or
+ * destroyed dynamically be the codels.
+ */
+port:
+  PORT opt_multiple port_dir type_spec identifier ';'
+  {
+    if (!$5) { parserror(@1, "dropped port"); break; }
+    if (!$4) { parserror(@1, "dropped '%s' port", $5); break; }
+    if (!port_create(@1, $3, $2, $5, $4))
+      parserror(@1, "dropped '%s' port", $5);
+  }
+;
+
+port_dir:
+    IN	{ $$ = PORT_IN; }
+  | OUT	{ $$ = PORT_OUT; }
+;
+
+opt_multiple:
+  /* empty */	{ $$ = PORT_SIMPLE; }
+  | MULTIPLE	{ $$ = PORT_MULTIPLE; }
+;
+
+/*/ @node Attribute declaration
+ * @section Attribute declaration
+ * @cindex attribute, declaration
+ * @cindex declaration, attribute
+ *
+ * @ruleinclude attribute
+ * @ruleinclude attribute_parameters
+ * @ruleinclude attribute_parameter
+ * @ruleinclude opt_properties
+ * @ruleinclude properties
+ * @sp 1
+ * @ruleinclude service_property
+ */
 attribute:
   ATTRIBUTE identifier '(' attribute_parameters ')' opt_properties ';'
   {
@@ -406,6 +667,23 @@ attribute:
   }
 ;
 
+/*/ @node Service declaration
+ * @section Service declaration
+ * @cindex service, declaration
+ * @cindex declaration, service
+ *
+ * @ruleinclude service
+ * @ruleinclude service_kind
+ * @ruleinclude service_parameters
+ * @ruleinclude service_parameter
+ * @ruleinclude opt_properties
+ * @ruleinclude properties
+ * @ruleinclude property
+ * @sp 1
+ * @ruleinclude service_property
+ * @ruleinclude codel_property
+ * @ruleinclude opt_async
+ */
 service:
   service_kind identifier '(' service_parameters ')' opt_properties ';'
   {
@@ -460,103 +738,16 @@ properties:
 ;
 
 property:
-    component_property | task_property | service_property | codel_property
+    component_property
+  | interface_property
+  | task_property
+  | service_property
+  | codel_property
   | throw_property
   | error ';'
   {
     parserror(@1, "invalid property");
     $$ = NULL;
-  }
-;
-
-component_property:
-  DOC string_literals ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_DOC, $2);
-  }
-  | VERSION string_literals ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_VERSION, $2);
-  }
-  | LANG string_literals ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_LANG, $2);
-  }
-  | EMAIL string_literals ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newstring(@1, PROP_EMAIL, $2);
-  }
-  | REQUIRE string_list ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newrequire(@1, PROP_REQUIRE, $2);
-  }
-  | CODELSREQUIRE string_list ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newrequire(@1, PROP_CODELS_REQUIRE, $2);
-  }
-  | CLOCKRATE const_expr time_unit ';'
-  {
-    if (const_binaryop(&$2, '*', $3)) {
-      parserror(@3, "invalid numeric constant");
-      break;
-    }
-    $$ = prop_newvalue(@1, PROP_CLOCKRATE, $2);
-  }
-  | EXTENDS interface_list ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newhash(@1, PROP_EXTENDS, $2);
-  }
-  | PROVIDES interface_list ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newhash(@1, PROP_PROVIDES, $2);
-  }
-  | USES interface_list ';'
-  {
-    if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
-    $$ = prop_newhash(@1, PROP_USES, $2);
-  }
-;
-
-task_property:
-  PERIOD const_expr time_unit ';'
-  {
-    if (const_binaryop(&$2, '*', $3)) {
-      parserror(@3, "invalid numeric constant");
-      break;
-    }
-    $$ = prop_newvalue(@1, PROP_PERIOD, $2);
-  }
-  | DELAY const_expr time_unit ';'
-  {
-    if (const_binaryop(&$2, '*', $3)) {
-      parserror(@3, "invalid numeric constant");
-      break;
-    }
-    $$ = prop_newvalue(@1, PROP_DELAY, $2);
-  }
-  | PRIORITY positive_int_const ';'
-  {
-    $$ = prop_newvalue(@1, PROP_PRIORITY, $2);
-  }
-  | SCHEDULING REAL_TIME ';'
-  {
-    $$ = prop_newstring(@1, PROP_SCHEDULING, $2);
-  }
-  | STACK positive_int_const size_unit ';'
-  {
-    if (const_binaryop(&$2, '*', $3)) {
-      parserror(@3, "invalid numeric constant");
-      break;
-    }
-    $$ = prop_newvalue(@1, PROP_STACK, $2);
   }
 ;
 
@@ -608,46 +799,23 @@ throw_property:
 ;
 
 
-/* --- codels -------------------------------------------------------------- */
-
-codel:
-  identifier '(' codel_parameters ')'
-  {
-    $$ = codel_create(@1, $1, CODEL_SYNC, NULL, NULL, $3);
-  }
-;
-
-fsm_codel:
-  event_list identifier '(' codel_parameters ')' YIELD identifier_list
-  {
-    if (!$1 || !$7) {
-      parserror(@1, "dropped codel '%s'", $2); $$ = NULL; break;
-    }
-    $$ = codel_create(@3, $2, CODEL_SYNC, $1, $7, $4);
-  }
-  | event_list identifier '(' codel_parameters ')' error
-  {
-    $$ = NULL;
-    parserror(@1, "missing 'yield' values for codel %s", $2);
-    if ($1) hash_destroy($1, 1);
-    if ($4) hash_destroy($4, 1);
-  }
-;
-
-opt_async:
-  /* empty */	{ $$ = CODEL_SYNC; }
-  | ASYNC	{ $$ = CODEL_ASYNC; }
-;
-
-event_list:
-  '<' identifier_list '>'
-  {
-    $$ = $2;
-  }
-;
-
-
 /* --- parameters ---------------------------------------------------------- */
+
+/*/ @node Service parameters
+ * @section Service parameters
+ * @cindex service, parameters
+ * @cindex parameters, service
+ *
+ * @ruleinclude attribute_parameter
+ * @ruleinclude service_parameter
+ * @sp 1
+ * @ruleinclude parameter_dir
+ * @ruleinclude parameter_variable
+ * @ruleinclude opt_initializer
+ * @ruleinclude initializers
+ * @ruleinclude initializer
+ * @ruleinclude initializer_value
+ */
 
 attribute_parameters:
   /* empty */
@@ -814,6 +982,60 @@ parameter_variable:
 ;
 
 
+/* --- codels -------------------------------------------------------------- */
+
+/*/ @node Codel declaration
+ * @section Codel declaration
+ * @cindex codel, declaration
+ * @cindex declaration, codel
+ *
+ * @ruleinclude codel
+ * @ruleinclude fsm_codel
+ * @ruleinclude codel_parameters
+ * @ruleinclude codel_parameter
+ * @ruleinclude opt_async
+ * @ruleinclude opt_parameter_src
+ * @ruleinclude parameter_dir
+ * @ruleinclude parameter_variable
+ * @ruleinclude event_list
+ */
+codel:
+  identifier '(' codel_parameters ')'
+  {
+    $$ = codel_create(@1, $1, CODEL_SYNC, NULL, NULL, $3);
+  }
+;
+
+fsm_codel:
+  event_list identifier '(' codel_parameters ')' YIELD identifier_list
+  {
+    if (!$1 || !$7) {
+      parserror(@1, "dropped codel '%s'", $2); $$ = NULL; break;
+    }
+    $$ = codel_create(@3, $2, CODEL_SYNC, $1, $7, $4);
+  }
+  | event_list identifier '(' codel_parameters ')' error
+  {
+    $$ = NULL;
+    parserror(@1, "missing 'yield' values for codel %s", $2);
+    if ($1) hash_destroy($1, 1);
+    if ($4) hash_destroy($4, 1);
+  }
+;
+
+opt_async:
+  /* empty */	{ $$ = CODEL_SYNC; }
+  | ASYNC	{ $$ = CODEL_ASYNC; }
+;
+
+event_list:
+  '<' identifier_list '>'
+  {
+    $$ = $2;
+  }
+;
+
+
 /* --- initializers -------------------------------------------------------- */
 
 opt_initializer:
@@ -939,6 +1161,7 @@ module_body: /* empty */ { $$ = 0; } | idl_statements;
  * @cindex Constant, declaration
  *
  * @ruleinclude const_dcl
+ * @ruleinclude const_type
  */
 
 const_dcl:

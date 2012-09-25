@@ -244,3 +244,63 @@ would map into
          int32_t _buffer[16];
       } bounded;
 @end verbatim
+
+
+@node C Port
+@subsection Mapping for port types
+
+Simple ports map onto an object-like C @code{struct} with a
+@code{data()}, @code{read()} or @code{write()} and @code{strerror()}
+function members. The @code{data()} function takes no parameter and
+returns a pointer on the current port data. Input ports may refresh
+their data by invoking the @code{read()} method, while output ports may
+publish new data by invoking the @code{write()} method. Both
+@code{read()} and @code{write()} return @code{0} on success, or an
+unsigned 32bits integer representing an error code. The
+@code{strerror()} method can be used to transform the error code into
+a user readable error message.
+
+Ports defined with the @code{multiple} flag map onto a similar
+@code{struct}, with the difference that @code{data()}, @code{read()}
+and @code{write()} methods take an additional string (@code{const char
+*}) parameter representing the port element name. Multiple output
+ports have two additional @code{open()} and @code{close()} members
+(also accepting a single string parameter) that dynamically create or
+destroy ports.
+
+For instance, the following IDL:
+@verbatim
+      port in double in_port;
+      port multiple in double multi_in_port;
+      port out double out_port;
+      port multiple out double multi_out_port;
+@end verbatim
+
+would map into
+@verbatim
+      typedef struct {
+         double * (*data)();
+         uint32_t (*read)(void);
+         const char * (*strerror)(uint32_t);
+      } in_port;
+
+      typedef struct {
+         double * (*data)(const char *id);
+         uint32_t (*read)(const char *id);
+         const char * (*strerror)(uint32_t);
+      } multi_in_port;
+
+      typedef struct {
+         double * (*data)();
+         uint32_t (*write)(void);
+         const char * (*strerror)(uint32_t);
+      } out_port;
+
+      typedef struct {
+         double * (*data)(const char *id);
+         uint32_t (*write)(const char *id);
+         uint32_t (*open)(const char *id);
+         uint32_t (*close)(const char *id);
+         const char * (*strerror)(uint32_t);
+      } multi_out_port;
+@end verbatim

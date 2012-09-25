@@ -55,6 +55,7 @@ languages.  For the @code{C} language, @xref{C mappings}. For the
 * C Struct::
 * C Union::
 * C Sequence::
+* C Port::
 @end menu
 @include texi/mappings-c.texi
 

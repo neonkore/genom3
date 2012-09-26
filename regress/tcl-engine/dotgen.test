@@ -113,12 +113,15 @@ expect out '
 	/^::b1::b$/ {next}
 	/^::c::event$/ {next}
 	/^::c::(ok|error|ether|start|stop|sleep)$/ {next}
+	/^::c::(serialization|disallowed|too_many_activities)$/ {next}
+	/^::c::(bad_transition|port_io|no_such_inport|no_such_outport)$/ {next}
+	/^::c::(remote_io|no_such_remote|no_such_service)$/ {next}
 	/^::c::p$/ {next}
 	{exit 2}
 '
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
-foreach t [dotgen types *b*] { lappend l [$t fullname] }
+foreach t [dotgen types ::b*] { lappend l [$t fullname] }
 puts $l
 EOF
 expect out '/^::b ::b1::b ::b1$/ {next}; {exit 2}'

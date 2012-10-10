@@ -55,7 +55,7 @@ if test x"$LEX" = x:; then
 fi
 
 AC_PROG_YACC
-if test x"$YACC" = x:; then
+if ! command -v $YACC; then
    AC_MSG_FAILURE([required yacc/bison program could not be found on your system.])
 fi
 

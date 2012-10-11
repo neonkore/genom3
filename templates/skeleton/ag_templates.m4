@@ -25,9 +25,6 @@ AC_DEFUN([AG_OPT_TEMPLATES],
         # we may need autoreconf
         AC_PATH_PROG(ag_autoreconf, [autoreconf], [no])
 
-        # compute recursive options
-        _AG_ARGS_SUBDIRS
-
         # compute AG_TEMPLATES_SUBDIRS
         agdir=
         oIFS="$IFS"; IFS=","; set -- $ag_templates; IFS="$oIFS"
@@ -35,6 +32,9 @@ AC_DEFUN([AG_OPT_TEMPLATES],
             agdir=$agdir${agdir:+ }./${t#/}
         done
         AC_SUBST([AG_TEMPLATES_SUBDIRS],[$agdir])
+
+        # compute recursive options
+        _AG_ARGS_SUBDIRS
     fi
 ])
 
@@ -55,6 +55,7 @@ AC_DEFUN([AG_OUTPUT_TEMPLATES],
             AC_MSG_NOTICE([running $ag_genom $t -C $tdir $ag_input])
             eval $ag_genom $t -C $tdir $ag_input
             if test $? != 0; then
+                rm -rf "$tdir"
                 AC_MSG_ERROR([cannot generate template $t], 2)
             fi
         fi
@@ -165,6 +166,9 @@ AC_DEFUN([_AG_ARGS_SUBDIRS],
 
     # always append PKG_CONFIG_PATH
     ag_arg="$ac_pwd${PKG_CONFIG_PATH:+:}$PKG_CONFIG_PATH"
+    for d in $AG_TEMPLATES_SUBDIRS; do
+      ag_arg="$ac_pwd/$d:$ag_arg"
+    done
     ag_sub_configure_args="$ag_sub_configure_args 'PKG_CONFIG_PATH=$ag_arg'"
 
     # always prepend --prefix to ensure using the same prefix in subdir

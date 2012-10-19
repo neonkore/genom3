@@ -1,6 +1,19 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2012 LAAS/CNRS
 
+			    Changes in genom 2.99.14
+
+Released on October 19th, 2012
+
+ . Added a list of "common" exceptions to be thrown by templates and std
+   services. Letting templates define their own exceptions raise an issue with
+   the generated enum implementing the exception list. Due to the way the
+   parser works, the enum may become desynchronized between the codels and the
+   server implementation.
+
+ . Fixed a few compilation/configuration glitches.
+
+
 			    Changes in genom 2.99.13
 
 Released on September 7th, 2012

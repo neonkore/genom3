@@ -34,22 +34,29 @@
 
 #include <errno.h>
 #include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef __cplusplus
+# include <stdlib.h>
+# include <string.h>
+# define genom_sequence_type void
+#else
+# include <cstdlib>
+# include <cstring>
+
+/* C++ needs a template function because it cannot cast from void * back to the
+ * actual sequence element type */
+template<typename genom_sequence_type>
 #endif
-
-static __inline__ void *
+static __inline__ genom_sequence_type *
 _genom_resize_buffer(uint32_t length, size_t esize,
-                     uint32_t *_length, uint32_t *_maximum, void *_buffer,
+                     uint32_t *_length, uint32_t *_maximum,
+                     genom_sequence_type *_buffer,
                      void (**_release)(void *))
 {
-  void *buffer;
+  genom_sequence_type *buffer;
 
   if (*_release == free && _buffer) {
-    buffer = realloc(_buffer, length * esize);
+    buffer = (genom_sequence_type *)realloc(_buffer, length * esize);
     if (!buffer) return NULL;
 
     *_maximum = length;
@@ -61,7 +68,7 @@ _genom_resize_buffer(uint32_t length, size_t esize,
     return buffer;
   }
 
-  buffer = calloc(length, esize);
+  buffer = (genom_sequence_type *)calloc(length, esize);
   if (!buffer) return NULL;
 
   *_maximum = length;
@@ -73,8 +80,8 @@ _genom_resize_buffer(uint32_t length, size_t esize,
   return buffer;
 }
 
-#ifdef __cplusplus
-}
+#ifndef __cplusplus
+# undef genom_sequence_type
 #endif
 
 #define genom_sequence_reserve(sequence, length)                        \

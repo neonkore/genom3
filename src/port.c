@@ -102,6 +102,10 @@ port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
   p->component = c;
   p->datatype = t;
   p->type = type_newport(l, name, p);
+  if (!p->type) {
+    free(p);
+    return NULL;
+  }
 
   e = hash_insert(comp_ports(c), p->name, p, (hrelease_f)port_destroy);
   switch(e) {

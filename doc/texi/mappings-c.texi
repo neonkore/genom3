@@ -80,7 +80,7 @@ integer types.
 @item @code{double}
 @tab @code{double}
 @item @code{char}
-@tab @code{char}
+@tab @code{int8_t}
 @item @code{octet}
 @tab @code{uint8_t}
 @item @code{any}

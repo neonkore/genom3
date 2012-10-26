@@ -110,7 +110,7 @@ namespace eval language::c++ {
 	    {long long}			{ set d "int64_t" }
 	    {float}			{ set d "float" }
 	    {double}			{ set d "double" }
-	    {char}			{ set d "char" }
+	    {char}			{ set d "int8_t" }
 	    {octet}			{ set d "uint8_t" }
 	    {any}			{ error "type any not supported yet" }
 

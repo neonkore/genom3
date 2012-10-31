@@ -371,7 +371,7 @@ service_check(service_s service)
         for(hash_first(prop_hash(i.value), &j); j.current; hash_next(&j)) {
           if (strcmp(j.value, ALL_SERVICE_NAME) &&
               !comp_service(service->component, j.value)) {
-            parserror(prop_loc(j.value), "no such service '%s'", j.value);
+            parserror(prop_loc(i.value), "no such service '%s'", j.value);
             e = 1;
           }
         }

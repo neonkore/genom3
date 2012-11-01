@@ -1,0 +1,21 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+cat >run.gen <<EOF
+component c {
+  function a() { interrupts b; };
+  function b();
+};
+EOF
+
+testing 'forward interrupt declaration'
+run 0 ${GENOM_BIN} -n run.gen
+
+cat >run.gen <<EOF
+component c {
+  function a() { interrupts b; };
+};
+EOF
+
+testing 'interrupt unknown service'
+run 1 ${GENOM_BIN} -n run.gen

@@ -147,6 +147,7 @@
 %type <s>	scoped_name string_literals identifier
 %type <hash>	event_list identifier_list
 %type <vlist>	string_list
+%type <c>	semicolon
 
 %expect 0
 %%
@@ -202,11 +203,11 @@ statement:
 idl_statements: idl_statement | idl_statements idl_statement;
 idl_statement:
   module
-  | const_dcl ';'
+  | const_dcl
   {
     $$ = 0;
   }
-  | type_dcl ';'
+  | type_dcl
   {
     $$ = 0;
   }
@@ -242,7 +243,7 @@ idl_statement:
  * will be defined within the component scope.
  *
  */
-component: COMPONENT component_name component_body ';'
+component: COMPONENT component_name component_body semicolon
   {
     comp_s c = comp_pop();
     if (c) assert(c == $2);
@@ -305,37 +306,37 @@ component_name: identifier
  * @end table
  */
 component_property:
-  DOC string_literals ';'
+  DOC string_literals semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_DOC, $2);
   }
-  | VERSION string_literals ';'
+  | VERSION string_literals semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_VERSION, $2);
   }
-  | LANG string_literals ';'
+  | LANG string_literals semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_LANG, $2);
   }
-  | EMAIL string_literals ';'
+  | EMAIL string_literals semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newstring(@1, PROP_EMAIL, $2);
   }
-  | REQUIRE string_list ';'
+  | REQUIRE string_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newrequire(@1, PROP_REQUIRE, $2);
   }
-  | CODELSREQUIRE string_list ';'
+  | CODELSREQUIRE string_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newrequire(@1, PROP_CODELS_REQUIRE, $2);
   }
-  | CLOCKRATE const_expr time_unit ';'
+  | CLOCKRATE const_expr time_unit semicolon
   {
     if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
@@ -343,12 +344,12 @@ component_property:
     }
     $$ = prop_newvalue(@1, PROP_CLOCKRATE, $2);
   }
-  | PROVIDES interface_list ';'
+  | PROVIDES interface_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_PROVIDES, $2);
   }
-  | USES interface_list ';'
+  | USES interface_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_USES, $2);
@@ -372,7 +373,7 @@ component_property:
  * typically only declare service prototypes and ports that are to be
  * @code{provide}d or @code{use}d by components.
  */
-interface: INTERFACE interface_scope component_body ';'
+interface: INTERFACE interface_scope component_body semicolon
   {
     comp_s c = comp_pop();
     if (c) assert(c == $2);
@@ -416,7 +417,7 @@ interface_name: identifier
  * @end table
  */
 interface_property:
-  EXTENDS interface_list ';'
+  EXTENDS interface_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_EXTENDS, $2);
@@ -467,6 +468,7 @@ export:
   | port
   | attribute
   | service
+  | error ';' { $$ = 0; }
 ;
 
 /*/ @node IDS declaration
@@ -478,20 +480,14 @@ export:
  * @ruleinclude ids_name
  */
 ids:
-  ids_name '{' member_list '}' ';'
+  ids_name '{' member_list '}' semicolon
   {
     scope_s s = scope_pop(); assert(s == $1);
     if (!comp_addids(@1, s)) parserror(@1, "dropped ids declaration");
   }
-  | ids_name error ';'
+  | ids_name error semicolon
   {
     scope_s s = scope_pop(); assert(s == $1);
-    parserror(@1, "dropped ids declaration");
-  }
-  | ids_name error
-  {
-    scope_s s = scope_pop(); assert(s == $1);
-    parsenoerror(@1, "maybe a missing ';'");
     parserror(@1, "dropped ids declaration");
   }
 ;
@@ -521,7 +517,7 @@ ids_name: IDS
  * initialization.
  */
 task:
-  TASK identifier opt_properties ';'
+  TASK identifier opt_properties semicolon
   {
     if (!$2) { parserror(@1, "dropped task"); break; }
     if (!task_create(@1, $2, $3)) {
@@ -557,7 +553,7 @@ task:
  * @end table
  */
 task_property:
-  PERIOD const_expr time_unit ';'
+  PERIOD const_expr time_unit semicolon
   {
     if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
@@ -565,7 +561,7 @@ task_property:
     }
     $$ = prop_newvalue(@1, PROP_PERIOD, $2);
   }
-  | DELAY const_expr time_unit ';'
+  | DELAY const_expr time_unit semicolon
   {
     if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
@@ -573,15 +569,15 @@ task_property:
     }
     $$ = prop_newvalue(@1, PROP_DELAY, $2);
   }
-  | PRIORITY positive_int_const ';'
+  | PRIORITY positive_int_const semicolon
   {
     $$ = prop_newvalue(@1, PROP_PRIORITY, $2);
   }
-  | SCHEDULING REAL_TIME ';'
+  | SCHEDULING REAL_TIME semicolon
   {
     $$ = prop_newstring(@1, PROP_SCHEDULING, $2);
   }
-  | STACK positive_int_const size_unit ';'
+  | STACK positive_int_const size_unit semicolon
   {
     if (const_binaryop(&$2, '*', $3)) {
       parserror(@3, "invalid numeric constant");
@@ -610,7 +606,7 @@ task_property:
  * destroyed dynamically be the codels.
  */
 port:
-  PORT opt_multiple port_dir type_spec identifier ';'
+  PORT opt_multiple port_dir type_spec identifier semicolon
   {
     if (!$5) { parserror(@1, "dropped port"); break; }
     if (!$4) { parserror(@1, "dropped '%s' port", $5); break; }
@@ -643,7 +639,7 @@ opt_multiple:
  * @ruleinclude service_property
  */
 attribute:
-  ATTRIBUTE identifier '(' attribute_parameters ')' opt_properties ';'
+  ATTRIBUTE identifier '(' attribute_parameters ')' opt_properties semicolon
   {
     task_p = 0;
     param_setlocals(NULL);
@@ -659,7 +655,7 @@ attribute:
       if ($6) hash_destroy($6, 1);
     }
   }
-  | ATTRIBUTE identifier '(' error ')' opt_properties ';'
+  | ATTRIBUTE identifier '(' error ')' opt_properties semicolon
   {
     task_p = 0;
     param_setlocals(NULL);
@@ -684,8 +680,9 @@ attribute:
  * @ruleinclude codel_property
  * @ruleinclude opt_async
  */
+
 service:
-  service_kind identifier '(' service_parameters ')' opt_properties ';'
+  service_kind identifier '(' service_parameters ')' opt_properties semicolon
   {
     task_p = 0;
     param_setlocals(NULL);
@@ -701,7 +698,7 @@ service:
       if ($6) hash_destroy($6, 1);
     }
   }
-  | service_kind identifier '(' error ')' opt_properties ';'
+  | service_kind identifier '(' error ')' opt_properties semicolon
   {
     task_p = 0;
     param_setlocals(NULL);
@@ -717,7 +714,9 @@ service_kind:
 
 /* --- GenoM object properties --------------------------------------------- */
 
-opt_properties: /* empty */ { $$ = 0; } | '{' properties '}' { $$ = $2; }
+opt_properties:
+  /* empty */ { $$ = NULL; }
+  | '{' properties '}' { $$ = $2; }
 
 properties:
   /* empty */
@@ -735,6 +734,11 @@ properties:
       }
     }
   }
+  | properties error semicolon
+  {
+    parserror(@1, "invalid property");
+    $$ = NULL;
+  }
 ;
 
 property:
@@ -744,47 +748,42 @@ property:
   | service_property
   | codel_property
   | throw_property
-  | error ';'
-  {
-    parserror(@1, "invalid property");
-    $$ = NULL;
-  }
 ;
 
 service_property:
-  TASK_P identifier ';'
+  TASK_P identifier semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newtask(@1, $2);
   }
-  | INTERRUPTS identifier_list ';'
+  | INTERRUPTS identifier_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_INTERRUPTS, $2);
   }
-  | BEFORE identifier_list ';'
+  | BEFORE identifier_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_BEFORE, $2);
   }
-  | AFTER identifier_list ';'
+  | AFTER identifier_list semicolon
   {
     if (!$2) { parserror(@1, "dropped '%s' property", $1); $$ = NULL; break; }
     $$ = prop_newhash(@1, PROP_AFTER, $2);
   }
-  | VALIDATE codel ';'
+  | VALIDATE codel semicolon
   {
     $$ = $2 ? prop_newcodel(@1, PROP_VALIDATE, $2) : NULL;
   }
 ;
 
 codel_property:
-  opt_async CODEL codel ';'
+  opt_async CODEL codel semicolon
   {
     if ($3) codel_setkind($3, $1);
     $$ = $3 ? prop_newcodel(@1, PROP_SIMPLE_CODEL, $3) : NULL;
   }
-  | opt_async CODEL fsm_codel ';'
+  | opt_async CODEL fsm_codel semicolon
   {
     if ($3) codel_setkind($3, $1);
     $$ = $3 ? prop_newcodel(@1, PROP_FSM_CODEL, $3) : NULL;
@@ -792,7 +791,7 @@ codel_property:
 ;
 
 throw_property:
-  THROWS identifier_list ';'
+  THROWS identifier_list semicolon
   {
     $$ = $2 ? prop_newhash(@1, PROP_THROWS, $2) : NULL;
   }
@@ -1125,7 +1124,7 @@ initializer_value:
  * clashes between components.
  */
 module:
-  MODULE module_name '{' module_body '}' ';'
+  MODULE module_name '{' module_body '}' semicolon
   {
     scope_s s = scope_pop();
 
@@ -1165,7 +1164,7 @@ module_body: /* empty */ { $$ = 0; } | idl_statements;
  */
 
 const_dcl:
-  CONST const_type identifier '=' const_expr
+  CONST const_type identifier '=' const_expr semicolon
   {
     assert($3);
     $$ = $2 ? type_newconst(@1, $3, $2, $5) : NULL;
@@ -1225,8 +1224,9 @@ const_type:
  */
 
 type_dcl:
-  constructed_type
-  | TYPEDEF alias_list {
+  constructed_type semicolon
+  | TYPEDEF alias_list semicolon
+  {
     $$ = $2;
   }
   | forward_dcl
@@ -1348,11 +1348,11 @@ enum_type: ENUM identifier '{' enumerator_list '}'
 ;
 
 forward_dcl:
-  STRUCT identifier
+  STRUCT identifier ';'
   {
     $$ = type_newforward(@1, $2, IDL_FORWARD_STRUCT);
   }
-  | UNION identifier
+  | UNION identifier ';'
   {
     $$ = type_newforward(@1, $2, IDL_FORWARD_UNION);
   }
@@ -1540,7 +1540,7 @@ switch_body: case | switch_body case
   }
 ;
 
-member_list: member ';' | member_list member ';';
+member_list: member semicolon | member_list member semicolon;
 
 member:
   type_spec declarator
@@ -1565,7 +1565,7 @@ member:
   }
 ;
 
-case: case_label_list type_spec declarator ';'
+case: case_label_list type_spec declarator semicolon
   {
     $$ = NULL;
     if (!$1 || !$2 || !$3) {
@@ -2005,6 +2005,18 @@ identifier_list:
     switch(hash_insert($$, $3, $3, NULL)) {
       case EEXIST: parserror(@3, "duplicate identifier '%s'", $3); break;
     }
+  }
+;
+
+semicolon:
+  ';'
+  {
+    $$ = ';';
+  }
+  | /* empty */
+  {
+    $$ = '\0';
+    parserror(@$, "missing ';' after statement");
   }
 ;
 

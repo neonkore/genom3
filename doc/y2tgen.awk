@@ -18,6 +18,9 @@
 #                                            Anthony Mallet on Sat May  8 2010
 #
 
+# rewrite / drop some statements for documentation
+/semicolon/ { gsub(/semicolon/, "\";\"") }
+
 /^[^ \t]/ {
     if (n) printdef(n, name, rule)
     n++; name = $1; rule = $0
@@ -35,6 +38,8 @@
 END { printdef(n, name, rule) }
 
 function printdef(n, name, rule) {
+    if (name == "\";\"") return
+
     out = "dotgen-rule-" name ".texi"
     print "@include " out
     gsub(/_/, "-", rule)

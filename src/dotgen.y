@@ -734,7 +734,7 @@ properties:
       }
     }
   }
-  | properties error semicolon
+  | properties error ';'
   {
     parserror(@1, "invalid property");
     $$ = NULL;

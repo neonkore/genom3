@@ -84,7 +84,7 @@ int	dotgen_consolidate(void);
 hash_s	dotgen_hdeps(void);
 hash_s	dotgen_hrequire(void);
 hash_s	dotgen_hprovide(void);
-hash_s	dotgen_hnative(void);
+hash_s	dotgen_hmasquerade(void);
 
 void	parserror(tloc l, const char *fmt, ...);
 void	parsenoerror(tloc l, const char *fmt, ...);

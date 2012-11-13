@@ -52,7 +52,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     typeidx_valuekind, typeidx_members, typeidx_discriminator, typeidx_port,
     typeidx_remote, typeidx_mapping, typeidx_declarator, typeidx_address,
     typeidx_deref, typeidx_argument, typeidx_pass, typeidx_digest,
-    typeidx_native, typeidx_loc, typeidx_class
+    typeidx_masquerade, typeidx_loc, typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
@@ -65,7 +65,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
     [typeidx_address] = "address", [typeidx_deref] = "dereference",
     [typeidx_argument] = "argument", [typeidx_pass] = "pass",
-    [typeidx_digest] = "digest", [typeidx_native] = "native",
+    [typeidx_digest] = "digest", [typeidx_masquerade] = "masquerade",
     [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
@@ -92,8 +92,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_WrongNumArgs(interp, 2, objv, "?var?");
       return TCL_ERROR;
     }
-  } else if (i == typeidx_native) {
-    /* 'native' subcommand can have one additional parameter */
+  } else if (i == typeidx_masquerade) {
+    /* 'masquerade' subcommand can have one additional parameter */
     if (objc > 3) {
       Tcl_WrongNumArgs(interp, 2, objv, "?template?");
       return TCL_ERROR;
@@ -290,14 +290,14 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
-    case typeidx_native: {
+    case typeidx_masquerade: {
       hash_s h;
       char *tmpl;
-      char *native;
+      char *masquerade;
 
       if (!type_fullname(t)) break;
 
-      h = dotgen_hnative();
+      h = dotgen_hmasquerade();
       if (!h) break;
 
       if (objc < 3) {
@@ -312,10 +312,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       h = hash_find(h, tmpl);
       if (!h) break;
 
-      native = hash_find(h, type_fullname(t));
-      if (!native) break;
+      masquerade = hash_find(h, type_fullname(t));
+      if (!masquerade) break;
 
-      r = Tcl_NewStringObj(native, -1);
+      r = Tcl_NewStringObj(masquerade, -1);
       break;
     }
 

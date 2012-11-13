@@ -50,7 +50,8 @@
 				YYLTYPE *yylloc);
    static void		dotgen_parsepragmaprovide(char *buffer,
 				YYLTYPE *yylloc);
-   static void		dotgen_parsepragmanative(char *buffer, YYLTYPE *yylloc);
+   static void		dotgen_parsepragmamasquerade(char *buffer,
+				YYLTYPE *yylloc);
 
 #define YY_INPUT(buf, result, max) ((result) = dotgen_read(buf, max))
 
@@ -155,8 +156,8 @@ chartext	([^\'])|(\\.)
 }
 
  /* pragmas */
-^[ \t]*#[ \t]*pragma[ \t]+native[ \t].*\n {
-  dotgen_parsepragmanative(yytext, yylloc);
+^[ \t]*#[ \t]*pragma[ \t]+masquerade[ \t].*\n {
+  dotgen_parsepragmamasquerade(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;
 }
 
@@ -597,14 +598,14 @@ dotgen_hprovide()
 }
 
 
-/* --- dotgen_parsepragmanative -------------------------------------------- */
+/* --- dotgen_parsepragmamasquerade ---------------------------------------- */
 
-static hash_s hnative;
+static hash_s hmasquerade;
 
-/** Parse #pragma native directives
+/** Parse #pragma masquerade directives
  */
 static void
-dotgen_parsepragmanative(char *buffer, YYLTYPE *yylloc)
+dotgen_parsepragmamasquerade(char *buffer, YYLTYPE *yylloc)
 {
   const char *delim;
   const char *args[3];
@@ -613,11 +614,11 @@ dotgen_parsepragmanative(char *buffer, YYLTYPE *yylloc)
   hash_s h;
   int n, s;
 
-  p = strstr(buffer, "native");
+  p = strstr(buffer, "masquerade");
   assert(p);
-  p+=6;
+  p+=sizeof("masquerade")-1;
 
-  /* split input into 3 args: template type native */
+  /* split input into 3 args: template type masquerade */
   n = 0;
   while(*p) {
     p += strspn(p, " \t\n");
@@ -638,59 +639,59 @@ dotgen_parsepragmanative(char *buffer, YYLTYPE *yylloc)
 
   if (n != 3) {
     parserror(*yylloc,
-              "syntax error for #pragma native <template> <type> <string>");
+              "syntax error for #pragma masquerade <template> <type> <string>");
     return;
   }
 
   /* resolve type */
   type = type_find(args[1]);
   if (!type) {
-    parserror(*yylloc, "unknown type '%s' in #pragma native", args[1]);
+    parserror(*yylloc, "unknown type '%s' in #pragma masquerade", args[1]);
     return;
   }
 
   /* create a new hash */
-  if (!hnative) {
-    hnative = hash_create("pragma native", 1);
-    if (!hnative) {
-      parserror(*yylloc, "dropped #pragma native");
+  if (!hmasquerade) {
+    hmasquerade = hash_create("pragma masquerade", 1);
+    if (!hmasquerade) {
+      parserror(*yylloc, "dropped #pragma masquerade");
       return;
     }
   }
 
   /* get hash for template */
-  h = hash_find(hnative, args[0]);
+  h = hash_find(hmasquerade, args[0]);
   if (!h) {
-    h = hash_create("pragma native", 1);
+    h = hash_create("pragma masquerade", 1);
     if (!h) {
-      parserror(*yylloc, "dropped #pragma native");
+      parserror(*yylloc, "dropped #pragma masquerade");
       return;
     }
-    if (hash_insert(hnative, args[0], h, NULL)) {
-      parserror(*yylloc, "dropped #pragma native");
+    if (hash_insert(hmasquerade, args[0], h, NULL)) {
+      parserror(*yylloc, "dropped #pragma masquerade");
       return;
     }
   }
 
-  /* insert native for type */
+  /* insert masquerade for type */
   s = hash_insert(h, type_fullname(type), (void *)args[2], NULL);
   switch(s) {
     case 0: break;
 
     case EEXIST:
-      parserror(*yylloc, "duplicate #pragma native for type '%s'",
+      parserror(*yylloc, "duplicate #pragma masquerade for type '%s'",
                 type_fullname(type));
       /*FALLTHROUGH*/
     default:
-      parserror(*yylloc, "dropped #pragma native");
+      parserror(*yylloc, "dropped #pragma masquerade");
       return;
   }
 
-  xwarnx("#pragma native for '%s' on '%s'", args[0], type_fullname(type));
+  xwarnx("#pragma masquerade for '%s' on '%s'", args[0], type_fullname(type));
 }
 
 hash_s
-dotgen_hnative()
+dotgen_hmasquerade()
 {
-  return hnative;
+  return hmasquerade;
 }

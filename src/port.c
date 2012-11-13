@@ -82,9 +82,14 @@ port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
     return NULL;
   }
 
-  /* refuse anonymous types */
+  /* refuse anonymous and native types */
   if (t && !type_name(t)) {
     parserror(l, "anonymous type is not allowed for port %s", name);
+    return NULL;
+  }
+  if (t && type_native(t, 0/*verbose*/)) {
+    parserror(l, "port %s may not contain native types", name);
+    type_native(t, 1/*verbose message*/);
     return NULL;
   }
 

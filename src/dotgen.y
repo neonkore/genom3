@@ -86,7 +86,7 @@
 %token <i>	COLONCOLON SL SR
 %token <i>	MODULE
 %token <i>	UNSIGNED SHORT LONG FIXED FLOAT DOUBLE CHAR WCHAR STRING
-%token <i>	WSTRING BOOLEAN OCTET OBJECT ANY VOID
+%token <i>	WSTRING BOOLEAN OCTET OBJECT ANY NATIVE
 %token <i>	CONST ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 %token <i>	TYPEDEF
 %token <i>	FALSE TRUE
@@ -1191,7 +1191,7 @@ const_type:
 
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
       case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION: case IDL_PORT: case IDL_REMOTE:
+      case IDL_FORWARD_UNION: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
 	parserror(@1, "%s %s is not a valid constant type",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -1228,6 +1228,10 @@ type_dcl:
   | TYPEDEF alias_list semicolon
   {
     $$ = $2;
+  }
+  | NATIVE identifier semicolon
+  {
+    $$ = type_newbasic(@1, $2, IDL_NATIVE);
   }
   | forward_dcl
 ;
@@ -1519,7 +1523,7 @@ switch_type_spec:
       case IDL_FLOAT: case IDL_DOUBLE: case IDL_OCTET: case IDL_STRING:
       case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
       case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION: case IDL_PORT: case IDL_REMOTE:
+      case IDL_FORWARD_UNION: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
 	parserror(@1, "%s %s is not a valid type for union switch",
 		  type_strkind(type_kind($$)), $1);
 	parsenoerror(type_loc($$), "  %s %s declared here",
@@ -1988,7 +1992,7 @@ identifier:
   | LANG | EMAIL | REQUIRE | CODELSREQUIRE | CLOCKRATE | TASK | TASK_P | PERIOD
   | DELAY | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS
   | DOC | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT
-  | LOCAL | ASYNC | REMOTE | EXTENDS | PROVIDES | USES | MULTIPLE
+  | LOCAL | ASYNC | REMOTE | EXTENDS | PROVIDES | USES | MULTIPLE | NATIVE
 ;
 
 identifier_list:

@@ -304,3 +304,26 @@ would map into
          const char * (*strerror)(uint32_t);
       } multi_out_port;
 @end verbatim
+
+@node C Native
+@subsection Mapping for native types
+
+@genom{} IDL native types map to a C @code{struct}. The mapping
+provides only a forward declaration, and the user has to provide the
+actual definition.
+
+For instance, the following IDL:
+@verbatim
+      native opaque;
+@end verbatim
+
+would map into
+@verbatim
+      typedef struct opaque opaque;
+@end verbatim
+
+The definition of the structure body is free, and will typically use
+native C types that cannot be described in IDL. When used as a
+parameter of a function, a native type will be passed around as a
+pointer on the structure data. Memory management associated with that
+pointer must be handled by the user.

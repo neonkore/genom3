@@ -494,8 +494,69 @@ type_fixed(idltype_s t)
     case IDL_REMOTE:
       return 1;
 
+    case IDL_NATIVE:
+      return 0;
+
     case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       assert(0);
+  }
+
+  assert(0);
+  return 0;
+}
+
+
+/* --- type_native --------------------------------------------------------- */
+
+/** Return true if type has a native member
+ */
+int
+type_native(idltype_s t, int verbose)
+{
+  assert(t);
+  t = type_final(t);
+  switch(type_kind(t)) {
+    case IDL_NATIVE:
+      return 1;
+
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
+    case IDL_ENUM: case IDL_ENUMERATOR: case IDL_STRING:
+    case IDL_PORT: case IDL_REMOTE:
+      return 0;
+
+    case IDL_SEQUENCE:
+    case IDL_ARRAY: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: {
+      if (type_native(type_type(t), verbose)) {
+        if (verbose)
+          parsenoerror(type_loc(t), " in %s%s%s declared here",
+                       type_strkind(type_kind(t)),
+                       type_name(t)?" ":"", type_name(t)?type_fullname(t):"");
+        return 1;
+      }
+      return 0;
+    }
+
+    case IDL_STRUCT: case IDL_UNION: {
+      idltype_s e;
+      hiter i;
+
+      for(e = type_first(t, &i); e; e = type_next(&i))
+        if (type_native(e, 0)) {
+          if (verbose) {
+            parsenoerror(type_loc(e), " in member %s of %s %s declared here",
+                         type_name(e), type_strkind(type_kind(t)),
+                         type_name(t));
+            type_native(e, 1);
+          }
+          return 1;
+        }
+      return 0;
+    }
+
+    case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
+      break;
   }
 
   assert(0);
@@ -524,7 +585,7 @@ type_equal(idltype_s a, idltype_s b)
     case IDL_STRING:
       return a->length == b->length;
 
-    case IDL_ENUMERATOR: case IDL_ENUM:
+    case IDL_NATIVE: case IDL_ENUMERATOR: case IDL_ENUM:
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_PORT:
     case IDL_REMOTE:
       if (!a->fullname || !b->fullname) return 0;
@@ -700,7 +761,7 @@ type_final(idltype_s t)
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
     case IDL_ANY: case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY:
     case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION: case IDL_PORT:
-    case IDL_REMOTE:
+    case IDL_REMOTE: case IDL_NATIVE:
       return t;
 
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
@@ -878,6 +939,7 @@ type_strkind(idlkind k)
     case IDL_OCTET:		return "octet";
     case IDL_STRING:		return "string";
     case IDL_ANY:		return "any";
+    case IDL_NATIVE:		return "native";
 
     case IDL_CONST:		return "const";
     case IDL_ENUM:		return "enum";

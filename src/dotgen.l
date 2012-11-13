@@ -208,7 +208,7 @@ chartext	([^\'])|(\\.)
 "octet"		{ return OCTET; }
 "object"	{ return OBJECT; }
 "any"		{ return ANY; }
-"void"		{ return VOID; }
+"native"	{ return NATIVE; }
 
 "const"		{ return CONST; }
 "enum"		{ return ENUM; }

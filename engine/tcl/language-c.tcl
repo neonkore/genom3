@@ -61,6 +61,7 @@ namespace eval language::c {
 
         {port}		{ append m [genport $type] }
         {remote}	{ append m [genremote $type] }
+        {native}	{ append m [gennative $type] }
 
         default		{ return "" }
       }
@@ -98,6 +99,8 @@ namespace eval language::c {
 	    {char}			{ set d "int8_t" }
 	    {octet}			{ set d "uint8_t" }
 	    {any}			{ error "type any not supported yet" }
+
+            {native}			{ set d "[cname [$type fullname]] *" }
 
 	    {const}			-
 	    {enum}			-
@@ -170,11 +173,10 @@ namespace eval language::c {
     # Return the C mapping of a variable address.
     #
     proc address { type {var {}} } {
-	switch -- [[$type final] kind] {
-	    {string} -
-	    {array}	{ return $var }
-	    default	{ return "&($var)" }
-	}
+      switch -- [[$type final] kind] {
+        string - array - native	{ return $var }
+        default			{ return "&($var)" }
+      }
     }
 
 
@@ -183,11 +185,10 @@ namespace eval language::c {
     # Return the C mapping for dereferencing a pointer on a variable.
     #
     proc dereference { type {var {}} } {
-	switch -- [[$type final] kind] {
-	    {string} -
-	    {array}	{ return $var }
-	    default	{ return "(*$var)" }
-	}
+      switch -- [[$type final] kind] {
+        string - array - native	{ return $var }
+        default			{ return "(*$var)" }
+      }
     }
 
 
@@ -199,19 +200,17 @@ namespace eval language::c {
       switch -- $kind {
 	{value}		{
 	   switch -- [[$type final] kind] {
-	       {string} -
-	       {array} {
-		   return "const [declarator $type $var]"
-	       }
-	       default {
-		   return "const [declarator $type *$var]"
-	       }
+             string - array - native {
+               return "const [declarator $type $var]"
+             }
+             default {
+               return "const [declarator $type *$var]"
+             }
 	   }
 	}
 	{reference}	{
 	  switch -- [[$type final] kind] {
-	    {string} -
-	    {array} {
+	    string - array {
 	      if {[catch { [$type final] length }]} {
 		return [declarator $type *$var]
 	      } else {
@@ -255,14 +254,16 @@ namespace eval language::c {
 	}
 	{reference}	{
 	  switch -- [$ftype kind] {
-	    {string} -
-	    {array} {
+	    string - array {
 	      if {[catch { $ftype length }]} {
 		return "&($var)"
 	      } else {
 		return $var
 	      }
 	    }
+            native {
+              return "&($var)"
+            }
 	    default {
 	      return [address $type $var]
 	    }
@@ -601,6 +602,20 @@ namespace eval language::c {
       append m "\n  const char *(*strerror)(uint32_t status);"
       append m "\n} $n;"
       return $f[guard $m $n]
+    }
+
+
+    # --- gennative --------------------------------------------------------
+
+    # Return the C mapping of a native.
+    #
+    proc gennative { type } {
+      set n [cname [$type fullname]]
+
+      append m [genloc $type]
+      append m "\ntypedef struct $n $n;"
+
+      return [guard $m $n]
     }
 
 

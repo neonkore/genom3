@@ -43,6 +43,7 @@ M		m
 MODULE		module
 MS		ms
 MULTIPLE	multiple
+NATIVE		native
 OCTET		octet
 OUT		out
 PERIOD		period

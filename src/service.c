@@ -281,6 +281,12 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
       case P_IDS: if (kind == S_ATTRIBUTE) break; else assert(0);
       case P_LOCAL: if (kind != S_ATTRIBUTE) break; else assert(0);
     }
+    if (type_native(param_type(i.value), 0)) {
+      parserror(l, "parameter %s of %s %s may not contain native types",
+                param_name(i.value), service_strkind(kind), name);
+      type_native(param_type(i.value), 1/*verbose message*/);
+      e = 1;
+    }
   }
   if (e) return NULL;
 

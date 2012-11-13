@@ -243,6 +243,7 @@ typedef enum idlkind {
   IDL_OCTET,		/**< octet */
   IDL_STRING,		/**< string */
   IDL_ANY,		/**< any */
+  IDL_NATIVE,		/**< native object */
 
   IDL_CONST,		/**< constant */
   IDL_ENUM,		/**< enumerated type */
@@ -302,6 +303,7 @@ int		type_renew(idltype_s t);
 void		type_destroy(idltype_s t);
 
 int		type_fixed(idltype_s t);
+int		type_native(idltype_s t, int verbose);
 int		type_equal(idltype_s a, idltype_s b);
 idltype_s	type_find(const char *name);
 idltype_s	type_member(idltype_s t, const char *name);

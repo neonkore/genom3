@@ -97,7 +97,8 @@ prop_newids(tloc l, idltype_s t)
     case IDL_STRUCT: case IDL_UNION:
       break;
 
-    case IDL_ANY: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+    case IDL_ANY: case IDL_NATIVE:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
     case IDL_PORT: case IDL_REMOTE:
       parserror(l, "invalid %s type for ids",
 		type_strkind(type_kind(type_final(t))));

@@ -564,6 +564,7 @@ port_s		param_port(param_s p);
 remote_s	param_remote(param_s p);
 initer_s	param_initer(param_s p);
 
+tloc		initer_loc(initer_s i);
 unsigned int	initer_index(initer_s i);
 const char *	initer_member(initer_s i);
 const char *	initer_doc(initer_s i);
@@ -598,11 +599,11 @@ int		param_list_equal(hash_s l, hash_s m);
 const char *	param_strsrc(psrc s);
 const char *	param_strdir(pdir d);
 
-initer_s	initer_create(unsigned int index, const char *member,
+initer_s	initer_create(tloc l, unsigned int index, const char *member,
 			initer_s sub, cval v);
 int		initer_setdoc(initer_s i, const char *d);
 initer_s	initer_append(initer_s l, initer_s m);
-int		initer_matchtype(tloc l, idltype_s t, initer_s i);
+int		initer_matchtype(idltype_s t, initer_s i);
 initer_s	initer_typeiniter(initer_s i, idltype_s haystack,
 			idltype_s needle);
 

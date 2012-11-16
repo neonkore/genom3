@@ -111,7 +111,7 @@ param_new(tloc l, psrc src, pdir dir, const char *name, idltype_s base,
     if (param_setmember(p, *i.value)) { free(p); return NULL; }
 
   if (initer)
-    if (initer_matchtype(l, p->type, initer)) { free(p); return NULL; }
+    if (initer_matchtype(p->type, initer)) { free(p); return NULL; }
 
   return p;
 }

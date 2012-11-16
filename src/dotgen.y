@@ -86,7 +86,7 @@
 %token <i>	COLONCOLON SL SR
 %token <i>	MODULE
 %token <i>	UNSIGNED SHORT LONG FIXED FLOAT DOUBLE CHAR WCHAR STRING
-%token <i>	WSTRING BOOLEAN OCTET OBJECT ANY NATIVE
+%token <i>	WSTRING BOOLEAN OCTET OBJECT ANY
 %token <i>	CONST ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
 %token <i>	TYPEDEF
 %token <i>	FALSE TRUE
@@ -100,7 +100,7 @@
 %token <s>	OUT INOUT LOCAL IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
-%token <s>	ASYNC REMOTE EXTENDS PROVIDES USES MULTIPLE
+%token <s>	ASYNC REMOTE EXTENDS PROVIDES USES MULTIPLE  NATIVE
 
 %type <i>	specification statement idl_statements idl_statement
 %type <i>	exports export
@@ -655,12 +655,6 @@ attribute:
       if ($6) hash_destroy($6, 1);
     }
   }
-  | ATTRIBUTE identifier '(' error ')' opt_properties semicolon
-  {
-    task_p = 0;
-    param_setlocals(NULL);
-    parserror(@1, "dropped '%s' attribute", $2);
-  }
 ;
 
 /*/ @node Service declaration
@@ -697,12 +691,6 @@ service:
       hash_destroy($4, 1);
       if ($6) hash_destroy($6, 1);
     }
-  }
-  | service_kind identifier '(' error ')' opt_properties semicolon
-  {
-    task_p = 0;
-    param_setlocals(NULL);
-    parserror(@1, "dropped '%s' %s", $2, service_strkind($1));
   }
 ;
 
@@ -819,22 +807,26 @@ throw_property:
 attribute_parameters:
   /* empty */
   {
-    $$ = hash_create("parameter list", 0);
-    task_p = 1;
-    param_setlocals($$);
+    task_p = 1; $$ = hash_create("parameter list", 0); param_setlocals($$);
   }
   | attribute_parameter
   {
-    $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
+    task_p = 1; $$ = param_locals(); if (!$1) break;
+    if (!$$) {
+      $$ = hash_create("parameter list", 3); param_setlocals($$);
+      if (!$$) break;
+    }
     if (hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
       param_destroy($1); break;
     }
-    task_p = 1;
-    param_setlocals($$);
   }
   | attribute_parameters ',' attribute_parameter
   {
-    $$ = $1; if (!$3) break;
+    $$ = param_locals(); if (!$3) break;
+    if (!$$) {
+      $$ = hash_create("parameter list", 3); param_setlocals($$);
+      if (!$$) break;
+    }
     switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
       case 0: break;
       case EEXIST:
@@ -851,32 +843,32 @@ attribute_parameter:
     if (!$2) { $$ = NULL; break; }
     $$ = param_newids(@2, $1, NULL, $2, $3);
   }
-  | parameter_dir error
-  {
-    parserror(@2, "expected ids member");
-    $$ = NULL;
-  }
+  | error { $$ = NULL; }
 ;
 
 service_parameters:
   /* empty */
   {
-    $$ = hash_create("parameter list", 0);
-    task_p = 1;
-    param_setlocals($$);
+    task_p = 1; $$ = hash_create("parameter list", 0); param_setlocals($$);
   }
   | service_parameter
   {
-    $$ = hash_create("parameter list", 3); if (!$$ || !$1) break;
+    task_p = 1; $$ = param_locals(); if (!$1) break;
+    if (!$$) {
+      $$ = hash_create("parameter list", 3); param_setlocals($$);
+      if (!$$) break;
+    }
     if (hash_insert($$, param_name($1), $1, (hrelease_f)param_destroy)) {
       param_destroy($1); break;
     }
-    task_p = 1;
-    param_setlocals($$);
   }
   | service_parameters ',' service_parameter
   {
-    $$ = $1; if (!$3) break;
+    $$ = param_locals(); if (!$3) break;
+    if (!$$) {
+      $$ = hash_create("parameter list", 3); param_setlocals($$);
+      if (!$$) break;
+    }
     switch(hash_insert($$, param_name($3), $3, (hrelease_f)param_destroy)) {
       case 0: break;
       case EEXIST:
@@ -899,6 +891,7 @@ service_parameter:
     m = clist_append(NULL, n, 0);
     $$ = param_newlocal(@3, $1, NULL, m, dcl_type($3), $4);
   }
+  | error { $$ = NULL; }
 ;
 
 codel_parameters:
@@ -939,6 +932,7 @@ codel_parameter:
   {
     $$ = param_newcodel(@3, $1, $2, $4, NULL);
   }
+  | error { $$ = NULL; }
 ;
 
 opt_parameter_src:
@@ -953,11 +947,11 @@ parameter_dir:
     IN		{ $$ = P_IN; }
   | OUT		{ $$ = P_OUT; }
   | INOUT	{ $$ = P_INOUT; }
-  | error
-  {
-    $$ = P_NODIR;
-    parserror(@1, "expected 'in', 'out' or 'inout'");
-  }
+  /* | error */
+  /* { */
+  /*   $$ = P_NODIR; */
+  /*   parserror(@1, "expected 'in', 'out' or 'inout'"); */
+  /* } */
 ;
 
 parameter_variable:
@@ -1060,7 +1054,7 @@ initializer:
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     if ($2) {
-      $$ = initer_create(-1U, NULL, NULL, v);
+      $$ = initer_create(@1, -1U, NULL, NULL, v);
       (void)initer_setdoc($$, $2);
     } else
       $$ = NULL;
@@ -1070,37 +1064,38 @@ initializer:
     $$ = $1; if (!$1 || !$3) break;
     (void)initer_setdoc($1, $3);
   }
+  | error { $$ = NULL; }
 ;
 
 initializer_value:
   const_expr
   {
-    $$ = initer_create(-1U, NULL, NULL, $1);
+    $$ = initer_create(@1, -1U, NULL, NULL, $1);
   }
   | '{' initializers '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
-    $$ = $2 ? initer_create(-1U, NULL, $2, v) : NULL;
+    $$ = $2 ? initer_create(@1, -1U, NULL, $2, v) : NULL;
   }
   | '[' positive_int_const ']' '=' const_expr
   {
     assert($2.k == CST_UINT);
-    $$ = initer_create($2.u, NULL, NULL, $5);
+    $$ = initer_create(@1, $2.u, NULL, NULL, $5);
   }
   | '[' positive_int_const ']' '=' '{' initializers '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     assert($2.k == CST_UINT);
-    $$ = initer_create($2.u, NULL, $6, v);
+    $$ = initer_create(@1, $2.u, NULL, $6, v);
   }
   | '.' identifier '=' const_expr
   {
-    $$ = initer_create(-1U, $2, NULL, $4);
+    $$ = initer_create(@1, -1U, $2, NULL, $4);
   }
   | '.' identifier '=' '{' initializers '}'
   {
     cval v; v.k = CST_VOID; v.u = -1U;
-    $$ = initer_create(-1U, $2, $5, v);
+    $$ = initer_create(@1, -1U, $2, $5, v);
   }
 ;
 

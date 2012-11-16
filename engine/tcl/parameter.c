@@ -206,12 +206,12 @@ initer_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum initeridx {
     initeridx_member, initeridx_doc, initeridx_kind, initeridx_value,
-    initeridx_class
+    initeridx_loc, initeridx_class
   };
   static const char *args[] = {
     [initeridx_member] = "member", [initeridx_doc] = "doc",
     [initeridx_kind] = "kind", [initeridx_value] = "value",
-    [initeridx_class] = "class", NULL
+    [initeridx_loc] = "loc", [initeridx_class] = "class", NULL
   };
   initer_s i = v;
   Tcl_Obj *r = NULL;
@@ -257,6 +257,16 @@ initer_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       } else
 	r = Tcl_NewStringObj(const_strval(initer_value(i)), -1);
       break;
+
+    case initeridx_loc: {
+      Tcl_Obj *l[3] = {
+        Tcl_NewStringObj(initer_loc(i).file, -1),
+        Tcl_NewIntObj(initer_loc(i).line),
+        Tcl_NewIntObj(initer_loc(i).col),
+      };
+      r = Tcl_NewListObj(3, l);
+      break;
+    }
 
     case initeridx_class:
       r = Tcl_NewStringObj("initializer", -1);

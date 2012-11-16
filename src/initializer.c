@@ -34,6 +34,7 @@
 /* --- local data ---------------------------------------------------------- */
 
 struct initer_s {
+  tloc loc;
   unsigned int index;	/**< array element number (or -1U) */
   const char *member;	/**< member name (or NULL) */
 
@@ -46,6 +47,7 @@ struct initer_s {
 };
 
 
+tloc		initer_loc(initer_s i) { assert(i); return i->loc; }
 unsigned int	initer_index(initer_s i) { assert(i); return i->index; }
 const char *	initer_member(initer_s i) { assert(i); return i->member; }
 const char *	initer_doc(initer_s i) { assert(i); return i->doc; }
@@ -53,8 +55,8 @@ cval		initer_value(initer_s i) { assert(i); return i->value; }
 initer_s	initer_compound(initer_s i) { assert(i); return i->sub; }
 initer_s	initer_next(initer_s i) { assert(i); return i->next; }
 
-static int	initer_matcharray(tloc l, idltype_s t, initer_s i);
-static int	initer_matchcomp(tloc l, idltype_s t, initer_s i);
+static int	initer_matcharray(idltype_s t, initer_s i);
+static int	initer_matchcomp(idltype_s t, initer_s i);
 
 
 /* --- initer_create ------------------------------------------------------- */
@@ -64,7 +66,8 @@ static int	initer_matchcomp(tloc l, idltype_s t, initer_s i);
  */
 
 initer_s
-initer_create(unsigned int index, const char *member, initer_s sub, cval v)
+initer_create(tloc l,
+              unsigned int index, const char *member, initer_s sub, cval v)
 {
   initer_s i = malloc(sizeof(*i));
   if (!i) {
@@ -77,6 +80,7 @@ initer_create(unsigned int index, const char *member, initer_s sub, cval v)
   /* same for sub and v */
   assert(!(v.k != CST_VOID && sub));
 
+  i->loc = l;
   i->index = index;
   i->member = member ? string(member) : NULL;
   i->doc = NULL;
@@ -123,19 +127,19 @@ initer_append(initer_s l, initer_s m)
 /** Check that an initializer matches a type.
  */
 int
-initer_matchtype(tloc l, idltype_s t, initer_s i)
+initer_matchtype(idltype_s t, initer_s i)
 {
   /* constructed initializer */
   if (i->sub) {
     switch(type_kind(type_final(t))) {
       case IDL_ARRAY: case IDL_SEQUENCE:
-	errno = initer_matcharray(l, t, i->sub);
+	errno = initer_matcharray(t, i->sub);
 	break;
       case IDL_STRUCT: case IDL_UNION:
-	errno = initer_matchcomp(l, t, i->sub);
+	errno = initer_matchcomp(t, i->sub);
 	break;
       default:
-	parserror(l, "compound initializer cannot initialize %s%s%s",
+	parserror(i->loc, "compound initializer cannot initialize %s%s%s",
 		  type_strkind(type_kind(t)), type_name(t)?" ":"",
 		  type_name(t)?type_fullname(t):"");
 	return errno = EINVAL;
@@ -147,7 +151,7 @@ initer_matchtype(tloc l, idltype_s t, initer_s i)
   if (i->value.k != CST_VOID && !i->sub) {
     switch(type_kind(type_final(t))) {
       case IDL_ARRAY: case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
-	parserror(l, "cannot initialize %s%s%s with a scalar",
+	parserror(i->loc, "cannot initialize %s%s%s with a scalar",
 		  type_strkind(type_kind(t)), type_name(t)?" ":"",
 		  type_name(t)?type_fullname(t):"");
 	return errno = EINVAL;
@@ -155,9 +159,9 @@ initer_matchtype(tloc l, idltype_s t, initer_s i)
       default: break;
     }
 
-    if (const_cast(l, &i->value, t)) {
+    if (const_cast(i->loc, &i->value, t)) {
       if (type_fullname(t))
-	parserror(l, "cannot set default value of member %s",
+	parserror(i->loc, "cannot set default value of member %s",
 		  type_fullname(t));
       return errno;
     }
@@ -170,7 +174,7 @@ initer_matchtype(tloc l, idltype_s t, initer_s i)
 }
 
 static int
-initer_matcharray(tloc l, idltype_s t, initer_s i)
+initer_matcharray(idltype_s t, initer_s i)
 {
   unsigned int d;
   idltype_s e;
@@ -185,24 +189,24 @@ initer_matcharray(tloc l, idltype_s t, initer_s i)
   /* loop on initializer elements */
   for(k = 0, j = i; j; k++, j = j->next) {
     if (j->member) {
-      parserror(l, "unknown member '%s' in %s %s", j->member,
+      parserror(i->loc, "unknown member '%s' in %s %s", j->member,
 		type_strkind(type_kind(t)), type_fullname(t));
       return errno = EINVAL;
     }
     if (j->index != -1U) k = j->index; else j->index = k;
 
     if (k >= d) {
-      parserror(l, "element %d in %s %s is out of bound",
+      parserror(i->loc, "element %d in %s %s is out of bound",
 		k, type_strkind(type_kind(t)), type_fullname(t));
       return errno = EINVAL;
     }
 
-    s = initer_matchtype(l, e, j);
+    s = initer_matchtype(e, j);
     if (s) return s;
   }
 
   if (j) {
-    parserror(l, "too many initializers for %s %s",
+    parserror(i->loc, "too many initializers for %s %s",
 	      type_strkind(type_kind(t)), type_fullname(t));
     return errno = EINVAL;
   }
@@ -212,7 +216,7 @@ initer_matcharray(tloc l, idltype_s t, initer_s i)
 
 
 static int
-initer_matchcomp(tloc l, idltype_s t, initer_s i)
+initer_matchcomp(idltype_s t, initer_s i)
 {
   idltype_s e, f;
   initer_s j;
@@ -226,14 +230,14 @@ initer_matchcomp(tloc l, idltype_s t, initer_s i)
 
   for(j = i; j; e = type_after(t, e, &k), j = j->next) {
     if (j->index != -1U) {
-      parserror(l, "unknown array index '%d' in %s %s", j->index,
+      parserror(i->loc, "unknown array index '%d' in %s %s", j->index,
 		type_strkind(type_kind(t)), type_fullname(t));
       return errno = EINVAL;
     }
     if (j->member) {
       f = type_member(t, j->member);
       if (!f) {
-	parserror(l, "unknown member '%s' in %s %s", j->member,
+	parserror(i->loc, "unknown member '%s' in %s %s", j->member,
 		  type_strkind(type_kind(t)), type_fullname(t));
 	return errno = EINVAL;
       }
@@ -243,12 +247,12 @@ initer_matchcomp(tloc l, idltype_s t, initer_s i)
 
     if (!j->member) j->member = type_name(e);
 
-    s = initer_matchtype(l, e, j);
+    s = initer_matchtype(e, j);
     if (s) return s;
   }
 
   if (j && !e) {
-    parserror(l, "too many initializers for %s %s",
+    parserror(i->loc, "too many initializers for %s %s",
 	      type_strkind(type_kind(t)), type_fullname(t));
     return errno = EINVAL;
   }

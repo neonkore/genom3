@@ -1088,6 +1088,12 @@ initializer_value:
     assert($2.k == CST_UINT);
     $$ = initer_create(@1, $2.u, NULL, $6, v);
   }
+  | '[' positive_int_const ']' '='
+  {
+    cval v; v.k = CST_VOID; v.u = -1U;
+    assert($2.k == CST_UINT);
+    $$ = initer_create(@1, $2.u, NULL, NULL, v);
+  }
   | '.' identifier '=' const_expr
   {
     $$ = initer_create(@1, -1U, $2, NULL, $4);
@@ -1096,6 +1102,11 @@ initializer_value:
   {
     cval v; v.k = CST_VOID; v.u = -1U;
     $$ = initer_create(@1, -1U, $2, $5, v);
+  }
+  | '.' identifier '='
+  {
+    cval v; v.k = CST_VOID; v.u = -1U;
+    $$ = initer_create(@1, -1U, $2, NULL, v);
   }
 ;
 

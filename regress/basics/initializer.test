@@ -1,0 +1,41 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+cat >run.gen <<EOF
+component c {
+  function f(
+    in long a,
+    in long b = 1,
+    in long c = : "c doc",
+    in long d = 2 : "d doc");
+};
+EOF
+
+testing 'simple initializer'
+run 0 ${GENOM_BIN} -n run.gen
+
+cat >run.gen <<EOF
+component c {
+  struct s { long m1, m2; };
+  function f(
+    in s a = {1, 2},
+    in s b = {.m1 = 1, .m2 = 2},
+    in s c = {.m1 = : "m1 doc", .m2 = : "m2 doc"},
+    in s d = {.m1 = 1 : "m1 doc", .m2 = 2 : "m2 doc"});
+};
+EOF
+
+testing 'complex initializer'
+run 0 ${GENOM_BIN} -n run.gen
+
+cat >run.gen <<EOF
+component c {
+  struct s { long m1, m2; };
+  function f(
+    in s a = {1, 2, 3},
+    in s b = {.m1 = 1, .m3 = 2});
+};
+EOF
+
+testing 'complex initializer errors'
+run 2 ${GENOM_BIN} -n run.gen

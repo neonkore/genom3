@@ -21,6 +21,7 @@ TESTS+=	basics/parser.test
 TESTS+=	basics/require.test
 TESTS+=	basics/extends.test
 TESTS+=	basics/interrupts.test
+TESTS+=	basics/initializer.test
 
 TESTS+=	templates/genom.test
 

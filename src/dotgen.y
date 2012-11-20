@@ -2026,7 +2026,10 @@ semicolon:
   | /* empty */
   {
     $$ = '\0';
-    parserror(@$, "missing ';' after statement");
+    parserror(curloc, "expected ';' before %s",
+              *dotgentext?dotgentext:"end-of-file");
+    if (memcmp(&curloc, &@$, sizeof(curloc)))
+      parsenoerror(@$, " for statement started here");
   }
 ;
 

@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2011 LAAS/CNRS
+# Copyright (c) 2011-2012 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -24,8 +24,8 @@
 #
 
 # check arguments
-if {[llength $argv] != 1} { error "expected argument: input" }
-lassign $argv input
+if {[llength $argv] != 2} { error "expected argument: input idls" }
+lassign $argv input idls
 
 # generate copyright notice (if any)
 if {![catch {dotgen input notice} text]} {
@@ -34,10 +34,14 @@ if {![catch {dotgen input notice} text]} {
 '>
 ACLOCAL_AMFLAGS=	-I autoconf
 
+# IDL source files
+idldir=		$(datadir)/idl/<"[[lindex [dotgen components] 0] name]">
+nobase_dist_idl_DATA= <"$idls">
+
 pkgconfigdir=	$(libdir)/pkgconfig
 pkgconfig_DATA=
 <'foreach c [dotgen components] {'>
-pkgconfig_DATA+= <"lib[$c name]_codels.pc">
+pkgconfig_DATA+= <"[$c name]-genom.pc">
 <'}'>
 
 # we don't want generated templates in the distribution

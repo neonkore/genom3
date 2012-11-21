@@ -26,6 +26,6 @@ dist_skel_DATA=		\
 	top.configure.ac		\
 	ag_templates.m4			\
 	top.Makefile.am			\
-	libcodels.pc.in			\
-	libcodels-uninstalled.pc.in	\
+	component.pc.in			\
+	component-uninstalled.pc.in	\
 	template.tcl

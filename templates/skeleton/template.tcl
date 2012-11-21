@@ -79,6 +79,18 @@ template options {
 if {![llength $argv]} { puts [template usage]; exit 2 }
 foreach f $argv { dotgen parse file $f }
 set input [file tail [lindex $argv 0]]
+if {![info exists outdir]} {
+  set outdir [file dirname [lindex $argv 0]]
+}
+
+# list of local idl source files
+set idls [list]
+set base [file normalize $outdir]
+foreach f [dotgen input deps] {
+  if {[string match $base/* [file normalize $f]]} {
+    lappend idls $f
+  }
+}
 
 # check options consistency
 if {$iface ne $lang} {
@@ -91,13 +103,9 @@ if {$iface ne $lang} {
     }
 }
 
-if {![info exists outdir]} {
-  set outdir [file dirname [lindex $argv 0]]
-}
-engine chdir $outdir
-
 # generate codel files
 #
+engine chdir $outdir
 set src [lang $iface; fileext]
 set ext [lang $lang; fileext]
 
@@ -116,11 +124,11 @@ foreach c [dotgen components] {
 
     # mandatory pkg-config file
     template parse					\
-	args [list $c] file libcodels.pc.in		\
-	file lib[$c name]_codels.pc.in
+	args [list $c] file component.pc.in		\
+	file [$c name]-genom.pc.in
     template parse					\
-	args [list $c] file libcodels-uninstalled.pc.in	\
-	file lib[$c name]_codels-uninstalled.pc.in
+	args [list $c] file component-uninstalled.pc.in	\
+	file [$c name]-genom-uninstalled.pc.in
 }
 
 # generate user build files fragment
@@ -134,7 +142,7 @@ template parse						\
     args [list $input $lang] file top.configure.ac	\
     file configure.ac
 template parse						\
-    args [list $input] file top.Makefile.am		\
+    args [list $input $idls] file top.Makefile.am	\
     file Makefile.am
 template parse						\
     args [list $input $lang] file codels.Makefile.am	\

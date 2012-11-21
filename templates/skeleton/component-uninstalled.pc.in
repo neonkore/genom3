@@ -3,14 +3,14 @@
 if {[llength $argv] != 1} { error "expected argument: component" }
 lassign $argv c
 '>
-# pkg-config file for uninstalled <"[$c name]"> codels
+# pkg-config file for uninstalled <"[$c name]"> interface and codels library
 #
 prefix=@abs_top_builddir@
 libdir=${prefix}/codels
 includedir=${prefix}/codels
 
-Name: lib<"[$c name]">_codels
-Description: <"[$c name]"> codels library
+Name: <"[$c name]">-genom
+Description: <"[$c name]"> interface and codels library
 Version: @PACKAGE_VERSION@
 <'set requires [join [concat [$c require] [$c codels-require]] {, }]'>
 <'if [llength $requires] {'>

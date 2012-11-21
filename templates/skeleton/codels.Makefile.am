@@ -51,26 +51,29 @@ foreach c [dotgen components] {
 
 lib_LTLIBRARIES = lib<"[$c name]">_codels.la
 
-lib<"[$c name]">_codels_la_SOURCES=\
-	<"[join $sources "\t\\\n\t"]">
-<'}'>
+lib<"[$c name]">_codels_la_SOURCES=
+<'  foreach f $sources {'>
+lib<"[$c name]">_codels_la_SOURCES+=	<"$f">
+<'  }'>
 
-lib<"[$c name]">_codels_la_CPPFLAGS=	$(genom3_CFLAGS)
-lib<"[$c name]">_codels_la_LDFLAGS=	-release $(PACKAGE_VERSION)
-
-<'foreach r [concat [$c require] [$c codels-require]] {
-  set pkg [string map {- _} [lindex $r 0]] '>
-lib<"[$c name]">_codels_la_CPPFLAGS+=	$(<"$pkg">_CFLAGS)
-lib<"[$c name]">_codels_la_LDFLAGS+=	$(<"$pkg">_LIBS)
+lib<"[$c name]">_codels_la_CPPFLAGS=	$(genom3_CFLAGS) $(requires_CFLAGS)
+lib<"[$c name]">_codels_la_LDFLAGS=	$(requires_LIBS)
+lib<"[$c name]">_codels_la_LDFLAGS+=	-release $(PACKAGE_VERSION)
 
 <'}'>
-BUILT_SOURCES=\
-	<"[join $built_sources "\t\\\n\t"]">
 
+BUILT_SOURCES=
+CLEANFILES=	${BUILT_SOURCES}
+
+
+# --- IDL to <"$lang"> mappings --------------------------------------------
 <'foreach m $built_sources {'>
+
+BUILT_SOURCES+= <"$m">
+
 <"$m">: ${top_srcdir}/<"$input">
 	${genom3} <"[dotgen genom cmdline]"> mappings \
-		-MD -MF .deps/<"$m">.d -MT $@ --signature -l <"$lang"> $<
+	  -MD -MF .deps/$@.d -MT $@ --signature -l <"$lang"> $<
 
 -include .deps/<"$m">.d
 <'}'>

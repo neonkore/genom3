@@ -39,7 +39,7 @@ if {![catch {dotgen input notice} text]} {
 }'>
 AC_PREREQ(2.59)
 
-AC_INIT([<"[$c name] codels">],[<"$version">],[<"$email">])
+AC_INIT([<"[$c name]">-genom],[<"$version">],[<"$email">])
 AC_CONFIG_MACRO_DIR([autoconf])
 AC_CONFIG_AUX_DIR([autoconf])
 AC_CONFIG_HEADERS([autoconf/ac<"[$c name]">.h])
@@ -67,15 +67,16 @@ PKG_CHECK_MODULES(genom3, [genom3 >= 2.99.4])
 _PKG_CONFIG(genom3, [variable=GENOM_TOOL], [genom3 >= 2.99.4])
 AC_SUBST(genom3, [$pkg_cv_genom3])
 
-<'
-foreach c [dotgen components] {
-  foreach r [concat [$c require] [$c codels-require]] {
-    set pkg [string map {- _} [lindex $r 0]]
-'>
-PKG_CHECK_MODULES(<"$pkg">, [<"$r">])
-<'  }
-}
-'>
+<'set requires [list]'>
+<'foreach c [dotgen components] {'>
+<'  lappend requires {*}[$c require]'>
+<'  lappend requires {*}[$c codels-require]'>
+<'}'>
+<'if {[llength $requires]} {'>
+PKG_CHECK_MODULES(requires, [
+  <"[join $requires "\n  "]">
+])
+<'}'>
 
 
 dnl --with-templates option
@@ -86,8 +87,8 @@ AG_OPT_TEMPLATES([$genom3 <"[dotgen genom cmdline]">],
 dnl Output
 AC_CONFIG_FILES([
 <'foreach c [dotgen components] {'>
-	lib<"[$c name]">_codels.pc
-	lib<"[$c name]">_codels-uninstalled.pc
+	<"[$c name]">-genom.pc
+	<"[$c name]">-genom-uninstalled.pc
 <'}'>
 	Makefile
 	codels/Makefile

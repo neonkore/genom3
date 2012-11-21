@@ -1,6 +1,37 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2012 LAAS/CNRS
 
+			    Changes in genom 2.99.15
+
+Released on November 21st, 2012
+ . Added 'native' IDL keyword. The meaning is slightly different from that of
+   the OMG IDL. GenoM 'native' keyowrd defines a new opaque type, that can be
+   used only in codels (or IDS). The type is manipulated as a pointer by GenoM
+   and the templates, and codels are responsible for the actual type
+   definition or memory management. This is typically used to store types in
+   the IDS that cannot be represented as IDL (external types, opaque types,
+   etc.).
+ . Renamed #pragma native to #pragma masquerade. This is to avoid confusion
+   with the new 'native' IDL keyword. The #pragma purpose is also hopefully
+   clearer.
+ . Updated mappings for the IDL 'char' type. 'char's are now mapped to
+   uint8_t in C/C++, so that the C 'char' type is reserved for strings.
+ . Fixed grammar to allow compound initializers with just a doc string and no
+    value.
+ . Improved syntax error handling in the parser. In particular, missing
+   semicolons or syntax erros in codels parameters should not spew loads of
+   errors anymore.
+ . Updated skeleton template to generate $component-genom.pc instead of
+   lib$component_codels.pc, because the top level package is most often used in
+   other genom components to include a part of the interface (rather than
+   linking with the codels).
+ . Fixed skeleton '-l c++' option for compiling codels with a C++ compiler.
+ . Temporary disabled support for C++ codels interface. This will not be
+   supported in 3.0, but remains on the TODO list. C++ codels must use the C
+   interface in the meantime.
+ . Fixed a bunch of minor bugs and added respective regression tests.
+
+
 			    Changes in genom 2.99.14
 
 Released on October 19th, 2012

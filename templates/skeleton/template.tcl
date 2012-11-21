@@ -50,13 +50,8 @@ template usage {*}{
     "  -h, --help\t\tprint usage summary (this text)"
 }
 
-# defaults: no file overwrite, C interface, C source and output in "codel"
-# subdir.
+# defaults: no file overwrite
 engine mode -overwrite -merge-if-change
-if {[catch {[dotgen component] lang} iface]} {
-    set iface c
-}
-set lang $iface
 
 # parse options
 template options {
@@ -93,6 +88,19 @@ foreach f [dotgen input deps] {
 }
 
 # check options consistency
+if {[catch {[dotgen component] lang} iface]} {
+    set iface c
+}
+if {![info exists lang]} {
+  set lang $iface
+}
+
+switch -- "$iface" {
+  c {}
+  default {
+    template fatal "codel interface in $iface is not yet supported."
+  }
+}
 if {$iface ne $lang} {
     switch -- "$iface|$lang" {
 	c|c++ {}

@@ -137,7 +137,7 @@ dotgen.l.texi: $(top_srcdir)/src/dotgen.l
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
 dotgen.y.texi: Makefile $(srcdir)/texigen.awk
-dotgen.y.texi: $(top_srcdir)/src/dotgen.y
+dotgen.y.texi: $(top_builddir)/src/dotgen.y
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
 dotgen.c.texi: Makefile $(srcdir)/texigen.awk
@@ -162,7 +162,7 @@ template.tcl.texi: $(top_srcdir)/engine/tcl/template.tcl
 # rule for the detailed description of each rule in the documentation.
 #
 dotgen-rules.texi: Makefile grammar-tokens $(srcdir)/y2tgen.awk
-dotgen-rules.texi: $(top_srcdir)/src/dotgen.y
+dotgen-rules.texi: $(top_builddir)/src/dotgen.y
 	$(Y2L) -- -p -O2 $< -t$(srcdir)/grammar-tokens | \
 		$(AWK) -f $(srcdir)/y2tgen.awk >$@
 

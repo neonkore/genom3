@@ -39,11 +39,28 @@ genom3_SOURCES=\
 	idltype.c	\
 	postproc.c	\
 	string.c	\
-	dotgen.y	\
-	dotgen.l	\
 			\
 	engine.c	\
 	engine-tcl.c
+
+nodist_genom3_SOURCES=\
+	dotgen.y	\
+	dotgen.l
+
+genom3_GRAMMAR=\
+	dotgen/main.y		\
+	dotgen/component.y	\
+	dotgen/interface.y	\
+	dotgen/ids.y		\
+	dotgen/task.y		\
+	dotgen/port.y		\
+	dotgen/service.y	\
+	dotgen/codel.y		\
+	dotgen/parameter.y	\
+	dotgen/idlscope.y	\
+	dotgen/idltype.y	\
+	dotgen/idldecl.y	\
+	dotgen/expr.y
 
 genom3_YFLAGS= -v -d
 genom3_CFLAGS = $(PTHREAD_CFLAGS)
@@ -58,9 +75,25 @@ libmain_a_CPPFLAGS += -DTMPLPATH='"$(tmpldir):$(sitetmpldir)"'
 libmain_a_CPPFLAGS += -DSYSDIR='"$(sysdir)"'
 
 
+# generate concatenated grammar source
+EXTRA_DIST=	$(genom3_GRAMMAR) dotgen.l
+BUILT_SOURCES=	dotgen.y
+CLEANFILES=	dotgen.y
+CLEANFILES+=	dotgen.c genom3-dotgen.c genom3-dotgen.h genom3-dotgen.output
+
+dotgen.y: Makefile $(genom3_GRAMMAR)
+dotgen.y: dotgen/main.y
+	$(AWK) '							\
+	  /^%include/ {							\
+	    while((getline line < ("$(srcdir)/" $$2))>0) print line;	\
+	    close("$(srcdir)/" $$2); next;				\
+	  }								\
+	  { print }' $< >$@
+
+
 # generate options strings and usage doc
-BUILT_SOURCES=	options.c
-CLEANFILES=	options.c
+BUILT_SOURCES+=	options.c
+CLEANFILES+=	options.c
 
 options.c: Makefile $(top_srcdir)/doc/optgen.awk
 options.c: options.txt

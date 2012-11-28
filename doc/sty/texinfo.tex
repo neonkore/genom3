@@ -1187,8 +1187,8 @@ output) for that.)}
   %
   % #1 is image name, #2 width (might be empty/whitespace), #3 height (ditto).
   \def\dopdfimage#1#2#3{%
-    \def\pdfimagewidth{#2}\setbox0 = \hbox{\ignorespaces #2}%
-    \def\pdfimageheight{#3}\setbox2 = \hbox{\ignorespaces #3}%
+    \def\pdfimagewidth{#2}
+    \def\pdfimageheight{#3}
     %
     % pdftex (and the PDF format) support .pdf, .png, .jpg (among
     % others).  Let's try in that order, PDF first since if
@@ -1226,8 +1226,8 @@ output) for that.)}
     \else
       \immediate\pdfximage
     \fi
-      \ifdim \wd0 >0pt width \pdfimagewidth \fi
-      \ifdim \wd2 >0pt height \pdfimageheight \fi
+      \ifx&#2&\else width \pdfimagewidth \fi
+      \ifx&#3&\else height \pdfimageheight \fi
       \ifnum\pdftexversion<13
          #1.\pdfimgext
        \else
@@ -8311,8 +8311,8 @@ end
     \dopdfimage{#1}{#2}{#3}%
   \else
     % \epsfbox itself resets \epsf?size at each figure.
-    \setbox0 = \hbox{\ignorespaces #2}\ifdim\wd0 > 0pt \epsfxsize=#2\relax \fi
-    \setbox0 = \hbox{\ignorespaces #3}\ifdim\wd0 > 0pt \epsfysize=#3\relax \fi
+    \ifx&#2&\else\epsfxsize=#2\relax\fi
+    \ifx&#3&\else\epsfysize=#3\relax\fi
     \epsfbox{#1.eps}%
   \fi
   %

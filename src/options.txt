@@ -23,7 +23,7 @@
 
 # This file contains the runtime options of the genom program. It is
 # post-processed by the doc/optgen.awk script to generate either C source code
-# compatible with getopt_long(3) or LaTeX(1) and roff(7) documentations.
+# compatible with getopt_long(3) or texinfo(5) and roff(7) documentations.
 #
 \desc
 \name generates the source code of the software components described in
@@ -34,10 +34,10 @@ services, input and output ports, data types definitions and execution contexts
 of a software component, written in the \em dotgen \rm language.
 
 The dotgen specification is first processed by a C preprocessor before it is
-parsed by \name and transformed into an abstract syntax tree. The program used
-as a C preprocessor can be changed with the \tt CPP \rm environment variable.
-\name accepts \tt -I \rm and \tt -D \rm options that are passed inchanged to
-the cpp program.
+parsed by \name and transformed into an abstract syntax tree. \tt
+libexec/genom-pcpp \rm is the default program, but this can be changed with the
+\tt CPP \rm environment variable.  \name accepts \tt -I \rm and \tt -D \rm
+options that are passed inchanged to the cpp program.
 
 The abstract syntax tree is exported in a format suitable to a
 \em generator engine \rm that is in charge of a \em template \rm execution for
@@ -47,9 +47,8 @@ source code for the generator engine is searched can be changed with the
 \tt -s \rm option.
 
 Templates are a set of source files that serve as the basis for source code
-generation. Templates source files are interpreted by the generator engine. They
-can contain code written in the scripting language provided by the generator
-engine, that computes generated output, or regular source code that is appended
+generation. They are interpreted by the generator engine, and contain either
+code written with a scripting language, or regular source code that is appended
 directly to the generated code. Intermediate files and scripts are saved in a
 temporary directory before they are copied to the final destination
 directory. The \tt -T \rm option changes the path of the temporary
@@ -63,9 +62,10 @@ they do. The names of the available templates can be listed with the \tt -l \rm
 option. The directory in which templates are looked for can be changed with the
 \tt -t \rm option.
 
-The \name program accepts \em general options\rm that affect the general program
-behaviour. \name can also pass \em template options \rm to the template. These
-options will only affect the template behaviour.
+The \name program accepts \em general options\rm that affect the general
+program behaviour. \name can also pass \em template options \rm to the
+template. These options will only affect the template behaviour and are
+documented separately, in each template documentation.
 
 # Arguments are split into categories introduced by '\args name desc'.
 # '\arg short long optarg' define a new argument, followed by a one-line
@@ -88,9 +88,9 @@ options will only affect the template behaviour.
 \arg D -      	     	macro[=value]
      predefine macro, with given value or 1 by default
 
-     Predefine \em macro\rm, with definition \tt 1\rm or \em value\rm if given,
-     in the same way as a \tt #define\rm directive would do it. This option is
-     passed as-is to the \tt cpp\rm program.
+     Predefine \em macro\rm to \em value\rm if given, or \tt 1\rm if \em
+     value\rm is omitted, in the same way as a \tt #define\rm directive would
+     do it. This option is passed as-is to the \tt cpp\rm program.
 
      If you are invoking genom from the shell, you may have to use the shell
      quoting character to protect shell's special characters such as spaces.
@@ -128,9 +128,7 @@ options will only affect the template behaviour.
 \arg l list
      list available templates
 
-     Print to the standard output the list of available templates. Each line of
-     output contains the name of a template and the genom engine that is uses
-     (currently, only Tcl-based templates are supported).
+     Print to the standard output the list of available templates, one per line.
 
      By default, the standard templates directory is searched, but any \tt
      -t\rm option will be taken into account.
@@ -139,16 +137,16 @@ options will only affect the template behaviour.
      use path as the templates directory
 
      Use \em path\rm as the directory containing templates. This can be a colon
-     separated list of directories which are search in order.
+     separated list of directories which are searched in order.
 
      This option is useful only for templates not installed in the genom
      standard directories, i.e. \tt share/genom/<version>/templates\rm or
      \tt share/genom/site-templates\rm.
 
-     \em path\rm is searched for files matching \tt dir/*/template.tcl\rm,
-     where \tt *\rm is the actual template name.
+     Each component of \em path\rm is searched for files matching \tt
+     */template.tcl\rm, where \tt *\rm is interpreted as the template name.
 
-\arg s sysdir	    	dir
+\arg s sysdir		dir
      use dir as the directory for generator system files
 
      Use \em dir\rm as the directory holding genom engine files. This option
@@ -221,7 +219,7 @@ options will only affect the template behaviour.
 \env GENOM_TMPL_PATH
      template search path
 
-     The value of \tt GENOM_TEMPLATE_PATH\rm is a colon-separated list of
+     The value of \tt GENOM_TMPL_PATH\rm is a colon-separated list of
      directories, much like \tt PATH\rm, where \name looks for
      templates. Setting this variable overrides the default search path, but
      any \tt -t\rm option takes precedence over this variable.

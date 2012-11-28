@@ -77,26 +77,101 @@ chartext	([^\'])|(\\.)
   *yylloc_param = curloc;
 %}
 
- /*/ @node #line
-  * @section @code{#line} directives
+ /*/ @node #pragma requires
+  * @section @code{#pragma requires} directives
+  * @cindex @code{#pragma}
+  * @cindex @code{#pragma requires}
+  * @cindex @code{pkg-config}
+  * @cindex @env{PKG_CONFIG}
+  * @cindex dependency
+  * @cindex require
+  * @cindex package, dependency
   *
-  * Line directives are inserted by the @code{C} preprocessor. They inform the
-  * @genom{} parser about the line number and file name where each token was
-  * defined. Line directives can also be inserted manually to achieve special
-  * effect on error reporting or similar.
+  * @code{#pragma requires} is recognized by @emph{both} @command{genom-pcpp}
+  * preprocessor and @genom{}. It indicates an external dependency on a
+  * software package that is required to parse the current
+  * specification. @code{#pragma requires} assumes that the package is using
+  * the @code{pkg-config} utility (see
+  * @uref{http://www.freedesktop.org/wiki/Software/pkg-config}) and a
+  * @code{.pc} is available. This has the same effect as placing
+  * @code{requires} directives in all components (@pxref{Component
+  * declaration}) but saves the need pass @code{-I} and @code{-D} directives to
+  * @command{genom} (@pxref{General options}) as they are automatically
+  * computed.
   *
-  * A line directive starts with the @code{#line} token, followed by the
-  * current line number, the file name of the source file and an optional
-  * numeric flag. The numeric flag is never used by @genom{}. Its meaning
-  * depends on the @code{C} preprocessor used.
-  *
+  * The pragma syntax is as follow:
   * @example
-  * @      #line linenum [ "filename" [flag] ]
+  * @      #pragma requires "@var{package} [ >= @var{version} ]"
   * @end example
   *
-  * The file name and line number replace the current location information.
-  * Line number is automatically incremented after each @code{\n}.
+  * @code{#pragma requires} accepts a string argument in the form @code{package
+  * [>= version]}. @code{genom-pcpp} interprets it by running @code{pkg-config
+  * --cflags} on the string argument. It then adds the resulting @code{-I} and
+  * @code{-D} flags as if they had been passed on the command line. Note that
+  * the flags are added @emph{at the current processing location}, so they do
+  * not influence already preprocessed input. The @code{pkg-config} utility is
+  * found in @env{PATH}, or via the @env{PKG_CONFIG} environment variable if
+  * defined (@pxref{Environment variables}).
+  *
+  * The pragma argument is also added to the @code{require} property of
+  * @emph{all} the components defined in a specification.
   */
+^[ \t]*#[ \t]*pragma[ \t]+requires?[ \t].*\n {
+  dotgen_parsepragmarequire(yytext, yylloc);
+  yylloc->line++; yylloc->col = 0;
+}
+
+ /*/ @node #pragma provides
+  * @section @code{#pragma provides} directives
+  * @cindex @code{#pragma}
+  * @cindex @code{#pragma provides}
+  *
+  * @code{#pragma provides} achieves the same effect as if @emph{all}
+  * components of a specification defined the same @code{provides} property
+  * (@pxref{Component declaration}).  This directive is mostly useful for
+  * templates implementation, so that they can provide a common interface to
+  * all user defined components.
+  *
+  * The pragma syntax is as follow:
+  * @example
+  * @      #pragma provides @var{interface}
+  * @end example
+  */
+^[ \t]*#[ \t]*pragma[ \t]+provides?[ \t].*\n {
+  dotgen_parsepragmaprovide(yytext, yylloc);
+  yylloc->line++; yylloc->col = 0;
+}
+
+ /*/ @node #pragma masquerade
+  * @section @code{#pragma masquerade} directives
+  * @cindex @code{#pragma}
+  * @cindex @code{#pragma masquerade}
+  *
+  * This directive applies to an IDL type definition in a component
+  * interface. It is meant for aliasing the IDL type description to a native
+  * object that cannot be described in IDL. The exact nature of the native
+  * object depends on the template used for code generation, so it is only
+  * described as a raw string here and not interpreted by @genom{}.
+  *
+  * The pragma syntax is as follow:
+  * @example
+  * @      #pragma masquerade @var{template} @var{type} @var{data}...
+  * @end example
+  *
+  * The @var{template} argument is a free form string that indicates to which
+  * template the directives applies. Templates can lookup this name and take
+  * the appropriate actions based on this information. @var{type} is the name
+  * of the IDL type thas is to be masqueraded. @var{data} describes how the
+  * masquerading will be done, and is template specific. Refer to the
+  * documentation of the template you are using for a precise description of
+  * the syntax and semantics of @var{data}.
+  */
+^[ \t]*#[ \t]*pragma[ \t]+masquerade[ \t].*\n {
+  dotgen_parsepragmamasquerade(yytext, yylloc);
+  yylloc->line++; yylloc->col = 0;
+}
+
+ /* line numbers */
 ^[ \t]*#[ \t]*[0-9]+[ \t]+\"{stringtext}*\"[ \t]+[0-9]+[ \t]*\n {
   dotgen_parsehash(yytext, yylloc);
 }
@@ -109,60 +184,8 @@ chartext	([^\'])|(\\.)
   dotgen_parsehash(yytext, yylloc);
 }
 
- /*/ @node #pragma requires
-  * @section @code{#pragma requires} directives
-  * @cindex @code{#pragma}
-  * @cindex @code{#pragma requires}
-  * @cindex @code{pkg-config}
-  * @cindex @env{PKG_CONFIG}
-  * @cindex dependency
-  * @cindex require
-  * @cindex package, dependency
-  *
-  * @code{#pragma requires} is recognized by @emph{both} the @code{genom-pcpp}
-  * preprocessor and @genom{}. This can be used to indicate an external
-  * dependency on a package using the @code{pkg-config} utility (see
-  * @uref{http://www.freedesktop.org/wiki/Software/pkg-config}).
-  *
-  * @example
-  * @      #pragma requires "package [ >= version ]"
-  * @end example
-  *
-  * @code{#pragma requires} accepts a string argument in the form @code{package
-  * [>= version]}. @code{genom-pcpp} interprets it by running @code{pkg-config
-  * --cflags} on the string argument. It then adds the resulting @code{-I} and
-  * @code{-D} flags as if they had been passed on the command line
-  * (@pxref{General options}). Note that the flags are added @emph{at the
-  * current processing location}, so they do not influence already preprocessed
-  * input. The @code{pkg-config} utility is found in @env{PATH}, or via the
-  * @env{PKG_CONFIG} environment variable if defined (@pxref{Environment
-  * variables}).
-  *
-  * @genom{} also recognizes @code{#pragma requires}. It handles it by adding
-  * the string argument to the @code{require} property of @emph{all} the
-  * components defined in a specification (@pxref{Component declaration}).
-  */
-^[ \t]*#[ \t]*pragma[ \t]+requires?[ \t].*\n {
-  dotgen_parsepragmarequire(yytext, yylloc);
-  yylloc->line++; yylloc->col = 0;
-}
-
- /*/ @node #pragma provides
-  * @section @code{#pragma provides} directives
-  */
-^[ \t]*#[ \t]*pragma[ \t]+provides?[ \t].*\n {
-  dotgen_parsepragmaprovide(yytext, yylloc);
-  yylloc->line++; yylloc->col = 0;
-}
-
- /* pragmas */
-^[ \t]*#[ \t]*pragma[ \t]+masquerade[ \t].*\n {
-  dotgen_parsepragmamasquerade(yytext, yylloc);
-  yylloc->line++; yylloc->col = 0;
-}
-
+ /* ignore unknown directives */
 ^[ \t]*#.*\n {
-  /* ignore unknown directives */
   yylloc->line++; yylloc->col = 0;
 }
 

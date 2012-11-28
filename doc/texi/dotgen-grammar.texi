@@ -22,16 +22,16 @@
 
 This chapter describes the @genom{3} Input File Format (@code{dotgen})
 semantics and gives the syntax for @code{dotgen} grammatical
-constructs. @I{dotgen} is the language used to formally describe a
-@genom{} component in terms of services and data types it provides.  A
-description written in dotgen completely defines the interface and the
-internals of a component.
+constructs. @I{@code{dotgen}} is the language used to formally
+describe a @genom{} component in terms of services and data types it
+provides.  A description written in @code{dotgen} completely defines
+the interface and the internals of a component.
 
 A description of the dotgen preprocessing is presented in
-@ref{Preprocessing}.  The grammar is presented in @ref{Grammar
-reference}. Associated semantics is described in the rest of this
-chapter either in place or through references to other sub sections of
-this chapter.
+@ref{Preprocessing}.  The complete grammar is presented in
+@ref{Grammar reference}. Associated semantics is described in the rest
+of this chapter either in place or through references to other sub
+sections of this chapter.
 
 A source file containing a dotgen component specification must have a
 @file{.gen} extension. The description of the dotgen grammar uses a
@@ -78,6 +78,7 @@ and their meaning.
 * Type declaration::	@htmd Naming new types
 * Type specification::	@htmd Defining new types
 * Reserved keywords::	@htmd Words with a special meaning
+* Pragmas::		@htmd Providing additional information to the parser
 * Grammar reference::	@htmd Extensive @genom{3} EBNF grammar reference
 @end menu
 
@@ -92,38 +93,46 @@ preprocessed. The preprocessing is controlled by directives introduced
 by lines having @code{#} as the first character other than white
 space.  Preprocessor directives have their own syntax (namely, the C
 preprocessor syntax), independent of the @code{dotgen} language and
-not entirely described in this document.  For instance, @infoorurl{The
-C preprocessor, Top, cpp, http://gcc.gnu.org/onlinedocs/cpp/} for a
+not entirely described in this document. @infoorurl{The C
+preprocessor, Top, cpp, http://gcc.gnu.org/onlinedocs/cpp/} for a
 comprehensive documentation.
 
-The C preprocessor used by @genom{} is invoked as a separate process
-from @code{libexec/genom-pcpp} by default. This is the @code{C}
-preprocessor from the @code{pcc} project
-(@uref{http://pcc.ludd.ltu.se/}). This can be changed by setting the
-environement variable @env{CPP}, @xref{Environment
-variables}. However, note that if you change the default, you will
-loose some functionalities of the @code{genom-pcpp} program.
-@xref{#pragma requires}.
-
 The primary use of the preprocessing facility is to include
-definitions (especially type definitions) from other dotgen
+definitions (especially type definitions) from other @code{dotgen}
 specifications. Directives may appear anywhere in the source file but
 are not seen nor interpreted by @genom{}. For instance, text in files
 included with a @code{#include} directive is treated as if it appeared
-in the including file. However, the preprocessor outputs some
-information, also as @code{#} directives, that are available to
-@genom{}. These are described in the following sections.
+in the including file. However, some preprocessor @code{#pragma}
+directives are available to @genom{} (@pxref{Pragmas}).
+
+The C preprocessor used by @genom{} is @command{pcpp} from the
+@code{pcc} project (@uref{http://pcc.ludd.ltu.se/}). It is invoked as
+a separate process from @command{libexec/genom-pcpp} by default. This
+can be changed by setting the environement variable @env{CPP},
+@xref{Environment variables}. However, note that if you change the
+default, you will loose some of the functionalities provided by
+@command{genom-pcpp}, like the @code{#pragma require} feature
+(@pxref{#pragma requires}).
+
+@include dotgen.y.texi
+
+@node Pragmas
+@section Pragmas
+@cindex pragma
+
+Pragmas are a method for providing additional information to @genom{},
+beyond what is conveyed in the language itself. They are introduced by
+the @code{#pragma} directive, followed by arguments. @genom{}
+understands the following pragmas:
 
 @menu
-* #line::		@htmd Locations in your source code
 * #pragma requires::	@htmd External dependencies
-* #pragma provides::	@htmd Proving interfaces for all components
+* #pragma provides::	@htmd Provide interfaces for all components
+* #pragma masquerade::	@htmd Pretend that ports are something else
 @end menu
 @lowersections
 @include dotgen.l.texi
 @raisesections
-
-@include dotgen.y.texi
 
 @node Grammar reference
 @section Grammar reference

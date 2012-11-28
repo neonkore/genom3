@@ -171,6 +171,7 @@ noinst_PROGRAMS= mdate
 endif REGEN_DOC_INFO
 
 if REGEN_DOC_TXT
+genom3.txt: $(genom3_TEXINFOS)
 .texi.txt:
 	$(MAKEINFO) --plaintext $(AM_MAKEINFOFLAGS) -I $(srcdir) -o $@ $<
 endif

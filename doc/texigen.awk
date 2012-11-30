@@ -20,18 +20,40 @@
 
 /^[ \t]*\/[*]\// {
     sub(/^[ \t]*\/[*]\/[ \t]*/, "");
-    if (match($0, /[*]\//)) { sub(/[*]\/.*$/, ""); substs(); next; }
-    substs(); grabbing = 1; next
+    if (!divert()) {
+        if (match($0, /[*]\//)) { sub(/[*]\/.*$/, ""); substs(); next; }
+        substs();
+    }
+    grabbing = 1; next
 }
 /^[ \t]*[#]\// {
-    sub(/^[ \t]*[#]\/[ \t]*/, ""); substs(); grabbing = 1; next
+    sub(/^[ \t]*[#]\/[ \t]*/, "");
+    if (!divert()) substs();
+    grabbing = 1; next
 }
 /^[ \t]*[*#]\/?/ && grabbing {
-    sub(/^[ \t]*[*#]\/?[ \t]*/, ""); substs(); next
+    sub(/^[ \t]*[*#]\/?[ \t]*/, "");
+    if (!divert()) substs();
+    next
 }
 
 {
     print ""; grabbing = 0
+}
+
+function divert() {
+    if (match($0, /^>-$/)) {
+        if (diversion) close(diversion)
+        diversion = ""
+        return 1
+    }
+    if (match($0, /^>./)) {
+        sub(/^>/, ""); diversion = $0
+        if (match(diversion, ".*/"))
+            system("mkdir -p " substr(diversion, 1, RLENGTH))
+        return 1
+    }
+    return 0
 }
 
 function substs() {
@@ -39,5 +61,5 @@ function substs() {
     sub(/@@end args/, "@end table\n@end quotation")
     sub(/@@returns/, "@b{Returns:}\n@quotation")
     sub(/@@end returns/, "@end quotation")
-    print
+    if (diversion) print >diversion; else print
 }

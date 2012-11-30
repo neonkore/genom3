@@ -47,6 +47,7 @@ function printdef(n, name, rule) {
     printf "@verbatim\n%5s " wrap(l[1]) "\n", "(" n ")" > out
     for (i = 2; i <= c; i++) { print "      " wrap(l[i]) >> out }
     print "@end verbatim" >> out
+    close(out)
 }
 
 function wrap(str,	c, i) {

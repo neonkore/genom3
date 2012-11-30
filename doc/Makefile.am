@@ -19,7 +19,7 @@
 
 info_TEXINFOS=\
 	genom3.texi
-genom3_TEXINFOS=	$(basesrcs) $(generatedsrcs)
+genom3_TEXINFOS=	$(basesrcs) $(generatedsrcs) $(generatedtxt)
 
 man_MANS=\
 	genom3.1
@@ -30,10 +30,13 @@ man_MANS=\
 # is included in the distribution archive.
 #
 dist_doc_DATA=\
-	index.html		\
-	genom3.pdf		\
-	genom3.txt		\
+	index.html			\
+	genom3.pdf			\
+	genom3.txt			\
 	$(top_srcdir)/COPYING
+
+nobase_dist_doc_DATA=	$(generatedsvg)
+
 EXTRA_DIST=genom3.html
 
 all-local: genom3.pdf genom3.txt genom3.html
@@ -41,9 +44,18 @@ install-data-hook: install-html
 
 install-data-hook:
 	cp $(DESTDIR)$(infodir)/genom3.info $(DESTDIR)$(docdir)/genom3.info
+	rm -f $(DESTDIR)$(infodir)/genom3.imgs
+	rm -f $(DESTDIR)$(docdir)/genom3.html/genom3.imgs
+	ln -s ../genom3.imgs $(DESTDIR)$(docdir)/genom3.html/genom3.imgs
+	ln -s $(DESTDIR)$(docdir)/genom3.imgs $(DESTDIR)$(infodir)/genom3.imgs
 
 uninstall-hook:
 	rm -f $(DESTDIR)$(docdir)/genom3.info
+	rm -f $(DESTDIR)$(infodir)/genom3.imgs
+
+# automake insists on dvi or ps, but we don't want that
+dvi:
+ps:
 
 
 # --- Doc source files -----------------------------------------------------
@@ -81,13 +93,21 @@ generatedsrcs=\
 	language.tcl.texi		\
 	template.tcl.texi
 
+# generated images
+generatedimgs=
+
+generatedtxt=	$(generatedimgs:=.txt)
+generatedsvg=	$(generatedimgs:=.svg)
+generatedpdf=	$(generatedimgs:=.pdf)
+
 EXTRA_DIST+=	$(basesrcs) $(roffsrcs)
 EXTRA_DIST+=	optgen.awk texigen.awk y2tgen.awk
 EXTRA_DIST+=	grammar-tokens
 
 CLEANFILES=	$(man_MANS)
 CLEANFILES+=	genom-options.mdoc
-CLEANFILES+=	$(generatedsrcs)
+CLEANFILES+=	$(generatedsrcs) $(generatedtxt)
+CLEANFILES+=	$(generatedsvg) $(generatedpdf)
 CLEANFILES+=	dotgen-rule-*.texi
 CLEANFILES+=	genom3.info genom3.txt
 
@@ -166,8 +186,20 @@ dotgen-rules.texi: $(top_builddir)/src/dotgen.y
 	$(Y2L) -- -p -O2 $< -t$(srcdir)/grammar-tokens | \
 		$(AWK) -f $(srcdir)/y2tgen.awk >$@
 
+# Convert figure to various graphic formats
+$(generatedtxt): $(generatedsrcs)
+$(generatedsvg): $(generatedtxt)
+$(generatedpdf): $(generatedtxt)
+
+.txt.svg:
+	$(AAFIGURE) -t svg -O proportional=1 $< >$@
+
+.txt.pdf:
+	$(AAFIGURE) -t pdf -O proportional=1 $< >$@
+
 if REGEN_DOC_INFO
 noinst_PROGRAMS= mdate
+genom3_TEXINFOS+=	$(generatedsvg)
 endif REGEN_DOC_INFO
 
 if REGEN_DOC_TXT
@@ -176,14 +208,20 @@ genom3.txt: $(genom3_TEXINFOS)
 	$(MAKEINFO) --plaintext $(AM_MAKEINFOFLAGS) -I $(srcdir) -o $@ $<
 endif
 
+if REGEN_DOC_PDF
+genom3_TEXINFOS+= $(generatedimgs:=.pdf)
+endif
+
 if !REGEN_DOC_INFO
 # Provide a fake info showing how to produce the real one.
 genom3.info:
+	@echo generating fake $@
 	@echo  >$@ ''
 	@echo >>$@ 'File: genom3.info,  Node: Top,  Up: (dir)'
 	@echo >>$@ 'To generate actual documentation you must configure the'
-	@echo >>$@ 'source tree with the --enable-docgen option and install'
-	@echo >>$@ 'makeinfo on your system.'
+	@echo >>$@ 'source tree with --enable-docgen option'
+	@echo >>$@ 'and install y2l, makeinfo and aafigure.'
+	@echo >>$@ 'See configure output for details.'
 	@echo >>$@ ''
 	@echo >>$@ 'Tag Table:'
 	@echo >>$@ 'Node: Top0'
@@ -197,6 +235,7 @@ if !REGEN_DOC_PDF
 # OK, I might be completely brain dead, but I love the idea of creating a
 # PDF just with echo ;)
 genom3.pdf:
+	@echo generating fake $@
 	@echo  >$@ '%PDF-1.4'
 	@echo >>$@ '1 0 obj'
 	@echo >>$@ '<< /Type /Catalog /Pages 2 0 R >>'
@@ -212,11 +251,13 @@ genom3.pdf:
 	@echo >>$@ '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'
 	@echo >>$@ 'endobj'
 	@echo >>$@ '5 0 obj'
-	@echo >>$@ '<< /Length 152 >>'
+	@echo >>$@ '<< /Length 230 >>'
 	@echo >>$@ 'stream'
-	@echo >>$@ 'BT /F1 12 Tf 20 200 Td (To generate actual documentation'
-	@echo >>$@ 'you must) Tj ET BT 20 180 Td (configure the source tree'
-	@echo >>$@ 'with the --enable-docgen option.) Tj ET'
+	@echo >>$@ 'BT /F1 10 Tf 20 200 Td'
+	@echo >>$@ '(To generate actual documentation you must configure) Tj'
+	@echo >>$@ '10 TL (the source tree with --enable-docgen option) '\'
+	@echo >>$@ '10 TL (and install y2l, texi2dvi and aafigure.) '\'
+	@echo >>$@ '20 TL (See configure output for details.) '\'' ET'
 	@echo >>$@ 'endstream'
 	@echo >>$@ 'endobj'
 	@echo >>$@ 'xref'
@@ -230,42 +271,53 @@ genom3.pdf:
 	@echo >>$@ 'trailer'
 	@echo >>$@ '<< /Size 6 /Root 1 0 R >>'
 	@echo >>$@ 'startxref'
-	@echo >>$@ '514'
+	@echo >>$@ '591'
 	@echo >>$@ '%%EOF'
 endif !REGEN_DOC_PDF
 
 if !REGEN_DOC_HTML
 # Provide a fake HTML showing how to produce the real one.
 genom3.html:
+	@echo generating fake $@
 	@$(MKDIR_P) genom3.html
 	@echo  >$@/index.html '<!DOCTYPE html>'
 	@echo >>$@/index.html '<html><head><title>GenoM</title></head>'
 	@echo >>$@/index.html '<body><h3>To generate actual documentation you'
-	@echo >>$@/index.html 'must configure the source tree with the'
-	@echo >>$@/index.html '--enable-docgen option and install makeinfo'
-	@echo >>$@/index.html ' on your system.</h3></body></html>'
+	@echo >>$@/index.html 'must configure the source tree with'
+	@echo >>$@/index.html '--enable-docgen option and install y2l,'
+	@echo >>$@/index.html 'makeinfo and aafigure.<br>See configure output'
+	@echo >>$@/index.html 'for details.</h3></body></html>'
 endif !REGEN_DOC_HTML
 
 if !REGEN_DOC_TXT
 # Provide a fake text showing how to produce the real one.
 genom3.txt:
+	@echo generating fake $@
 	@echo  >$@ 'To generate actual documentation you must configure the'
-	@echo >>$@ 'source tree with the --enable-docgen option and install'
-	@echo >>$@ 'makeinfo on your system.'
+	@echo >>$@ 'source tree with --enable-docgen option and install y2l,'
+	@echo >>$@ 'makeinfo and aafigure.'
+	@echo >>$@ 'See configure output for details.'
 endif !REGEN_DOC_TXT
 
-if !REGEN_DOC_TXT
+if !REGEN_DOC_INFO
 # For the dist target, make sure the documentation is regenerated
 dist-hook:
 	@echo '=============================================================='
-	@echo '    For doing `$(MAKE) dist`, you have to enable documentation'
-	@echo '    (re)generation by configuring with --enable-docgen.'
+	@test -f $(top_builddir)/config.log &&				\
+	  $(AWK) '/^[-]+$$/ { toggle=!toggle; next } toggle { print }'	\
+	    $(top_builddir)/config.log
+	@echo
+	@echo '*** For doing `$(MAKE) dist`, you have to enable documentation'
+	@echo '*** (re)generation by configuring with --enable-docgen and'
+	@echo '*** installing all required dependencies.'
 	@echo '=============================================================='
 	@exit 2
-else REGEN_DOC_TXT
+else REGEN_DOC_INFO
 # Undist generated files from genom3_TEXINFOS, no way to tell automake not to
 # dist them...
 dist-hook:
 	chmod u+w $(distdir)
-	cd $(distdir) && chmod u+w $(generatedsrcs) && rm -f $(generatedsrcs)
-endif REGEN_DOC_TXT
+	cd $(distdir) && \
+	  chmod u+w $(generatedsrcs) $(generatedtxt) &&	\
+	  rm -f $(generatedsrcs) $(generatedtxt) $(generatedpdf)
+endif REGEN_DOC_INFO

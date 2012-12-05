@@ -24,31 +24,64 @@
 
 # Template for type mappings generation.
 
-template usage {*}{
-    "\n"
-    "Mappings generation template.\n"
-    "\n"
-    "Mappings are the translation of IDL types defined in the .gen file into\n"
-    "native type definitions. By default, this template generates the\n"
-    "mappings for the codels language (defined in the .gen file). This can be\n"
-    "changed with the -l option (several -l options can be given, for\n"
-    "multiple mappings generation). The generated files are named after the\n"
-    "component name, that is suffixed with _types. The suffix can be changed\n"
-    "with the -s option.\n"
-    "\n"
-    "Supported options:\n"
-    "  -l, --language=lang\tgenerate mappings for language\n"
-    "  -s, --suffix=string\tset output file name suffix\n"
-    "  --signature\t\tgenerate codel signatures and types mappings\n"
-    "  -MD\t\t\tgenerate dependency information (in out.d)\n"
-    "  -MF=file\t\tgenerate dependency in file instead of out.d\n"
-    "  -MT=target\t\tchange the target of the dependency rules\n"
-    "  -C, --directory=dir\toutput files in dir instead of current directory\n"
-    "  -C, --directory=dir\toutput files in dir instead of current directory\n"
-    "  -p, --preserve\tdo not overwrite existing files\n"
-    "  -m, --modify\t\toverwrite files even if they did not change\n"
-    "  -h, --help\t\tprint usage summary (this text)"
-}
+template usage "Mappings generation template\n" [regsub -all [join {
+  { *#/? ?} {@(b|code){([^{}]*)}} {@itemx?([^\n]*)\n} {@(genom){([^{}]*)}}
+  {@(quotation|example|table|var|end)[^\n]*\n} {@([@{}])}
+} |] {
+  #/ This template generates a source file containing the native type
+  # definitions for all IDL types defined in the .gen input file. By default,
+  # types are generated for the codels language (defined in the .gen
+  # file). This can be changed with the -l option (several -l options can be
+  # given, for multiple mappings generation). The generated files are named
+  # after the component name, that is suffixed with _types. The suffix can be
+  # changed with the -s option. The source files are generated in the current
+  # directory by default (see -C option for changing the output directory).
+  #
+  # Additionnaly, a dependency file suitable for inclusion in a @code{Makefile}
+  # can be generated. This is controlled by the @code{-MD}, @code{-MF} and
+  # @code{-MT} options. These options are documented herafter, and follow the
+  # same syntax as the same options of @code{gcc}.
+  #
+  # @b{Example:}
+  # @example
+  # user@@host:~$ genom3 mappings demo.gen
+  # creating ./demo_c_types.h
+  # user@@host:~$ genom3 mappings -l c++ demo.gen
+  # creating ./demo_cxx_types.h
+  # @end example
+  #
+  # @b{Supported options:}
+  # @quotation
+  # @table @code
+  # @item -l
+  # @itemx --language=lang
+  #	Generate mappings for language
+  # @item -s
+  # @itemx --suffix=string
+  #	Set output file name suffix
+  # @item --signature
+  #		Generate codel signatures and types mappings
+  # @item -MD
+  #			Generate dependency information (in out.d)
+  # @item -MF=file
+  #		Generate dependency in file instead of out.d
+  # @item -MT=target
+  #		Change the target of the dependency rules
+  # @item -C
+  # @item --directory=dir
+  #	Output files in dir instead of current directory
+  # @item -p
+  # @itemx --preserve
+  #		Do not overwrite existing files
+  # @item -m
+  # @itemx --modify
+  #		Overwrite files even if they did not change
+  # @item -h
+  # @itemx --help
+  #		Print usage summary (this text)
+  # @end table
+  # @end quotation
+} {\2\3\4\7}]
 
 # defaults
 variable dir		.

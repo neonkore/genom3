@@ -74,7 +74,7 @@ basesrcs=\
 	texi/mappings-c++.texi		\
 	texi/running.texi		\
 	texi/templates.texi		\
-	texi/tcl-backend.texi
+	texi/tcl-engine.texi
 
 # static source files for manuals
 roffsrcs=\
@@ -91,7 +91,11 @@ generatedsrcs=\
 	dotgen.c.texi			\
 	engine.tcl.texi			\
 	language.tcl.texi		\
-	template.tcl.texi
+	template.tcl.texi		\
+					\
+	skeleton.tmpl.texi		\
+	mappings.tmpl.texi		\
+	interactive.tmpl.texi
 
 # generated images
 generatedimgs=
@@ -160,22 +164,17 @@ dotgen.y.texi: Makefile $(srcdir)/texigen.awk
 dotgen.y.texi: $(top_builddir)/src/dotgen.y
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
-dotgen.c.texi: Makefile $(srcdir)/texigen.awk
-dotgen.c.texi: $(top_srcdir)/engine/tcl/dotgen.c
-	$(AWK) -f $(srcdir)/texigen.awk $< >$@
-
-engine.tcl.texi: Makefile $(srcdir)/texigen.awk
-engine.tcl.texi: $(top_srcdir)/engine/tcl/engine.tcl
-	$(AWK) -f $(srcdir)/texigen.awk $< >$@
-
-language.tcl.texi: Makefile $(srcdir)/texigen.awk
-language.tcl.texi: $(top_srcdir)/engine/tcl/language.tcl
+template.tcl.texi: Makefile $(srcdir)/texigen.awk
+%.c.texi: $(top_srcdir)/engine/tcl/%.c
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
 template.tcl.texi: Makefile $(srcdir)/texigen.awk
-template.tcl.texi: $(top_srcdir)/engine/tcl/template.tcl
+%.tcl.texi: $(top_srcdir)/engine/tcl/%.tcl
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
+%.tmpl.texi: Makefile $(srcdir)/texigen.awk
+%.tmpl.texi: $(top_srcdir)/templates/%/template.tcl
+	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
 # Generate a texinfo translation of the .gen yacc grammar with y2l. Also,
 # fiddle at little bit with the y2l output to generate one additional file per

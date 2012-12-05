@@ -24,31 +24,73 @@
 
 # Default template for user skeleton file generation.
 
-template usage {*}{
-    "\n"
-    "Skeleton generation template.\n"
-    "\n"
-    "This template generates the skeleton of codel functions. Files are\n"
-    "put in a \"codels\" subdirectory of the directory of the .gen file.\n"
-    "The -C option can be used to specify another output directory.\n"
-    "\n"
-    "The -l option can be used to define the language in which the codels\n"
-    "are written. This is not to be confused with the codel interface\n"
-    "language which is defined in the .gen file. The -l switch is only\n"
-    "useful to have a codel interface in C with codels written in C++; other\n"
-    "combinations are not supported.\n"
-    "\n"
-    "Supported options:\n"
-    "  -l, --language=lang\tset codels source code language\n"
-    "  -C, --directory=dir\toutput files in dir instead of source directory\n"
-    "  -m, --merge=tool\tmerge conflicting files with tool\n"
-    "  -i\t\t\tinteractively merge conflicting files, alias for\n"
-    "\t\t\t-m interactive\n"
-    "  -u\t\t\tautomatically merge conflicting files, alias for\n"
-    "\t\t\t-m auto\n"
-    "  -f, --force\t\toverwrite existing files (use with caution)\n"
-    "  -h, --help\t\tprint usage summary (this text)"
-}
+template usage "Skeleton generation template\n" [regsub -all [join {
+  { *#/? ?} {@(b|code|emph|command){([^{}]*)}} {@itemx?([^\n]*)\n}
+  {@(genom){([^{}]*)}} {@(quotation|example|table|var|end)[^\n]*\n} {@([@{}])}
+} |] {
+  #/ The skeleton template generates the skeleton of the codel functions
+  # defined in the input .gen file. It also generates a sample build
+  # infrastructure for building them. By default, files are generated in the
+  # same directory as the input .gen file. The @code{-C} option can be used to
+  # specify another output directory.
+  #
+  # The @code{-l c++} option is specific to @code{C} codels. It generates a
+  # skeleton that compiles the codels with a @code{C++} compiler. This is
+  # useful for invoking @code{C++} code from the codels (Note that this is
+  # different from having @code{C++} codels.)
+  #
+  # Files generated with this template are freely modifiable (and are actually
+  # required to be modified in order to provide some real codels). They are
+  # provided only as a sample - yet sensible - implementation. The only
+  # requirement is that codels provide a @command{pkg-config} file (@code{.pc})
+  # named @code{<component>-genom.pc} and telling the other templates how to
+  # link with the codels library.
+  #
+  # The template can also be invoked in @emph{merge} mode, where it updates
+  # existing skeletons. This mode tries to merge modifications in the .gen
+  # file, for instance service addition or new interface definitions, into
+  # existing codels. In case of conflicting files, there are several merge
+  # strategies: option @code{-u} places conflicts markers in the source file,
+  # option @code{-i} interactively asks what to do, and the generic option
+  # @code{-m tool} runs @command{tool} on the conflicting files. @command{tool}
+  # can be any merge tool, for instance @command{meld}.
+  #
+  # @b{Example:}
+  # @example
+  # user@@host:~$ genom3 skeleton demo.gen
+  # creating ./codels/demo_motion_codels.c
+  # creating ./codels/demo_codels.c
+  # [...]
+  # creating ./codels/Makefile.am
+  # @end example
+  #
+  # @b{Supported options:}
+  # @quotation
+  # @table @code
+  # @item -l c++
+  # @itemx --language=c++
+  #	Compile C codels with a C++ compiler
+  # @item -C
+  # @itemx --directory=dir
+  #	Output files in dir instead of source directory
+  # @item -m
+  # @itemx --merge=tool
+  #	Merge conflicting files with tool
+  # @item -i
+  #			Interactively merge conflicting files, alias for
+  #			-m interactive
+  # @item -u
+  #			Automatically merge conflicting files, alias for
+  #			-m auto
+  # @item -f
+  # @itemx --force
+  #		Overwrite existing files (use with caution)
+  # @item -h
+  # @itemx --help
+  #		Print usage summary (this text)
+  # @end table
+  # @end quotation
+} {\2\3\4\7}]
 
 # defaults: no file overwrite
 engine mode -overwrite -merge-if-change

@@ -116,8 +116,8 @@ Revision @value{VERSION}, updated @value{MONTH} @value{YEAR}
 * A minimal example::	@htmd ...
 * Input file format::	@htmd ...
 * GenoM IDL mappings::	@htmd ...
-* Running genom::	@htmd ...
-* Templates::		@htmd ...
+* Running::		@htmd @genom{} command line invocation
+* Templates::		@htmd Code generation proper
 * Indices::		@htmd Indices of concepts and functions.
 @end menu
 
@@ -148,8 +148,8 @@ Revision @value{VERSION}, updated @value{MONTH} @value{YEAR}
 @chapter @genom{} IDL mappings
 @include texi/mappings.texi
 
-@node Running genom
-@chapter Running genom
+@node Running
+@chapter Running @genom{}
 @include texi/running.texi
 
 @node Templates

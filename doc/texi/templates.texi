@@ -18,10 +18,45 @@
 @c                                      Anthony Mallet on Sun May 20 2012
 @c
 
-Templates ...
+Templates are the heart of the code generation system: they read a
+@code{dotgen} specification and produce a bunch of source files from
+it. Templates can produce virtually any kind of code, but they are
+usually used to produce a server or a client implementation of the
+component(s) described in the input specification.
+
+A template is invoked on a @code{dotgen} specification by invoking
+@genom{} with the template name followed by one or several input
+files (@pxref{Running} for details).
+
+A number of base templates are provided by @genom{}. These are the
+@code{skeleton}, @code{mappings} and @code{interactive} templates
+described hereafter. Additional templates can be made available by
+installing extra packages. At the time of writing, there exist for
+instance a @code{pocolibs} and a @code{ros} template that both provide
+a server and several kind of clients implementations. The list of
+available templates can be obtained by the command
+@command{genom3@tie{}-l} (@pxref{General options}).
+
+New templates can be developed by using the @code{TCL} code generator
+engine (@pxref{Creating Templates}).
 
 @menu
-* TCL Backend::	@htmd The TCL backend
+* Skeleton::		@htmd Creating initial codels skeleton
+* Mappings::		@htmd Generating IDL mappings
+* Interactive::		@htmd Running the TCL engine interactively
+* Creating Templates::	@htmd Producing your own code
 @end menu
 
-@include texi/tcl-backend.texi
+@node Skeleton
+@section Creating initial codels skeleton
+@include skeleton.tmpl.texi
+
+@node Mappings
+@section Generating IDL mappings
+@include mappings.tmpl.texi
+
+@node Interactive
+@section Running the TCL engine interactively
+@include interactive.tmpl.texi
+
+@include texi/tcl-engine.texi

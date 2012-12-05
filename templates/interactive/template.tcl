@@ -22,19 +22,37 @@
 #                                           Anthony Mallet on Fri Jan 22 2010
 #
 
-# Interactive template
-template usage {*}{
-    "\n"
-    "Interactive Tcl template.\n"
-    "\n"
-    "Objects from the .gen file and template engine procedures are available\n"
-    "as in regular (scripted) templates. This template is mostly useful\n"
-    "for development of new templates or troubleshooting existing ones.\n"
-    "\n"
-    "Supported options:\n"
-    "  -b\t\t\tbatch mode: disable line editing facility\n"
-    "  -h.--help\t\tprint usage summary (this text)"
-}
+template usage "Interactive TCL template\n" [regsub -all [join {
+  { *#/? ?} {@(b|code){([^{}]*)}} {@itemx?([^\n]*)\n} {@(genom){([^{}]*)}}
+  {@(quotation|example|table|var|end)[^\n]*\n} {@([@{}])}
+} |] {
+  #/ This template exports all the objects from the input .gen file for
+  # interactive use in a @command{tclsh} interpreter. The @genom{} TCL engine
+  # procedures are available as in regular (scripted) templates.
+  #
+  # This template is mostly useful for development of new templates or
+  # troubleshooting existing ones.
+  #
+  # @b{Example:}
+  # @example
+  # user@@host:~$ genom3 interactive demo.gen
+  # % foreach c [dotgen components] @{ puts [$c name] @}
+  # demo
+  # % exit
+  # user@@host:~$
+  # @end example
+  #
+  # @b{Supported options:}
+  # @quotation
+  # @table @code
+  # @item -b
+  #		Batch mode: disable line editing facility
+  # @item -h
+  # @itemx --help
+  #	Print usage summary (this text)
+  # @end table
+  # @end quotation
+} {\2\3\4\7}]
 
 # defaults
 variable tcl_interactive 1

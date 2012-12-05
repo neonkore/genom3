@@ -17,19 +17,20 @@
 @c
 @c                                      Anthony Mallet on Fri May 28 2010
 @c
-@node TCL Backend
-@section The TCL backend
+@node Creating Templates
+@section Creating new templates
 
 @menu
-* template::		@htmd Runtime template information
-* engine::		@htmd Backend configuration
-* dotgen::		@htmd Input file information
-* language::		@htmd Language dependent code generation
+* TCL Engine::		@htmd The complete TCL engine reference
 @end menu
 
-@node template
-@subsection Runtime template information
+@node TCL Engine
+@subsection The complete TCL engine reference
+
 @menu
+
+Runtime template information
+
 * template require::	@htmd Source additional template code
 * template parse::	@htmd Generate template content
 * template link::	@htmd Create symbolic links
@@ -39,34 +40,25 @@
 * template usage::	@htmd Define template help string
 * template message::	@htmd Print runtime information
 * template fatal::	@htmd Abort template processing
-@end menu
-@include template.tcl.texi
 
-@node engine
-@subsection Backend configuration
-@menu
+Backend configuration
+
 * engine mode::		@htmd Engine output configuration
 * engine merge-tool::	@htmd Automatic merge of generated content
 * engine chdir::	@htmd Change output directory
 * engine pwd::		@htmd Get current output directory
-@end menu
-@include engine.tcl.texi
 
-@node dotgen
-@subsection Input file information
-@menu
+Input file information
+
 * dotgen genom::	@htmd genom program and command line
 * dotgen template::	@htmd Template path and directories
 * dotgen input::	@htmd Input file name and path
 * dotgen parse::	@htmd Process additional input
 * dotgen types::	@htmd Data type definitions from the specification
 * dotgen components::	@htmd Components definitions from the specification
-@end menu
-@include dotgen.c.texi
 
-@node language
-@subsection Language dependent code generation
-@menu
+Language dependent code generation
+
 * lang::		@htmd Target programming language
 * cname::		@htmd Cannonical object name
 * comment::		@htmd Generate comment strings
@@ -84,4 +76,7 @@
 * language signature::	@htmd Code for declaring codel signatures
 * language invoke::	@htmd Code for calling codels
 @end menu
+@include template.tcl.texi
+@include engine.tcl.texi
+@include dotgen.c.texi
 @include language.tcl.texi

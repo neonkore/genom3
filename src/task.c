@@ -131,10 +131,7 @@ task_create(tloc l, const char *name, hash_s props)
 
   /* build task's fsm */
   t->fsm = codel_fsmcreate(l, t->props);
-  if (!t->fsm) {
-    free(t);
-    return NULL;
-  }
+  if (!t->fsm) parsenoerror(l, " in task %s declared here", name);
 
   /* set codel's parent task and (NULL) service */
   for(hash_first(props, &i); i.current; hash_next(&i))

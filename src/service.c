@@ -308,10 +308,8 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
 
   /* build service's fsm */
   s->fsm = codel_fsmcreate(l, s->props);
-  if (!s->fsm) {
-    free(s);
-    return NULL;
-  }
+  if (!s->fsm)
+    parsenoerror(l, " in %s %s declared here", service_strkind(kind), name);
 
   /* set codels parent task and service */
   for(hash_first(props, &i); i.current; hash_next(&i))

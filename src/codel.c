@@ -45,6 +45,10 @@ struct codel_s {
 
   task_s task;		/**< codel's task */
   service_s service;	/**< codel's service */
+
+  struct {
+    int start:1, stop:1, ether:1;
+  } connected;		/**< reached by start or stop or yields to ether */
 };
 
 tloc		codel_loc(codel_s c) { assert(c); return c->loc; }
@@ -59,6 +63,7 @@ service_s *	codel_service(codel_s c) { assert(c); return &c->service; }
 void	codel_setkind(codel_s c, codelkind k) { assert(c); c->kind = k; }
 
 static codel_s	codel_find(const char *name);
+static void	connectivity(hash_s fsm, codel_s node, int start);
 
 
 /* --- codel_create -------------------------------------------------------- */
@@ -98,6 +103,8 @@ codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
 
   c->task = NULL;
   c->service = NULL;
+
+  c->connected.start = c->connected.stop = c->connected.ether = 0;
 
   if (!yields) {
     /* validation codels return OK, or one of the exceptions of the service */
@@ -231,47 +238,105 @@ codel_find(const char *name)
 hash_s
 codel_fsmcreate(tloc l, hash_s props)
 {
+  hash_s fsm;
   const char *e;
-  hash_s h;
   codel_s c, u;
-  hiter i, j;
+  hiter i, t;
   int s;
 
-  h = hash_create("fsm", 1);
-  if (!h) {
-    parserror(l, "failed to create fsm");
-    return NULL;
-  }
+  /* build fsm */
+  fsm = hash_create("fsm", 1);
+  if (!fsm) { parserror(l, "not enough memory"); return NULL; }
 
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
       case PROP_FSM_CODEL:
-	c = prop_codel(i.value);
-	for(hash_first(codel_triggers(c), &j); j.current; hash_next(&j)) {
-	  assert(type_kind(j.value) == IDL_ENUMERATOR);
-	  e = type_name(j.value);
-	  s = hash_insert(h, e, c, NULL);
-	  switch(s) {
-	    case 0: break;
+        c = prop_codel(i.value);
 
-	    case EEXIST:
-	      /* only one codel per event is allowed */
-	      parserror(codel_loc(c), "duplicate event %s", e);
-	      u = hash_find(h, e);
-	      if (u) parserror(codel_loc(u), " event %s declared here", e);
-	      break;
+        for(hash_first(codel_triggers(c), &t); t.current; hash_next(&t)) {
+          assert(type_kind(t.value) == IDL_ENUMERATOR);
+          e = type_name(t.value);
+          s = hash_insert(fsm, e, c, NULL);
+          switch(s) {
+            case 0: break;
 
-	    default:
-	      hash_destroy(h, 1);
-	      return NULL;
-	  }
-	}
-	break;
+            case EEXIST:
+              /* only one codel per event is allowed */
+              parserror(codel_loc(c), "duplicate event %s", e);
+              u = hash_find(fsm, e);
+              if (u) parserror(codel_loc(u), " event %s declared here", e);
+              break;
+
+            default:
+              hash_destroy(fsm, 1);
+              return NULL;
+          }
+        }
+        break;
 
       default: break;
     }
 
-  return h;
+  /* check fsm connectivity if not empty */
+  if (hash_first(fsm, &i)) return fsm;
+
+  c = hash_find(fsm, "start");
+  if (!c) {
+    parserror(l, "event start undeclared");
+    hash_destroy(fsm, 1);
+    return NULL;
+  }
+  connectivity(fsm, c, 1);
+
+  c = hash_find(fsm, "stop");
+  if (c) {
+    connectivity(fsm, c, 0);
+    if (!c->connected.ether) {
+      parserror(codel_loc(c), "event stop must eventually yield to ether");
+      hash_destroy(fsm, 1);
+      return NULL;
+    }
+  }
+
+  for(hash_first(fsm, &i); i.current; hash_next(&i)) {
+    c = i.value;
+    if (!c->connected.start && !c->connected.stop)
+      parserror(codel_loc(c), "unreachable event %s", i.key);
+  }
+
+  return fsm;
+}
+
+static void
+connectivity(hash_s fsm, codel_s node, int start)
+{
+  const char *e;
+  codel_s n;
+  hiter y;
+  int r;
+
+  if (start) node->connected.start = 1; else node->connected.stop = 1;
+  for(hash_first(codel_yields(node), &y); y.current; hash_next(&y)) {
+    assert(type_kind(y.value) == IDL_ENUMERATOR);
+    e = type_name(y.value);
+
+    n = hash_find(fsm, e);
+    if (!n) {
+      if (!strcmp(e, "ether")) { node->connected.ether = 1; continue; }
+      if (!strcmp(e, "stop") || !strcmp(e, "sleep")) continue;
+
+      parserror(codel_loc(node), "event %s undeclared", e);
+      continue;
+    }
+
+    r = start ? n->connected.start : n->connected.stop;
+    if (start) n->connected.start = 1; else n->connected.stop = 1;
+
+    /* successor has not yet been visited; recurse on it */
+    if (!r) connectivity(fsm, n, start);
+
+    if (n->connected.ether) node->connected.ether = 1;
+  }
 }
 
 

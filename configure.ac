@@ -1,10 +1,10 @@
 #
-# Copyright (c) 2009-2012 LAAS/CNRS
+# Copyright (c) 2009-2013 LAAS/CNRS
 #
 # GenoM autoconf file
 #
 AC_PREREQ(2.62)
-AC_INIT([genom],[2.99.15],[openrobots@laas.fr])
+AC_INIT([genom],[2.99.16],[openrobots@laas.fr])
 
 AC_CONFIG_AUX_DIR([autoconf])
 AC_CONFIG_MACRO_DIR([autoconf])

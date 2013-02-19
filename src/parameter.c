@@ -621,7 +621,7 @@ const char *
 param_strsrc(psrc s)
 {
   switch(s) {
-    case P_NOSRC:		return "sourceless";
+    case P_NOSRC:		return "nosrc";
 
     case P_IDS:			return "ids";
     case P_LOCAL:		return "local";
@@ -643,8 +643,7 @@ const char *
 param_strdir(pdir d)
 {
   switch(d) {
-    case P_NODIR:		return "directionless";
-
+    case P_NODIR:		return "local";
     case P_IN:			return "in";
     case P_OUT:			return "out";
     case P_INOUT:		return "inout";

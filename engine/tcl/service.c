@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012 LAAS/CNRS
+ * Copyright (c) 2010,2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -204,11 +204,11 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case serviceidx_params: {
       enum servicepdiridx {
-        svcpdiridx_in, svcpdiridx_out, svcpdiridx_inout
+        svcpdiridx_nodir, svcpdiridx_in, svcpdiridx_out, svcpdiridx_inout
       };
       static const char *dirarg[] = {
-        [svcpdiridx_in] = "in", [svcpdiridx_out] = "out",
-        [svcpdiridx_inout] = "inout", NULL
+        [svcpdiridx_nodir] = "local", [svcpdiridx_in] = "in",
+        [svcpdiridx_out] = "out", [svcpdiridx_inout] = "inout", NULL
       };
       int f, d = -1, sc;
       hiter i;
@@ -226,6 +226,9 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
           if (e != TCL_OK) return e;
 
           switch(d) {
+            case svcpdiridx_nodir:
+              if (param_dir(i.value) == P_NODIR) f = 1;
+              break;
             case svcpdiridx_in:
               if (param_dir(i.value) == P_IN) f = 1;
               break;

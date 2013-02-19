@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -121,6 +121,10 @@ service_property:
   {
     $$ = $2 ? prop_newcodel(@1, PROP_VALIDATE, $2) : NULL;
   }
+  | LOCAL local_variables semicolon
+  {
+    $$ = NULL; /* parameters were added to param_locals() */
+  }
 ;
 
 /*/ @node Service parameters
@@ -227,4 +231,68 @@ service_parameter:
     $$ = param_newlocal(@3, $1, NULL, m, dcl_type($3), $4);
   }
   | error { $$ = NULL; }
+;
+
+local_variables:
+  type_spec declarator
+  {
+    param_s p;
+    clist_s m;
+    hash_s h;
+    cval n;
+
+    if (!task_p) {
+      parserror(@1, "local variables may not be defined outside services");
+      $$ = NULL;
+      break;
+    }
+    if (!$1 || !$2) { $$ = NULL; break; }
+    if (!dcl_settype($2, $1)) { $$ = NULL; break; }
+    $$ = $1;
+
+    n.k = CST_STRING;
+    n.s = dcl_name($2);
+    m = clist_append(NULL, n, 0);
+    p = param_newlocal(@2, P_NODIR, NULL, m, dcl_type($2), NULL);
+    if (!p) break;
+
+    h = param_locals();
+    if (!h) {
+      h = hash_create("parameter list", 3); param_setlocals(h);
+      if (!h) { param_destroy(p); break; }
+    }
+    switch(hash_insert(h, param_name(p), p, (hrelease_f)param_destroy)) {
+      case 0: break;
+      case EEXIST:
+	parserror(@2, "duplicate parameter '%s'", param_name(p));
+	/*FALLTHROUGH*/
+      default: param_destroy(p); break;
+    }
+  }
+  | local_variables ',' declarator
+  {
+    $$ = $1; if (!$1 || !$3) break;
+    if (dcl_settype($3, $1)) {
+      param_s p;
+      clist_s m;
+      hash_s h;
+      cval n;
+
+      n.k = CST_STRING;
+      n.s = dcl_name($3);
+      m = clist_append(NULL, n, 0);
+      p = param_newlocal(@3, P_NODIR, NULL, m, dcl_type($3), NULL);
+      if (!p) break;
+
+      h = param_locals();
+      if (!h) { param_destroy(p); break; }
+      switch(hash_insert(h, param_name(p), p, (hrelease_f)param_destroy)) {
+        case 0: break;
+        case EEXIST:
+          parserror(@2, "duplicate parameter '%s'", param_name(p));
+          /*FALLTHROUGH*/
+        default: param_destroy(p); break;
+      }
+    }
+  }
 ;

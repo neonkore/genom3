@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -592,6 +592,7 @@ param_s		param_clone(param_s param);
 void		param_destroy(param_s p);
 int		param_setname(param_s p, const char *name);
 int		param_setdir(param_s p, pdir dir);
+int		param_setiniter(param_s p, initer_s initer);
 initer_s	param_typeiniter(param_s p, idltype_s t);
 
 int		param_equal(param_s p, param_s q);

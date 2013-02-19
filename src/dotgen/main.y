@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -117,6 +117,7 @@
 %type <codel>	codel fsm_codel
 %type <ckind>	opt_async
 %type <param>	attribute_parameter service_parameter codel_parameter
+%type <type>	local_variables
 %type <vlist>	parameter_variable
 %type <psrc>	opt_parameter_src
 %type <pdir>	parameter_dir

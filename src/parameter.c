@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -105,13 +105,12 @@ param_new(tloc l, psrc src, pdir dir, const char *name, idltype_s base,
   p->type = base;
 
   p->port = NULL;
-  p->init = initer;
+  p->init = NULL;
 
   for(clist_first(member, &i); i.value; clist_next(&i))
     if (param_setmember(p, *i.value)) { free(p); return NULL; }
 
-  if (initer)
-    if (initer_matchtype(p->type, initer)) p->init = NULL;
+  if (initer) param_setiniter(p, initer);
 
   return p;
 }
@@ -167,8 +166,6 @@ param_newlocal(tloc l, pdir dir, const char *name, clist_s member,
   comp_s c;
   citer i;
 
-  if (dir == P_NODIR) return NULL;
-
   assert(member);
   c = comp_active(); assert(c);
 
@@ -201,10 +198,12 @@ param_newlocal(tloc l, pdir dir, const char *name, clist_s member,
   }
 
   if (type_fullname(p->type))
-    xwarnx("created service parameter %s %s %s",
+    xwarnx("created %s parameter %s %s %s",
+           dir == P_NODIR ? "local":"service",
            type_strkind(type_kind(p->type)), type_fullname(p->type), p->name);
   else
-    xwarnx("created service parameter %s %s",
+    xwarnx("created %s parameter %s %s",
+           dir == P_NODIR ? "local":"service",
            type_strkind(type_kind(p->type)), p->name);
 
   return p;
@@ -507,6 +506,23 @@ param_setdir(param_s p, pdir dir)
   assert(p && p->dir == P_NODIR);
 
   p->dir = dir;
+  return 0;
+}
+
+
+/* --- param_setiniter ----------------------------------------------------- */
+
+/** set parameter initializer
+ */
+int
+param_setiniter(param_s p, initer_s initer)
+{
+  assert(p && p->init == NULL);
+
+  p->init = initer;
+  if (initer)
+    if (initer_matchtype(p->type, initer)) p->init = NULL;
+
   return 0;
 }
 

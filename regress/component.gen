@@ -1,7 +1,7 @@
 /* GenoM objects parsing test */
 
 /*/
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -115,10 +115,10 @@ component c {
     validate	v(ids in b[0].c::a, local out c);
 
     codel<start>
-      a(port in pa, port out pb::port) yield sleep, ether;
+      a(port in pa, port out pb::port) yield sleep, main, ether;
     codel<main>
       b(ids in b[2].c.d::input, ids inout b[0].a::inout, out ::ids)
-      yield ether;
+      yield other, ether;
     codel<other>
       e(local in f, local out f::outf) yield ether;
     codel<stop>

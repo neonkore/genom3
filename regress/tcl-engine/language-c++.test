@@ -101,11 +101,11 @@ struct s {
 };
 component c {
   task t {
-    codel<x> tcodel() yield ether;
+    codel<start> tcodel() yield ether;
   };
   activity s() {
     task t;
-    codel<x> scodel() yield ether;
+    codel<start> scodel() yield ether;
   };
 };
 EOF

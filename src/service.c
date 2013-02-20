@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 LAAS/CNRS
+ * Copyright (c) 2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -410,10 +410,16 @@ service_clone(service_s service)
   }
   if (e) return NULL;
 
-  /* clone properties */
+  /* activate local parameters and clone properties */
+  assert(!param_locals());
+  param_setlocals(service_params(service));
   prop = hash_create("property list", 0);
-  if (!prop || prop_merge_list(prop, service_props(service), 0/*ignore_dup*/))
+  if (!prop ||
+      prop_merge_list(prop, service_props(service), 0/*ignore_dup*/)) {
+    param_setlocals(NULL);
     return NULL;
+  }
+  param_setlocals(NULL);
 
   /* create */
   s = service_create(service->loc, service->kind, service->name, param, prop);

@@ -46,6 +46,7 @@ struct param_s {
   union {
     port_s port;	/**< in/out port (for port only) */
     remote_s remote;	/**< in/out remote (for remote only) */
+    param_s param;	/**< local service param (for local only) */
   };
 
   initer_s init;	/**< initial value (or NULL) */
@@ -63,6 +64,9 @@ port_s		param_port(param_s p) {
 }
 remote_s	param_remote(param_s p) {
   assert(p && p->src == P_REMOTE); return p->remote;
+}
+param_s		param_param(param_s p) {
+  assert(p && p->src == P_LOCAL); return p->param;
 }
 initer_s	param_initer(param_s p) { assert(p); return p->init; }
 
@@ -162,7 +166,7 @@ param_s
 param_newlocal(tloc l, pdir dir, const char *name, clist_s member,
                idltype_s type, initer_s initer)
 {
-  param_s p;
+  param_s local, p;
   comp_s c;
   citer i;
 
@@ -174,12 +178,14 @@ param_newlocal(tloc l, pdir dir, const char *name, clist_s member,
   if (!name) name = i.value->s;
   assert(name);
 
-  /* lookup type */
+  /* lookup type and src param */
+  local = NULL;
   if (!type && param_locals()) {
     hiter j;
     for(hash_first(param_locals(), &j); j.current; hash_next(&j))
       if (!strcmp(param_name(j.value), i.value->s)) {
-        type = param_type(j.value);
+        local = j.value;
+        type = param_type(local);
         break;
       }
   }
@@ -196,6 +202,7 @@ param_newlocal(tloc l, pdir dir, const char *name, clist_s member,
     parserror(l, "dropped parameter '%s'", name);
     return NULL;
   }
+  p->param = local;
 
   if (type_fullname(p->type))
     xwarnx("created %s parameter %s %s %s",
@@ -427,7 +434,8 @@ param_clone(param_s param)
       k.k = CST_STRING; k.s = param_name(param);
       m = clist_prepend(m, k, 0);
       p = param_newlocal(param_loc(param), param_dir(param), param_name(param),
-                         m, param_type(param), param_initer(param));
+                         m, param_param(param) ? NULL : param_type(param),
+                         param_initer(param));
       break;
 
     case P_PORT:

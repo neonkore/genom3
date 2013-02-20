@@ -562,6 +562,7 @@ idltype_s	param_base(param_s p);
 idltype_s	param_type(param_s p);
 port_s		param_port(param_s p);
 remote_s	param_remote(param_s p);
+param_s		param_param(param_s p);
 initer_s	param_initer(param_s p);
 
 tloc		initer_loc(initer_s i);

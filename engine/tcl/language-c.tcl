@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -452,6 +452,11 @@ namespace eval language::c {
 	    append m "\n  const uint32_t _maximum;"
 	    append m "\n  uint32_t _length;"
 	    append m "\n  [declarator [$type type] _buffer\[$l\]];"
+            # need explicit '_maximum' initialization if compiled by a C++
+            # compiler
+            append m "\n# ifdef __cplusplus"
+            append m "\n  ${n}():_maximum($l) {};"
+            append m "\n# endif"
 	}
 	append m "\n} $n;"
 	return $f[guard $m $n]

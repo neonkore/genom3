@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -45,6 +45,7 @@ identifier:
   | DELAY | PRIORITY | SCHEDULING | STACK | CODEL | VALIDATE | YIELD | THROWS
   | DOC | INTERRUPTS | BEFORE | AFTER | HANDLE | PORT | IN | OUT | INOUT
   | LOCAL | ASYNC | REMOTE | EXTENDS | PROVIDES | USES | MULTIPLE | NATIVE
+  | EXCEPTION
 ;
 
 identifier_list:

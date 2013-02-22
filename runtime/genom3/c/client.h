@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 LAAS/CNRS
+ * Copyright (c) 2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -20,30 +20,32 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <genom3/c/event.h>
 
 #define GENOM_CLIENT_DLSYM		"genom_client_info"
 
-enum { genom_client_protocol = 20120725 };
+enum { genom_client_protocol = 20130319 };
 
 typedef struct genom_client_s *genom_client;
 
 typedef void (*genom_request_cb)(
-  genom_client h, int rqstid, int error, uint32_t report, void *output,
-  void *cb_data);
-typedef int (*genom_request_sendfn)(
+  genom_client h, int rqstid, int done, genom_event report, void *output,
+  const void *exdetail, void *cb_data);
+typedef genom_event (*genom_request_sendfn)(
   genom_client h, const void *in,
   genom_request_cb sentcb, genom_request_cb donecb, void *cb_data,
   int *rqstid);
 
-typedef int (*genom_port_readfn)(genom_client h, void *data);
-typedef int (*genom_port_multiple_readfn)(genom_client h,
+typedef genom_event (*genom_port_readfn)(genom_client h, void *data);
+typedef genom_event (*genom_port_multiple_readfn)(genom_client h,
   const char *name, void *data);
 
 typedef void (*genom_initfn)(void *data);
 typedef void (*genom_finifn)(void *data);
 
-typedef int (*genom_json_scanfn)(void *in, const char *json, char **endptr);
-typedef int (*genom_json_printfn)(char **json, void *out);
+typedef genom_event (*genom_json_scanfn)(void *in, const char *json,
+  char **endptr);
+typedef genom_event (*genom_json_printfn)(char **json, void *out);
 
 struct genom_service_info {
   const char *name;
@@ -84,10 +86,10 @@ struct genom_client_info {
   int (*eventfd)(genom_client h);
   const struct genom_service_info *(*service_info)(genom_client h, int rqstid);
   int (*done)(genom_client h, int rqstid);
-  int (*wait)(genom_client h, int rqstid);
-  int (*clean)(genom_client h, int rqstid);
-  int (*doevents)(genom_client h);
-  const char *(*strerror)(genom_client h);
+  genom_event (*wait)(genom_client h, int rqstid);
+  genom_event (*clean)(genom_client h, int rqstid);
+  genom_event (*doevents)(genom_client h);
+  const char *(*json_error)(genom_event e, const void *detail);
 
   int nservices;
   const struct genom_service_info *services;

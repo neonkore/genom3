@@ -177,6 +177,13 @@ switch_body: case | switch_body case
   }
 ;
 
+opt_member_list:
+  /* empty */ { $$ = NULL; }
+  | '{' '}' { $$ = NULL; }
+  | '{' member_list '}' { $$ = $2; }
+  | '{' error '}' { $$ = NULL; }
+;
+
 member_list: member semicolon | member_list member semicolon;
 
 member:

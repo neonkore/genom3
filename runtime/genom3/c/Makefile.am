@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -25,4 +25,5 @@ hdir=	$(includedir)/genom3/c
 
 h_HEADERS=\
 	idlsequence.h	\
+	event.h		\
 	client.h

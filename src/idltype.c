@@ -49,7 +49,7 @@ struct idltype_s {
 	uint32_t length;	/**< string, sequence, array */
 	cval value;		/**< const */
 	clist_s values;		/**< case */
-	scope_s elems;		/**< struct, union */
+	scope_s elems;		/**< struct, union, exception */
       };
     };
     hash_s members;		/**< enum */
@@ -256,28 +256,6 @@ type_newenumerator(tloc l, const char *name)
 }
 
 idltype_s
-type_addenumerator(tloc l, idltype_s e, const char *name)
-{
-  idltype_s t;
-  assert(e && scope_current() == e->scope);
-
-  t = type_newenumerator(l, name);
-  if (!t) return NULL;
-
-  if (!e->members) {
-    e->members = hash_create("enumerator list", 3);
-    if (!e->members) goto error;
-  }
-  if (hash_insert(e->members, type_name(t), t, NULL)) goto error;
-
-  t->type = e;
-  return t;
-error:
-  type_destroy(t);
-  return NULL;
-}
-
-idltype_s
 type_newarray(tloc l, const char *name, idltype_s t, uint32_t len)
 {
   idltype_s c = type_new(l, IDL_ARRAY, name);
@@ -328,9 +306,9 @@ type_newunion(tloc l, const char *name, idltype_s t, scope_s s)
 
     case IDL_FLOAT: case IDL_DOUBLE: case IDL_OCTET: case IDL_STRING:
     case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
-    case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-    case IDL_FORWARD_UNION: case IDL_PORT: case IDL_EVENT: case IDL_REMOTE:
-    case IDL_NATIVE:
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_PORT:
+    case IDL_EVENT: case IDL_REMOTE: case IDL_NATIVE:
       parserror(l, "%s%s%s is not a valid type for union switch",
                 type_strkind(type_kind(t)),
                 type_name(t)?" ":"", type_name(t)?type_name(t):"");
@@ -411,6 +389,17 @@ type_newalias(tloc l, const char *name, idltype_s t)
 
   c->type = t;
   return c;
+}
+
+idltype_s
+type_newexception(tloc l, const char *name, scope_s s)
+{
+  idltype_s t = type_new(l, IDL_EXCEPTION, name);;
+  if (!t) return NULL;
+  assert(s);
+
+  t->elems = s;
+  return t;
 }
 
 idltype_s
@@ -506,7 +495,7 @@ type_fixed(idltype_s t)
     case IDL_ARRAY: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
       return type_fixed(type_type(t));
 
-    case IDL_STRUCT: case IDL_UNION: {
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION: {
       idltype_s e;
       hiter i;
 
@@ -515,8 +504,7 @@ type_fixed(idltype_s t)
       return 1;
     }
 
-    case IDL_PORT:
-    case IDL_REMOTE:
+    case IDL_EVENT: case IDL_PORT: case IDL_REMOTE:
       return 1;
 
     case IDL_NATIVE:
@@ -548,7 +536,7 @@ type_native(idltype_s t, int verbose)
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
     case IDL_ENUM: case IDL_ENUMERATOR: case IDL_STRING:
-    case IDL_PORT: case IDL_REMOTE:
+    case IDL_EVENT: case IDL_PORT: case IDL_REMOTE:
       return 0;
 
     case IDL_SEQUENCE:
@@ -563,7 +551,7 @@ type_native(idltype_s t, int verbose)
       return 0;
     }
 
-    case IDL_STRUCT: case IDL_UNION: {
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION: {
       idltype_s e;
       hiter i;
 
@@ -611,8 +599,8 @@ type_equal(idltype_s a, idltype_s b)
       return a->length == b->length;
 
     case IDL_NATIVE: case IDL_ENUMERATOR: case IDL_ENUM:
-    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_PORT:
-    case IDL_REMOTE:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_EVENT:
+    case IDL_PORT: case IDL_REMOTE:
       if (!a->fullname || !b->fullname) return 0;
       return strcmp(a->fullname, b->fullname)?0:1;
 
@@ -620,7 +608,7 @@ type_equal(idltype_s a, idltype_s b)
       if (a->length != b->length) return 0;
       return type_equal(type_type(a), type_type(b));
 
-    case IDL_STRUCT: case IDL_UNION: {
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION: {
       idltype_s t, u;
       hiter i, j;
 
@@ -684,7 +672,7 @@ type_member(idltype_s t, const char *name)
 
   /* only structs, unions and enum have members */
   switch(type_kind(t)) {
-    case IDL_STRUCT: case IDL_UNION:
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
       t = scope_findtype(t->elems, name);
       if (!t) return NULL;
       if (type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE) return NULL;
@@ -695,7 +683,14 @@ type_member(idltype_s t, const char *name)
       if (!t) return NULL;
       break;
 
-    default: return NULL;
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ANY: case IDL_ARRAY: case IDL_SEQUENCE: case IDL_CASE:
+    case IDL_MEMBER: case IDL_ENUMERATOR: case IDL_EVENT: case IDL_PORT:
+    case IDL_REMOTE: case IDL_NATIVE: case IDL_CONST: case IDL_TYPEDEF:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      return NULL;
   }
 
   return t;
@@ -713,9 +708,9 @@ type_first(idltype_s t, hiter *i)
   t = type_final(t);
   if (!t) return NULL;
 
-  /* only structs, unions and enum have members */
+  /* only structs, unions, enum and exceptions have members */
   switch(type_kind(t)) {
-    case IDL_STRUCT: case IDL_UNION:
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
       if (!scope_firstype(t->elems, i)) return NULL;
       while (type_kind(i->value) != IDL_MEMBER &&
 	     type_kind(i->value) != IDL_CASE)
@@ -728,7 +723,14 @@ type_first(idltype_s t, hiter *i)
       t = i->value;
       break;
 
-    default: i->current = NULL; return NULL;
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ANY: case IDL_ARRAY: case IDL_SEQUENCE: case IDL_CASE:
+    case IDL_MEMBER: case IDL_ENUMERATOR: case IDL_EVENT: case IDL_PORT:
+    case IDL_REMOTE: case IDL_NATIVE: case IDL_CONST: case IDL_TYPEDEF:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      i->current = NULL; return NULL;
   }
 
   return t;
@@ -764,7 +766,14 @@ type_next(hiter *i)
       t = i->value;
       break;
 
-    default: i->current = NULL; return NULL;
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ANY: case IDL_ENUM: case IDL_ARRAY: case IDL_SEQUENCE:
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION: case IDL_EVENT:
+    case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE: case IDL_CONST:
+    case IDL_TYPEDEF: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      i->current = NULL; return NULL;
   }
 
   return t;
@@ -785,8 +794,8 @@ type_final(idltype_s t)
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
     case IDL_ANY: case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY:
-    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION: case IDL_PORT:
-    case IDL_REMOTE: case IDL_NATIVE:
+    case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
+    case IDL_EVENT: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
       return t;
 
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
@@ -890,13 +899,20 @@ type_members(idltype_s t)
   assert(t);
 
   switch(type_kind(t)) {
-    case IDL_STRUCT: case IDL_UNION:
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
       return scope_types(t->elems);
 
     case IDL_ENUM:
       return t->members;
 
-    default: assert(0);
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
+    case IDL_EVENT: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
+    case IDL_CONST: case IDL_MEMBER: case IDL_CASE: case IDL_TYPEDEF:
+    case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      assert(0);
   }
 
   return NULL;
@@ -908,10 +924,17 @@ type_membersscope(idltype_s t)
   assert(t);
 
   switch(type_kind(t)) {
-    case IDL_STRUCT: case IDL_UNION:
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
       return t->elems;
 
-    default: assert(0);
+    case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
+    case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
+    case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
+    case IDL_ANY: case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY:
+    case IDL_SEQUENCE: case IDL_EVENT: case IDL_PORT: case IDL_REMOTE:
+    case IDL_NATIVE: case IDL_CONST: case IDL_MEMBER: case IDL_CASE:
+    case IDL_TYPEDEF: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+      assert(0);
   }
 
   return NULL;
@@ -965,6 +988,7 @@ type_strkind(idlkind k)
     case IDL_STRING:		return "string";
     case IDL_ANY:		return "any";
     case IDL_NATIVE:		return "native";
+    case IDL_EXCEPTION:		return "exception";
 
     case IDL_CONST:		return "const";
     case IDL_ENUM:		return "enum";
@@ -981,6 +1005,7 @@ type_strkind(idlkind k)
     case IDL_FORWARD_STRUCT:	return "forward struct";
     case IDL_FORWARD_UNION:	return "forward union";
 
+    case IDL_EVENT:		return "event";
     case IDL_PORT:		return "port";
     case IDL_REMOTE:		return "remote";
   }

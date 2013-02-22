@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -124,13 +124,14 @@ foreach c [dotgen components] {
     if {[info exists lang]} { set l $lang } else { set l [$c language] }
     foreach l $l {
       lang $l
+      set filen [string map {+ x} $l]
       template parse					\
           args [list $c $l]				\
           raw [comment $header]\n			\
           string [language mapping]			\
           {*}$sign					\
-          file "[$c name]_[cname $l]$suffix[fileext header]"
-      lappend out "[$c name]_[cname $l]$suffix[fileext header]"
+          file "[$c name]_${filen}$suffix[fileext header]"
+      lappend out "[$c name]_${filen}$suffix[fileext header]"
     }
 }
 

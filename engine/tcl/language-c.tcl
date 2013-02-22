@@ -55,10 +55,12 @@ namespace eval language::c {
         {union}		{ append m [genunion $type] }
         {typedef}	{ append m [gentypedef $type] }
         {sequence}	{ append m [gensequence $type] }
+        {exception}	{ append m [genexception $type] }
 
         {forward struct} -
         {forward union}	{ append m [genforward $type] }
 
+        {event}		{ append m [genevent $type] }
         {port}		{ append m [genport $type] }
         {remote}	{ append m [genremote $type] }
         {native}	{ append m [gennative $type] }
@@ -74,7 +76,7 @@ namespace eval language::c {
         append p "#include <stdbool.h>\n"
       }
       if {[regexp {sequence} $m]} {
-        append p "#include <genom3/c/idlsequence.h>\n"
+        append p "#include \"genom3/c/idlsequence.h\"\n"
       }
 
       return $p$m
@@ -98,19 +100,21 @@ namespace eval language::c {
 	    {double}			{ set d "double" }
 	    {char}			{ set d "int8_t" }
 	    {octet}			{ set d "uint8_t" }
+            {event}			{ set d "genom_event" }
 	    {any}			{ error "type any not supported yet" }
 
-            {native}			{ set d "[cname [$type fullname]] *" }
+            {native}			{ set d "[$type cname] *" }
+            {exception}			{ set d [$type cname]_detail }
 
 	    {const}			-
 	    {enum}			-
-	    {enumerator}		-
 	    {struct}			-
 	    {union}			-
 	    {typedef}			-
             {port}			-
-            {remote}			{ set d [cname [$type fullname]] }
+            {remote}			{ set d [$type cname] }
 
+	    {enumerator}		-
 	    {struct member}		-
 	    {union member}		-
 	    {forward struct}		-
@@ -282,7 +286,7 @@ namespace eval language::c {
     # Return the C signature of a codel
     #
     proc signature { codel {symchar " "} {location 0}} {
-	set ret [declarator [$codel return]]
+	set ret genom_event
 	set sym [cname $codel]
 	set arg [list]
 	foreach p [$codel parameters] {
@@ -340,7 +344,7 @@ namespace eval language::c {
           set type [$type type]
         }
 
-        {struct} {
+        {struct} - {exception} {
           set m [$type members $member]
           if {[llength $m] == 0} {
             template fatal "[$type kind] has no member $member"
@@ -518,6 +522,52 @@ namespace eval language::c {
     }
 
 
+    # --- genexception -----------------------------------------------------
+
+    # Return the C mapping of an exception.
+    #
+    proc genexception { type } {
+      set n [$type cname]
+      set f ""
+      set s ""
+
+      append m "\n#include \"genom3/c/event.h\""
+      append m [genloc $type]
+      append m "\nconst char genom_weak ${n}_id\[\] = \"[$type fullname]\";"
+
+      append m [genloc $type]
+      if {[llength [$type members]]} {
+        append m "\ntypedef struct ${n}_detail ${n}_detail;"
+
+        append s "\nstruct ${n}_detail {"
+        foreach e [$type members] {
+          append s [genloc $e]
+          append s "\n [declarator $e [$e name]];"
+          if {[[$e type] kind] == "sequence"} {
+            append f [gensequence [$e type]]
+          }
+        }
+        append s "\n};"
+
+        append s "\nstatic inline genom_event"
+        append s "\n${n}(${n}_detail *d) {"
+        append s "\n genom_throw(${n}_id, d, sizeof(*d));"
+        append s "\n return ${n}_id;"
+        append s "\n}"
+      } else {
+        append m "\ntypedef void ${n}_detail;"
+
+        append s "\nstatic inline genom_event"
+        append s "\n${n}(void) {"
+        append s "\n genom_throw(${n}_id, NULL, 0);"
+        append s "\n return ${n}_id;"
+        append s "\n}"
+      }
+
+      return [guard $m $n]$f[guard $s "${n}_definition"]
+    }
+
+
     # --- genforward -------------------------------------------------------
 
     # Return the C mapping of forward declaration.
@@ -528,6 +578,19 @@ namespace eval language::c {
 	append m [genloc $type]
 	append m "\ntypedef struct $n $n;"
 	return [guard $m $n]
+    }
+
+
+    # --- genevent ---------------------------------------------------------
+
+    # Return the C mapping of an event.
+    #
+    proc genevent { type } {
+      set n [$type cname]
+      append m "\n#include \"genom3/c/event.h\""
+      append m [genloc $type]
+      append m "\nconst char genom_weak $n\[\] = \"[$type fullname]\";"
+      return [guard $m $n]
     }
 
 
@@ -545,33 +608,34 @@ namespace eval language::c {
         append f [gensequence $t]
       }
 
+      append m "\n#include \"genom3/c/event.h\""
       append m [genloc $type]
       append m "\ntypedef struct $n {"
       switch -- [$p kind]/[$p dir] {
         simple/in {
           append m "\n  [$t argument reference] (*data)(void);"
-          append m "\n  uint32_t (*read)(void);"
+          append m "\n  genom_event (*read)(void);"
         }
         simple/out {
           append m "\n  [$t argument reference] (*data)(void);"
-          append m "\n  uint32_t (*write)(void);"
+          append m "\n  genom_event (*write)(void);"
         }
 
         multiple/in {
           append m "\n  [$t argument reference] (*data)(const char *id);"
-          append m "\n  uint32_t (*read)(const char *id);"
+          append m "\n  genom_event (*read)(const char *id);"
         }
 
         multiple/out {
           append m "\n  [$t argument reference] (*data)(const char *id);"
-          append m "\n  uint32_t (*write)(const char *id);"
-          append m "\n  uint32_t (*open)(const char *id);"
-          append m "\n  uint32_t (*close)(const char *id);"
+          append m "\n  genom_event (*write)(const char *id);"
+          append m "\n  genom_event (*open)(const char *id);"
+          append m "\n  genom_event (*close)(const char *id);"
         }
 
         default	{ error "invalid port direction" }
       }
-      append m "\n  const char *(*strerror)(uint32_t status);"
+      append m "\n  const char *(*strerror)(genom_event status);"
       append m "\n} $n;"
       return $f[guard $m $n]
     }
@@ -601,10 +665,11 @@ namespace eval language::c {
       }
       if {[llength $arg]} { set arg [join $arg {, }] } else { set arg "void" }
 
+      append m "\n#include \"genom3/c/event.h\""
       append m [genloc $type]
       append m "\ntypedef struct $n {"
-      append m "\n  uint32_t (*call)($arg);"
-      append m "\n  const char *(*strerror)(uint32_t status);"
+      append m "\n  genom_event (*call)($arg);"
+      append m "\n  const char *(*strerror)(genom_event status);"
       append m "\n} $n;"
       return $f[guard $m $n]
     }
@@ -695,9 +760,8 @@ namespace eval language::c {
     proc cname { object } {
 	if {![catch {$object class} class]} {
 	    switch -- $class {
-		codel	{
-                  set object [$object name]
-		}
+              codel	{ set object [$object name] }
+              type	{ set object [$object fullname] }
 	    }
 	}
 

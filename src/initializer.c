@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012 LAAS/CNRS
+ * Copyright (c) 2010,2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -276,13 +276,13 @@ initer_typeiniter(initer_s i, idltype_s haystack, idltype_s needle)
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
     case IDL_ANY: case IDL_CONST: case IDL_ENUM: case IDL_ENUMERATOR:
-    case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
+    case IDL_EVENT: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
       break;
 
     case IDL_ARRAY: case IDL_SEQUENCE:
       return initer_typeiniter(i->sub, type_type(haystack), needle);
 
-    case IDL_STRUCT: case IDL_UNION: {
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION: {
       idltype_s t;
       initer_s j, f;
 

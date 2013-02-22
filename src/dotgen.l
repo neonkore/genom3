@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -233,6 +233,7 @@ chartext	([^\'])|(\\.)
 "object"	{ return OBJECT; }
 "any"		{ return ANY; }
 "native"	{ return NATIVE; }
+"exception"	{ return EXCEPTION; }
 
 "const"		{ return CONST; }
 "enum"		{ return ENUM; }

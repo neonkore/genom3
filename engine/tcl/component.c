@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -47,17 +47,17 @@ int
 comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum compidx {
-    compidx_name, compidx_doc, compidx_ids, compidx_iev, compidx_version,
-    compidx_lang, compidx_email, compidx_require, compidx_crequire,
-    compidx_clockrate, compidx_tasks, compidx_ports, compidx_services,
+    compidx_name, compidx_doc, compidx_ids, compidx_version, compidx_lang,
+    compidx_email, compidx_require, compidx_crequire, compidx_clockrate,
+    compidx_throws, compidx_tasks, compidx_ports, compidx_services,
     compidx_remotes, compidx_digest, compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
-    [compidx_iev] = "event-type", [compidx_version] = "version",
-    [compidx_lang] = "language", [compidx_email] = "email",
-    [compidx_require] = "require", [compidx_crequire] = "codels-require",
-    [compidx_clockrate] = "clock-rate", [compidx_tasks] = "tasks",
+    [compidx_version] = "version", [compidx_lang] = "language",
+    [compidx_email] = "email", [compidx_require] = "require",
+    [compidx_crequire] = "codels-require", [compidx_clockrate] = "clock-rate",
+    [compidx_throws] = "throws", [compidx_tasks] = "tasks",
     [compidx_ports] = "ports", [compidx_services] = "services",
     [compidx_remotes] = "remotes", [compidx_digest] = "digest",
     [compidx_loc] = "loc", [compidx_class] = "class", NULL
@@ -86,7 +86,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       return TCL_ERROR;
   }
 
-  switch(i) {
+  switch((enum compidx)i) {
     case compidx_name:
       r = Tcl_NewStringObj(comp_name(c), -1);
       break;
@@ -107,10 +107,6 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       if (p) r = Tcl_NewStringObj(type_genref(prop_type(p)), -1);
       break;
 
-    case compidx_iev:
-      r = Tcl_NewStringObj(type_genref(comp_eventtype(c)), -1);
-      break;
-
     case compidx_require: case compidx_crequire:
       r = Tcl_NewListObj(0, NULL);
       p = hash_find(comp_props(c), prop_strkind(argkind[i]));
@@ -125,6 +121,55 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	}
       }
       break;
+
+    case compidx_throws: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("lsort", -1),
+        Tcl_NewStringObj("-unique", -1),
+        NULL,
+      };
+      prop_s p;
+      hiter i, j;
+
+      r = Tcl_NewListObj(0, NULL);
+
+      p = hash_find(comp_props(c), prop_strkind(PROP_THROWS));
+      if (p)
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      for(hash_first(comp_tasks(c), &j); j.current; hash_next(&j)) {
+        p = hash_find(task_props(j.value), prop_strkind(PROP_THROWS));
+        if (p)
+          for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+            Tcl_ListObjAppendElement(
+              interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+          }
+      }
+
+      for(hash_first(comp_services(c), &j); j.current; hash_next(&j)) {
+        p = hash_find(service_props(j.value), prop_strkind(PROP_THROWS));
+        if (p)
+          for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+            Tcl_ListObjAppendElement(
+              interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+          }
+      }
+
+      argv[2] = r;
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      Tcl_IncrRefCount(argv[2]);
+      s = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[2]);
+      Tcl_DecrRefCount(argv[1]);
+      Tcl_DecrRefCount(argv[0]);
+      if (s != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
+      break;
+    }
 
     case compidx_tasks: {
       hiter i;

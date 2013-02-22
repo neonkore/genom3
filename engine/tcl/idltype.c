@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -50,9 +50,9 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     typeidx_kind, typeidx_name, typeidx_fullname, typeidx_scope, typeidx_fixed,
     typeidx_final, typeidx_type, typeidx_length, typeidx_value,
     typeidx_valuekind, typeidx_members, typeidx_discriminator, typeidx_port,
-    typeidx_remote, typeidx_mapping, typeidx_declarator, typeidx_address,
-    typeidx_deref, typeidx_argument, typeidx_pass, typeidx_digest,
-    typeidx_masquerade, typeidx_loc, typeidx_class
+    typeidx_remote, typeidx_cname, typeidx_mapping, typeidx_declarator,
+    typeidx_address, typeidx_deref, typeidx_argument, typeidx_pass,
+    typeidx_digest, typeidx_masquerade, typeidx_loc, typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
@@ -62,11 +62,12 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_value] = "value", [typeidx_valuekind] = "valuekind",
     [typeidx_members] = "members", [typeidx_discriminator] = "discriminator",
     [typeidx_port] = "port", [typeidx_remote] = "remote",
-    [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
-    [typeidx_address] = "address", [typeidx_deref] = "dereference",
-    [typeidx_argument] = "argument", [typeidx_pass] = "pass",
-    [typeidx_digest] = "digest", [typeidx_masquerade] = "masquerade",
-    [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
+    [typeidx_cname] = "cname", [typeidx_mapping] = "mapping",
+    [typeidx_declarator] = "declarator", [typeidx_address] = "address",
+    [typeidx_deref] = "dereference", [typeidx_argument] = "argument",
+    [typeidx_pass] = "pass", [typeidx_digest] = "digest",
+    [typeidx_masquerade] = "masquerade", [typeidx_loc] = "loc",
+    [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r = NULL;
@@ -110,7 +111,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       return TCL_ERROR;
     }
   }
-  switch(i) {
+  switch((enum typeidx)i) {
     case typeidx_kind:
       r = Tcl_NewStringObj(type_strkind(type_kind(t)), -1);
       break;
@@ -223,13 +224,15 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       }
       break;
 
+    case typeidx_cname:
     case typeidx_mapping: {
       Tcl_Obj *argv[] = {
-        Tcl_NewStringObj("language::mapping", -1),
+        Tcl_NewStringObj("language::", -1),
         objv[0]
       };
 
       Tcl_IncrRefCount(argv[0]);
+      Tcl_AppendStringsToObj(argv[0], args[i], NULL);
       s = Tcl_EvalObjv(interp, 2, argv, TCL_EVAL_GLOBAL);
       Tcl_DecrRefCount(argv[0]);
       if (s != TCL_OK) return TCL_ERROR;

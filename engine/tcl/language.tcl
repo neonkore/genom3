@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -41,33 +41,6 @@ proc lang { language } {
   set language::current [language::support $language]
 }
 slave alias lang lang
-
-
-# --- cname ----------------------------------------------------------------
-
-#/ @nodebeproc{cname, Cannonical object name}
-# @deffn {TCL Backend} {cname} @var{string|object}
-#
-# Return the cannonical name of the @var{string} or the @genom{} @var{object},
-# according to the current language.
-#
-# If a regular string is given, this procedure typically maps IDL :: scope
-# separator into the native scope separator symbol for the current language.
-# If a codel object is given, this procedure returns the symbol name of the
-# codel for the current language.
-#
-# @@args
-# @item @var{string}
-# The name to convert.
-# @item @var{object}
-# A @genom{} object. Only class @code{codel} is supported at the moment.
-# @@end args
-# @end deffn
-#
-proc cname { object } {
-  return [${language::current}::cname $object]
-}
-slave alias cname cname
 
 
 # --- comment --------------------------------------------------------------
@@ -250,6 +223,35 @@ slave alias wrap wrap
 
 
 namespace eval language {
+
+  # --- cname --------------------------------------------------------------
+
+  #/ @nodebeproc{cname, Cannonical object name}
+  # @deffn {TCL Backend} {cname} @var{string|object}
+  #
+  # Return the cannonical name of the @var{string} or the @genom{}
+  # @var{object}, according to the current language.
+  #
+  # If a regular string is given, this procedure typically maps IDL :: scope
+  # separator into the native scope separator symbol for the current language.
+  # If a codel object is given, this procedure returns the symbol name of the
+  # codel for the current language.
+  #
+  # @@args
+  # @item @var{string}
+  # The name to convert.
+  # @item @var{object}
+  # A @genom{} object.
+  # @@end args
+  # @end deffn
+  #
+  proc cname { object } {
+    variable current
+    return [${current}::cname $object]
+  }
+  slave alias language::cname language::cname
+  namespace export cname
+
 
   # --- mapping ------------------------------------------------------------
 

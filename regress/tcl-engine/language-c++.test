@@ -91,7 +91,7 @@ expect out '
 
 # --- language cname c++ ---------------------------------------------------
 #
-testing '[cname]'
+testing '[language cname]'
 
 cat >run.gen <<'EOF'
 struct s {
@@ -112,9 +112,9 @@ EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 lang c++
-puts 1,[cname [[dotgen type ::s::ss::a] fullname]]
-puts 2,[cname [[lindex [[dotgen component] task] 0] codel]]
-puts 3,[cname [[[dotgen component] service] codel]]
+puts 1,[[dotgen type ::s::ss::a] cname]
+puts 2,[[[lindex [[dotgen component] task] 0] codel] cname]
+puts 3,[[[[dotgen component] service] codel] cname]
 EOF
 expect out '
 	/^1,s::ss::a$/ {next}
@@ -141,7 +141,7 @@ set c [[[dotgen component] service] validate]
 puts [$c signature -sep-]
 EOF
 expect out '
-	/^c::event-sep-codel\(void\)$/ {next}
+	/^genom::event-sep-codel\(void\)$/ {next}
 	{exit 2}
 '
 

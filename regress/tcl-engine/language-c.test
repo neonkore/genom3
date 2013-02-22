@@ -91,7 +91,7 @@ expect out '
 
 # --- language cname c -----------------------------------------------------
 #
-testing '[cname]'
+testing '[language cname]'
 
 cat >run.gen <<'EOF'
 struct s {
@@ -112,9 +112,9 @@ EOF
 
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 lang c
-puts 1,[cname [[dotgen type ::s::ss::a] fullname]]
-puts 2,[cname [[lindex [[dotgen component] task] 0] codel]]
-puts 3,[cname [[[dotgen component] service] codel]]
+puts 1,[[dotgen type ::s::ss::a] cname]
+puts 2,[[[lindex [[dotgen component] task] 0] codel] cname]
+puts 3,[[[[dotgen component] service] codel] cname]
 EOF
 expect out '
 	/^1,s_ss_a$/ {next}
@@ -153,11 +153,11 @@ foreach c [[[dotgen component] service] codels] {
 }
 EOF
 expect out '
-	/^comp_event-sep-c\(const int32_t \*a, int32_t \*b\)$/ {next}
-	/^comp_event-sep-d\(const int16_t \*a1, int16_t \*b1\)$/ {next}
-	/^comp_event-sep-e\(const comp_a \*a2, const comp_b \*b2\)$/ {next}
-	/^comp_event-sep-f\(const comp_am \*a3\)$/ {next}
-	/^comp_event-sep-g\(const comp_bm \*b3\)$/ {next}
+	/^genom_event-sep-c\(const int32_t \*a, int32_t \*b\)$/ {next}
+	/^genom_event-sep-d\(const int16_t \*a1, int16_t \*b1\)$/ {next}
+	/^genom_event-sep-e\(const comp_a \*a2, const comp_b \*b2\)$/ {next}
+	/^genom_event-sep-f\(const comp_am \*a3\)$/ {next}
+	/^genom_event-sep-g\(const comp_bm \*b3\)$/ {next}
 	{exit 2}
 '
 

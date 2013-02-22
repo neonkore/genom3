@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012 LAAS/CNRS
+ * Copyright (c) 2010,2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -100,15 +100,40 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case taskidx_throws: {
-      prop_s p = hash_find(task_props(t), prop_strkind(PROP_THROWS));
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("lsort", -1),
+        Tcl_NewStringObj("-unique", -1),
+        NULL,
+      };
+      prop_s p;
       hiter i;
 
       r = Tcl_NewListObj(0, NULL);
+
+      p = hash_find(comp_props(task_comp(t)), prop_strkind(PROP_THROWS));
       if (p)
-	for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
-	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
-	}
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      p = hash_find(task_props(t), prop_strkind(PROP_THROWS));
+      if (p)
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      argv[2] = r;
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      Tcl_IncrRefCount(argv[2]);
+      s = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[2]);
+      Tcl_DecrRefCount(argv[1]);
+      Tcl_DecrRefCount(argv[0]);
+      if (s != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
       break;
     }
 
@@ -141,21 +166,34 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case taskidx_fsm: {
+      idltype_s e;
       codel_s c;
       hiter i;
 
       if (objc < 3) {
-	r = Tcl_NewListObj(0, NULL);
-	for(hash_first(task_fsm(t), &i); i.current; hash_next(&i)) {
-	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(i.key, -1));
-	}
+        r = Tcl_NewListObj(0, NULL);
+        for(hash_first(task_fsm(t), &i); i.current; hash_next(&i)) {
+          e = type_find(i.key); assert(e);
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(e), -1));
+        }
       } else {
-	c = hash_find(task_fsm(t), Tcl_GetString(objv[2]));
-	if (c)
-	  r = Tcl_NewStringObj(codel_genref(c), -1);
-	else
-	  r = Tcl_NewListObj(0, NULL);
+        c = hash_find(task_fsm(t), Tcl_GetString(objv[2]));
+        if (!c) {
+          Tcl_Obj *argv[] = { objv[2], Tcl_NewStringObj("fullname", -1) };
+
+          Tcl_IncrRefCount(argv[1]);
+          s = Tcl_EvalObjv(interp, 2, argv, TCL_EVAL_GLOBAL);
+          Tcl_DecrRefCount(argv[1]);
+          if (s == TCL_OK)
+            c = hash_find(task_fsm(t),
+                          Tcl_GetString(Tcl_GetObjResult(interp)));
+        }
+
+        if (c)
+          r = Tcl_NewStringObj(codel_genref(c), -1);
+        else
+          r = Tcl_NewListObj(0, NULL);
       }
       break;
     }

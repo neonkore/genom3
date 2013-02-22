@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -123,7 +123,7 @@ scope_addtype(scope_s s, idltype_s t)
   assert(s); assert(t);
 
   /* check name does not clash with either parent/children scopes or types */
-  if (!strcmp(type_name(t), s->name)) {
+  if (s->kind == SCOPE_MODULE && !strcmp(type_name(t), s->name)) {
     parserror(type_loc(t),
 	      "declaration of '%s' clashes with name of enclosing module",
 	      type_name(t));
@@ -134,10 +134,10 @@ scope_addtype(scope_s s, idltype_s t)
   o = hash_find(s->idltypes, type_name(t));
   if (o) {
     parserror(type_loc(t),
-	      "declaration of '%s' clashes with existing %s",
-	      type_name(t), type_strkind(type_kind(o)));
+              "declaration of '%s' clashes with existing %s",
+              type_name(t), type_strkind(type_kind(o)));
     parsenoerror(type_loc(o), "  %s '%s' declared here",
-		 type_strkind(type_kind(o)), type_name(o));
+                 type_strkind(type_kind(o)), type_name(o));
     return errno = EEXIST;
   }
 
@@ -234,9 +234,10 @@ scope_push(tloc l, const char *name, scopekind k)
 
   /* check name does not clash with either parent scope or types */
   if (!strcmp(name, current->name)) {
-    parserror(l, "declaration of '%s' clashes with name of enclosing module",
-	      name);
-    parsenoerror(current->loc, "  module '%s' declared here", current->name);
+    parserror(l, "declaration of '%s' clashes with name of enclosing %s",
+              name, scope_strkind(current->kind));
+    parsenoerror(current->loc, "  %s '%s' declared here",
+                 scope_strkind(current->kind), current->name);
     errno = EEXIST;
     return NULL;
   }
@@ -416,6 +417,7 @@ scope_strkind(scopekind k)
     case SCOPE_MODULE:		return "module";
     case SCOPE_STRUCT:		return "struct";
     case SCOPE_UNION:		return "union";
+    case SCOPE_EXCEPTION:	return "exception";
   }
 
   assert(0);

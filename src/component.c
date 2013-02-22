@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -41,7 +41,6 @@ struct comp_s {
   scope_s scope;
   scope_s idsscope;
 
-  idltype_s events;
   hash_s props;
   hash_s tasks;
   hash_s ports;
@@ -56,16 +55,14 @@ const char *	comp_name(comp_s c) { assert(c); return c->name; }
 compkind	comp_kind(comp_s c) { assert(c); return c->kind; }
 scope_s		comp_scope(comp_s c) { assert(c); return c->scope; }
 scope_s		comp_idsscope(comp_s c) { assert(c); return c->idsscope; }
-idltype_s	comp_eventtype(comp_s c) { assert(c); return c->events; }
 hash_s		comp_props(comp_s c) { assert(c); return c->props; }
 hash_s		comp_tasks(comp_s c) { assert(c); return c->tasks; }
 hash_s		comp_ports(comp_s c) { assert(c); return c->ports; }
 hash_s		comp_services(comp_s c) { assert(c); return c->services; }
 hash_s		comp_remotes(comp_s c) { assert(c); return c->remotes; }
 
-static idltype_s	comp_ievcreate(tloc l, const char *name);
 static void		comp_dopragma(comp_s c);
-static int		comp_extends(comp_s c, hash_s e, propkind k);
+static int		comp_extends(tloc l, comp_s c, hash_s e, propkind k);
 static int		comp_merge(comp_s c, comp_s m, propkind k);
 
 /** the components and interfaces of a dotgen file */
@@ -99,8 +96,10 @@ comp_find(const char *name)
 comp_s
 comp_push(tloc l, const char *name, compkind kind)
 {
+  static const char *stdev[] = COMPONENT_STD_EVENTS;
   comp_s c, t;
   scope_s scomp, spop, sids;
+  int i;
   assert(name);
 
   /* push component scope */
@@ -126,7 +125,7 @@ comp_push(tloc l, const char *name, compkind kind)
 
   /* create ids scope */
   sids = scope_push(l, prop_strkind(PROP_IDS), SCOPE_STRUCT);
-  if (!sids) return NULL;
+  if (!sids) goto error;
   scope_detach(sids);
   scope_pop();
 
@@ -142,13 +141,12 @@ comp_push(tloc l, const char *name, compkind kind)
   c->kind = kind;
   c->scope = scomp;
   c->idsscope = sids;
-  c->events = comp_ievcreate(l, name);
   c->props = hash_create(strings(name, " property list", NULL), 2);
   c->tasks = hash_create(strings(name, " tasks", NULL), 1);
   c->ports = hash_create(strings(name, " ports", NULL), 1);
   c->services = hash_create(strings(name, " services", NULL), 2);
   c->remotes = hash_create(strings(name, " remotes", NULL), 1);
-  if (!c->events || !c->tasks || !c->ports || !c->services || !c->remotes) {
+  if (!c->tasks || !c->ports || !c->services || !c->remotes) {
     if (c->tasks) hash_destroy(c->tasks, 1);
     if (c->ports) hash_destroy(c->ports, 1);
     if (c->services) hash_destroy(c->services, 1);
@@ -166,6 +164,11 @@ comp_push(tloc l, const char *name, compkind kind)
 
   active = c;
   xwarnx("created %s %s", comp_strkind(kind), c->name);
+
+  /* create std events for regular components (not interfaces) */
+  if (kind == COMP_REGULAR)
+    for(i=0; i<sizeof(stdev)/sizeof(stdev[0]); i++)
+      if (!comp_addevent(l, stdev[i])) goto error;
 
   /* apply #pragma directives */
   comp_dopragma(c);
@@ -189,6 +192,10 @@ comp_pop(void)
   hiter i;
   int e = 0;
   assert(active);
+
+  /* check tasks */
+  for(hash_first(c->tasks, &i); i.current; hash_next(&i))
+    e |= task_check(i.value);
 
   /* check services */
   for(hash_first(c->services, &i); i.current; hash_next(&i))
@@ -287,7 +294,7 @@ comp_addprop(tloc l, prop_s p)
     case PROP_PROVIDES:
     case PROP_USES:
       s = prop_merge(comp_props(c), p, 0/*ignore_dup*/);
-      if (!s) s = comp_extends(c, prop_hash(p), prop_kind(p));
+      if (!s) s = comp_extends(l, c, prop_hash(p), prop_kind(p));
       return s;
       break;
 
@@ -351,6 +358,34 @@ comp_addids(tloc l, scope_s s)
 }
 
 
+/* --- comp_addiev --------------------------------------------------------- */
+
+/** Add an event to a component
+ */
+idltype_s
+comp_addevent(tloc l, const char *name)
+{
+  comp_s c = comp_active();
+  idltype_s e;
+  assert(c && name);
+  assert(c->scope == scope_current());
+
+  /* reuse if it exists */
+  e = type_find(name);
+  if (e && type_kind(e) == IDL_EVENT) return e;
+
+  /* prevent creating in other scopes */
+  if (strstr(name, "::")) {
+    parserror(l, "cannot create event %s outside current scope", name);
+    errno = ENOENT;
+    return NULL;
+  }
+
+  /* create */
+  return type_newbasic(l, name, IDL_EVENT);
+}
+
+
 /* --- comp_strkind -------------------------------------------------------- */
 
 /** Return a component kind as a string
@@ -365,52 +400,6 @@ comp_strkind(compkind k)
   }
 
   assert(0);
-  return NULL;
-}
-
-
-/* --- comp_ievcreate ------------------------------------------------------ */
-
-/** Create component internal event type
- */
-static idltype_s
-comp_ievcreate(tloc l, const char *name)
-{
-  const char *stdev[] = COMPONENT_EVENT_STD_NAMES;
-  const char *stdthrow[] = COMPONENT_THROW_STD_NAMES;
-  idltype_s t, e;
-  hash_s h;
-  int i;
-
-  /* create standard events */
-  h = hash_create("enumerator list", 10);
-  if (!h) goto error;
-
-  for(i=0; i<sizeof(stdev)/sizeof(stdev[0]); i++) {
-    e = type_newenumerator(l, stdev[i]);
-    if (!e) goto error;
-    if (hash_insert(h, type_name(e), e, NULL)) goto error;
-    xwarnx("created component standard event %s", stdev[i]);
-  }
-
-  for(i=0; i<sizeof(stdthrow)/sizeof(stdthrow[0]); i++) {
-    e = type_newenumerator(l, stdthrow[i]);
-    if (!e) goto error;
-    if (hash_insert(h, type_name(e), e, NULL)) goto error;
-    xwarnx("created component standard event %s", stdthrow[i]);
-  }
-
-  /* create enum */
-  t = type_newenum(l, COMPONENT_EVENTTYPE_NAME, h);
-  if (!t) goto error;
-
-  xwarnx("created component internal event type %s %s",
-	 type_strkind(type_kind(t)), type_fullname(t));
-  return t;
-
-error:
-  parserror(l, "failed to create component internal event type '%s'",
-	    strings(name, "::" COMPONENT_EVENTTYPE_NAME, NULL));
   return NULL;
 }
 
@@ -443,54 +432,10 @@ comp_dopragma(comp_s c)
 }
 
 
-/* --- comp_addiev --------------------------------------------------------- */
-
-
-/** Add internal event to component
- */
-int
-comp_addievs(tloc l, hash_s h, int nostd)
-{
-  const char *stdev[] = COMPONENT_EVENT_STD_NAMES;
-  comp_s c = comp_active();
-  idltype_s e;
-  hiter i;
-  int r, v;
-  assert(c && h);
-
-  r = 0;
-  for(hash_first(h, &i); i.current; hash_next(&i)) {
-
-    if (nostd) {
-      for(v=0; v<sizeof(stdev)/sizeof(stdev[0]); v++)
-        if (!strcmp(i.key, stdev[v])) {
-          parserror(l, "event '%s' is reserved and cannot be thrown", i.key);
-          r = r?r:EINVAL;
-          break;
-        }
-    }
-
-    e = scope_findtype(c->scope, i.key);
-    if (!e || type_kind(e) != IDL_ENUMERATOR) {
-      e = type_addenumerator(l, c->events, i.key);
-      if (e)
-	xwarnx("added component internal event %s", type_name(e));
-      else {
-	parserror(l, "failed to create component internal event '%s'", i.key);
-	r = r?r:EINVAL;
-      }
-    }
-    hash_set(h, i.key, e);
-  }
-
-  return errno = r;
-}
-
-
 /* --- comp_extends -------------------------------------------------------- */
 
 static int
-comp_extends(comp_s c, hash_s extends, propkind k)
+comp_extends(tloc l, comp_s c, hash_s extends, propkind k)
 {
   hiter i;
   int s, e = 0;

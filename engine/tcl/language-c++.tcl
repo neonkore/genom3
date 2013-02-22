@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -112,15 +112,16 @@ namespace eval language::c++ {
 	    {double}			{ set d "double" }
 	    {char}			{ set d "int8_t" }
 	    {octet}			{ set d "uint8_t" }
+            {event}			{ set d "genom::event" }
 	    {any}			{ error "type any not supported yet" }
 
 	    {const}			-
 	    {enum}			-
-	    {enumerator}		-
 	    {struct}			-
 	    {union}			-
 	    {typedef}			{ set d [cname [$type fullname]] }
 
+	    {enumerator}		-
 	    {struct member}		-
 	    {union member}		-
 	    {forward struct}		-
@@ -240,7 +241,7 @@ namespace eval language::c++ {
     # Return the C++ signature of a codel
     #
     proc signature { codel {symchar " "} {location 0}} {
-	set ret [declarator [$codel return]]
+	set ret genom::event
 	set sym [cname $codel]
 	set arg [list]
 	foreach p [$codel parameters] {
@@ -591,9 +592,8 @@ namespace eval language::c++ {
     proc cname { object } {
 	if {![catch {$object class} class]} {
 	    switch -- $class {
-		codel	{
-                  set object [$object name]
-		}
+              codel	{ set object [$object name] }
+              type	{ set object [$object fullname] }
 	    }
 	}
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -46,9 +46,6 @@ namespace eval object {
   # from digest).
   #
   proc component-digest { component } {
-    md5::update events
-    type-digest [$component event]
-
     foreach p [$component ports] {
       md5::update port
       md5::update [$p kind]
@@ -60,6 +57,9 @@ namespace eval object {
       md5::update [$s kind]
       md5::update [$s name]
       service-digest $s
+      foreach t [$s throws] {
+        type-digest $t
+      }
     }
   }
 

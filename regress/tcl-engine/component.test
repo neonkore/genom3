@@ -14,3 +14,17 @@ EOF
 run 2 ${GENOM_BIN} interactive -b run.gen <<EOF
 puts [[dotgen component] ids]
 EOF
+
+
+# --- component digest -----------------------------------------------------
+#
+testing '[$component digest]'
+
+cat >run.gen <<EOF
+component c;
+component d;
+EOF
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+lassign [dotgen component] c d
+if {[$c digest] != [$d digest]} { error digest }
+EOF

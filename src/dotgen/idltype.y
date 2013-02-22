@@ -74,6 +74,10 @@ type_dcl:
   {
     $$ = type_newbasic(@1, $2, IDL_NATIVE);
   }
+  | EXCEPTION exception_list semicolon
+  {
+    $$ = $2;
+  }
   | forward_dcl
 ;
 
@@ -106,6 +110,7 @@ struct_type: STRUCT scope_push_struct '{' member_list '}'
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
+    $$ = NULL;
 
     if (scope_name(s)[0] == '&') {
       /* there was an error during the creation of the scope. */
@@ -124,6 +129,7 @@ struct_type: STRUCT scope_push_struct '{' member_list '}'
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
+    $$ = NULL;
 
     if (scope_name(s)[0] == '&') {
       /* there was an error during the creation of the scope. */
@@ -140,6 +146,7 @@ union_type:
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
+    $$ = NULL;
 
     if (scope_name(s)[0] == '&') {
       /* there was an error during the creation of the scope. */
@@ -166,6 +173,7 @@ union_type:
   {
     scope_s s = scope_detach(scope_pop());
     assert(s == $2);
+    $$ = NULL;
 
     if (scope_name(s)[0] == '&') {
       /* there was an error during the creation of the scope. */
@@ -174,6 +182,29 @@ union_type:
       parserror(@1, "dropped declaration for '%s'", scope_name(s));
 
     scope_destroy(s);
+  }
+;
+
+exception_list: exception_dcl | exception_list ',' exception_dcl;
+
+exception_dcl: exception_name opt_member_list
+  {
+    scope_s s = scope_detach(scope_pop());
+    assert(s == $1);
+    $$ = NULL;
+
+    if (scope_name(s)[0] == '&') {
+      /* there was an error during the creation of the scope. */
+      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
+      scope_destroy(s);
+      break;
+    }
+
+    $$ = type_newexception(@1, scope_name(s), s);
+    if (!$$) {
+      parserror(@1, "dropped declaration for '%s'", scope_name(s));
+      scope_destroy(s);
+    }
   }
 ;
 

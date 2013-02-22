@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -63,7 +63,7 @@ service_s *	codel_service(codel_s c) { assert(c); return &c->service; }
 void	codel_setkind(codel_s c, codelkind k) { assert(c); c->kind = k; }
 
 static codel_s	codel_find(const char *name);
-static void	connectivity(hash_s fsm, codel_s node, int start);
+static void	connectivity(hash_s fsm, comp_s comp, codel_s node, int start);
 
 
 /* --- codel_create -------------------------------------------------------- */
@@ -106,18 +106,6 @@ codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
 
   c->connected.start = c->connected.stop = c->connected.ether = 0;
 
-  if (!yields) {
-    /* validation codels return OK, or one of the exceptions of the service */
-    if (hash_insert(c->yields, "ok", "ok", NULL))
-      parserror(l, "failed to create component internal event '%s'", "ok");
-  }
-
-  /* register internal events */
-  if (comp_addievs(l, c->yields, 0) || comp_addievs(l, c->triggers, 0)) {
-    free(c);
-    return NULL;
-  }
-
   xwarnx("created codel %s", c->name);
   return c;
 }
@@ -157,7 +145,7 @@ codel_clone(codel_s codel)
 
   c->yields = hash_create("yields list", 0);
   for(hash_first(codel_yields(codel), &i); i.current; hash_next(&i)) {
-    if (hash_insert(c->yields, i.key, string(i.key), NULL)) {
+    if (hash_insert(c->yields, i.key, i.value, NULL)) {
       hash_destroy(c->yields, 1); hash_destroy(c->params, 1); free(c);
       return NULL;
     }
@@ -165,7 +153,7 @@ codel_clone(codel_s codel)
 
   c->triggers = hash_create("triggers list", 0);
   for(hash_first(codel_triggers(codel), &i); i.current; hash_next(&i)) {
-    if (hash_insert(c->triggers, i.key, string(i.key), NULL)) {
+    if (hash_insert(c->triggers, i.key, i.value, NULL)) {
       hash_destroy(c->triggers, 1); hash_destroy(c->yields, 1);
       hash_destroy(c->params, 1); free(c); return NULL;
     }
@@ -179,13 +167,6 @@ codel_clone(codel_s codel)
     c->service = comp_service(comp_active(), service_name(codel->service));
   else
     c->service = NULL;
-
-  /* register internal events */
-  if (comp_addievs(c->loc, c->yields, 0) ||
-      comp_addievs(c->loc, c->triggers, 0)) {
-    free(c);
-    return NULL;
-  }
 
   xwarnx("created codel %s", c->name);
   return c;
@@ -236,11 +217,12 @@ codel_find(const char *name)
 /** Build a fsm hash from existing codels in a list of properties
  */
 hash_s
-codel_fsmcreate(tloc l, hash_s props)
+codel_fsmcreate(tloc l, comp_s comp, hash_s props)
 {
   hash_s fsm;
   const char *e;
   codel_s c, u;
+  idltype_s ev;
   hiter i, t;
   int s;
 
@@ -254,17 +236,17 @@ codel_fsmcreate(tloc l, hash_s props)
         c = prop_codel(i.value);
 
         for(hash_first(codel_triggers(c), &t); t.current; hash_next(&t)) {
-          assert(type_kind(t.value) == IDL_ENUMERATOR);
-          e = type_name(t.value);
+          assert(type_kind(t.value) == IDL_EVENT);
+          e = type_fullname(t.value);
           s = hash_insert(fsm, e, c, NULL);
           switch(s) {
             case 0: break;
 
             case EEXIST:
               /* only one codel per event is allowed */
-              parserror(codel_loc(c), "duplicate event %s", e);
+              parserror(codel_loc(c), "duplicate codel<%s>", e);
               u = hash_find(fsm, e);
-              if (u) parserror(codel_loc(u), " event %s declared here", e);
+              if (u) parsenoerror(codel_loc(u), " codel<%s> declared here", e);
               break;
 
             default:
@@ -277,22 +259,27 @@ codel_fsmcreate(tloc l, hash_s props)
       default: break;
     }
 
-  /* check fsm connectivity if not empty */
-  if (hash_first(fsm, &i)) return fsm;
+  /* check fsm connectivity if not empty and in a regular component */
+  if (hash_first(fsm, &i) || comp_kind(comp) != COMP_REGULAR) return fsm;
 
-  c = hash_find(fsm, "start");
+  ev = scope_findtype(comp_scope(comp), "start");
+  assert(ev);
+  c = hash_find(fsm, type_fullname(ev));
   if (!c) {
-    parserror(l, "event start undeclared");
+    parserror(l, "undefined codel<%s>", type_fullname(ev));
     hash_destroy(fsm, 1);
     return NULL;
   }
-  connectivity(fsm, c, 1);
+  connectivity(fsm, comp, c, 1);
 
-  c = hash_find(fsm, "stop");
+  ev = scope_findtype(comp_scope(comp), "stop");
+  assert(ev);
+  c = hash_find(fsm, type_fullname(ev));
   if (c) {
-    connectivity(fsm, c, 0);
+    connectivity(fsm, comp, c, 0);
     if (!c->connected.ether) {
-      parserror(codel_loc(c), "event stop must eventually yield to ether");
+      parserror(codel_loc(c), "codel<%s> must eventually yield to ether",
+                type_fullname(ev));
       hash_destroy(fsm, 1);
       return NULL;
     }
@@ -301,31 +288,40 @@ codel_fsmcreate(tloc l, hash_s props)
   for(hash_first(fsm, &i); i.current; hash_next(&i)) {
     c = i.value;
     if (!c->connected.start && !c->connected.stop)
-      parserror(codel_loc(c), "unreachable event %s", i.key);
+      parserror(codel_loc(c), "codel<%s> not reached", i.key);
   }
 
   return fsm;
 }
 
 static void
-connectivity(hash_s fsm, codel_s node, int start)
+connectivity(hash_s fsm, comp_s comp, codel_s node, int start)
 {
+  idltype_s sleep, stop, ether;
   const char *e;
   codel_s n;
   hiter y;
   int r;
 
+  sleep = scope_findtype(comp_scope(comp), "sleep");
+  stop = scope_findtype(comp_scope(comp), "stop");
+  ether = scope_findtype(comp_scope(comp), "ether");
+  assert(sleep && stop && ether);
+
   if (start) node->connected.start = 1; else node->connected.stop = 1;
   for(hash_first(codel_yields(node), &y); y.current; hash_next(&y)) {
-    assert(type_kind(y.value) == IDL_ENUMERATOR);
-    e = type_name(y.value);
+    assert(type_kind(y.value) == IDL_EVENT);
+    e = type_fullname(y.value);
 
     n = hash_find(fsm, e);
     if (!n) {
-      if (!strcmp(e, "ether")) { node->connected.ether = 1; continue; }
-      if (!strcmp(e, "stop") || !strcmp(e, "sleep")) continue;
+      if (!strcmp(e, type_fullname(ether))) {
+        node->connected.ether = 1; continue;
+      }
+      if (!strcmp(e, type_fullname(ether)) || !strcmp(e, type_fullname(sleep)))
+        continue;
 
-      parserror(codel_loc(node), "event %s undeclared", e);
+      parserror(codel_loc(node), "undefined codel<%s>", e);
       continue;
     }
 
@@ -333,7 +329,7 @@ connectivity(hash_s fsm, codel_s node, int start)
     if (start) n->connected.start = 1; else n->connected.stop = 1;
 
     /* successor has not yet been visited; recurse on it */
-    if (!r) connectivity(fsm, n, start);
+    if (!r) connectivity(fsm, comp, n, start);
 
     if (n->connected.ether) node->connected.ether = 1;
   }

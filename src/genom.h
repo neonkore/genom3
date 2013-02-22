@@ -125,7 +125,8 @@ typedef struct idltype_s *idltype_s;
 typedef enum scopekind {
   SCOPE_MODULE,
   SCOPE_STRUCT,
-  SCOPE_UNION
+  SCOPE_UNION,
+  SCOPE_EXCEPTION
 } scopekind;
 
 scopekind	scope_kind(scope_s s);
@@ -244,6 +245,7 @@ typedef enum idlkind {
   IDL_STRING,		/**< string */
   IDL_ANY,		/**< any */
   IDL_NATIVE,		/**< native object */
+  IDL_EXCEPTION,	/**< exception */
 
   IDL_CONST,		/**< constant */
   IDL_ENUM,		/**< enumerated type */
@@ -260,7 +262,7 @@ typedef enum idlkind {
   IDL_FORWARD_STRUCT,	/**< forward struct declaration */
   IDL_FORWARD_UNION,	/**< forward union declaration */
 
-  IDL_EVENT,		/**< event object */
+  IDL_EVENT,		/**< event */
   IDL_PORT,		/**< port object */
   IDL_REMOTE		/**< rpc object */
 } idlkind;
@@ -290,7 +292,6 @@ idltype_s	type_newsequence(tloc l, const char *name, idltype_s t,
 idltype_s	type_newconst(tloc l, const char *name, idltype_s t, cval v);
 idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
 idltype_s	type_newenumerator(tloc l, const char *name);
-idltype_s	type_addenumerator(tloc l, idltype_s e, const char *name);
 idltype_s	type_newarray(tloc l, const char *name, idltype_s t,
 			uint32_t len);
 idltype_s	type_newstruct(tloc l, const char *name, scope_s s);
@@ -298,6 +299,7 @@ idltype_s	type_newmember(tloc l, const char *name, idltype_s t);
 idltype_s	type_newunion(tloc l, const char *name, idltype_s t, scope_s s);
 idltype_s	type_newcase(tloc l, const char *name, idltype_s t, clist_s c);
 idltype_s	type_newalias(tloc l, const char *name, idltype_s t);
+idltype_s	type_newexception(tloc l, const char *name, scope_s s);
 idltype_s	type_newport(tloc l, const char *name, port_s p);
 idltype_s	type_newremote(tloc l, const char *name, remote_s r);
 int		type_renew(idltype_s t);
@@ -319,16 +321,6 @@ void		type_usage(void);
 
 
 /* --- GenoM object properties --------------------------------------------- */
-
-#define COMPONENT_EVENTTYPE_NAME	"event"
-#define COMPONENT_EVENT_STD_NAMES {					\
-    "ok", "error", "ether", "start", "stop", "sleep"			\
-      }
-#define COMPONENT_THROW_STD_NAMES {					\
-    "serialization", "disallowed", "too_many_activities",		\
-      "bad_transition", "port_io", "no_such_inport", "no_such_outport",	\
-      "remote_io", "no_such_remote", "no_such_service"			\
-      }
 
 #define ALL_SERVICE_NAME		"all"
 
@@ -396,6 +388,8 @@ const char *	prop_strkind(propkind k);
 
 /* --- component ----------------------------------------------------------- */
 
+#define COMPONENT_STD_EVENTS { "ether", "start", "stop", "sleep" }
+
 #define COMPONENT_PROP_DEFAULTS {               \
     { PROP_LANG,	"c" },                  \
     { PROP_VERSION,	"0" },                  \
@@ -426,7 +420,6 @@ const char *	comp_name(comp_s c);
 scope_s		comp_scope(comp_s c);
 scope_s		comp_idsscope(comp_s c);
 idltype_s	comp_ids(comp_s c);
-idltype_s	comp_eventtype(comp_s c);
 hash_s		comp_props(comp_s c);
 hash_s		comp_tasks(comp_s c);
 hash_s		comp_ports(comp_s c);
@@ -442,7 +435,7 @@ comp_s		comp_push(tloc l, const char *name, compkind kind);
 comp_s		comp_pop(void);
 int		comp_addprop(tloc l, prop_s p);
 idltype_s	comp_addids(tloc l, scope_s s);
-int		comp_addievs(tloc l, hash_s h, int nostd);
+idltype_s	comp_addevent(tloc l, const char *name);
 
 int		comp_dumpall(FILE *out);
 int		comp_dump(comp_s c, FILE *out);
@@ -454,6 +447,7 @@ hash_s		task_props(task_s t);
 hash_s		task_fsm(task_s t);
 
 task_s		task_create(tloc l, const char *name, hash_s props);
+int		task_check(task_s task);
 task_s		task_clone(task_s task);
 void		task_destroy(task_s t);
 
@@ -574,7 +568,7 @@ initer_s	initer_next(initer_s i);
 codel_s		codel_create(tloc l, const char *name, codelkind kind,
 			hash_s triggers, hash_s yields, hash_s params);
 codel_s		codel_clone(codel_s codel);
-hash_s		codel_fsmcreate(tloc l, hash_s props);
+hash_s		codel_fsmcreate(tloc l, comp_s comp, hash_s props);
 const char *	codel_strkind(codelkind k);
 
 param_s		param_newids(tloc l, pdir dir, const char *name,

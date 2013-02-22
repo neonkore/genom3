@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -94,12 +94,12 @@ prop_newids(tloc l, idltype_s t)
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
     case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
-    case IDL_STRUCT: case IDL_UNION:
+    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
       break;
 
     case IDL_ANY: case IDL_NATIVE:
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
-    case IDL_PORT: case IDL_REMOTE:
+    case IDL_EVENT: case IDL_PORT: case IDL_REMOTE:
       parserror(l, "invalid %s type for ids",
 		type_strkind(type_kind(type_final(t))));
       return NULL;
@@ -355,7 +355,6 @@ int
 prop_merge(hash_s p, prop_s i, int ignore_dup)
 {
   hiter j;
-  hash_s iev;
   prop_s q;
   int e = 0;
 
@@ -363,20 +362,6 @@ prop_merge(hash_s p, prop_s i, int ignore_dup)
 
   /* some properties must be recreated for current component */
   switch (prop_kind(i)) {
-    case PROP_THROWS:
-      iev = hash_create("enumerator list", 0);
-      if (!iev) { e = errno; break; }
-
-      for(hash_first(prop_hash(i), &j); j.current; hash_next(&j)) {
-        e = hash_insert(iev, j.key, string(j.key), NULL);
-        if (e) break;
-      }
-      if (comp_addievs(prop_loc(i), iev, 1/*nostd*/))
-        e = errno;
-      else
-        i->hash = iev;
-      break;
-
     case PROP_IDS:
       if (!comp_addids(type_loc(prop_type(i)),
                        type_membersscope(prop_type(i))))
@@ -401,7 +386,7 @@ prop_merge(hash_s p, prop_s i, int ignore_dup)
     /* some properties can be merged */
     switch(prop_kind(i)) {
       case PROP_THROWS: {
-        for(hash_first(iev, &j); j.current; hash_next(&j)) {
+        for(hash_first(prop_hash(i), &j); j.current; hash_next(&j)) {
           e = hash_insert(prop_hash(q), j.key, j.value, NULL);
           if (e && e != EEXIST) break; else e = 0;
         }

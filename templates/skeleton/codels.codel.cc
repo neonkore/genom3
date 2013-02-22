@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -61,7 +61,7 @@ if {$task ne ""} {'>
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
-  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] cname]">;
 }
 <' } '>
 <'}
@@ -85,7 +85,7 @@ if {$task eq ""} {
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
-  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] cname]">;
 }
 <'       } '>
 <'    } '>
@@ -112,7 +112,7 @@ foreach service [$component services] {
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
-  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] cname]">;
 }
 <'    } '>
 <' } '>

@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2010-2011 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -44,7 +44,7 @@ if {![catch {dotgen input notice} text]} {
 '>
 #include "ac<"[$component name]">.h"
 
-#include "<"[$component name]_[cname c]">_types.h"
+#include "<"[$component name]_c">_types.h"
 <'
 # --- Task codels --------------------------------------------------------
 if {$task ne ""} {'>
@@ -57,12 +57,12 @@ if {$task ne ""} {'>
 /** Codel <"[$codel name]"> of task <"[$task name]">.
  *
 <'    if {[llength [$codel triggers]]} {'>
-<'      set triggers [join [map {e {return [$e name]}} [$codel triggers]] {, }]'>
+<'      set triggers [join [map {e {return [$e cname]}} [$codel triggers]] {, }]'>
 <"[wrap " * Triggered by $triggers." { * }]">
 <'    }'>
- * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
+ * Yields to <"[join [map {e {return [$e cname]}} [$codel yields]] {, }]">.
 <'    if {[llength [$task throws]]} {'>
-<'      set throws [join [map {e {return [$e name]}} [$task throws]] {, }]'>
+<'      set throws [join [map {e {return [$e cname]}} [$task throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
 <'    }'>
  */
@@ -76,7 +76,7 @@ if {$task ne ""} {'>
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
-  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] cname]">;
 }
 <' } '>
 <'}
@@ -94,8 +94,8 @@ if {$task eq ""} {
 
 /** Validation codel <"[$codel name]"> of <"[$service kind]"> <"[$service name]">.
  *
- * Returns <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
-<'   set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
+ * Returns genom_ok.
+<'   set throws [join [map {e {return [$e cname]}} [$service throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
  */
 <'
@@ -108,7 +108,7 @@ if {$task eq ""} {
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
-  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
+  /* skeleton sample */ return genom_ok;
 }
 <'       } '>
 <'    } '>
@@ -129,12 +129,16 @@ foreach service [$component services] {
 /** Codel <"[$codel name]"> of <"[$service kind]"> <"[$service name]">.
  *
 <'   if {[llength [$codel triggers]]} {'>
-<'     set triggers [join [map {e {return [$e name]}} [$codel triggers]] {, }]'>
+<'     set triggers [join [map {e {return [$e cname]}} [$codel triggers]] {, }]'>
 <"[wrap " * Triggered by $triggers." { * }]">
 <'   }'>
- * Yields to <"[join [map {e {return [$e name]}} [$codel yields]] {, }]">.
+<'   if {[llength [$codel yields]]} {'>
+ * Yields to <"[join [map {e {return [$e cname]}} [$codel yields]] {, }]">.
+<'   } else {'>
+ * Returns genom_ok.
+<'   }'>
 <'   if {[llength [$service throws]]} {'>
-<'     set throws [join [map {e {return [$e name]}} [$service throws]] {, }]'>
+<'     set throws [join [map {e {return [$e cname]}} [$service throws]] {, }]'>
 <"[wrap " * Throws $throws." { * }]">
 <'   }'>
  */
@@ -148,7 +152,11 @@ foreach service [$component services] {
 <"[$codel signature \n]">
 {
   /* skeleton sample: insert your code */
-  /* skeleton sample */ return <"[[lindex [$codel yields] 0] declarator]">;
+<'   if {[llength [$codel yields]]} {'>
+  /* skeleton sample */ return <"[[lindex [$codel yields] 0] cname]">;
+<'   } else {'>
+  /* skeleton sample */ return genom_ok;
+<'   }'>
 }
 <'    } '>
 <' } '>

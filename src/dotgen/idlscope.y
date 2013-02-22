@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -81,8 +81,7 @@ scope_push_struct: identifier
       /* on error, still create a scope to continue the parsing
        * but with a special name -- it will be deleted afterwards */
       $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_STRUCT);
-      if (!$$) { /* still failed, just resign */ YYABORT;
-      }
+      if (!$$) { /* still failed, just resign */ YYABORT; }
     }
   }
 ;
@@ -94,6 +93,18 @@ scope_push_union: identifier
       /* on error, still create a scope to continue the parsing
        * but with a special name -- it will be deleted afterwards */
       $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_UNION);
+      if (!$$) { /* still failed, just resign */ YYABORT; }
+    }
+  }
+;
+
+exception_name: identifier
+  {
+    $$ = scope_push(@1, $1, SCOPE_EXCEPTION);
+    if (!$$) {
+      /* on error, still create a scope to continue the parsing
+       * but with a special name -- it will be deleted afterwards */
+      $$ = scope_push(@1, strings("&", $1, NULL), SCOPE_EXCEPTION);
       if (!$$) { /* still failed, just resign */ YYABORT; }
     }
   }

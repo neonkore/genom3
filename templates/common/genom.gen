@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 LAAS/CNRS
+ * Copyright (c) 2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software for any purpose
@@ -18,6 +18,24 @@
  */
 
 interface genom {
+  exception incompatible_digest {
+    struct client_digest { string<32> version; string<32> date; } client;
+    struct server_digest { string<32> version; string<32> date; } server;
+  };
+  throw incompatible_digest;
+
+  exception bad_transition { string<128> from, to; };
+  throw bad_transition;
+
+  exception interrupted { string<128> by; };
+  throw interrupted;
+
+  exception serialization, too_many_activities, disallowed;
+  throw serialization, too_many_activities, disallowed;
+
+  exception no_such_inport, no_such_outport, port_io;
+  exception no_such_remote, no_such_service, remote_io;
+
   struct state {
     string<33> digest;
     string<31> date;

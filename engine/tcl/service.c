@@ -139,15 +139,49 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case serviceidx_throws: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("lsort", -1),
+        Tcl_NewStringObj("-unique", -1),
+        NULL,
+      };
       hiter i;
 
       r = Tcl_NewListObj(0, NULL);
+
+      p = hash_find(comp_props(service_comp(s)), prop_strkind(PROP_THROWS));
+      if (p)
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      p = hash_find(service_props(s), prop_strkind(PROP_TASK));
+      if (p) {
+        p = hash_find(task_props(prop_task(p)), prop_strkind(PROP_THROWS));
+        if (p)
+          for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+            Tcl_ListObjAppendElement(
+              interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+          }
+      }
+
       p = hash_find(service_props(s), prop_strkind(PROP_THROWS));
       if (p)
-	for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
-	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
-	}
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      argv[2] = r;
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      Tcl_IncrRefCount(argv[2]);
+      e = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[2]);
+      Tcl_DecrRefCount(argv[1]);
+      Tcl_DecrRefCount(argv[0]);
+      if (e != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
       break;
     }
 
@@ -248,21 +282,34 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case serviceidx_fsm: {
+      idltype_s t;
       codel_s c;
       hiter i;
 
       if (objc < 3) {
-	r = Tcl_NewListObj(0, NULL);
-	for(hash_first(service_fsm(s), &i); i.current; hash_next(&i)) {
-	  Tcl_ListObjAppendElement(
-	    interp, r, Tcl_NewStringObj(i.key, -1));
-	}
+        r = Tcl_NewListObj(0, NULL);
+        for(hash_first(service_fsm(s), &i); i.current; hash_next(&i)) {
+          t = type_find(i.key); assert(t);
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(t), -1));
+        }
       } else {
-	c = hash_find(service_fsm(s), Tcl_GetString(objv[2]));
-	if (c)
-	  r = Tcl_NewStringObj(codel_genref(c), -1);
-	else
-	  r = Tcl_NewListObj(0, NULL);
+        c = hash_find(service_fsm(s), Tcl_GetString(objv[2]));
+        if (!c) {
+          Tcl_Obj *argv[] = { objv[2], Tcl_NewStringObj("fullname", -1) };
+
+          Tcl_IncrRefCount(argv[1]);
+          e = Tcl_EvalObjv(interp, 2, argv, TCL_EVAL_GLOBAL);
+          Tcl_DecrRefCount(argv[1]);
+          if (e == TCL_OK)
+            c = hash_find(service_fsm(s),
+                          Tcl_GetString(Tcl_GetObjResult(interp)));
+        }
+
+        if (c)
+          r = Tcl_NewStringObj(codel_genref(c), -1);
+        else
+          r = Tcl_NewListObj(0, NULL);
       }
       break;
     }

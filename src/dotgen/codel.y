@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -45,19 +45,19 @@ codel:
 ;
 
 fsm_codel:
-  event_list identifier '(' codel_parameters ')' YIELD identifier_list
+  '<' event_list '>' identifier '(' codel_parameters ')' YIELD event_list
   {
-    if (!$1 || !$7) {
-      parserror(@1, "dropped codel '%s'", $2); $$ = NULL; break;
+    if (!$2 || !$9) {
+      parserror(@4, "dropped codel '%s'", $4); $$ = NULL; break;
     }
-    $$ = codel_create(@3, $2, CODEL_SYNC, $1, $7, $4);
+    $$ = codel_create(@4, $4, CODEL_SYNC, $2, $9, $6);
   }
-  | event_list identifier '(' codel_parameters ')' error
+  | '<' event_list '>' identifier '(' codel_parameters ')' error
   {
     $$ = NULL;
-    parserror(@1, "missing 'yield' values for codel %s", $2);
-    if ($1) hash_destroy($1, 1);
-    if ($4) hash_destroy($4, 1);
+    parserror(@4, "missing 'yield' values for codel %s", $4);
+    if ($2) hash_destroy($2, 1);
+    if ($6) hash_destroy($6, 1);
   }
 ;
 
@@ -67,9 +67,21 @@ opt_async:
 ;
 
 event_list:
-  '<' identifier_list '>'
+  scoped_name
   {
-    $$ = $2;
+    idltype_s e = comp_addevent(@1, $1);
+    $$ = hash_create("event list", 2); if (!$$ || !$1 || !e) break;
+    switch(hash_insert($$, type_fullname(e), e, NULL)) {
+      case EEXIST: parserror(@1, "duplicate identifier '%s'", $1); break;
+    }
+  }
+  | event_list ',' scoped_name
+  {
+    idltype_s e = comp_addevent(@3, $3);
+    $$ = $1; if (!$3 || !e) break;
+    switch(hash_insert($$, type_fullname(e), e, NULL)) {
+      case EEXIST: parserror(@3, "duplicate identifier '%s'", $3); break;
+    }
   }
 ;
 

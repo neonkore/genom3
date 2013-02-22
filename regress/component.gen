@@ -60,6 +60,10 @@ component c {
     sequence<long,128> h;
   };
 
+  exception ERR1;
+  exception ERR2 { string<80> detail; };
+  exception ERR3 { ERR2 err2; long code; };
+
   attribute a(inout a = 0:"first attribute");
   attribute set_b(in b = { { 0 } }:"second attribute");
   attribute get_d(out d = "none");

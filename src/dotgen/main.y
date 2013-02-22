@@ -100,7 +100,7 @@
 %token <s>	OUT INOUT LOCAL IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
 %token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
-%token <s>	ASYNC REMOTE EXTENDS PROVIDES USES MULTIPLE  NATIVE
+%token <s>	ASYNC REMOTE EXTENDS PROVIDES USES MULTIPLE NATIVE EXCEPTION
 
 %type <i>	specification statement idl_statements idl_statement
 %type <i>	exports export
@@ -124,7 +124,7 @@
 
 %type <i>	module module_body
 %type <type>	const_dcl const_type
-%type <type>	type_dcl constructed_type forward_dcl
+%type <type>	type_dcl constructed_type exception_dcl forward_dcl
 %type <dcl>	declarator simple_declarator array_declarator
 %type <type>	type_spec simple_type_spec base_type_spec template_type_spec
 %type <type>	constructed_type_spec switch_type_spec
@@ -135,18 +135,19 @@
 %type <type>	boolean_type char_type octet_type any_type
 %type <type>	sequence_type string_type fixed_type named_type
 %type <type>	struct_type union_type enum_type enumerator case switch_body
-%type <type>	alias_list member member_list
+%type <type>	exception_list alias_list member member_list opt_member_list
 %type <hash>	enumerator_list
 %type <v>	case_label
 %type <vlist>	case_label_list
-%type <scope>	module_name scope_push_struct scope_push_union ids_name
+%type <scope>	module_name scope_push_struct scope_push_union
+%type <scope>	exception_name ids_name
 
 %type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
 %type <v>	or_expr xor_expr and_expr shift_expr add_expr mult_expr
 %type <v>	literal time_unit size_unit
 %type <s>	scoped_name string_literals identifier
-%type <hash>	event_list identifier_list
+%type <hash>	event_list throw_list identifier_list
 %type <vlist>	string_list
 %type <c>	semicolon
 

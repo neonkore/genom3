@@ -166,7 +166,8 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
         return NULL;
     }
     props = s->props;
-    hash_destroy(s->fsm, 1);
+    if (s->fsm) hash_destroy(s->fsm, 1);
+    s->fsm = NULL;
   }
 
   /* create empty property list if none has been defined */
@@ -198,10 +199,6 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
   /* check unwanted properties */
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
-      case PROP_THROWS:
-        if (comp_addievs(l, prop_hash(i.value), 1)) e = errno;
-        break;
-
       case PROP_SIMPLE_CODEL:
         switch(kind) {
           case S_ATTRIBUTE:
@@ -260,7 +257,7 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
         break;
 
       case PROP_TASK: case PROP_DOC: case PROP_INTERRUPTS: case PROP_BEFORE:
-      case PROP_AFTER:
+      case PROP_AFTER: case PROP_THROWS:
         /* ok */
         break;
 
@@ -304,12 +301,8 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
     s->component = comp;
     s->props = props;
     s->params = params;
+    s->fsm = NULL;
   }
-
-  /* build service's fsm */
-  s->fsm = codel_fsmcreate(l, s->props);
-  if (!s->fsm)
-    parsenoerror(l, " in %s %s declared here", service_strkind(kind), name);
 
   /* set codels parent task and service */
   for(hash_first(props, &i); i.current; hash_next(&i))
@@ -358,6 +351,20 @@ service_check(service_s service)
 {
   hiter i, j;
   int e = 0;
+
+  /* build service's fsm */
+  assert(!service->fsm);
+  service->fsm = codel_fsmcreate(
+    service->loc, service->component, service->props);
+  if (!service->fsm)
+    parsenoerror(service->loc, " in %s %s declared here",
+                 service_strkind(service->kind), service->name);
+  else if (service->kind == S_ACTIVITY && hash_first(service->fsm, &i)) {
+    parserror(service->loc, "undefined codel<start>",
+              service_strkind(service->kind), service->name);
+    parsenoerror(service->loc, " in %s %s declared here",
+                 service_strkind(service->kind), service->name);
+  }
 
   /* check service names in interrupts, before and after properties */
   for(hash_first(service->props, &i); i.current; hash_next(&i)) {

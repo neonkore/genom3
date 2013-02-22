@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 LAAS/CNRS
+ * Copyright (c) 2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -66,6 +66,19 @@ task_create(tloc l, const char *name, hash_s props)
   int e;
   assert(comp && name);
 
+  /* reopen existing task */
+  t = comp_task(comp, name);
+  if (t) {
+    /* merge properties */
+    if (props) {
+      if (prop_merge_list(t->props, props, 0/*ignore dups*/))
+        return NULL;
+    }
+    props = t->props;
+    if (t->fsm) hash_destroy(t->fsm, 1);
+    t->fsm = NULL;
+  }
+
   /* create empty property list if none has been defined */
   if (!props) {
     props = hash_create("property list", 0);
@@ -76,13 +89,9 @@ task_create(tloc l, const char *name, hash_s props)
   /* check unwanted properties */
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
-      case PROP_DOC: case PROP_PERIOD: case PROP_PRIORITY:
+      case PROP_DOC: case PROP_PERIOD: case PROP_PRIORITY: case PROP_THROWS:
       case PROP_SCHEDULING: case PROP_STACK: case PROP_FSM_CODEL:
-        break;
-
-      case PROP_THROWS:
-        /* register internal events */
-        if (comp_addievs(l, prop_hash(i.value), 1)) e = errno;
+        /* ok */
         break;
 
       case PROP_DELAY:
@@ -116,22 +125,20 @@ task_create(tloc l, const char *name, hash_s props)
     }
   if (e) return NULL;
 
-
   /* create */
-  t = malloc(sizeof(*t));
   if (!t) {
-    warnx("memory exhausted, cannot create task");
-    return NULL;
+    t = malloc(sizeof(*t));
+    if (!t) {
+      warnx("memory exhausted, cannot create task");
+      return NULL;
+    }
+
+    t->loc = l;
+    t->name = string(name);
+    t->component = comp;
+    t->props = props;
+    t->fsm = NULL;
   }
-
-  t->loc = l;
-  t->name = string(name);
-  t->component = comp;
-  t->props = props;
-
-  /* build task's fsm */
-  t->fsm = codel_fsmcreate(l, t->props);
-  if (!t->fsm) parsenoerror(l, " in task %s declared here", name);
 
   /* set codel's parent task and (NULL) service */
   for(hash_first(props, &i); i.current; hash_next(&i))
@@ -145,20 +152,37 @@ task_create(tloc l, const char *name, hash_s props)
   e = hash_insert(comp_tasks(comp), t->name, t, (hrelease_f)task_destroy);
   switch(e) {
     case 0: break;
-
     case EEXIST:
-      parserror(t->loc, "duplicate task %s", t->name);
-      task_s u = comp_task(comp, name);
-      if (u) parsenoerror(u->loc, " task %s declared here", u->name);
-      /*FALLTHROUGH*/
+      xwarnx("%s task %s in %s %s",
+             e?"updated":"created", task_name(t),
+             comp_strkind(comp_kind(comp)), comp_name(comp));
+      break;
+
     default:
       free(t);
       return NULL;
   }
 
-  xwarnx("created task %s in %s %s",
-         task_name(t), comp_strkind(comp_kind(comp)), comp_name(comp));
   return t;
+}
+
+
+/* --- task_check ---------------------------------------------------------- */
+
+/** sanity checks for a task
+ */
+int
+task_check(task_s task)
+{
+  /* build task's fsm */
+  assert(!task->fsm);
+  task->fsm = codel_fsmcreate(task->loc, task->component, task->props);
+  if (!task->fsm) {
+    parsenoerror(task->loc, " in task %s declared here", task->name);
+    return errno;
+  }
+
+  return 0;
 }
 
 

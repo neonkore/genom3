@@ -40,15 +40,15 @@ run 2 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
 component c {
-  activity s();
+  activity s() { codel<start> c() yield ether; };
 };
 EOF
-run 0 ${GENOM_BIN} -n run.gen
+run 2 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
 component c {
   task t;
-  activity s() { task t; };
+  activity s() { task t; codel<start> c() yield ether; };
 };
 EOF
 run 0 ${GENOM_BIN} -n run.gen

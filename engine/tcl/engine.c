@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -338,9 +338,9 @@ engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave, idltype_s t)
     case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_ANY:
-    case IDL_ENUMERATOR: case IDL_STRING: case IDL_PORT: case IDL_REMOTE:
-    case IDL_NATIVE:
-      /* no type reference */
+    case IDL_ENUMERATOR: case IDL_STRING: case IDL_EVENT: case IDL_PORT:
+    case IDL_REMOTE: case IDL_NATIVE:
+      /* no recursive type reference */
       s = 0;
       break;
 
@@ -362,11 +362,11 @@ engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave, idltype_s t)
       s = engine_gentype(interp, slave, type_discriminator(t));
       if (s) break;
       /*FALLTHROUGH*/
-    case IDL_STRUCT:
-    case IDL_ENUM: {
+    case IDL_STRUCT: case IDL_ENUM: case IDL_EXCEPTION: {
       hash_s h;
       hiter i;
 
+      s = 0;
       h = type_members(t); assert(h);
       for(hash_first(h, &i); i.value; hash_next(&i)) {
 	s = engine_gentype(interp, slave, i.value);
@@ -397,10 +397,6 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
   } else
     xwarnx("exported %s %s", comp_strkind(comp_kind(c)), comp_name(c));
 
-  /* internal event type */
-  s = engine_gentype(interp, slave, comp_eventtype(c));
-  if (s) return s;
-
   /* properties */
   for(hash_first(comp_props(c), &i); i.current; hash_next(&i)) {
     switch(prop_kind(i.value)) {
@@ -419,6 +415,7 @@ engine_gencomponent(Tcl_Interp *interp, Tcl_Interp *slave, comp_s c)
       case PROP_CODELS_REQUIRE: case PROP_TASK: case PROP_THROWS:
       case PROP_INTERRUPTS: case PROP_BEFORE: case PROP_AFTER:
       case PROP_EXTENDS: case PROP_PROVIDES: case PROP_USES:
+        s = 0;
         break;
     }
 
@@ -625,6 +622,16 @@ engine_gencodel(Tcl_Interp *interp, Tcl_Interp *slave, codel_s c)
   /* parameters */
   for(hash_first(codel_params(c), &i); i.current; hash_next(&i)) {
     s = engine_genparam(interp, slave, i.value);
+    if (s) return s;
+  }
+
+  /* events */
+  for(hash_first(codel_triggers(c), &i); i.current; hash_next(&i)) {
+    s = engine_gentype(interp, slave, i.value);
+    if (s) return s;
+  }
+  for(hash_first(codel_yields(c), &i); i.current; hash_next(&i)) {
+    s = engine_gentype(interp, slave, i.value);
     if (s) return s;
   }
 

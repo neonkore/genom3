@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -188,8 +188,45 @@ component_property:
 ;
 
 throw_property:
-  THROWS identifier_list semicolon
+  THROWS throw_list semicolon
   {
     $$ = $2 ? prop_newhash(@1, PROP_THROWS, $2) : NULL;
+  }
+;
+
+throw_list:
+  named_type
+  {
+    if ($1 && type_kind($1) != IDL_EXCEPTION) {
+      parserror(@1, "%s%s%s is not an exception",
+                type_strkind(type_kind($1)),
+                type_name($1)?" ":"", type_name($1)?type_name($1):"");
+      parsenoerror(type_loc($1), " %s%s%s declared here",
+                   type_strkind(type_kind($1)),
+                   type_name($1)?" ":"", type_name($1)?type_name($1):"");
+      $1 = NULL;
+    }
+    $$ = hash_create("exception list", 2); if (!$$ || !$1) break;
+    switch(hash_insert($$, type_fullname($1), $1, NULL)) {
+      case EEXIST:
+        parserror(@1, "duplicate exception '%s'", type_fullname($1)); break;
+    }
+  }
+  | throw_list ',' named_type
+  {
+    $$ = $1; if (!$3) break;
+    if ($3 && type_kind($3) != IDL_EXCEPTION) {
+      parserror(@3, "%s%s%s is not an exception",
+                type_strkind(type_kind($3)),
+                type_name($3)?" ":"", type_name($3)?type_name($3):"");
+      parsenoerror(type_loc($3), " %s%s%s declared here",
+                   type_strkind(type_kind($3)),
+                   type_name($3)?" ":"", type_name($3)?type_name($3):"");
+      break;
+    }
+    switch(hash_insert($$, type_fullname($3), $3, NULL)) {
+      case EEXIST:
+        parserror(@3, "duplicate exception '%s'", type_fullname($3)); break;
+    }
   }
 ;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012 LAAS/CNRS
+ * Copyright (c) 2011-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -45,15 +45,15 @@ int
 codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum codelidx {
-    codelidx_name, codelidx_kind, codelidx_return, codelidx_params,
-    codelidx_yields, codelidx_triggers, codelidx_task, codelidx_service,
+    codelidx_name, codelidx_kind, codelidx_params, codelidx_yields,
+    codelidx_triggers, codelidx_task, codelidx_service, codelidx_cname,
     codelidx_signature, codelidx_invoke, codelidx_loc, codelidx_class
   };
   static const char *args[] = {
     [codelidx_name] = "name", [codelidx_kind] = "kind",
-    [codelidx_return] = "return", [codelidx_params] = "parameters",
-    [codelidx_yields] = "yields", [codelidx_triggers] = "triggers",
-    [codelidx_task] = "task", [codelidx_service] = "service",
+    [codelidx_params] = "parameters", [codelidx_yields] = "yields",
+    [codelidx_triggers] = "triggers", [codelidx_task] = "task",
+    [codelidx_service] = "service", [codelidx_cname] = "cname",
     [codelidx_signature] = "signature", [codelidx_invoke] = "invoke",
     [codelidx_loc] = "loc", [codelidx_class] = "class", NULL
   };
@@ -85,22 +85,13 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       return TCL_ERROR;
     }
   }
-  switch(i) {
+  switch((enum codelidx)i) {
     case codelidx_name:
       r = Tcl_NewStringObj(codel_name(c), -1);
       break;
 
     case codelidx_kind:
       r = Tcl_NewStringObj(codel_strkind(codel_kind(c)), -1);
-      break;
-
-    case codelidx_return:
-      if (*codel_task(c))
-	r = Tcl_NewStringObj(
-	  type_genref(comp_eventtype(task_comp(*codel_task(c)))), -1);
-      else if (*codel_service(c))
-	r = Tcl_NewStringObj(
-	  type_genref(comp_eventtype(service_comp(*codel_service(c)))), -1);
       break;
 
     case codelidx_params:
@@ -140,6 +131,7 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	r = Tcl_NewStringObj(service_genref(*codel_service(c)), -1);
       break;
 
+    case codelidx_cname:
     case codelidx_signature:
     case codelidx_invoke: {
       Tcl_Obj *argv[] = {

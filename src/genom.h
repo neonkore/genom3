@@ -260,6 +260,7 @@ typedef enum idlkind {
   IDL_FORWARD_STRUCT,	/**< forward struct declaration */
   IDL_FORWARD_UNION,	/**< forward union declaration */
 
+  IDL_EVENT,		/**< event object */
   IDL_PORT,		/**< port object */
   IDL_REMOTE		/**< rpc object */
 } idlkind;
@@ -485,9 +486,6 @@ void		remote_destroy(remote_s r);
 
 
 /* --- port ---------------------------------------------------------------- */
-
-#define PORT_HANDLE_NAME		"port_handle"
-#define PORT_HANDLE_SET_NAME		"port_handle_set"
 
 typedef enum portdir {
   PORT_IN,

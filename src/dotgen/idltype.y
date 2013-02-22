@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -44,33 +44,7 @@ const_dcl:
 
 const_type:
   integer_type | char_type | boolean_type | floating_pt_type | octet_type
-  | string_type
-  | named_type
-  {
-    $$ = $1; if (!$$) break;
-
-    switch(type_kind(type_final($$))) {
-      case IDL_BOOL: case IDL_USHORT: case IDL_SHORT: case IDL_ULONG:
-      case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
-      case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
-      case IDL_ENUM:
-	break;
-
-      case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
-      case IDL_STRUCT: case IDL_UNION: case IDL_FORWARD_STRUCT:
-      case IDL_FORWARD_UNION: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
-	parserror(@1, "%s %s is not a valid constant type",
-		  type_strkind(type_kind($$)), $1);
-	parsenoerror(type_loc($$), "  %s %s declared here",
-		     type_strkind(type_kind($$)), $1);
-	$$ = NULL;
-	break;
-
-      case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
-	/* not a valid return from type_final() */
-	assert(0); break;
-    }
-  }
+  | string_type | named_type
 ;
 
 

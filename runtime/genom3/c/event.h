@@ -33,11 +33,21 @@
  * fallback to e.g. strings and the use strcmp() instead of == to compare
  * events. (note that this is the CORBA approach).
  *
+ * In C++, a name of file scope that is explicitly declared const, and not
+ * explicitly declared extern, has internal linkage, while in C it would have
+ * external linkage (C++03 Standard Annex C Compatibility C.1.2 Clause 3: basic
+ * concepts).
+ *
  * These definitions can be #ifdef'ed depending on the compiler.
  */
 typedef const char *genom_event;
 
 #define genom_weak __attribute__((weak))
+#ifdef __cplusplus
+# define genom_extern_weak extern genom_weak
+#else
+# define genom_extern_weak genom_weak
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +62,7 @@ extern "C" {
 genom_event genom_weak genom_ok = NULL;
 
 /* unknown exception */
-const char genom_weak genom_unkex_id[] = "::genom::unkex";
+const char genom_extern_weak genom_unkex_id[] = "::genom::unkex";
 typedef struct genom_unkex_detail { char what[128]; } genom_unkex_detail;
 
 static inline genom_event
@@ -63,7 +73,7 @@ genom_unkex(genom_unkex_detail *d)
 }
 
 /* generic system error */
-const char genom_weak genom_syserr_id[] = "::genom::syserr";
+const char genom_extern_weak genom_syserr_id[] = "::genom::syserr";
 typedef struct genom_syserr_detail { uint32_t code; } genom_syserr_detail;
 
 static inline genom_event

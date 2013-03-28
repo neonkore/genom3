@@ -533,7 +533,8 @@ namespace eval language::c {
 
       append m "\n#include \"genom3/c/event.h\""
       append m [genloc $type]
-      append m "\nconst char genom_weak ${n}_id\[\] = \"[$type fullname]\";"
+      append m "\nconst char genom_extern_weak "
+      append m "${n}_id\[\] = \"[$type fullname]\";"
 
       append m [genloc $type]
       if {[llength [$type members]]} {
@@ -589,7 +590,7 @@ namespace eval language::c {
       set n [$type cname]
       append m "\n#include \"genom3/c/event.h\""
       append m [genloc $type]
-      append m "\nconst char genom_weak $n\[\] = \"[$type fullname]\";"
+      append m "\nconst char genom_extern_weak $n\[\] = \"[$type fullname]\";"
       return [guard $m $n]
     }
 

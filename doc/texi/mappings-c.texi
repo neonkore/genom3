@@ -1,5 +1,5 @@
 @c
-@c Copyright (c) 2009-2012 LAAS/CNRS
+@c Copyright (c) 2009-2013 LAAS/CNRS
 @c All rights reserved.
 @c
 @c Permission to use, copy, modify,  and distribute this software for any
@@ -327,3 +327,41 @@ native C types that cannot be described in IDL. When used as a
 parameter of a function, a native type will be passed around as a
 pointer on the structure data. Memory management associated with that
 pointer must be handled by the user.
+
+@node C Exception
+@subsection Mapping for exceptions
+
+Each defined exception type is defined as a @code{struct} tag and a
+@code{typedef} with the C global name for the exception suffixed by
+@code{_detail}. An identifier for the exception is also defined, as is
+a type-specific function for raising the exception. For example:
+
+@verbatim
+      exception foo {
+        long dummy;
+      };
+@end verbatim
+
+yields the following C declarations:
+@verbatim
+      genom_event ex_foo_id = <unique identifier for exception>;
+
+      typedef struct foo_detail {
+        uint32_t dummy;
+      } foo_detail;
+
+      genom_event foo(const foo_detail *detail);
+@end verbatim
+
+The identifier for the exception uniquely identifies this exception
+type, so that any data of type @code{genom_event} can be compared to
+an exception id with the @code{==} operator.
+
+The function throwing the exception returns a @code{genom_event}
+that should be used as the return value of a codel. It makes a copy of
+the exception details.
+
+Since exceptions are allowed to have no members, but C structs must
+have at least one member, exceptions with no members map to the C
+@code{void} type and the type-specific throw function takes no
+argument.

@@ -1,5 +1,5 @@
 @c
-@c Copyright (c) 2009-2012 LAAS/CNRS
+@c Copyright (c) 2009-2013 LAAS/CNRS
 @c All rights reserved.
 @c
 @c Permission to use, copy, modify,  and distribute this software for any
@@ -57,6 +57,7 @@ languages.  For the @code{C} language, @xref{C mappings}. For the
 * C Sequence::
 * C Port::
 * C Native::
+* C Exception::
 @end menu
 @include texi/mappings-c.texi
 

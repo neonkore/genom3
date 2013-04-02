@@ -230,7 +230,9 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
 	      parserror(
                 prop_loc(j.value), "%s %s is not allowed in %s codel %s",
                 param_strsrc(param_src(j.value)),
-                port_name(param_port(j.value)),
+                param_src(j.value) == P_PORT ?
+                port_name(param_port(j.value)) :
+                remote_name(param_remote(j.value)),
                 prop_kind(i.value) == PROP_VALIDATE ? "validate" : "simple",
                 codel_name(c));
 	      e = 1; break;

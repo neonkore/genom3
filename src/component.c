@@ -478,8 +478,7 @@ comp_merge(comp_s c, comp_s m, propkind k)
         break;
 
       case PROP_USES:
-        if (!remote_create(service_loc(i.value), service_kind(i.value),
-                           service_name(i.value), service_params(i.value)))
+        if (!remote_create(service_loc(i.value), i.value))
           e = errno;
         break;
 

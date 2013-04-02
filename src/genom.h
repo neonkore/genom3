@@ -468,13 +468,12 @@ void		service_destroy(service_s s);
 
 tloc		remote_loc(remote_s r);
 const char *	remote_name(remote_s r);
-svckind		remote_kind(remote_s s);
 comp_s		remote_comp(remote_s r);
 idltype_s	remote_type(remote_s r);
 hash_s		remote_params(remote_s r);
+service_s	remote_service(remote_s r);
 
-remote_s	remote_create(tloc l, svckind kind, const char *name,
-                        hash_s params);
+remote_s	remote_create(tloc l, service_s service);
 remote_s	remote_clone(remote_s remote);
 void		remote_destroy(remote_s r);
 

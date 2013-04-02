@@ -56,19 +56,19 @@ hash_s		service_fsm(service_s s) { assert(s); return s->fsm; }
 struct remote_s {
   tloc loc;
   const char *name;
-  svckind kind;
   comp_s component;
 
   hash_s params;
   idltype_s type;
+  service_s service;
 };
 
 tloc		remote_loc(remote_s r) { assert(r); return r->loc; }
 const char *	remote_name(remote_s r) { assert(r); return r->name; }
-svckind		remote_kind(remote_s r) { assert(r); return r->kind; }
 comp_s		remote_comp(remote_s r) { assert(r); return r->component; }
 idltype_s	remote_type(remote_s r) { assert(r); return r->type; }
 hash_s		remote_params(remote_s r) { assert(r); return r->params; }
+service_s	remote_service(remote_s r) { assert(r); return r->service; }
 
 
 /* --- service_create ------------------------------------------------------ */
@@ -483,29 +483,48 @@ service_strkind(svckind k)
 /** create a remote in component
  */
 remote_s
-remote_create(tloc l, svckind kind, const char *name, hash_s params)
+remote_create(tloc l, service_s service)
 {
   comp_s comp = comp_active();
-  service_s service;
+  service_s s;
+  const char *name;
+  hash_s params;
   port_s port;
   remote_s r;
+  param_s p;
+  hiter i;
   int e;
-  assert(comp && name && params);
+  assert(comp && service);
+  name = service_name(service);
 
   /* check for already used names */
   port = comp_port(comp, name);
-  service = comp_service(comp, name);
-  if (port || service) {
+  s = comp_service(comp, name);
+  if (port || s) {
     parserror(l, "redefinition of '%s'", name);
     if (port)
       parsenoerror(port_loc(port), " port '%s' declared here", port_name(port));
-    if (service)
-      parsenoerror(service_loc(service), " %s '%s' declared here",
-                   service_strkind(service_kind(service)),
-                   service_name(service));
+    if (s)
+      parsenoerror(service_loc(s), " %s '%s' declared here",
+                   service_strkind(service_kind(s)),
+                   service_name(s));
     errno = EEXIST;
     return NULL;
   }
+
+  /* clone parameters */
+  e = 0;
+  params = hash_create("parameter list", 0);
+  assert(!param_locals());
+  param_setlocals(service_params(service));
+  for(hash_first(service_params(service), &i); i.current; hash_next(&i)) {
+    p = param_clone(i.value);
+    if (!p || hash_insert(params, i.key, p, (hrelease_f)param_destroy)) {
+      e = 1; continue;
+    }
+  }
+  param_setlocals(NULL);
+  if (e) return NULL;
 
   /* create */
   r = malloc(sizeof(*r));
@@ -516,9 +535,9 @@ remote_create(tloc l, svckind kind, const char *name, hash_s params)
 
   r->loc = l;
   r->name = string(name);
-  r->kind = kind;
   r->component = comp;
   r->params = params;
+  r->service = service;
 
   /* create underlying type */
   assert(scope_current() == comp_scope(comp));
@@ -553,27 +572,7 @@ remote_create(tloc l, svckind kind, const char *name, hash_s params)
 remote_s
 remote_clone(remote_s remote)
 {
-  remote_s r;
-  hash_s param;
-  param_s p;
-  hiter i;
-  int e;
-
-  /* clone parameters */
-  e = 0;
-  param = hash_create("parameter list", 0);
-  for(hash_first(remote_params(remote), &i); i.current; hash_next(&i)) {
-    p = param_clone(i.value);
-    if (!p || hash_insert(param, i.key, p, (hrelease_f)param_destroy)) {
-      e = 1; continue;
-    }
-  }
-  if (e) return NULL;
-
-  /* create */
-  r = remote_create(remote->loc, remote->kind, remote->name, param);
-  if (!r) hash_destroy(param, 1);
-  return r;
+  return remote_create(remote->loc, remote->service);
 }
 
 

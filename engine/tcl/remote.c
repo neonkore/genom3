@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 LAAS/CNRS
+ * Copyright (c) 2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -73,7 +73,8 @@ remote_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     case remoteidx_kind:
-      r = Tcl_NewStringObj(service_strkind(remote_kind(s)), -1);
+      r = Tcl_NewStringObj(
+        service_strkind(service_kind(remote_service(s))), -1);
       break;
 
     case remoteidx_comp:

@@ -162,8 +162,13 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
 
     /* merge properties */
     if (props) {
-      if (prop_merge_list(s->props, props, 0/*ignore dups*/))
+      assert(!param_locals());
+      param_setlocals(service_params(s));
+      if (prop_merge_list(s->props, props, 0/*ignore dups*/)) {
+        param_setlocals(NULL);
         return NULL;
+      }
+      param_setlocals(NULL);
     }
     props = s->props;
     if (s->fsm) hash_destroy(s->fsm, 1);

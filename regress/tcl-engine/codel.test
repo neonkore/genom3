@@ -10,6 +10,35 @@ testing '[$codel parameter]'
 
 cat >run.gen <<EOF
 component c {
+  function s(in long a, in long b) {
+    codel c(in a, out b);
+  };
+};
+EOF
+run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach p [[[[dotgen component] service] codel] parameter] {
+  puts -nonewline "[$p name] "
+}
+puts ""
+EOF
+expect out '
+	/^a b $/ {next}
+	{exit 2}
+'
+
+run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
+foreach p [[[[dotgen component] service] codel] parameter in] {
+  puts -nonewline "[$p name] "
+}
+puts ""
+EOF
+expect out '
+	/^a $/ {next}
+	{exit 2}
+'
+
+cat >run.gen <<EOF
+component c {
   task t;
   ids { long a; };
   port out c::ids a;

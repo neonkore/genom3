@@ -41,16 +41,19 @@ remote_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum remoteidx {
     remoteidx_name, remoteidx_kind, remoteidx_comp, remoteidx_type,
-    remoteidx_params, remoteidx_digest, remoteidx_loc, remoteidx_class
+    remoteidx_params, remoteidx_throws, remoteidx_digest, remoteidx_loc,
+    remoteidx_class
   };
   static const char *args[] = {
     [remoteidx_name] = "name",  [remoteidx_kind] = "kind",
     [remoteidx_comp] = "component", [remoteidx_type] = "type",
-    [remoteidx_params] = "parameters", [remoteidx_digest] = "digest",
-    [remoteidx_loc] = "loc", [remoteidx_class] = "class", NULL
+    [remoteidx_params] = "parameters", [remoteidx_throws] = "throws",
+    [remoteidx_digest] = "digest", [remoteidx_loc] = "loc",
+    [remoteidx_class] = "class", NULL
   };
   remote_s s = v;
   Tcl_Obj *r = NULL;
+  prop_s p;
   int e;
 
   enum remoteidx i = remoteidx_name; /* return name by default */
@@ -124,6 +127,62 @@ remote_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
           Tcl_ListObjAppendElement(
             interp, r, Tcl_NewStringObj(param_genref(i.value), -1));
       }
+      break;
+    }
+
+    case remoteidx_throws: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("lsort", -1),
+        Tcl_NewStringObj("-unique", -1),
+        NULL,
+      };
+      hiter i;
+
+      r = Tcl_NewListObj(0, NULL);
+
+      p = hash_find(comp_props(remote_comp(s)), prop_strkind(PROP_THROWS));
+      if (p)
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      p = hash_find(comp_props(service_comp(remote_service(s))),
+                    prop_strkind(PROP_THROWS));
+      if (p)
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      p = hash_find(service_props(remote_service(s)), prop_strkind(PROP_TASK));
+      if (p) {
+        p = hash_find(task_props(prop_task(p)), prop_strkind(PROP_THROWS));
+        if (p)
+          for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+            Tcl_ListObjAppendElement(
+              interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+          }
+      }
+
+      p = hash_find(service_props(remote_service(s)),
+                    prop_strkind(PROP_THROWS));
+      if (p)
+        for(hash_first(prop_hash(p), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+
+      argv[2] = r;
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[1]);
+      Tcl_IncrRefCount(argv[2]);
+      e = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[2]);
+      Tcl_DecrRefCount(argv[1]);
+      Tcl_DecrRefCount(argv[0]);
+      if (e != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
       break;
     }
 

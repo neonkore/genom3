@@ -1,0 +1,19 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+cat >run.gen <<EOF
+interface i {
+  function r(in long a, out long b);
+};
+
+component c {
+  provides i;
+
+  function r(in long a, out long b) {
+    codel c(in a, inout b);
+  };
+};
+EOF
+
+testing 'provides directive with codel implementation'
+run 0 ${GENOM_BIN} -n run.gen

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2012 LAAS/CNRS
+# Copyright (c) 2009-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -20,6 +20,7 @@ TESTS=	basics/cpp.test
 TESTS+=	basics/parser.test
 TESTS+=	basics/require.test
 TESTS+=	basics/extends.test
+TESTS+=	basics/provides.test
 TESTS+=	basics/interrupts.test
 TESTS+=	basics/initializer.test
 

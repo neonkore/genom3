@@ -250,15 +250,13 @@ would map into
 @subsection Mapping for port types
 
 Simple ports map onto an object-like C @code{struct} with a
-@code{data()}, @code{read()} or @code{write()} and @code{strerror()}
-function members. The @code{data()} function takes no parameter and
-returns a pointer on the current port data. Input ports may refresh
-their data by invoking the @code{read()} method, while output ports may
-publish new data by invoking the @code{write()} method. Both
-@code{read()} and @code{write()} return @code{0} on success, or an
-unsigned 32bits integer representing an error code. The
-@code{strerror()} method can be used to transform the error code into
-a user readable error message.
+@code{data()} and @code{read()} or @code{write()} function
+members. The @code{data()} function takes no parameter and returns a
+pointer on the current port data. Input ports may refresh their data
+by invoking the @code{read()} method, while output ports may publish
+new data by invoking the @code{write()} method. Both @code{read()} and
+@code{write()} return @code{0} on success, or an unsigned 32bits
+integer representing an error code.
 
 Ports defined with the @code{multiple} flag map onto a similar
 @code{struct}, with the difference that @code{data()}, @code{read()}
@@ -281,19 +279,16 @@ would map into
       typedef struct {
          double * (*data)();
          uint32_t (*read)(void);
-         const char * (*strerror)(uint32_t);
       } in_port;
 
       typedef struct {
          double * (*data)(const char *id);
          uint32_t (*read)(const char *id);
-         const char * (*strerror)(uint32_t);
       } multi_in_port;
 
       typedef struct {
          double * (*data)();
          uint32_t (*write)(void);
-         const char * (*strerror)(uint32_t);
       } out_port;
 
       typedef struct {
@@ -301,7 +296,6 @@ would map into
          uint32_t (*write)(const char *id);
          uint32_t (*open)(const char *id);
          uint32_t (*close)(const char *id);
-         const char * (*strerror)(uint32_t);
       } multi_out_port;
 @end verbatim
 

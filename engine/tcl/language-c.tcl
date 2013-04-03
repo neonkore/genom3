@@ -636,7 +636,6 @@ namespace eval language::c {
 
         default	{ error "invalid port direction" }
       }
-      append m "\n  const char *(*strerror)(genom_event status);"
       append m "\n} $n;"
       return $f[guard $m $n]
     }
@@ -670,7 +669,6 @@ namespace eval language::c {
       append m [genloc $type]
       append m "\ntypedef struct $n {"
       append m "\n  genom_event (*call)($arg);"
-      append m "\n  const char *(*strerror)(genom_event status);"
       append m "\n} $n;"
       return $f[guard $m $n]
     }

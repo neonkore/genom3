@@ -74,13 +74,33 @@ fixed_array_size: '[' positive_int_const ']'
 
 type_spec: simple_type_spec
   {
-    /* forward declarations are invalid type specification */
-    if ($1) if (type_kind($1) == IDL_FORWARD_STRUCT ||
-		type_kind($1) == IDL_FORWARD_UNION) {
-	parserror(@1, "cannot use %s %s before it is fully defined",
-		  type_strkind(type_kind($1)), type_name($1));
-	$$ = NULL;
+    $$ = $1; if (!$1) break;
+
+    /* forward declarations are an invalid type specification */
+    if (type_kind($1) == IDL_FORWARD_STRUCT ||
+        type_kind($1) == IDL_FORWARD_UNION) {
+      parserror(@1, "cannot use %s %s before it is fully defined",
+                type_strkind(type_kind($1)), type_name($1));
+      $$ = NULL;
+      break;
+    }
+
+    /* void exceptions are an invalid type specification */
+    if (type_kind($1) == IDL_EXCEPTION) {
+      hiter i;
+      int empty = 1;
+      for(hash_first(type_members($1), &i); i.current; hash_next(&i))
+        if (type_kind(i.value) == IDL_MEMBER) {
+          empty = 0;
+          break;
+        }
+      if (empty) {
+        parserror(@1, "cannot use void %s %s as a regular type",
+                  type_strkind(type_kind($1)), type_name($1));
+        $$ = NULL;
+        break;
       }
+    }
   }
   | constructed_type_spec;
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -69,7 +69,7 @@ namespace eval template {
 
 	if {[catch {
           uplevel #0 source $src
-          slave invokehidden source $src
+          slave eval source $src
 	} m]} {
 	    template fatal "$m"
 	}
@@ -417,7 +417,7 @@ namespace eval template {
       }
 
       return -code error -level 2 \
-          -errorinfo "error: [join $args]\n    $l" "error: [join $args]"
+          -errorinfo "[join $args]\n    $l" [join $args]
     }
     namespace export fatal
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -59,6 +59,7 @@ namespace eval engine {
     # template.tcl file). 'puts' is redefined to catch template output within
     # <' '> markups.
     interp share {} stderr slave
+    slave expose source
     slave hide puts
     slave alias puts slave invokehidden puts
     slave alias dotgen dotgen
@@ -370,152 +371,215 @@ namespace eval engine {
     # result of its evaluation by 'subst'.
     #
     proc process { src in out } {
-	variable markup
+      variable debug
+      variable markup
 
-	# initalize template program source code
-	set linenum	1
-	set code {}
+      # initalize template program source code file
+      set tpath [mktemp]
+      set tfile [::open $tpath w]
 
-	# read source and build program
-	while { ![eof $in] } {
-	    # read input by chunks of 4k, and avoid stopping on a tag limit
-	    append raw [read $in 4096]
-	    while { [string equal {<} [string index $raw end]] } {
-		if [eof $in] break
-		append raw [read $in 1]
-	    }
+      if {$debug} { puts "generating template code for $src in $tpath" }
 
-	    # look for complete tags - x is the full match including markers, o
-	    # and c are the opening and closing markers and t the enclosed
-	    # text
-	    while {[regexp $markup(full) $raw x o t c]} {
+      # read source and build program
+      while { ![eof $in] } {
+        # read input by chunks of 4k, and avoid stopping on a tag limit
+        append raw [read $in 4096]
+        while { [string equal {<} [string index $raw end]] } {
+          if [eof $in] break
+          append raw [read $in 1]
+        }
 
-		# get match indices (x is overwritten)
-		regexp -indices $markup(full) $raw x io it ic
+        # look for complete tags - x is the full match including markers, o
+        # and c are the opening and closing markers and t the enclosed
+        # text
+        while {[regexp $markup(full) $raw x o t c]} {
 
-		# no \n has been discarded yet
-		set nldiscarded 0
+          # get match indices (x is overwritten)
+          regexp -indices $markup(full) $raw x io it ic
 
-		# flush raw data before opening tag, if any
-		if {[lindex $x 0] > 0} {
+          # no \n has been discarded yet
+          set nldiscarded 0
 
-		    set notag [string range $raw 0 [lindex $x 0]-1]
+          # flush raw data before opening tag, if any
+          if {[lindex $x 0] > 0} {
 
-		    if [regexp -indices $markup(open) $notag l] {
-			incr linenum [linecount $notag 0 [lindex $l 0]]
-			error "$src:$linenum: missing closing tag"
-		    }
-		    if [regexp -indices $markup(close) $notag l] {
-			incr linenum [linecount $notag 0 [lindex $l 0]]
-			error "$src:$linenum: missing opening tag"
-		    }
+            set notag [string range $raw 0 [lindex $x 0]-1]
 
-		    # update current line number in the template file
-		    incr linenum [linecount $notag]
+            if [regexp -indices $markup(open) $notag l] {
+              error "$src:$linenum: missing closing tag"
+            }
+            if [regexp -indices $markup(close) $notag l] {
+              error "$src:$linenum: missing opening tag"
+            }
 
-		    # if the character immediately preceeding the opening <'
-		    # tag  is a \n, it is discarded.
-		    if {$o == "'" && [string index $notag end] == "\n"} {
-			set notag [string range $notag 0 end-1]
-			incr nldiscarded
-		    }
+            # if the character immediately preceeding the opening <'
+            # tag  is a \n, it is discarded.
+            if {$o == "'" && [string index $notag end] == "\n"} {
+              set notag [string range $notag 0 end-1]
+              incr nldiscarded
+            }
 
-		    # output raw data (properly quoted with 'list')
-		    append code "puts -nonewline [list $notag]\n"
-		}
+            # output raw data. One cannot use [list] to quote the text, because
+            # in case of unbalanced braces, tcl quotes everything and, in
+            # particular, newlines as \n, thus messing the line counting wrt.
+            # the original code.
+            if {$notag != ""} {
+              set notag [string map {\{ \\\{ \} \\\} \\ \\\\} $notag]
+              puts -nonewline $tfile ";\2' {$notag} '\3;"
+            }
+            if {$nldiscarded} { puts -nonewline $tfile "\n" }
+          }
 
-		# generate code to track source line number
-		append code						\
-		    "set ::__source__ \[list {$src} \[expr { "		\
-		    " $linenum - \[dict get \[info frame 2\] line\] "	\
-		    "} \]\]; "
+          # generate tag program
+          switch -- $o$c {
+            {''} {
+              puts -nonewline $tfile $t
+            }
+            {""} {
+              set t [string map {\{ \\\{ \} \\\} \\ \\\\} $t]
+              puts -nonewline $tfile ";\2'' {$t} ''\3;"
+            }
+            default {
+              if {[string equal $o $c]} {
+                error "$src:$linenum: unknown tag '$o'"
+              } else {
+                error "$src:$linenum: unbalanced tags '$o' and '$c'"
+              }
+            }
+          }
 
-		# generate tag program
-		switch -- $o$c {
-		    {''} { set s $t }
-		    {""} { set s "puts -nonewline \[subst [list $t]\]" }
-		    default {
-			if {[string equal $o $c]} {
-			    error "$src:$linenum: unknown tag '$o'"
-			} else {
-			    error "$src:$linenum: unbalanced tags '$o' and '$c'"
-			}
-		    }
-		}
-		append code "$s\n"
+          # discard processed source text - if the character immediately
+          # following the closing '> tag is a \n, it is discarded, except
+          # if a similar \n was discarded before the tag.
+          if {!$nldiscarded &&
+              $c == "'" && [string index $raw [lindex $x 1]+1] == "\n"} {
+            lset x 1 [expr [lindex $x 1] + 1]
+            puts -nonewline $tfile "\n"
+          }
+          set raw [string replace $raw 0 [lindex $x 1]]
+        }
 
-		# update current line number in the template file
-		incr linenum [linecount $t]
+        # finished processing all tags in the current buffer, now check for
+        # orphaned closing tag (error)
+        if [regexp -indices $markup(close) $raw l] {
+          error "$src:$linenum: missing opening tag"
+        }
 
-		# discard processed source text - if the character immediately
-		# following the closing '> tag is a \n, it is discarded, except
-		# if a similar \n was discarded before the tag.
-		if {!$nldiscarded && $c == "'" &&
-		    [string index $raw [lindex $x 1]+1] == "\n"} {
+        # incomplete opening tag: must read more text
+        if [regexp $markup(open) $raw] { continue }
 
-		    lset x 1 [expr [lindex $x 1] + 1]
-		    incr linenum
-		}
-		set raw [string replace $raw 0 [lindex $x 1]]
-	    }
+        # concatenate remaining raw output (properly quoted)
+        set raw [string map {\{ \\\{ \} \\\} \\ \\\\} $raw]
+        puts -nonewline $tfile ";\2' {$raw} '\3;"
+        set raw {}
+      }
 
-	    # finished processing all tags in the current buffer, now check for
-	    # orphaned closing tag (error)
-	    if [regexp -indices $markup(close) $raw l] {
-		incr linenum [linecount $raw 0 [lindex $l 0]]
-		error "$src:$linenum: missing opening tag"
-	    }
+      # finished processing all tags in the file, now check for orphaned tags
+      # (error)
+      if {[string length $raw] > 0} {
+        if [regexp -indices $markup(open) $raw l] {
+          error "$src:$linenum: missing closing tag"
+        }
+        if [regexp -indices $markup(close) $raw l] {
+          error "$src:$linenum: missing opening tag"
+        }
+      }
+      close $tfile
 
-	    # incomplete opening tag: must read more text
-	    if [regexp $markup(open) $raw] { continue }
+      # execute template program in slave interpreter
+      variable monitor
+      slave alias puts [namespace code "slave-output $out"]
+      slave eval {
+        trace add execution source leavestep {slave-monitor [slave-eline]}}
+      set s [slave eval [list catch [list source $tpath] ::__m ::__ctx]]
+      slave eval {
+        trace remove execution source leavestep {slave-monitor [slave-eline]}}
+      slave alias puts slave invokehidden puts
+      if {$s} {
+        set line ""
+        set file "<unknown file>"
+        set err [list]
+        catch {
+          set bt [slave eval set ::__backtrace]
+          foreach t [lreverse $bt] {
+            if {[dict exists $t file]} {
+              set file [dict get $t file]
+              if {[file normalize $file] == [file normalize $tpath]} {
+                set file $src
+              }
 
-	    # concatenate remaining raw output (properly quoted with 'list')
-	    append code "puts -nonewline [list $raw]\n"
-	    incr linenum [linecount $raw]
-	    set raw {}
-	}
+              if {[dict exists $t line]} {
+                set l [dict get $t line]
+                if {$l > 0} {
+                  set c [lindex [split [dict get $t cmd] \n] 0]
+                  set c [string map {
+                    ;\2''\ \{    <\"    \2''\ \{    <\"
+                    \}\ ''\3;    \">    \}\ ''\3    \">
 
-	# finished processing all tags in the file, now check for orphaned tags
-	# (error)
-	if {[string length $raw] > 0} {
-	    if [regexp -indices $markup(open) $raw l] {
-		incr linenum [linecount $raw 0 [lindex $l 0]]
-		error "$src:$linenum: missing closing tag"
-	    }
-	    if [regexp -indices $markup(close) $raw l] {
-		incr linenum [linecount $raw 0 [lindex $l 0]]
-		error "$src:$linenum: missing opening tag"
-	    }
-	}
+                    ;\2'\ \{     '>     \2'\ \{     '>
+                    \}\ '\3;     <'     \}\ '\3     <'
+                  } $c]
+                  if {[string length $c] > 40} {
+                    set c [string range $c 0 40]...
+                  }
+                  set err [linsert $err 0 "$file:$l: $c"]
 
-	# dump program in debug mode
-	variable debug
-	if {$debug} {
-	    set t [mktemp]
-	    set c [::open $t w]
-	    puts $c $code
-	    close $c
-	    puts "dumped template code for $src in $t"
-	}
+                  incr l [expr {[dict get $t errorline]-1}]
+                  set line :$l
+                }
+              }
+            }
+          }
+        }
+        if {$debug} {
+          set m "$file$line: [slave eval {dict get $__ctx -errorinfo}]"
+        } else {
+          set m "$file$line: [slave eval set ::__m]"
+        }
+        set err [linsert $err 0 $m]
+        error [join $err "\n called by: "]
+      }
 
-	# execute template program in slave interpreter
-	slave alias puts [namespace code "slave-output $out"]
-	set s [slave eval catch [list $code] __m __ctx]
-	slave alias puts slave invokehidden puts
-	if {$s} {
-	    if {![catch {slave eval set ::__source__} s]} {
-		set line [lindex $s 1]
-		catch {incr line [slave eval {dict get $__ctx -errorline}]}
-		lset s 1 $line
-		if {[dotgen genom verbose]} {
-		    set m "[join $s :]: [slave eval {dict get $__ctx -errorinfo}]"
-		} else {
-		    set m "[join $s :]: [slave eval {set __m}]"
-		}
-	    }
-	    error $m
-	}
-	return
+      return
+    }
+
+
+    # --- ' and " ----------------------------------------------------------
+
+    # The two commands that output raw template source. They have obscure names
+    # and a final dummy argument just to robustly (?) detect them and convert
+    # them back to markups when printing error backtraces.
+    #
+    slave eval {
+      proc "\2'" {text dummy} {
+        puts -nonewline [subst -noc -nov $text]
+      }
+
+      proc "\2''" {text dummy} {
+        if {[catch [list uplevel [list subst [subst -noc -nov $text]]] r]} {
+          return -level 1 -code error $r
+        }
+        puts -nonewline $r
+      }
+    }
+
+
+    # --- slave-monitor ----------------------------------------------------
+
+    # Trace slave executions and construct a backtrace upon errors.
+    #
+    slave eval {
+      set ::__backtrace {}
+
+      proc slave-monitor {eline cmd code result op} {
+        global __backtrace
+        if {$code != 1} { set __backtrace {}; return }
+
+        set f [info frame -2]
+        dict set f errorline $eline
+        lappend __backtrace $f
+        return
+      }
     }
 
 
@@ -539,16 +603,6 @@ namespace eval engine {
 
 	puts -nonewline $out [lindex $args 0]${nl}
 	return
-    }
-
-
-    # --- linecount --------------------------------------------------------
-
-    # Count the number of lines (\n) in the string, optinally starting from
-    # index 'start' and stopping at index 'end'.
-    #
-    proc linecount { s { start 0 } { end end } } {
-	return [regexp -all "\n" [string range $s $start $end]]
     }
 
 

@@ -95,6 +95,8 @@ static const char *nslist[] = {
 };
 
 
+static int	engine_eline(ClientData dummy, Tcl_Interp *interp,
+			int objc, Tcl_Obj *const objv[]);
 static int	engine_exit(ClientData dummy, Tcl_Interp *interp,
 			int objc, Tcl_Obj *const objv[]);
 
@@ -170,6 +172,9 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   slave = Tcl_CreateSlave(interp, "slave", 1/*safe*/);
   if (!slave) goto error;
 
+  if (!Tcl_CreateObjCommand(slave, "slave-eline", engine_eline, NULL, NULL))
+    goto error;
+
   /* create dotgen objects */
   if (!Tcl_CreateNamespace(interp, "::" DOTGEN_NS, NULL, NULL))
     goto error;
@@ -235,6 +240,19 @@ error:
     fprintf(stderr, "%s: %s\n",
             basename(path), Tcl_GetStringResult(interp));
   goto done;
+}
+
+
+/* --- engine_eline -------------------------------------------------------- */
+
+/** Return the current errorLine number found in Tcl_Interp. Too bad that
+ * there is no built-in command for that. */
+static int
+engine_eline(ClientData dummy, Tcl_Interp *interp,
+             int objc, Tcl_Obj *const objv[])
+{
+  Tcl_SetObjResult(interp, Tcl_NewIntObj(interp->errorLine));
+  return TCL_OK;
 }
 
 

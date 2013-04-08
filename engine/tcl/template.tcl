@@ -182,8 +182,8 @@ namespace eval template {
 		    set in [engine::open $stype $src read]
 		    if {$stype == "string"} { set src "<string>" }
 		    if {[catch {engine::process $src $in $out} m]} {
-			engine::close $in
-			template fatal $m
+                      engine::close $in
+                      return -code error $m
 		    }
 		    engine::close $in
 
@@ -398,26 +398,32 @@ namespace eval template {
     #/ @nodebeproc{template fatal, Abort template processing}
     # @deffn {TCL Backend} {template fatal} [@var{string}]
     #
-    # Print an error message and stop. In verbose mode, print the source
+    # Print an error message and stop. The message indicates the error
     # location as reported by the @code{TCL} command [info frame].
     # @end deffn
     #
     proc fatal { args } {
-      set info [info frame -1]
-      set l ""
-      if {[dict exists $info file]} {
-        append l "(file \"[file tail [dict get $info file]]\""
-        if {[dict exists $info line]} {
-          append l " line [dict get $info line]"
+      set m ""
+      for {set i 2} {$i < [info frame]-1} {incr i} {
+        set info [info frame -$i]
+        if {[dict exists $info file]} {
+          set f [dict get $info file]
+          if {[string match [dotgen template dir]/* $f]} {
+            set f [file tail $f]
+          }
+          if {[dict exists $info line]} {
+            set l [dict get $info line]
+            set c [lindex [split [dict get $info cmd] \n] 0]
+            if {[string length $c] > 40} {
+              set c [string range $c 0 40]...
+            }
+            append m "\n called by: $f:$l $c"
+          }
         }
-        append l ")"
-      }
-      if {[dict exists $info proc]} {
-        append l " in [dict get $info proc]"
       }
 
-      return -code error -level 2 \
-          -errorinfo "[join $args]\n    $l" [join $args]
+      puts stderr [info frame]
+      return -code error -level [expr {[info level]+1}] "[join $args]$m"
     }
     namespace export fatal
 

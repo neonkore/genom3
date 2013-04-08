@@ -537,7 +537,7 @@ namespace eval engine {
           set m "$file$line: [slave eval set ::__m]"
         }
         set err [linsert $err 0 $m]
-        error [join $err "\n called by: "]
+        return -code error [join $err "\n called by: "]
       }
 
       return

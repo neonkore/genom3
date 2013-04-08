@@ -63,9 +63,6 @@ namespace eval object {
       md5::update [$s kind]
       md5::update [$s name]
       service-digest $s $filter
-      foreach t [$s throws] {
-        type-digest $t $filter
-      }
     }
   }
 
@@ -84,6 +81,9 @@ namespace eval object {
       md5::update [$p dir]
       type-digest [$p type] $filter
     }
+    foreach t [$service throws] {
+      type-digest $t $filter
+    }
   }
 
 
@@ -100,6 +100,9 @@ namespace eval object {
 
       md5::update [$p dir]
       type-digest [$p type] $filter
+    }
+    foreach t [$remote throws] {
+      type-digest $t $filter
     }
   }
 
@@ -131,7 +134,7 @@ namespace eval object {
         type-digest [$type type] $filter
       }
 
-      enum - struct - union {
+      enum - struct - union - exception {
         foreach e [$type members] {
           md5::update [$e name]
           type-digest $e $filter

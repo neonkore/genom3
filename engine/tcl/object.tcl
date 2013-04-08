@@ -28,12 +28,12 @@ namespace eval object {
 
   # Compute a md5 hash of a genom object.
   #
-  proc digest { object } {
+  proc digest { object {filter {v {return 1}}} } {
     if {[catch {$object class} class]} { error "not a genom object" }
 
     md5::init
     switch $class {
-      component - service - remote - type { $class-digest $object }
+      component - service - remote - type { $class-digest $object $filter }
     }
     return [md5::final]
   }
@@ -45,20 +45,26 @@ namespace eval object {
   # Compute a md5 hash of the public interface of a component (must be called
   # from digest).
   #
-  proc component-digest { component } {
+  proc component-digest { component filter } {
+    if {![eval [list apply $filter $component]]} continue
+
     foreach p [$component ports] {
+      if {![eval [list apply $filter $p]]} continue
+
       md5::update port
       md5::update [$p kind]
       md5::update [$p name]
-      type-digest [$p datatype]
+      type-digest [$p datatype] $filter
     }
 
     foreach s [$component services] {
+      if {![eval [list apply $filter $s]]} continue
+
       md5::update [$s kind]
       md5::update [$s name]
-      service-digest $s
+      service-digest $s $filter
       foreach t [$s throws] {
-        type-digest $t
+        type-digest $t $filter
       }
     }
   }
@@ -69,10 +75,14 @@ namespace eval object {
   # Compute a md5 hash of the interface of a service (must be called from
   # digest).
   #
-  proc service-digest { service } {
+  proc service-digest { service filter } {
+    if {![eval [list apply $filter $service]]} continue
+
     foreach p [$service parameters] {
+      if {![eval [list apply $filter $p]]} continue
+
       md5::update [$p dir]
-      type-digest [$p type]
+      type-digest [$p type] $filter
     }
   }
 
@@ -82,10 +92,14 @@ namespace eval object {
   # Compute a md5 hash of the interface of a remote (must be called from
   # digest).
   #
-  proc remote-digest { remote } {
+  proc remote-digest { remote filter } {
+    if {![eval [list apply $filter $remote]]} continue
+
     foreach p [$remote parameters] {
+      if {![eval [list apply $filter $p]]} continue
+
       md5::update [$p dir]
-      type-digest [$p type]
+      type-digest [$p type] $filter
     }
   }
 
@@ -94,7 +108,9 @@ namespace eval object {
 
   # Compute a md5 hash of a type (must be called from digest).
   #
-  proc type-digest { type } {
+  proc type-digest { type filter } {
+    if {![eval [list apply $filter $type]]} continue
+
     switch -- [$type kind] {
       string {
         md5::update string
@@ -104,7 +120,7 @@ namespace eval object {
       }
 
       const - typedef - {forward struct} - {forward union} - {struct member} {
-        type-digest [$type type]
+        type-digest [$type type] $filter
       }
 
       array - sequence {
@@ -112,13 +128,13 @@ namespace eval object {
         if {![catch { $type length } l]} {
           md5::update $l
         }
-        type-digest [$type type]
+        type-digest [$type type] $filter
       }
 
       enum - struct - union {
         foreach e [$type members] {
           md5::update [$e name]
-          type-digest $e
+          type-digest $e $filter
         }
       }
 

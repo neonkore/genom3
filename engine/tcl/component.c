@@ -79,9 +79,9 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
     if (s != TCL_OK) return s;
   }
-  /* 'ports' subcommand can have additional parameters, other
+  /* 'ports' and 'digest' subcommands can have additional parameters, other
    * subcommand don't have any. */
-  if (i != compidx_ports && objc > 2) {
+  if (i != compidx_ports && i != compidx_digest && objc > 2) {
       Tcl_WrongNumArgs(interp, 0, objv, "$component subcommand");
       return TCL_ERROR;
   }
@@ -213,12 +213,13 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("object", -1),
         Tcl_NewStringObj("digest", -1),
-        objv[0]
+        objv[0],
+        objc>2 ? objv[2]:NULL
       };
 
       Tcl_IncrRefCount(argv[0]);
       Tcl_IncrRefCount(argv[1]);
-      s = Tcl_EvalObjv(interp, 3, argv, TCL_EVAL_GLOBAL);
+      s = Tcl_EvalObjv(interp, objc>2 ? 4:3, argv, TCL_EVAL_GLOBAL);
       Tcl_DecrRefCount(argv[1]);
       Tcl_DecrRefCount(argv[0]);
       if (s != TCL_OK) return TCL_ERROR;

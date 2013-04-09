@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -124,8 +124,9 @@ if {![info exists outdir]} {
 set idls [list]
 set base [file normalize $outdir]
 foreach f [dotgen input deps] {
-  if {[string match $base/* [file normalize $f]]} {
-    lappend idls $f
+  set f [file normalize $f]
+  if {[string match $base/* $f]} {
+    lappend idls [string range $f [string length $base/] end]
   }
 }
 

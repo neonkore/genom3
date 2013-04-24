@@ -1,5 +1,42 @@
 GenoM3 - Generator of robotic component
-Copyright (c) 2009-2012 LAAS/CNRS
+Copyright (c) 2009-2013 LAAS/CNRS
+
+			    Changes in genom 2.99.19
+
+Released on May 13th, 2013
+ . Added proper exceptions in lieu of integer reports. This allows services to
+   report additional information in case of abnormal termination. A few
+   incompatible changes in the codels API, the ports mapping and the remote
+   services had to be introduced.
+ . Added service local variables. Local variables are specific to each instance
+   of running services (i.e. specific to internal activities). They are useful
+   for sharing a reentrantstate among codels of reentrant services.
+ . Dropped the 'strerror()' method in ports and remotes objets. This is
+   superseeded by exceptions.
+ . Added more runtime consistency checks in the codels finite state machine.
+ . Updated C mapping of bound sequences so that it is also valid in C++ and can
+   be included in C++ code (issue with the constructor of a 'const' member).
+ . Fixed [dotgen type] tcl engine procedure not returning anonymous types.
+ . Added a [$component types visibility ?filter?] tcl engine procedure,
+   returning the list of types defined in a component (public interface and/or
+   private types).
+ . Added a [$type types] tcl engine procedure, returning the list of types
+   recursively contained in $type.
+ . Added a [$type mangle] tcl engine procedure, returning a unique ascii type
+   name suitable for use a an identifier in source code.
+ . Added a 'filter' callback in the objects digest computation, so that some
+   objects can be excluded from the digest.
+ . Improved a lot the error reporting in TCL templates.
+ . Fixed the skeleton template when invoked from another directory than the
+   .gen file.
+ . Fixed a bunch of minor bugs and added respective regression tests.
+ . Added more documentation on the builtin templates (skeleton, mappings and
+   interactive).
+ . Documented the available #pragma directives.
+ . Added a requirement on python-aafigure for managing the figures in the
+   documentation (but no figure was added yet).
+ . Fixed a bunch of minor issues in the documentation generation.
+
 
 			    Changes in genom 2.99.15
 

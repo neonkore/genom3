@@ -48,7 +48,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum typeidx {
     typeidx_kind, typeidx_name, typeidx_fullname, typeidx_scope, typeidx_fixed,
-    typeidx_final, typeidx_type, typeidx_length, typeidx_value,
+    typeidx_final, typeidx_types, typeidx_type, typeidx_length, typeidx_value,
     typeidx_valuekind, typeidx_members, typeidx_discriminator, typeidx_port,
     typeidx_remote, typeidx_cname, typeidx_mangle, typeidx_mapping,
     typeidx_declarator, typeidx_address, typeidx_deref, typeidx_argument,
@@ -58,16 +58,17 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_kind] = "kind", [typeidx_name] = "name",
     [typeidx_fullname] = "fullname", [typeidx_scope] = "scope",
     [typeidx_fixed] = "fixed", [typeidx_final] = "final",
-    [typeidx_type] = "type", [typeidx_length] = "length",
-    [typeidx_value] = "value", [typeidx_valuekind] = "valuekind",
-    [typeidx_members] = "members", [typeidx_discriminator] = "discriminator",
-    [typeidx_port] = "port", [typeidx_remote] = "remote",
-    [typeidx_cname] = "cname", [typeidx_mangle] = "mangle",
-    [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
-    [typeidx_address] = "address", [typeidx_deref] = "dereference",
-    [typeidx_argument] = "argument", [typeidx_pass] = "pass",
-    [typeidx_digest] = "digest", [typeidx_masquerade] = "masquerade",
-    [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
+    [typeidx_types] = "types", [typeidx_type] = "type",
+    [typeidx_length] = "length", [typeidx_value] = "value",
+    [typeidx_valuekind] = "valuekind", [typeidx_members] = "members",
+    [typeidx_discriminator] = "discriminator", [typeidx_port] = "port",
+    [typeidx_remote] = "remote", [typeidx_cname] = "cname",
+    [typeidx_mangle] = "mangle", [typeidx_mapping] = "mapping",
+    [typeidx_declarator] = "declarator", [typeidx_address] = "address",
+    [typeidx_deref] = "dereference", [typeidx_argument] = "argument",
+    [typeidx_pass] = "pass", [typeidx_digest] = "digest",
+    [typeidx_masquerade] = "masquerade", [typeidx_loc] = "loc",
+    [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r = NULL;
@@ -145,6 +146,24 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     case typeidx_final:
       r = Tcl_NewStringObj(type_genref(type_final(t)), -1);
       break;
+
+    case typeidx_types: {
+      Tcl_Obj *argv[] = {
+        Tcl_NewStringObj("object", -1),
+        objv[1],
+        objv[0],
+        Tcl_NewStringObj("public", -1),
+      };
+
+      Tcl_IncrRefCount(argv[0]);
+      Tcl_IncrRefCount(argv[3]);
+      s = Tcl_EvalObjv(interp, 4, argv, TCL_EVAL_GLOBAL);
+      Tcl_DecrRefCount(argv[3]);
+      Tcl_DecrRefCount(argv[0]);
+      if (s != TCL_OK) return TCL_ERROR;
+      r = Tcl_GetObjResult(interp);
+      break;
+    }
 
     case typeidx_type:
       switch(type_kind(t)) {

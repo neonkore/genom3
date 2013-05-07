@@ -24,6 +24,125 @@
 
 namespace eval object {
 
+  # --- types --------------------------------------------------------------
+
+  # Return the list of types defined by a genom object.
+  #
+  proc types { object visibility {filter {v {return 1}}} } {
+    if {[catch {$object class} class]} { error "not a genom object" }
+
+    switch $visibility {
+      public - private {}
+      default { error "bad parameter $visibility: must be public or private" }
+    }
+
+    switch $class {
+      component - type {
+        set types [$class-types $object $visibility $filter]
+      }
+
+      default { error "bad genom object type $class" }
+    }
+
+    return [dict values $types]
+  }
+  namespace export types
+
+
+  # --- component-types ----------------------------------------------------
+
+  # Return the list of types defined by a component (must be called from
+  # types).
+  #
+  proc component-types { component visibility {filter {v {return 1}}} } {
+    set types [dict create]
+    if {![eval [list apply $filter $component]]} return $types
+
+    foreach p [$component ports] {
+      set r [type-types [$p datatype] $visibility $filter]
+      set types [dict merge $types $r]
+
+      if {$visibility == "private"} {
+        set r [type-types [$p type] $visibility $filter]
+        set types [dict merge $types $r]
+      }
+    }
+
+    foreach s [$component services] {
+      foreach p [$s parameters] {
+        switch [$p dir] {
+          "inport" - "outport" {
+            # handled above
+          }
+          default {
+            set r [type-types [$p type] $visibility $filter]
+            set types [dict merge $types $r]
+          }
+        }
+      }
+
+      foreach t [$s throws] {
+        set types [dict merge $types [type-types $t $visibility $filter]]
+      }
+    }
+
+    if {$visibility == "private"} {
+      foreach r [$component remotes] {
+        foreach p [$r parameters] {
+          set r [type-types [$p type] $visibility $filter]
+          set types [dict merge $types $r]
+        }
+        foreach t [$r throws] {
+          set types [dict merge $types [type-types $t $visibility $filter]]
+        }
+      }
+
+      if {![catch {$component ids} ids]} {
+        set types [dict merge $types [type-types $ids $visibility $filter]]
+      }
+    }
+
+    return $types
+  }
+
+
+  # --- type-types ---------------------------------------------------------
+
+  # Return the list of recursive types defined by a type (must be called from
+  # types).
+  #
+  proc type-types { type visibility {filter {v {return 1}}} } {
+    if {![eval [list apply $filter $type]]} return [dict create]
+
+    set types [dict create]
+    switch -- [$type kind] {
+      array - sequence - typedef {
+        set r [type-types [$type type] $visibility $filter]
+        set types [dict merge $types $r]
+        dict set types [$type mangle] $type
+      }
+
+      {struct member} - {union member} {
+        set r [type-types [$type type] $visibility $filter]
+        set types [dict merge $types $r]
+      }
+
+      struct - union - exception {
+        foreach e [$type members] {
+          set types [dict merge $types [type-types $e $visibility $filter]]
+        }
+        dict set types [$type mangle] $type
+      }
+
+      default {
+        dict set types [$type mangle] $type
+      }
+    }
+
+    return $types
+  }
+
+
   # --- digest -------------------------------------------------------------
 
   # Compute a md5 hash of a genom object.

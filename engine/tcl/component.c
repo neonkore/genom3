@@ -50,7 +50,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     compidx_name, compidx_doc, compidx_ids, compidx_version, compidx_lang,
     compidx_email, compidx_require, compidx_crequire, compidx_clockrate,
     compidx_throws, compidx_tasks, compidx_ports, compidx_services,
-    compidx_remotes, compidx_digest, compidx_loc, compidx_class
+    compidx_remotes, compidx_types, compidx_digest, compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
@@ -59,8 +59,9 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [compidx_crequire] = "codels-require", [compidx_clockrate] = "clock-rate",
     [compidx_throws] = "throws", [compidx_tasks] = "tasks",
     [compidx_ports] = "ports", [compidx_services] = "services",
-    [compidx_remotes] = "remotes", [compidx_digest] = "digest",
-    [compidx_loc] = "loc", [compidx_class] = "class", NULL
+    [compidx_remotes] = "remotes", [compidx_types] = "types",
+    [compidx_digest] = "digest", [compidx_loc] = "loc",
+    [compidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [compidx_doc] = PROP_DOC, [compidx_version] = PROP_VERSION,
@@ -79,11 +80,16 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &i);
     if (s != TCL_OK) return s;
   }
-  /* 'ports' and 'digest' subcommands can have additional parameters, other
-   * subcommand don't have any. */
-  if (i != compidx_ports && i != compidx_digest && objc > 2) {
+  /* 'ports', 'types' and 'digest' subcommands can have additional parameters,
+   * other subcommand don't have any. */
+  if (i != compidx_ports && i != compidx_types && i != compidx_digest &&
+      objc > 2) {
       Tcl_WrongNumArgs(interp, 0, objv, "$component subcommand");
       return TCL_ERROR;
+  }
+  if (i == compidx_types && objc < 3) {
+    Tcl_WrongNumArgs(interp, 0, objv, "$component types visibility ?filter?");
+    return TCL_ERROR;
   }
 
   switch((enum compidx)i) {
@@ -209,18 +215,18 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    case compidx_types:
     case compidx_digest: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("object", -1),
-        Tcl_NewStringObj("digest", -1),
+        objv[1],
         objv[0],
-        objc>2 ? objv[2]:NULL
+        objc>2 ? objv[2]:NULL,
+        objc>3 ? objv[3]:NULL
       };
 
       Tcl_IncrRefCount(argv[0]);
-      Tcl_IncrRefCount(argv[1]);
-      s = Tcl_EvalObjv(interp, objc>2 ? 4:3, argv, TCL_EVAL_GLOBAL);
-      Tcl_DecrRefCount(argv[1]);
+      s = Tcl_EvalObjv(interp, objc+1, argv, TCL_EVAL_GLOBAL);
       Tcl_DecrRefCount(argv[0]);
       if (s != TCL_OK) return TCL_ERROR;
       r = Tcl_GetObjResult(interp);

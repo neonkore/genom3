@@ -253,6 +253,59 @@ namespace eval language {
   namespace export cname
 
 
+  # --- mangle -------------------------------------------------------------
+
+  #/ @nodebeproc{language mangle, Unique type name}
+  # @deffn {TCL Backend} {language mangle} @var{type}
+  #
+  # Return a string containing a universally unique representation of the name
+  # of the @var{type} object.
+  #
+  # @@args
+  # @item @var{type}
+  # A 'type' object.
+  # @@end args
+  # @end deffn
+  #
+  proc mangle { type } {
+    switch -- [$type kind] {
+      enum - struct - union - exception - typedef {
+        return [$type cname]
+      }
+
+      array - sequence {
+        if {[catch {$type length} l]} {
+          return dyn[$type kind]_[mangle [$type type]]
+        } else {
+          return [$type kind]${l}_[mangle [$type type]]
+        }
+      }
+
+      string {
+        if {[catch {$type length} l]} {
+          return dynstring
+        } else {
+          return string${l}
+        }
+      }
+
+      native {
+        return [$type kind][$type cname]
+      }
+
+      {struct member} - {union member} - {const} {
+        return [mangle [$type type]]
+      }
+
+      default {
+        return [language cname [$type kind]]
+      }
+    }
+  }
+  slave alias language::mangle language::mangle
+  namespace export mangle
+
+
   # --- mapping ------------------------------------------------------------
 
   #/ @nodebeproc{language mapping, IDL type language mapping}

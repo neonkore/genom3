@@ -1,5 +1,5 @@
 @c
-@c Copyright (c) 2009-2012 LAAS/CNRS
+@c Copyright (c) 2009-2013 LAAS/CNRS
 @c All rights reserved.
 @c
 @c Permission to use, copy, modify,  and distribute this software for any
@@ -66,6 +66,7 @@ Language dependent code generation
 * indent::		@htmd Generate indented text
 * ---::			@htmd Generate filler string
 * wrap::		@htmd Chop blocks of text
+* language mangle::	@htmd Unique type name
 * language mapping::	@htmd IDL type language mapping
 * language declarator::	@htmd Code for type declarations
 * language address::	@htmd Code for variable addresses

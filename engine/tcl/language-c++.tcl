@@ -60,7 +60,6 @@ namespace eval language::c++ {
 	    {struct}		{ append m [genstruct $type] }
 	    {union}		{ append m [genunion $type] }
 	    {typedef}		{ append m [gentypedef $type] }
-            {sequence}		{ append m [gensequence $type] }
 
 	    {forward struct}	-
 	    {forward union}	{ append m [genforward $type] }

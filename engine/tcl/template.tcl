@@ -422,7 +422,6 @@ namespace eval template {
         }
       }
 
-      puts stderr [info frame]
       return -code error -level [expr {[info level]+1}] "[join $args]$m"
     }
     namespace export fatal

@@ -395,6 +395,8 @@ namespace eval language::c {
     # Return the C mapping of a const
     #
     proc genconst { type } {
+        if {[catch {$type fullname}]} return ""
+
 	set n [cname [$type fullname]]
 	set t [declarator [$type type]]
 

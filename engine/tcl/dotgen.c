@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -386,7 +386,7 @@ dg_types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   l = Tcl_NewListObj(0, NULL);
   if (type_all()) {
     for(hash_first(type_all(), &i); i.current; hash_next(&i)) {
-      assert(type_fullname(i.value));
+      if (p && !type_fullname(i.value)) continue;
       if (p && !Tcl_StringMatch(type_fullname(i.value), p)) continue;
 
       Tcl_ListObjAppendElement(

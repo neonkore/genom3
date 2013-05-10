@@ -105,7 +105,7 @@ component c {
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
-foreach t [dotgen types] { puts [$t fullname] }
+foreach t [dotgen types] { catch { puts [$t fullname] } }
 EOF
 expect out '
 	/^::[ab]$/ {next}

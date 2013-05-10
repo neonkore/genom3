@@ -319,7 +319,6 @@ engine_export(Tcl_Interp *interp, Tcl_Interp *slave)
 
   if (type_all()) {
     for(hash_first(type_all(), &t); t.current; hash_next(&t)) {
-      assert(type_fullname(t.value));
       s = engine_gentype(interp, slave, t.value);
       if (s) return s;
     }

@@ -117,8 +117,21 @@ type_new(tloc l, idlkind k, const char *name)
   t->length = 0;
   t->value = (cval){ 0 };
 
-  /* don't register anything for anon types */
-  if (!name) return t;
+  /* don't register anon types in a scope, but generate a unique local name so
+   * that type_all() can return it */
+  if (!name) {
+    static unsigned int anon = 0;
+    char tmp[32];
+
+    snprintf(tmp, sizeof(tmp), "@anon%d", ++anon);
+    e = hash_insert(htypes, tmp, t, (hrelease_f)type_destroy);
+    if (e) {
+      free(t);
+      errno = e;
+      return NULL;
+    }
+    return t;
+  }
 
   /* handle forward declarations */
   c = strings(scope_fullname(s), "::", name, NULL);

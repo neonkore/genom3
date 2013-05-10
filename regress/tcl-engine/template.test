@@ -15,7 +15,7 @@ cat >run.t/template.tcl <<EOF
 template option {}
 EOF
 run 2 ${GENOM_BIN} -t . run.t -h run.gen
-expect err '/^run.t: error: help not implemented$/ {exit 0}; {exit 2}'
+expect err '/^run.t: help not implemented$/ {exit 0}; {exit 2}'
 
 # bad option spec
 cat >run.t/template.tcl <<EOF
@@ -60,7 +60,7 @@ cat >run.t/template.tcl <<EOF
 template fatal {fatal ok}
 EOF
 run 2 ${GENOM_BIN} -t . run.t run.gen
-expect err '/^run.t: error: fatal ok$/ {exit 0}; {exit 2}'
+expect err '/^run.t: fatal ok$/ {exit 0}; {exit 2}'
 
 
 # --- template message -----------------------------------------------------

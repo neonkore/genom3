@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2012 LAAS/CNRS
+# Copyright (c) 2009-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -77,7 +77,7 @@ libmain_a_CPPFLAGS += -DSYSDIR='"$(sysdir)"'
 
 # generate concatenated grammar source
 EXTRA_DIST=	$(genom3_GRAMMAR) dotgen.l
-BUILT_SOURCES=	dotgen.y
+BUILT_SOURCES=	dotgen.y genom3-dotgen.h
 CLEANFILES=	dotgen.y
 CLEANFILES+=	dotgen.c genom3-dotgen.c genom3-dotgen.h genom3-dotgen.output
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -201,12 +201,12 @@ documented separately, in each template documentation.
      passed after the template name, and before the input file name.
 
 # Environment variables
-\env CPP
+\env GENOM_CPP
      C preprocessor program
 
      Define the C preprocessor program to use. The default is \tt
-     libexec/genom-pcpp\rm. The \tt CPP\rm program must recognize \tt -I\rm and
-     \tt -D\rm arguments.
+     libexec/genom-pcpp\rm. The \tt GENOM_CPP\rm program must recognize \tt
+     -I\rm and \tt -D\rm arguments.
 
 \env PKG_CONFIG
      pkg-config utility

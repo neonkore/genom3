@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -79,7 +79,7 @@ main(int argc, char *argv[])
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
 
-  optarg = getenv("CPP");
+  optarg = getenv("GENOM_CPP");
   strlcpy(runopt.cpppath, optarg?optarg:CPPPATH, sizeof(runopt.cpppath));
 
   xwarnx_verbosity(0);

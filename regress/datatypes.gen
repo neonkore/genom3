@@ -1,5 +1,43 @@
 /* Datatypes parsing test */
 
+interface basic {
+  typedef char tc;
+  typedef long tl;
+  typedef double td;
+  typedef string ts;
+  typedef string<8> ts8;
+  typedef sequence<long> tv;
+  typedef sequence<long, 8> tv8;
+
+  typedef char tac[4];
+  typedef string tas[4];
+  typedef string<8> tas8[4];
+  typedef tv tav[4];
+  typedef tv8 tav8[4];
+
+  struct r {
+    char c;
+    long l;
+    double d;
+    string s;
+    string<8> s8;
+    sequence<long> v;
+    sequence<long, 8> v8;
+
+    char ac[4];
+    string as[4];
+    string<8> as8[4];
+    sequence<long> av[4];
+    sequence<long, 8> av8[4];
+  };
+  typedef r ar[4];
+
+  native n;
+  exception e;
+
+  port in tl p;
+};
+
 typedef long xlong;
 typedef long xlongarray[1][2];
 typedef string<16> xbstring;

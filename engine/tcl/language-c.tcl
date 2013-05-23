@@ -179,19 +179,46 @@ namespace eval language::c {
     proc address { type {var {}} } {
       switch -- [[$type final] kind] {
         string - array - native	{ return $var }
-        default			{ return "&($var)" }
+        default			{ return &($var) }
       }
     }
 
 
     # --- dereference ------------------------------------------------------
 
-    # Return the C mapping for dereferencing a pointer on a variable.
+    # Return the C mapping for dereferencing a parameter passed by value or
+    # reference.
     #
-    proc dereference { type {var {}} } {
-      switch -- [[$type final] kind] {
-        string - array - native	{ return $var }
-        default			{ return "(*$var)" }
+    proc dereference { type kind {var {}} } {
+      switch -- $kind {
+        {value}		{
+          switch -- [[$type final] kind] {
+            sequence - struct - union - exception - port - remote {
+              return *($var)
+            }
+            default {
+              return $var
+            }
+          }
+        }
+        {reference}	{
+          switch -- [[$type final] kind] {
+            string - array {
+              if {[catch {[$type final] length}]} {
+                return "*($var)"
+              } else {
+                return $var
+              }
+            }
+            default {
+              return "*($var)"
+            }
+          }
+        }
+        default	{
+          template fatal \
+              "unknown argument kind \"$kind\": must be value or reference"
+        }
       }
     }
 
@@ -202,34 +229,37 @@ namespace eval language::c {
     #
     proc argument { type kind {var {}} } {
       switch -- $kind {
-	{value}		{
-	   switch -- [[$type final] kind] {
+        {value}		{
+          switch -- [[$type final] kind] {
+             sequence - struct - union - exception - port - remote {
+               return "const [declarator $type *$var]"
+             }
              string - array - native {
                return "const [declarator $type $var]"
              }
              default {
-               return "const [declarator $type *$var]"
+               return [declarator $type $var]
              }
-	   }
-	}
-	{reference}	{
-	  switch -- [[$type final] kind] {
-	    string - array {
-	      if {[catch { [$type final] length }]} {
-		return [declarator $type *$var]
-	      } else {
-		return [declarator $type $var]
-	      }
-	    }
-	    default {
-	      return [declarator $type *$var]
-	    }
-	  }
-	}
-	default	{
-	  template fatal \
-	      "unknown argument kind \"$kind\": must be value or reference"
-	}
+           }
+        }
+        {reference}	{
+          switch -- [[$type final] kind] {
+            string - array {
+              if {[catch { [$type final] length }]} {
+                return [declarator $type *$var]
+              } else {
+                return [declarator $type $var]
+              }
+            }
+            default {
+              return [declarator $type *$var]
+            }
+          }
+        }
+        default	{
+          template fatal \
+              "unknown argument kind \"$kind\": must be value or reference"
+        }
       }
     }
 
@@ -241,42 +271,41 @@ namespace eval language::c {
     proc pass { type kind {var {}} } {
       set ftype [$type final]
       switch -- $kind {
-	{value}		{
+        {value}		{
           switch -- [$ftype kind] {
             array {
               switch -- [[[$ftype type] final] kind] {
                 array - string {
                   # need explicit cast to const type **.
                   # see http://c-faq.com/ansi/constmismatch.html
-                  set const "const [[$ftype type] declarator (*)]"
-                  return "(($const)[address $type $var])"
+                  return "((const [[$ftype type] declarator (*)])$var)"
                 }
               }
             }
+            sequence - struct - union - exception - port - remote {
+              return &($var)
+            }
           }
-          return [address $type $var]
-	}
-	{reference}	{
-	  switch -- [$ftype kind] {
-	    string - array {
-	      if {[catch { $ftype length }]} {
-		return "&($var)"
-	      } else {
-		return $var
-	      }
-	    }
-            native {
+          return $var
+        }
+        {reference}	{
+          switch -- [$ftype kind] {
+            string - array {
+              if {[catch {$ftype length}]} {
+                return "&($var)"
+              } else {
+                return $var
+              }
+            }
+            default {
               return "&($var)"
             }
-	    default {
-	      return [address $type $var]
-	    }
-	  }
-	}
-	default	{
-	  template fatal \
-	      "unknown argument kind \"$kind\": must be value or reference"
-	}
+          }
+        }
+        default	{
+          template fatal \
+              "unknown argument kind \"$kind\": must be value or reference"
+        }
       }
     }
 
@@ -741,15 +770,19 @@ namespace eval language::c {
     # comes from arrays, because name should preceede the brackets, if any.
     #
     proc cdecl { type name } {
-	set b [string first \[ $type]
-	if { $b < 0 } {
-	    if {[string index $type end] eq "*"} {
-		return "$type$name"
-	    }
-	    return "$type $name"
-	}
+      set b [string first \[ $type]
+      if { $b < 0 } {
+        set pre $type
+        set post ""
+      } else {
+        set pre [string range $type 0 $b-1]
+        set post [string range $type $b end]
+      }
 
-	return "[string range $type 0 $b-1] $name[string range $type $b end]"
+      if {[string index $pre end] eq "*"} {
+        return "$pre$name$post"
+      }
+      return "$pre $name$post"
     }
 
 

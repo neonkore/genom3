@@ -86,9 +86,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_WrongNumArgs(interp, 2, objv, "?pattern?");
       return TCL_ERROR;
     }
-  } else if (i == typeidx_declarator || i == typeidx_address ||
-             i == typeidx_deref) {
-    /* 'declarator', 'address' and 'deref' subcommands can have one additional
+  } else if (i == typeidx_declarator || i == typeidx_address) {
+    /* 'declarator' and 'address' subcommands can have one additional
      * parameter */
     if (objc > 3) {
       Tcl_WrongNumArgs(interp, 2, objv, "?var?");
@@ -100,8 +99,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_WrongNumArgs(interp, 2, objv, "?template?");
       return TCL_ERROR;
     }
-  } else if (i == typeidx_argument || i == typeidx_pass) {
-    /* 'argument' and 'pass' subcommands can have two additional parameters */
+  } else if (i == typeidx_argument || i == typeidx_pass ||
+             i == typeidx_deref) {
+    /* 'argument', 'pass' and 'deref' subcommands can have two additional
+     * parameters */
     if (objc < 3 || objc > 4) {
       Tcl_WrongNumArgs(interp, 2, objv, "kind ?var?");
       return TCL_ERROR;
@@ -261,8 +262,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case typeidx_declarator:
-    case typeidx_address:
-    case typeidx_deref: {
+    case typeidx_address: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("language::", -1),
         objv[0],
@@ -279,7 +279,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case typeidx_argument:
-    case typeidx_pass: {
+    case typeidx_pass:
+    case typeidx_deref: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("language::", -1),
         objv[0],

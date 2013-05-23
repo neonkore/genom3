@@ -384,22 +384,25 @@ namespace eval language {
   # --- dereference --------------------------------------------------------
 
   #/ @nodebeproc{language dereference, Code for dereferencing variables}
-  # @deffn {TCL Backend} {language dereference} @var{type} [@var{var}]
+  # @deffn {TCL Backend} {language dereference} @var{type} @var{kind} @
+  # [@var{var}]
   #
-  # Return an expression dereferencing the address of a variable in the current
-  # language.
+  # Return an expression dereferencing a parameter passed by value or
+  # reference, in the current language.
   #
   # @@args
   # @item @var{type}
   # A 'type' object.
+  # @item @var{kind}
+  # Must be @code{value} or @code{reference}.
   # @item @var{var}
-  # A string representing the name of a variable of type @var{type}.
+  # A string representing the name of a parameter of type @var{type}.
   # @@end args
   # @end deffn
   #
-  proc dereference { type {var {}} } {
+  proc dereference { type kind {var {}} } {
     variable current
-    return [${current}::dereference $type $var]
+    return [${current}::dereference $type $kind $var]
   }
   slave alias language::dereference language::dereference
   namespace export dereference

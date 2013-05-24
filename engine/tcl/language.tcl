@@ -132,7 +132,7 @@ slave eval [list proc indent [info args indent] [info body indent]]
 # --- --- ------------------------------------------------------------------
 
 #/ @nodebeproc{---, Generate filler string}
-# @deffn {TCL Backend} {---} [-@var{column}] @var{text} @dots{} @var{filler}
+# @deffn {TCL Backend} {-@--@--} [-@var{column}] @var{text} @dots{} @var{filler}
 #
 # This command, spelled with 3 dashes (@code{-}), return a string of length
 # @var{column} (70 by default), starting with @var{text} and filled with the

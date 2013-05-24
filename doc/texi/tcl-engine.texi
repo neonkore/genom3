@@ -76,8 +76,14 @@ Language dependent code generation
 * language member::	@htmd Code for accessing structure members
 * language signature::	@htmd Code for declaring codel signatures
 * language invoke::	@htmd Code for calling codels
+
+Object manipulation procedures
+
+* $type methods::	@htmd IDL Type manipulation procedures
+
 @end menu
 @include template.tcl.texi
 @include engine.tcl.texi
 @include dotgen.c.texi
 @include language.tcl.texi
+@include idltype.c.texi

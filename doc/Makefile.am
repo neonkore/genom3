@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -89,6 +89,7 @@ generatedsrcs=\
 	dotgen.y.texi			\
 					\
 	dotgen.c.texi			\
+	idltype.c.texi			\
 	engine.tcl.texi			\
 	language.tcl.texi		\
 	template.tcl.texi		\
@@ -164,11 +165,11 @@ dotgen.y.texi: Makefile $(srcdir)/texigen.awk
 dotgen.y.texi: $(top_builddir)/src/dotgen.y
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
-template.tcl.texi: Makefile $(srcdir)/texigen.awk
+%.c.texi: Makefile $(srcdir)/texigen.awk
 %.c.texi: $(top_srcdir)/engine/tcl/%.c
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 
-template.tcl.texi: Makefile $(srcdir)/texigen.awk
+%.tcl.texi: Makefile $(srcdir)/texigen.awk
 %.tcl.texi: $(top_srcdir)/engine/tcl/%.tcl
 	$(AWK) -f $(srcdir)/texigen.awk $< >$@
 

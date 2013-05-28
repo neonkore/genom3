@@ -283,7 +283,7 @@ type_newarray(tloc l, const char *name, idltype_s t, uint32_t len)
 idltype_s
 type_newstruct(tloc l, const char *name, scope_s s)
 {
-  idltype_s t = type_new(l, IDL_STRUCT, name);;
+  idltype_s t = type_new(l, IDL_STRUCT, name);
   if (!t) return NULL;
   assert(s);
 
@@ -820,6 +820,33 @@ type_final(idltype_s t)
 
   assert(0);
   return 0;
+}
+
+
+/* --- type_parent --------------------------------------------------------- */
+
+/** Return the parent type of a nested type definition
+ */
+idltype_s
+type_parent(idltype_s t)
+{
+  scope_s s = type_scope(t);
+  scope_s p;
+  assert(s);
+
+  switch(type_kind(t)) {
+    case IDL_ENUM: case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
+      break;
+
+    default:
+      return NULL;
+  }
+
+  if (scope_kind(s) == SCOPE_MODULE) return NULL;
+  p = scope_parent(s);
+  if (!p) return NULL;
+
+  return scope_findtype(p, scope_name(s));
 }
 
 

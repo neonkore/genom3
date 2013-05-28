@@ -311,6 +311,7 @@ int		type_equal(idltype_s a, idltype_s b);
 idltype_s	type_find(const char *name);
 idltype_s	type_member(idltype_s t, const char *name);
 idltype_s	type_final(idltype_s t);
+idltype_s	type_parent(idltype_s t);
 idltype_s	type_first(idltype_s t, hiter *i);
 idltype_s	type_after(idltype_s t, idltype_s p, hiter *i);
 idltype_s	type_next(hiter *i);

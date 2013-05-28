@@ -63,6 +63,300 @@ expect out '
 '
 
 
+# --- language address c++ -------------------------------------------------
+#
+testing '[language address]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+lang c++
+foreach t [dotgen types ::basic::*] {
+  puts [$t address [$t name]]
+}
+EOF
+expect out '
+	/^&\(c\)$/ {next}
+	/^&\(l\)$/ {next}
+	/^&\(d\)$/ {next}
+	/^&\(s\)$/ {next}
+	/^s8$/ {next}
+	/^&\(v\)$/ {next}
+	/^&\(v8\)$/ {next}
+
+	/^ac$/ {next}
+	/^as$/ {next}
+	/^as8$/ {next}
+	/^av$/ {next}
+	/^av8$/ {next}
+
+	/^&\(tc\)$/ {next}
+	/^&\(tl\)$/ {next}
+	/^&\(td\)$/ {next}
+	/^&\(ts\)$/ {next}
+	/^ts8$/ {next}
+	/^&\(tv\)$/ {next}
+	/^&\(tv8\)$/ {next}
+
+	/^tac$/ {next}
+	/^tas$/ {next}
+	/^tas8$/ {next}
+	/^tav$/ {next}
+	/^tav8$/ {next}
+
+	/^&\(r\)$/ {next}
+	/^ar$/ {next}
+
+	/^n$/ {next}
+	/^&\(e\)$/ {next}
+
+	/^&\(p\)$/ {next}
+
+	{print "mismatched line " NR; exit 2}
+'
+
+
+# --- language argument c++ ------------------------------------------------
+#
+testing '[language argument]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+lang c++
+foreach t [dotgen types ::basic::*] {
+  puts [$t argument value v[$t name]]
+  puts [$t argument reference r[$t name]]
+}
+EOF
+expect out '
+	/^int8_t vc$/ {next}
+	/^int8_t &rc$/ {next}
+	/^int32_t vl$/ {next}
+	/^int32_t &rl$/ {next}
+	/^double vd$/ {next}
+	/^double &rd$/ {next}
+	/^const std::string &vs$/ {next}
+	/^std::string &rs$/ {next}
+	/^const char vs8\[8\]$/ {next}
+	/^char rs8\[8\]$/ {next}
+	/^const std::vector< int32_t > &vv$/ {next}
+	/^std::vector< int32_t > &rv$/ {next}
+	/^const std::tr1::array< int32_t,8 > &vv8$/ {next}
+	/^std::tr1::array< int32_t,8 > &rv8$/ {next}
+
+	/^const int8_t vac\[4\]$/ {next}
+	/^int8_t rac\[4\]$/ {next}
+	/^const std::string vas\[4\]$/ {next}
+	/^std::string ras\[4\]$/ {next}
+	/^const char vas8\[4\]\[8\]$/ {next}
+	/^char ras8\[4\]\[8\]$/ {next}
+	/^const std::vector< int32_t > vav\[4\]$/ {next}
+	/^std::vector< int32_t > rav\[4\]$/ {next}
+	/^const std::tr1::array< int32_t,8 > vav8\[4\]$/ {next}
+	/^std::tr1::array< int32_t,8 > rav8\[4\]$/ {next}
+
+	/^basic::tc vtc$/ {next}
+	/^basic::tc &rtc$/ {next}
+	/^basic::tl vtl$/ {next}
+	/^basic::tl &rtl$/ {next}
+	/^basic::td vtd$/ {next}
+	/^basic::td &rtd$/ {next}
+	/^const basic::ts &vts$/ {next}
+	/^basic::ts &rts$/ {next}
+	/^const basic::ts8 vts8$/ {next}
+	/^basic::ts8 rts8$/ {next}
+	/^const basic::tv &vtv$/ {next}
+	/^basic::tv &rtv$/ {next}
+	/^const basic::tv8 &vtv8$/ {next}
+	/^basic::tv8 &rtv8$/ {next}
+
+	/^const basic::tac vtac$/ {next}
+	/^basic::tac rtac$/ {next}
+	/^const basic::tas vtas$/ {next}
+	/^basic::tas rtas$/ {next}
+	/^const basic::tas8 vtas8$/ {next}
+	/^basic::tas8 rtas8$/ {next}
+	/^const basic::tav vtav$/ {next}
+	/^basic::tav rtav$/ {next}
+	/^const basic::tav8 vtav8$/ {next}
+	/^basic::tav8 rtav8$/ {next}
+
+	/^const basic::r &vr$/ {next}
+	/^basic::r &rr$/ {next}
+	/^const basic::ar var$/ {next}
+	/^basic::ar rar$/ {next}
+
+	/^const basic::n \*vn$/ {next}
+	/^basic::n \*&rn$/ {next}
+	/^const basic::e &ve$/ {next}
+	/^basic::e &re$/ {next}
+
+	/^basic::p &vp$/ {next}
+	/^basic::p &rp$/ {next}
+
+	{print "mismatched line " NR; exit 2}
+'
+
+
+# --- language pass c++ ----------------------------------------------------
+#
+testing '[language pass]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+lang c++
+foreach t [dotgen types ::basic::*] {
+  puts [$t pass value v[$t name]]
+  puts [$t pass reference r[$t name]]
+}
+EOF
+expect out '
+	/^vc$/ {next}
+	/^rc$/ {next}
+	/^vl$/ {next}
+	/^rl$/ {next}
+	/^vd$/ {next}
+	/^rd$/ {next}
+	/^vs$/ {next}
+	/^rs$/ {next}
+	/^vs8$/ {next}
+	/^rs8$/ {next}
+	/^vv$/ {next}
+	/^rv$/ {next}
+	/^vv8$/ {next}
+	/^rv8$/ {next}
+
+	/^vac$/ {next}
+	/^rac$/ {next}
+	/^vas$/ {next}
+	/^ras$/ {next}
+	/^vas8$/ {next}
+	/^ras8$/ {next}
+	/^vav$/ {next}
+	/^rav$/ {next}
+	/^vav8$/ {next}
+	/^rav8$/ {next}
+
+	/^vtc$/ {next}
+	/^rtc$/ {next}
+	/^vtl$/ {next}
+	/^rtl$/ {next}
+	/^vtd$/ {next}
+	/^rtd$/ {next}
+	/^vts$/ {next}
+	/^rts$/ {next}
+	/^vts8$/ {next}
+	/^rts8$/ {next}
+	/^vtv$/ {next}
+	/^rtv$/ {next}
+	/^vtv8$/ {next}
+	/^rtv8$/ {next}
+
+	/^vtac$/ {next}
+	/^rtac$/ {next}
+	/^vtas$/ {next}
+	/^rtas$/ {next}
+	/^vtas8$/ {next}
+	/^rtas8$/ {next}
+	/^vtav$/ {next}
+	/^rtav$/ {next}
+	/^vtav8$/ {next}
+	/^rtav8$/ {next}
+
+	/^vr$/ {next}
+	/^rr$/ {next}
+	/^var$/ {next}
+	/^rar$/ {next}
+
+	/^vn$/ {next}
+	/^rn$/ {next}
+	/^ve$/ {next}
+	/^re$/ {next}
+
+	/^vp$/ {next}
+	/^rp$/ {next}
+
+	{print "mismatched line " NR; exit 2}
+'
+
+
+# --- language dereference c++ ---------------------------------------------
+#
+testing '[language dereference]'
+
+run 0 ${GENOM_BIN} interactive -b ${0%${0##*/}}../datatypes.gen <<'EOF'
+lang c++
+foreach t [dotgen types ::basic::*] {
+  puts [$t dereference value v[$t name]]
+  puts [$t dereference reference r[$t name]]
+}
+EOF
+expect out '
+	/^vc$/ {next}
+	/^rc$/ {next}
+	/^vl$/ {next}
+	/^rl$/ {next}
+	/^vd$/ {next}
+	/^rd$/ {next}
+	/^vs$/ {next}
+	/^rs$/ {next}
+	/^vs8$/ {next}
+	/^rs8$/ {next}
+	/^vv$/ {next}
+	/^rv$/ {next}
+	/^vv8$/ {next}
+	/^rv8$/ {next}
+
+	/^vac$/ {next}
+	/^rac$/ {next}
+	/^vas$/ {next}
+	/^ras$/ {next}
+	/^vas8$/ {next}
+	/^ras8$/ {next}
+	/^vav$/ {next}
+	/^rav$/ {next}
+	/^vav8$/ {next}
+	/^rav8$/ {next}
+
+	/^vtc$/ {next}
+	/^rtc$/ {next}
+	/^vtl$/ {next}
+	/^rtl$/ {next}
+	/^vtd$/ {next}
+	/^rtd$/ {next}
+	/^vts$/ {next}
+	/^rts$/ {next}
+	/^vts8$/ {next}
+	/^rts8$/ {next}
+	/^vtv$/ {next}
+	/^rtv$/ {next}
+	/^vtv8$/ {next}
+	/^rtv8$/ {next}
+
+	/^vtac$/ {next}
+	/^rtac$/ {next}
+	/^vtas$/ {next}
+	/^rtas$/ {next}
+	/^vtas8$/ {next}
+	/^rtas8$/ {next}
+	/^vtav$/ {next}
+	/^rtav$/ {next}
+	/^vtav8$/ {next}
+	/^rtav8$/ {next}
+
+	/^vr$/ {next}
+	/^rr$/ {next}
+	/^var$/ {next}
+	/^rar$/ {next}
+
+	/^vn$/ {next}
+	/^rn$/ {next}
+	/^ve$/ {next}
+	/^re$/ {next}
+
+	/^vp$/ {next}
+	/^rp$/ {next}
+
+	{print "mismatched line " NR; exit 2}
+'
+
+
 # --- language member c++ --------------------------------------------------
 #
 testing '[language member]'
@@ -129,19 +423,35 @@ expect out '
 testing '[language signature]'
 
 cat >run.gen <<'EOF'
-component c {
-  attribute s() {
-    validate codel();
+component comp {
+  task t;
+  ids { short a, b; };
+  port in comp::ids a;
+  port out comp::ids b;
+  port multiple in comp::ids am;
+  port multiple out comp::ids bm;
+  activity s(in long a, out long b) {
+    task t;
+    codel<start> c(local in a, local out b) yield d;
+    codel<d> d(ids in a::a1, ids out b::b1) yield e;
+    codel<e> e(port in a::a2, port out b::b2) yield f;
+    codel<f> f(port in am::a3) yield g;
+    codel<g> g(port out bm::b3) yield ether;
   };
 };
 EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 lang c++
-set c [[[dotgen component] service] validate]
-puts [$c signature -sep-]
+foreach c [[[dotgen component] service] codels] {
+  puts [$c signature -sep-]
+}
 EOF
 expect out '
-	/^genom::event-sep-codel\(void\)$/ {next}
+	/^genom::event-sep-c\(int32_t a, int32_t &b\)$/ {next}
+	/^genom::event-sep-d\(int16_t a1, int16_t &b1\)$/ {next}
+	/^genom::event-sep-e\(comp::a &a2, comp::b &b2\)$/ {next}
+	/^genom::event-sep-f\(comp::am &a3\)$/ {next}
+	/^genom::event-sep-g\(comp::bm &b3\)$/ {next}
 	{exit 2}
 '
 

@@ -47,50 +47,44 @@ namespace eval language::c++ {
     # Generate and return the C++ mapping of types matching the glob pattern
     #
     proc mapping { type } {
-	foreach s [$type scope] {
-	    # nested structs or union are defined by the enclosing type only
-	    if {[lindex $s 0] ne "module"} { return "" }
+      # Nested types which are defined within the scope of another type trigger
+      # the generation of the enclosing type.
+      while {![catch {$type parent} p]} { set type $p }
 
-	    append m "\nnamespace [lindex $s 1] \{"
-	}
+      switch -- [$type kind] {
+        {const}		{ append m [genconst $type] }
+        {enum}		{ append m [genenum $type] }
+        {struct}	{ append m [genstruct $type] }
+        {union}		{ append m [genunion $type] }
+        {typedef}	{ append m [gentypedef $type] }
+        {exception}	{ append m [genexception $type] }
 
-	switch -- [$type kind] {
-	    {const}		{ append m [genconst $type] }
-	    {enum}		{ append m [genenum $type] }
-	    {struct}		{ append m [genstruct $type] }
-	    {union}		{ append m [genunion $type] }
-	    {typedef}		{ append m [gentypedef $type] }
+        {forward struct} -
+        {forward union}	{ append m [genforward $type] }
 
-	    {forward struct}	-
-	    {forward union}	{ append m [genforward $type] }
+        {event}		{ append m [genevent $type] }
+        {port}		{ append m [genport $type] }
+        {remote}	{ append m [genremote $type] }
+        {native}	{ append m [gennative $type] }
 
-            {remote}		{ template fatal "fix mapping for remote" }
+        default		{ return "" }
+      }
 
-            default		{ return "" }
-	}
+      set p ""
+      if {[regexp {u?int(8|16|32|64)_t} $m]} {
+        append p "\n#include <stdint.h>"
+      }
+      if {[regexp {std::string} $m]} {
+        append p "\n#include <string>"
+      }
+      if {[regexp {std::vector<} $m]} {
+        append p "\n#include <vector>"
+      }
+      if {[regexp {std::tr1::array<} $m]} {
+        append p "\n#include <tr1/array>"
+      }
 
-	foreach s [$type scope] {
-	    append m "\n\}\n"
-	}
-
-	set p ""
-	if {[regexp {u?int(8|16|32|64)_t} $m]} {
-	    append p "#include <stdint.h>\n"
-	}
-	if {[regexp {std::string} $m]} {
-	    append p "#include <string>\n"
-	}
-	if {[regexp {std::vector<} $m]} {
-	    append p "#include <vector>\n"
-	}
-	if {[regexp {genom3::bounded_string<} $m]} {
-	    append p "#include <genom3/c++/idlstring.h>\n"
-	}
-	if {[regexp {genom3::bounded_vector<} $m]} {
-	    append p "#include <genom3/c++/idlvector.h>\n"
-	}
-
-	return $p$m
+      return $p$m
     }
 
 
@@ -114,11 +108,16 @@ namespace eval language::c++ {
             {event}			{ set d "genom::event" }
 	    {any}			{ error "type any not supported yet" }
 
+            {native}			{ set d "[$type cname] *" }
+
 	    {const}			-
 	    {enum}			-
 	    {struct}			-
 	    {union}			-
-	    {typedef}			{ set d [cname [$type fullname]] }
+	    {typedef}			-
+            {exception}			-
+            {port}			-
+            {remote}			{ set d [$type cname] }
 
 	    {enumerator}		-
 	    {struct member}		-
@@ -127,30 +126,30 @@ namespace eval language::c++ {
 	    {forward union}		{ set d [declarator [$type type]] }
 
 	    {string} {
-		if {[catch { $type length } l]} {
-		    set d "std::string"
-		} else {
-		    set d "genom3::bounded_string<$l>"
-		}
+              if {[catch { $type length } l]} {
+                set d "std::string"
+              } else {
+                set d "char\[$l\]"
+              }
 	    }
 
 	    {array} {
-		if {[catch { $type length } l]} { set l {} }
-		set d "[declarator [$type type]]"
-                set b [string first \[ $d]
-                if {$b < 0} {
-                  append d "\[$l\]"
-                } else {
-                  set d "[string range $d 0 $b-1]\[$l\][string range $d $b end]"
-                }
-	    }
+              if {[catch { $type length } l]} { set l {} }
+              set d "[declarator [$type type]]"
+              set b [string first \[ $d]
+              if {$b < 0} {
+                append d "\[$l\]"
+              } else {
+                set d "[string range $d 0 $b-1]\[$l\][string range $d $b end]"
+              }
+            }
 
 	    {sequence} {
 		set t [$type type]
 		if {[catch {$type length} l]} {
 		    set d "std::vector< [declarator $t] >"
 		} else {
-		    set d "genom3::bounded_vector< [declarator $t],$l >"
+		    set d "std::tr1::array< [declarator $t],$l >"
 		}
 	    }
 
@@ -170,21 +169,23 @@ namespace eval language::c++ {
     #
     proc address { type {var {}} } {
       switch -- [[$type final] kind] {
-	{array}	{ return $var }
-	default	{ return "&($var)" }
+        string		{
+          if {![catch {[$type final] length}]} { return $var }
+        }
+        array - native	{ return $var }
       }
+
+      return &($var)
     }
 
 
     # --- dereference ------------------------------------------------------
 
-    # Return the C++ mapping of a variable dereference.
+    # Return the C++ mapping for dereferencing a parameter passed by value or
+    # reference.
     #
-    proc dereference { type {var {}} } {
-      switch -- [[$type final] kind] {
-	{array} { return $var }
-	default	{ return "(*$var)" }
-      }
+    proc dereference { type kind {var {}} } {
+      return $var
     }
 
 
@@ -194,23 +195,53 @@ namespace eval language::c++ {
     #
     proc argument { type kind {var {}} } {
       switch -- $kind {
-	{value}		{
-	  return "const [declarator $type &$var]"
-	}
-	{reference}	{
-	  switch -- [[$type final] kind] {
-	    {array} {
-	      return [declarator $type $var]
-	    }
-	    default {
-	      return [declarator $type &$var]
-	    }
-	  }
-	}
-	default	{
-	  template fatal \
-	      "unknown argument kind \"$kind\": must be value or reference"
-	}
+        {value}		{
+          switch -- [[$type final] kind] {
+            sequence - struct - union - exception {
+              return "const [declarator $type &$var]"
+            }
+            string {
+              if {[catch {[$type final] length}]} {
+                return "const [declarator $type &$var]"
+              } else {
+                return "const [declarator $type $var]"
+              }
+            }
+            array - native {
+              return "const [declarator $type $var]"
+            }
+            port - remote {
+              return "[declarator $type &$var]"
+            }
+            default {
+              return [declarator $type $var]
+            }
+          }
+        }
+
+        {reference}	{
+          switch -- [[$type final] kind] {
+            string {
+              if {[catch {[$type final] length}]} {
+                return [declarator $type &$var]
+              } else {
+                return [declarator $type $var]
+              }
+            }
+            array {
+              return [declarator $type $var]
+            }
+
+            default {
+              return [declarator $type &$var]
+            }
+          }
+        }
+
+        default	{
+          template fatal \
+              "unknown argument kind \"$kind\": must be value or reference"
+        }
       }
     }
 
@@ -221,16 +252,13 @@ namespace eval language::c++ {
     #
     proc pass { type kind {var {}} } {
       switch -- $kind {
-	{value}		{
-	  return $var
-	}
-	{reference}	{
-	  return $var
-	}
-	default	{
-	  template fatal \
-	      "unknown argument kind \"$kind\": must be value or reference"
-	}
+        value - reference	{
+          return $var
+        }
+        default {
+          template fatal \
+              "unknown argument kind \"$kind\": must be value or reference"
+        }
       }
     }
 
@@ -240,36 +268,31 @@ namespace eval language::c++ {
     # Return the C++ signature of a codel
     #
     proc signature { codel {symchar " "} {location 0}} {
-	set ret genom::event
-	set sym [cname $codel]
-	set arg [list]
-	foreach p [$codel parameters] {
-	    set a ""
-	    switch -- [$p dir] {
-		"in" {
-		  append a [parameter value [$p type] [$p name]]
-		}
-		"inport" {
-                  if {"handle" in [[$p port] kind]} {
-                    append a [parameter reference [$p type] [$p name]]
-                  } else {
-                    append a [parameter value [$p type] [$p name]]
-                  }
-		}
-		default	{
-		  append a [parameter reference [$p type] [$p name]]
-		}
-	    }
-	    lappend arg $a
-	}
-        if {[llength $arg] == 0} { set arg "void" }
+      set ret genom::event
+      set sym [cname $codel]
+      set arg [list]
+      foreach p [$codel parameters] {
+        set a ""
+        switch -glob -- [$p dir]/[$p src] {
+          in/* - */port - */remote {
+            append a [[$p type] argument value [$p name]]
+          }
+          inout/* - out/* {
+            append a [[$p type] argument reference [$p name]]
+          }
+        }
+        lappend arg $a
+      }
+      if {[llength $arg] == 0} { set arg "void" }
 
-        set m ""
-        if {$location} {
-	  set m [genloc $codel]\n
-	}
-        append m [join [list $ret ${sym}([join $arg {, }])] $symchar]
-	return $m
+      set m ""
+      if {$location} {
+        set m [genloc $codel]\n
+      }
+      set p [string repeat " " [string length "${sym}("]]
+      set sig [wrap "${sym}([join $arg {, }])" $p ,]
+      append m [join [list $ret $sig] $symchar]
+      return $m
     }
 
 
@@ -349,20 +372,20 @@ namespace eval language::c++ {
     # Return the C++ mapping of a const
     #
     proc genconst { type } {
-        if {[catch {$type fullname}]} return ""
-	set t [declarator [$type type] [cname [$type name]]]
+      if {[catch {$type fullname}]} return ""
+      set t [declarator [$type type] [cname [$type name]]]
 
-	set v [$type value]
-	switch [$type valuekind] {
-	    bool	{ set v [expr {$v?"true":"false"}] }
-	    char	{ set v "'$v'" }
-	    string	{ set v "\"[string map {\" \\\"} $v]\"" }
-	    enum	{ set v [cname $v] }
-	}
+      set v [$type value]
+      switch [$type valuekind] {
+        bool	{ set v [expr {$v?"true":"false"}] }
+        char	{ set v "'$v'" }
+        string	{ set v "\"[string map {\" \\\"} $v]\"" }
+        enum	{ set v [cname $v] }
+      }
 
-	append m [genloc $type]
-	append m "\nconst $t = $v;"
-	return [guard $m [cname [$type fullname]]]
+      append m [genloc $type]
+      append m [c++namespace "\nconst $t = $v;" $type]
+      return [guard $m [$type cname]]
     }
 
 
@@ -372,17 +395,16 @@ namespace eval language::c++ {
     #
     proc genenum { type } {
 	append m [genloc $type]
-
 	append m "\nenum [cname [$type name]] \{"
 	set v -1
 	foreach e [$type members] {
 	    append m [genloc $e]
-	    append m "\n  [cname [$e name]] = \t[incr v],"
+	    append m "\n  [cname [$e name]] =\t[incr v],"
 	}
-	append m "\n  _unused = \t0xffffffff"
+	append m "\n  _unused =\t0xffffffff"
 	append m "\n\};"
 
-	return [guard $m [cname [$type fullname]]]
+	return [guard [c++namespace $m $type] [$type cname]]
     }
 
 
@@ -392,38 +414,26 @@ namespace eval language::c++ {
     # recursive structures with anonymous sequences.
     #
     proc genstruct { type } {
-	set nested [list]
-	set n [cname [$type name]]
+      set n [cname [$type name]]
 
-	append m [genloc $type]
-	append m "\nstruct $n;"
+      set s "\nstruct $n {"
+      # mapping for nested types
+      foreach e [$type nested] {
+        switch -- [$e kind] {
+          struct { append s [genstruct $e] }
+          union  { append s [genunion $e] }
+          enum   { append s [genenum $e] }
+        }
+      }
 
-	set f "\nstruct $n {"
-	foreach e [$type members] {
-	    append s [genloc $e]
-	    append s "\n [declarator $e [cname [$e name]]];"
+      # member decl
+      foreach e [$type members] {
+        append s [genloc $e]
+        append s "\n [declarator $e [$e name]];"
+      }
+      append s "\n};"
 
-	    # handle nested type definitions
-	    set ntype [$e type]
-	    lassign [lindex [$ntype scope] end] skind sname
-	    if {$skind eq "struct" && $sname eq [$type name]} {
-		while {[$ntype kind] eq "array"} { set ntype [$ntype type] }
-		if {![catch {$ntype fullname} nname]} {
-		    if {[lsearch $nested $nname] < 0} {
-			switch -- [$ntype kind] {
-			    struct { append f "\n[genstruct $ntype]" }
-			    union  { append f "\n[genunion $ntype]" }
-			    enum   { append f "\n[genenum $ntype]" }
-			}
-			lappend nested $nname
-		    }
-		}
-	    }
-	}
-	append s "\n};"
-
-	set n [cname [$type fullname]]
-	return [guard $m $n][guard $f$s "${n}_definition"]
+      return [guard [c++namespace $s $type] [$type cname]]
     }
 
 
@@ -433,56 +443,90 @@ namespace eval language::c++ {
     # recursive and forward decls.
     #
     proc genunion { type } {
-	set nested [list]
-	set n [cname [$type name]]
-	set discr [$type discriminator]
+      set n [cname [$type name]]
+      set discr [$type discriminator]
 
-	append m [genloc $type]
-	append m "\nstruct $n;"
+      set s "\nstruct $n {"
+      # mapping for nested types
+      foreach e [$type nested] {
+        switch -- [$e kind] {
+          struct { append s [genstruct $e] }
+          union  { append s [genunion $e] }
+          enum   { append s [genenum $e] }
+        }
+      }
 
-	set f "\nstruct $n {"
-	append s [genloc $discr]
-	append s "\n [declarator $discr] _d;"
-	append s "\n union {"
-	foreach e [$type members] {
-	    append s [genloc $e]
-	    append s "\n  [declarator $e [cname [$e name]]];"
+      # member decl
+      append s [genloc $discr]
+      append s "\n [declarator $discr] _d;"
+      append s "\n union {"
+      foreach e [$type members] {
+        append s [genloc $e]
+        append s "\n  [declarator $e [$e name]];"
 
-	    # C++ does not allow union members with non-trivial ctors
-	    if {![has_trivial_ctor $e]} {
-		set emsg ""
-		if {![catch {$e loc} tloc]} {
-		    lset tloc 0 [file tail [lindex $tloc 0]]
-		    append emsg [join [lrange $tloc 0 1] :]
-		    append emsg {: }
-		}
-		append emsg "member '[$e name]' of type [[$e type] kind]"
-		append emsg " not allowed in C++"
-		template fatal $emsg
-	    }
+        # C++ does not allow union members with non-trivial ctors
+        if {![has_trivial_ctor $e]} {
+          set emsg ""
+          if {![catch {$e loc} tloc]} {
+            lset tloc 0 [file tail [lindex $tloc 0]]
+            append emsg [join [lrange $tloc 0 1] :]
+            append emsg {: }
+          }
+          append emsg "member '[$e name]' of type [[$e type] kind]"
+          append emsg " not allowed in C++"
+          template fatal $emsg
+        }
+      }
+      append s "\n } _u;"
+      append s "\n};"
 
-	    # handle nested type definitions
-	    set ntype [$e type]
-	    lassign [lindex [$ntype scope] end] skind sname
-	    if {$skind eq "union" && $sname eq [$type name]} {
-		while {[$ntype kind] eq "array"} { set ntype [$ntype type] }
-		if {![catch {$ntype fullname} nname]} {
-		    if {[lsearch $nested $nname] < 0} {
-			switch -- [$ntype kind] {
-			    struct { append f "\n[genstruct $ntype]" }
-			    union  { append f "\n[genunion $ntype]" }
-			    enum   { append f "\n[genenum $ntype]" }
-			}
-			lappend nested $nname
-		    }
-		}
-	    }
-	}
-	append s "\n } _u;"
-	append s "\n};"
+      return [guard [c++namespace $s $type] [$type cname]]
+    }
 
-	set n [cname [$type fullname]]
-	return [guard $m $n][guard $f$s "${n}_definition"]
+
+    # --- genexception -----------------------------------------------------
+
+    # Return the C++ mapping of an exception.
+    #
+    proc genexception { type } {
+      set n [cname [$type name]]
+      append f "\n#include \"genom3/c++/event.h\""
+
+      append m [genloc $type]
+      append m "\nconst char genom_extern_weak "
+      append m "${n}_id\[\] = \"[$type fullname]\";"
+
+      append m [genloc $type]
+      if {[llength [$type members]]} {
+        append m "\nstruct ${n} : public genom::exception {"
+
+        # mapping for nested types
+        foreach e [$type nested] {
+          switch -- [$e kind] {
+            struct { append s [genstruct $e] }
+            union  { append s [genunion $e] }
+            enum   { append s [genenum $e] }
+          }
+        }
+
+        # mapping for members
+        append m "\n struct detail {"
+        foreach e [$type members] {
+          append m [genloc $e]
+          append m "\n  [declarator $e [$e name]];"
+        }
+        append m "\n } detail;"
+        append m "\n const char *what() { return ${n}_id; };"
+        append m "\n}"
+
+      } else {
+        append m "\nstruct ${n} : public genom::exception {"
+        append m "\n typedef void detail;"
+        append m "\n const char *what() { return ${n}_id; };"
+        append m "\n};"
+      }
+
+      return $f[guard [c++namespace $m $type] [$type cname]]
     }
 
 
@@ -491,9 +535,106 @@ namespace eval language::c++ {
     # Return the C++ mapping of forward declaration.
     #
     proc genforward { type } {
-	append m [genloc $type]
-	append m "\nstruct [cname [$type name]];"
-	return [guard $m [cname [$type fullname]]]
+      append m [genloc $type]
+      append m "\nstruct [cname [$type name]];"
+      return [guard [c++namespace $m $type] [$type cname]]
+    }
+
+
+    # --- genevent ---------------------------------------------------------
+
+    # Return the C++ mapping of an event.
+    #
+    proc genevent { type } {
+      set n [cname [$type name]]
+      append f "\n#include \"genom3/c++/event.h\""
+      append m [genloc $type]
+      append m "\nconst char genom_extern_weak $n\[\] = \"[$type fullname]\";"
+      return $f[guard [c++namespace $m $type] [$type cname]]
+    }
+
+
+    # --- genport ----------------------------------------------------------
+
+    # Return the C mapping of a port.
+    #
+    proc genport { type } {
+      set n [cname [$type name]]
+      set p [$type port]
+      set t [$p datatype]
+
+      append f "\n#include \"genom3/c++/event.h\""
+      append m [genloc $type]
+      append m "\nstruct $n {"
+      switch -- [$p kind]/[$p dir] {
+        simple/in {
+          append m "\n  virtual const [$t argument reference] data(void)" \
+              " const = 0;"
+          append m "\n  virtual void read(void) = 0;"
+        }
+        simple/out {
+          append m "\n  virtual [$t argument reference] data(void) const = 0;"
+          append m "\n  virtual void write(void) = 0;"
+        }
+
+        multiple/in {
+          append m \
+              "\n  virtual const [$t argument reference] data(const char *id)" \
+              " const = 0;"
+          append m "\n  virtual void read(const char *id) = 0;"
+        }
+
+        multiple/out {
+          append m "\n  virtual [$t argument reference] data(const char *id)" \
+              " const = 0;"
+          append m "\n  virtual void write(const char *id) = 0;"
+          append m "\n  virtual void open(const char *id) = 0;"
+          append m "\n  virtual void close(const char *id) = 0;"
+        }
+
+        default	{ error "invalid port direction" }
+      }
+      append m "\n};"
+      return $f[guard [c++namespace $m $type] [$type cname]]
+    }
+
+
+    # --- genremote --------------------------------------------------------
+
+    # Return the C mapping of a remote.
+    #
+    proc genremote { type } {
+      set n [cname [$type name]]
+      set r [$type remote]
+      append f "\n#include \"genom3/c++/event.h\""
+
+      set arg [list]
+      foreach p [$r parameters] {
+        switch -- [$p dir] {
+          in		{ set a [[$p type] argument value [$p name]] }
+          out - inout	{ set a [[$p type] argument reference [$p name]] }
+          default	{ template fatal "invalid parameter direction" }
+        }
+        lappend arg $a
+      }
+      if {[llength $arg]} { set arg [join $arg {, }] } else { set arg "void" }
+
+      append m [genloc $type]
+      append m "\nstruct $n {"
+      append m "\n  virtual void call($arg) = 0;"
+      append m "\n};"
+      return $f[guard [c++namespace $m $type] [$type cname]]
+    }
+
+
+    # --- gennative --------------------------------------------------------
+
+    # Return the C mapping of a native.
+    #
+    proc gennative { type } {
+      append m [genloc $type]
+      append m "\nstruct [cname [$type name]];"
+      return [guard [c++namespace $m $type] [$type cname]]
     }
 
 
@@ -502,9 +643,9 @@ namespace eval language::c++ {
     # Return the C++ mapping of a typedef.
     #
     proc gentypedef { type } {
-	append m [genloc $type]
-	append m "\ntypedef [declarator [$type type] [cname [$type name]]];"
-	return [guard $m [cname [$type fullname]]]
+      append m [genloc $type]
+      append m "\ntypedef [declarator [$type type] [cname [$type name]]];"
+      return [guard [c++namespace $m $type] [$type cname]]
     }
 
 
@@ -550,6 +691,25 @@ namespace eval language::c++ {
 	}
     }
 
+
+    # --- c++namespace -----------------------------------------------------
+
+    # Generate namespace hiearachy for type
+    #
+    proc c++namespace { string type } {
+      foreach s [$type scope] {
+        # nested structs or union are defined by the enclosing type and need
+        # no namespace.
+        if {[lindex $s 0] ne "module"} { return $string }
+
+        append m "\nnamespace [lindex $s 1] \{"
+      }
+      append m "$string"
+      foreach s [$type scope] {
+        append m "\n\}"
+      }
+      return $m
+    }
 
     # --- guard -----------------------------------------------------------
 

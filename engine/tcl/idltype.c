@@ -94,6 +94,12 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_WrongNumArgs(interp, 2, objv, "?pattern?");
       return TCL_ERROR;
     }
+  } else if (i == typeidx_types) {
+    /* 'types' subcommand can have one additional parameter */
+    if (objc > 3) {
+      Tcl_WrongNumArgs(interp, 2, objv, "?filter?");
+      return TCL_ERROR;
+    }
   } else if (i == typeidx_declarator || i == typeidx_address) {
     /* 'declarator' and 'address' subcommands can have one additional
      * parameter */
@@ -218,10 +224,19 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type types}
+     * @deffn {TCL Backend} {$type types [@var{filter}]}
      *
      * Return a list of all types recursively defined in the given type. This
      * is mostly useful for @code{struct} or @code{union} types.
+     *
+     * @@args
+     * @item @var{filter}
+     * The optional filter can be used to filter out some elements from the
+     * type list. The filter must be a tcl anonymous function (see tcl [apply]
+     * command) that accepts one argument that is a genom object. It must
+     * return a boolean to indicate whether the type should be included (true)
+     * or excluded (false).
+     * @@end args
      * @end deffn
      */
     case typeidx_types: {
@@ -230,11 +245,12 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
         objv[1],
         objv[0],
         Tcl_NewStringObj("public", -1),
+        objc>2 ? objv[2]:NULL
       };
 
       Tcl_IncrRefCount(argv[0]);
       Tcl_IncrRefCount(argv[3]);
-      s = Tcl_EvalObjv(interp, 4, argv, TCL_EVAL_GLOBAL);
+      s = Tcl_EvalObjv(interp, objc + 2, argv, TCL_EVAL_GLOBAL);
       Tcl_DecrRefCount(argv[3]);
       Tcl_DecrRefCount(argv[0]);
       if (s != TCL_OK) return TCL_ERROR;

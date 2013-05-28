@@ -55,28 +55,29 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum typeidx {
     typeidx_kind, typeidx_name, typeidx_fullname, typeidx_scope, typeidx_fixed,
-    typeidx_final, typeidx_parent, typeidx_types, typeidx_type, typeidx_length,
-    typeidx_value, typeidx_valuekind, typeidx_members, typeidx_discriminator,
-    typeidx_port, typeidx_remote, typeidx_cname, typeidx_mangle,
-    typeidx_mapping, typeidx_declarator, typeidx_address, typeidx_deref,
-    typeidx_argument, typeidx_pass, typeidx_digest, typeidx_masquerade,
-    typeidx_loc, typeidx_class
+    typeidx_final, typeidx_parent, typeidx_nested, typeidx_types, typeidx_type,
+    typeidx_length, typeidx_value, typeidx_valuekind, typeidx_members,
+    typeidx_discriminator, typeidx_port, typeidx_remote, typeidx_cname,
+    typeidx_mangle, typeidx_mapping, typeidx_declarator, typeidx_address,
+    typeidx_deref, typeidx_argument, typeidx_pass, typeidx_digest,
+    typeidx_masquerade, typeidx_loc, typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
     [typeidx_fullname] = "fullname", [typeidx_scope] = "scope",
     [typeidx_fixed] = "fixed", [typeidx_final] = "final",
-    [typeidx_parent] = "parent", [typeidx_types] = "types",
-    [typeidx_type] = "type", [typeidx_length] = "length",
-    [typeidx_value] = "value", [typeidx_valuekind] = "valuekind",
-    [typeidx_members] = "members", [typeidx_discriminator] = "discriminator",
-    [typeidx_port] = "port", [typeidx_remote] = "remote",
-    [typeidx_cname] = "cname", [typeidx_mangle] = "mangle",
-    [typeidx_mapping] = "mapping", [typeidx_declarator] = "declarator",
-    [typeidx_address] = "address", [typeidx_deref] = "dereference",
-    [typeidx_argument] = "argument", [typeidx_pass] = "pass",
-    [typeidx_digest] = "digest", [typeidx_masquerade] = "masquerade",
-    [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
+    [typeidx_parent] = "parent", [typeidx_nested] = "nested",
+    [typeidx_types] = "types", [typeidx_type] = "type",
+    [typeidx_length] = "length", [typeidx_value] = "value",
+    [typeidx_valuekind] = "valuekind", [typeidx_members] = "members",
+    [typeidx_discriminator] = "discriminator", [typeidx_port] = "port",
+    [typeidx_remote] = "remote", [typeidx_cname] = "cname",
+    [typeidx_mangle] = "mangle", [typeidx_mapping] = "mapping",
+    [typeidx_declarator] = "declarator", [typeidx_address] = "address",
+    [typeidx_deref] = "dereference", [typeidx_argument] = "argument",
+    [typeidx_pass] = "pass", [typeidx_digest] = "digest",
+    [typeidx_masquerade] = "masquerade", [typeidx_loc] = "loc",
+    [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r = NULL;
@@ -220,6 +221,32 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     case typeidx_parent: {
       idltype_s p = type_parent(t);
       if (p) r = Tcl_NewStringObj(type_genref(p), -1);
+      break;
+    }
+
+    /*/
+     * @deffn {TCL Backend} {$type nested}
+     *
+     * Return the nested types defined by the given type
+     * @end deffn
+     */
+    case typeidx_nested: {
+      hiter i;
+
+      r = Tcl_NewListObj(0, NULL);
+      switch(type_kind(t)) {
+        case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
+          for(hash_first(type_members(t), &i); i.current; hash_next(&i)) {
+            if (type_kind(i.value) != IDL_MEMBER &&
+                type_kind(i.value) != IDL_CASE &&
+                type_kind(i.value) != IDL_ENUMERATOR)
+              Tcl_ListObjAppendElement(
+                interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+          }
+          break;
+
+        default: break;
+      }
       break;
     }
 

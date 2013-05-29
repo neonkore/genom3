@@ -18,6 +18,8 @@
  */
 
 interface genom {
+  /* standard exceptions */
+
   exception incompatible_digest {
     struct client_digest { string<32> version; string<32> date; } client;
     struct server_digest { string<32> version; string<32> date; } server;
@@ -36,13 +38,41 @@ interface genom {
   exception no_such_inport, no_such_outport, port_io;
   exception no_such_remote, no_such_service, remote_io;
 
-  struct state {
-    string<33> digest;
-    string<31> date;
-    string<32> version;
+
+  /* standard "state" port */
+  const unsigned short MAX_TASKS = 8;
+  const unsigned short MAX_ACTIVITIES = 32;
+
+  module state {
+    struct time {
+      double last, max, avg;
+    };
+
+    struct task {
+      string<64> name;
+      time cputime;
+    };
+
+    struct activity {
+      unsigned short id;
+      string<64> name;
+      string<64> state;
+    };
+
+    struct component {
+      sequence<task, MAX_TASKS> task;
+      sequence<activity, MAX_ACTIVITIES> activity;
+
+      string<33> digest;
+      string<31> date;
+      string<32> version;
+    };
   };
 
-  port out state genom_state;
+  port out state::component genom_state;
+
+
+  /* standard services */
 
   function abort_activity(in unsigned long activity) {
     doc "Abort an activity";

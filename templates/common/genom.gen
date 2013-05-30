@@ -37,6 +37,7 @@ interface genom {
 
   exception no_such_inport, no_such_outport, port_io;
   exception no_such_remote, no_such_service, remote_io;
+  exception no_such_activity;
 
 
   /* standard "state" port */
@@ -74,8 +75,12 @@ interface genom {
 
   /* standard services */
 
-  function abort_activity(in unsigned long activity) {
+  function abort_activity(in unsigned long activity =	: "Activity id") {
     doc "Abort an activity";
+
+    codel genom_abort_activity_codel(local in activity);
+
+    throw no_such_activity;
   };
 
   function

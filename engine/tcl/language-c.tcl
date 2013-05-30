@@ -490,7 +490,13 @@ namespace eval language::c {
             # need explicit '_maximum' initialization if compiled by a C++
             # compiler
             append m "\n# ifdef __cplusplus"
-            append m "\n  ${n}():_maximum($l) {};"
+            append m "\n  ${n}():_maximum($l) {}"
+            append m "\n  const $n &operator=(const $n &x) {"
+            append m "\n    _length = x._length;"
+            append m "\n    for(unsigned i=0; i<_length; i++)"
+            append m "\n      _buffer\[i\] = x._buffer\[i\];"
+            append m "\n    return *this;"
+            append m "\n  };"
             append m "\n# endif"
 	}
 	append m "\n} $n;"

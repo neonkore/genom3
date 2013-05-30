@@ -491,7 +491,7 @@ namespace eval language::c {
             # compiler
             append m "\n# ifdef __cplusplus"
             append m "\n  ${n}():_maximum($l) {}"
-            append m "\n  const $n &operator=(const $n &x) {"
+            append m "\n  $n &operator=(const $n &x) {"
             append m "\n    _length = x._length;"
             append m "\n    for(unsigned i=0; i<_length; i++)"
             append m "\n      _buffer\[i\] = x._buffer\[i\];"

@@ -245,6 +245,37 @@ would map into
       } bounded;
 @end verbatim
 
+A helper function for reserving space in unbounded sequences is
+available. It is defined as follow:
+
+@verbatim
+      int genom_sequence_reserve(sequence_type *s, uint32_t length);
+@end verbatim
+where @code{sequence_type} is the actual type name of the sequence.
+
+Given a pointer @code{s} on a valid, unbouded sequence,
+@code{genom_sequence_reserve} will allocate storage for up to
+@code{length} elements. If needed, the previous storage is first
+released using the function pointed to by @code{_release}. If the
+sequence already had enough space available,
+@code{genom_sequence_reserve} does nothing. New storage is allocated
+using @code{malloc()}, and the @code{_release} member is updated to
+point on the @code{free()} function. The @code{_maximum} member is
+updated to reflect the new maximum number of elements that the
+sequence may hold. Finally, the function returns 0 on success, or -1
+if no memory could be allocated (in this case, the global variable
+@code{errno} is updated with the value @code{ENOMEM}).
+
+Beware that @code{genom_sequence_reserve} is able to shrink a sequence
+if the @code{length} parameter happens to be smaller than the current
+length of a sequence. In this case, any elements previously stored
+beyond the new effective length will be definitely lost. The
+@code{_length} member will be updated accordingly.
+
+The use of this function to reserve space in a sequence is purely
+optional. Any storage allocation strategy can be used, provided it
+maintains the consistency between the @code{_maximum}, @code{_release}
+and @code{_buffer} elements.
 
 @node C Port
 @subsection Mapping for port types

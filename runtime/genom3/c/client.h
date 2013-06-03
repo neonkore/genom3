@@ -24,7 +24,7 @@
 
 #define GENOM_CLIENT_DLSYM		"genom_client_info"
 
-enum { genom_client_protocol = 20130319 };
+enum { genom_client_protocol = 20130531 };
 
 typedef struct genom_client_s *genom_client;
 
@@ -88,6 +88,7 @@ struct genom_client_info {
   int (*done)(genom_client h, int rqstid);
   genom_event (*wait)(genom_client h, int rqstid);
   genom_event (*clean)(genom_client h, int rqstid);
+  genom_event (*abort)(genom_client h, int rqstid);
   genom_event (*doevents)(genom_client h);
   const char *(*json_error)(genom_event e, const void *detail);
 

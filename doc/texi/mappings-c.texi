@@ -299,6 +299,36 @@ would map into
       } multi_out_port;
 @end verbatim
 
+
+@node C Remote
+@subsection Mapping for remote services
+
+Remote objects map onto an object-like C @code{struct} providing a
+@code{call()} method. @code{call()} takes the same parameters as the
+corresponing service definition and returns @code{genom_ok} on
+success, or a @code{genom_event} exception representing an error code.
+
+For instance, the following IDL:
+@verbatim
+      interface i {
+        function f(in long i, out double o);
+      };
+
+      component c {
+        uses i;
+      };
+@end verbatim
+
+would map into
+@verbatim
+      typedef struct c_f {
+        genom_event (*call)(uint32_t i, double *o);
+      } c_f;
+@end verbatim
+
+The remote service is invoked in a synchronous manner.
+
+
 @node C Native
 @subsection Mapping for native types
 
@@ -338,7 +368,7 @@ a type-specific function for raising the exception. For example:
 
 yields the following C declarations:
 @verbatim
-      genom_event ex_foo_id = <unique identifier for exception>;
+      genom_event foo_id = <unique identifier for exception>;
 
       typedef struct foo_detail {
         uint32_t dummy;

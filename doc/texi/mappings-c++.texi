@@ -1,5 +1,5 @@
 @c
-@c Copyright (c) 2009-2012 LAAS/CNRS
+@c Copyright (c) 2009-2013 LAAS/CNRS
 @c All rights reserved.
 @c
 @c Permission to use, copy, modify,  and distribute this software for any
@@ -126,10 +126,9 @@ would map, according to the scoped names rules, into
 @node C++ String
 @subsection Mapping for strings
 
-@genom{}  IDL bounded  strings are  mapped to  nul terminated  character arrays
-(i.e.,  C strings)  wrapped  inside the  specific @code{genom::bounded_string}
-class. Unbounded strings are mapped to @code{std::string} provided by the C++
-standard.
+@genom{} IDL bounded strings are mapped to nul terminated character
+arrays (i.e., C strings). Unbounded strings are mapped to
+@code{std::string} provided by the C++ standard.
 
 For instance, the following OMG IDL declarations:
 @verbatim
@@ -140,20 +139,8 @@ For instance, the following OMG IDL declarations:
 would map into
 @verbatim
       typedef std::string unbounded;
-      typedef genom::bounded_string<16> bounded;
+      typedef char bounded[16];
 @end verbatim
-
-The @code{genom::bounded_string} provides the following interface:
-@verbatim
-      namespace genom3 {
-         template<std::size_t L> struct bounded_string {
-            char c[L];
-         };
-      }
-@end verbatim
-
-This minimalistic definition will be refined before the official 3.0 @genom{}
-release.
 
 
 @node C++ Array
@@ -233,9 +220,12 @@ contain such a type. You should thus avoid to define such datatypes in
 @subsection Mapping for sequence types
 
 @genom{} IDL sequences mapping differ for bounded or unbouded
-variations of the sequence. The unbounded sequence maps onto a C++
-@code{std::vector} provided by the C++ standard.  The bounded
-sequences maps onto the specific @code{genom3::bounded_vector} class.
+variations of the sequence. The bounded sequences maps onto the
+@code{std::vector} template class provided by the C++ standard.  The
+unbounded sequence maps onto a C++ @code{std::tr1::array} template
+class. The definition of @code{std::tr1::array} is not provided by the
+C++ standard, but is commonly implemented by modern C++ compiler as a
+transition step toward the C++11 standard.
 
 For instance, the following IDL:
 @verbatim
@@ -246,17 +236,164 @@ For instance, the following IDL:
 would map into
 @verbatim
       typedef std::vector<int32_t> unbounded;
-      typedef genom3::bounded_vector<int32_t, 16> bounded;
+      typedef std::tr1::array<int32_t, 16> bounded;
 @end verbatim
 
-The @code{genom::bounded_vector} provides the following interface:
+At the time of writing, @code{std::array} is still not officially
+supported by most compilers and available only as an experimental
+extension, so it has been decided to not use it. As soon as most
+compilers will provide an official implementation of
+@code{std::array}, this type will be used instead of
+@code{std::tr1::array}. Since the differences between the two
+interfaces are minimal, this should have only little impact on
+existing code.
+
+
+@node C++ Port
+@subsection Mapping for port types
+
+Simple ports map onto a pure virtual @code{struct} providing a
+@code{data()} and @code{read()} or @code{write()} methods. The
+@code{data()} method takes no parameter and returns a constant
+reference on the current port data. Input ports may refresh their data
+by invoking the @code{read()} method, while output ports may publish
+new data by invoking the @code{write()} method. Both @code{read()} and
+@code{write()} return no value (@code{void}).
+
+Ports defined with the @code{multiple} flag map onto a similar
+pure virtual @code{struct}, with the difference that @code{data()},
+@code{read()} and @code{write()} methods take an additional string
+(@code{const char *}) parameter representing the port element
+name. Multiple output ports have two additional @code{open()} and
+@code{close()} members (also accepting a single string parameter) that
+dynamically create or destroy ports.
+
+All these method may throw a @code{genom::exception} representing an
+error code.
+
+For instance, the following IDL:
 @verbatim
-      namespace genom3 {
-         template<typename T, std::size_t L> struct bounded_vector {
-            T e[L];
-         };
+      port in double in_port;
+      port multiple in double multi_in_port;
+      port out double out_port;
+      port multiple out double multi_out_port;
+@end verbatim
+
+would map into
+@verbatim
+      struct in_port {
+         virtual const double &data(void) const = 0;
+         virtual void read(void) = 0;
+      };
+
+      struct multi_in_port {
+         virtual const double &data(const char *id) const = 0;
+         virtual void read(const char *id) = 0;
+      };
+
+      struct out_port {
+         virtual double &data(void) const = 0;
+         virtual void write(void) = 0;
+      };
+
+      struct multi_out_port {
+         virtual double &data(const char *id) const = 0;
+         virtual void write(const char *id) = 0;
+         virtual void open(const char *id) = 0;
+         virtual void close(const char *id) = 0;
+      };
+@end verbatim
+
+
+@node C++ Remote
+@subsection Mapping for remote services
+
+Remote objects map onto a pure virtual @code{struct} providing a
+@code{call()} method. @code{call()} takes the same parameters as the
+corresponing service definition and return no data (@code{void}). It
+may throw a @code{genom::exception} representing an error code.
+
+For instance, the following IDL:
+@verbatim
+      interface i {
+        function f(in long i, out double o);
+      };
+
+      component c {
+        uses i;
+      };
+@end verbatim
+
+would map into
+@verbatim
+      namespace c {
+        struct f {
+          virtual void call(uint32_t i, double &o) = 0;
+        };
       }
 @end verbatim
 
-This minimalistic definition will be refined before the official 3.0 @genom{}
-release.
+The remote service is invoked in a synchronous manner.
+
+
+@node C++ Native
+@subsection Mapping for native types
+
+@genom{} IDL native types map to a C++ @code{struct}. The mapping
+provides only a forward declaration, and the user has to provide the
+actual definition.
+
+For instance, the following IDL:
+@verbatim
+      native opaque;
+@end verbatim
+
+would map into
+@verbatim
+      struct opaque;
+@end verbatim
+
+The definition of the structure body is free, and will typically use
+native C++ types that cannot be described in IDL. When used as a
+parameter of a function, a native type will be passed around as a
+pointer on the structure data. Memory management associated with that
+pointer must be handled by the user.
+
+
+@node C++ Exception
+@subsection Mapping for exceptions
+
+Each defined exception type is defined as a C++ @code{struct} that
+derives from the generic @code{genom::exception} type and implements a
+@code{what()} method returning a unique identifier for the
+exception. Exceptions with members define an additional @code{struct
+detail} type inside the scope of the exception as well a a
+@code{detail} member of that type. A global identifier for the
+exception is also defined (it is identical to the return value of the
+@code{what} method).
+
+For example:
+@verbatim
+      exception foo {
+        long dummy;
+      };
+@end verbatim
+
+yields the following C++ declarations:
+@verbatim
+      genom_event foo_id = <unique identifier for exception>;
+
+      struct foo : public genom::exception {
+        struct detail {
+          uint32_t dummy;
+        } detail;
+
+        const char *what();
+      } foo_detail;
+@end verbatim
+
+Exceptions must be thrown with the C++ @code{throw} operator.
+
+The identifier for the exception uniquely identifies this exception
+type, so that any data of type @code{genom_event} can be compared to
+an exception id with the @code{==} operator.

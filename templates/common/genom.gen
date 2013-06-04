@@ -102,6 +102,14 @@ interface genom {
 
     throw no_such_remote, no_such_service, remote_io;
   };
+
+  function
+  kill()
+  {
+    doc "Terminate all activities and quit";
+    codel genom_kill_codel();
+    interrupt all;
+  };
 };
 
 #pragma provides genom

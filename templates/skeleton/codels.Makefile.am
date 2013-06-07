@@ -32,13 +32,12 @@ if {![catch {dotgen input notice} text]} {
   puts #[join [split $text "\n"] "\n#"]
 }
 '>
-BUILT_SOURCES=	# but see below
-CLEANFILES=	${BUILT_SOURCES}
-
+<'set hlist [dict create]'>
 <'foreach c [dotgen components] {'>
-<'  lang $lang'>
-<'  set if [string map {+ x} [$c lang]]'>
+<'  set if [$c lang]'>
 <'  set h [$c name]_${if}_types[fileext header]'>
+<'  lang $if'>
+<'  dict set hlist $h $if'>
 lib_LTLIBRARIES = lib<"[$c name]">_codels.la
 
 lib<"[$c name]">_codels_la_SOURCES=	<"$h">
@@ -51,13 +50,15 @@ lib<"[$c name]">_codels_la_CPPFLAGS=	$(genom3_CFLAGS) $(requires_CFLAGS)
 lib<"[$c name]">_codels_la_LDFLAGS=	$(requires_LIBS)
 lib<"[$c name]">_codels_la_LDFLAGS+=	-release $(PACKAGE_VERSION)
 
-# idl to <"[$c lang]"> mappings
-BUILT_SOURCES+= <"$h">
+<'}'>
+
+# idl  mappings
+BUILT_SOURCES=	<"[dict keys $hlist]">
+CLEANFILES=	${BUILT_SOURCES}
+<'dict for {h l} $hlist {'>
 <"$h">: ${top_srcdir}/<"$input">
 	${genom3} <"[dotgen genom cmdline]"> mappings \
-	  -MD -MF .deps/$@.d -MT $@ --signature -l <"$if"> $<
+	  -MD -MF .deps/$@.d -MT $@ --signature -l <"$l"> $< >$@
+<'}'>
 
 -include .deps/<"$h">.d
-
-<'}'>
-# end of file

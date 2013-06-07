@@ -28,11 +28,6 @@
 #
 #					Anthony Mallet on Thu Jan 27 2011
 #
-
-# check arguments
-if {[llength $argv] != 2} { error "expected arguments: component lang" }
-lassign $argv component l
-lang $l
 '>
 
 <"[comment " Codel functions signatures"]">
@@ -40,19 +35,21 @@ lang $l
 #ifdef __cplusplus
 extern "C" {
 #endif
+<'foreach component [dotgen components] {'>
 
-<'foreach t [$component tasks] { foreach c [$t codels] {'>
+<'  foreach t [$component tasks] { foreach c [$t codels] {'>
 <"[$c signature " " 1]">;
-<'} }'>
+<'  } }'>
 
-<'foreach s [$component services] { foreach c [$s validate] {'>
+<'  foreach s [$component services] { foreach c [$s validate] {'>
 <"[$c signature " " 1]">;
-<'} }'>
+<'  } }'>
 
-<'foreach s [$component services] { foreach c [$s codels] {'>
+<'  foreach s [$component services] { foreach c [$s codels] {'>
 <"[$c signature " " 1]">;
-<'} }'>
+<'  } }'>
 
+<'}'>
 #ifdef __cplusplus
 }
 #endif

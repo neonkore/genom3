@@ -244,7 +244,7 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     case compidx_class:
-      r = Tcl_NewStringObj("component", -1);
+      r = Tcl_NewStringObj(comp_strkind(comp_kind(c)), -1);
       break;
   }
 

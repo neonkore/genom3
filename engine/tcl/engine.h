@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012 LAAS/CNRS
+ * Copyright (c) 2010,2012-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -71,6 +71,8 @@ int	dg_parse(ClientData v, Tcl_Interp *interp, int objc,
 int	dg_types(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 int	dg_components(ClientData d, Tcl_Interp *interp, int objc,
+		Tcl_Obj *const objv[]);
+int	dg_interfaces(ClientData d, Tcl_Interp *interp, int objc,
 		Tcl_Obj *const objv[]);
 
 int	type_cmd(ClientData c, Tcl_Interp *interp, int objc,

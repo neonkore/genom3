@@ -401,6 +401,32 @@ dg_types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 /* --- components ----------------------------------------------------------- */
 
+static int
+dg_clist(compkind k, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+  const char *p;
+  Tcl_Obj *l;
+  comp_s c;
+
+  if (objc > 2) {
+    Tcl_WrongNumArgs(interp, 1, objv, "?pattern?");
+    return TCL_ERROR;
+  }
+  if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
+
+  l = Tcl_NewListObj(0, NULL);
+  for(c = comp_first(); c; c = comp_next(c)) {
+    if (comp_kind(c) != k) continue;
+    if (p && !Tcl_StringMatch(comp_name(c), p)) continue;
+
+    Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(comp_genref(c), -1));
+  }
+
+  Tcl_SetObjResult(interp, l);
+  return TCL_OK;
+}
+
+
 /*/ @nodebeproc{dotgen components,Components definitions from the specification}
  * @deffn {TCL Backend} {dotgen components} [@var{pattern}]
  *
@@ -424,24 +450,32 @@ dg_types(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 int
 dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-  const char *p;
-  Tcl_Obj *l;
-  comp_s c;
+  return dg_clist(COMP_REGULAR, interp, objc, objv);
+}
 
-  if (objc > 2) {
-    Tcl_WrongNumArgs(interp, 1, objv, "?pattern?");
-    return TCL_ERROR;
-  }
-  if (objc > 1) { p = Tcl_GetString(objv[1]); } else { p = NULL; }
 
-  l = Tcl_NewListObj(0, NULL);
-  for(c = comp_first(); c; c = comp_next(c)) {
-    if (comp_kind(c) != COMP_REGULAR) continue;
-    if (p && !Tcl_StringMatch(comp_name(c), p)) continue;
-
-    Tcl_ListObjAppendElement(interp, l, Tcl_NewStringObj(comp_genref(c), -1));
-  }
-
-  Tcl_SetObjResult(interp, l);
-  return TCL_OK;
+/*/ @nodebeproc{dotgen interfaces,Interfaces definitions from the specification}
+ * @deffn {TCL Backend} {dotgen interfaces} [@var{pattern}]
+ *
+ * This command returns the list of interfaces that are defined in the current
+ * @code{.gen} file. This list may be filtered with the optional @var{pattern}
+ * argument. Each element of the returned list is an interface command that can
+ * be used to access detailed information about each particular interface
+ * object.
+ *
+ * @@args
+ * @item @var{pattern}
+ * Filter the interface name. The filter may contain a glob-like pattern (with
+ * @code{*} or @code{?} wildcards). Only the components whose name match the
+ * pattern will be returned.
+ * @@end args
+ * @@returns
+ * A list of interface objects of class @code{interface}.
+ * @@end returns
+ * @end deffn
+ */
+int
+dg_interfaces(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+  return dg_clist(COMP_IFACE, interp, objc, objv);
 }

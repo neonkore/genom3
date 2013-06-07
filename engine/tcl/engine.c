@@ -55,6 +55,7 @@
 #define PARSE_CMD	"parse"
 #define TYPES_CMD	"types"
 #define COMPONENTS_CMD	"components"
+#define INTERFACE_CMD	"interfaces"
 
 /* list of extra package paths */
 static const char *extra[] = TCL_EXTRAPKG;
@@ -82,6 +83,7 @@ static const struct dgcmd {
   { "::" DOTGEN_NS "::" PARSE_CMD, dg_parse },
   { "::" DOTGEN_NS "::" TYPES_CMD, dg_types },
   { "::" DOTGEN_NS "::" COMPONENTS_CMD, dg_components },
+  { "::" DOTGEN_NS "::" INTERFACE_CMD, dg_interfaces },
   { NULL, NULL }
 };
 

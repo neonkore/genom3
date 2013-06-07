@@ -28,6 +28,9 @@ namespace eval engine {
     # debug mode
     variable debug		[dotgen genom debug]
 
+    # informative message
+    variable silent		off
+
     # overwrite existing files
     variable overwrite		off
 
@@ -38,7 +41,7 @@ namespace eval engine {
     variable merge-if-change	off
 
     # available engine modes
-    variable modes {overwrite move-if-change merge-if-change debug}
+    variable modes {overwrite move-if-change merge-if-change silent debug}
 
     # default merge tool (builtin interactive)
     variable merge-tool	{interactive}
@@ -100,6 +103,10 @@ namespace eval engine {
     #   when turned on, existing destination files will be merged with new
     #   content by the engine, instead of being overwritten (@pxref{engine
     #   merge-tool}). @code{merge-if-change} is off by default.
+    #
+    #   @item silent
+    #   when on, this mode avoids scattering standard output with informative
+    #   messages from the code generator.
     #
     #   @item debug
     #   when on, this mode preserves temporary files and tcl programs
@@ -292,6 +299,7 @@ namespace eval engine {
 
     proc close { channel {perm {}} } {
 	variable moc
+	variable silent
 	variable overwrite
 	variable move-if-change
 	variable merge-if-change
@@ -311,7 +319,7 @@ namespace eval engine {
 		    if {[llength $perm]} {
 		      file attributes $dst -permissions $perm
 		    }
-		    puts "$dst is up-to-date"
+                    if {!$silent} { puts "$dst is up-to-date" }
 		    return
 		}
 	    }
@@ -319,7 +327,7 @@ namespace eval engine {
 	}
 
         if {${merge-if-change} && [file exists $dst]} {
-          puts "merging $dst"
+          if {!$silent} { puts "merging $dst" }
           if {[switch ${merge-tool} {
             interactive	{ merge::auto $tmp $dst on}
             auto	{ merge::auto $tmp $dst off}
@@ -343,9 +351,9 @@ namespace eval engine {
 	}
 
 	if {[file exists $dst]} {
-	    puts "overwriting $dst"
+          if {!$silent} { puts "overwriting $dst" }
 	} else {
-	    puts "creating $dst"
+          if {!$silent} { puts "creating $dst" }
 	}
 	file mkdir [file dirname $dst]
 	file copy -force $tmp $dst
@@ -371,6 +379,7 @@ namespace eval engine {
     # result of its evaluation by 'subst'.
     #
     proc process { src in out } {
+      variable silent
       variable debug
       variable markup
 
@@ -378,7 +387,9 @@ namespace eval engine {
       set tpath [mktemp]
       set tfile [::open $tpath w]
 
-      if {$debug} { puts "generating template code for $src in $tpath" }
+      if {!$silent && $debug} {
+        puts "generating template code for $src in $tpath"
+      }
 
       # read source and build program
       while { ![eof $in] } {
@@ -612,6 +623,7 @@ namespace eval engine {
     #
     variable seed [expr int(rand()*9999)]
     proc mktemp { } {
+	variable silent
 	variable seed
 
 	for { set r 1 } { 1 } { incr r } {
@@ -621,7 +633,7 @@ namespace eval engine {
 
 	    if { ![file exists $f] } { break; }
 	}
-	if {$r > 1} {
+	if {!$silent && $r > 1} {
 	    puts "$r iterations required for finding a temporary file"
 	}
 	return $f

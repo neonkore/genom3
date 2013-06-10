@@ -1,6 +1,37 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2013 LAAS/CNRS
 
+			    Changes in genom 2.99.20
+
+Released on June 10th, 2013
+ . Changed codels prototypes so that basic types are passed by value instead of
+   const reference.
+ . Updated the "genom_state" standard port, with a list of running activities
+   and timing properties of tasks.
+ . Added a standard service for killing a component.
+ . Changed the "mappings" templates to generate the mappings on stdout instead
+   of as many files as components.
+ . Changed the skeleton template so that components are named with a "-genom3"
+   suffix instead of "-genom". This is more consistent with e.g. robotpkg
+   packages.
+ . Updated IDL to C++ mappings. They should now be complete and stable.
+ . Fixed the C mappings for bounded sequences when used in a C++ context.
+ . Added an abort() method in the client/c interface, for aborting services via
+   a client request id.
+ . Renamed the environment variable used to redefine the .gen prepocessor from
+   "CPP" to "GENOM_CPP".
+ . Added [$type parent] and [$type nested] procedures in the tcl generator
+   engine, to access nested types definitions (required for the IDL to C++
+   mappings).
+ . Added a [dotgen interface] procedure in the tcl generator engine, listing
+   existing interfaces in the input file.
+ . Added a "+silent" mode to the tcl [engine mode] procedure, that leaves
+   stdout uncluttered for template-specific usage.
+ . Documented the IDL type manipulation procedures of the tcl generator engine.
+ . Documented the IDL to C++ mappings and added missing entries for ports and
+   remotes in the IDL to C mappings.
+
+
 			    Changes in genom 2.99.19
 
 Released on May 13th, 2013

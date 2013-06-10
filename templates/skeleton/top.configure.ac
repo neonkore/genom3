@@ -63,20 +63,27 @@ foreach l [lsort -unique $lang] {
 '>
 
 dnl External packages
-PKG_CHECK_MODULES(genom3, [genom3 >= 2.99.4])
-_PKG_CONFIG(genom3, [variable=GENOM_TOOL], [genom3 >= 2.99.4])
-AC_SUBST(genom3, [$pkg_cv_genom3])
-
 <'set requires [list]'>
 <'foreach c [dotgen components] {'>
 <'  lappend requires {*}[$c require]'>
 <'  lappend requires {*}[$c codels-require]'>
 <'}'>
-<'if {[llength $requires]} {'>
+<'set genom3req [lindex $requires [lsearch -glob $requires "genom3 *"]]'>
 PKG_CHECK_MODULES(requires, [
-  <"[join $requires "\n  "]">
-])
+<'if {$genom3req == ""} {'>
+  genom3 >= 2.99.4
 <'}'>
+<'if {[llength $requires]} {'>
+  <"[join $requires "\n  "]">
+<'}'>
+])
+
+<'if {$genom3req == ""} {'>
+_PKG_CONFIG(genom3, [variable=GENOM_TOOL], [genom3 >= 2.99.4])
+<'} else {'>
+_PKG_CONFIG(genom3, [variable=GENOM_TOOL], [<"$genom3req">])
+<'}'>
+AC_SUBST(genom3, [$pkg_cv_genom3])
 
 
 dnl --with-templates option

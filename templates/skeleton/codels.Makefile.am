@@ -46,7 +46,7 @@ lib<"[$c name]">_codels_la_SOURCES+=	<"[$c name]_codels[fileext]">
 lib<"[$c name]">_codels_la_SOURCES+=	<"[$c name]_[$t name]_codels[fileext]">
 <'  }'>
 
-lib<"[$c name]">_codels_la_CPPFLAGS=	$(genom3_CFLAGS) $(requires_CFLAGS)
+lib<"[$c name]">_codels_la_CPPFLAGS=	$(requires_CFLAGS)
 lib<"[$c name]">_codels_la_LDFLAGS=	$(requires_LIBS)
 lib<"[$c name]">_codels_la_LDFLAGS+=	-release $(PACKAGE_VERSION)
 

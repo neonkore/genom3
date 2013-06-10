@@ -54,7 +54,7 @@ EXTRA_DIST+=		component.gen
 
 # export useful variables to the test scripts
 export AWK
-export CPP=${top_builddir}/pcpp/genom-pcpp
+export GENOM_CPP=${top_builddir}/pcpp/genom-pcpp
 export CC
 export CXX
 export PKG_CONFIG

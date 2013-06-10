@@ -69,7 +69,7 @@ export top_srcdir
 generate: Makefile
 	@exec >$@;						\
 	${ECHO} '#!${SHELL}';					\
-	${ECHO} ${top_builddir}/src/genom3 -v 			\
+	${ECHO} ${top_builddir}/src/genom3 -v			\
 			-t ${srcdir} -s ${top_builddir}/engine	\
 			template ${srcdir}/$@.gen
 	@chmod u+x $@

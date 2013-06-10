@@ -20,8 +20,8 @@ expect out '
 	/^codels$/ {next}
 	/^configure.ac$/ {next}
 	/^Makefile.am$/ {next}
-	/^c-genom-uninstalled.pc.in$/ {next}
-	/^c-genom.pc.in$/ {next}
+	/^c-genom3-uninstalled.pc.in$/ {next}
+	/^c-genom3.pc.in$/ {next}
 	/^c_t[12]_codels\.c$/ {next}
 	/^c_codels\.c$/ {next}
 	/^$/ {next}

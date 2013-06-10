@@ -94,8 +94,8 @@ AG_OPT_TEMPLATES([$genom3 <"[dotgen genom cmdline]">],
 dnl Output
 AC_CONFIG_FILES([
 <'foreach c [dotgen components] {'>
-	<"[$c name]">-genom.pc
-	<"[$c name]">-genom-uninstalled.pc
+	<"[$c name]">-genom3.pc
+	<"[$c name]">-genom3-uninstalled.pc
 <'}'>
 	Makefile
 	codels/Makefile

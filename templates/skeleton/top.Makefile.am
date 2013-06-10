@@ -41,7 +41,7 @@ nobase_dist_idl_DATA= <"$idls">
 pkgconfigdir=	$(libdir)/pkgconfig
 pkgconfig_DATA=
 <'foreach c [dotgen components] {'>
-pkgconfig_DATA+= <"[$c name]-genom.pc">
+pkgconfig_DATA+= <"[$c name]-genom3.pc">
 <'}'>
 
 # we don't want generated templates in the distribution

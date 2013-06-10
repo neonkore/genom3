@@ -11,7 +11,7 @@ libdir=@libdir@
 includedir=@includedir@
 idldir=@datadir@/idl
 
-Name: <"[$c name]">-genom
+Name: <"[$c name]">-genom3
 Description: <"[$c name]"> interface and codels library
 Version: @PACKAGE_VERSION@
 <'set requires [join [concat [$c require] [$c codels-require]] {, }]'>

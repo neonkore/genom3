@@ -176,10 +176,10 @@ foreach c [dotgen components] {
     # mandatory pkg-config file
     template parse					\
 	args [list $c] file component.pc.in		\
-	file [$c name]-genom.pc.in
+	file [$c name]-genom3.pc.in
     template parse					\
 	args [list $c] file component-uninstalled.pc.in	\
-	file [$c name]-genom-uninstalled.pc.in
+	file [$c name]-genom3-uninstalled.pc.in
 }
 
 # generate user build files fragment

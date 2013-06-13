@@ -62,7 +62,6 @@ namespace eval engine {
     # template.tcl file). 'puts' is redefined to catch template output within
     # <' '> markups.
     interp share {} stderr slave
-    slave expose source
     slave hide puts
     slave alias puts slave invokehidden puts
     slave alias dotgen dotgen
@@ -458,9 +457,9 @@ namespace eval engine {
             }
             default {
               if {[string equal $o $c]} {
-                error "$src:$linenum: unknown tag '$o'"
+                error "$src:$linenum: unknown tag '<$o'"
               } else {
-                error "$src:$linenum: unbalanced tags '$o' and '$c'"
+                error "$src:$linenum: unbalanced tags '<$o' and '$c>'"
               }
             }
           }
@@ -508,54 +507,51 @@ namespace eval engine {
       close $tfile
 
       # execute template program in slave interpreter
-      variable monitor
       slave alias puts [namespace code "slave-output $out"]
       slave eval {
-        trace add execution source leavestep {slave-monitor [slave-eline]}}
-      set s [slave eval [list catch [list source $tpath] ::__m ::__ctx]]
+        trace add execution gsource leavestep {slave-monitor [eline]}
+      }
+      set s [slave eval [list catch [list gsource $tpath] ::__m ::__ctx]]
       slave eval {
-        trace remove execution source leavestep {slave-monitor [slave-eline]}}
+        trace remove execution gsource leavestep {slave-monitor [eline]}
+      }
       slave alias puts slave invokehidden puts
       if {$s} {
-        set line ""
-        set file "<unknown file>"
+        set line [slave eval {dict get $__ctx -errorline}]
+        set file $src
         set err [list]
         catch {
           set bt [slave eval set ::__backtrace]
           foreach t [lreverse $bt] {
             if {[dict exists $t file]} {
               set file [dict get $t file]
+              set line [dict get $t line]
               if {[file normalize $file] == [file normalize $tpath]} {
                 set file $src
               }
 
-              if {[dict exists $t line]} {
-                set l [dict get $t line]
-                if {$l > 0} {
-                  set c [lindex [split [dict get $t cmd] \n] 0]
-                  set c [string map {
-                    ;\2''\ \{    <\"    \2''\ \{    <\"
-                    \}\ ''\3;    \">    \}\ ''\3    \">
+              if {[dict get $t line] > 0} {
+                set c [lindex [split [dict get $t cmd] \n] 0]
+                set c [string map {
+                  ;\2''\ \{    <\"    \2''\ \{    <\"
+                  \}\ ''\3;    \">    \}\ ''\3    \">
 
-                    ;\2'\ \{     '>     \2'\ \{     '>
-                    \}\ '\3;     <'     \}\ '\3     <'
-                  } $c]
-                  if {[string length $c] > 40} {
-                    set c [string range $c 0 40]...
-                  }
-                  set err [linsert $err 0 "$file:$l: $c"]
-
-                  incr l [expr {[dict get $t errorline]-1}]
-                  set line :$l
+                  ;\2'\ \{     '>     \2'\ \{     '>
+                  \}\ '\3;     <'     \}\ '\3     <'
+                } $c]
+                if {[string length $c] > 40} {
+                  set c [string range $c 0 40]...
                 }
+                set err [linsert $err 0 "$file:$line: $c"]
+                incr line [expr {[dict get $t errorline]-1}]
               }
             }
           }
         }
         if {$debug} {
-          set m "$file$line: [slave eval {dict get $__ctx -errorinfo}]"
+          set m "$file:$line: [slave eval {dict get $__ctx -errorinfo}]"
         } else {
-          set m "$file$line: [slave eval set ::__m]"
+          set m "$file:$line: [slave eval set ::__m]"
         }
         set err [linsert $err 0 $m]
         return -code error [join $err "\n called by: "]
@@ -594,7 +590,10 @@ namespace eval engine {
 
       proc slave-monitor {eline cmd code result op} {
         global __backtrace
-        if {$code != 1} { set __backtrace {}; return }
+
+        if {[lindex $cmd 0] == "catch"} return
+        if {$code == 0} { set __backtrace {}; return }
+        if {$code != 1} return
 
         set f [info frame -2]
         dict set f errorline $eline

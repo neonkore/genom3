@@ -62,22 +62,24 @@ namespace eval template {
     # @end deffn
     #
     proc require { src } {
-        variable deps
+      variable deps
 
-	set src [file join [dotgen template dir] $src]
-	template message "sourcing $src"
+      set path [file join [dotgen template dir] $src]
+      template message "sourcing $path"
 
-	if {[catch {
-          uplevel #0 source $src
-          slave eval source $src
-	} m]} {
-	    template fatal "$m"
-	}
-
-        set src [file normalize $src]
-        if {$src ni $deps} {
-          lappend deps $src
+      uplevel #0 [list apply { { src path } {
+        if {[catch {
+          gsource $path
+          slave eval gsource $path
+        } m c]} {
+          template fatal -2 "$src:[dict get $c -errorline] $m"
         }
+      } } $src $path]
+
+      set path [file normalize $path]
+      if {$path ni $deps} {
+        lappend deps $path
+      }
     }
     namespace export require
 
@@ -404,7 +406,14 @@ namespace eval template {
     #
     proc fatal { args } {
       set m ""
-      for {set i 2} {$i < [info frame]-1} {incr i} {
+      set skip 0
+      switch -glob -- [lindex $args 0] {
+        -* {
+          set args [lassign $args skip]
+          set skip [expr {-$skip}]
+        }
+      }
+      for {set i [expr {2+$skip}]} {$i < [info frame]} {incr i} {
         set info [info frame -$i]
         if {[dict exists $info file]} {
           set f [dict get $info file]

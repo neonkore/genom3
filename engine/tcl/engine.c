@@ -97,8 +97,11 @@ static const char *nslist[] = {
 };
 
 
+static int	engine_source(ClientData dummy, Tcl_Interp *interp,
+			int objc, Tcl_Obj *const objv[]);
 static int	engine_eline(ClientData dummy, Tcl_Interp *interp,
 			int objc, Tcl_Obj *const objv[]);
+
 static int	engine_exit(ClientData dummy, Tcl_Interp *interp,
 			int objc, Tcl_Obj *const objv[]);
 
@@ -166,15 +169,19 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   if (!Tcl_PkgRequire(interp, "Tcl", "8.5", 0))
     goto error;
 
-  /* redefine exit */
+  /* define helper procs */
   if (!Tcl_CreateObjCommand(interp, "exit", engine_exit, NULL, NULL))
+    goto error;
+  if (!Tcl_CreateObjCommand(interp, "gsource", engine_source, NULL, NULL))
     goto error;
 
   /* create a safe slave interpreter for evaluating template files */
   slave = Tcl_CreateSlave(interp, "slave", 1/*safe*/);
   if (!slave) goto error;
 
-  if (!Tcl_CreateObjCommand(slave, "slave-eline", engine_eline, NULL, NULL))
+  if (!Tcl_CreateObjCommand(slave, "gsource", engine_source, NULL, NULL))
+    goto error;
+  if (!Tcl_CreateObjCommand(slave, "eline", engine_eline, NULL, NULL))
     goto error;
 
   /* create dotgen objects */
@@ -242,6 +249,35 @@ error:
     fprintf(stderr, "%s: %s\n",
             basename(path), Tcl_GetStringResult(interp));
   goto done;
+}
+
+
+/* --- engine_source ------------------------------------------------------- */
+
+/** Source a file and return the error context in case of error. Too bad
+ * that tcl has no builtin to programmatically get the error line of a "source"
+ * or "eval" command ("source" or "eval" add their own errorInfo and
+ * errorLine in the eval'ed script is lost, except in the human readable
+ * errorinfo string...)
+ */
+static int
+engine_source(ClientData dummy, Tcl_Interp *interp,
+            int objc, Tcl_Obj *const objv[])
+{
+  int s;
+
+  if (objc != 2) {
+    Tcl_WrongNumArgs(interp, 1, objv, "?fileName?");
+    return TCL_ERROR;
+  }
+
+  s = Tcl_EvalFile(interp, Tcl_GetString(objv[1]));
+  if (s != TCL_OK) {
+    Tcl_Obj *options = Tcl_GetReturnOptions(interp, s);
+    Tcl_SetReturnOptions(interp, options);
+  }
+
+  return s;
 }
 
 

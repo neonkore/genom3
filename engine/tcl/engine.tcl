@@ -386,6 +386,7 @@ namespace eval engine {
       # initalize template program source code file
       set tpath [mktemp]
       set tfile [::open $tpath w]
+      set linenum 1
 
       if {!$silent && $debug} {
         puts "generating template code for $src in $tpath"
@@ -417,11 +418,16 @@ namespace eval engine {
             set notag [string range $raw 0 [lindex $x 0]-1]
 
             if [regexp -indices $markup(open) $notag l] {
+              incr linenum [linecount $notag 0 [lindex $l 0]]
               error "$src:$linenum: missing closing tag"
             }
             if [regexp -indices $markup(close) $notag l] {
+              incr linenum [linecount $notag 0 [lindex $l 0]]
               error "$src:$linenum: missing opening tag"
             }
+
+            # update current line number in the template file
+            incr linenum [linecount $notag]
 
             # if the character immediately preceeding the opening <'
             # tag  is a \n, it is discarded.
@@ -459,6 +465,9 @@ namespace eval engine {
             }
           }
 
+          # update current line number in the template file
+          incr linenum [linecount $t]
+
           # discard processed source text - if the character immediately
           # following the closing '> tag is a \n, it is discarded, except
           # if a similar \n was discarded before the tag.
@@ -466,6 +475,7 @@ namespace eval engine {
               $c == "'" && [string index $raw [lindex $x 1]+1] == "\n"} {
             lset x 1 [expr [lindex $x 1] + 1]
             puts -nonewline $tfile "\n"
+            incr linenum
           }
           set raw [string replace $raw 0 [lindex $x 1]]
         }
@@ -614,6 +624,16 @@ namespace eval engine {
 
 	puts -nonewline $out [lindex $args 0]${nl}
 	return
+    }
+
+
+    # --- linecount --------------------------------------------------------
+
+    # Count the number of lines (\n) in the string, optinally starting from
+    # index 'start' and stopping at index 'end'.
+    #
+    proc linecount { s { start 0 } { end end } } {
+      return [regexp -all "\n" [string range $s $start $end]]
     }
 
 

@@ -717,10 +717,10 @@ namespace eval language::c++ {
     #
     proc guard { string name } {
 	set name [string map {:: _} $name]
-	append m "\n#ifndef _${name}_type"
-	append m "\n# define _${name}_type"
+	append m "\n#ifndef _${name}_cxx_type"
+	append m "\n# define _${name}_cxx_type"
 	append m $string
-	append m "\n#endif /* _${name}_type */"
+	append m "\n#endif /* _${name}_cxx_type */"
 	append m "\n"
 	return $m
     }

@@ -761,10 +761,10 @@ namespace eval language::c {
     # Protect a string with guards
     #
     proc guard { string name } {
-	append m "\n#ifndef _${name}_type"
-	append m "\n# define _${name}_type"
+	append m "\n#ifndef _${name}_c_type"
+	append m "\n# define _${name}_c_type"
 	append m $string
-	append m "\n#endif /* _${name}_type */"
+	append m "\n#endif /* _${name}_c_type */"
 	append m "\n"
 	return $m
     }

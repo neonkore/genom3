@@ -503,9 +503,9 @@ namespace eval language::c++ {
         # mapping for nested types
         foreach e [$type nested] {
           switch -- [$e kind] {
-            struct { append s [genstruct $e] }
-            union  { append s [genunion $e] }
-            enum   { append s [genenum $e] }
+            struct { append m [genstruct $e] }
+            union  { append m [genunion $e] }
+            enum   { append m [genenum $e] }
           }
         }
 

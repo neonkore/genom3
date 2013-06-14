@@ -86,3 +86,9 @@ typedef union u2 switch(boolean) {
  case TRUE: s1 a;
  case FALSE: u1 b;
 } t3;
+
+exception e1;
+
+exception e2 {
+  long a;
+};

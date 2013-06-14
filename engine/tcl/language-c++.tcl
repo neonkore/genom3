@@ -517,7 +517,7 @@ namespace eval language::c++ {
         }
         append m "\n } detail;"
         append m "\n const char *what() { return ${n}_id; };"
-        append m "\n}"
+        append m "\n};"
 
       } else {
         append m "\nstruct ${n} : public genom::exception {"

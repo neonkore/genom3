@@ -92,3 +92,9 @@ exception e1;
 exception e2 {
   long a;
 };
+
+exception e3 {
+  struct e3n {
+    long a;
+  } a;
+};

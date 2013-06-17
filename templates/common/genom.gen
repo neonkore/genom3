@@ -32,6 +32,12 @@ interface genom {
   exception interrupted { string<128> by; };
   throw interrupted;
 
+  exception mwerr {
+    long code;
+    string<256> what;
+  };
+  throw mwerr;
+
   exception serialization, too_many_activities, disallowed;
   throw serialization, too_many_activities, disallowed;
 

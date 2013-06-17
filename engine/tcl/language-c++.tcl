@@ -401,7 +401,7 @@ namespace eval language::c++ {
 	    append m [genloc $e]
 	    append m "\n  [cname [$e name]] =\t[incr v],"
 	}
-	append m "\n  _unused =\t0xffffffff"
+        append m "\n  genom_max_[$type name] =\t0xffffffff"
 	append m "\n\};"
 
 	return [guard [c++namespace $m $type] [$type cname]]

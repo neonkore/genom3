@@ -185,7 +185,15 @@ eng_listtmpldir(const char *base, const char *dir, char ***list, int *n)
     xwarnx("looking for template in '%s'", de.d_name);
     name = eng_findentry(path);
     if (name) {
-      char **r = realloc(*list, (*n+2)*sizeof(char *));
+      char **r;
+
+      /* avoid duplicates */
+      for(r = *list; r && *r; r++)
+        if (!strcmp(ent, *r)) { name = NULL; break; }
+      if (!name) continue;
+
+      /* push into the list */
+      r = realloc(*list, (*n+2)*sizeof(char *));
       if (r) {
         r[*n] = strdup(ent);
         r[*n+1] = NULL;

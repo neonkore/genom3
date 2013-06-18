@@ -156,11 +156,13 @@ operator>=(const genom::bounded_sequence<T, N> &x,
     return !(x < y);
 }
 
-template <typename T, size_t N> inline void
-std::swap(const genom::bounded_sequence<T, N> &x,
-          const genom::bounded_sequence<T, N> &y)
-{
-  x.swap(y);
+namespace std {
+  template <typename T, size_t N> inline void
+  swap(const genom::bounded_sequence<T, N> &x,
+       const genom::bounded_sequence<T, N> &y)
+  {
+    x.swap(y);
+  }
 }
 
 #endif /* H_GENOM3_CXX_IDLSEQUENCE */

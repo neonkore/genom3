@@ -80,6 +80,7 @@ namespace genom {
     void resize(size_type l, value_type u = value_type()) {
       if (l > N) throw std::out_of_range("genom::bounded_sequence::resize");
       if (l > n) std::fill_n(e + n, l-n, u);
+      n = l;
     }
     size_type max_size() const { return N; }
     bool empty() const { return n == 0; }

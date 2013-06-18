@@ -220,12 +220,11 @@ contain such a type. You should thus avoid to define such datatypes in
 @subsection Mapping for sequence types
 
 @genom{} IDL sequences mapping differ for bounded or unbouded
-variations of the sequence. The bounded sequences maps onto the
+variations of the sequence. The unbounded sequences maps onto the
 @code{std::vector} template class provided by the C++ standard.  The
-unbounded sequence maps onto a C++ @code{std::tr1::array} template
-class. The definition of @code{std::tr1::array} is not provided by the
-C++ standard, but is commonly implemented by modern C++ compiler as a
-transition step toward the C++11 standard.
+bounded sequence maps onto a C++ @code{genom::bounded_sequence} template
+class. The definition of @code{genom::bounded_sequence} is very
+similar to @code{std::array} but provides a variable number of elements.
 
 For instance, the following IDL:
 @verbatim
@@ -236,18 +235,73 @@ For instance, the following IDL:
 would map into
 @verbatim
       typedef std::vector<int32_t> unbounded;
-      typedef std::tr1::array<int32_t, 16> bounded;
+      typedef genom::bounded_sequence<int32_t, 16> bounded;
 @end verbatim
 
-At the time of writing, @code{std::array} is still not officially
-supported by most compilers and available only as an experimental
-extension, so it has been decided to not use it. As soon as most
-compilers will provide an official implementation of
-@code{std::array}, this type will be used instead of
-@code{std::tr1::array}. Since the differences between the two
-interfaces are minimal, this should have only little impact on
-existing code.
+The interface of @code{genom::bounded_sequence} is the following:
+@verbatim
+  template <typename T, size_t N>
+  struct bounded_sequence {
+    // types:
+    typedef T                                     value_type;
+    typedef value_type&                           reference;
+    typedef const value_type&                     const_reference;
+    typedef value_type*                           iterator;
+    typedef const value_type*                     const_iterator;
+    typedef value_type*                           pointer;
+    typedef const value_type*                     const_pointer;
+    typedef size_t                                size_type;
+    typedef ptrdiff_t                             difference_type;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
+    value_type e[N];
+    size_type n;
+
+    // No explicit construct/copy/destroy for aggregate type
+
+    void fill(const value_type &u);
+
+    // iterators:
+    iterator begin();
+    iterator end();
+    const_iterator begin() const;
+    const_iterator end() const;
+
+    reverse_iterator rbegin();
+    reverse_iterator rend();
+    const_reverse_iterator rbegin() const;
+    const_reverse_iterator rend() const;
+
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+    const_reverse_iterator crbegin() const;
+    const_reverse_iterator crend() const;
+
+    // capacity:
+    size_type size() const;
+    void resize(size_type l, value_type u = value_type());
+    size_type max_size() const;
+    bool empty() const;
+
+    // element access:
+    reference operator[](size_type i);
+    const_reference operator[](size_type i) const;
+    reference at(size_type i);
+    const_reference at(size_type i) const;
+
+    reference front();
+    const_reference front() const;
+    reference back();
+    const_reference back() const;
+    value_type *data();
+    const value_type *data() const;
+
+    // modifiers
+    void swap(bounded_sequence &a);
+    void clear();
+  };
+@end verbatim
 
 @node C++ Port
 @subsection Mapping for port types

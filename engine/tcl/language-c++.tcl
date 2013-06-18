@@ -80,8 +80,8 @@ namespace eval language::c++ {
       if {[regexp {std::vector<} $m]} {
         append p "\n#include <vector>"
       }
-      if {[regexp {std::tr1::array<} $m]} {
-        append p "\n#include <tr1/array>"
+      if {[regexp {genom::bounded_sequence<} $m]} {
+        append p "\n#include <genom3/c++/idlsequence.h>"
       }
 
       return $p$m
@@ -149,7 +149,7 @@ namespace eval language::c++ {
 		if {[catch {$type length} l]} {
 		    set d "std::vector< [declarator $t] >"
 		} else {
-		    set d "std::tr1::array< [declarator $t],$l >"
+		    set d "genom::bounded_sequence< [declarator $t],$l >"
 		}
 	    }
 

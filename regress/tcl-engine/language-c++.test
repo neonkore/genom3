@@ -138,8 +138,8 @@ expect out '
 	/^char rs8\[8\]$/ {next}
 	/^const std::vector< int32_t > &vv$/ {next}
 	/^std::vector< int32_t > &rv$/ {next}
-	/^const std::tr1::array< int32_t,8 > &vv8$/ {next}
-	/^std::tr1::array< int32_t,8 > &rv8$/ {next}
+	/^const genom::bounded_sequence< int32_t,8 > &vv8$/ {next}
+	/^genom::bounded_sequence< int32_t,8 > &rv8$/ {next}
 
 	/^const int8_t vac\[4\]$/ {next}
 	/^int8_t rac\[4\]$/ {next}
@@ -149,8 +149,8 @@ expect out '
 	/^char ras8\[4\]\[8\]$/ {next}
 	/^const std::vector< int32_t > vav\[4\]$/ {next}
 	/^std::vector< int32_t > rav\[4\]$/ {next}
-	/^const std::tr1::array< int32_t,8 > vav8\[4\]$/ {next}
-	/^std::tr1::array< int32_t,8 > rav8\[4\]$/ {next}
+	/^const genom::bounded_sequence< int32_t,8 > vav8\[4\]$/ {next}
+	/^genom::bounded_sequence< int32_t,8 > rav8\[4\]$/ {next}
 
 	/^basic::tc vtc$/ {next}
 	/^basic::tc &rtc$/ {next}

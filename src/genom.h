@@ -39,8 +39,9 @@ extern struct runopt_s {
   int parse;		/** parse file only */
   int list;		/** list available templates */
   char engine[PATH_MAX];/** generator engine */
-  char *tmplpath;	/** templates directories, colon separated */
+  char *sitetmplpath;	/** site templates directories, colon separated */
   char sysdir[PATH_MAX];/** system files directory */
+  char tmpldir[PATH_MAX];/** genom template directory */
   char tmpdir[PATH_MAX];/** temporary directory */
   int cppdotgen;	/** cpp accepts .gen file extension */
   char cpppath[PATH_MAX];/** genom cpp preprocessor */

@@ -72,9 +72,10 @@ main(int argc, char *argv[])
   runopt.tmpl[0] = '\0';
   runopt.engine[0] = '\0';
   strlcpy(runopt.sysdir, SYSDIR, sizeof(runopt.sysdir));
+  strlcpy(runopt.tmpldir, TMPLDIR, sizeof(runopt.tmpldir));
 
   optarg = getenv("GENOM_TMPL_PATH");
-  runopt.tmplpath = optarg?optarg:TMPLPATH;
+  runopt.sitetmplpath = optarg?optarg:SITETMPLPATH;
 
   optarg = getenv("TMPDIR");
   strlcpy(runopt.tmpdir, optarg?optarg:TMPDIR, sizeof(runopt.tmpdir));
@@ -128,7 +129,7 @@ main(int argc, char *argv[])
 	break;
 
       case 't':
-	runopt.tmplpath = string(optarg);
+	runopt.sitetmplpath = string(optarg);
 	runopt.cmdline = strings(runopt.cmdline, " -t ", abspath(optarg), NULL);
 	break;
 

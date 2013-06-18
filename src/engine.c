@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -82,7 +82,7 @@ eng_findtmpl(const char *tmpl)
   if (tmpl[0] == '/') return tmpl;
 
   /* iterate over components of tmplpath */
-  dirs = strdup(runopt.tmplpath);
+  dirs = strdup(runopt.sitetmplpath);
   if (!dirs) return tmpl;
   for (dir = strtok(dirs, ":"); dir; dir = strtok(NULL, ":")) {
 
@@ -102,8 +102,20 @@ eng_findtmpl(const char *tmpl)
       return string(path);
     }
   }
-
   free(dirs);
+
+  /* check genom tmpldir */
+  xwarnx("searching template directory '%s'", runopt.tmpldir);
+
+  strlcpy(path, runopt.tmpldir, sizeof(path));
+  strlcat(path, "/", sizeof(path));
+  strlcat(path, tmpl, sizeof(path));
+  if (!stat(path, &sb) && (sb.st_mode & S_IFDIR)) {
+    xwarnx("looking for template in '%s'", path);
+    name = eng_findentry(path);
+    if (name) return string(path);
+  }
+
   warnx("cannot find template '%s'", tmpl);
   return NULL;
 }
@@ -122,13 +134,16 @@ eng_listtmpl(char ***list)
   assert(list);
   *list = NULL;
 
-  /* iterate over components of tmplpath */
-  dirs = strdup(runopt.tmplpath);
+  /* iterate over components of sitetmplpath */
+  dirs = strdup(runopt.sitetmplpath);
   if (!dirs) return ENOMEM;
   for (dir = strtok(dirs, ":"); dir; dir = strtok(NULL, ":"))
     eng_listtmpldir("", dir, list, &n);
-
   free(dirs);
+
+  /* list tmpldir */
+  eng_listtmpldir("", runopt.tmpldir, list, &n);
+
   if (!n) { warnx("no template found!"); return ENOENT; }
   return 0;
 }

@@ -22,11 +22,11 @@ AC_SUBST(cpppath)
 AC_DEFINE([TMPDIR],["/tmp"],[Default temporary directory])
 
 # define templates directory (relative to datadir)
-tmpldir='${datadir}/${PACKAGE_NAME}/${PACKAGE_VERSION}/templates'
+tmpldir='${datadir}/${PACKAGE_NAME}/templates'
 AC_SUBST(tmpldir)
 
 # define sys directory (relative to datadir)
-sysdir='${datadir}/${PACKAGE_NAME}/${PACKAGE_VERSION}/engines'
+sysdir='${datadir}/${PACKAGE_NAME}/engines'
 AC_SUBST(sysdir)
 
 # define site templates directory (relative to datadir)

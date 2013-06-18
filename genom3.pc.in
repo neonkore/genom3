@@ -13,6 +13,7 @@ libdir=@libdir@
 includedir=@includedir@
 datarootdir=@datarootdir@
 datadir=@datadir@
+tmpldir=@tmpldir@
 sitetmpldir=@sitetmpldir@
 
 GENOM_TOOL=${exec_prefix}/bin/genom3

@@ -61,6 +61,9 @@ extern "C" {
 /* no exception symbol */
 genom_event genom_weak genom_ok = NULL;
 
+/* exception while throwing an execption or other unrecoverable errors */
+const char genom_extern_weak genom_fatal[] = "::genom::fatal";
+
 /* unknown exception */
 const char genom_extern_weak genom_unkex_id[] = "::genom::unkex";
 typedef struct genom_unkex_detail { char what[128]; } genom_unkex_detail;

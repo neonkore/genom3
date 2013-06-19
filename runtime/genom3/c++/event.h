@@ -47,6 +47,9 @@ namespace genom {
   /* no exception symbol */
   event genom_weak ok = NULL;
 
+  /* exception while throwing an execption or other unrecoverable errors */
+  const char genom_extern_weak fatal[] = "::genom::fatal";
+
   /* generic genom exception */
   struct exception : public std::runtime_error {};
 

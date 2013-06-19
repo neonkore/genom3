@@ -433,8 +433,9 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
      *
      * @deffn {TCL Backend} {$type mangle}
      *
-     * Return an ASCII string uniquely describing the given type, suitable for
-     * use in source code written in the current programming language.
+     * Return a string uniquely describing the given type, suitable for use as
+     * an identifier in source code written in the current programming
+     * language.
      * @end deffn
      *
      * @deffn {TCL Backend} {$type mapping}

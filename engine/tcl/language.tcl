@@ -269,13 +269,13 @@ namespace eval language {
   #
   proc mangle { type } {
     switch -- [$type kind] {
-      enum - struct - union - exception - typedef {
-        return [$type cname]
+      enum - enumerator - struct - union - exception - typedef - native {
+	return [string map {:: _} t[$type fullname]]
       }
 
       array - sequence {
         if {[catch {$type length} l]} {
-          return dyn[$type kind]_[mangle [$type type]]
+          return [$type kind]_[mangle [$type type]]
         } else {
           return [$type kind]${l}_[mangle [$type type]]
         }
@@ -283,14 +283,10 @@ namespace eval language {
 
       string {
         if {[catch {$type length} l]} {
-          return dynstring
+          return string
         } else {
           return string${l}
         }
-      }
-
-      native {
-        return [$type kind][$type cname]
       }
 
       {struct member} - {union member} - {const} {
@@ -298,7 +294,7 @@ namespace eval language {
       }
 
       default {
-        return [language cname [$type kind]]
+        return [string map {{ } _} [$type kind]]
       }
     }
   }

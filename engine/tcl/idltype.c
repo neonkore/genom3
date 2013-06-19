@@ -253,8 +253,17 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     /*/
      * @deffn {TCL Backend} {$type types [@var{filter}]}
      *
-     * Return a list of all types recursively defined in the given type. This
-     * is mostly useful for @code{struct} or @code{union} types.
+     * Return the list of all types that are recursively used by the given
+     * type. In other words, this is the list of types that must be known in
+     * order to completely define the given $type.
+     *
+     * For all basic types such as @code{long}, @code{double} and so forth, the
+     * returned list is empty. For @code{enum}erated types, the result is the
+     * list of enumerators. For aggregates such as @code{struct}, @code{union}
+     * or @code{exception}, the result is the list of all members, expanded
+     * recursively with the same rules. Finally, for @code{array}s or
+     * @code{sequence}s, this returns the type of the array or sequence
+     * elements, recursively expanded.
      *
      * @@args
      * @item @var{filter}

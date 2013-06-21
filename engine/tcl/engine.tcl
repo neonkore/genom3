@@ -295,7 +295,6 @@ namespace eval engine {
     # If permissions are specified, apply them.
     #
     variable moc [dict create]
-
     proc close { channel {perm {}} } {
 	variable moc
 	variable silent
@@ -334,8 +333,7 @@ namespace eval engine {
               merge::custom ${merge-tool} $tmp $dst
             }
           }]} {
-            template fatal "could not merge $dst"
-            return
+            error "stop: could not merge changes in $dst"
           }
 
           if {[llength $perm]} {
@@ -345,8 +343,11 @@ namespace eval engine {
         }
 
 	if {!$overwrite && [file exists $dst]} {
-	    template fatal "file $dst would be overwritten"
-	    return
+          error [subst [join {
+            "stop: file $dst exists and would be overwritten.\n"
+            "See [dotgen template name] -h for available merge or overwrite"
+            " modes."
+          } {}]]
 	}
 
 	if {[file exists $dst]} {

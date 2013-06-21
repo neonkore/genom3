@@ -20,5 +20,5 @@
 hdir=	$(includedir)/genom3/c++
 
 h_HEADERS=\
-	idlsequence.h
+	idlsequence.h	\
 	event.h

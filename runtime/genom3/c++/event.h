@@ -18,7 +18,8 @@
 #ifndef H_GENOM3_CXX_EVENT
 #define H_GENOM3_CXX_EVENT
 
-#include <stdexcept>
+#include <stdint.h>
+
 
 /*
  * Definition of codel transitions and exceptions.
@@ -45,13 +46,15 @@ namespace genom {
 #define genom_extern_weak extern genom_weak
 
   /* no exception symbol */
-  event genom_weak ok = NULL;
+  event genom_weak ok = 0;
 
   /* exception while throwing an execption or other unrecoverable errors */
   const char genom_extern_weak fatal[] = "::genom::fatal";
 
   /* generic genom exception */
-  struct exception : public std::runtime_error {};
+  struct exception {
+    virtual const char* what() const { return ok; }
+  };
 
   /* unknown exception */
   const char genom_extern_weak unkex_id[] = "::genom::unkex";

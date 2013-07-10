@@ -1,0 +1,11 @@
+#
+# GenoM C Client Interface pkg-config file
+#
+Name: genom3-c-client
+Description: Generator of robotic Modules / C Client Interface
+Version: @GENOM_CLIENT_PROTOCOL@
+
+prefix=@prefix@
+includedir=@includedir@
+
+Cflags: -I${includedir}

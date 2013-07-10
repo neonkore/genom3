@@ -24,7 +24,7 @@
 
 #define GENOM_CLIENT_DLSYM		"genom_client_info"
 
-enum { genom_client_protocol = 20130619 };
+enum { genom_client_protocol = @GENOM_CLIENT_PROTOCOL@ };
 
 typedef struct genom_client_s *genom_client;
 

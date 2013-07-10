@@ -5,6 +5,7 @@
 #
 AC_PREREQ(2.62)
 AC_INIT([genom],[2.99.21],[openrobots@laas.fr])
+AC_SUBST(GENOM_CLIENT_PROTOCOL, 20130619)
 
 AC_CONFIG_AUX_DIR([autoconf])
 AC_CONFIG_MACRO_DIR([autoconf])
@@ -148,11 +149,13 @@ fi
 # output
 AC_CONFIG_FILES([
 	genom3.pc
+	genom3-c-client.pc
 	Makefile
 	compat/Makefile
 	src/Makefile
 	engine/tcl/Makefile
 	runtime/genom3/c/Makefile
+	runtime/genom3/c/client.h
 	runtime/genom3/c++/Makefile
 	templates/common/Makefile
 	templates/interactive/Makefile

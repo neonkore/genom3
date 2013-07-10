@@ -53,7 +53,7 @@ namespace genom {
 
   /* generic genom exception */
   struct exception {
-    virtual const char* what() const { return ok; }
+    virtual const char* what() const { return fatal; }
   };
 
   /* unknown exception */

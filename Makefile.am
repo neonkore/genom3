@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2012 LAAS/CNRS
+# Copyright (c) 2009-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -19,7 +19,7 @@
 ACLOCAL_AMFLAGS = -I autoconf
 
 pkgconfigdir=	$(libdir)/pkgconfig
-pkgconfig_DATA=	genom3.pc
+pkgconfig_DATA=	genom3.pc genom3-c-client.pc
 
 if WITH_TCL
   TCLDIR=\

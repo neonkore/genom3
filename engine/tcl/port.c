@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 LAAS/CNRS
+ * Copyright (c) 2010-2013 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -43,13 +43,13 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum portidx {
     portidx_name, portidx_dir, portidx_kind, portidx_comp, portidx_type,
-    portidx_datatype, portidx_loc, portidx_class
+    portidx_datatype, portidx_throws, portidx_loc, portidx_class
   };
   static const char *args[] = {
     [portidx_name] = "name", [portidx_dir] = "dir", [portidx_kind] = "kind",
     [portidx_comp] = "component", [portidx_type] = "type",
-    [portidx_datatype] = "datatype", [portidx_loc] = "loc",
-    [portidx_class] = "class", NULL
+    [portidx_datatype] = "datatype", [portidx_throws] = "throws",
+    [portidx_loc] = "loc", [portidx_class] = "class", NULL
   };
   port_s p = v;
   Tcl_Obj *r;
@@ -90,6 +90,21 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = port_datatype(p)?
         Tcl_NewStringObj(type_genref(port_datatype(p)), -1) : NULL;
       break;
+
+    case portidx_throws: {
+      prop_s t;
+      hiter i;
+
+      r = Tcl_NewListObj(0, NULL);
+
+      t = hash_find(comp_props(port_comp(p)), prop_strkind(PROP_THROWS));
+      if (t)
+        for(hash_first(prop_hash(t), &i); i.current; hash_next(&i)) {
+          Tcl_ListObjAppendElement(
+            interp, r, Tcl_NewStringObj(type_genref(i.value), -1));
+        }
+      break;
+    }
 
     case portidx_loc: {
       Tcl_Obj *l[3] = {

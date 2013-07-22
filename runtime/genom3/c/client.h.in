@@ -92,7 +92,7 @@ struct genom_client_info {
   genom_event (*clean)(genom_client h, int rqstid);
   genom_event (*abort)(genom_client h, int rqstid);
   genom_event (*doevents)(genom_client h);
-  const char *(*json_error)(genom_event e, const void *detail);
+  char *(*json_error)(genom_event e, const void *detail);
 
   int nservices;
   const struct genom_service_info *services;

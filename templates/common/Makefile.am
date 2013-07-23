@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012 LAAS/CNRS
+# Copyright (c) 2012-2013 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -19,5 +19,8 @@
 
 tdir=$(tmpldir)/common
 
-dist_t_DATA=			\
-	genom.gen
+dist_t_DATA=\
+	genom.gen			\
+	c-client.pc.in			\
+	c-client-uninstalled.pc.in	\
+	client.h

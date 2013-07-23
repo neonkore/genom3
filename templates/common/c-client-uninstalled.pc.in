@@ -1,0 +1,17 @@
+<'
+if {[llength $argv] != 1} { error "expected arguments: middleware" }
+lassign $argv middleware
+set c [dotgen components]
+'>
+# pkg-config file for uninstalled <"[$c name]"> c client
+#
+prefix=@abs_top_builddir@
+libdir=${prefix}
+includedir=${prefix}/src
+
+Name: <"[$c name]">-c-client
+Description: <"[$c name]"> C client (<"$middleware">)
+Version: @PACKAGE_VERSION@
+Requires: genom3-c-client = @GENOM_CLIENT_PROTOCOL@
+Cflags: -I${includedir}
+Libs: ${libdir}/lib<"[$c name]">-c-client.la

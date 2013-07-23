@@ -1,0 +1,18 @@
+<'
+if {[llength $argv] != 1} { error "expected arguments: middleware" }
+lassign $argv middleware
+set c [dotgen components]
+'>
+# pkg-config file for <"[$c name]"> c client
+#
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: <"[$c name]">-c-client
+Description: <"[$c name]"> C client (<"$middleware">)
+Version: @PACKAGE_VERSION@
+Requires: genom3-c-client = @GENOM_CLIENT_PROTOCOL@
+Cflags: -I${includedir}
+Libs: -L${libdir} -l<"[$c name]">-c-client

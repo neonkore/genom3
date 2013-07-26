@@ -1,6 +1,37 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2013 LAAS/CNRS
 
+			    Changes in genom 2.99.21
+
+Released on July 26th, 2013
+ . Changed the C++ IDL mapping for bounded sequences (use a
+   genom::bounded_sequence instead of tr1::array).
+ . Fixed a few syntactic issues in the C++ IDL mapping.
+ . Fixed the C client interface to be able to invoke requests synchronously:
+   added a result() function getting the result of a request and changed the
+   semantics of send() so that it is always non-blocking (callbacks are
+   optional).
+ . Fixed the constness of the json_error() function in the c/client.h
+   interface.
+ . Added a .pc file for the version of the c/client.h interface, to detect
+   versions mistmatch early during the configuration of clients.
+ . Centralized a client.h tcl template source describing the instanciated
+   c/client interface, so that templates providing a C client are guaranteed to
+   be compatible.
+ . Removed the version number in the installation path of genom3 builtin
+   templates.
+ . The --tmpldir or the GENOM_TMPL_PATH variable do not discard the genom3
+   builtin template path anymore.
+ . Replaced middleware-specific errors with a common middleware exception
+   mwerr.
+ . Added a [$port throw] procedure in the tcl template engine, that reports
+   exceptions that can be raised during the reading or writing of a port.
+ . Fix error reporting in the tcl template engine (line error number and error
+   backtrace).
+ . Improved documentation for the [$type ...] procedure in the tcl template
+   engine.
+
+
 			    Changes in genom 2.99.20
 
 Released on June 10th, 2013

@@ -86,7 +86,7 @@ namespace eval object {
       }
     }
 
-    if {$visibility == "private"} {
+    if {$visibility == "private" || $visibility == "extern"} {
       foreach r [$component remotes] {
         foreach p [$r parameters] {
           set r [type-types [$p type] $visibility $filter]
@@ -96,7 +96,9 @@ namespace eval object {
           set types [dict merge $types [type-types $t $visibility $filter]]
         }
       }
+    }
 
+    if {$visibility == "private"} {
       if {![catch {$component ids} ids]} {
         set types [dict merge $types [type-types $ids $visibility $filter]]
       }

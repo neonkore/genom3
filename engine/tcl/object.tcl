@@ -32,8 +32,10 @@ namespace eval object {
     if {[catch {$object class} class]} { error "not a genom object" }
 
     switch $visibility {
-      public - private {}
-      default { error "bad parameter $visibility: must be public or private" }
+      public - extern - private {}
+      default {
+        error "bad parameter $visibility: must be public, extern or private"
+      }
     }
 
     switch $class {

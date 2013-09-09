@@ -3,7 +3,7 @@
 #
 Name: genom3
 Description: Generator of robotic Modules
-Version: @VERSION@
+Version: @PACKAGE_VERSION@
 
 PACKAGE_NAME=@PACKAGE_NAME@
 

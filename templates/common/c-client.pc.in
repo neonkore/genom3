@@ -7,8 +7,8 @@ set c [dotgen components]
 #
 prefix=@prefix@
 exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+libdir=@libdir@/genom/<"$middleware">
+includedir=@includedir@/genom/<"$middleware">
 
 Name: <"[$c name]">-c-client
 Description: <"[$c name]"> C client (<"$middleware">)

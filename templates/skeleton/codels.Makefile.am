@@ -26,6 +26,7 @@
 # check arguments
 if {[llength $argv] != 2} { error "expected argument: input lang" }
 lassign $argv input lang
+lang $lang
 
 # generate copyright notice (if any)
 if {![catch {dotgen input notice} text]} {
@@ -36,7 +37,6 @@ if {![catch {dotgen input notice} text]} {
 <'foreach c [dotgen components] {'>
 <'  set if [$c lang]'>
 <'  set h [$c name]_${if}_types[fileext header]'>
-<'  lang $if'>
 <'  dict set hlist $h $if'>
 lib_LTLIBRARIES = lib<"[$c name]">_codels.la
 

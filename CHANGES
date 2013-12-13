@@ -1,6 +1,19 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2013 LAAS/CNRS
 
+			    Changes in genom 2.99.22
+
+Release on December 13th, 2013
+ . Support an "extern" parameter in tcl procedure [$component types], returning
+   the list of public types of the components interface.
+ . Fix version in the genom3.pc file (use @PACKAGE_VERSION@ in instead of
+   @VERSION@).
+ . Install C client libraries and headers in a middleware-dependent location,
+   so that multiple builds can be installed inside the same prefix. .pc files
+   are "middlewarized" too, so PKG_CONFIG_PATH must be tuned.
+ . Fix skeleton codels Makefile for -l c++ option.
+
+
 			    Changes in genom 2.99.21
 
 Released on July 26th, 2013

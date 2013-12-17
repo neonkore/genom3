@@ -77,8 +77,10 @@ const_expr: or_expr;
 positive_int_const: const_expr
   {
     $$ = $1;
-    if (const_convert(&$$, CST_UINT))
+    if (const_convert(&$$, CST_UINT)) {
       parserror(@1, "positive integer constant required at column %d", @1.col);
+      $$.k = CST_UINT; $$.u = 1;
+    }
   }
 ;
 

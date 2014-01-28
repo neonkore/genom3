@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 LAAS/CNRS
+ * Copyright (c) 2010-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -130,8 +130,8 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     case compidx_throws: {
       Tcl_Obj *argv[] = {
-        Tcl_NewStringObj("lsort", -1),
-        Tcl_NewStringObj("-unique", -1),
+        Tcl_NewStringObj("object", -1),
+        Tcl_NewStringObj("unique", -1),
         NULL,
       };
       prop_s p;

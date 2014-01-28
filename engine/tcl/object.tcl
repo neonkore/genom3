@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -269,6 +269,21 @@ namespace eval object {
       }
     }
   }
+
+
+  # --- unique -------------------------------------------------------------
+
+  # Remove duplicates in a list while preserving order: only the first item is
+  # kept.
+  #
+  proc unique { list } {
+    set r [list]
+    foreach e $list {
+      if {[lsearch -exact $r $e] < 0} { lappend r $e }
+    }
+    return $r
+  }
+  namespace export unique
 
 
   namespace ensemble create

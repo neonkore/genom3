@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -458,19 +458,14 @@ static hash_s hdeps;
 static void
 dotgen_parsehash(char *buffer, YYLTYPE *yylloc)
 {
-  char file[PATH_MAX];
+  char file[PATH_MAX], raw[PATH_MAX];
   int line, flag;
   int n;
 
-  n = sscanf(buffer, "# %d \"%[^\"]\" %d", &line, file, &flag);
+  n = sscanf(buffer, "# %d \"%[^\"]\" %d", &line, raw, &flag);
   if (n < 1) return;
   if (n < 2) { yylloc->line = line; return; }
-
-  if (!runopt.cppdotgen) {
-    char dst[PATH_MAX];
-    realpath(file, dst);
-    strncpy(file, dst, sizeof(file));
-  }
+  if (!realpath(raw, file)) strcpy(file, raw);
 
   yylloc->file = string(file);
   yylloc->line = line;

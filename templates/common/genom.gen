@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 LAAS/CNRS
+ * Copyright (c) 2012-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software for any purpose
@@ -32,8 +32,39 @@ interface genom {
   exception interrupted { string<128> by; };
   throw interrupted;
 
+  /* this is a subset of standard errnos */
+  enum mwerrno {
+    EOK,         /* Success */
+    EPERM,       /* Operation not permitted */
+    ENOENT,      /* No such file or directory */
+    ESRCH,       /* No such process */
+    EINTR,       /* Interrupted system call */
+    EIO,         /* I/O error */
+    ENXIO,       /* No such device or address */
+    E2BIG,       /* Argument list too long */
+    ECHILD,      /* No child processes */
+    EAGAIN,      /* Try again */
+    ENOMEM,      /* Out of memory */
+    EACCES,      /* Permission denied */
+    EFAULT,      /* Bad address */
+    EBUSY,       /* Device or resource busy */
+    EEXIST,      /* File exists */
+    ENODEV,      /* No such device */
+    ENOTDIR,     /* Not a directory */
+    EISDIR,      /* Is a directory */
+    EINVAL,      /* Invalid argument */
+    EMFILE,      /* Too many open files */
+    EFBIG,       /* File too large */
+    ENOSPC,      /* No space left on device */
+    ESPIPE,      /* Illegal seek */
+    EPIPE,       /* Broken pipe */
+    EDOM,        /* Math argument out of domain of func */
+    ETIMEDOUT,   /* Connection timed out */
+    ECONNREFUSED /* Connection refused */
+  };
+
   exception mwerr {
-    long code;
+    mwerrno code;
     string<256> what;
   };
   throw mwerr;

@@ -61,12 +61,12 @@ namespace eval object {
     if {![eval [list apply $filter $component]]} return $types
 
     foreach p [$component ports] {
-      set r [type-types [$p datatype] $visibility $filter]
-      set types [dict merge $types $r]
+      set t [type-types [$p datatype] $visibility $filter]
+      set types [dict merge $types $t]
 
       if {$visibility == "private"} {
-        set r [type-types [$p type] $visibility $filter]
-        set types [dict merge $types $r]
+        set t [type-types [$p type] $visibility $filter]
+        set types [dict merge $types $t]
       }
     }
 
@@ -77,8 +77,8 @@ namespace eval object {
             # handled above
           }
           default {
-            set r [type-types [$p type] $visibility $filter]
-            set types [dict merge $types $r]
+            set t [type-types [$p type] $visibility $filter]
+            set types [dict merge $types $t]
           }
         }
       }
@@ -91,8 +91,8 @@ namespace eval object {
     if {$visibility == "private" || $visibility == "extern"} {
       foreach r [$component remotes] {
         foreach p [$r parameters] {
-          set r [type-types [$p type] $visibility $filter]
-          set types [dict merge $types $r]
+          set t [type-types [$p type] $visibility $filter]
+          set types [dict merge $types $t]
         }
         foreach t [$r throws] {
           set types [dict merge $types [type-types $t $visibility $filter]]

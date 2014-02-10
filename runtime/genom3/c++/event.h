@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 LAAS/CNRS
+ * Copyright (c) 2013-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -66,7 +66,7 @@ namespace genom {
 
   /* generic system error */
   const char genom_extern_weak syserr_id[] = "::genom::syserr";
-  struct syserr_detail { uint32_t code; };
+  struct syserr_detail { int32_t code; };
   struct syserr : public exception {
     syserr_detail detail;
     const char *what() { return syserr_id; };

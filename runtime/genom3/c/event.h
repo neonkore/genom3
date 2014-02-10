@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 LAAS/CNRS
+ * Copyright (c) 2013-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -77,7 +77,7 @@ genom_unkex(genom_unkex_detail *d)
 
 /* generic system error */
 const char genom_extern_weak genom_syserr_id[] = "::genom::syserr";
-typedef struct genom_syserr_detail { uint32_t code; } genom_syserr_detail;
+typedef struct genom_syserr_detail { int32_t code; } genom_syserr_detail;
 
 static inline genom_event
 genom_syserr(genom_syserr_detail *d)

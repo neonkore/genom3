@@ -101,6 +101,12 @@ namespace eval object {
     }
 
     if {$visibility == "private"} {
+      foreach t [$component tasks] {
+        foreach e [$t throws] {
+          set types [dict merge $types [type-types $e $visibility $filter]]
+        }
+      }
+
       if {![catch {$component ids} ids]} {
         set types [dict merge $types [type-types $ids $visibility $filter]]
       }

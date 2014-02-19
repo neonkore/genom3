@@ -73,8 +73,11 @@ namespace eval object {
     foreach s [$component services] {
       foreach p [$s parameters] {
         switch [$p dir] {
-          "inport" - "outport" {
-            # handled above
+          "local" {
+            if {$visibility == "private"} {
+              set t [type-types [$p type] $visibility $filter]
+              set types [dict merge $types $t]
+            }
           }
           default {
             set t [type-types [$p type] $visibility $filter]

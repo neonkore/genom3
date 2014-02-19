@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 LAAS/CNRS
+ * Copyright (c) 2012-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -285,7 +285,8 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
       case P_IDS: if (kind == S_ATTRIBUTE) break; else assert(0);
       case P_LOCAL: if (kind != S_ATTRIBUTE) break; else assert(0);
     }
-    if (type_native(param_type(i.value), 0)) {
+    if (param_dir(i.value) != P_NODIR &&
+        type_native(param_type(i.value), 0)) {
       parserror(l, "parameter %s of %s %s may not contain native types",
                 param_name(i.value), service_strkind(kind), name);
       type_native(param_type(i.value), 1/*verbose message*/);

@@ -1,5 +1,5 @@
 @c
-@c Copyright (c) 2009-2013 LAAS/CNRS
+@c Copyright (c) 2009-2014 LAAS/CNRS
 @c All rights reserved.
 @c
 @c Permission to use, copy, modify,  and distribute this software for any
@@ -55,6 +55,7 @@ languages.  For the @code{C} language, @xref{C mappings}. For the
 * C Struct::
 * C Union::
 * C Sequence::
+* C Optional::
 * C Port::
 * C Remote::
 * C Native::
@@ -74,6 +75,7 @@ languages.  For the @code{C} language, @xref{C mappings}. For the
 * C++ Struct::
 * C++ Union::
 * C++ Sequence::
+* C++ Optional::
 * C++ Port::
 * C++ Remote::
 * C++ Native::

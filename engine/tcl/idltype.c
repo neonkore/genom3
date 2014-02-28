@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 LAAS/CNRS
+ * Copyright (c) 2010-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -305,9 +305,9 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
      */
     case typeidx_type:
       switch(type_kind(t)) {
-	case IDL_ENUMERATOR: case IDL_SEQUENCE: case IDL_ARRAY: case IDL_CONST:
-	case IDL_TYPEDEF: case IDL_MEMBER: case IDL_CASE:
-	case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
+	case IDL_ENUMERATOR: case IDL_SEQUENCE: case IDL_OPTIONAL:
+        case IDL_ARRAY: case IDL_CONST: case IDL_TYPEDEF: case IDL_MEMBER:
+        case IDL_CASE: case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
 	  r = Tcl_NewStringObj(type_genref(type_type(t)), -1);
 	  break;
 

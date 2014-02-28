@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -117,7 +117,7 @@ named_type: scoped_name
 base_type_spec:
   boolean_type | integer_type | floating_pt_type | char_type | octet_type |
   any_type;
-template_type_spec: sequence_type | string_type | fixed_type;
+template_type_spec: sequence_type | optional_type | string_type | fixed_type;
 
 integer_type: signed_int | unsigned_int;
 floating_pt_type: float_type | double_type;
@@ -171,6 +171,13 @@ sequence_type:
   | SEQUENCE '<' simple_type_spec '>'
   {
     $$ = $3 ? type_newsequence(@1, NULL, $3, -1U) : NULL;
+  }
+;
+
+optional_type:
+  OPTIONAL '<' simple_type_spec '>'
+  {
+    $$ = $3 ? type_newoptional(@1, NULL, $3) : NULL;
   }
 ;
 

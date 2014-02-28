@@ -1,5 +1,5 @@
 @c
-@c Copyright (c) 2009-2013 LAAS/CNRS
+@c Copyright (c) 2009-2014 LAAS/CNRS
 @c All rights reserved.
 @c
 @c Permission to use, copy, modify,  and distribute this software for any
@@ -302,6 +302,41 @@ The interface of @code{genom::bounded_sequence} is the following:
     void clear();
   };
 @end verbatim
+
+@node C++ Optional
+@subsection Mapping for optional types
+
+@genom{}  IDL optional types map onto the @code{genom::optional} template
+class.
+
+For instance, the following IDL:
+@verbatim
+      typedef optional< long > opt;
+@end verbatim
+
+would map into
+@verbatim
+      typedef genom::optional< int32_t > opt;
+@end verbatim
+
+The interface of @code{genom::optional} is the following:
+@verbatim
+  template <typename T>
+  struct optional {
+    // types:
+    typedef T                                     value_type;
+    typedef value_type&                           reference;
+    typedef const value_type&                     const_reference;
+
+    bool _present;
+    value_type _value;
+  };
+@end verbatim
+
+The @code{_present} member, when @code{true}, indicates the presence of
+valid data in @code{_value}. When @code{_present} is @code{false}, the
+@code{_value} should be ignored.
+
 
 @node C++ Port
 @subsection Mapping for port types

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010,2013 LAAS/CNRS
+# Copyright (c) 2010,2013-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -21,4 +21,5 @@ hdir=	$(includedir)/genom3/c++
 
 h_HEADERS=\
 	idlsequence.h	\
+	idloptional.h	\
 	event.h

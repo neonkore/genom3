@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -83,6 +83,9 @@ namespace eval language::c++ {
       if {[regexp {genom::bounded_sequence<} $m]} {
         append p "\n#include <genom3/c++/idlsequence.h>"
       }
+      if {[regexp {genom::optional<} $m]} {
+        append p "\n#include <genom3/c++/idloptional.h>"
+      }
 
       return $p$m
     }
@@ -153,6 +156,11 @@ namespace eval language::c++ {
 		}
 	    }
 
+            optional {
+              set t [$type type]
+              set d "genom::optional< [declarator $t] >"
+            }
+
 	    default {
 		template fatal "internal error: unhandled type '[$type kind]'"
 	    }
@@ -197,7 +205,7 @@ namespace eval language::c++ {
       switch -- $kind {
         {value}		{
           switch -- [[$type final] kind] {
-            sequence - struct - union - exception {
+            sequence - optional - struct - union - exception {
               return "const [declarator $type &$var]"
             }
             string {
@@ -337,6 +345,12 @@ namespace eval language::c++ {
           }
           append access "._u.$member"
           set type $m
+        }
+
+        optional {
+          set type [$type type]
+          append access "._value"
+          set mlist [concat $member $mlist]
         }
 
         {forward struct} - {forward union}	-
@@ -670,6 +684,7 @@ namespace eval language::c++ {
     proc has_trivial_ctor { type } {
 	switch -- [$type kind] {
 	    {sequence}		-
+            {optional}		-
 	    {string}	{ return false }
 
 	    {forward struct}	-

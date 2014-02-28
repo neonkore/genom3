@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -253,6 +253,7 @@ typedef enum idlkind {
   IDL_ENUMERATOR,	/**< constant in an enumerated type */
   IDL_ARRAY,		/**< array */
   IDL_SEQUENCE,		/**< sequence */
+  IDL_OPTIONAL,		/**< optional */
   IDL_STRUCT,		/**< struct */
   IDL_MEMBER,		/**< element of struct */
   IDL_UNION,		/**< union */
@@ -290,6 +291,7 @@ idltype_s	type_newforward(tloc l, const char *name, idlkind k);
 idltype_s	type_newstring(tloc l, const char *name, uint32_t len);
 idltype_s	type_newsequence(tloc l, const char *name, idltype_s t,
 			uint32_t len);
+idltype_s	type_newoptional(tloc l, const char *name, idltype_s t);
 idltype_s	type_newconst(tloc l, const char *name, idltype_s t, cval v);
 idltype_s	type_newenum(tloc l, const char *name, hash_s enumerators);
 idltype_s	type_newenumerator(tloc l, const char *name);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -94,7 +94,7 @@ prop_newids(tloc l, idltype_s t)
     case IDL_LONG: case IDL_ULONGLONG: case IDL_LONGLONG: case IDL_FLOAT:
     case IDL_DOUBLE: case IDL_CHAR: case IDL_OCTET: case IDL_STRING:
     case IDL_ENUM: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
-    case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
+    case IDL_OPTIONAL: case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
       break;
 
     case IDL_ANY: case IDL_NATIVE:

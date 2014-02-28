@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 LAAS/CNRS
+ * Copyright (c) 2010-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -411,6 +411,7 @@ engine_gentype(Tcl_Interp *interp, Tcl_Interp *slave, idltype_s t)
     case IDL_CONST:
     case IDL_ARRAY:
     case IDL_SEQUENCE:
+    case IDL_OPTIONAL:
     case IDL_MEMBER:
     case IDL_CASE:
     case IDL_TYPEDEF:

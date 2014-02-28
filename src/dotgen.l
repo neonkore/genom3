@@ -243,6 +243,7 @@ chartext	([^\'])|(\\.)
 "default"	{ return DEFAULT; }
 "struct"	{ return STRUCT; }
 "sequence"	{ return SEQUENCE; }
+"optional"	{ return OPTIONAL; }
 "typedef"	{ return TYPEDEF; }
 
  /* GenoM keywords (can be identifiers as well depending on the context) */

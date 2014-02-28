@@ -81,12 +81,15 @@ expect out '
 	/^s8$/ {next}
 	/^&\(v\)$/ {next}
 	/^&\(v8\)$/ {next}
+	/^&\(v8\)$/ {next}
+	/^&\(o\)$/ {next}
 
 	/^ac$/ {next}
 	/^as$/ {next}
 	/^as8$/ {next}
 	/^av$/ {next}
 	/^av8$/ {next}
+	/^ao$/ {next}
 
 	/^&\(tc\)$/ {next}
 	/^&\(tl\)$/ {next}
@@ -95,12 +98,14 @@ expect out '
 	/^ts8$/ {next}
 	/^&\(tv\)$/ {next}
 	/^&\(tv8\)$/ {next}
+	/^&\(to\)$/ {next}
 
 	/^tac$/ {next}
 	/^tas$/ {next}
 	/^tas8$/ {next}
 	/^tav$/ {next}
 	/^tav8$/ {next}
+	/^tao$/ {next}
 
 	/^&\(r\)$/ {next}
 	/^ar$/ {next}
@@ -140,6 +145,8 @@ expect out '
 	/^sequence_long \*rv$/ {next}
 	/^const sequence8_long \*vv8$/ {next}
 	/^sequence8_long \*rv8$/ {next}
+	/^const optional_long \*vo$/ {next}
+	/^optional_long \*ro$/ {next}
 
 	/^const int8_t vac\[4\]$/ {next}
 	/^int8_t rac\[4\]$/ {next}
@@ -151,6 +158,8 @@ expect out '
 	/^sequence_long rav\[4\]$/ {next}
 	/^const sequence8_long vav8\[4\]$/ {next}
 	/^sequence8_long rav8\[4\]$/ {next}
+	/^const optional_long vao\[4\]$/ {next}
+	/^optional_long rao\[4\]$/ {next}
 
 	/^basic_tc vtc$/ {next}
 	/^basic_tc \*rtc$/ {next}
@@ -166,6 +175,8 @@ expect out '
 	/^basic_tv \*rtv$/ {next}
 	/^const basic_tv8 \*vtv8$/ {next}
 	/^basic_tv8 \*rtv8$/ {next}
+	/^const basic_to \*vto$/ {next}
+	/^basic_to \*rto$/ {next}
 
 	/^const basic_tac vtac$/ {next}
 	/^basic_tac rtac$/ {next}
@@ -177,6 +188,8 @@ expect out '
 	/^basic_tav rtav$/ {next}
 	/^const basic_tav8 vtav8$/ {next}
 	/^basic_tav8 rtav8$/ {next}
+	/^const basic_tao vtao$/ {next}
+	/^basic_tao rtao$/ {next}
 
 	/^const basic_r \*vr$/ {next}
 	/^basic_r \*rr$/ {next}
@@ -221,6 +234,8 @@ expect out '
 	/^&\(rv\)$/ {next}
 	/^&\(vv8\)$/ {next}
 	/^&\(rv8\)$/ {next}
+	/^&\(vo\)$/ {next}
+	/^&\(ro\)$/ {next}
 
 	/^vac$/ {next}
 	/^rac$/ {next}
@@ -232,6 +247,8 @@ expect out '
 	/^rav$/ {next}
 	/^vav8$/ {next}
 	/^rav8$/ {next}
+	/^vao$/ {next}
+	/^rao$/ {next}
 
 	/^vtc$/ {next}
 	/^&\(rtc\)$/ {next}
@@ -247,6 +264,8 @@ expect out '
 	/^&\(rtv\)$/ {next}
 	/^&\(vtv8\)$/ {next}
 	/^&\(rtv8\)$/ {next}
+	/^&\(vto\)$/ {next}
+	/^&\(rto\)$/ {next}
 
 	/^vtac$/ {next}
 	/^rtac$/ {next}
@@ -258,6 +277,8 @@ expect out '
 	/^rtav$/ {next}
 	/^vtav8$/ {next}
 	/^rtav8$/ {next}
+	/^vtao$/ {next}
+	/^rtao$/ {next}
 
 	/^&\(vr\)$/ {next}
 	/^&\(rr\)$/ {next}
@@ -302,6 +323,8 @@ expect out '
 	/^\*\(rv\)$/ {next}
 	/^\*\(vv8\)$/ {next}
 	/^\*\(rv8\)$/ {next}
+	/^\*\(vo\)$/ {next}
+	/^\*\(ro\)$/ {next}
 
 	/^vac$/ {next}
 	/^rac$/ {next}
@@ -313,6 +336,8 @@ expect out '
 	/^rav$/ {next}
 	/^vav8$/ {next}
 	/^rav8$/ {next}
+	/^vao$/ {next}
+	/^rao$/ {next}
 
 	/^vtc$/ {next}
 	/^\*\(rtc\)$/ {next}
@@ -328,6 +353,8 @@ expect out '
 	/^\*\(rtv\)$/ {next}
 	/^\*\(vtv8\)$/ {next}
 	/^\*\(rtv8\)$/ {next}
+	/^\*\(vto\)$/ {next}
+	/^\*\(rto\)$/ {next}
 
 	/^vtac$/ {next}
 	/^rtac$/ {next}
@@ -339,6 +366,8 @@ expect out '
 	/^rtav$/ {next}
 	/^vtav8$/ {next}
 	/^rtav8$/ {next}
+	/^vtao$/ {next}
+	/^rtao$/ {next}
 
 	/^\*\(vr\)$/ {next}
 	/^\*\(rr\)$/ {next}
@@ -363,12 +392,15 @@ testing '[language member]'
 
 cat >run.gen <<'EOF'
 component c {
+  struct sss {
+    long c;
+  };
   ids {
     struct ss {
-      long a;
+      optional<sss> b;
     } a[2];
   };
-  attribute s() { validate c(in a[1].a); };
+  attribute s() { validate c(in a[1].b.c); };
 };
 EOF
 
@@ -378,7 +410,7 @@ set p [[[[dotgen component] service] validate] parameter]
 puts [$p member]
 EOF
 expect out '
-	/^.a\[1\]\.a$/ {next}
+	/^.a\[1\]\.b._value.c$/ {next}
 	{exit 2}
 '
 

@@ -1,5 +1,5 @@
 @c
-@c Copyright (c) 2009-2013 LAAS/CNRS
+@c Copyright (c) 2009-2014 LAAS/CNRS
 @c All rights reserved.
 @c
 @c Permission to use, copy, modify,  and distribute this software for any
@@ -276,6 +276,30 @@ The use of this function to reserve space in a sequence is purely
 optional. Any storage allocation strategy can be used, provided it
 maintains the consistency between the @code{_maximum}, @code{_release}
 and @code{_buffer} elements.
+
+@node C Optional
+@subsection Mapping for optional types
+
+@genom{}  IDL optional types map onto  C @code{ struct}s with a
+@code{_present} and @code{_value}.
+
+For instance, the following IDL:
+@verbatim
+      typedef optional< long > opt;
+@end verbatim
+
+would map into
+@verbatim
+      typedef struct {
+         bool _present;
+         int32_t _value;
+      } opt;
+@end verbatim
+
+The @code{_present} member, when @code{true}, indicates the presence of
+valid data in @code{_value}. When @code{_present} is @code{false}, the
+@code{_value} should be ignored.
+
 
 @node C Port
 @subsection Mapping for port types

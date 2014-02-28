@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 LAAS/CNRS
+ * Copyright (c) 2010-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -575,13 +575,15 @@ param_setmember(param_s p, cval m)
 
   assert(p);
   assert(p->type);
-
+  for(t = type_final(p->type);
+      type_kind(t) == IDL_OPTIONAL; t = type_type(t))
+    ;
   switch(m.k) {
     case CST_UINT: /* array element */
-      switch(type_kind(type_final(p->type))) {
+      switch(type_kind(t)) {
 	case IDL_ARRAY: case IDL_SEQUENCE:
-	  t = type_type(type_final(p->type));
-	  d = type_length(type_final(p->type));
+	  d = type_length(t);
+	  t = type_type(t);
 	  if (t) break;
 	default:
 	  parserror(p->loc, "%s %s is scalar",
@@ -598,7 +600,7 @@ param_setmember(param_s p, cval m)
       break;
 
     case CST_STRING:
-      t = type_member(p->type, m.s);
+      t = type_member(t, m.s);
       if (!t) {
 	parserror(p->loc, "unknown member '%s' in %s %s",
 		  m.s, type_strkind(type_kind(p->type)),

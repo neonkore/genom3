@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -273,7 +273,7 @@ namespace eval language {
 	return [string map {:: _} t[$type fullname]]
       }
 
-      array - sequence {
+      array - sequence - optional {
         if {[catch {$type length} l]} {
           return [$type kind]_[mangle [$type type]]
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -87,7 +87,7 @@
 %token <i>	MODULE
 %token <i>	UNSIGNED SHORT LONG FIXED FLOAT DOUBLE CHAR WCHAR STRING
 %token <i>	WSTRING BOOLEAN OCTET OBJECT ANY
-%token <i>	CONST ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE
+%token <i>	CONST ENUM UNION SWITCH CASE DEFAULT STRUCT SEQUENCE OPTIONAL
 %token <i>	TYPEDEF
 %token <i>	FALSE TRUE
 %token <i>	integer_literal FIXED_LIT
@@ -133,7 +133,7 @@
 %type <type>	signed_long_int signed_longlong_int
 %type <type>	floating_pt_type float_type double_type
 %type <type>	boolean_type char_type octet_type any_type
-%type <type>	sequence_type string_type fixed_type named_type
+%type <type>	sequence_type optional_type string_type fixed_type named_type
 %type <type>	struct_type union_type enum_type enumerator case switch_body
 %type <type>	exception_list alias_list member member_list opt_member_list
 %type <hash>	enumerator_list

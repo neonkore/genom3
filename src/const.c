@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -288,9 +288,13 @@ int
 const_cast(tloc l, cval *value, idltype_s t)
 {
   int s;
+  idltype_s p;
   assert(value && t);
 
-  switch(type_kind(type_final(t))) {
+  for(p = type_final(t);
+      type_kind(p) == IDL_OPTIONAL; p = type_type(p))
+    ;
+  switch(type_kind(p)) {
     case IDL_BOOL:      s = const_convert(value, CST_BOOL);	break;
     case IDL_USHORT:
     case IDL_ULONG:
@@ -306,7 +310,7 @@ const_cast(tloc l, cval *value, idltype_s t)
     case IDL_ENUM:
       if (value->k == CST_ENUM) {
 	assert(value->e && type_kind(value->e) == IDL_ENUMERATOR);
-	s = type_equal(type_type(value->e), t) ? 0 : EDOM;
+	s = type_equal(type_type(value->e), p) ? 0 : EDOM;
       } else s = EDOM;
       break;
 
@@ -322,6 +326,9 @@ const_cast(tloc l, cval *value, idltype_s t)
 		   type_name(t)?" ":"", type_name(t)?type_name(t):"");
       return errno = EINVAL;
 
+    case IDL_OPTIONAL:
+      /* resolved above */
+      assert(0); break;
     case IDL_CASE: case IDL_MEMBER: case IDL_CONST: case IDL_TYPEDEF:
       /* not a valid return from type_final() */
       assert(0); break;

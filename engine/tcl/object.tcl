@@ -129,7 +129,7 @@ namespace eval object {
 
     set types [dict create]
     switch -- [$type kind] {
-      array - sequence - typedef {
+      array - sequence - optional - typedef {
         set r [type-types [$type type] $visibility $filter]
         set types [dict merge $types $r]
         dict set types [$type mangle] $type
@@ -258,7 +258,7 @@ namespace eval object {
         type-digest [$type type] $filter
       }
 
-      array - sequence {
+      array - sequence - optional {
         md5::update [$type kind]
         if {![catch { $type length } l]} {
           md5::update $l

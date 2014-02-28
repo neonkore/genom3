@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -55,6 +55,7 @@ namespace eval language::c {
         {union}		{ append m [genunion $type] }
         {typedef}	{ append m [gentypedef $type] }
         {sequence}	{ append m [gensequence $type] }
+        {optional}	{ append m [genoptional $type] }
         {exception}	{ append m [genexception $type] }
 
         {forward struct} -
@@ -139,28 +140,30 @@ namespace eval language::c {
                 }
 	    }
 
-	    {sequence} {
-		set t [$type type]
+            sequence - optional {
+              set t [$type type]
 
-		set d "sequence"
-		if {![catch {$type length} l]} { append d $l }
+              set d [$type kind]
+              if {![catch {$type length} l]} {
+                append d $l
+              }
 
-		if {[catch {$t fullname}]} {
-		    append d [cname " [cname [$t kind]]"]
-		} else {
-		    append d [cname " [cname [$t fullname]]"]
-		}
-		if {![catch {$t length} l]} { append d $l }
-		while {[$t kind] == "sequence"} {
-		    set t [$t type]
-		    if {[catch {$t fullname}]} {
-			append d [cname " [cname [$t kind]]"]
-		    } else {
-			append d [cname " [cname [$t fullname]]"]
-		    }
-		    if {![catch {$t length} l]} { append d $l }
-		}
-	    }
+              if {[catch {$t fullname}]} {
+                append d [cname " [cname [$t kind]]"]
+              } else {
+                append d [cname " [cname [$t fullname]]"]
+              }
+              if {![catch {$t length} l]} { append d $l }
+              while {[$t kind] == "sequence" || [$t kind] == "optional"} {
+                set t [$t type]
+                if {[catch {$t fullname}]} {
+                  append d [cname " [cname [$t kind]]"]
+                } else {
+                  append d [cname " [cname [$t fullname]]"]
+                }
+                if {![catch {$t length} l]} { append d $l }
+              }
+            }
 
 	    default {
 		template fatal "internal error: unhandled type '[$type kind]'"
@@ -193,7 +196,7 @@ namespace eval language::c {
       switch -- $kind {
         {value}		{
           switch -- [[$type final] kind] {
-            sequence - struct - union - exception - port - remote {
+            sequence - optional - struct - union - exception - port - remote {
               return *($var)
             }
             default {
@@ -231,7 +234,7 @@ namespace eval language::c {
       switch -- $kind {
         {value}		{
           switch -- [[$type final] kind] {
-             sequence - struct - union - exception - port - remote {
+             sequence - optional - struct - union - exception - port - remote {
                return "const [declarator $type *$var]"
              }
              string - array - native {
@@ -282,7 +285,7 @@ namespace eval language::c {
                 }
               }
             }
-            sequence - struct - union - exception - port - remote {
+            sequence - optional - struct - union - exception - port - remote {
               return &($var)
             }
           }
@@ -391,6 +394,12 @@ namespace eval language::c {
           set type $m
         }
 
+        optional {
+          set type [$type type]
+          append access "._value"
+          set mlist [concat $member $mlist]
+        }
+
         {forward struct} - {forward union}	-
         {struct member} - {union member}	-
         {typedef} {
@@ -474,9 +483,11 @@ namespace eval language::c {
 	set n [declarator $type]
 
 	set f ""
-	if {[[$type type] kind] eq "sequence"} {
-	    append f [gensequence [$type type]]
-	}
+        switch [[$type type] kind] {
+          sequence { append f [gensequence [$type type]] }
+          optional { append f [genoptional [$type type]] }
+        }
+
 	append m [genloc $type]
 	append m "\ntypedef struct $n {"
 	if {[catch {$type length} l]} {
@@ -504,6 +515,28 @@ namespace eval language::c {
     }
 
 
+    # --- genoptional ------------------------------------------------------
+
+    # Return the C mapping of an optional.
+    #
+    proc genoptional { type } {
+      set n [declarator $type]
+
+      set f ""
+      switch [[$type type] kind] {
+        sequence { append f [gensequence [$type type]] }
+        optional { append f [genoptional [$type type]] }
+      }
+
+      append m [genloc $type]
+      append m "\ntypedef struct $n {"
+      append m "\n  bool _present;"
+      append m "\n  [declarator [$type type] _value];"
+      append m "\n} $n;"
+      return $f[guard $m $n]
+    }
+
+
     # --- genstruct --------------------------------------------------------
 
     # Return the C mapping of a struct. The typedef is output first to handle
@@ -520,9 +553,10 @@ namespace eval language::c {
 	foreach e [$type members] {
 	    append s [genloc $e]
 	    append s "\n [declarator $e [cname [$e name]]];"
-	    if {[[$e type] kind] == "sequence"} {
-		append f [gensequence [$e type]]
-	    }
+            switch [[$e type] kind] {
+              sequence { append f [gensequence [$e type]] }
+              optional { append f [genoptional [$e type]] }
+            }
 	}
 	append s "\n};"
 	return [guard $m $n]$f[guard $s "${n}_definition"]
@@ -549,9 +583,10 @@ namespace eval language::c {
 	foreach e [$type members] {
 	    append s [genloc $e]
 	    append s "\n  [declarator $e [cname [$e name]]];"
-	    if {[[$e type] kind] == "sequence"} {
-		append f [gensequence [$e type]]
-	    }
+            switch [[$e type] kind] {
+              sequence { append f [gensequence [$e type]] }
+              optional { append f [genoptional [$e type]] }
+            }
 	}
 	append s "\n } _u;"
 	append s "\n};"
@@ -581,8 +616,9 @@ namespace eval language::c {
         foreach e [$type members] {
           append s [genloc $e]
           append s "\n [declarator $e [$e name]];"
-          if {[[$e type] kind] == "sequence"} {
-            append f [gensequence [$e type]]
+          switch [[$e type] kind] {
+            sequence { append f [gensequence [$e type]] }
+            optional { append f [genoptional [$e type]] }
           }
         }
         append s "\n};"
@@ -733,9 +769,10 @@ namespace eval language::c {
 	set n [cname [$type fullname]]
 
 	set f ""
-	if {[[$type type] kind] == "sequence"} {
-	    append f [gensequence [$type type]]
-	}
+        switch [[$type type] kind] {
+          sequence { append f [gensequence [$type type]] }
+          optional { append f [genoptional [$type type]] }
+        }
 
 	append m [genloc $type]
 	append m "\ntypedef [declarator [$type type] $n];"

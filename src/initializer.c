@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012-2013 LAAS/CNRS
+ * Copyright (c) 2010,2012-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -129,9 +129,13 @@ initer_append(initer_s l, initer_s m)
 int
 initer_matchtype(idltype_s t, initer_s i)
 {
+  for(t = type_final(t);
+      type_kind(t) == IDL_OPTIONAL; t = type_type(t))
+    ;
+
   /* constructed initializer */
   if (i->sub) {
-    switch(type_kind(type_final(t))) {
+    switch(type_kind(t)) {
       case IDL_ARRAY: case IDL_SEQUENCE:
 	errno = initer_matcharray(t, i->sub);
 	break;
@@ -149,7 +153,7 @@ initer_matchtype(idltype_s t, initer_s i)
 
   /* simple initializer */
   if (i->value.k != CST_VOID && !i->sub) {
-    switch(type_kind(type_final(t))) {
+    switch(type_kind(t)) {
       case IDL_ARRAY: case IDL_SEQUENCE: case IDL_STRUCT: case IDL_UNION:
 	parserror(i->loc, "cannot initialize %s%s%s with a scalar",
 		  type_strkind(type_kind(t)), type_name(t)?" ":"",
@@ -279,7 +283,7 @@ initer_typeiniter(initer_s i, idltype_s haystack, idltype_s needle)
     case IDL_EVENT: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
       break;
 
-    case IDL_ARRAY: case IDL_SEQUENCE:
+    case IDL_ARRAY: case IDL_SEQUENCE: case IDL_OPTIONAL:
       return initer_typeiniter(i->sub, type_type(haystack), needle);
 
     case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION: {

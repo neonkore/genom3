@@ -81,12 +81,14 @@ expect out '
 	/^s8$/ {next}
 	/^&\(v\)$/ {next}
 	/^&\(v8\)$/ {next}
+	/^&\(o\)$/ {next}
 
 	/^ac$/ {next}
 	/^as$/ {next}
 	/^as8$/ {next}
 	/^av$/ {next}
 	/^av8$/ {next}
+	/^ao$/ {next}
 
 	/^&\(tc\)$/ {next}
 	/^&\(tl\)$/ {next}
@@ -95,12 +97,14 @@ expect out '
 	/^ts8$/ {next}
 	/^&\(tv\)$/ {next}
 	/^&\(tv8\)$/ {next}
+	/^&\(to\)$/ {next}
 
 	/^tac$/ {next}
 	/^tas$/ {next}
 	/^tas8$/ {next}
 	/^tav$/ {next}
 	/^tav8$/ {next}
+	/^tao$/ {next}
 
 	/^&\(r\)$/ {next}
 	/^ar$/ {next}
@@ -140,6 +144,8 @@ expect out '
 	/^std::vector< int32_t > &rv$/ {next}
 	/^const genom::bounded_sequence< int32_t,8 > &vv8$/ {next}
 	/^genom::bounded_sequence< int32_t,8 > &rv8$/ {next}
+	/^const genom::optional< int32_t > &vo$/ {next}
+	/^genom::optional< int32_t > &ro$/ {next}
 
 	/^const int8_t vac\[4\]$/ {next}
 	/^int8_t rac\[4\]$/ {next}
@@ -151,6 +157,8 @@ expect out '
 	/^std::vector< int32_t > rav\[4\]$/ {next}
 	/^const genom::bounded_sequence< int32_t,8 > vav8\[4\]$/ {next}
 	/^genom::bounded_sequence< int32_t,8 > rav8\[4\]$/ {next}
+	/^const genom::optional< int32_t > vao\[4\]$/ {next}
+	/^genom::optional< int32_t > rao\[4\]$/ {next}
 
 	/^basic::tc vtc$/ {next}
 	/^basic::tc &rtc$/ {next}
@@ -166,6 +174,8 @@ expect out '
 	/^basic::tv &rtv$/ {next}
 	/^const basic::tv8 &vtv8$/ {next}
 	/^basic::tv8 &rtv8$/ {next}
+	/^const basic::to &vto$/ {next}
+	/^basic::to &rto$/ {next}
 
 	/^const basic::tac vtac$/ {next}
 	/^basic::tac rtac$/ {next}
@@ -177,6 +187,8 @@ expect out '
 	/^basic::tav rtav$/ {next}
 	/^const basic::tav8 vtav8$/ {next}
 	/^basic::tav8 rtav8$/ {next}
+	/^const basic::tao vtao$/ {next}
+	/^basic::tao rtao$/ {next}
 
 	/^const basic::r &vr$/ {next}
 	/^basic::r &rr$/ {next}
@@ -221,6 +233,8 @@ expect out '
 	/^rv$/ {next}
 	/^vv8$/ {next}
 	/^rv8$/ {next}
+	/^vo$/ {next}
+	/^ro$/ {next}
 
 	/^vac$/ {next}
 	/^rac$/ {next}
@@ -232,6 +246,8 @@ expect out '
 	/^rav$/ {next}
 	/^vav8$/ {next}
 	/^rav8$/ {next}
+	/^vao$/ {next}
+	/^rao$/ {next}
 
 	/^vtc$/ {next}
 	/^rtc$/ {next}
@@ -247,6 +263,8 @@ expect out '
 	/^rtv$/ {next}
 	/^vtv8$/ {next}
 	/^rtv8$/ {next}
+	/^vto$/ {next}
+	/^rto$/ {next}
 
 	/^vtac$/ {next}
 	/^rtac$/ {next}
@@ -258,6 +276,8 @@ expect out '
 	/^rtav$/ {next}
 	/^vtav8$/ {next}
 	/^rtav8$/ {next}
+	/^vtao$/ {next}
+	/^rtao$/ {next}
 
 	/^vr$/ {next}
 	/^rr$/ {next}
@@ -302,6 +322,8 @@ expect out '
 	/^rv$/ {next}
 	/^vv8$/ {next}
 	/^rv8$/ {next}
+	/^vo$/ {next}
+	/^ro$/ {next}
 
 	/^vac$/ {next}
 	/^rac$/ {next}
@@ -313,6 +335,8 @@ expect out '
 	/^rav$/ {next}
 	/^vav8$/ {next}
 	/^rav8$/ {next}
+	/^vao$/ {next}
+	/^rao$/ {next}
 
 	/^vtc$/ {next}
 	/^rtc$/ {next}
@@ -328,6 +352,8 @@ expect out '
 	/^rtv$/ {next}
 	/^vtv8$/ {next}
 	/^rtv8$/ {next}
+	/^vto$/ {next}
+	/^rto$/ {next}
 
 	/^vtac$/ {next}
 	/^rtac$/ {next}
@@ -339,6 +365,8 @@ expect out '
 	/^rtav$/ {next}
 	/^vtav8$/ {next}
 	/^rtav8$/ {next}
+	/^vtao$/ {next}
+	/^rtao$/ {next}
 
 	/^vr$/ {next}
 	/^rr$/ {next}

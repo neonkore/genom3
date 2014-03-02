@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -508,7 +508,7 @@ namespace eval engine {
       close $tfile
 
       # execute template program in slave interpreter
-      slave alias puts [namespace code "slave-output $out"]
+      slave alias puts {*}[namespace code "slave-output $out"]
       slave eval {
         trace add execution gsource leavestep {slave-monitor [eline]}
       }

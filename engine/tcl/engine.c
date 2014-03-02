@@ -289,7 +289,11 @@ static int
 engine_eline(ClientData dummy, Tcl_Interp *interp,
              int objc, Tcl_Obj *const objv[])
 {
+#if TCL_MAJOR_VERSION < 8 || (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 6)
   Tcl_SetObjResult(interp, Tcl_NewIntObj(interp->errorLine));
+#else
+  Tcl_SetObjResult(interp, Tcl_NewIntObj(Tcl_GetErrorLine(interp)));
+#endif
   return TCL_OK;
 }
 

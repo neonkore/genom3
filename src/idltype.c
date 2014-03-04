@@ -672,14 +672,18 @@ type_find(const char *name)
   if (!htypes) return NULL;
 
   /* if the name starts with ::, direct look */
-  if (!strncmp(name, "::", 2))
-    return hash_find(htypes, name);
+  if (!strncmp(name, "::", 2)) {
+    t = hash_find(htypes, name);
+    if (t && type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE)
+      return t;
+  }
 
   /* otherwise, look in the current hierarchy */
   for(s = scope_current(); s; s = scope_parent(s)) {
     c = strings(scope_fullname(s), "::", name, NULL);
     t = hash_find(htypes, c);
-    if (t) return t;
+    if (t && type_kind(t) != IDL_MEMBER && type_kind(t) != IDL_CASE)
+      return t;
   }
 
   errno = ENOENT;

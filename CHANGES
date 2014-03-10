@@ -1,9 +1,19 @@
 GenoM3 - Generator of robotic component
-Copyright (c) 2009-2013 LAAS/CNRS
+Copyright (c) 2009-2014 LAAS/CNRS
+
+			    Changes in genom 2.99.23
+
+Released on March 10th, 2014
+ . Added a new genom-IDL type "optional< type >"
+ . Fixed compatibility issues with tcl-8.6
+ . Fixed the definition of the error code in genom_syserr
+ . Dropped error code from genom_mwerr exception
+ . Fixed a bunch of minor bugs in the parser / code generator.
+
 
 			    Changes in genom 2.99.22
 
-Release on December 13th, 2013
+Released on December 13th, 2013
  . Support an "extern" parameter in tcl procedure [$component types], returning
    the list of public types of the components interface.
  . Fix version in the genom3.pc file (use @PACKAGE_VERSION@ in instead of

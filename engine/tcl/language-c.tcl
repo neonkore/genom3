@@ -499,7 +499,8 @@ namespace eval language::c {
 	    append m "\n  uint32_t _length;"
 	    append m "\n  [declarator [$type type] _buffer\[$l\]];"
             # need explicit '_maximum' initialization if compiled by a C++
-            # compiler
+            # compiler. Also need to override the default operator= because of
+            # the 'const _maximum'. The default copy constructor should be ok.
             append m "\n# ifdef __cplusplus"
             append m "\n  ${n}():_maximum($l) {}"
             append m "\n  $n &operator=(const $n &x) {"

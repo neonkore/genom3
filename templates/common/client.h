@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2012-2013 LAAS/CNRS
+# Copyright (c) 2012-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution and use  in source  and binary  forms,  with or without
@@ -79,8 +79,10 @@ extern "C" {
 
 /* --- Services ------------------------------------------------------------ */
 
-genom_client		genom_<"$comp">_client_init(int argc, char *argv[]);
+genom_client		genom_<"$comp">_client_init(int argc, char *argv[],
+                                genom_event *ex, const void **exdetail);
 void			genom_<"$comp">_client_fini(genom_client h);
+genom_context		genom_<"$comp">_client_context(genom_client h);
 const char *		genom_<"$comp">_client_instance(genom_client h);
 int			genom_<"$comp">_client_eventfd(genom_client h);
 const struct genom_service_info *
@@ -93,8 +95,8 @@ genom_event		genom_<"$comp">_client_clean(genom_client h,
 genom_event		genom_<"$comp">_client_abort(genom_client h,
                                 int rqstid);
 genom_event		genom_<"$comp">_client_doevents(genom_client h);
-char *			genom_<"$comp">_client_json_error(genom_event e,
-				const void *detail);
+char *			genom_<"$comp">_client_json_error(genom_client h,
+				genom_event e, const void *detail);
 
 <'foreach s [$component services] {'>
 /* <"[$s name]"> */
@@ -126,10 +128,10 @@ void	genom_<"$comp">_client_<"[$s name]">_fini_input(
 void	genom_<"$comp">_client_<"[$s name]">_fini_output(
   struct genom_<"$comp">_<"[$s name]">_output *output);
 
-genom_event	genom_<"$comp">_client_<"[$s name]">_json_scan(
+int	genom_<"$comp">_client_<"[$s name]">_json_scan(
   struct genom_<"$comp">_<"[$s name]">_input *in,
   const char *json, char **endptr);
-genom_event	genom_<"$comp">_client_<"[$s name]">_json_print(
+int	genom_<"$comp">_client_<"[$s name]">_json_print(
   char **json, const struct genom_<"$comp">_<"[$s name]">_output *out);
 
 <'}'>
@@ -150,11 +152,11 @@ genom_event genom_<"$comp">_client_<"[$p name]">_port(
 <'}'>
 
 <'foreach p [$component ports out] {'>
-void		genom_<"$comp">_client_<"[$p name]">_init_data(
+void	genom_<"$comp">_client_<"[$p name]">_init_data(
   <"[[$p datatype] argument reference data]">);
-void		genom_<"$comp">_client_<"[$p name]">_fini_data(
+void	genom_<"$comp">_client_<"[$p name]">_fini_data(
   <"[[$p datatype] argument reference data]">);
-genom_event	genom_<"$comp">_client_<"[$p name]">_json_print(char **json,
+int	genom_<"$comp">_client_<"[$p name]">_json_print(char **json,
   <"[[$p datatype] argument value data]">);
 
 <'}'>

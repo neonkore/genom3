@@ -79,6 +79,9 @@ namespace eval language::c {
       if {[regexp {sequence} $m]} {
         append p "#include \"genom3/c/idlsequence.h\"\n"
       }
+      if {[regexp {genom_context} $m]} {
+        append p "#include \"genom3/c/context.h\"\n"
+      }
 
       return $p$m
     }
@@ -333,7 +336,7 @@ namespace eval language::c {
           }
           lappend arg $a
 	}
-        if {[llength $arg] == 0} { set arg "void" }
+        lappend arg {genom_context self}
 
         set m ""
         if {$location} {
@@ -604,7 +607,7 @@ namespace eval language::c {
       set f ""
       set s ""
 
-      append m "\n#include \"genom3/c/event.h\""
+      append m "\n#include \"genom3/c/exception.h\""
       append m [genloc $type]
       append m "\nconst char genom_extern_weak "
       append m "${n}_id\[\] = \"[$type fullname]\";"
@@ -625,17 +628,15 @@ namespace eval language::c {
         append s "\n};"
 
         append s "\nstatic inline genom_event"
-        append s "\n${n}(${n}_detail *d) {"
-        append s "\n genom_throw(${n}_id, d, sizeof(*d));"
-        append s "\n return ${n}_id;"
+        append s "\n${n}(${n}_detail *d, genom_context self) {"
+        append s "\n return self->raise(${n}_id, d, sizeof(*d), self);"
         append s "\n}"
       } else {
         append m "\ntypedef void ${n}_detail;"
 
         append s "\nstatic inline genom_event"
-        append s "\n${n}(void) {"
-        append s "\n genom_throw(${n}_id, NULL, 0);"
-        append s "\n return ${n}_id;"
+        append s "\n${n}(genom_context self) {"
+        append s "\n return self->raise(${n}_id, NULL, 0, self);"
         append s "\n}"
       }
 
@@ -662,7 +663,7 @@ namespace eval language::c {
     #
     proc genevent { type } {
       set n [$type cname]
-      append m "\n#include \"genom3/c/event.h\""
+      append m "\n#include \"genom3/c/exception.h\""
       append m [genloc $type]
       append m "\nconst char genom_extern_weak $n\[\] = \"[$type fullname]\";"
       return [guard $m $n]
@@ -683,29 +684,35 @@ namespace eval language::c {
         append f [gensequence $t]
       }
 
-      append m "\n#include \"genom3/c/event.h\""
+      append m "\n#include \"genom3/c/exception.h\""
       append m [genloc $type]
       append m "\ntypedef struct $n {"
       switch -- [$p kind]/[$p dir] {
         simple/in {
-          append m "\n  [$t argument reference] (*data)(void);"
-          append m "\n  genom_event (*read)(void);"
+          append m "\n  [$t argument reference] (*data)(genom_context self);"
+          append m "\n  genom_event (*read)(genom_context self);"
         }
         simple/out {
-          append m "\n  [$t argument reference] (*data)(void);"
-          append m "\n  genom_event (*write)(void);"
+          append m "\n  [$t argument reference] (*data)(genom_context self);"
+          append m "\n  genom_event (*write)(genom_context self);"
         }
 
         multiple/in {
-          append m "\n  [$t argument reference] (*data)(const char *id);"
-          append m "\n  genom_event (*read)(const char *id);"
+          append m "\n  [$t argument reference] (*data)"
+          append m   "(const char *id, genom_context self);"
+          append m "\n  genom_event (*read)"
+          append m   "(const char *id, genom_context self);"
         }
 
         multiple/out {
-          append m "\n  [$t argument reference] (*data)(const char *id);"
-          append m "\n  genom_event (*write)(const char *id);"
-          append m "\n  genom_event (*open)(const char *id);"
-          append m "\n  genom_event (*close)(const char *id);"
+          append m "\n  [$t argument reference] (*data)"
+          append m   "(const char *id, genom_context self);"
+          append m "\n  genom_event (*write)"
+          append m   "(const char *id, genom_context self);"
+          append m "\n  genom_event (*open)"
+          append m   "(const char *id, genom_context self);"
+          append m "\n  genom_event (*close)"
+          append m   "(const char *id, genom_context self);"
         }
 
         default	{ error "invalid port direction" }
@@ -737,12 +744,12 @@ namespace eval language::c {
           append f [gensequence [$p type]]
         }
       }
-      if {[llength $arg]} { set arg [join $arg {, }] } else { set arg "void" }
+      lappend arg {genom_context self}
 
-      append m "\n#include \"genom3/c/event.h\""
+      append m "\n#include \"genom3/c/exception.h\""
       append m [genloc $type]
       append m "\ntypedef struct $n {"
-      append m "\n  genom_event (*call)($arg);"
+      append m "\n  genom_event (*call)([join $arg {, }]);"
       append m "\n} $n;"
       return $f[guard $m $n]
     }

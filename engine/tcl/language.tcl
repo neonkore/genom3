@@ -534,7 +534,7 @@ namespace eval language {
   proc invoke { codel params } {
     variable current
 
-    if {[llength $params] != [llength [$codel parameters]]} {
+    if {[llength $params] != 1 + [llength [$codel parameters]]} {
       template fatal "wrong # arguments for codel [$codel name]"
     }
     return [${current}::invoke $codel $params]

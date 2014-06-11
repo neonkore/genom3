@@ -18,10 +18,6 @@
 #ifndef H_GENOM3_C_EVENT
 #define H_GENOM3_C_EVENT
 
-#include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
-
 /*
  * Definition of codel transitions and exceptions.
  *
@@ -48,42 +44,5 @@ typedef const char *genom_event;
 #else
 # define genom_extern_weak genom_weak
 #endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-  genom_event	genom_throw(genom_event ex, void *detail, size_t size);
-  const void *	genom_thrown(genom_event *ex);
-#ifdef __cplusplus
-}
-#endif
-
-/* no exception symbol */
-genom_event genom_weak genom_ok = NULL;
-
-/* exception while throwing an execption or other unrecoverable errors */
-const char genom_extern_weak genom_fatal[] = "::genom::fatal";
-
-/* unknown exception */
-const char genom_extern_weak genom_unkex_id[] = "::genom::unkex";
-typedef struct genom_unkex_detail { char what[128]; } genom_unkex_detail;
-
-static inline genom_event
-genom_unkex(genom_unkex_detail *d)
-{
-  genom_throw(genom_unkex_id, d, sizeof(*d));
-  return genom_unkex_id;
-}
-
-/* generic system error */
-const char genom_extern_weak genom_syserr_id[] = "::genom::syserr";
-typedef struct genom_syserr_detail { int32_t code; } genom_syserr_detail;
-
-static inline genom_event
-genom_syserr(genom_syserr_detail *d)
-{
-  genom_throw(genom_syserr_id, d, sizeof(*d));
-  return genom_syserr_id;
-}
 
 #endif /* H_GENOM3_C_EVENT */

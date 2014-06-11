@@ -4,8 +4,8 @@
 # GenoM autoconf file
 #
 AC_PREREQ(2.62)
-AC_INIT([genom],[2.99.23],[openrobots@laas.fr])
-AC_SUBST(GENOM_CLIENT_PROTOCOL, 20130722)
+AC_INIT([genom],[2.99.24],[openrobots@laas.fr])
+AC_SUBST(GENOM_CLIENT_PROTOCOL, 20140611)
 
 AC_CONFIG_AUX_DIR([autoconf])
 AC_CONFIG_MACRO_DIR([autoconf])

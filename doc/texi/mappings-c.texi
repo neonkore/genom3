@@ -332,25 +332,25 @@ For instance, the following IDL:
 would map into
 @verbatim
       typedef struct {
-         double * (*data)();
-         genom_event (*read)(void);
+         double * (*data)(genom_context self);
+         genom_event (*read)(genom_context self);
       } in_port;
 
       typedef struct {
-         double * (*data)(const char *id);
-         genom_event (*read)(const char *id);
+         double * (*data)(const char *id, genom_context self);
+         genom_event (*read)(const char *id, genom_context self);
       } multi_in_port;
 
       typedef struct {
-         double * (*data)();
-         genom_event (*write)(void);
+         double * (*data)(genom_context self);
+         genom_event (*write)(genom_context self);
       } out_port;
 
       typedef struct {
-         double * (*data)(const char *id);
-         genom_event (*write)(const char *id);
-         genom_event (*open)(const char *id);
-         genom_event (*close)(const char *id);
+         double * (*data)(const char *id, genom_context self);
+         genom_event (*write)(const char *id, genom_context self);
+         genom_event (*open)(const char *id, genom_context self);
+         genom_event (*close)(const char *id, genom_context self);
       } multi_out_port;
 @end verbatim
 
@@ -377,7 +377,7 @@ For instance, the following IDL:
 would map into
 @verbatim
       typedef struct c_f {
-        genom_event (*call)(uint32_t i, double *o);
+        genom_event (*call)(uint32_t i, double *o, genom_context self);
       } c_f;
 @end verbatim
 
@@ -429,7 +429,7 @@ yields the following C declarations:
         uint32_t dummy;
       } foo_detail;
 
-      genom_event foo(const foo_detail *detail);
+      genom_event foo(const foo_detail *detail, genom_context self);
 @end verbatim
 
 The identifier for the exception uniquely identifies this exception

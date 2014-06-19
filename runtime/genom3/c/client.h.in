@@ -49,6 +49,10 @@ typedef int (*genom_json_scanfn)(void *in, const char *json,
   char **endptr);
 typedef int (*genom_json_printfn)(char **json, void *out);
 
+struct genom_client_option {
+  const char *option, *descr;
+};
+
 struct genom_service_info {
   const char *name;
   const char *input;
@@ -81,6 +85,7 @@ struct genom_port_info {
 struct genom_client_info {
   const uint32_t protocol;
   const char *name;
+  const struct genom_client_option *options;
 
   genom_client (*init)(int argc, char *argv[],
                        genom_event *ex, const void **exdetail);

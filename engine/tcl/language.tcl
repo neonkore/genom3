@@ -535,7 +535,12 @@ namespace eval language {
     variable current
 
     if {[llength $params] != 1 + [llength [$codel parameters]]} {
-      template fatal "wrong # arguments for codel [$codel name]"
+      template fatal [subst [join {
+        "wrong # arguments in \"[$codel name] invoke\":"
+        "[join $params {, }]"
+        "expecting:"
+        "[signature $codel]"
+      } "\n"]]
     }
     return [${current}::invoke $codel $params]
   }

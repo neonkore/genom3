@@ -221,7 +221,7 @@ documented separately, in each template documentation.
 
      The value of \tt GENOM_TMPL_PATH\rm is a colon-separated list of
      directories, much like \tt PATH\rm, where \name looks for
-     templates. Setting this variable overrides the default search path, but
+     templates. Paths set by
      any \tt -t\rm option takes precedence over this variable.
 
 \env TMPDIR

@@ -1,0 +1,74 @@
+// Generated from ../../src/dotgen/port.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Port declaration
+----------------
+
+Ports implement the data flow between components as a publish/subscribe
+model. Ports have a name and a type and can be either `out` (for publishing
+data) or `in` (for subscribing to a sibling `out` port).
+
+The optional `multiple` qualifier defines a dynamic list of ports of
+the given type, indexed by strings. In this case, ports are created or
+destroyed dynamically be the codels.
+
+[[dotgen-rule-port]]
+____
+(22) port                  ::= ::
+   "port" link:grammar{outfilesuffix}#dotgen-rule-opt-multiple[opt-multiple] link:grammar{outfilesuffix}#dotgen-rule-port-dir[port-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] ";"
+____
+[[dotgen-rule-opt-multiple]]
+____
+(24) opt-multiple          ::= ::
+   [ "multiple" ]
+____
+[[dotgen-rule-port-dir]]
+____
+(23) port-dir              ::= ::
+   "in" +
+                              | "out"
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

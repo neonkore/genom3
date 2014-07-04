@@ -1,0 +1,202 @@
+// Generated from ../../templates/skeleton/template.tcl - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Skeleton template
+-----------------
+
+
+
+
+
+
+The skeleton template generates the skeleton of the codel functions
+defined in the input .gen file. It also generates a sample build
+infrastructure for building them. By default, files are generated in the
+same directory as the input .gen file. The `-C` option can be used to
+specify another output directory.
+
+The `-l c++` option is specific to `C` codels. It generates a skeleton that
+compiles the codels with a `C++` compiler. This is useful for invoking
+`C++` code from the codels (Note that this is different from having
+`C++` codels.)
+
+Files generated with this template are freely modifiable (and are actually
+required to be modified in order to provide some real codels). They are
+provided only as a sample - yet sensible - implementation. The only
+requirement is that codels provide a `pkg-config` file (`.pc`)
+named `<component>-genom3.pc` and telling the other templates how to
+link with the codels library.
+
+The template can also be invoked in 'merge' mode, where it updates existing
+skeletons. This mode tries to merge modifications in the .gen file, for
+instance service addition or new interface definitions, into existing
+codels. In case of conflicting files, there are several merge strategies:
+option `-u` places conflicts markers in the source file, option `-i`
+interactively asks what to do, and the generic option `-m tool` runs `tool`
+on the conflicting files. `tool` can be any merge tool, for instance
+`meld`.
+
+=== Example
+----
+user@host:~$ genom3 skeleton demo.gen
+creating ./codels/demo_motion_codels.c
+creating ./codels/demo_codels.c
+[...]
+creating ./codels/Makefile.am
+----
+
+=== Supported options
+
++-l c+++::
++--language=c+++ ::
+Compile C codels with a C++ compiler
++-C+::
++--directory='dir'+ ::
+Output files in dir instead of source directory
++-m+::
++--merge='tool'+ ::
+Merge conflicting files with tool
++-i+ ::
+Interactively merge conflicting files, alias for
+`-m interactive`
++-u+ ::
+Automatically merge conflicting files, alias for
+`-m auto`
++-f+::
++--force+ ::
+Overwrite existing files (use with caution)
++-h+::
++--help+ ::
+Print usage summary (this text)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

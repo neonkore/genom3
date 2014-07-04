@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010,2012 LAAS/CNRS
+# Copyright (c) 2010,2012,2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,37 +22,37 @@
 #                                           Anthony Mallet on Fri Jan 22 2010
 #
 
+#/
+# Interactive template
+# --------------------
+
 template usage "Interactive TCL template\n" [regsub -all [join {
-  { *#/? ?} {@(b|code){([^{}]*)}} {@itemx?([^\n]*)\n} {@(genom){([^{}]*)}}
-  {@(quotation|example|table|var|end)[^\n]*\n} {@([@{}])}
+  { *#/? ?} {----} {[*+]([^*+\n]+)[*+]} {::} { ::\n}
 } |] {
   #/ This template exports all the objects from the input .gen file for
-  # interactive use in a @command{tclsh} interpreter. The @genom{} TCL engine
+  # interactive use in a `tclsh` interpreter. The `genom` TCL engine
   # procedures are available as in regular (scripted) templates.
   #
   # This template is mostly useful for development of new templates or
   # troubleshooting existing ones.
   #
-  # @b{Example:}
-  # @example
-  # user@@host:~$ genom3 interactive demo.gen
-  # % foreach c [dotgen components] @{ puts [$c name] @}
+  # === Example
+  # ----
+  # user@host:~$ genom3 interactive demo.gen
+  # % foreach c [dotgen components] { puts [$c name] }
   # demo
   # % exit
-  # user@@host:~$
-  # @end example
+  # user@host:~$
+  # ----
   #
-  # @b{Supported options:}
-  # @quotation
-  # @table @code
-  # @item -b
-  #		Batch mode: disable line editing facility
-  # @item -h
-  # @itemx --help
+  # === Supported options
+  #
+  # +-b+ ::
+  #	Batch mode: disable line editing facility
+  # +-h+::
+  # +--help+ ::
   #	Print usage summary (this text)
-  # @end table
-  # @end quotation
-} {\2\3\4\7}]
+} {\1}]
 
 # defaults
 variable tcl_interactive 1

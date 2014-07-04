@@ -1,0 +1,358 @@
+// Generated from ../../src/dotgen/idldecl.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Type definition
+---------------
+
+A type definition is the description of a type. It can be used in a
+`typedef` construct or anywhere a typed value is expected.
+
+[[dotgen-rule-type-spec]]
+____
+(70) type-spec             ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-constructed-type-spec[constructed-type-spec]
+____
+[[dotgen-rule-simple-type-spec]]
+____
+(71) simple-type-spec      ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-base-type-spec[base-type-spec] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-template-type-spec[template-type-spec] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-named-type[named-type]
+____
+[[dotgen-rule-base-type-spec]]
+____
+(74) base-type-spec        ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-floating-pt-type[floating-pt-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-octet-type[octet-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-any-type[any-type]
+____
+[[dotgen-rule-template-type-spec]]
+____
+(75) template-type-spec    ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-sequence-type[sequence-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-optional-type[optional-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-string-type[string-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-fixed-type[fixed-type]
+____
+[[dotgen-rule-constructed-type-spec]]
+____
+(72) constructed-type-spec ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-constructed-type[constructed-type]
+____
+[[dotgen-rule-named-type]]
+____
+(73) named-type            ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name]
+____
+[[dotgen-rule-scoped-name]]
+____
+(54) scoped-name           ::= ::
+   [ [ link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name] ] "::" ] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+[[dotgen-rule-declarator]]
+____
+(66) declarator            ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-simple-declarator[simple-declarator] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-array-declarator[array-declarator]
+____
+[[dotgen-rule-simple-declarator]]
+____
+(67) simple-declarator     ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

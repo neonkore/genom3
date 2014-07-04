@@ -22,17 +22,24 @@
 #                                           Anthony Mallet on Fri Jan 15 2010
 #
 
+#/
+# `language` TCL engine command
+# -----------------------------
 
 # --- lang -----------------------------------------------------------------
 
-#/ @nodebeproc{lang, Target programming language}
-# @deffn {TCL Backend} {lang} @var{language}
+#/
+# [[lang]]
+# === `lang`: Target programming language
+# ____
+# `lang` 'language'
+# ____
 #
 # Set the current language for procedures that output a language dependent
 # string
 #
-# @@args
-# @item @var{language}
+# ==== Arguments
+# @item 'language'
 # The language name. Must be one of @code{c} or @code{c++}.
 # @@end args
 # @end deffn
@@ -45,18 +52,20 @@ slave alias lang lang
 
 # --- comment --------------------------------------------------------------
 
-#/ @nodebeproc{comment, Generate comment strings}
-# @deffn {TCL Backend} {comment} [-@var{c}] @var{text}
+#/
+# [[comment]]
+# === `comment`: Generate comment strings
+# ____
+# `comment` ['-c'] 'text'
+# ____
 #
 # Return a string that is a valid comment in the current language.
 #
-# @@args
-# @item @var{c}
+# ==== Arguments
+# 'c'::
 # The string to use as a comment character (overriding current language).
-# @item @var{test}
+# 'text'::
 # The string to be commented.
-# @@end args
-# @end deffn
 #
 proc comment { args } {
   if {[string index [lindex $args 0] 0] == "-" } {
@@ -71,17 +80,19 @@ slave alias comment comment
 
 # --- fileext --------------------------------------------------------------
 
-#/ @nodebeproc{fileext, Cannonical file extension}
-# @deffn {TCL Backend} {fileext} [-@var{kind}]
+#/
+# [[fileext]]
+# === `fileext`: Cannonical file extension
+# ____
+# `fileext` ['-kind']
+# ____
 #
 # Return the cannonical file extension for the current language.
 #
 #
-# @@args
-# @item @var{kind}
-# Must be one of the strings @code{source} or @code{header}.
-# @@end args
-# @end deffn
+# ==== Arguments
+# 'kind'::
+# Must be one of the strings `source` or `header`.
 #
 proc fileext { {kind source} } {
   return [${language::current}::fileext $kind]
@@ -91,19 +102,21 @@ slave alias fileext fileext
 
 # --- indent ---------------------------------------------------------------
 
-#/ @nodebeproc{indent, Generate indented text}
-# @deffn {TCL Backend} {indent} [#@var{n}|@b{++}|@b{--}] [@var{text} @dots{}]
+#/
+# [[indent]]
+# === `indent`: Generate indented text
+# ____
+# `indent` [#'n'|++|--] ['text' ...]
+# ____
 #
-# Output @var{text}, indented to the current indent level. Each @var{text}
+# Output 'text', indented to the current indent level. Each 'text'
 # argument is followed by a newline.
-# Indent level can be changed by passing an absolute level with #@var{n}, or
-# incremented or decremented with @code{++} or @code{--}.
+# Indent level can be changed by passing an absolute level with #'n', or
+# incremented or decremented with `++` or `--`.
 #
-# @@args
-# @item @var{test}
+# ==== Arguments
+# 'text'::
 # The string to output indented.
-# @@end args
-# @end deffn
 #
 proc indent { args } {
   global _ilevel
@@ -131,22 +144,24 @@ slave eval [list proc indent [info args indent] [info body indent]]
 
 # --- --- ------------------------------------------------------------------
 
-#/ @nodebeproc{---, Generate filler string}
-# @deffn {TCL Backend} {-@--@--} [-@var{column}] @var{text} @dots{} @var{filler}
+#/
+# [[___]]
+# === `---`: Generate filler string
+# ____
+# `---` [-'column'] 'text' ... 'filler'
+# ____
 #
-# This command, spelled with 3 dashes (@code{-}), return a string of length
-# @var{column} (70 by default), starting with @var{text} and filled with the
-# last character of the @var{filler} string.
+# This command, spelled with 3 dashes (`-`), return a string of length
+# 'column' (70 by default), starting with 'text' and filled with the
+# last character of the 'filler' string.
 #
-# @@args
-# @item @var{text}
+# ==== Arguments
+# 'text'::
 # The text to fill.
-# @item @var{filler}
+# 'filler'::
 # The filler character.
-# @item @var{column}
+# 'column'::
 # The desired length of the returned string.
-# @@end args
-# @end deffn
 #
 proc --- { args } {
   set column 70
@@ -169,25 +184,26 @@ slave alias --- ---
 
 # --- wrap -----------------------------------------------------------------
 
-#/ @nodebeproc{wrap, Chop blocks of text}
-# @deffn {TCL Backend} {wrap} [-@var{column}] @var{text} [@var{prefix}] @
-# [@var{sep}]
+#/
+# [[wrap]]
+# === `wrap`: Chop blocks of text
+# ____
+# `wrap` [-'column'] 'text' ['prefix'] ['sep']
+# ____
 #
-# Chop a string into lines of length @var{column} (70 by default), prefixed
-# with @var{prefix} (empty by default). The string is split at spaces by
-# default, or at @var{sep} if given.
+# Chop a string into lines of length 'column' (70 by default), prefixed
+# with 'prefix' (empty by default). The string is split at spaces by
+# default, or at 'sep' if given.
 #
-# @@args
-# @item @var{text}
+# ==== Arguments
+# 'text'::
 # The text to fill.
-# @item @var{prefix}
+# 'prefix'::
 # A string prefixed to each line.
-# @item @var{sep}
+# 'sep'::
 # The separator for breaking text.
-# @item @var{column}
+# 'column'::
 # The desired maximum length of each line
-# @@end args
-# @end deffn
 #
 proc wrap { args } {
   set column 70
@@ -226,24 +242,26 @@ namespace eval language {
 
   # --- cname --------------------------------------------------------------
 
-  #/ @nodebeproc{cname, Cannonical object name}
-  # @deffn {TCL Backend} {cname} @var{string|object}
+  #/
+  # [[cname]]
+  # === `cname`: Cannonical object name
+  # ____
+  # `cname` `string|object`
+  # ____
   #
-  # Return the cannonical name of the @var{string} or the @genom{}
-  # @var{object}, according to the current language.
+  # Return the cannonical name of the 'string' or the `genom3` 'object',
+  # according to the current language.
   #
-  # If a regular string is given, this procedure typically maps IDL :: scope
+  # If a regular string is given, this procedure typically maps IDL `::` scope
   # separator into the native scope separator symbol for the current language.
   # If a codel object is given, this procedure returns the symbol name of the
   # codel for the current language.
   #
-  # @@args
-  # @item @var{string}
+  # ==== Arguments
+  # 'string'::
   # The name to convert.
-  # @item @var{object}
-  # A @genom{} object.
-  # @@end args
-  # @end deffn
+  # 'object'::
+  # A `genom3` object.
   #
   proc cname { object } {
     variable current
@@ -255,17 +273,19 @@ namespace eval language {
 
   # --- mangle -------------------------------------------------------------
 
-  #/ @nodebeproc{language mangle, Unique type name}
-  # @deffn {TCL Backend} {language mangle} @var{type}
+  #/
+  # [[mangle]]
+  # === `language mangle`: Unique type name
+  # ____
+  # `language mangle` 'type'
+  # ____
   #
   # Return a string containing a universally unique representation of the name
-  # of the @var{type} object.
+  # of the 'type' object.
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @@end args
-  # @end deffn
   #
   proc mangle { type } {
     switch -- [$type kind] {
@@ -304,18 +324,20 @@ namespace eval language {
 
   # --- mapping ------------------------------------------------------------
 
-  #/ @nodebeproc{language mapping, IDL type language mapping}
-  # @deffn {TCL Backend} {language mapping} [@var{type}]
+  #/
+  # [[mapping]]
+  # === `language mapping`: IDL type language mapping
+  # ____
+  # `language mangle` ['type']
+  # ____
   #
-  # Generate and return a string containing the mapping of @var{type} for the
+  # Generate and return a string containing the mapping of 'type' for the
   # current language, or of all types if no argument is given.
   # The returned string is a valid source code for the language.
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @@end args
-  # @end deffn
   #
   proc mapping { args } {
     variable current
@@ -331,19 +353,21 @@ namespace eval language {
 
   # --- declarator ---------------------------------------------------------
 
-  #/ @nodebeproc{language declarator, Code for type declarations}
-  # @deffn {TCL Backend} {language declarator} @var{type} [@var{var}]
+  #/
+  # [[declarator]]
+  # === `language declarator`: Code for type declarations
+  # ____
+  # `language declarator` 'type' ['var']
+  # ____
   #
-  # Return the abstract declarator for @var{type} or for a variable @var{var}
+  # Return the abstract declarator for 'type' or for a variable 'var'
   # of that type, in the current language.
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @item @var{var}
-  # A string representing the name of a variable of type @var{type}.
-  # @@end args
-  # @end deffn
+  # 'var'::
+  # A string representing the name of a variable of type 'type'.
   #
   proc declarator { type {var {}} } {
     variable current
@@ -355,19 +379,21 @@ namespace eval language {
 
   # --- address ------------------------------------------------------------
 
-  #/ @nodebeproc{language address, Code for variable addresses}
-  # @deffn {TCL Backend} {language address} @var{type} [@var{var}]
+  #/
+  # [[address]]
+  # === `language address`: Code for variable addresses
+  # ____
+  # `language address` 'type' ['var']
+  # ____
   #
   # Return an expression evaluating to the address of a variable in the current
   # language.
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @item @var{var}
-  # A string representing the name of a variable of type @var{type}.
-  # @@end args
-  # @end deffn
+  # 'var'::
+  # A string representing the name of a variable of type 'type'.
   #
   proc address { type {var {}} } {
     variable current
@@ -379,22 +405,23 @@ namespace eval language {
 
   # --- dereference --------------------------------------------------------
 
-  #/ @nodebeproc{language dereference, Code for dereferencing variables}
-  # @deffn {TCL Backend} {language dereference} @var{type} @var{kind} @
-  # [@var{var}]
+  #/
+  # [[dereference]]
+  # === `language dereference`: Code for dereferencing variables
+  # ____
+  # `language dereference` 'type' 'kind' ['var']
+  # ____
   #
   # Return an expression dereferencing a parameter passed by value or
   # reference, in the current language.
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @item @var{kind}
-  # Must be @code{value} or @code{reference}.
-  # @item @var{var}
-  # A string representing the name of a parameter of type @var{type}.
-  # @@end args
-  # @end deffn
+  # 'kind'::
+  # Must be `value` or `reference`.
+  # 'var'::
+  # A string representing the name of a parameter of type 'type'.
   #
   proc dereference { type kind {var {}} } {
     variable current
@@ -406,21 +433,23 @@ namespace eval language {
 
   # --- argument -----------------------------------------------------------
 
-  #/ @nodebeproc{language argument, Code for declaring functions arguments}
-  # @deffn {TCL Backend} {language argument} @var{type} @var{kind} [@var{var}]
+  #/
+  # [[argument]]
+  # === `language argument`: Code for declaring functions arguments
+  # ____
+  # `language argument` 'type' 'kind' ['var']
+  # ____
   #
-  # Return an expression that declares a parameter @var{var} of type
-  # @var{type}, passed by value or reference according to @var{kind}.
+  # Return an expression that declares a parameter 'var' of type
+  # 'type', passed by value or reference according to 'kind'.
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @item @var{kind}
-  # Must be @code{value} or @code{reference}.
-  # @item @var{var}
-  # A string representing the name of a variable of type @var{type}.
-  # @@end args
-  # @end deffn
+  # 'kind'::
+  # Must be `value` or `reference`.
+  # 'var'::
+  # A string representing the name of a variable of type 'type'.
   #
   proc argument { type kind {var {}} } {
     variable current
@@ -432,21 +461,23 @@ namespace eval language {
 
   # --- pass ---------------------------------------------------------------
 
-  #/ @nodebeproc{language pass, Code for passing functions arguments}
-  # @deffn {TCL Backend} {language pass} @var{type} @var{kind} [@var{var}]
+  #/
+  # [[pass]]
+  # === `language pass`: Code for passing functions arguments
+  # ____
+  # `language pass` 'type' 'kind' ['var']
+  # ____
   #
-  # Return an expression that passes @var{var} of type @var{type} as a
-  # parameter, by value or reference according to @var{kind}.
+  # Return an expression that passes 'var' of type 'type' as a
+  # parameter, by value or reference according to 'kind'.
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @item @var{kind}
-  # Must be @code{value} or @code{reference}.
-  # @item @var{var}
-  # A string representing the name of a variable of type @var{type}.
-  # @@end args
-  # @end deffn
+  # 'kind'::
+  # Must be `value` or `reference`.
+  # 'var'::
+  # A string representing the name of a variable of type 'type'.
   #
   proc pass { type kind {var {}} } {
     variable current
@@ -458,22 +489,23 @@ namespace eval language {
 
   # --- member -----------------------------------------------------------
 
-  #/ @nodebeproc{language member, Code for accessing structure members}
-  # @deffn {TCL Backend} {language member} @var{type} @var{mlist}
+  #/
+  # [[member]]
+  # === `language member`: Code for accessing structure members
+  # ____
+  # `language member` 'type' 'mlist'
+  # ____
   #
-  # Return the language construction to access a member of a @var{type}.
-  # @var{mlist} is a list interpreted as follow: if it starts with a letter,
-  # @var{type} should be an aggregate type (like @code{struct}); if it starts
-  # with a numeric digit, @var{type} should be an array type (like
-  # @code{sequence}).
+  # Return the language construction to access a member of a 'type'.  'mlist'
+  # is a list interpreted as follow: if it starts with a letter, 'type' should
+  # be an aggregate type (like `struct`); if it starts with a numeric digit,
+  # 'type' should be an array type (like `sequence`).
   #
-  # @@args
-  # @item @var{type}
+  # ==== Arguments
+  # 'type'::
   # A 'type' object.
-  # @item @var{mlist}
+  # 'mlist'::
   # A list of hierachical members to access.
-  # @@end args
-  # @end deffn
   #
   proc member { type mlist } {
     variable current
@@ -485,25 +517,26 @@ namespace eval language {
 
   # --- signature ----------------------------------------------------------
 
-  #/ @nodebeproc{language signature, Code for declaring codel signatures}
-  # @deffn {TCL Backend} {language signature} @var{codel} [@var{separator}] @
-  # [@var{location}]
+  #/
+  # [[signature]]
+  # === `language signature`: Code for declaring codel signatures
+  # ____
+  # `language signature` 'codel' ['separator'] ['location']
+  # ____
   #
   # Return the signature of a codel in the current language. If separator is
-  # given, it is a string that is inserted between the return type of the
-  # codel and the codel name (for instance, a @code{\n} in C so that the
-  # symbol name is guaranteed to be on the first column).
+  # given, it is a string that is inserted between the return type of the codel
+  # and the codel name (for instance, a `\n` in C so that the symbol name is
+  # guaranteed to be on the first column).
   #
-  # @@args
-  # @item @var{code}
+  # ==== Arguments
+  # 'code'::
   # A 'codel' object.
-  # @item @var{separator}
+  # 'separator'::
   # A string, inserted between the return type and the codel symbol name.
-  # @item @var{location}
-  # A boolean indicating whether to generate @code{#line} directives
-  # corresponding to the codel location in @code{.gen} file.
-  # @@end args
-  # @end deffn
+  # 'location'::
+  # A boolean indicating whether to generate `#line` directives
+  # corresponding to the codel location in `.gen` file.
   #
   proc signature { codel {symchar { }} {location off}} {
     variable current
@@ -515,21 +548,23 @@ namespace eval language {
 
   # --- invoke -------------------------------------------------------------
 
-  #/ @nodebeproc{language invoke, Code for calling codels}
-  # @deffn {TCL Backend} {language invoke} @var{codel} @var{params}
+  #/
+  # [[invoke]]
+  # === `language invoke`: Code for calling codels
+  # ____
+  # `language invoke` 'codel' 'params'
+  # ____
   #
   # Return a string corresponding to the invocation of a codel in the current
   # language.
   #
-  # @@args
-  # @item @var{code}
+  # ==== Arguments
+  # 'codel'::
   # A 'codel' object.
-  # @item @var{params}
+  # 'params'::
   # The list of parameters passed to the codel. Each element of this list must
   # be a valid string in the current language corresponding to each parameter
-  # value or reference to be passed to the codel (@pxref{language pass}).
-  # @@end args
-  # @end deffn
+  # value or reference to be passed to the codel (<<pass,`language pass`>>).
   #
   proc invoke { codel params } {
     variable current

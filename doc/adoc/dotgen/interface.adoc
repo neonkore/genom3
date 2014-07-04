@@ -1,0 +1,123 @@
+// Generated from ../../src/dotgen/interface.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Interface declaration
+---------------------
+
+An interface declaration is basically the same as a
+link:component{outfilesuffix}[component declaration] but is meant to be
+shared between several components. Although any object can be defined in an
+interface, it will typically only declare service prototypes and ports that
+are to be `provided` or `used` by components.
+
+[[dotgen-rule-interface]]
+____
+(13) interface             ::= ::
+   "interface" link:grammar{outfilesuffix}#dotgen-rule-interface-scope[interface-scope] link:grammar{outfilesuffix}#dotgen-rule-component-body[component-body] ";"
+____
+[[dotgen-rule-interface-scope]]
+____
+(14) interface-scope       ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+
+[[dotgen-rule-interface-property]]
+____
+(16) interface-property    ::= ::
+   "extends" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] ";"
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In addition to regular component properties, an interface can also define
+the following properties:
+
++extends+::
+A list of interfaces that are imported as-is into the current one. All
+objects from the extended interfaces appear as if they had been defined in
+the extending interface.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

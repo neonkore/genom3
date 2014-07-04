@@ -1,0 +1,421 @@
+// Generated from ../../src/dotgen/service.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Service declaration
+-------------------
+
+
+
+
+=== Attribute declaration
+
+[[dotgen-rule-attribute]]
+____
+(25) attribute             ::= ::
+   "attribute" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-attribute-parameters[attribute-parameters] ")" link:grammar{outfilesuffix}#dotgen-rule-opt-properties[opt-properties] ";"
+____
+[[dotgen-rule-attribute-parameters]]
+____
+(29) attribute-parameters  ::= ::
+   [ { link:grammar{outfilesuffix}#dotgen-rule-attribute-parameter[attribute-parameter] "," } link:grammar{outfilesuffix}#dotgen-rule-attribute-parameter[attribute-parameter] ]
+____
+[[dotgen-rule-attribute-parameter]]
+____
+(30) attribute-parameter   ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] link:grammar{outfilesuffix}#dotgen-rule-opt-initializer[opt-initializer]
+____
+[[dotgen-rule-opt-properties]]
+____
+(123) opt-properties        ::= ::
+   [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
+____
+[[dotgen-rule-properties]]
+____
+(124) properties            ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
+____
+
+[[dotgen-rule-service-property]]
+____
+(28) service-property      ::= ::
+   ( "task" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | "interrupts" link:grammar{outfilesuffix}#dotgen-rule-identifier-list[identifier-list] +
+                              | "before" link:grammar{outfilesuffix}#dotgen-rule-identifier-list[identifier-list] +
+                              | "after" link:grammar{outfilesuffix}#dotgen-rule-identifier-list[identifier-list] +
+                              | "validate" link:grammar{outfilesuffix}#dotgen-rule-codel[codel] +
+                              | "local" link:grammar{outfilesuffix}#dotgen-rule-local-variables[local-variables] ) ";"
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Function and activity declaration
+
+[[dotgen-rule-service-kind]]
+____
+(27) service-kind          ::= ::
+   "function" +
+                              | "activity"
+____
+[[dotgen-rule-service-parameters]]
+____
+(31) service-parameters    ::= ::
+   [ { link:grammar{outfilesuffix}#dotgen-rule-service-parameter[service-parameter] "," } link:grammar{outfilesuffix}#dotgen-rule-service-parameter[service-parameter] ]
+____
+[[dotgen-rule-service-parameter]]
+____
+(32) service-parameter     ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator] link:grammar{outfilesuffix}#dotgen-rule-opt-initializer[opt-initializer]
+____
+[[dotgen-rule-opt-properties]]
+____
+(123) opt-properties        ::= ::
+   [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
+____
+[[dotgen-rule-properties]]
+____
+(124) properties            ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
+____
+[[dotgen-rule-property]]
+____
+(125) property              ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-component-property[component-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-interface-property[interface-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-task-property[task-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-service-property[service-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-codel-property[codel-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-throw-property[throw-property]
+____
+
+[[dotgen-rule-service-property]]
+____
+(28) service-property      ::= ::
+   ( "task" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | "interrupts" link:grammar{outfilesuffix}#dotgen-rule-identifier-list[identifier-list] +
+                              | "before" link:grammar{outfilesuffix}#dotgen-rule-identifier-list[identifier-list] +
+                              | "after" link:grammar{outfilesuffix}#dotgen-rule-identifier-list[identifier-list] +
+                              | "validate" link:grammar{outfilesuffix}#dotgen-rule-codel[codel] +
+                              | "local" link:grammar{outfilesuffix}#dotgen-rule-local-variables[local-variables] ) ";"
+____
+[[dotgen-rule-codel-property]]
+____
+(40) codel-property        ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-opt-async[opt-async] "codel" ( link:grammar{outfilesuffix}#dotgen-rule-codel[codel] ";" +
+                              | link:grammar{outfilesuffix}#dotgen-rule-fsm-codel[fsm-codel] ";" )
+____
+[[dotgen-rule-opt-async]]
+____
+(36) opt-async             ::= ::
+   [ "async" ]
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Function and activity parameters
+
+[[dotgen-rule-attribute-parameter]]
+____
+(30) attribute-parameter   ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] link:grammar{outfilesuffix}#dotgen-rule-opt-initializer[opt-initializer]
+____
+[[dotgen-rule-service-parameter]]
+____
+(32) service-parameter     ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator] link:grammar{outfilesuffix}#dotgen-rule-opt-initializer[opt-initializer]
+____
+
+[[dotgen-rule-parameter-dir]]
+____
+(42) parameter-dir         ::= ::
+   "in" +
+                              | "out" +
+                              | "inout"
+____
+[[dotgen-rule-parameter-variable]]
+____
+(43) parameter-variable    ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]"
+____
+[[dotgen-rule-opt-initializer]]
+____
+(44) opt-initializer       ::= ::
+   [ "=" link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] ]
+____
+[[dotgen-rule-initializers]]
+____
+(45) initializers          ::= ::
+   [ { link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] "," } link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] ]
+____
+[[dotgen-rule-initializer]]
+____
+(46) initializer           ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-initializer-value[initializer-value] +
+                              | ":" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-initializer-value[initializer-value] ":" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals]
+____
+[[dotgen-rule-initializer-value]]
+____
+(47) initializer-value     ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
+                              | "{" link:grammar{outfilesuffix}#dotgen-rule-initializers[initializers] "}" +
+                              | "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]" "=" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
+                              | "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]" "=" "{" link:grammar{outfilesuffix}#dotgen-rule-initializers[initializers] "}" +
+                              | "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]" "=" +
+                              | "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "=" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
+                              | "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "=" "{" link:grammar{outfilesuffix}#dotgen-rule-initializers[initializers] "}" +
+                              | "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "="
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

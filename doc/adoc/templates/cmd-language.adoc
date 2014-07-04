@@ -1,0 +1,598 @@
+// Generated from ../../engine/tcl/language.tcl - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`language` TCL engine command
+-----------------------------
+
+
+
+
+[[lang]]
+=== `lang`: Target programming language
+____
+`lang` 'language'
+____
+
+Set the current language for procedures that output a language dependent
+string
+
+==== Arguments
+@item 'language'
+The language name. Must be one of @code{c} or @code{c++}.
+@end table
+@end quotation
+@end deffn
+
+
+
+
+
+
+
+
+
+
+[[comment]]
+=== `comment`: Generate comment strings
+____
+`comment` ['-c'] 'text'
+____
+
+Return a string that is a valid comment in the current language.
+
+==== Arguments
+'c'::
+The string to use as a comment character (overriding current language).
+'text'::
+The string to be commented.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[fileext]]
+=== `fileext`: Cannonical file extension
+____
+`fileext` ['-kind']
+____
+
+Return the cannonical file extension for the current language.
+
+
+==== Arguments
+'kind'::
+Must be one of the strings `source` or `header`.
+
+
+
+
+
+
+
+
+
+
+[[indent]]
+=== `indent`: Generate indented text
+____
+`indent` [#'n'|++|--] ['text' ...]
+____
+
+Output 'text', indented to the current indent level. Each 'text'
+argument is followed by a newline.
+Indent level can be changed by passing an absolute level with #'n', or
+incremented or decremented with `++` or `--`.
+
+==== Arguments
+'text'::
+The string to output indented.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[___]]
+=== `---`: Generate filler string
+____
+`---` [-'column'] 'text' ... 'filler'
+____
+
+This command, spelled with 3 dashes (`-`), return a string of length
+'column' (70 by default), starting with 'text' and filled with the
+last character of the 'filler' string.
+
+==== Arguments
+'text'::
+The text to fill.
+'filler'::
+The filler character.
+'column'::
+The desired length of the returned string.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[wrap]]
+=== `wrap`: Chop blocks of text
+____
+`wrap` [-'column'] 'text' ['prefix'] ['sep']
+____
+
+Chop a string into lines of length 'column' (70 by default), prefixed
+with 'prefix' (empty by default). The string is split at spaces by
+default, or at 'sep' if given.
+
+==== Arguments
+'text'::
+The text to fill.
+'prefix'::
+A string prefixed to each line.
+'sep'::
+The separator for breaking text.
+'column'::
+The desired maximum length of each line
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[cname]]
+=== `cname`: Cannonical object name
+____
+`cname` `string|object`
+____
+
+Return the cannonical name of the 'string' or the `genom3` 'object',
+according to the current language.
+
+If a regular string is given, this procedure typically maps IDL `::` scope
+separator into the native scope separator symbol for the current language.
+If a codel object is given, this procedure returns the symbol name of the
+codel for the current language.
+
+==== Arguments
+'string'::
+The name to convert.
+'object'::
+A `genom3` object.
+
+
+
+
+
+
+
+
+
+
+
+
+[[mangle]]
+=== `language mangle`: Unique type name
+____
+`language mangle` 'type'
+____
+
+Return a string containing a universally unique representation of the name
+of the 'type' object.
+
+==== Arguments
+'type'::
+A 'type' object.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[mapping]]
+=== `language mapping`: IDL type language mapping
+____
+`language mangle` ['type']
+____
+
+Generate and return a string containing the mapping of 'type' for the
+current language, or of all types if no argument is given.
+The returned string is a valid source code for the language.
+
+==== Arguments
+'type'::
+A 'type' object.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[declarator]]
+=== `language declarator`: Code for type declarations
+____
+`language declarator` 'type' ['var']
+____
+
+Return the abstract declarator for 'type' or for a variable 'var'
+of that type, in the current language.
+
+==== Arguments
+'type'::
+A 'type' object.
+'var'::
+A string representing the name of a variable of type 'type'.
+
+
+
+
+
+
+
+
+
+
+
+
+[[address]]
+=== `language address`: Code for variable addresses
+____
+`language address` 'type' ['var']
+____
+
+Return an expression evaluating to the address of a variable in the current
+language.
+
+==== Arguments
+'type'::
+A 'type' object.
+'var'::
+A string representing the name of a variable of type 'type'.
+
+
+
+
+
+
+
+
+
+
+
+
+[[dereference]]
+=== `language dereference`: Code for dereferencing variables
+____
+`language dereference` 'type' 'kind' ['var']
+____
+
+Return an expression dereferencing a parameter passed by value or
+reference, in the current language.
+
+==== Arguments
+'type'::
+A 'type' object.
+'kind'::
+Must be `value` or `reference`.
+'var'::
+A string representing the name of a parameter of type 'type'.
+
+
+
+
+
+
+
+
+
+
+
+
+[[argument]]
+=== `language argument`: Code for declaring functions arguments
+____
+`language argument` 'type' 'kind' ['var']
+____
+
+Return an expression that declares a parameter 'var' of type
+'type', passed by value or reference according to 'kind'.
+
+==== Arguments
+'type'::
+A 'type' object.
+'kind'::
+Must be `value` or `reference`.
+'var'::
+A string representing the name of a variable of type 'type'.
+
+
+
+
+
+
+
+
+
+
+
+
+[[pass]]
+=== `language pass`: Code for passing functions arguments
+____
+`language pass` 'type' 'kind' ['var']
+____
+
+Return an expression that passes 'var' of type 'type' as a
+parameter, by value or reference according to 'kind'.
+
+==== Arguments
+'type'::
+A 'type' object.
+'kind'::
+Must be `value` or `reference`.
+'var'::
+A string representing the name of a variable of type 'type'.
+
+
+
+
+
+
+
+
+
+
+
+
+[[member]]
+=== `language member`: Code for accessing structure members
+____
+`language member` 'type' 'mlist'
+____
+
+Return the language construction to access a member of a 'type'.  'mlist'
+is a list interpreted as follow: if it starts with a letter, 'type' should
+be an aggregate type (like `struct`); if it starts with a numeric digit,
+'type' should be an array type (like `sequence`).
+
+==== Arguments
+'type'::
+A 'type' object.
+'mlist'::
+A list of hierachical members to access.
+
+
+
+
+
+
+
+
+
+
+
+
+[[signature]]
+=== `language signature`: Code for declaring codel signatures
+____
+`language signature` 'codel' ['separator'] ['location']
+____
+
+Return the signature of a codel in the current language. If separator is
+given, it is a string that is inserted between the return type of the codel
+and the codel name (for instance, a `\n` in C so that the symbol name is
+guaranteed to be on the first column).
+
+==== Arguments
+'code'::
+A 'codel' object.
+'separator'::
+A string, inserted between the return type and the codel symbol name.
+'location'::
+A boolean indicating whether to generate `#line` directives
+corresponding to the codel location in `.gen` file.
+
+
+
+
+
+
+
+
+
+
+
+
+[[invoke]]
+=== `language invoke`: Code for calling codels
+____
+`language invoke` 'codel' 'params'
+____
+
+Return a string corresponding to the invocation of a codel in the current
+language.
+
+==== Arguments
+'codel'::
+A 'codel' object.
+'params'::
+The list of parameters passed to the codel. Each element of this list must
+be a valid string in the current language corresponding to each parameter
+value or reference to be passed to the codel (<<pass,`language pass`>>).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

@@ -1,0 +1,476 @@
+//
+// Copyright (c) 2009-2014 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Anthony Mallet on Fri Jun 25 2010
+//
+
+`C++` mappings: From IDL types to `C++` types
+---------------------------------------------
+
+[[scoped_name]]
+=== Scoped names
+
+The `C++` mappings for scoped names use `C++` scopes.  IDL `module` are
+mapped to `namespace`. For instance, the following IDL:
+----
+      module m {
+         const string str = "scoped string";
+      };
+----
+
+would map into
+----
+      namespace m {
+         const std::string str = "scoped string";
+      }
+----
+
+
+[[constant]]
+=== Mapping for constants
+
+`genom3` IDL constants are mapped to a `C++` constant. For
+instance, the following IDL:
+----
+   const long longint = 1;
+   const string str = "string example";
+----
+
+would map into
+----
+   const int32_t longint = 1;
+   const std::string str = "string example";
+----
+
+
+[[basic_type]]
+=== Mapping for basic data types
+
+The basic data types have the mappings shown in the table below.
+Integer types use the `C99` fixed size integer types as provided
+by the `stdint.h` standard header (since the `C++` `cstdint`
+header is not part of the `C++` at the time of writing this document).
+Users do not have to include this header: the template mapping
+generation procedure output the appropriate `#include` directive
+along with the mappings for the integer types.
+
+.Basic data types mappings in `C++`
+[width="60%",cols="^,1",frame="topbot",options="header"]
+|==================================================================
+| IDL                  | `C++`
+| `boolean`            | `bool`
+| `unsigned short`     | `uint16_t`
+| `short`              | `int16_t`
+| `unsigned long`      | `uint32_t`
+| `long`               | `int32_t`
+| `unsigned long long` | `uint64_t`
+| `long long`          | `int64_t`
+| `float`              | `float`
+| `double`             | `double`
+| `char`               | `int8_t`
+| `octet`              | `uint8_t`
+| `any`                | type any not implemented yet
+|==================================================================
+
+
+[[enumerated_type]]
+=== Mapping for enumerated types
+
+The `C++` mapping of an IDL `enum` type is the corresponding `C++`
+`enum`. An additional constant is generated to guarantee that the
+type occupies a 32 bits wide integer.
+
+For instance, the following IDL:
+----
+      enum e {
+         value1,
+         value2
+      };
+----
+
+would map, according to the scoped names rules, into
+----
+      enum e {
+         value1,
+         value2,
+         _unused = 0xffffffff,
+      };
+----
+
+[[string]]
+=== Mapping for strings
+
+`genom3` IDL bounded strings are mapped to nul terminated character
+arrays (i.e., C strings). Unbounded strings are mapped to
+`std::string` provided by the `C++` standard.
+
+For instance, the following OMG IDL declarations:
+----
+      typedef string unbounded;
+      typedef string\<16> bounded;
+----
+
+would map into
+----
+      typedef std::string unbounded;
+      typedef char bounded[16];
+----
+
+
+[[array]]
+=== Mapping for arrays
+
+`genom3` IDL arrays map directly to `C++` arrays. All array indices run from 0 to
+`size-1`.
+
+For instance, the following IDL:
+----
+      typedef long array[4][16];
+----
+
+would map into
+----
+      typedef int32_t array[4][16];
+----
+
+[[struct]]
+=== Mapping for structure types
+
+`genom3` IDL  structures map directly onto  `C++` `struct`s.  Note that these
+structures may potentially include padding.
+
+For instance, the following IDL:
+----
+      struct s {
+         long a;
+         long b;
+      };
+----
+
+would map into
+----
+      struct s {
+         int32_t a;
+         int32_t b;
+      };
+----
+
+
+[[union]]
+=== Mapping for union types
+
+`genom3` IDL unions map onto C  `struct`s. The discriminator in the enum is
+referred to as  `_d`, the union  itself is referred to as  `_u`.
+
+For instance, the following IDL:
+----
+      union u switch(long) {
+         case 1: long a;
+         case 2: float b;
+         default: char c;
+      };
+----
+
+would map into
+----
+      struct u {
+         int32_t _d;
+         union {
+            int32_t a;
+            float b;
+            char c;
+         } _u;
+      };
+----
+
+Note that the `C++` standard does not allow union members that have a
+non-trivial constructor.  Consequently, the `C++` mapping for such kind
+of unions is not allowed in `genom3` either. This concerns
+`sequence`s and `string`s, and structures or unions that
+contain such a type. You should thus avoid to define such datatypes in
+`genom3` IDL in order to maximize the portability of your definitions.
+
+[[sequence]]
+=== Mapping for sequence types
+
+`genom3` IDL sequences mapping differ for bounded or unbouded
+variations of the sequence. The unbounded sequences maps onto the
+`std::vector` template class provided by the `C++` standard.  The
+bounded sequence maps onto a `C++` `genom::bounded_sequence` template
+class. The definition of `genom::bounded_sequence` is very
+similar to `std::array` but provides a variable number of elements.
+
+For instance, the following IDL:
+----
+      typedef sequence<long> unbounded;
+      typedef sequence<long,16> bounded;
+----
+
+would map into
+----
+      typedef std::vector<int32_t> unbounded;
+      typedef genom::bounded_sequence<int32_t, 16> bounded;
+----
+
+The interface of `genom::bounded_sequence` is the following:
+----
+  template <typename T, size_t N>
+  struct bounded_sequence {
+    // types:
+    typedef T                                     value_type;
+    typedef value_type&                           reference;
+    typedef const value_type&                     const_reference;
+    typedef value_type*                           iterator;
+    typedef const value_type*                     const_iterator;
+    typedef value_type*                           pointer;
+    typedef const value_type*                     const_pointer;
+    typedef size_t                                size_type;
+    typedef ptrdiff_t                             difference_type;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+    value_type e[N];
+    size_type n;
+
+    // No explicit construct/copy/destroy for aggregate type
+
+    void fill(const value_type &u);
+
+    // iterators:
+    iterator begin();
+    iterator end();
+    const_iterator begin() const;
+    const_iterator end() const;
+
+    reverse_iterator rbegin();
+    reverse_iterator rend();
+    const_reverse_iterator rbegin() const;
+    const_reverse_iterator rend() const;
+
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+    const_reverse_iterator crbegin() const;
+    const_reverse_iterator crend() const;
+
+    // capacity:
+    size_type size() const;
+    void resize(size_type l, value_type u = value_type());
+    size_type max_size() const;
+    bool empty() const;
+
+    // element access:
+    reference operator[](size_type i);
+    const_reference operator[](size_type i) const;
+    reference at(size_type i);
+    const_reference at(size_type i) const;
+
+    reference front();
+    const_reference front() const;
+    reference back();
+    const_reference back() const;
+    value_type *data();
+    const value_type *data() const;
+
+    // modifiers
+    void swap(bounded_sequence &a);
+    void clear();
+  };
+----
+
+[[optional]]
+=== Mapping for optional types
+
+`genom3`  IDL optional types map onto the `genom::optional` template
+class.
+
+For instance, the following IDL:
+----
+      typedef optional< long > opt;
+----
+
+would map into
+----
+      typedef genom::optional< int32_t > opt;
+----
+
+The interface of `genom::optional` is the following:
+----
+  template <typename T>
+  struct optional {
+    // types:
+    typedef T                                     value_type;
+    typedef value_type&                           reference;
+    typedef const value_type&                     const_reference;
+
+    bool _present;
+    value_type _value;
+  };
+----
+
+The `_present` member, when `true`, indicates the presence of
+valid data in `_value`. When `_present` is `false`, the
+`_value` should be ignored.
+
+
+[[port]]
+=== Mapping for port types
+
+Simple ports map onto a pure virtual `struct` providing a
+`data()` and `read()` or `write()` methods. The
+`data()` method takes no parameter and returns a constant
+reference on the current port data. Input ports may refresh their data
+by invoking the `read()` method, while output ports may publish
+new data by invoking the `write()` method. Both `read()` and
+`write()` return no value (`void`).
+
+Ports defined with the `multiple` flag map onto a similar
+pure virtual `struct`, with the difference that `data()`,
+`read()` and `write()` methods take an additional string
+(`const char *`) parameter representing the port element
+name. Multiple output ports have two additional `open()` and
+`close()` members (also accepting a single string parameter) that
+dynamically create or destroy ports.
+
+All these method may throw a `genom::exception` representing an
+error code.
+
+For instance, the following IDL:
+----
+      port in double in_port;
+      port multiple in double multi_in_port;
+      port out double out_port;
+      port multiple out double multi_out_port;
+----
+
+would map into
+----
+      struct in_port {
+         virtual const double &data(void) const = 0;
+         virtual void read(void) = 0;
+      };
+
+      struct multi_in_port {
+         virtual const double &data(const char *id) const = 0;
+         virtual void read(const char *id) = 0;
+      };
+
+      struct out_port {
+         virtual double &data(void) const = 0;
+         virtual void write(void) = 0;
+      };
+
+      struct multi_out_port {
+         virtual double &data(const char *id) const = 0;
+         virtual void write(const char *id) = 0;
+         virtual void open(const char *id) = 0;
+         virtual void close(const char *id) = 0;
+      };
+----
+
+
+[[remote]]
+=== Mapping for remote services
+
+Remote objects map onto a pure virtual `struct` providing a
+`call()` method. `call()` takes the same parameters as the
+corresponing service definition and return no data (`void`). It
+may throw a `genom::exception` representing an error code.
+
+For instance, the following IDL:
+----
+      interface i {
+        function f(in long i, out double o);
+      };
+
+      component c {
+        uses i;
+      };
+----
+
+would map into
+----
+      namespace c {
+        struct f {
+          virtual void call(uint32_t i, double &o) = 0;
+        };
+      }
+----
+
+The remote service is invoked in a synchronous manner.
+
+
+[[native]]
+=== Mapping for native types
+
+`genom3` IDL native types map to a `C++` `struct`. The mapping
+provides only a forward declaration, and the user has to provide the
+actual definition.
+
+For instance, the following IDL:
+----
+      native opaque;
+----
+
+would map into
+----
+      struct opaque;
+----
+
+The definition of the structure body is free, and will typically use
+native `C++` types that cannot be described in IDL. When used as a
+parameter of a function, a native type will be passed around as a
+pointer on the structure data. Memory management associated with that
+pointer must be handled by the user.
+
+
+[[exception]]
+=== Mapping for exceptions
+
+Each defined exception type is defined as a `C++` `struct` that
+derives from the generic `genom::exception` type and implements a
+`what()` method returning a unique identifier for the
+exception. Exceptions with members define an additional `struct
+detail` type inside the scope of the exception as well a a
+`detail` member of that type. A global identifier for the
+exception is also defined (it is identical to the return value of the
+`what` method).
+
+For example:
+----
+      exception foo {
+        long dummy;
+      };
+----
+
+yields the following `C++` declarations:
+----
+      genom_event foo_id = <unique identifier for exception>;
+
+      struct foo : public genom::exception {
+        struct detail {
+          uint32_t dummy;
+        } detail;
+
+        const char *what();
+      } foo_detail;
+----
+
+Exceptions must be thrown with the `C++` `throw` operator.
+
+The identifier for the exception uniquely identifies this exception
+type, so that any data of type `genom_event` can be compared to
+an exception id with the `==` operator.

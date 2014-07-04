@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2012,2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,13 +22,12 @@
  *                                           Anthony Mallet on Mon Apr 20 2009
  */
 
-/*/ @node IDS declaration
- * @section IDS declaration
- * @cindex ids, declaration
- * @cindex declaration, ids
+/*/
+ * IDS declaration
+ * ---------------
  *
- * @ruleinclude ids
- * @ruleinclude ids_name
+ * <dotgen-rule-ids.adoc
+ * <dotgen-rule-ids-name.adoc
  */
 ids:
   ids_name '{' member_list '}' semicolon

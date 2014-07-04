@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2012,2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,23 +22,23 @@
  *                                           Anthony Mallet on Mon Apr 20 2009
  */
 
-/*/ @node Task declaration
- * @section Task declaration
- * @cindex task, declaration
- * @cindex declaration, task
+/*/
+ * Task declaration
+ * ----------------
  *
- * @ruleinclude task
- * @ruleinclude opt_properties
- * @ruleinclude properties
- * @sp 1
- * @ruleinclude task_property
- * @ruleinclude codel_property
+ * <dotgen-rule-task.adoc
+ * <dotgen-rule-opt-properties.adoc
+ * <dotgen-rule-properties.adoc
+ * <dotgen-rule-property.adoc
  *
- * Tasks define an execution context suitable for running @emph{activities}
- * (@pxref{Component declaration}). A task may define a state machine and
- * associated codels (@pxref{Codel declaration}). The state machine starts in
- * the @code{start} state when the task is created during component
- * initialization.
+ * <dotgen-rule-task-property.adoc
+ * <dotgen-rule-codel-property.adoc
+ *
+ * Tasks define an execution context suitable for running _activities_ (see
+ * link:component[Component declaration]). A task may define a state machine
+ * and associated codels (see link:codels[Codel declaration]). The state
+ * machine starts in the `start` state when the task is created during
+ * component initialization.
  */
 task:
   TASK identifier opt_properties semicolon
@@ -52,29 +52,27 @@ task:
 ;
 
 /*/
- * Tasks are named can also define the following properties:
+ * Tasks are named and may define the following properties:
  *
- * @table @code
- * @item period
- * The granularity of the codel scheduler. Periodic task will sequence the
- * codels they manage at that frequency.
+ * +period+::
+ *   The granularity of the codel scheduler. Periodic task will sequence the
+ *   codels they manage at that frequency.
  *
- * @item delay
- * The delay from the beginning of each period after which codels are run. This
- * can be used to delay two tasks running at the same period in the same
- * component.
+ * +delay+::
+ *   The delay from the beginning of each period after which codels are
+ *   run. This can be used to delay two tasks running at the same period in the
+ *   same component.
  *
- * @item priority
- * Can be used to prioritize different tasks whithin the same component.
+ * +priority+::
+ *   Can be used to prioritize different tasks whithin the same component.
  *
- * @item scheduling real-time
- * This indicates that the task requires real-time scheduling. This may not be
- * supported by all templates.
+ * +scheduling real-time+::
+ *   This indicates that the task requires real-time scheduling. This may not
+ *   be supported by all templates.
  *
- * @item stack
- * Defines the required stack size for this task. The stack size should be big
- * enough to run all codels that the task manages.
- * @end table
+ * +stack+::
+ *   Defines the required stack size for this task. The stack size should be
+ *   big enough to run all codels that the task manages.
  */
 task_property:
   PERIOD const_expr time_unit semicolon

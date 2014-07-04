@@ -1,0 +1,27 @@
+Preprocessing
+-------------
+
+A `dotgen` specification consists of one or more files that are
+preprocessed. The preprocessing is controlled by directives introduced by lines
+having `#` as the first character other than white space.  Preprocessor
+directives have their own syntax (namely, the C preprocessor syntax),
+independent of the `dotgen` language and not entirely described in this
+document. See link:http://gcc.gnu.org/onlinedocs/cpp/[The C preprocessor] for a
+comprehensive documentation.
+
+The primary use of the preprocessing facility is to include definitions
+(especially type definitions) from other `dotgen` specifications. Directives
+may appear anywhere in the source file but are not seen nor interpreted by
+`genom`. For instance, text in files included with a `#include` directive is
+treated as if it appeared in the including file. However, some
+preprocessor `#pragma` directives are available to `genom` (see
+link:pragma{outfilesuffix}[Pragmas]).
+
+The C preprocessor used by `genom` is `pcpp` from the `pcc` project
+(link:http://pcc.ludd.ltu.se/[]). It is invoked as a separate process from
+`libexec/genom-pcpp` by default. This can be changed by setting the
+environement variable `GENOM_CPP`, see
+link:../manual{outfilesuffix}#_environment_variables[Environment
+variables]. However, note that if you change the default, you will loose some
+of the functionalities provided by `genom-pcpp`, like the
++link:pragma{outfilesuffix}#pragma_requires[#pragma requires]+ feature.

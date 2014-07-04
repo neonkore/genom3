@@ -1,0 +1,247 @@
+genom3(1)
+=========
+:revision: 2.99.24
+:month: July
+:year: 2014
+:doctype: manpage
+:revdate: {month} {year}
+:man source:   Openrobots
+:man version:
+:man manual:   GenoM Manual
+:am cpp: <prefix>/libexec/genom-pcpp
+:am docdir: <prefix>/share/doc/genom
+:am sitetmpldir: <prefix>share/genom/site-templates
+:am tmpldir: <prefix>/share/genom/templates
+
+
+NAME
+----
+genom3 - software component source code generator
+
+
+SYNOPSIS
+--------
+*genom3* [*-l*] [*-h*] [*--version*]
+
+*genom3* [*-I* 'dir'] [*-D* 'macro[=value]'] [*-E | -n*] 'file.gen'
+
+*genom3* ['general options'] 'template' ['template options'] 'file.gen'
+
+
+DESCRIPTION
+-----------
+
+genom3 generates the source code of the software components described in the
+formal description 'file.gen' input file.
+
+The input 'file.gen' is expected to contain the description of the
+services, input and output ports, data types definitions and execution contexts
+of a software component, written in the _dotgen_ language.
+
+The dotgen specification is first processed by a C preprocessor before it is
+parsed by genom3 and transformed into an abstract syntax
+tree. 'libexec/genom-pcpp' is the default program, but this can be changed with
+the 'CPP' environment variable. genom3 accepts *-I* and *-D* options that are
+passed inchanged to the cpp program.
+
+The abstract syntax tree is exported in a format suitable to a _generator
+engine_ that is in charge of a _template_ execution for actual source code
+generation. The generator engine provides a scripting language and a set of
+procedures for use by templates. The directory where source code for the
+generator engine is searched can be changed with the *-s* option.
+
+Templates are a set of source files that serve as the basis for source code
+generation. They are interpreted by the generator engine, and contain either
+code written with a scripting language, or regular source code that is appended
+directly to the generated code. Intermediate files and scripts are saved in a
+temporary directory before they are copied to the final destination
+directory. The *-T* option changes the path of the temporary directory. The
+*-d* option will keep all temporary files instead of deleting them once the
+program terminates. This is useful only for template development and debugging.
+
+The choice of a template depends on the kind of source code that is wanted by
+the user. Refer to the documentation of the templates for a description on what
+they do. The names of the available templates can be listed with the *-l*
+option. The directory in which templates are looked for can be changed with the
+*-t* option.
+
+The genom3 program accepts _general options_ that affect the general program
+behaviour. genom3 can also pass _template options_ to the template. These
+options will only affect the template behaviour and are documented separately,
+in each template documentation.
+
+
+[[general]]
+GENERAL OPTIONS
+---------------
+
+*-I*'dir'::
+// add dir to the list of directories searched for headers
+Add the directory 'dir' to the list of directories to be searched
+for included files. The 'dir' argument is passed as-is to the `cpp`
+program via the same *-I* option.
++
+When *-r* option is in effect (either explicitely passed on the
+command line, or configured by default during the build process), an
+implicit *-I* directive pointing to the directory of the input file
+is appended to the end of the list of searched directories.
+
+*-D*'macro[=value]'::
+// predefine macro, with given value or 1 by default
+Predefine 'macro' to 'value' if given, or '1' if 'value' is omitted, in the same
+way as a '#define' directive would do it. This option is passed as-is to the
+'cpp' program.
++
+If you are invoking genom from the shell, you may have to use the shell
+quoting character to protect shell's special characters such as spaces.
++
+An implicit macro '__GENOM__' is always defined and contains the
+version of the genom program. This can be used to divert some lines in
+source files meant to be included by other tools that genom, and that
+contain syntax that genom does not understand.
+
+*-E*::
+// stop after preprocessing stage
+Stop after the preprocessing stage, and do not run genom proper. The
+output of 'cpp' is sent to the standard output. genom exits with a
+non-zero status if there are any preprocessing errors, such as a
+non-existent included file.
+
+*-n*, *--parse-only*::
+// stop after parsing stage (check syntax only)
+Stop after the input file parsing stage, and do not invoke any
+template. This is useful to check the syntax of the input file. Any errors
+or warning are reported and genom exits with a non-zero status if there
+are errors.
+
+*-N*, *--dump*::
+// stop after parsing stage and dump specification
+Stop after the input file parsing stage, do not invoke any template and
+dump the parsed specification in dotgen format. This is mostly useful for
+debugging genom itself or to view the actual specification built by genom
+from a complex (set of) file(s). Any errors or warning are reported and
+genom exits with a non-zero status if there are errors.
+
+*-l*, *--list*::
+// list available templates
+Print to the standard output the list of available templates, one per line.
++
+By default, the standard templates directory is searched, but any *-t* option
+will be taken into account.
+
+*-t*, *--tmpldir=path*::
+// use path as the templates directory
+Use 'path' as the directory containing templates. This can be a colon
+separated list of directories which are searched in order.
++
+This option is useful only for templates not installed in the genom
+standard directories, i.e. 'share/genom/templates' or
+'share/genom/site-templates'.
++
+Each component of 'path' is searched for files matching '*/template.tcl', where
+'*' is interpreted as the template name.
+
+*-s*, *--sysdir=dir*::
+// use dir as the directory for generator system files
+Use 'dir' as the directory holding genom engine files. This option
+is useful if non-standard engines are to be used. The default value is
+'share/genom/engines'.
++
+'dir' should contain directories named after the engine name.
+
+*-T*, *--tmpdir=dir*::
+// use dir as the directory for temporary files
+Use 'dir' as the temporary directory holding intermediate files. See also the
+environment variable 'TMPDIR'.
+
+*-r*, *--rename*::
+// always invoke cpp with a .c file linked to the input file
+Some 'cpp' programs cannot handle correctly files with a '.gen' extension. This
+option will make genom call cpp with an input file ending in '.c', linked
+to the real input file.
+
+*-v*, *--verbose*::
+// produce verbose output
+Force genom to be more verbose while processing input files.
+
+*-d*, *--debug*::
+// activate debugging options
+Activate some debugging options. In particular, temporary files are not
+deleted. Useful for debugging genom itself or generator engines.
+
+*--version*::
+// display the version number of the invoked GenoM
+Display the version number of the invoked GenoM.
+
+*-h*, *--help*::
+// print usage summary (this text)
+Print usage summary and exit.
+
+
+TEMPLATE OPTIONS
+----------------
+
+*-h*, *--help*::
+// print options specific to template
+Templates might define their own specific options. The *-h* option is always
+defined, and prints a summary of supported options. See the template manual for
+a detailed description. Template options should be passed after the template
+name, and before the input file name.
+
+
+[[environment]]
+ENVIRONMENT VARIABLES
+---------------------
+
+'GENOM_CPP'::
+// C preprocessor program
+Define the C preprocessor program to use. The default is
+'libexec/genom-pcpp'. The 'GENOM_CPP' program must recognize *-I* and *-D*
+arguments.
+
+'PKG_CONFIG'::
+// pkg-config utility
+Define the path to the pkg-config(1) program. pkg-config(1) may be spawned by
+'genom-pcpp' for handling the '#pragma require' directive. The default is to
+search in the 'PATH' variable.
+
+'GENOM_TMPL_PATH'::
+// template search path
+The value of 'GENOM_TMPL_PATH' is a colon-separated list of directories, much
+like 'PATH', where genom3 looks for templates. Paths set by any *-t* option
+takes precedence over this variable.
+
+'TMPDIR'::
+// directory for temporary files
+Path to the directory holding temporary files. Defaults to '/tmp'.
+
+
+FILES
+-----
++{amcpp}+ :: Default C preprocessor.
++{amdocdir}+ :: HTML and asciidoc documentations.
++{amsitetmpldir}+ :: Default directory for additional templates.
++{amtmpldir}+ :: Builtin template directory.
+
+SEE ALSO
+--------
+cpp(1), pkg-config(1)
+
+HISTORY
+-------
+Genom development was initiated by Sara Fleury and Matthieu Herrb in 1994.
+The first opensource version, labelled version 2.x, was released in 2004.
+The reflexion and development of version 3 was started by Anthony Mallet in
+2009, with the great help of C&eacute;dric Pasteur who quickly developed the
+first prototype in the context of his master training period.
+
+AUTHORS
+-------
+Sara Fleury, Matthieu Herrb, Anthony Mallet, C&eacute;dric Pasteur and and
+people working on the LAAS openrobots projet <openrobots@laas.fr>.
+
+BUGS
+----
+Bug and problem reports are always apreciated. Please send an e-mail with
+detailed information about the problem and the context in which it appeared to
+<openrobots@laas.fr>.

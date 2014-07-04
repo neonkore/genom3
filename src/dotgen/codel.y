@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,20 +22,19 @@
  *                                           Anthony Mallet on Mon Apr 20 2009
  */
 
-/*/ @node Codel declaration
- * @section Codel declaration
- * @cindex codel, declaration
- * @cindex declaration, codel
+/*/
+ * Codel declaration
+ * -----------------
  *
- * @ruleinclude codel
- * @ruleinclude fsm_codel
- * @ruleinclude codel_parameters
- * @ruleinclude codel_parameter
- * @ruleinclude opt_async
- * @ruleinclude opt_parameter_src
- * @ruleinclude parameter_dir
- * @ruleinclude parameter_variable
- * @ruleinclude event_list
+ * <dotgen-rule-codel.adoc
+ * <dotgen-rule-fsm-codel.adoc
+ * <dotgen-rule-codel-parameters.adoc
+ * <dotgen-rule-codel-parameter.adoc
+ * <dotgen-rule-opt-async.adoc
+ * <dotgen-rule-opt-parameter-src.adoc
+ * <dotgen-rule-parameter-dir.adoc
+ * <dotgen-rule-parameter-variable.adoc
+ * <dotgen-rule-event-list.adoc
  */
 codel:
   identifier '(' codel_parameters ')'

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2012,2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,23 +22,21 @@
  *                                           Anthony Mallet on Mon Apr 20 2009
  */
 
-/*/ @node Port declaration
- * @section Port declaration
- * @cindex port, declaration
- * @cindex declaration, port
- *
- * @ruleinclude port
- * @ruleinclude opt_multiple
- * @ruleinclude port_dir
+/*/
+ * Port declaration
+ * ----------------
  *
  * Ports implement the data flow between components as a publish/subscribe
- * model. Ports have a name and a type and can be either @code{out} (for
- * publishing data) or @code{in} (for subscribing to a sibling @code{out}
- * port).
+ * model. Ports have a name and a type and can be either `out` (for publishing
+ * data) or `in` (for subscribing to a sibling `out` port).
  *
- * The optional @code{multiple} qualifier defines a dynamic list of ports of
+ * The optional `multiple` qualifier defines a dynamic list of ports of
  * the given type, indexed by strings. In this case, ports are created or
  * destroyed dynamically be the codels.
+ *
+ * <dotgen-rule-port.adoc
+ * <dotgen-rule-opt-multiple.adoc
+ * <dotgen-rule-port-dir.adoc
  */
 port:
   PORT opt_multiple port_dir type_spec identifier semicolon

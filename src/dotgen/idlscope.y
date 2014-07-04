@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -24,21 +24,21 @@
 
 /* --- IDL modules --------------------------------------------------------- */
 
-/*/ @node Module declaration
- * @section Module declaration
- * @cindex module, declaration
+/*/
+ * Module declaration
+ * ------------------
  *
  * A module definition satisfies the following syntax:
  *
- * @ruleinclude module
- * @ruleinclude module_name
- * @ruleinclude module_body
- * @ruleinclude idl_statements
+ * <dotgen-rule-module.adoc
+ * <dotgen-rule-module-name.adoc
+ * <dotgen-rule-module-body.adoc
+ * <dotgen-rule-idl-statements.adoc
  *
- * The only effect of a module is to scope @acronym{IDL} identifiers. It is
- * similar to a @acronym{C++} or Java namespace; it is considered good practice
- * to enclose your type definitions inside a module definition to prevent name
- * clashes between components.
+ * The only effect of a module is to scope IDL identifiers. It is similar to a
+ * C++ or Java namespace; it is considered good practice to enclose your type
+ * definitions inside a module definition to prevent name clashes between
+ * components.
  */
 module:
   MODULE module_name '{' module_body '}' semicolon

@@ -1,0 +1,114 @@
+//
+// Copyright (c) 2009-2013 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Anthony Mallet on Fri May 28 2010
+//
+Creating New Templates
+----------------------
+
+=== The complete TCL engine reference
+
+==== Runtime template information
+
+* link:cmd-template{outfilesuffix}#template_require[`template require`]:
+Source additional template code
+* link:cmd-template{outfilesuffix}#template_parse[`template parse`]:
+Generate template content
+* link:cmd-template{outfilesuffix}#template_link[`template link`]:
+Create symbolic links
+* link:cmd-template{outfilesuffix}#template_options[`template options`]:
+Define template options
+* link:cmd-template{outfilesuffix}#template_deps[`template deps`]:
+Template dependencies
+* link:cmd-template{outfilesuffix}#template_arg[`template arg`]:
+Retrieve options passed to templates
+* link:cmd-template{outfilesuffix}#template_usage[`template usage`]:
+Define template help string
+* link:cmd-template{outfilesuffix}#template_message[`template message`]:
+Print runtime information
+* link:cmd-template{outfilesuffix}#template_fatal[`template fatal`]:
+Abort template processing
+
+==== Backend configuration
+
+* link:cmd-engine{outfilesuffix}#engine_mode[`engine mode`]:
+Engine output configuration
+* link:cmd-engine{outfilesuffix}#engine_merge_tool[`engine merge-tool`]:
+Automatic merge of generated content
+* link:cmd-engine{outfilesuffix}#engine_chdir[`engine chdir`]:
+Change output directory
+* link:cmd-engine{outfilesuffix}#engine_pwd[`engine pwd`]:
+Get current output directory
+
+==== Input file information
+
+* link:cmd-dotgen{outfilesuffix}#dotgen_genom[`dotgen genom`]:
+genom program and command line information
+* link:cmd-dotgen{outfilesuffix}#dotgen_template[`dotgen template`]:
+Template path and directories
+* link:cmd-dotgen{outfilesuffix}#dotgen_input[`dotgen input`]:
+Input file name and path
+* link:cmd-dotgen{outfilesuffix}#dotgen_parse[`dotgen parse`]:
+Process additional input
+* link:cmd-dotgen{outfilesuffix}#dotgen_types[`dotgen types`]:
+Data type definitions from the specification
+* link:cmd-dotgen{outfilesuffix}#dotgen_components[`dotgen components`]:
+Components definitions from the specification
+* link:cmd-dotgen{outfilesuffix}#dotgen_interfaces[`dotgen interfaces`]:
+Interfaces definitions from the specification
+
+==== Language dependent code generation
+
+* link:cmd-language{outfilesuffix}#lang[`lang`]:
+Target programming language
+* link:cmd-language{outfilesuffix}#comment[`comment`]:
+Generate comment strings
+* link:cmd-language{outfilesuffix}#fileext[`fileext`]:
+Cannonical file extension
+* link:cmd-language{outfilesuffix}#indent[`indent`]:
+Generate indented text
+* link:cmd-language{outfilesuffix}#___[`---`]:
+Generate filler string
+* link:cmd-language{outfilesuffix}#wrap[`wrap`]:
+Chop blocks of text
+* link:cmd-language{outfilesuffix}#cname[`cname`]:
+Cannonical object name
+* link:cmd-language{outfilesuffix}#mangle[`language mangle`]:
+Unique type name
+* link:cmd-language{outfilesuffix}#mapping[`language mapping`]:
+IDL type language mapping
+* link:cmd-language{outfilesuffix}#declarator[`language declarator`]:
+Code for type declarations
+* link:cmd-language{outfilesuffix}#address[`language address`]:
+Code for variable addresses
+* link:cmd-language{outfilesuffix}#dereference[`language dereference`]:
+Code for dereferencing variables
+* link:cmd-language{outfilesuffix}#argument[`language argument`]:
+Code for declaring functions arguments
+* link:cmd-language{outfilesuffix}#pass[`language pass`]:
+Code for passing functions arguments
+* link:cmd-language{outfilesuffix}#member[`language member`]:
+Code for accessing structure members
+* link:cmd-language{outfilesuffix}#signature[`language signature`]:
+Code for declaring codel signatures
+* link:cmd-language{outfilesuffix}#invoke[`language invoke`]:
+Code for calling codels
+
+==== Object manipulation procedures
+
+* link:cmd-type{outfilesuffix}[`$type` methods]:
+IDL Type manipulation procedures

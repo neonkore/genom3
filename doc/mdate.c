@@ -23,7 +23,7 @@ main(int argc, const char *argv[])
   putenv("LC_TIME=C");
 
   for(argv++; *argv; argv++) {
-    if (stat(*argv, &sb)) err(2, "%s", argv[1]);
+    if (stat(*argv, &sb)) err(2, "%s", argv[0]);
     if (t < sb.st_mtime) t = sb.st_mtime;
   }
 
@@ -31,8 +31,8 @@ main(int argc, const char *argv[])
   if (!tm) err(2, "localtime");
 
   if (!strftime(date, sizeof(date), "%Y", tm)) err(2, "strftime");
-  printf("@set YEAR %s\n", date);
+  printf("YEAR='%s'\n", date);
   if (!strftime(date, sizeof(date), "%B", tm)) err(2, "strftime");
-  printf("@set MONTH %s\n", date);
+  printf("MONTH='%s'\n", date);
   return 0;
 }

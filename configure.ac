@@ -61,12 +61,6 @@ if ! command -v $1 >/dev/null; then
    AC_MSG_FAILURE([required yacc/bison program could not be found on your system.])
 fi
 
-AC_PATH_PROG(TEXI2DVI, [texi2dvi], [:])
-AC_PATH_PROG(MAKEINFO, [makeinfo], [:])
-AC_PATH_PROG(Y2L, [y2l], [:])
-AC_PATH_PROG(AAFIGURE, [aafigure], [:])
-
-
 # C library
 AC_CONFIG_LIBOBJ_DIR([compat])
 AC_REPLACE_FUNCS([strlcpy strlcat getline])
@@ -79,17 +73,13 @@ AC_ARG_ENABLE(docgen,
 	AS_HELP_STRING([--enable-docgen], [regenerate documentation]),
 	[enable_docgen=$enableval],[enable_docgen=no])
 
-AM_CONDITIONAL([REGEN_DOC_INFO],
-  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$MAKEINFO" != ":" \
-                               -a "$AAFIGURE" != ":"])
-AM_CONDITIONAL([REGEN_DOC_TXT],
-  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$MAKEINFO" != ":"])
-AM_CONDITIONAL([REGEN_DOC_PDF],
-  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$TEXI2DVI" != ":"] \
-                               -a "$AAFIGURE" != ":"])
-AM_CONDITIONAL([REGEN_DOC_HTML],
-  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$MAKEINFO" != ":"] \
-                               -a "$AAFIGURE" != ":"])
+AC_PATH_PROG(Y2L, [y2l], [:])
+AC_PATH_PROG(A2X, [a2x], [:])
+AC_PATH_PROG(ASCIIDOC, [asciidoc], [:])
+
+AM_CONDITIONAL([DOCGEN],
+  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$A2X" != ":" \
+                               -a "ASCIIDOC" != ":"])
 
 # C compiler features
 AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
@@ -194,13 +184,33 @@ summary=["$summary
 
 Documentation generation:"]
 if test x"$enable_docgen" = xno; then
-  if test -f "$srcdir/doc/genom3.pdf"; then
+  if test -f "$srcdir/doc/genom3.1"; then
     summary=["${summary}	bundled"]
   else
     summary=["${summary}	no"]
   fi
   summary=["${summary} (use --enable-docgen to regenerate)"]
 else
+  summary=["${summary}
+    a2x:			"]
+  if test x"$A2X" = x:; then
+    summary=["${summary}no: missing a2x"]
+    summary=["${summary}
+	see http://asciidoc.org/"]
+  else
+    summary=["${summary}yes
+	(with ${A2X})"]
+  fi
+  summary=["${summary}
+    asciidoc:			"]
+  if test x"$ASCIIDOC" = x:; then
+    summary=["${summary}no: missing asciidoc"]
+    summary=["${summary}
+	see http://asciidoc.org/"]
+  else
+    summary=["${summary}yes
+	(with ${ASCIIDOC})"]
+  fi
   summary=["${summary}
     yacc to text:		"]
   if test x"$Y2L" = x:; then
@@ -210,59 +220,6 @@ else
   else
     summary=["${summary}yes
 	(with ${Y2L})"]
-  fi
-  summary=["${summary}
-    ascii to image:		"]
-  if test x"$AAFIGURE" = x:; then
-    summary=["${summary}no: missing aafigure"]
-    summary=["${summary}
-	see https://launchpad.net/aafigure"]
-  else
-    summary=["${summary}yes
-	(with ${AAFIGURE})"]
-  fi
-  summary=["$summary
-    info:			"]
-  if test x"$Y2L" = x: -o x"$MAKEINFO" = x: -o x"$AAFIGURE" = x:; then
-    summary=["${summary}no: missing"]
-    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
-    test ! x"$MAKEINFO" = x: || summary=["${summary} makeinfo"]
-    test ! x"$AAFIGURE" = x: || summary=["${summary} aafigure"]
-  else
-    summary=["${summary}yes
-	(with ${MAKEINFO})"]
-  fi
-  summary=["$summary
-    pdf:			"]
-  if test x"$Y2L" = x: -o x"$TEXI2DVI" = x: -o x"$AAFIGURE" = x:; then
-    summary=["${summary}no: missing"]
-    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
-    test ! x"$TEXI2DVI" = x: || summary=["${summary} texi2dvi"]
-    test ! x"$AAFIGURE" = x: || summary=["${summary} aafigure"]
-  else
-    summary=["${summary}yes
-	(with ${TEXI2DVI})"]
-  fi
-  summary=["$summary
-    html:			"]
-  if test x"$Y2L" = x: -o x"$MAKEINFO" = x: -o x"$AAFIGURE" = x:; then
-    summary=["${summary}no: missing"]
-    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
-    test ! x"$MAKEINFO" = x: || summary=["${summary} makeinfo"]
-    test ! x"$AAFIGURE" = x: || summary=["${summary} aafigure"]
-  else
-    summary=["${summary}yes
-	(with ${MAKEINFO})"]
-  fi
-  summary=["$summary
-    text:			"]
-  if test x"$Y2L" = x: -o x"$MAKEINFO" = x:; then
-    summary=["${summary}no: missing"]
-    test ! x"$Y2L" = x: || summary=["${summary} y2l"]
-    test ! x"$MAKEINFO" = x: || summary=["${summary} makeinfo"]
-  else
-    summary=["${summary}yes
-	(with ${MAKEINFO})"]
   fi
 fi
 

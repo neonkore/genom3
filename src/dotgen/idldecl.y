@@ -52,24 +52,24 @@ fixed_array_size: '[' positive_int_const ']'
 ;
 
 
-/* --- type specification -------------------------------------------------- */
+/* --- type definion ------------------------------------------------------- */
 
-/*/ @node Type specification
- * @section Type specification
- * @cindex Type, specification
+/*/
+ * Type definition
+ * ---------------
  *
- * A type specification is the description of a type. It can be used in a
- * @code{typedef} construct or anywhere a typed value is expected.
+ * A type definition is the description of a type. It can be used in a
+ * `typedef` construct or anywhere a typed value is expected.
  *
- * @ruleinclude type_spec
- * @ruleinclude simple_type_spec
- * @ruleinclude base_type_spec
- * @ruleinclude template_type_spec
- * @ruleinclude constructed_type_spec
- * @ruleinclude named_type
- * @ruleinclude scoped_name
- * @ruleinclude declarator
- * @ruleinclude simple_declarator
+ * <dotgen-rule-type-spec.adoc
+ * <dotgen-rule-simple-type-spec.adoc
+ * <dotgen-rule-base-type-spec.adoc
+ * <dotgen-rule-template-type-spec.adoc
+ * <dotgen-rule-constructed-type-spec.adoc
+ * <dotgen-rule-named-type.adoc
+ * <dotgen-rule-scoped-name.adoc
+ * <dotgen-rule-declarator.adoc
+ * <dotgen-rule-simple-declarator.adoc
  */
 
 type_spec: simple_type_spec

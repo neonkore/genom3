@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -24,16 +24,16 @@
 
 /* --- identifiers --------------------------------------------------------- */
 
-/*/ @node Reserved keywords
- * @section Identifiers and reserved keywords
- * @cindex Dotgen, identifier
+/*/
+ * Identifiers and reserved keywords
+ * ---------------------------------
  *
- * An @I{identifier} is a sequence of @acronym{ASCII} alphabetic, digit, and
- * underscore (@code{_}) characters.  The first character must be an
- * @acronym{ASCII} alphabetic character.
+ * An identifier is a sequence of ASCII alphabetic, digit, and
+ * underscore (`_`) characters.  The first character must be an
+ * ASCII alphabetic character.
  *
- * @ruleinclude identifier
- * @ruleinclude identifier_list
+ * <dotgen-rule-identifier.adoc
+ * <dotgen-rule-identifier-list.adoc
  *
  * Words that are reserved keywords in the dotgen language are valid
  * identifiers where their use is not ambiguous.

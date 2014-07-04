@@ -1,0 +1,94 @@
+//
+// Copyright (c) 2009-2014 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Anthony Mallet on Mon May 31 2010
+//
+//
+
+Input File Format
+-----------------
+
+This chapter describes the `genom3` Input File Format (also known as `dotgen`)
+and gives the syntax for `dotgen` grammatical constructs. `dotgen` is the
+language used to formally describe a `genom3` component in terms of services
+and data types it provides.  A description written in `dotgen` completely
+defines the interface and the internals of a component.
+
+A description of the `dotgen` preprocessing is presented in
+link:preprocessing{outfilesuffix}[Preprocessing].  The complete grammar is
+presented in link:grammar{outfilesuffix}[Grammar reference]. Associated
+semantics is described in the rest of this chapter either in place or through
+references to other sub sections of this chapter.
+
+A source file containing a dotgen component specification must have a `.gen`
+extension. The description of the dotgen grammar uses a syntax notation that is
+similar to `EBNF` (Extended Backus-Naur Format).  The following table lists the
+symbols used in this format and their meaning.
+
+.`dotgen` 'EBNF' symbols
+[width="60%",cols="^,3",frame="topbot",options="header"]
+|===========================================================================
+|Symbol       | Meaning
+|`::=`        | Definition
+|`\|`         | Alternation
+|`text`       | Non terminals
+|`"text"`     | Terminals
+|`( ... )`    | Grouping
+|`{ ... }`    | Repetitions: may occur zero or any number of times
+|`[ ... ]`    | Option: may occur zero or one time
+|===========================================================================
+
+
+=== Topics
+
+
+* link:preprocessing{outfilesuffix}[Preprocessing]:
+Inclusion of definitions from other specifications
+
+* link:specification{outfilesuffix}[Specification]:
+Basic elements of a `genom3` specification
+
+* link:component{outfilesuffix}[Component declaration]
+
+* link:interface{outfilesuffix}[Interface declaration]
+
+* link:ids{outfilesuffix}[IDS declaration]
+
+* link:task{outfilesuffix}[Task declaration]
+
+* link:port{outfilesuffix}[Port declaration]
+
+* link:service{outfilesuffix}[Service declaration]:
+Attributes, functions, activities and their parameters
+
+* link:codel{outfilesuffix}[Codel declaration]
+
+* link:module{outfilesuffix}[Module declaration]:
+Scope type definitions
+
+* link:typespec{outfilesuffix}[Type definition]
+
+* link:typedef{outfilesuffix}[Type and constant declaration]
+
+* link:keywords{outfilesuffix}[Identifiers and reserved keywords]:
+Words with a special meaning
+
+* link:pragma{outfilesuffix}[Pragmas]:
+Providing additional information to the parser
+
+* link:grammar{outfilesuffix}[Grammar reference]:
+Extensive `genom3` EBNF grammar reference

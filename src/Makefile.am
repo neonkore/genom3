@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2013 LAAS/CNRS
+# Copyright (c) 2009-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -22,7 +22,6 @@ bin_PROGRAMS=\
 
 genom3_SOURCES=\
 	genom.h		\
-	options.txt	\
 	cpp.c		\
 	hash.c		\
 	property.c	\
@@ -97,8 +96,8 @@ BUILT_SOURCES+=	options.c
 CLEANFILES+=	options.c
 
 options.c: Makefile $(top_srcdir)/doc/optgen.awk
-options.c: options.txt
-	$(AWK) -f $(top_srcdir)/doc/optgen.awk -- -c $< >$@
+options.c: $(top_srcdir)/doc/adoc/manual.adoc
+	$(AWK) -f $(top_srcdir)/doc/optgen.awk $< >$@
 
 # install a versioned copy of genom3
 install-exec-hook:

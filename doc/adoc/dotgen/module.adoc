@@ -1,0 +1,141 @@
+// Generated from ../../src/dotgen/idlscope.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Module declaration
+------------------
+
+A module definition satisfies the following syntax:
+
+[[dotgen-rule-module]]
+____
+(48) module                ::= ::
+   "module" link:grammar{outfilesuffix}#dotgen-rule-module-name[module-name] "{" link:grammar{outfilesuffix}#dotgen-rule-module-body[module-body] "}" ";"
+____
+[[dotgen-rule-module-name]]
+____
+(49) module-name           ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+[[dotgen-rule-module-body]]
+____
+(50) module-body           ::= ::
+   [ link:grammar{outfilesuffix}#dotgen-rule-idl-statements[idl-statements] ]
+____
+[[dotgen-rule-idl-statements]]
+____
+(3) idl-statements        ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement] } link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement]
+____
+
+The only effect of a module is to scope IDL identifiers. It is similar to a
+C++ or Java namespace; it is considered good practice to enclose your type
+definitions inside a module definition to prevent name clashes between
+components.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

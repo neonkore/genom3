@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,18 +22,22 @@
  *                                           Anthony Mallet on Mon Apr 20 2009
  */
 
-/*/ @node Attribute declaration
- * @section Attribute declaration
- * @cindex attribute, declaration
- * @cindex declaration, attribute
+/*/
+ * Service declaration
+ * -------------------
  *
- * @ruleinclude attribute
- * @ruleinclude attribute_parameters
- * @ruleinclude attribute_parameter
- * @ruleinclude opt_properties
- * @ruleinclude properties
- * @sp 1
- * @ruleinclude service_property
+ */
+
+/*/
+ * === Attribute declaration
+ *
+ * <dotgen-rule-attribute.adoc
+ * <dotgen-rule-attribute-parameters.adoc
+ * <dotgen-rule-attribute-parameter.adoc
+ * <dotgen-rule-opt-properties.adoc
+ * <dotgen-rule-properties.adoc
+ *
+ * <dotgen-rule-service-property.adoc
  */
 attribute:
   ATTRIBUTE identifier '(' attribute_parameters ')' opt_properties semicolon
@@ -54,22 +58,20 @@ attribute:
   }
 ;
 
-/*/ @node Service declaration
- * @section Service declaration
- * @cindex service, declaration
- * @cindex declaration, service
+/*/
+ * === Function and activity declaration
  *
- * @ruleinclude service
- * @ruleinclude service_kind
- * @ruleinclude service_parameters
- * @ruleinclude service_parameter
- * @ruleinclude opt_properties
- * @ruleinclude properties
- * @ruleinclude property
- * @sp 1
- * @ruleinclude service_property
- * @ruleinclude codel_property
- * @ruleinclude opt_async
+ * <dotgen-rule-service.adoc.adoc
+ * <dotgen-rule-service-kind.adoc
+ * <dotgen-rule-service-parameters.adoc
+ * <dotgen-rule-service-parameter.adoc
+ * <dotgen-rule-opt-properties.adoc
+ * <dotgen-rule-properties.adoc
+ * <dotgen-rule-property.adoc
+ *
+ * <dotgen-rule-service-property.adoc
+ * <dotgen-rule-codel-property.adoc
+ * <dotgen-rule-opt-async.adoc
  */
 
 service:
@@ -127,20 +129,18 @@ service_property:
   }
 ;
 
-/*/ @node Service parameters
- * @section Service parameters
- * @cindex service, parameters
- * @cindex parameters, service
+/*/
+ * === Function and activity parameters
  *
- * @ruleinclude attribute_parameter
- * @ruleinclude service_parameter
- * @sp 1
- * @ruleinclude parameter_dir
- * @ruleinclude parameter_variable
- * @ruleinclude opt_initializer
- * @ruleinclude initializers
- * @ruleinclude initializer
- * @ruleinclude initializer_value
+ * <dotgen-rule-attribute-parameter.adoc
+ * <dotgen-rule-service-parameter.adoc
+ *
+ * <dotgen-rule-parameter-dir.adoc
+ * <dotgen-rule-parameter-variable.adoc
+ * <dotgen-rule-opt-initializer.adoc
+ * <dotgen-rule-initializers.adoc
+ * <dotgen-rule-initializer.adoc
+ * <dotgen-rule-initializer-value.adoc
  */
 
 attribute_parameters:

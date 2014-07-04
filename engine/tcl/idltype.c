@@ -42,13 +42,14 @@ static Tcl_Obj *	member_list(Tcl_Interp *interp, idltype_s t,
 /* --- type command -------------------------------------------------------- */
 
 /*/
- * @nodebeproc{$type methods, IDL Type manipulation procedures}
- * @findex $type
+ * `$type` TCL engine command
+ * --------------------------
  *
  * Those commands manipulate IDL type objects and return information about
- * them. They all take a type object as their first argument, noted $type
- * in the following command descriptions. Such an object is typically returned
- * by other procedures, such as @code{dotgen types} (@pxref{dotgen types}).
+ * them. They all take a type object as their first argument, noted `$type` in
+ * the following command descriptions. Such an object is typically returned by
+ * other procedures, such as
+ * link:cmd-dotgen{outfilesuffix}#dotgen_types[`dotgen types`].
  */
 int
 type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -130,48 +131,47 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   }
   switch((enum typeidx)i) {
     /*/
-     * @deffn {TCL Backend} {$type kind}
+     * [[kind]]
+     * === `$type kind`
      *
-     * Return a string describing the nature of the IDL type, such as
-     * @code{long}, @code{double}, @code{struct} ...
-     * @end deffn
+     * Return a string describing the nature of the IDL type, such as `long`,
+     * `double`, `struct` ...
      */
     case typeidx_kind:
       r = Tcl_NewStringObj(type_strkind(type_kind(t)), -1);
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type name}
+     * [[name]]
+     * === `$type name`
      *
      * Return the name of the IDL type. No namespace components are included in
      * the result.
-     * @end deffn
      */
     case typeidx_name:
       r = type_name(t) ? Tcl_NewStringObj(type_name(t), -1) : NULL;
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type fullname}
+     * [[fullname]]
+     * === `$type fullname`
      *
      * Return the fully qualified name of the IDL type. The result includes
      * the namespace hierarchy in which the type is defined and the last
-     * component is the result of @code{$type name}.
-     * @end deffn
+     * component is the result of `$type name`.
      */
     case typeidx_fullname:
       r = type_fullname(t) ? Tcl_NewStringObj(type_fullname(t), -1) : NULL;
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type scope}
+     * [[scope]]
+     * === `$type scope`
      *
      * Return the list of lexical scopes in which the type is defined. Each
      * element of the list contains two values: the nature of the scope and its
-     * name. The nature of the scope will be either @code{module} for IDL
-     * modules, or @code{struct} if the type is defined inside an IDL
-     * @code{struct}.
-     * @end deffn
+     * name. The nature of the scope will be either `module` for IDL modules,
+     * or `struct` if the type is defined inside an IDL `struct`.
      */
     case typeidx_scope: {
       scope_s s = type_scope(t);
@@ -188,35 +188,35 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type fixed}
+     * [[fixed]]
+     * === `$type fixed`
      *
      * Return a boolean indicating if the type is of fixed, constant size
      * (true) or not (false).
-     * @end deffn
      */
     case typeidx_fixed:
       r = Tcl_NewBooleanObj(type_fixed(t));
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type final}
+     * [[final]]
+     * === `$type final`
      *
-     * Return a new type object with all aliases resolved. For @code{const}
-     * types, this returns the type of the constant. For @code{typedef}, this
-     * return the first non-aliased type. For @code{struct} and @code{union}
-     * members, this returns the type of the member.
-     * @end deffn
+     * Return a new type object with all aliases resolved. For `const` types,
+     * this returns the type of the constant. For `typedef`, this return the
+     * first non-aliased type. For `struct` and `union` members, this returns
+     * the type of the member.
      */
     case typeidx_final:
       r = Tcl_NewStringObj(type_genref(type_final(t)), -1);
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type parent}
+     * [[parent]]
+     * === `$type parent`
      *
      * Return the parent type of a nested type definition, or raise an error if
      * the type is not nested.
-     * @end deffn
      */
     case typeidx_parent: {
       idltype_s p = type_parent(t);
@@ -225,10 +225,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type nested}
+     * [[nested]]
+     * === `$type nested`
      *
      * Return the nested types defined by the given type
-     * @end deffn
      */
     case typeidx_nested: {
       hiter i;
@@ -251,29 +251,27 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type types [@var{filter}]}
+     * [[types]]
+     * === `$type types` ['filter']
      *
      * Return the list of all types that are recursively used by the given
      * type. In other words, this is the list of types that must be known in
-     * order to completely define the given $type.
+     * order to completely define the given `$type`.
      *
-     * For all basic types such as @code{long}, @code{double} and so forth, the
-     * returned list is empty. For @code{enum}erated types, the result is the
-     * list of enumerators. For aggregates such as @code{struct}, @code{union}
-     * or @code{exception}, the result is the list of all members, expanded
-     * recursively with the same rules. Finally, for @code{array}s or
-     * @code{sequence}s, this returns the type of the array or sequence
-     * elements, recursively expanded.
+     * For all basic types such as `long`, `double` and so forth, the returned
+     * list is empty. For enumerated types, the result is the list of
+     * enumerators. For aggregates such as `struct`, `union` or `exception`,
+     * the result is the list of all members, expanded recursively with the
+     * same rules. Finally, for `array`s or `sequence`s, this returns the type
+     * of the array or sequence elements, recursively expanded.
      *
-     * @@args
-     * @item @var{filter}
+     * ==== Arguments
+     * 'filter'::
      * The optional filter can be used to filter out some elements from the
-     * type list. The filter must be a tcl anonymous function (see tcl [apply]
-     * command) that accepts one argument that is a genom object. It must
-     * return a boolean to indicate whether the type should be included (true)
-     * or excluded (false).
-     * @@end args
-     * @end deffn
+     * type list. The filter must be a tcl anonymous function (see tcl
+     * `[apply]` command) that accepts one argument that is a genom object. It
+     * must return a boolean to indicate whether the type should be included
+     * (true) or excluded (false).
      */
     case typeidx_types: {
       Tcl_Obj *argv[] = {
@@ -295,13 +293,13 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type type}
+     * [[type]]
+     * === `$type type`
      *
      * Return the underlying type of a type that contains another type
-     * definition. For instance, this procedure invoked on an @code{array} or
-     * @code{sequence} type returns the element type. It returns the aliased
-     * type for @code{typedef}.
-     * @end deffn
+     * definition. For instance, this procedure invoked on an `array` or
+     * `sequence` type returns the element type. It returns the aliased type
+     * for `typedef`.
      */
     case typeidx_type:
       switch(type_kind(t)) {
@@ -316,11 +314,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type length}
+     * [[length]]
+     * === `$type length`
      *
-     * Return the length of an @code{array}, @code{sequence} or @code{string}
-     * type.
-     * @end deffn
+     * Return the length of an `array`, `sequence` or `string` type.
      */
     case typeidx_length:
       switch(type_kind(t)) {
@@ -335,10 +332,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type value}
+     * [[value]]
+     * === `$type value`
      *
-     * Return the value associated with a @code{const} type.
-     * @end deffn
+     * Return the value associated with a `const` type.
      */
     case typeidx_value:
       switch(type_kind(t)) {
@@ -351,10 +348,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type valuekind}
+     * [[valuekind]]
+     * === `$type valuekind`
      *
-     * Return the nature of the value associated with a @code{const} type.
-     * @end deffn
+     * Return the nature of the value associated with a `const` type.
      */
     case typeidx_valuekind:
       switch(type_kind(t)) {
@@ -367,21 +364,21 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type members}
+     * [[members]]
+     * === `$type members`
      *
-     * Return a list of types defined by the given @code{struct}, @code{union}
-     * or @code{enum} type.
-     * @end deffn
+     * Return a list of types defined by the given `struct`, `union` or `enum`
+     * type.
      */
     case typeidx_members:
       r = member_list(interp, t, objc > 2 ? objv[2] : NULL);
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type discriminator}
+     * [[discriminator]]
+     * === `$type discriminator`
      *
-     * Return the discriminator of the given @code{union}.
-     * @end deffn
+     * Return the discriminator of the given `union`.
      */
     case typeidx_discriminator:
       switch(type_kind(t)) {
@@ -394,10 +391,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type port}
+     * [[port]]
+     * === `$type port`
      *
-     * Return the port object referenced by the given @code{port}.
-     * @end deffn
+     * Return the port object referenced by the given `port`.
      */
     case typeidx_port:
       switch(type_kind(t)) {
@@ -410,10 +407,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type remote}
+     * [[remote]]
+     * === `$type remote`
      *
-     * Return the remote object referenced by the given @code{remote}.
-     * @end deffn
+     * Return the remote object referenced by the given `remote`.
      */
     case typeidx_remote:
       switch(type_kind(t)) {
@@ -426,24 +423,24 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type cname}
+     * [[cname]]
+     * === `$type cname`
      *
      * Return a string representing the type name in the current language.
-     * @end deffn
      *
-     * @deffn {TCL Backend} {$type mangle}
+     * [[mangle]]
+     * === `$type mangle`
      *
      * Return a string uniquely describing the given type, suitable for use as
      * an identifier in source code written in the current programming
      * language.
-     * @end deffn
      *
-     * @deffn {TCL Backend} {$type mapping}
+     * [[mapping]]
+     * === `$type mapping`
      *
      * Return an ASCII string representing the implementation (definition) of
      * the given type, suitable for use in source code written in the current
      * programming language.
-     * @end deffn
      */
     case typeidx_cname:
     case typeidx_mangle:
@@ -463,28 +460,26 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type declarator} [@var{var}]
+     * [[declarator]]
+     * === `$type declarator` ['var']
      *
-     * Return the declarator for $type or for a variable @var{var} of that
+     * Return the declarator for $type or for a variable 'var' of that
      * type, in the current language.
      *
-     * @@args
-     * @item @var{var}
+     * ==== Arguments
+     * 'var'::
      * The variable being declared. If not given, an abstract declarator is
      * returned.
-     * @@end args
-     * @end deffn
      *
-     * @deffn {TCL Backend} {$type address} @var{var}
+     * [[address]]
+     * === `$type address` 'var'
      *
      * Return an expression representing the address of a variable of the given
      * type in the current language.
      *
-     * @@args
-     * @item @var{var}
+     * ==== Arguments
+     * 'var'::
      * The variable of which the address must be taken.
-     * @@end args
-     * @end deffn
      */
     case typeidx_declarator:
     case typeidx_address: {
@@ -504,40 +499,37 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type argument} @b{value|reference} [@var{var}]
+     * [[argument]]
+     * === `$type argument` `value|reference` ['var']
      *
-     * Return an expression that declares a parameter @var{var} of the given
+     * Return an expression that declares a parameter 'var' of the given
      * type, passed by value or reference according to the second parameter.
      *
-     * @@args
-     * @item @var{var}
+     * ==== Arguments
+     * 'var'::
      * The argument name being declared. If not given, an abstract declarator
      * is returned.
-     * @@end args
-     * @end deffn
      *
-     * @deffn {TCL Backend} {$type pass} @b{value|reference} @var{var}
+     * [[pass]]
+     * === `$type pass` `value|reference` 'var'
      *
-     * Return an expression that passes a variable @var{var} of the given type
+     * Return an expression that passes a variable 'var' of the given type
      * as a function parameter. The variable is passed by value or reference
      * according to second argument.
      *
-     * @@args
-     * @item @var{var}
+     * ==== Arguments
+     * 'var'::
      * The variable that must be passed.
-     * @@end args
-     * @end deffn
      *
-     * @deffn {TCL Backend} {$type dereference} @b{value|reference} @var{var}
+     * [[dereference]]
+     * === `$type dereference` `value|reference` 'var'
      *
-     * Return an expression that retrieves the value of a parameter @var{var},
+     * Return an expression that retrieves the value of a parameter 'var',
      * passed by value or reference according to the second argument.
      *
-     * @@args
-     * @item @var{var}
+     * ==== Arguments
+     * 'var'::
      * The argument name.
-     * @@end args
-     * @end deffn
      */
     case typeidx_argument:
     case typeidx_pass:
@@ -559,12 +551,12 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type digest}
+     * [[digest]]
+     * === `$type digest`
      *
      * Return an ASCII representaion (32 characters) of an MD5 digest of the
      * given type. This is useful for implementing a cheap runtime verification
      * that two types match.
-     * @end deffn
      */
     case typeidx_digest: {
       Tcl_Obj *argv[] = {
@@ -584,12 +576,14 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type masquerade}
+     * [[masquerade]]
+     * === `$type masquerade`
      *
-     * Return any value defined in a @code{#pragma masquerade} for that type,
+     * Return any value defined in a `#pragma masquerade` for that type,
      * if the current template matches the corresponding parameter of the
-     * @code{#pragma}. @xref{#pragma masquerade}.
-     * @end deffn
+     * `#pragma`. See
+     * link:../dotgen/pragma{outfilesuffix}#pragma_masquerade[`#pragma
+     * masquerade`].
      */
     case typeidx_masquerade: {
       hash_s h;
@@ -621,12 +615,12 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
 
     /*/
-     * @deffn {TCL Backend} {$type loc}
+     * [[loc]]
+     * === `$type loc`
      *
      * Return list describing the source location where that type is
      * defined. The list contains three elements: the file name, the line
      * number and the column number.
-     * @end deffn
      */
     case typeidx_loc:
       if (!type_loc(t).file) { r = NULL; } else {
@@ -640,11 +634,11 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
 
     /*/
-     * @deffn {TCL Backend} {$type class}
+     * [[class]]
+     * === `$type class`
      *
      * Always returns the string "type". Useful to determine at runtime
      * that the object is a type object.
-     * @end deffn
      */
     case typeidx_class:
       r = Tcl_NewStringObj("type", -1);

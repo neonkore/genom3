@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2012,2014 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -22,46 +22,70 @@
 /semicolon/ { gsub(/semicolon/, "\";\"") }
 
 /^[^ \t]/ {
-    if (n) printdef(n, name, rule)
+    if (n) {
+        gsub(/_/, "-", name)
+        gsub(/_/, "-", rule)
+        names[n] = name
+        rules[name] = rule
+    }
     n++; name = $1; rule = $0
     next
 }
 
 /^[ \t]+\|/ {
-    rule = rule "\n" $0; next
+    rule = rule $0; next
 }
 
 {
     for (i=1; i<=NF; i++) { rule = rule " " $i; }
 }
 
-END { printdef(n, name, rule) }
+END {
+    names[n] = name
+    rules[n] = rule
+
+    print "Grammar reference"
+    print "-----------------"
+    print ""
+
+    for (i=1; i<=n; i++) {
+        printdef(i, names[i], rules[names[i]])
+    }
+
+    print "// eof"
+}
 
 function printdef(n, name, rule) {
     if (name == "\";\"") return
 
-    out = "dotgen-rule-" name ".texi"
-    print "@include " out
-    gsub(/_/, "-", rule)
-    c = split(rule, l, "\n")
-    printf "@verbatim\n%5s " wrap(l[1]) "\n", "(" n ")" > out
-    for (i = 2; i <= c; i++) { print "      " wrap(l[i]) >> out }
-    print "@end verbatim" >> out
+    out = "dotgen-rule-" name ".adoc"
+    r = "[[dotgen-rule-" name "]]\n____"
+    print r
+    print r > out
+
+    r = sprintf("%s " wrap(rule) "\n____", "(" n ")")
+    print r
+    print r > out
     close(out)
 }
 
 function wrap(str,	c, i) {
     match(str, /^[^=|]+[=|]/);
     bs_pln = bs_len = RLENGTH;
-    bs_str = substr(str, 1, RLENGTH);
-    bs_pre = substr("                                         " \
-                    "                                     ", 1, RLENGTH+6);
+    bs_str = substr(str, 1, RLENGTH) " ::\n  ";
+    bs_pre = substr("                                          " \
+                    "                                     ", 1, RLENGTH+4);
     c = split(substr(str, RLENGTH + 2), f);
     for (i = 1; i <= c; i++) {
-        if (bs_len + 1 + length(f[i]) > 73) {
-            bs_str = bs_str "\n" bs_pre; bs_len = bs_pln;
+        if (f[i] in rules) {
+            md = "link:grammar{outfilesuffix}#dotgen-rule-" f[i] "[" f[i] "]";
+        } else {
+            md = f[i];
         }
-        bs_str = bs_str " " f[i]; bs_len += 1 + length(f[i]);
+        if (f[i] == "|") {
+            bs_str = bs_str " +\n" bs_pre; bs_len = bs_pln;
+        }
+        bs_str = bs_str " " md; bs_len += 1 + length(f[i]);
     }
     return bs_str;
 }

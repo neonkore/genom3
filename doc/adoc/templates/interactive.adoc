@@ -1,0 +1,113 @@
+// Generated from ../../templates/interactive/template.tcl - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Interactive template
+--------------------
+
+
+
+
+This template exports all the objects from the input .gen file for
+interactive use in a `tclsh` interpreter. The `genom` TCL engine
+procedures are available as in regular (scripted) templates.
+
+This template is mostly useful for development of new templates or
+troubleshooting existing ones.
+
+=== Example
+----
+user@host:~$ genom3 interactive demo.gen
+% foreach c [dotgen components] { puts [$c name] }
+demo
+% exit
+user@host:~$
+----
+
+=== Supported options
+
++-b+ ::
+Batch mode: disable line editing facility
++-h+::
++--help+ ::
+Print usage summary (this text)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

@@ -1,0 +1,59 @@
+// Generated from ../../src/dotgen/ids.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+IDS declaration
+---------------
+
+[[dotgen-rule-ids]]
+____
+(18) ids                   ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-ids-name[ids-name] "{" link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}" ";"
+____
+[[dotgen-rule-ids-name]]
+____
+(19) ids-name              ::= ::
+   "ids"
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

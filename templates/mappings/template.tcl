@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,49 +22,49 @@
 #                                           Anthony Mallet on Tue Jan 12 2010
 #
 
+#/
+# Mappings template
+# -----------------
+
 # Template for type mappings generation.
 
 template usage "Mappings generation template\n" [regsub -all [join {
-  { *#/? ?} {@(b|code){([^{}]*)}} {@itemx?([^\n]*)\n} {@(genom){([^{}]*)}}
-  {@(quotation|example|table|var|end)[^\n]*\n} {@([@{}])}
+  { *#/? ?} {----} {[*+]([^*+\n]+)[*+]} {::} { ::\n}
 } |] {
   #/ This template generates a source file containing the native type
   # definitions for all IDL types defined in the .gen input file. By default,
-  # types are generated for the codels language (defined in the .gen
-  # file) for the first available component. This can be changed with the -l
-  # option. The generated mappings are output on stdout.
+  # types are generated for the codels language (defined in the .gen file) for
+  # the first available component. This can be changed with the -l option. The
+  # generated mappings are output on stdout.
   #
-  # Additionnaly, a dependency file suitable for inclusion in a @code{Makefile}
-  # can be generated. This is controlled by the @code{-MD}, @code{-MF} and
-  # @code{-MT} options. These options are documented herafter, and follow the
-  # same syntax as the same options of @code{gcc}.
+  # Additionnaly, a dependency file suitable for inclusion in a `Makefile` can
+  # be generated. This is controlled by the `-MD`, `-MF` and `-MT`
+  # options. These options are documented herafter, and follow the same syntax
+  # as the same options of `gcc`.
   #
-  # @b{Example:}
-  # @example
-  # user@@host:~$ genom3 mappings demo.gen > demo_c_types.h
-  # user@@host:~$ genom3 mappings -l c++ demo.gen > demo_cxx_types.h
-  # @end example
+  # === Example
+  # ----
+  # user@host:~$ genom3 mappings demo.gen > demo_c_types.h
+  # user@host:~$ genom3 mappings -l c++ demo.gen > demo_cxx_types.h
+  # ----
   #
-  # @b{Supported options:}
-  # @quotation
-  # @table @code
-  # @item -l
-  # @itemx --language=lang
-  #	Generate mappings for language
-  # @item --signature
-  #		Generate codel signatures and types mappings
-  # @item -MD
-  #			Generate dependency information (in out.d)
-  # @item -MF=file
-  #		Generate dependency in file instead of out.d
-  # @item -MT=target
-  #		Change the target of the dependency rules
-  # @item -h
-  # @itemx --help
+  # === Supported options
+  #
+  # +-l+::
+  # +--language=lang+ ::
+  #	Generate mappings for language 'lang'
+  # +--signature+ ::
+  #	Generate codel signatures in addition to types mappings
+  # +-MD+ ::
+  #		Generate dependency information (in out.d)
+  # +-MF='file'+ ::
+  #	Generate dependency in 'file' instead of out.d
+  # +-MT='target'+ ::
+  #	Change the target of the dependency rules
+  # +-h+::
+  # +--help+ ::
   #		Print usage summary (this text)
-  # @end table
-  # @end quotation
-} {\2\3\4\7}]
+} {\1}]
 
 # defaults
 variable sign		[list]

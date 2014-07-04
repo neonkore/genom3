@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,32 +22,30 @@
  *                                           Anthony Mallet on Mon Apr 20 2009
  */
 
-/*/ @node Component declaration
- * @section Component declaration
- * @cindex component, declaration
- * @cindex declaration, component
+/*/
+ * Component declaration
+ * ---------------------
  *
- * @ruleinclude component
- * @ruleinclude component_name
- * @ruleinclude component_body
- * @sp 1
- * @ruleinclude exports
- * @ruleinclude export
- * @sp 1
- * @ruleinclude component_property
- *
- * A component declaration describes a instance of the @genom{} component
+ * A component declaration describes a instance of the `genom` component
  * model. It is defined by a unique name (an identifier) that also defines an
  * IDL scope for any embedded types.
  *
- * Components export objects from the @genom{} component model, namely: IDS
- * (@pxref{IDS declaration}), tasks (@pxref{Task declaration}), ports
- * (@pxref{Port declaration}), attributes (@pxref{Attribute declaration}) or
- * services (@pxref{Service declaration}).
+ * Components export objects from the `genom` component model, namely:
+ * link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
+ * link:port{outfilesuffix}[ports], link:attribute{outfilesuffix}[attributes] or
+ * link:service[services].
  *
- * Components may also define new types @emph{via} IDL statements. These types
- * will be defined within the component scope.
+ * Components may also define new types via IDL statements. These types will
+ * be defined within the component scope.
  *
+ * <dotgen-rule-component.adoc
+ * <dotgen-rule-component-name.adoc
+ * <dotgen-rule-component-body.adoc
+ *
+ * <dotgen-rule-exports.adoc
+ * <dotgen-rule-export.adoc
+ *
+ * <dotgen-rule-component-property.adoc
  */
 component: COMPONENT component_name component_body semicolon
   {
@@ -94,47 +92,48 @@ export:
 
 /*/
  * A number of properties can be attached to a component:
- * @table @code
- * @item doc
+ *
+ * +doc+::
  * A string that describes the functionality of the component.
  *
- * @item version
+ * +version+::
  * The component version number, as a string
  *
- * @item lang
+ * +lang+::
  * The programming language of the codels interface.
  *
- * @item email
+ * +email+::
  * A string containing the e-mail address of the author of the component.
  *
- * @item requires
- * A list of dependencies of the component (@pxref{#pragma requires}). Each
- * string should contain a package name in @code{pkg-config} format.
+ * +requires+::
+ * A list of dependencies of the component (see
+ * link:pragma{outfilesuffix}#pragma_requires[#pragma requires]). Each
+ * string should contain a package name in `pkg-config` format.
  *
- * @item codels-requires
+ * +codels-requires+::
  * A list of dependencies of the codels. Each string should contain a package
- * name in @code{pkg-config} format.
+ * name in `pkg-config` format.
  *
- * @item clock-rate
+ * +clock-rate+::
  * The period of the internal component clock. It is usually not necessary to
  * define it explicitly. If the component defines periodic task, the component
  * clock period will be automatically computed as the greatest common divisor
  * of the period of all periodic tasks.
  *
- * @item provides
- * A list of interfaces (@pxref{Interface declaration}) that the component
- * implements. All objects from the interface are imported as-is into
- * the component description. Ports and services may be further refined
- * once imported, typically by defining codels (@pxref{Codel declaration}) that
- * implement the services.
+ * +provides+::
+ * A list of interfaces (see link:interface{outfilesuffix}[Interface
+ * declaration]) that the component implements. All objects from the interface
+ * are imported as-is into the component description. Ports and services may be
+ * further refined once imported, typically by defining codels (see
+ * link:codel{outfilesuffix}[Codel declaration]) that implement the services.
  *
- * @item uses
- * A list of interfaces (@pxref{Interface declaration}) that the component
- * uses. Ports are imported in the opposite direction (e.g. a @code{port out}
- * is imported as a @code{port in}. Services are imported as @code{remote}
- * objects that can be accessed @emph{via} codel parameters (@pxref{Codel
- * declaration}). Other objects are imported as-is.
- * @end table
+ * +uses+::
+ * A list of interfaces (see link:interface{outfilesuffix}[Interface
+ * declaration]) that the component uses. Ports are imported in the opposite
+ * direction (e.g. a `port out` is imported as a `port in`). Services are
+ * imported as `remote` objects that can be accessed via codel parameters
+ * (see link:codel{outfilesuffix}[Codel declaration]). Other objects are
+ * imported as-is.
  */
 component_property:
   DOC string_literals semicolon

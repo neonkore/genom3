@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,75 +22,75 @@
 #                                           Anthony Mallet on Tue Jan 12 2010
 #
 
+#/
+# Skeleton template
+# -----------------
+
 # Default template for user skeleton file generation.
 
 template usage "Skeleton generation template\n" [regsub -all [join {
-  { *#/? ?} {@(b|code|emph|command){([^{}]*)}} {@itemx?([^\n]*)\n}
-  {@(genom){([^{}]*)}} {@(quotation|example|table|var|end)[^\n]*\n} {@([@{}])}
+  { *#/? ?} {----} {[*+]([^*+\n]+)[*+]} {::} { ::\n}
 } |] {
   #/ The skeleton template generates the skeleton of the codel functions
   # defined in the input .gen file. It also generates a sample build
   # infrastructure for building them. By default, files are generated in the
-  # same directory as the input .gen file. The @code{-C} option can be used to
+  # same directory as the input .gen file. The `-C` option can be used to
   # specify another output directory.
   #
-  # The @code{-l c++} option is specific to @code{C} codels. It generates a
-  # skeleton that compiles the codels with a @code{C++} compiler. This is
-  # useful for invoking @code{C++} code from the codels (Note that this is
-  # different from having @code{C++} codels.)
+  # The `-l c++` option is specific to `C` codels. It generates a skeleton that
+  # compiles the codels with a `C++` compiler. This is useful for invoking
+  # `C++` code from the codels (Note that this is different from having
+  # `C++` codels.)
   #
   # Files generated with this template are freely modifiable (and are actually
   # required to be modified in order to provide some real codels). They are
   # provided only as a sample - yet sensible - implementation. The only
-  # requirement is that codels provide a @command{pkg-config} file (@code{.pc})
-  # named @code{<component>-genom.pc} and telling the other templates how to
+  # requirement is that codels provide a `pkg-config` file (`.pc`)
+  # named `<component>-genom3.pc` and telling the other templates how to
   # link with the codels library.
   #
-  # The template can also be invoked in @emph{merge} mode, where it updates
-  # existing skeletons. This mode tries to merge modifications in the .gen
-  # file, for instance service addition or new interface definitions, into
-  # existing codels. In case of conflicting files, there are several merge
-  # strategies: option @code{-u} places conflicts markers in the source file,
-  # option @code{-i} interactively asks what to do, and the generic option
-  # @code{-m tool} runs @command{tool} on the conflicting files. @command{tool}
-  # can be any merge tool, for instance @command{meld}.
+  # The template can also be invoked in 'merge' mode, where it updates existing
+  # skeletons. This mode tries to merge modifications in the .gen file, for
+  # instance service addition or new interface definitions, into existing
+  # codels. In case of conflicting files, there are several merge strategies:
+  # option `-u` places conflicts markers in the source file, option `-i`
+  # interactively asks what to do, and the generic option `-m tool` runs `tool`
+  # on the conflicting files. `tool` can be any merge tool, for instance
+  # `meld`.
   #
-  # @b{Example:}
-  # @example
-  # user@@host:~$ genom3 skeleton demo.gen
+  # === Example
+  # ----
+  # user@host:~$ genom3 skeleton demo.gen
   # creating ./codels/demo_motion_codels.c
   # creating ./codels/demo_codels.c
   # [...]
   # creating ./codels/Makefile.am
-  # @end example
+  # ----
   #
-  # @b{Supported options:}
-  # @quotation
-  # @table @code
-  # @item -l c++
-  # @itemx --language=c++
-  #	Compile C codels with a C++ compiler
-  # @item -C
-  # @itemx --directory=dir
+  # === Supported options
+  #
+  # +-l c+++::
+  # +--language=c+++ ::
+  #		Compile C codels with a C++ compiler
+  # +-C+::
+  # +--directory='dir'+ ::
   #	Output files in dir instead of source directory
-  # @item -m
-  # @itemx --merge=tool
-  #	Merge conflicting files with tool
-  # @item -i
+  # +-m+::
+  # +--merge='tool'+ ::
+  #		Merge conflicting files with tool
+  # +-i+ ::
   #			Interactively merge conflicting files, alias for
-  #			-m interactive
-  # @item -u
+  #			`-m interactive`
+  # +-u+ ::
   #			Automatically merge conflicting files, alias for
-  #			-m auto
-  # @item -f
-  # @itemx --force
-  #		Overwrite existing files (use with caution)
-  # @item -h
-  # @itemx --help
-  #		Print usage summary (this text)
-  # @end table
-  # @end quotation
-} {\2\3\4\7}]
+  #			`-m auto`
+  # +-f+::
+  # +--force+ ::
+  #			Overwrite existing files (use with caution)
+  # +-h+::
+  # +--help+ ::
+  #			Print usage summary (this text)
+} {\1}]
 
 # defaults: no file overwrite
 engine mode -overwrite -merge-if-change

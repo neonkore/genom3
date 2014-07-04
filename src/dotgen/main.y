@@ -153,35 +153,34 @@
 
 %expect 0
 %%
-/*/ @node Specification
- * @section Elements of a @genom{3} specification
- * @cindex specification
- * @cindex @genom{3}, specification
- * @cindex @code{dotgen}, specification
+/*/
+ * Specification
+ * -------------
  *
  * A dotgen specification consists of one or more statements. Statements are
- * either @genom{} statements, IDL statements. @command{cpp} directives
- * (@pxref{Preprocessing}) are handled at the lexical level and do not
- * interfere with the specification grammar.
+ * either `genom` statements or IDL statements. `cpp` directives (see
+ * link:preprocessing{outfilesuffix}[Preprocessing]) are handled at the lexical
+ * level and do not interfere with the specification grammar.
  *
- * @ruleinclude specification
- * @ruleinclude statement
- * @sp 1
- * @ruleinclude idl_statement
+ * <dotgen-rule-specification.adoc
+ * <dotgen-rule-statement.adoc
  *
- * Definitions are named by the mean of identifiers, @pxref{Reserved keywords}.
+ * <dotgen-rule-idl-statement.adoc
  *
- * A @genom{} statement defines components (@pxref{Component declaration}) or
- * interfaces (@pxref{Interface declaration}).
+ * Definitions are named by the mean of
+ * link:indentifier{outfilesuffix}[identifiers].
  *
- * An @acronym{IDL} statement defines types (@pxref{Type declaration}),
- * constants (@pxref{Constant declaration}) or @acronym{IDL} modules containing
- * types and constants (@pxref{Module declaration}).  The syntax follows
- * closely the subset the @acronym{OMG} @acronym{IDL} specification
- * corresponding to type and constants definitions (see Chapter 7 of
- * @cite{CORBA specification, Object Management Group, version 3.1. Part I:
- * CORBA interfaces}).  Note that this subset of the dogten grammar is not in
- * any manner tied to OMG IDL and may diverge from future OMG specifications.
+ * A `genom` statement defines link:component{outfilesuffix}[components] or
+ * link:interface{outfilesuffix}[interfaces].
+ *
+ * An IDL statement defines link:type{outfilesuffix}[types],
+ * link:constant{outfilesuffix}[constants] or IDL
+ * link:module{outfilesuffix}[modules] containing types and constants.  The
+ * syntax follows closely the subset the 'OMG' IDL specification corresponding
+ * to type and constants definitions (see Chapter 7 of the CORBA specification,
+ * Object Management Group, version 3.1. Part I: CORBA interfaces).  Note that
+ * this subset of the dogten grammar is not in any manner tied to OMG IDL and
+ * may diverge from future OMG specifications.
  */
 
 specification: /* empty */ { $$ = 0; } | specification statement;

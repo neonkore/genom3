@@ -1,0 +1,53 @@
+//
+// Copyright (c) 2012,2014 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Anthony Mallet on Sun May 20 2012
+//
+
+Templates
+---------
+
+Templates are the heart of the code generation system: they read a
+`dotgen` specification and produce a bunch of source files from
+it. Templates can produce virtually any kind of code, but they are
+usually used to produce a server or a client implementation of the
+component(s) described in the input specification.
+
+A template is invoked on a `dotgen` specification by invoking `genom3`
+with the template name followed by one or several input files (see the
+link:../manual{outfilesuffix}[manual] for details).
+
+A number of base templates are provided by `genom3`. These are the
+`skeleton`, `mappings` and `interactive` templates described
+hereafter. Additional templates can be made available by installing
+extra packages. At the time of writing, there exist for instance a
+`pocolibs` and a `ros` template that both provide a server and several
+kind of clients implementations. The list of available templates can
+be obtained by the command `genom3 -l` (see the
+link:../manual{outfilesuffix}#general[general options]).
+
+New templates can be developed by using the `TCL` code generator
+engine (link:tcl-engine{outfilesuffix}[Creating Templates]).
+
+Topics
+------
+
+* link:skeleton{outfilesuffix}[Skeleton]: Creating initial codels
+* link:mappings{outfilesuffix}[Mappings]: Generating IDL mappings
+* link:interactive{outfilesuffix}[Interactive]:
+Running the TCL engine interactively
+* link:tcl-engine{outfilesuffix}[Creating Templates]: Producing your own code

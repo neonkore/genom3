@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2012,2014 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -17,282 +17,71 @@
 #
 #                                            Anthony Mallet on Sat Jun  5 2010
 #
-BEGIN {
-    grabbing = "none";
-    output = "c";
 
-    for (i=1; i<ARGC; i++) {
-	if (ARGV[i] ~ /^-c/)
-	    output = "c";
-	else if (ARGV[i] ~ /^-t/)
-	    output = "texi";
-	else if (ARGV[i] ~ /^-m/)
-	    output = "mdoc";
-	else if (ARGV[i] ~ /^-./) {
-	    print "Unknown option " ARGV[i];
-	    exit;
-	} else
-	    break;
-    }
-    for (j=1; i<ARGC; i++ && j++)
-	ARGV[j] = ARGV[i];
-    ARGC = j;
+/^(GENERAL|TEMPLATE|ENVIRONMENT) (OPTIONS|VARIABLES)/ {
+    argcats[++cats] = substr($0, 1, 1) tolower(substr($0, 2));
+    next
 }
 
-/^#/ {
-    grabbing = "none";
-}
-
-/^\\args/ {
-    grabbing = "none";
-    t = substr($0, index($0, $3))
-    argcat = $2;
-    arglist = arglist " " argcat;
-    args[argcat] = t;
+/^.*::/ {
+    if (split($0, f, /::/) != 2) next;
+    getline f[2]
+    if (f[2] !~ /^\/\//) next;
+    gsub(/[*']/, "", f[1]);
+    gsub(/\/\/[ \t]*/, "", f[2]);
+    argcomm[cats] = argcomm[cats] f[1] SUBSEP f[2] SUBSEP;
     next;
-}
-
-/^\\arg/ {
-    grabbing = substr($1, 2);
-    argkey = $2;
-    argkeys[argcat] = argkeys[argcat] " " argkey;
-    arglong[argcat,argkey] = $3;
-    argopt[argcat,argkey] = $4;
-    next;
-}
-
-/^\\env/ {
-    grabbing = substr($1, 2);
-    envkey = $2
-    envs = envs " " envkey;
-    next;
-}
-
-/^\\desc/ {
-    grabbing = substr($1, 2);
-    next;
-}
-
-grabbing ~ "arg" {
-    sub(/^[ \t]+/, ""); sub(/[ \t]+$/, "");
-    if (!argcomm[argcat,argkey])
-	argcomm[argcat,argkey] = $0;
-    else
-	argdesc[argcat,argkey] = argdesc[argcat,argkey] "\n" $0;
-}
-
-grabbing ~ "env" {
-    sub(/^[ \t]+/, ""); sub(/[ \t]+$/, "");
-    if (!envcomm[envkey])
-	envcomm[envkey] = $0;
-    else
-	envdesc[envkey] = envdesc[envkey] "\n" $0;
-}
-
-grabbing ~ "desc" {
-    sub(/^[ \t]+/, ""); sub(/[ \t]+$/, "");
-    desc = desc "\n" $0;
 }
 
 END {
-    sub(/^[ \t\n]+/, "", desc); sub(/[ \t\n]+$/, "", desc);
-    for (k in argdesc) {
-	sub(/^[ \t\n]+/, "", argdesc[k]); sub(/[ \t\n]+$/, "", argdesc[k]);
-    }
-    for (k in envdesc) {
-	sub(/^[ \t\n]+/, "", envdesc[k]); sub(/[ \t\n]+$/, "", envdesc[k]);
-    }
-
-    if (output == "c")
-	output_c();
-    if (output == "texi")
-	output_texi();
-    if (output == "mdoc")
-	output_mdoc();
-}
-
-function output_c() {
     print "static const char usage_string[] = \"\\";
-    c = split(arglist, cat);
-    for (i = 1; i <= c; i++) {
-	print args[cat[i]] ":\\n\\";
-	k = split(argkeys[cat[i]], key);
-	for (j = 1; j <= k; j++) {
-	    if (key[j] ~ /^-/)
-		s = "    ";
-	    else
-		s = "  -" key[j];
-	    if (arglong[cat[i],key[j]] != "-") {
-		if (key[j] ~ /^-/)
-		    s = s " ";
-		else
-		    s = s ",";
-		s = s "--" arglong[cat[i],key[j]];
-		if (argopt[cat[i],key[j]])
-		    s = s "=" argopt[cat[i],key[j]];
-	    } else {
-		if (argopt[cat[i],key[j]])
-		    s = s argopt[cat[i],key[j]];
-	    }
-	    while(length(s) < 20)
-		s = s " ";
-	    print s argcomm[cat[i],key[j]] "\\n\\";
-	}
-	print "\\n\\";
-    }
-    print "Environment variables:\\n\\";
-    k = split(envs, key);
-    for (i = 1; i <= k; i++) {
-	s = "  " key[i];
-	while(length(s) < 20)
-	    s = s " ";
-	print s envcomm[key[i]] "\\n\\";
-    }
-    print "\";";
-
-    printf "static const char shortopts_string[] = \"+";
-    split(argkeys["general"], key);
-    for (k in key) {
-	if (key[k] !~ /^-/) {
-	    printf "%s", key[k];
-	    if (argopt["general",key[k]])
-		printf ":";
-	}
-    }
-    print "\";";
-
-    print "static struct option longopts_list[] = {";
-    split(argkeys["general"], key);
-    for (k in key) {
-	if (arglong["general",key[k]] != "-") {
-	    printf "{ \"%s\",\t", arglong["general",key[k]];
-	    if (argopt["general",key[k]])
-		printf "required_argument,\t";
-	    else
-		printf "no_argument,\t";
-	    printf "NULL,\t";
-	    if (key[k] !~ /^-/)
-		printf "'%s'", key[k];
-	    else
-		printf "%s", key[k];
-	    print "},";
-	}
-    }
-    print "{ NULL, 0, NULL, 0}";
-    print "};";
-}
-
-
-function output_texi() {
-    print "@node Description";
-    print "@section Description";
-    gsub(/\\name/, "@code{genom3}", desc);
-    gsub(/\\em[ \t]*/, "@i{",  desc);
-    gsub(/\\tt[ \t]*/, "@code{",  desc);
-    gsub(/[ \t]*\\rm/, "}",  desc);
-    print desc;
-
-    c = split(arglist, cat);
-    for (i = 1; i <= c; i++) {
-	print "@node " args[cat[i]];
-	print "@section " args[cat[i]]
-	print "@table @code";
-	k = split(argkeys[cat[i]], key);
-	for (j = 1; j <= k; j++) {
-	    printf "@item ";
-	    if (key[j] ~ /^-/)
-		s = "";
-	    else {
-		s = "-" key[j];
-                if (argopt[cat[i],key[j]])
-                    s = s " @i{" argopt[cat[i],key[j]] "}";
-            }
-	    if (arglong[cat[i],key[j]] != "-") {
-		if (key[j] !~ /^-/)
-		    s = s "\n@itemx ";
-		s = s "--" arglong[cat[i],key[j]];
-		if (argopt[cat[i],key[j]])
-		    s = s "=@i{" argopt[cat[i],key[j]] "}";
-	    }
-	    print s;
-
-	    gsub(/\\em[ \t]*/, "@var{", argdesc[cat[i],key[j]]);
-	    gsub(/\\tt[ \t]*/, "@code{", argdesc[cat[i],key[j]]);
-	    gsub(/[ \t]*\\rm/, "}", argdesc[cat[i],key[j]]);
-	    print argdesc[cat[i],key[j]];
-	    print "";
-	}
-	print "@end table";
-    }
-
-    print "@node Environment variables";
-    print "@section Environment variables";
-    print "@table @code";
-    k = split(envs, key);
-    for (i = 1; i <= k; i++) {
-        s = key[i]
-	print "@item " s "";
-	gsub(/\\name/, "@genom{}", envdesc[key[i]]);
-	gsub(/\\em[ \t]*/, "@env{", envdesc[key[i]]);
-	gsub(/\\tt[ \t]*/, "@code{", envdesc[key[i]]);
-	gsub(/[ \t]*\\rm/, "}", envdesc[key[i]]);
-	print envdesc[key[i]];
-    }
-    print "@end table";
-}
-
-function output_mdoc() {
-    print ".Sh DESCRIPTION";
-    gsub(/^\\name/, ".Nm\n.Ns ", desc);
-    gsub(/\n?\\name/, "\n.Nm\n.Ns ", desc);
-    gsub(/\n?\\em/, "\n.Em", desc);
-    gsub(/\n?\\tt/, "\n.Em", desc);
-    gsub(/\n?\\rm/, "\n.Ns ", desc);
-    gsub(/\n\n/, "\n.Pp\n", desc);
-    print desc;
-
-    c = split(arglist, cat);
-    for (i = 1; i <= c; i++) {
-      print ".Sh " toupper(args[cat[i]]);
-      print ".Bl -tag -width pancake";
-      k = split(argkeys[cat[i]], key);
-      for (j = 1; j <= k; j++) {
-	printf ".It ";
-	if (key[j] ~ /^-/)
-	  s = "";
-	else {
-	  s = "Fl " key[j];
-          if (argopt[cat[i],key[j]])
-              s = s " Em " argopt[cat[i],key[j]];
+    for (i = 1; i <= cats; i++) {
+        print argcats[i] ":\\n\\";
+        k = split(argcomm[i], key, SUBSEP);
+        for (j = 1; j < k; j+=2) {
+            if (key[j] ~ /^--/) { key[j] = "    " key[j] }
+            printf("  %-18s %s\\n\\\n", key[j], key[j+1]);
         }
-	if (arglong[cat[i],key[j]] != "-") {
-	  if (key[j] !~ /^-/)
-	    s = s " ,";
-	  s = s " Fl -" arglong[cat[i],key[j]];
-	  if (argopt[cat[i],key[j]])
-	    s = s " Ns = Ns Em " argopt[cat[i],key[j]];
-	}
-	print s;
-	gsub(/\n?\\em/, "\n.Em", argdesc[cat[i],key[j]]);
-	gsub(/\n?\\tt/, "\n.Li", argdesc[cat[i],key[j]]);
-	gsub(/\n?\\rm/, "\n.Ns ", argdesc[cat[i],key[j]]);
-	gsub(/\n\n/, "\n.Pp\n", argdesc[cat[i],key[j]]);
-	print argdesc[cat[i],key[j]];
-      }
-      print ".El";
+
+        print "\\n\\";
+    }
+    print "\";";
+
+    sopt = "";
+    lopt = "";
+    k = split(argcomm[1], key, SUBSEP);
+    for (i = 1; i < k; i+=2) {
+        n = split(key[i], opt, /, */)
+        short = ""
+        for (j = 1; j <= n; j++) {
+            if (opt[j] ~ /^-[^-]/) {
+                short = substr(opt[j], 2, 1);
+                sopt = sopt short;
+                if (opt[j] ~ /^-[^-]./ || key[i] ~ /=/) {
+                    sopt = sopt ":";
+                }
+            }
+            if (opt[j] ~ /^--[^-]/) {
+                match(opt[j], /--[^=]+/)
+                long = substr(opt[j], RSTART+2, RLENGTH-2)
+                lopt = lopt "\n{ \"" long "\",\t"
+                if (opt[j] ~ /=/)
+                    lopt = lopt "required"
+                else
+                    lopt = lopt "no"
+                lopt = lopt "_argument,\tNULL,\t"
+                if (short == "")
+                    lopt = lopt "-'" substr(long, 1, 1) "'"
+                else
+                    lopt = lopt "'" short "'"
+                lopt = lopt "},"
+            }
+        }
     }
 
-    print ".Sh ENVIRONMENT";
-    print ".Bl -tag -width TMPDIR";
-    k = split(envs, key);
-    for (i = 1; i <= k; i++) {
-	print ".It Ev " key[i];
-	gsub(/\n?\\name/, "\n.Nm\n.Ns ", envdesc[key[i]]);
-	gsub(/\n?\\em/, "\n.Em", envdesc[key[i]]);
-	gsub(/\n?\\tt/, "\n.Li", envdesc[key[i]]);
-	gsub(/\n?\\rm/, "\n.Ns ", envdesc[key[i]]);
-	gsub(/\n\n/, "\n.Pp\n", envdesc[key[i]]);
-	print envdesc[key[i]];
-    }
-    print ".El";
+    print "static const char shortopts_string[] = \"+" sopt "\";";
+    print "static struct option longopts_list[] = {";
+    print   lopt;
+    print   "{ NULL, 0, NULL, 0}";
+    print "};";
 }

@@ -1,0 +1,473 @@
+// Generated from ../../engine/tcl/dotgen.c - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`dotgen` TCL engine command
+-----------------------------
+
+
+
+[[dotgen_genom]]
+=== `dotgen genom`: Genom program path and command line
+
+Those commands implement access to genom program parameters or general
+information.
+
+
+`dotgen genom program`::
+Return the absolute path to the GenoM executable currently running.
+
+
+
+
+
+
+
+
+
+
+
+
+`dotgen genom cmdline`::
+Returns a string containing the options passed to the `genom3` program.
+
+
+
+
+
+
+
+
+
+`dotgen genom version`::
+Returns the full version string of the `genom3` program.
+
+
+
+
+
+
+
+
+
+`dotgen genom templates`::
+Return the list of all currently available templates name.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`dotgen genom debug`::
+Returns a boolean indicating whether genom was invoked in debugging mode or
+not.
+
+
+
+
+
+
+
+
+
+`dotgen genom verbose`::
+Returns a boolean indicating whether genom was invoked in verbose mode or
+not.
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[dotgen_template]]
+=== `dotgen template`: Template path and directories
+
+Those commands return information about the template currently being parsed.
+
+
+`dotgen template name`::
+Return the current template name.
+
+
+
+
+
+
+
+
+
+
+
+
+`dotgen template dir`::
+Return a path to the template source directory (the directory holding the
+template.tcl file).
+
+
+
+
+
+
+
+
+
+`dotgen template builtindir`::
+Return a path to the genom builtin templates source directory.
+
+
+
+
+
+
+
+
+
+`dotgen template tmpdir`::
+Return a path to the temporary directory where the template engine writes
+its temporary files.
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[dotgen_input]]
+=== `dotgen input`: Input file name and path
+
+Those commands return information about the current genom input file (.gen
+file).
+
+
+`dotgen input notice`::
+Return the copyright notice (as text) found in the .gen file. This notice
+can actually be any text and is the content of the special comment starting
+with the three caracters `/` `*` `/, near the beginning of
+the .gen file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`dotgen input deps`::
+Return the comprehensive list of input files processed so far. This includes
+the input `.gen` file itself, plus any other file required, directly or
+indirectly, via a @code{#include} directive. This list is typically used to
+generate dependency information in a Makefile.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[dotgen_parse]]
+=== `dotgen parse`: Process additional input
+____
+`dotgen parse {file|string}` 'data'
+____
+
+Parse additional `.gen` data either from a file or from a string. When
+parsing is successful, the corresponding objects are exported to the
+backend.
+
+==== Arguments
+'file|string':: Specify if parsing from a file or from a string.
+
+'data':: When parsing from a file, data is the file name. When parsing from
+a string, data is the string to be parsed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[dotgen_types]]
+=== `dotgen types`: Data type definitions from the specification
+____
+`dotgen types` ['pattern']
+____
+
+This command returns the list of type objects that are defined in the
+current `.gen` file. This list may be filtered with the optional 'pattern'
+argument. Each element of the returned list is a type command that can be
+used to access detailed information about that particular type object.
+
+==== Arguments
+'pattern'::
+Filter the type names with 'pattern'. The filter may contain a glob-like
+pattern (with `*` or `?` wildcards). Only the types whose name
+match the pattern will be returned.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[dotgen_components]]
+=== `dotgen components`: Components definitions from the specification
+____
+`dotgen components` ['pattern']
+____
+
+This command returns the list of components that are defined in the current
+`.gen` file. This list may be filtered with the optional 'pattern'
+argument. Each element of the returned list is a component command that can
+be used to access detailed information about each particular component
+object.
+
+==== Arguments
+'pattern'::
+Filter the component name. The filter may contain a glob-like pattern (with
+`*` or `?` wildcards). Only the components whose name match the
+pattern will be returned.
+
+==== Return value
+A list of component objects of class `component`.
+
+
+
+
+
+
+
+
+
+[[dotgen_components]]
+=== `dotgen interfaces`: Interfaces definitions from the specification
+____
+`dotgen interfaces` ['pattern']
+____
+
+This command returns the list of interfaces that are defined in the current
+`.gen` file. This list may be filtered with the optional 'pattern'
+argument. Each element of the returned list is an interface command that can
+be used to access detailed information about each particular interface
+object.
+
+==== Arguments
+'pattern'::
+Filter the interface name. The filter may contain a glob-like pattern (with
+`*` or `?` wildcards). Only the components whose name match the
+pattern will be returned.
+
+==== Return value
+A list of interface objects of class `interface`.
+
+
+
+
+
+
+// eof

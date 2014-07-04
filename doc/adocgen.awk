@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2012 LAAS/CNRS
+# Copyright (c) 2012,2014 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -41,6 +41,10 @@
     print ""; grabbing = 0
 }
 
+END {
+    print "// eof";
+}
+
 function divert() {
     if (match($0, /^>-$/)) {
         if (diversion) close(diversion)
@@ -51,6 +55,13 @@ function divert() {
         sub(/^>/, ""); diversion = $0
         if (match(diversion, ".*/"))
             system("mkdir -p " substr(diversion, 1, RLENGTH))
+        return 1
+    }
+    if (match($0, /^<./)) {
+        sub(/^</, ""); input = $0
+        while ((getline < input) > 0)
+            substs()
+        close(input)
         return 1
     }
     return 0

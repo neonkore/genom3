@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2014 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -22,12 +22,16 @@
  *                                           Anthony Mallet on Mon Apr 20 2009
  */
 
-/*/ @node Constant declaration
- * @section Constant declaration
- * @cindex Constant, declaration
+/*/
+ * Constant and type declaration
+ * -----------------------------
+ */
+
+/*/
+ * === Constant declaration
  *
- * @ruleinclude const_dcl
- * @ruleinclude const_type
+ * <dotgen-rule-const-dcl.adoc
+ * <dotgen-rule-const-type.adoc
  */
 
 const_dcl:
@@ -50,18 +54,17 @@ const_type:
 
 /* --- IDL type definitions ------------------------------------------------ */
 
-/*/ @node Type declaration
- * @section Type declaration
- * @cindex Type, declaration
+/*/
+ * === Type declaration
  *
  * Type declarations define new data types and associate a name (an identifier)
- * with it. The @code{typedef} keyword can be used to name an existing
- * type. The constructed types @code{struct}, @code{union} and @code{enum} also
- * name the type they define. The syntax is the following:
+ * with it. The `typedef` keyword can be used to name an existing type. The
+ * constructed types `struct`, `union` and `enum` also name the type they
+ * define. The syntax is the following:
  *
- * @ruleinclude type_dcl
- * @ruleinclude constructed_type
- * @ruleinclude alias_list
+ * <dotgen-rule-type-dcl.adoc
+ * <dotgen-rule-constructed-type.adoc
+ * <dotgen-rule-alias-list.adoc
  */
 
 type_dcl:

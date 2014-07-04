@@ -24,6 +24,9 @@
 package require Tcl 8.5
 
 namespace eval engine {
+    #/
+    # `engine` TCL engine command
+    # -----------------------------
 
     # debug mode
     variable debug		[dotgen genom debug]
@@ -71,59 +74,55 @@ namespace eval engine {
 
     # --- mode -------------------------------------------------------------
 
-    #/ @nodebeproc{engine mode, Engine output configuration}
-    # @deffn {TCL Backend} {engine mode} [[+-]@var{modespec}]@dots{}
+    #/
+    # [[engine_mode]]
+    # === `engine mode`: Engine output configuration
+    # ____
+    # `engine mode` ['[`+-`]modespec'] ...
+    # ____
     #
-    # Configures various engine operating modes. @code{engine mode} can be
-    # invoked without argument to retrieve the current settings for all
-    # supported modes. The command can also be invoked with one or more mode
-    # specification to set these modes (see @var{modespec} argument below).
+    # Configures various engine operating modes. `engine mode` can be invoked
+    # without argument to retrieve the current settings for all supported
+    # modes. The command can also be invoked with one or more mode
+    # specification to set these modes (see 'modespec' argument below).
     #
-    # @@args
-    # @item modespec
-    # A mode specification string. If @code{mode} string is prefixed with a
-    # dash (@code{-}), it is turned off. If mode is prefixed with a plus
-    # (@code{+}) or not prefixed, it is turned on. Supported @var{modespec}
+    # ==== Arguments
+    # 'modespec'::
+    # A mode specification string. If `mode` string is prefixed with a
+    # dash (`-`), it is turned off. If mode is prefixed with a plus
+    # (`+`) or not prefixed, it is turned on. Supported 'modespec'
     # are:
-    #   @table @code
-    #   @item overwrite
-    #   when turned on, newly generated files will overwrite existing files
-    #   without warning. When turned off, the engine will stop with an error
-    #   if a newly generated file would overwrite an existing
-    #   file. @code{overwrite} is by default off.
+    #   `overwrite`::: when turned on, newly generated files will overwrite
+    #   existing files without warning. When turned off, the engine will stop
+    #   with an error if a newly generated file would overwrite an existing
+    #   file. `overwrite` is by default off.
     #
-    #   @item move-if-change
-    #   when turned on, an existing file with the same content as a newly
-    #   generated file will not be modified (preserving the last modification
-    #   timestamp). When off, files are systematically
-    #   updated. @code{move-if-change} is on by default.
+    #   'move-if-change'::: when turned on, an existing file with the same
+    #   content as a newly generated file will not be modified (preserving the
+    #   last modification timestamp). When off, files are systematically
+    #   updated. `move-if-change` is on by default.
     #
-    #	@item merge-if-change
-    #   when turned on, existing destination files will be merged with new
-    #   content by the engine, instead of being overwritten (@pxref{engine
-    #   merge-tool}). @code{merge-if-change} is off by default.
+    #   'merge-if-change'::: when turned on, existing destination files will be
+    #   merged with new content by the engine, instead of being overwritten
+    #   (<<engine_merge_tool,`engine merge tool>>). `merge-if-change` is off by
+    #   default.
     #
-    #   @item silent
-    #   when on, this mode avoids scattering standard output with informative
-    #   messages from the code generator.
+    #   'silent'::: when on, this mode avoids scattering standard output with
+    #   informative messages from the code generator.
     #
-    #   @item debug
-    #   when on, this mode preserves temporary files and tcl programs
-    #   generated in the temporary directory. Useful only for debugging the
-    #   template.
-    #   @end table
-    # @@end args
+    #   'debug'::: when on, this mode preserves temporary files and tcl
+    #   programs generated in the temporary directory. Useful only for
+    #   debugging the template.
     #
-    # @@returns
+    # ==== Return value
+    #
     # When called without arguments, the command returs the current
     # configuration of all engine modes.
-    # @@end returns
     #
-    # @b{Example:}
-    # @example
+    # ==== Example
+    # ____
     # engine mode -overwrite +move-if-change
-    # @end example
-    # @end deffn
+    # ____
     #
     proc mode { args } {
 	variable modes
@@ -159,28 +158,29 @@ namespace eval engine {
 
     # --- merge-tool -------------------------------------------------------
 
-    #/ @nodebeproc{engine merge-tool, Automatic merge of generated content}
-    # @deffn {TCL Backend} {engine merge-tool} @var{tool}
+    #/
+    # [[engine_merge_tool]]
+    # === `engine merge-tool`: Automatic merge of generated content
+    # ____
+    # `engine merge-tool` 'tool'
+    # ____
     #
     # Changes the engine merge tool. When the engine is in 'merge-if-change'
-    # mode (see @pxref{engine mode}), a merge tool is inkoked with the two
-    # conflicting versions of the destination file. If the merge tools exits
-    # successfuly, the generated file is replaced by the merged version.
+    # mode (see <<engine_mode,`engine mode`>>), a merge tool is inkoked with
+    # the two conflicting versions of the destination file. If the merge tools
+    # exits successfuly, the generated file is replaced by the merged version.
     #
-    # There are two builtin tools: @code{interactive} and
-    # @code{auto}. @code{interactive} interactively prompts the user for each
-    # patch to be applied to merge the final destination. The user can accept
-    # or reject the patch, or leave the destination file unchanged. The
-    # @code{auto} builtin tool automatically merges the two files and places
-    # conflict markers (@code{<<<<<<<} and @code{>>>>>>>}) were appropriate in
-    # the destination file.
+    # There are two builtin tools: `interactive` and `auto`. `interactive`
+    # interactively prompts the user for each patch to be applied to merge the
+    # final destination. The user can accept or reject the patch, or leave the
+    # destination file unchanged. The `auto` builtin tool automatically merges
+    # the two files and places conflict markers (`<<<<<<<` and `>>>>>>>`) were
+    # appropriate in the destination file.
     #
-    # @@args
-    # @item tool
-    # The path to the merge tool executable (e.g. @command{meld}), or one of
-    # the builtin keywords @code{interactive} or @code{auto}.
-    # @@end args
-    # @end deffn
+    # ==== Arguments
+    # 'tool'::
+    # The path to the merge tool executable (e.g. `meld`), or one of
+    # the builtin keywords `interactive` or `auto`.
     #
     proc merge-tool { tool } {
       variable merge-tool
@@ -191,19 +191,21 @@ namespace eval engine {
 
     # --- chdir ------------------------------------------------------------
 
-    #/ @nodebeproc{engine chdir, Change output directory}
-    # @deffn {TCL Backend} {engine chdir} @var{dir}
+    #/
+    # [[engine_chdir]]
+    # === `engine chdir`: Change output directory
+    # ____
+    # `engine chdir` 'dir'
+    # ____
     #
     # Change the engine output directory. By default, files are generated in
     # the current directory. This command can be used to generate output in
     # any other directory.
     #
-    # @@args
-    # @item dir
+    # ==== Arguments
+    # 'dir'::
     # The new output directory, absolute or relative to the current working
     # directory.
-    # @@end args
-    # @end deffn
     #
     proc chdir { d } {
 	variable outdir
@@ -217,13 +219,14 @@ namespace eval engine {
 
     # --- pwd --------------------------------------------------------------
 
-    #/ @nodebeproc{engine pwd, Get current output directory}
-    # @deffn {TCL Backend} {engine pwd}
+    #/
+    # === `engine pwd`: Get current output directory
+    # ____
+    # `engine pwd`
+    # ____
     #
-    # @@returns
+    # ==== Return value
     # The current engine output directory.
-    # @@end returns
-    # @end deffn
     #
     proc pwd { } {
 	variable outdir

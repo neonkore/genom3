@@ -1,0 +1,186 @@
+// Generated from ../../src/dotgen/codel.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Codel declaration
+-----------------
+
+[[dotgen-rule-codel]]
+____
+(34) codel                 ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-codel-parameters[codel-parameters] ")"
+____
+[[dotgen-rule-fsm-codel]]
+____
+(35) fsm-codel             ::= ::
+   "<" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list] ">" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-codel-parameters[codel-parameters] ")" "yields" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list]
+____
+[[dotgen-rule-codel-parameters]]
+____
+(38) codel-parameters      ::= ::
+   [ { link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] "," } link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] ]
+____
+[[dotgen-rule-codel-parameter]]
+____
+(39) codel-parameter       ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-opt-parameter-src[opt-parameter-src] link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] ( link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] )
+____
+[[dotgen-rule-opt-async]]
+____
+(36) opt-async             ::= ::
+   [ "async" ]
+____
+[[dotgen-rule-opt-parameter-src]]
+____
+(41) opt-parameter-src     ::= ::
+   [ "ids" +
+                              | "local" +
+                              | "port" +
+                              | "remote" ]
+____
+[[dotgen-rule-parameter-dir]]
+____
+(42) parameter-dir         ::= ::
+   "in" +
+                              | "out" +
+                              | "inout"
+____
+[[dotgen-rule-parameter-variable]]
+____
+(43) parameter-variable    ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]"
+____
+[[dotgen-rule-event-list]]
+____
+(37) event-list            ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name] "," } link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name]
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

@@ -1,0 +1,271 @@
+// Generated from ../../src/dotgen/component.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Component declaration
+---------------------
+
+A component declaration describes a instance of the `genom` component
+model. It is defined by a unique name (an identifier) that also defines an
+IDL scope for any embedded types.
+
+Components export objects from the `genom` component model, namely:
+link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
+link:port{outfilesuffix}[ports], link:attribute{outfilesuffix}[attributes] or
+link:service[services].
+
+Components may also define new types via IDL statements. These types will
+be defined within the component scope.
+
+[[dotgen-rule-component]]
+____
+(5) component             ::= ::
+   "component" link:grammar{outfilesuffix}#dotgen-rule-component-name[component-name] link:grammar{outfilesuffix}#dotgen-rule-component-body[component-body] ";"
+____
+[[dotgen-rule-component-name]]
+____
+(6) component-name        ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+[[dotgen-rule-component-body]]
+____
+(7) component-body        ::= ::
+   [ "{" link:grammar{outfilesuffix}#dotgen-rule-exports[exports] "}" ]
+____
+
+[[dotgen-rule-exports]]
+____
+(8) exports               ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-export[export] }
+____
+[[dotgen-rule-export]]
+____
+(9) export                ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-property[property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-ids[ids] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-task[task] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-port[port] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-attribute[attribute] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-service[service]
+____
+
+[[dotgen-rule-component-property]]
+____
+(10) component-property    ::= ::
+   ( "doc" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "version" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "lang" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "email" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "requires" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
+                              | "codels-require" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
+                              | "clock-rate" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
+                              | "provides" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] +
+                              | "uses" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] ) ";"
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+A number of properties can be attached to a component:
+
++doc+::
+A string that describes the functionality of the component.
+
++version+::
+The component version number, as a string
+
++lang+::
+The programming language of the codels interface.
+
++email+::
+A string containing the e-mail address of the author of the component.
+
++requires+::
+A list of dependencies of the component (see
+link:pragma{outfilesuffix}#pragma_requires[#pragma requires]). Each
+string should contain a package name in `pkg-config` format.
+
++codels-requires+::
+A list of dependencies of the codels. Each string should contain a package
+name in `pkg-config` format.
+
++clock-rate+::
+The period of the internal component clock. It is usually not necessary to
+define it explicitly. If the component defines periodic task, the component
+clock period will be automatically computed as the greatest common divisor
+of the period of all periodic tasks.
+
++provides+::
+A list of interfaces (see link:interface{outfilesuffix}[Interface
+declaration]) that the component implements. All objects from the interface
+are imported as-is into the component description. Ports and services may be
+further refined once imported, typically by defining codels (see
+link:codel{outfilesuffix}[Codel declaration]) that implement the services.
+
++uses+::
+A list of interfaces (see link:interface{outfilesuffix}[Interface
+declaration]) that the component uses. Ports are imported in the opposite
+direction (e.g. a `port out` is imported as a `port in`). Services are
+imported as `remote` objects that can be accessed via codel parameters
+(see link:codel{outfilesuffix}[Codel declaration]). Other objects are
+imported as-is.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

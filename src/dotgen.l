@@ -22,6 +22,24 @@
  *                                           Cédric Pasteur on Mon Apr 20 2009
  */
 
+/*/
+ * Pragmas
+ * -------
+ *
+ * Pragmas are a method for providing additional information to `genom`,
+ * beyond what is conveyed in the language itself. They are introduced by
+ * the `#pragma` directive, followed by arguments. `genom` understands the
+ * following pragmas:
+ *
+ * * <<pragma_requires, #pragma requires>>: External dependencies
+ *
+ * * <<pragma_provides, #pragma provides>>:
+ * Provide interfaces for all components
+ *
+ * * <<pragma_masquerade, #pragma masquerade>>:
+ * Pretend that ports are something else
+ */
+
 %option prefix="dotgen"
 %option outfile="lex.yy.c"
 %option noyywrap nounput
@@ -77,94 +95,86 @@ chartext	([^\'])|(\\.)
   *yylloc_param = curloc;
 %}
 
- /*/ @node #pragma requires
-  * @section @code{#pragma requires} directives
-  * @cindex @code{#pragma}
-  * @cindex @code{#pragma requires}
-  * @cindex @code{pkg-config}
-  * @cindex @env{PKG_CONFIG}
-  * @cindex dependency
-  * @cindex require
-  * @cindex package, dependency
+ /*/
+  * [[pragma_requires]]
+  * === `#pragma requires`
   *
-  * @code{#pragma requires} is recognized by @emph{both} @command{genom-pcpp}
-  * preprocessor and @genom{}. It indicates an external dependency on a
-  * software package that is required to parse the current
-  * specification. @code{#pragma requires} assumes that the package is using
-  * the @code{pkg-config} utility (see
-  * @uref{http://www.freedesktop.org/wiki/Software/pkg-config}) and a
-  * @code{.pc} is available. This has the same effect as placing
-  * @code{requires} directives in all components (@pxref{Component
-  * declaration}) but saves the need pass @code{-I} and @code{-D} directives to
-  * @command{genom} (@pxref{General options}) as they are automatically
+  * `#pragma requires` is recognized by 'both' `genom-pcpp` preprocessor and
+  * 'genom3'. It indicates an external dependency on a software package that is
+  * required to parse the current specification. `#pragma requires` assumes
+  * that the package is using the `pkg-config` utility (see
+  * link:http://www.freedesktop.org/wiki/Software/pkg-config[]) and a `.pc`
+  * file is available. This has the same effect as placing `requires`
+  * directives in all components (link:component[Component declaration]) but
+  * saves the need to pass `-I` and `-D` directives to `genom3` (see
+  * link:../manual#_general_options[General options]) as they are automatically
   * computed.
   *
   * The pragma syntax is as follow:
-  * @example
-  * @      #pragma requires "@var{package} [ >= @var{version} ]"
-  * @end example
+  * ____
+  * `#pragma requires "` 'package' `[ >=` 'version' `]"`
+  * ____
   *
-  * @code{#pragma requires} accepts a string argument in the form @code{package
-  * [>= version]}. @code{genom-pcpp} interprets it by running @code{pkg-config
-  * --cflags} on the string argument. It then adds the resulting @code{-I} and
-  * @code{-D} flags as if they had been passed on the command line. Note that
-  * the flags are added @emph{at the current processing location}, so they do
-  * not influence already preprocessed input. The @code{pkg-config} utility is
-  * found in @env{PATH}, or via the @env{PKG_CONFIG} environment variable if
-  * defined (@pxref{Environment variables}).
+  * `#pragma requires` accepts a string argument in the form `package [>=
+  * version]`. `genom-pcpp` interprets it by running `pkg-config --cflags` on
+  * the string argument. It then adds the resulting `-I` and `-D` flags as if
+  * they had been passed on the command line. Note that the flags are added 'at
+  * the current processing location', so they do not influence already
+  * preprocessed input. The `pkg-config` utility is found in `PATH`, or via the
+  * `PKG_CONFIG` environment variable if defined (see
+  * link:../manual#environment[Environment variables]).
   *
-  * The pragma argument is also added to the @code{require} property of
-  * @emph{all} the components defined in a specification.
+  * The pragma argument is added to the `require` property of all components
+  * later defined in a specification.
   */
 ^[ \t]*#[ \t]*pragma[ \t]+requires?[ \t].*\n {
   dotgen_parsepragmarequire(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;
 }
 
- /*/ @node #pragma provides
-  * @section @code{#pragma provides} directives
-  * @cindex @code{#pragma}
-  * @cindex @code{#pragma provides}
+ /*/
+  * [[pragma_provides]]
+  * === `#pragma provides`
   *
-  * @code{#pragma provides} achieves the same effect as if @emph{all}
-  * components of a specification defined the same @code{provides} property
-  * (@pxref{Component declaration}).  This directive is mostly useful for
-  * templates implementation, so that they can provide a common interface to
-  * all user defined components.
+  * `#pragma provides` achieves the same effect as if 'all' components of a
+  * specification defined the same `provides` property (see
+  * link:component{outfilesuffix}[Component declaration]).  This directive is
+  * mostly useful for templates implementation, so that they can provide a
+  * common interface to all user defined components.
   *
   * The pragma syntax is as follow:
-  * @example
-  * @      #pragma provides @var{interface}
-  * @end example
+  * ____
+  * `#pragma provides` 'interface'
+  * ____
+  *
   */
 ^[ \t]*#[ \t]*pragma[ \t]+provides?[ \t].*\n {
   dotgen_parsepragmaprovide(yytext, yylloc);
   yylloc->line++; yylloc->col = 0;
 }
 
- /*/ @node #pragma masquerade
-  * @section @code{#pragma masquerade} directives
-  * @cindex @code{#pragma}
-  * @cindex @code{#pragma masquerade}
+ /*/
+  * [[pragma_masquerade]]
+  * === `#pragma masquerade`
   *
   * This directive applies to an IDL type definition in a component
   * interface. It is meant for aliasing the IDL type description to a native
   * object that cannot be described in IDL. The exact nature of the native
   * object depends on the template used for code generation, so it is only
-  * described as a raw string here and not interpreted by @genom{}.
+  * described as a raw string here and not interpreted by `genom`.
   *
   * The pragma syntax is as follow:
-  * @example
-  * @      #pragma masquerade @var{template} @var{type} @var{data}...
-  * @end example
+  * ____
+  * `#pragma masquerade` 'template' 'type' 'data...'
+  * ____
   *
-  * The @var{template} argument is a free form string that indicates to which
+  * The 'template' argument is a free form string that indicates to which
   * template the directives applies. Templates can lookup this name and take
-  * the appropriate actions based on this information. @var{type} is the name
-  * of the IDL type thas is to be masqueraded. @var{data} describes how the
+  * the appropriate actions based on this information. 'type' is the name
+  * of the IDL type thas is to be masqueraded. 'data' describes how the
   * masquerading will be done, and is template specific. Refer to the
   * documentation of the template you are using for a precise description of
-  * the syntax and semantics of @var{data}.
+  * the syntax and semantics of 'data'.
   */
 ^[ \t]*#[ \t]*pragma[ \t]+masquerade[ \t].*\n {
   dotgen_parsepragmamasquerade(yytext, yylloc);

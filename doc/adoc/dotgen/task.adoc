@@ -1,0 +1,146 @@
+// Generated from ../../src/dotgen/task.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task declaration
+----------------
+
+[[dotgen-rule-task]]
+____
+(20) task                  ::= ::
+   "task" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] link:grammar{outfilesuffix}#dotgen-rule-opt-properties[opt-properties] ";"
+____
+[[dotgen-rule-opt-properties]]
+____
+(123) opt-properties        ::= ::
+   [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
+____
+[[dotgen-rule-properties]]
+____
+(124) properties            ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
+____
+[[dotgen-rule-property]]
+____
+(125) property              ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-component-property[component-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-interface-property[interface-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-task-property[task-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-service-property[service-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-codel-property[codel-property] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-throw-property[throw-property]
+____
+
+[[dotgen-rule-task-property]]
+____
+(21) task-property         ::= ::
+   ( "period" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
+                              | "delay" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
+                              | "priority" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] +
+                              | "scheduling" "real-time" +
+                              | "stack" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] link:grammar{outfilesuffix}#dotgen-rule-size-unit[size-unit] ) ";"
+____
+[[dotgen-rule-codel-property]]
+____
+(40) codel-property        ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-opt-async[opt-async] "codel" ( link:grammar{outfilesuffix}#dotgen-rule-codel[codel] ";" +
+                              | link:grammar{outfilesuffix}#dotgen-rule-fsm-codel[fsm-codel] ";" )
+____
+
+Tasks define an execution context suitable for running _activities_ (see
+link:component[Component declaration]). A task may define a state machine
+and associated codels (see link:codels[Codel declaration]). The state
+machine starts in the `start` state when the task is created during
+component initialization.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Tasks are named and may define the following properties:
+
++period+::
+The granularity of the codel scheduler. Periodic task will sequence the
+codels they manage at that frequency.
+
++delay+::
+The delay from the beginning of each period after which codels are
+run. This can be used to delay two tasks running at the same period in the
+same component.
+
++priority+::
+Can be used to prioritize different tasks whithin the same component.
+
++scheduling real-time+::
+This indicates that the task requires real-time scheduling. This may not
+be supported by all templates.
+
++stack+::
+Defines the required stack size for this task. The stack size should be
+big enough to run all codels that the task manages.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

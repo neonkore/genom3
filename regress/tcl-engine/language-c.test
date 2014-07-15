@@ -479,12 +479,12 @@ foreach c [[[dotgen component] service] codels] {
 }
 EOF
 expect out '
-	/^genom_event-sep-c\(int32_t a, int32_t \*b\)$/ {next}
-	/^genom_event-sep-d\(int16_t a1, int16_t \*b1\)$/ {next}
-	/^genom_event-sep-e\(const comp_a \*a2, const comp_b \*b2\)$/ {next}
-	/^genom_event-sep-f\(const comp_am \*a3\)$/ {next}
-	/^genom_event-sep-g\(const comp_bm \*b3\)$/ {next}
-	{exit 2}
+  /^genom_event-sep-c\(int32_t a, int32_t \*b, genom_context self\)$/ {next}
+  /^genom_event-sep-d\(int16_t a1, int16_t \*b1, genom_context self\)$/ {next}
+  /^genom_event-sep-e\(const comp_a \*a2, const comp_b \*b2, genom_context self\)$/ {next}
+  /^genom_event-sep-f\(const comp_am \*a3, genom_context self\)$/ {next}
+  /^genom_event-sep-g\(const comp_bm \*b3, genom_context self\)$/ {next}
+  {exit 2}
 '
 
 
@@ -502,9 +502,9 @@ EOF
 run 0 ${GENOM_BIN} interactive -b run.gen <<'EOF'
 lang c
 set c [[[dotgen component] service] validate]
-puts [$c invoke {}]
+puts [$c invoke {self}]
 EOF
 expect out '
-	/^codel\(\)$/ {next}
+	/^codel\(self\)$/ {next}
 	{exit 2}
 '

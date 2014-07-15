@@ -475,12 +475,12 @@ foreach c [[[dotgen component] service] codels] {
 }
 EOF
 expect out '
-	/^genom::event-sep-c\(int32_t a, int32_t &b\)$/ {next}
-	/^genom::event-sep-d\(int16_t a1, int16_t &b1\)$/ {next}
-	/^genom::event-sep-e\(comp::a &a2, comp::b &b2\)$/ {next}
-	/^genom::event-sep-f\(comp::am &a3\)$/ {next}
-	/^genom::event-sep-g\(comp::bm &b3\)$/ {next}
-	{exit 2}
+  /^genom::event-sep-c\(int32_t a, int32_t &b\)$/ {next}
+  /^genom::event-sep-d\(int16_t a1, int16_t &b1\)$/ {next}
+  /^genom::event-sep-e\(comp::a &a2, comp::b &b2\)$/ {next}
+  /^genom::event-sep-f\(comp::am &a3\)$/ {next}
+  /^genom::event-sep-g\(comp::bm &b3\)$/ {next}
+  {exit 2}
 '
 
 

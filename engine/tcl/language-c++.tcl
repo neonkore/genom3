@@ -376,8 +376,17 @@ namespace eval language::c++ {
     # Return the C++ invocation of a codel
     #
     proc invoke { codel params } {
-	set sym [cname $codel]
-	return "${sym}([join $params {, }])"
+      if {[llength $params] != [llength [$codel parameters]]} {
+        template fatal [subst [join {
+          "wrong # arguments in \"[$codel name] invoke\":"
+          "[join $params {, }]"
+          "expecting:"
+          "[signature $codel]"
+        } "\n"]]
+      }
+
+      set sym [cname $codel]
+      return "${sym}([join $params {, }])"
     }
 
 

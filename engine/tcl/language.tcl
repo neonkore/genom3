@@ -533,15 +533,6 @@ namespace eval language {
   #
   proc invoke { codel params } {
     variable current
-
-    if {[llength $params] != 1 + [llength [$codel parameters]]} {
-      template fatal [subst [join {
-        "wrong # arguments in \"[$codel name] invoke\":"
-        "[join $params {, }]"
-        "expecting:"
-        "[signature $codel]"
-      } "\n"]]
-    }
     return [${current}::invoke $codel $params]
   }
   slave alias language::invoke language::invoke

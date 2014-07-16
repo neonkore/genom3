@@ -45,6 +45,8 @@ dist_man_MANS=\
 
 # static source files
 basesrcs=\
+	adoc/introduction.adoc		\
+					\
 	adoc/dotgen/index.adoc		\
 	adoc/dotgen/preprocessing.adoc	\
 					\

@@ -1,0 +1,60 @@
+//
+// Copyright (c) 2014 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Matthieu Herrb on Wed Jul 16 2014
+//
+
+Introduction
+------------
+
+Component based architectures, where components are independent units that can
+be reused across applications have become increasingly popular. This as lead to
+the development of a long list of middlewares and integration tools, often
+available as free and open-source software.
+
+Genom is a component generator developed by the robotics team of the LAAS
+laboratory for the LAAS Architecture for Autonomous Systems.  It was originally
+designed for autonomous and terrestrial mobile robots, however it can be used
+in a broader set of applications.
+
+`genom3` (the current version of Genom) provides middleware independence to the
+components, to completely separate the algorithmic concerns of the components
+from the integration framework.
+
+In Genom, each component is formally described using a language derived from
+OMG IDL (Interface Description Language).  This allows to generate all the
+communication parts of the components as well as the internal sequencing logic
+automatically. The programmer can concentrate his efforts on the functional
+parts of the components and all generated components are guaranteed to have a
+predictable, homogeneous behavior.
+
+`genom3` supports different middlewares through the notion of templates. A
+template is a program that describes how the formal description of the
+component is going to be translated into actual code.
+
+Templates also make it possible to support different programming languages.
+
+This manual describes the link:nonexistent{outfilesuffix}[Genom Component
+model] in details. It also proposes an link:nonexistent[overview of the
+development process] as well a practical tutorial using a
+link:nonexistent{outfilesuffix}[simple Genom component]. Other sections are
+reference material, presenting the link:dotgen/index{outfilesuffix}[detailed
+syntax of the Genom description language], the
+link:mappings/index{outfilesuffix}[mappings from Genom IDL types to the
+component actual programming languages] and
+link:templates/index{outfilesuffix}[a guide for code generation template
+writers].

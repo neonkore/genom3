@@ -35,7 +35,7 @@ Contents
 --------
 
 * link:copying{outfilesuffix}[Your rights]
-* Introduction
+* link:introduction{outfilesuffix}[Introduction]
 * GenoM overview
 * Component model
 * A minimal example

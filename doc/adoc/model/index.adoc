@@ -1,0 +1,136 @@
+//
+// Copyright (c) 2014 LAAS/CNRS
+// All rights reserved.
+//
+// Redistribution and use  in source  and binary  forms,  with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//   1. Redistributions of  source  code must retain the  above copyright
+//      notice and this list of conditions.
+//   2. Redistributions in binary form must reproduce the above copyright
+//      notice and  this list of  conditions in the  documentation and/or
+//      other materials provided with the distribution.
+//
+//                                      Anthony Mallet on Wed Jul 16 2014
+//
+
+Genom component model
+---------------------
+
+.Overview
+[graphviz]
+----
+digraph {
+rankdir = BT
+
+node [
+  fontname = "sans"
+  fontsize = 10
+  shape = "record"
+]
+
+component [
+  label="{Component|name\lprovides\luses\l|}"
+]
+
+ids [
+  label="{IDS|members\l|}"
+]
+
+exception [
+  label="{Exception|detail\l|}"
+]
+
+task [
+  label="{Task|name\lperiod\l|}"
+]
+
+service [
+  label="{Service|name\ltype\linputs\loutputs\llocal variables|}"
+]
+
+attribute [
+  label="{Attribute|name\l|}"
+]
+
+function [
+  label="{Function|name\l|}"
+]
+
+activity [
+  label="{Activity|name\l|}"
+]
+
+port [
+  label="{Port|name\ldirection\l|}"
+]
+
+fsm [
+  label="{State Machine||start()\lstop()\l}"
+]
+
+codel [
+  label="{Codel||run()\l}"
+]
+
+{
+  rank=same
+  attribute
+  function
+  activity
+}
+
+{
+  rank=same
+  port
+  service
+  task
+  ids
+  exception
+}
+
+{
+  rank=same
+  fsm
+  codel
+}
+
+edge [
+  fontname = "sans"
+  fontsize = 8
+  arrowhead = "diamond"
+  arrowtail = "none"
+  labeldistance=1.5
+  labelangle=-30
+]
+
+service -> component [taillabel="1", headlabel="0..*"]
+port -> component [taillabel="1", headlabel="0..*"]
+ids -> component [taillabel="1", headlabel="0..1"]
+task -> component [taillabel="1", headlabel="0..*"]
+
+fsm -> activity [taillabel="1", headlabel="1"]
+codel -> attribute [taillabel="1", headlabel="1"]
+codel -> function [taillabel="1", headlabel="1..*"]
+codel -> fsm [taillabel="1", headlabel="1..*"]
+
+edge [
+  arrowhead = "none"
+]
+
+activity -> task [taillabel="1", headlabel="0..*"]
+service -> exception [taillabel="0..*", headlabel="1..*"]
+
+codel -> port [label="updates"]
+codel -> ids [label="updates"]
+
+edge [
+  arrowhead = "empty"
+]
+
+attribute -> service
+function -> service
+activity -> service
+}
+----

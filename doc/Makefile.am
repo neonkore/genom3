@@ -47,6 +47,8 @@ dist_man_MANS=\
 basesrcs=\
 	adoc/introduction.adoc		\
 					\
+	adoc/model/index.adoc		\
+					\
 	adoc/dotgen/index.adoc		\
 	adoc/dotgen/preprocessing.adoc	\
 					\

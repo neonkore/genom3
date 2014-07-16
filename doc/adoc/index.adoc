@@ -37,7 +37,7 @@ Contents
 * link:copying{outfilesuffix}[Your rights]
 * link:introduction{outfilesuffix}[Introduction]
 * GenoM overview
-* Component model
+* link:model/index{outfilesuffix}[Component model]
 * A minimal example
 * link:manual{outfilesuffix}[genom3(1) manual]
 * link:dotgen/index{outfilesuffix}[Input file format]

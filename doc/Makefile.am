@@ -214,10 +214,14 @@ $(adoctgts):
 # Must work around an issue with leftofver generated images, so build in a
 # temporary directory so that it is easy to clean up after ourselves.
 #
-html/%.html: $(srcdir)/adoc/%.adoc
+ASCIIDOC_ARGS=	-b html5
+ASCIIDOC_ARGS+=	-a data-uri
+ASCIIDOC_ARGS+= -a stylesdir=$(abs_srcdir)
+
+html/%.html: $(srcdir)/adoc/%.adoc $(srcdir)/asciidoc.css
 	@test -d '$@.in' || mkdir -p '$@.in'
 	rm -rf '$@.in/input.adoc' && cp '$<' '$@.in/input.adoc'
-	$(ASCIIDOC) -a data-uri -b html5 -o - '$@.in/input.adoc' >$@
+	$(ASCIIDOC) $(ASCIIDOC_ARGS) -o - '$@.in/input.adoc' >$@
 	rm -rf '$@.in'
 endif
 

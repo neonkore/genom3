@@ -97,10 +97,10 @@ interface genom {
   };
 
   function
-  connect_remote(in string<128> local =	:"Local remote name",
-                 in string<128> remote =	:"Service to connect to")
+  connect_service(in string<128> local =	:"Local service name",
+                  in string<128> remote =	:"Remote service name")
   {
-    doc "Connect two remotes";
+    doc "Connect to a remote service";
     codel genom_connect_remote_codel(local in local, local in remote);
 
     throw no_such_remote, no_such_service, remote_io;

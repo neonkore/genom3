@@ -90,24 +90,24 @@ component initialization.
 Tasks are named and may define the following properties:
 
 +period+::
-The granularity of the codel scheduler. Periodic task will sequence the
-codels they manage at that frequency.
+  The granularity of the codel scheduler. Periodic task will sequence the
+  codels they manage at that frequency.
 
 +delay+::
-The delay from the beginning of each period after which codels are
-run. This can be used to delay two tasks running at the same period in the
-same component.
+  The delay from the beginning of each period after which codels are
+  run. This can be used to delay two tasks running at the same period in the
+  same component.
 
 +priority+::
-Can be used to prioritize different tasks whithin the same component.
+  Can be used to prioritize different tasks whithin the same component.
 
 +scheduling real-time+::
-This indicates that the task requires real-time scheduling. This may not
-be supported by all templates.
+  This indicates that the task requires real-time scheduling. This may not
+  be supported by all templates.
 
 +stack+::
-Defines the required stack size for this task. The stack size should be
-big enough to run all codels that the task manages.
+  Defines the required stack size for this task. The stack size should be
+  big enough to run all codels that the task manages.
 
 
 

@@ -1,0 +1,412 @@
+// Generated from ../../src/dotgen/idltype-constr.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+IDL Constructed types
+---------------------
+
+`structs`, `unions` and `enums` are the constructed types. Their syntax is
+presented in this section:
+
+[[dotgen-rule-constructed-type]]
+____
+(92) constructed-type      ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-struct-type[struct-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-union-type[union-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-enum-type[enum-type]
+____
+
+
+
+
+
+
+=== Structures
+
+[[dotgen-rule-struct-type]]
+____
+(93) struct-type           ::= ::
+   "struct" link:grammar{outfilesuffix}#dotgen-rule-struct-name[struct-name] "{" link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}"
+____
+[[dotgen-rule-struct-name]]
+____
+(51) struct-name           ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+[[dotgen-rule-member-list]]
+____
+(94) member-list           ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-member[member] ";" } link:grammar{outfilesuffix}#dotgen-rule-member[member] ";"
+____
+[[dotgen-rule-member]]
+____
+(95) member                ::= ::
+   ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-member[member] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
+____
+
+The `identiﬁer` in `struct-type` defines a new legal type. Structure types
+may also be named using a typedef declaration.
+
+Name scoping rules require that the member declarators in a particular
+structure be unique.
+
+==== Example
+
+Here is a small structure definition with one integer and one double
+precision value:
+
+[source,C]
+----
+struct foo {
+  long a;
+  double x;
+};
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Discriminated unions
+
+[[dotgen-rule-union-type]]
+____
+(96) union-type            ::= ::
+   "union" link:grammar{outfilesuffix}#dotgen-rule-union-name[union-name] "switch" "(" link:grammar{outfilesuffix}#dotgen-rule-switch-type-spec[switch-type-spec] ")" "{" link:grammar{outfilesuffix}#dotgen-rule-switch-body[switch-body] "}"
+____
+[[dotgen-rule-union-name]]
+____
+(52) union-name            ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+[[dotgen-rule-switch-type-spec]]
+____
+(97) switch-type-spec      ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-enum-type[enum-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-named-type[named-type]
+____
+[[dotgen-rule-switch-body]]
+____
+(98) switch-body           ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-case[case] } link:grammar{outfilesuffix}#dotgen-rule-case[case]
+____
+[[dotgen-rule-case]]
+____
+(99) case                  ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-case-label-list[case-label-list] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator] ";"
+____
+[[dotgen-rule-case-label-list]]
+____
+(100) case-label-list       ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label] } link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label]
+____
+[[dotgen-rule-case-label]]
+____
+(101) case-label            ::= ::
+   ( "case" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
+                              | "default" ) ":"
+____
+
+Unions are a cross between the C union and switch statements. Unions must be
+discriminated; that is, the union header must specify a typed tag field that
+determines which union member to use for the current instance of a call. The
+`identiﬁer` following the union keyword defines a new legal type. Union
+types may also be named using a typedef declaration. The `const_exp` in a
+`case_label` must be consistent with the `switch_type_spec`. A default case
+can appear at most once. The `named-type` in the `switch-type-spec`
+production must be a previously defined integer, char, boolean or enum type.
+
+Case labels must match or be automatically castable to the defined type of
+the discriminator. Name scoping rules require that the element declarators
+in a particular union be unique. It is not required that all possible values
+of the union discriminator be listed in the `switch-body`.
+
+==== Example
+
+[source,C]
+----
+union foo switch(long) {
+  case 0: long a;
+  default: double x;
+};
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Enumerations
+
+Enumerated types consist of ordered lists of identifiers. The syntax is:
+
+[[dotgen-rule-enum-type]]
+____
+(102) enum-type             ::= ::
+   "enum" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "{" link:grammar{outfilesuffix}#dotgen-rule-enumerator-list[enumerator-list] "}"
+____
+[[dotgen-rule-enumerator-list]]
+____
+(103) enumerator-list       ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator] "," } link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator]
+____
+[[dotgen-rule-enumerator]]
+____
+(104) enumerator            ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+
+A maximum of 2^32^ identifiers may be specified in an enumeration. The order
+in which the identifiers are named in the specification of an enumeration
+defines the relative order of the identifiers. The
+`identiﬁer` following the enum keyword defines a new legal type. Enumerated
+types may also be named using a typedef declaration.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Forward declarations
+
+[[dotgen-rule-forward-dcl]]
+____
+(105) forward-dcl           ::= ::
+   ( "struct" +
+                              | "union" ) link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

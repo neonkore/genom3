@@ -155,13 +155,14 @@
 
 
 
-Specification
--------------
+Elements of a description file
+------------------------------
 
-A dotgen specification consists of one or more statements. Statements are
-either `genom` statements or IDL statements. `cpp` directives (see
+A `dot gen` specification consists of one or more statements. Statements are
+either _data types_ definitions, via IDL statements, or specific _genom_
+statements. `cpp` directives (see
 link:preprocessing{outfilesuffix}[Preprocessing]) are handled at the lexical
-level and do not interfere with the specification grammar.
+level and do not appear in the grammar.
 
 [[dotgen-rule-specification]]
 ____
@@ -171,9 +172,9 @@ ____
 [[dotgen-rule-statement]]
 ____
 (2) statement             ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-component[component] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-interface[interface] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement]
+   link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-component[component] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-interface[interface]
 ____
 
 [[dotgen-rule-idl-statement]]
@@ -184,20 +185,24 @@ ____
                               | link:grammar{outfilesuffix}#dotgen-rule-type-dcl[type-dcl]
 ____
 
-Definitions are named by the mean of
-link:indentifier{outfilesuffix}[identifiers].
-
-A `genom` statement defines link:component{outfilesuffix}[components] or
-link:interface{outfilesuffix}[interfaces].
-
-An IDL statement defines link:typedef{outfilesuffix}[types],
+IDL statements define link:typedef{outfilesuffix}[types],
 link:typedef{outfilesuffix}[constants] or link:module{outfilesuffix}[IDL
 modules] containing types and constants.  The syntax follows closely the
-subset the 'OMG' IDL specification corresponding to type and constants
+subset the 'OMG IDL' specification corresponding to type and constants
 definitions (see Chapter 7 of the CORBA specification, Object Management
 Group, version 3.1. Part I: CORBA interfaces).  Note that this subset of the
 dogten grammar is not in any manner tied to OMG IDL and may diverge from
 future OMG specifications.
+
+A `genom` statement defines link:component{outfilesuffix}[components] or
+link:interface{outfilesuffix}[interfaces].
+
+=== See also
+* link:typespec{outfilesuffix}[Data type description]
+* link:component{outfilesuffix}[Component declaration]
+* link:interface{outfilesuffix}[Interface declaration]
+
+
 
 
 

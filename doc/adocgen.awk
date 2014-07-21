@@ -19,7 +19,7 @@
 #
 
 /^[ \t]*\/[*]\// {
-    sub(/^[ \t]*\/[*]\/[ \t]*/, "");
+    sub(/^[ \t]*\/[*]\/[ \t]?/, "");
     if (!divert()) {
         if (match($0, /[*]\//)) { sub(/[*]\/.*$/, ""); substs(); next; }
         substs();
@@ -27,12 +27,12 @@
     grabbing = 1; next
 }
 /^[ \t]*[#]\// {
-    sub(/^[ \t]*[#]\/[ \t]*/, "");
+    sub(/^[ \t]*[#]\/[ \t]?/, "");
     if (!divert()) substs();
     grabbing = 1; next
 }
 /^[ \t]*[*#]\/?/ && grabbing {
-    sub(/^[ \t]*[*#]\/?[ \t]*/, "");
+    sub(/^[ \t]*[*#]\/?[ \t]?/, "");
     if (!divert()) substs();
     next
 }

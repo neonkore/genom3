@@ -23,53 +23,97 @@
  */
 
 /*/
- * Constant and type declaration
- * -----------------------------
+ * Data type and constant definitions
+ * ----------------------------------
+ *
+ * All data types manipulated by Genom are described with a subset of the OMG
+ * IDL syntax. Those types map into traditional programming languages types
+ * using the specific mappings described in the
+ * link:../mappings/index{outfilesuffix}[GenoM IDL mappings] section.
  */
 
 /*/
- * === Constant declaration
+ * === Type specification
  *
- * <dotgen-rule-const-dcl.adoc
- * <dotgen-rule-const-type.adoc
+ * The following set of type specifiers to represent
+ * typed values is available:
+ *
+ * <dotgen-rule-type-spec.adoc
+ * <dotgen-rule-simple-type-spec.adoc
+ * <dotgen-rule-constructed-type-spec.adoc
+ *
+ * ==== Subtopics
+ *
+ * * link:idltype-base{outfilesuffix}[IDL base types]:
+ *   integers, floating point values ...
+ * * link:idltype-tmpl{outfilesuffix}[IDL template types]:
+ *   sequences, strings ...
+ * * link:idltype-constr{outfilesuffix}[IDL constructed types]:
+ *   structs, unions, enums, ...
  */
 
-const_dcl:
-  CONST const_type identifier '=' const_expr semicolon
+type_spec: simple_type_spec
   {
-    assert($3);
-    $$ = $2 ? type_newconst(@1, $3, $2, $5) : NULL;
-    if (!$$) {
-      if ($2 && !type_name($2)) type_destroy($2);
-      parserror(@1, "dropped declaration for '%s'", $3);
+    $$ = $1; if (!$1) break;
+
+    /* forward declarations are an invalid type specification */
+    if (type_kind($1) == IDL_FORWARD_STRUCT ||
+        type_kind($1) == IDL_FORWARD_UNION) {
+      parserror(@1, "cannot use %s %s before it is fully defined",
+                type_strkind(type_kind($1)), type_name($1));
+      $$ = NULL;
+      break;
+    }
+
+    /* void exceptions are an invalid type specification */
+    if (type_kind($1) == IDL_EXCEPTION) {
+      hiter i;
+      int empty = 1;
+      for(hash_first(type_members($1), &i); i.current; hash_next(&i))
+        if (type_kind(i.value) == IDL_MEMBER) {
+          empty = 0;
+          break;
+        }
+      if (empty) {
+        parserror(@1, "cannot use void %s %s as a regular type",
+                  type_strkind(type_kind($1)), type_name($1));
+        $$ = NULL;
+        break;
+      }
     }
   }
-;
+  | constructed_type_spec;
 
-const_type:
-  integer_type | char_type | boolean_type | floating_pt_type | octet_type
-  | string_type | named_type
-;
-
-
-/* --- IDL type definitions ------------------------------------------------ */
+simple_type_spec: base_type_spec | template_type_spec | named_type;
 
 /*/
  * === Type declaration
  *
- * Type declarations define new data types and associate a name (an identifier)
- * with it. The `typedef` keyword can be used to name an existing type. The
- * constructed types `struct`, `union` and `enum` also name the type they
- * define. The syntax is the following:
+ * Type defined with the following syntax can then be used in the component
+ * interface definition and anywhere a type value is expected.
  *
  * <dotgen-rule-type-dcl.adoc
  * <dotgen-rule-constructed-type.adoc
- * <dotgen-rule-alias-list.adoc
+ * <dotgen-rule-type-declarator.adoc
+ *
+ * ==== Typedef
+ *
+ * Types are most often given a unique name thanks to a `typedef` declaration;
+ * a name is also associated with a data type via the `struct`, `union`,
+ * `enum`, `native` and `exception` declarations.
+ *
+ * ==== Native types
+ *
+ * It is possible to hide the actual definition of a data type from Genom (and
+ * its IDL parser) when it will never be directly used in the interface of the
+ * component, but can nevertheless be needed by codels. These types can be
+ * declared using the `native` attribute.
+ *
+ * For example: `native foo;`
  */
 
 type_dcl:
-  constructed_type semicolon
-  | TYPEDEF alias_list semicolon
+  TYPEDEF type_declarator semicolon
   {
     $$ = $2;
   }
@@ -81,12 +125,11 @@ type_dcl:
   {
     $$ = $2;
   }
-  | forward_dcl
+  | constructed_type semicolon
+  | forward_dcl ';'
 ;
 
-constructed_type: struct_type | union_type | enum_type;
-
-alias_list:
+type_declarator:
   type_spec declarator
   {
     $$ = $1; if (!$2) break;
@@ -97,7 +140,7 @@ alias_list:
 
     dcl_destroy($2);
   }
-  | alias_list ',' declarator
+  | type_declarator ',' declarator
   {
     $$ = $1; if (!$3) break;
 
@@ -109,84 +152,33 @@ alias_list:
   }
 ;
 
-struct_type: STRUCT scope_push_struct '{' member_list '}'
-  {
-    scope_s s = scope_detach(scope_pop());
-    assert(s == $2);
-    $$ = NULL;
 
-    if (scope_name(s)[0] == '&') {
-      /* there was an error during the creation of the scope. */
-      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
-      scope_destroy(s);
-      break;
-    }
-
-    $$ = type_newstruct(@1, scope_name(s), s);
-    if (!$$) {
-      parserror(@1, "dropped declaration for '%s'", scope_name(s));
-      scope_destroy(s);
-    }
-  }
-  | STRUCT scope_push_struct error '}'
-  {
-    scope_s s = scope_detach(scope_pop());
-    assert(s == $2);
-    $$ = NULL;
-
-    if (scope_name(s)[0] == '&') {
-      /* there was an error during the creation of the scope. */
-      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
-    } else
-      parserror(@1, "dropped declaration for '%s'", scope_name(s));
-
-    scope_destroy(s);
-  }
-;
-
-union_type:
-  UNION scope_push_union SWITCH '(' switch_type_spec ')' '{' switch_body '}'
-  {
-    scope_s s = scope_detach(scope_pop());
-    assert(s == $2);
-    $$ = NULL;
-
-    if (scope_name(s)[0] == '&') {
-      /* there was an error during the creation of the scope. */
-      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
-      if ($5 && !type_name($5)) type_destroy($5);
-      scope_destroy(s);
-      break;
-    }
-    if (!$8 || !$5) {
-      parserror(@1, "dropped declaration for '%s'", scope_name(s));
-      if ($5 && !type_name($5)) type_destroy($5);
-      scope_destroy(s);
-      break;
-    }
-
-    $$ = type_newunion(@1, scope_name(s), $5, s);
-    if (!$$) {
-      parserror(@1, "dropped declaration for '%s'", scope_name(s));
-      if ($5 && !type_name($5)) type_destroy($5);
-      scope_destroy(s);
-    }
-  }
-  | UNION scope_push_union error '}'
-  {
-    scope_s s = scope_detach(scope_pop());
-    assert(s == $2);
-    $$ = NULL;
-
-    if (scope_name(s)[0] == '&') {
-      /* there was an error during the creation of the scope. */
-      parserror(@1, "dropped declaration for '%s'", &scope_name(s)[1]);
-    } else
-      parserror(@1, "dropped declaration for '%s'", scope_name(s));
-
-    scope_destroy(s);
-  }
-;
+/*/
+ *
+ * ==== Exceptions
+ *
+ * Exceptions are thrown by services in case of error. The `exception` keyword
+ * declares an exception, which is an identifier with an optional associated
+ * data type.
+ *
+ * <dotgen-rule-exception-list.adoc
+ * <dotgen-rule-exception-dcl.adoc
+ * <dotgen-rule-opt-member-list.adoc
+ *
+ * A simple exception declaration would be :
+ *
+ * ----
+ * exception INVALID_SPEED;
+ * ----
+ *
+ * or with an associated type (to store the actual value for instance):
+ *
+ * ----
+ * exception INVALID_SPEED {
+ *   double speed;
+ * };
+ * ----
+ */
 
 exception_list: exception_dcl | exception_list ',' exception_dcl;
 
@@ -211,28 +203,79 @@ exception_dcl: exception_name opt_member_list
   }
 ;
 
-enum_type: ENUM identifier '{' enumerator_list '}'
+opt_member_list:
+  /* empty */ { $$ = NULL; }
+  | '{' '}' { $$ = NULL; }
+  | '{' member_list '}' { $$ = $2; }
+  | '{' error '}' { $$ = NULL; }
+;
+
+
+
+named_type: scoped_name
   {
-    $$ = $4 ? type_newenum(@2, $2, $4) : NULL;
+    $$ = type_find($1);
+    if (!$$) parserror(@1, "unknown type %s", $1);
+  }
+;
+
+
+/* --- type declarators ---------------------------------------------------- */
+
+declarator: simple_declarator | array_declarator;
+
+simple_declarator: identifier
+  {
+    $$ = dcl_create(@1, $1);
+  }
+;
+
+array_declarator:
+  simple_declarator fixed_array_size
+  {
+    assert($2.k == CST_UINT);
+    $$ = $1 ? dcl_adddim($1, $2.u) : NULL;
+  }
+  | array_declarator fixed_array_size
+  {
+    assert($2.k == CST_UINT);
+    $$ = $1 ? dcl_adddim($1, $2.u) : NULL;
+  }
+;
+
+fixed_array_size: '[' positive_int_const ']'
+  {
+    $$ = $2;
+  }
+;
+
+
+/*/
+ * === Constant declaration
+ *
+ * Constants define read-only values that are used by the component, like the
+ * maximal speed allowed for a motor or the physical bounds of a process that
+ * will be controlled. The syntax is again very similar to `C` or `C++`:
+ *
+ * <dotgen-rule-const-dcl.adoc
+ * <dotgen-rule-const-type.adoc
+ *
+ * For example: `const double max_speed = 72.0;`
+ */
+
+const_dcl:
+  CONST const_type identifier '=' const_expr semicolon
+  {
+    assert($3);
+    $$ = $2 ? type_newconst(@1, $3, $2, $5) : NULL;
     if (!$$) {
-      if ($4) {
-	hiter i;
-	for(hash_first($4, &i); i.current; hash_next(&i))
-	  type_destroy(i.value);
-	hash_destroy($4, 1);
-      }
-      parserror(@1, "dropped declaration for '%s'", $2);
+      if ($2 && !type_name($2)) type_destroy($2);
+      parserror(@1, "dropped declaration for '%s'", $3);
     }
   }
 ;
 
-forward_dcl:
-  STRUCT identifier ';'
-  {
-    $$ = type_newforward(@1, $2, IDL_FORWARD_STRUCT);
-  }
-  | UNION identifier ';'
-  {
-    $$ = type_newforward(@1, $2, IDL_FORWARD_UNION);
-  }
+const_type:
+  integer_type | char_type | boolean_type | floating_pt_type | octet_type
+  | string_type | named_type
 ;

@@ -46,6 +46,7 @@ dist_man_MANS=\
 # static source files
 basesrcs=\
 	adoc/introduction.adoc		\
+	adoc/overview.adoc		\
 					\
 	adoc/model/index.adoc		\
 					\
@@ -80,8 +81,10 @@ adocsrcs=\
 	adoc/dotgen/service.adoc		\
 	adoc/dotgen/codel.adoc			\
 	adoc/dotgen/module.adoc			\
-	adoc/dotgen/typespec.adoc		\
-	adoc/dotgen/typedef.adoc		\
+	adoc/dotgen/idltype.adoc		\
+	adoc/dotgen/idltype-base.adoc		\
+	adoc/dotgen/idltype-tmpl.adoc		\
+	adoc/dotgen/idltype-constr.adoc		\
 	adoc/dotgen/keywords.adoc		\
 						\
 	adoc/templates/skeleton.adoc		\
@@ -189,8 +192,10 @@ adoc/dotgen/port.adoc~: $(top_srcdir)/src/dotgen/port.y
 adoc/dotgen/service.adoc~: $(top_srcdir)/src/dotgen/service.y
 adoc/dotgen/codel.adoc~: $(top_srcdir)/src/dotgen/codel.y
 adoc/dotgen/module.adoc~: $(top_srcdir)/src/dotgen/idlscope.y
-adoc/dotgen/typespec.adoc~: $(top_srcdir)/src/dotgen/idldecl.y
-adoc/dotgen/typedef.adoc~: $(top_srcdir)/src/dotgen/idltype.y
+adoc/dotgen/idltype.adoc~: $(top_srcdir)/src/dotgen/idltype.y
+adoc/dotgen/idltype-base.adoc~: $(top_srcdir)/src/dotgen/idltype-base.y
+adoc/dotgen/idltype-tmpl.adoc~: $(top_srcdir)/src/dotgen/idltype-tmpl.y
+adoc/dotgen/idltype-constr.adoc~: $(top_srcdir)/src/dotgen/idltype-constr.y
 adoc/dotgen/keywords.adoc~: $(top_srcdir)/src/dotgen/expr.y
 
 adoc/templates/skeleton.adoc~: $(top_srcdir)/templates/skeleton/template.tcl

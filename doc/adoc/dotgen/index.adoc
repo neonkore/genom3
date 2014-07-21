@@ -19,25 +19,29 @@
 //
 //
 
-Input File Format
------------------
+Component description file
+--------------------------
 
-This chapter describes the `genom3` Input File Format (also known as `dotgen`)
-and gives the syntax for `dotgen` grammatical constructs. `dotgen` is the
-language used to formally describe a `genom3` component in terms of services
-and data types it provides.  A description written in `dotgen` completely
-defines the interface and the internals of a component.
+This chapter describes the syntax of the `genom` component description
+file. This file has by convention a name ending with the `.gen` suffix. It is
+thus often called the `.gen` file (or `dot gen`).
 
-A description of the `dotgen` preprocessing is presented in
-link:preprocessing{outfilesuffix}[Preprocessing].  The complete grammar is
-presented in link:grammar{outfilesuffix}[Grammar reference]. Associated
-semantics is described in the rest of this chapter either in place or through
-references to other sub sections of this chapter.
+The `dot gen` file contains the complete formal description of a component in
+terms of services and data types it provides. Such a description completely
+defines the interface and the internals of a component. The syntax of this
+files is a mix between a subset of the OMG IDL for data types definitions and
+genom specific constructs.
 
-A source file containing a dotgen component specification must have a `.gen`
-extension. The description of the dotgen grammar uses a syntax notation that is
-similar to `EBNF` (Extended Backus-Naur Format).  The following table lists the
-symbols used in this format and their meaning.
+The `dot gen` file is pre-processed by a pre-processor that follows the
+standard of the `C` preprocessor. See the
+link:preprocessing{outfilesuffix}[Preprocessing] section for details.  The
+complete link:grammar{outfilesuffix}[grammar definition] is available for
+reference, but the most important constructs are detailed in the following
+sections.
+
+The description of the `dot gen` grammar uses a syntax notation that is similar
+to `EBNF` (Extended Backus-Naur Format).  The following table lists the symbols
+used in this format and their meaning.
 
 .`dotgen` 'EBNF' symbols
 [width="60%",cols="^,3",frame="topbot",options="header"]
@@ -59,8 +63,11 @@ symbols used in this format and their meaning.
 * link:preprocessing{outfilesuffix}[Preprocessing]:
 Inclusion of definitions from other specifications
 
-* link:specification{outfilesuffix}[Specification]:
+* link:specification{outfilesuffix}[Elements of a description file]:
 Basic elements of a `genom3` specification
+
+* link:idltype{outfilesuffix}[Data type and constant definitions]:
+Definition of new types and constant values
 
 * link:component{outfilesuffix}[Component declaration]
 
@@ -79,10 +86,6 @@ Attributes, functions, activities and their parameters
 
 * link:module{outfilesuffix}[Module declaration]:
 Scope type definitions
-
-* link:typespec{outfilesuffix}[Type definition]
-
-* link:typedef{outfilesuffix}[Type and constant declaration]
 
 * link:keywords{outfilesuffix}[Identifiers and reserved keywords]:
 Words with a special meaning

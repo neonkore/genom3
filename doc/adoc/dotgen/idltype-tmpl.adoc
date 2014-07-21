@@ -1,0 +1,173 @@
+// Generated from ../../src/dotgen/idltype-tmpl.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+IDL Template types
+------------------
+
+The template types are:
+[[dotgen-rule-template-type-spec]]
+____
+(86) template-type-spec    ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-sequence-type[sequence-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-optional-type[optional-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-string-type[string-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-fixed-type[fixed-type]
+____
+
+
+
+
+=== Sequences
+
+A sequence is a one-dimensional array with two characteristics: a maximum
+size (which is fixed at compile time) and a length (which is determined at
+run time).
+
+[[dotgen-rule-sequence-type]]
+____
+(87) sequence-type         ::= ::
+   "sequence" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ( ">" +
+                              | "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" )
+____
+
+The second parameter in a sequence declaration indicates the maximum size of
+the sequence. If a positive integer constant is specified for the maximum
+size, the sequence is termed a bounded sequence. If no maximum size is
+specified, size of the sequence is unspecified (unbounded).
+
+Prior to passing a bounded or unbounded sequence as a function argument (or
+as a field in a structure or union), the length of the sequence must be set
+in a language- mapping dependent manner. After receiving a sequence as an
+input parameter, the length of the returned sequence will have been set;
+this value may be obtained in a language-mapping dependent manner.
+
+A sequence type may be used as the type parameter for another sequence
+type. For example, the following: declares an “unbounded sequence of
+unbounded sequence of long”.
+
+----
+sequence< sequence<long> >
+----
+
+Note that for nested sequence declarations, white space must be used to
+separate the two “>” tokens ending the declaration so they are not parsed as
+a single “>>”
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Optional
+
+Optional types represent a value that may or may not be present.
+
+[[dotgen-rule-optional-type]]
+____
+(88) optional-type         ::= ::
+   "optional" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ">"
+____
+
+The parameter of the 'optional' declaration describes the data type of the
+value.
+
+
+
+
+
+
+
+
+
+=== Strings
+
+A string is similar to a sequence of char.
+
+[[dotgen-rule-string-type]]
+____
+(89) string-type           ::= ::
+   "string" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
+____
+
+The argument to the string declaration is the maximum size of the string. If
+a positive integer maximum size is specified, the string is termed a bounded
+string; if no maximum size is specified, the string is termed an unbounded
+string.  Strings are singled out as a separate type because many languages
+have special built-in functions or standard library functions for string
+manipulation. A separate string type may permit substantial optimization in
+the handling of strings compared to what can be done with sequences of
+general types.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Fixed type
+
+The ﬁxed data type represents a fixed-point decimal number
+
+[[dotgen-rule-fixed-type]]
+____
+(90) fixed-type            ::= ::
+   "fixed" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
+____
+
+[CAUTION]
+Fixed types are not properly handled in existing genom
+templates. You must not use them at the moment.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

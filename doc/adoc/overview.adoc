@@ -1,0 +1,67 @@
+//
+// Copyright (c) 2014 LAAS/CNRS
+// All rights reserved.
+//
+// Redistribution and use  in source  and binary  forms,  with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//   1. Redistributions of  source  code must retain the  above copyright
+//      notice and this list of conditions.
+//   2. Redistributions in binary form must reproduce the above copyright
+//      notice and  this list of  conditions in the  documentation and/or
+//      other materials provided with the distribution.
+//
+//                                      Matthieu Herrb on Mon Jul 21 2014
+//
+
+Overview
+--------
+
+A Genom component is a server that provides a number of services and
+communicates through data ports with other components in the system.  Services
+are asynchronous (meaning that they can be started without waiting for
+termination).
+
+The execution of a service is controlled by a finite state automaton and an
+optional clock. Several services can be active in parallel in the same
+component, using distinct execution tasks or not.
+
+A running service can be observed and controlled from outside the component. In
+particular it can be interrupted if needed, and the programmer can provide code
+to handle the interruption in a clean and safe way (for example offering a
+clean stop of an ongoing motor motion).
+
+The algorithms executed by a service must be decomposed in chunks whose
+execution cannot be interrupted, and thus should not run for too long
+(otherwise compromising the ability to interrupt it). Those chunks form the
+basic code elements manipulated by Genom and are called "codels".
+
+Genom provides a powerful exception mechanism to handle errors that can be
+detected during codel execution. Genom exceptions can transmit any kind of data
+available to the codels to describe the error to the component that called the
+service, making it possible to perform a diagnostic of the error, and
+eventually to recover from it.
+
+So in order to build a Genom component, the programmer has to write two kind of
+inputs:
+
+ * the formal description of the component, describing the services,
+   input and output ports and other kind of information that is needed to
+   run the component.
+ * the codels themselves that implements the algorithms of the services.
+
+Genom processes those inputs with a middleware specific template to generate
+several outputs:
+
+ * the source code of the component itself, interfaced with the codels and the
+   communication layer for the selected middleware bound to all external
+   libraries that the component may depend upon.
+ * a set of client libraries that use the chosen middleware to interact with
+   the component. The API of those libraries are themselves middleware
+   independent, making it possible to control component with middleware
+   independent code.
+
+Note that Genom templates can potentially generate any kind of source code,
+such as a graphical test program or even documentation, so Genom itself is
+highly extensible.

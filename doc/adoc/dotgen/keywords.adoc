@@ -83,7 +83,7 @@ ____
                               | "uses" +
                               | "multiple" +
                               | "native" +
-                              | EXCEPTION
+                              | "exception"
 ____
 [[dotgen-rule-identifier-list]]
 ____

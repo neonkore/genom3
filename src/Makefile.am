@@ -58,7 +58,9 @@ genom3_GRAMMAR=\
 	dotgen/parameter.y	\
 	dotgen/idlscope.y	\
 	dotgen/idltype.y	\
-	dotgen/idldecl.y	\
+	dotgen/idltype-base.y	\
+	dotgen/idltype-tmpl.y	\
+	dotgen/idltype-constr.y	\
 	dotgen/expr.y
 
 genom3_YFLAGS= -v -d

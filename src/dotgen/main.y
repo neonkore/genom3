@@ -126,6 +126,7 @@
 %type <type>	const_dcl const_type
 %type <type>	type_dcl constructed_type exception_dcl forward_dcl
 %type <dcl>	declarator simple_declarator array_declarator
+%type <type>	type_declarator
 %type <type>	type_spec simple_type_spec base_type_spec template_type_spec
 %type <type>	constructed_type_spec switch_type_spec
 %type <type>	integer_type unsigned_int unsigned_short_int unsigned_long_int
@@ -135,12 +136,11 @@
 %type <type>	boolean_type char_type octet_type any_type
 %type <type>	sequence_type optional_type string_type fixed_type named_type
 %type <type>	struct_type union_type enum_type enumerator case switch_body
-%type <type>	exception_list alias_list member member_list opt_member_list
+%type <type>	exception_list member member_list opt_member_list
 %type <hash>	enumerator_list
 %type <v>	case_label
 %type <vlist>	case_label_list
-%type <scope>	module_name scope_push_struct scope_push_union
-%type <scope>	exception_name ids_name
+%type <scope>	module_name struct_name union_name exception_name ids_name
 
 %type <v>	fixed_array_size
 %type <v>	positive_int_const const_expr unary_expr primary_expr
@@ -154,41 +154,44 @@
 %expect 0
 %%
 /*/
- * Specification
- * -------------
+ * Elements of a description file
+ * ------------------------------
  *
- * A dotgen specification consists of one or more statements. Statements are
- * either `genom` statements or IDL statements. `cpp` directives (see
+ * A `dot gen` specification consists of one or more statements. Statements are
+ * either _data types_ definitions, via IDL statements, or specific _genom_
+ * statements. `cpp` directives (see
  * link:preprocessing{outfilesuffix}[Preprocessing]) are handled at the lexical
- * level and do not interfere with the specification grammar.
+ * level and do not appear in the grammar.
  *
  * <dotgen-rule-specification.adoc
  * <dotgen-rule-statement.adoc
  *
  * <dotgen-rule-idl-statement.adoc
  *
- * Definitions are named by the mean of
- * link:indentifier{outfilesuffix}[identifiers].
- *
- * A `genom` statement defines link:component{outfilesuffix}[components] or
- * link:interface{outfilesuffix}[interfaces].
- *
- * An IDL statement defines link:typedef{outfilesuffix}[types],
+ * IDL statements define link:typedef{outfilesuffix}[types],
  * link:typedef{outfilesuffix}[constants] or link:module{outfilesuffix}[IDL
  * modules] containing types and constants.  The syntax follows closely the
- * subset the 'OMG' IDL specification corresponding to type and constants
+ * subset the 'OMG IDL' specification corresponding to type and constants
  * definitions (see Chapter 7 of the CORBA specification, Object Management
  * Group, version 3.1. Part I: CORBA interfaces).  Note that this subset of the
  * dogten grammar is not in any manner tied to OMG IDL and may diverge from
  * future OMG specifications.
+ *
+ * A `genom` statement defines link:component{outfilesuffix}[components] or
+ * link:interface{outfilesuffix}[interfaces].
+ *
+ * === See also
+ * * link:typespec{outfilesuffix}[Data type description]
+ * * link:component{outfilesuffix}[Component declaration]
+ * * link:interface{outfilesuffix}[Interface declaration]
  */
 
 specification: /* empty */ { $$ = 0; } | specification statement;
 
 statement:
-    component
+  idl_statement
+  | component
   | interface
-  | idl_statement
   | error ';'
   {
     parserror(@1, "expected `component', `interface' or IDL definition");
@@ -230,7 +233,9 @@ idl_statement:
 
 %include dotgen/idlscope.y
 %include dotgen/idltype.y
-%include dotgen/idldecl.y
+%include dotgen/idltype-base.y
+%include dotgen/idltype-tmpl.y
+%include dotgen/idltype-constr.y
 %include dotgen/expr.y
 
 

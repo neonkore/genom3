@@ -72,25 +72,25 @@ creating ./codels/Makefile.am
 
 +-l c+++::
 +--language=c+++ ::
-Compile C codels with a C++ compiler
+	Compile C codels with a C++ compiler
 +-C+::
 +--directory='dir'+ ::
 Output files in dir instead of source directory
 +-m+::
 +--merge='tool'+ ::
-Merge conflicting files with tool
+	Merge conflicting files with tool
 +-i+ ::
-Interactively merge conflicting files, alias for
-`-m interactive`
+		Interactively merge conflicting files, alias for
+		`-m interactive`
 +-u+ ::
-Automatically merge conflicting files, alias for
-`-m auto`
+		Automatically merge conflicting files, alias for
+		`-m auto`
 +-f+::
 +--force+ ::
-Overwrite existing files (use with caution)
+		Overwrite existing files (use with caution)
 +-h+::
 +--help+ ::
-Print usage summary (this text)
+		Print usage summary (this text)
 
 
 

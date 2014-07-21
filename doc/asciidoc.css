@@ -20,11 +20,11 @@ body {
 }
 
 a {
-  color: blue;
+  color: #00294b;
   text-decoration: underline;
 }
 a:visited {
-  color: fuchsia;
+  color: #169;
 }
 
 em {

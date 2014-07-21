@@ -3,19 +3,22 @@ Preprocessing
 
 A `dotgen` specification consists of one or more files that are
 preprocessed. The preprocessing is controlled by directives introduced by lines
-having `#` as the first character other than white space.  Preprocessor
-directives have their own syntax (namely, the C preprocessor syntax),
-independent of the `dotgen` language and not entirely described in this
-document. See link:http://gcc.gnu.org/onlinedocs/cpp/[The C preprocessor] for a
-comprehensive documentation.
+having `#` as the first character other than white space. `C` comments are also
+recognized (both `/* ... */` and `//` styles), and their use strongly
+encouraged.  Preprocessor directives are independent of the `dotgen` language
+and not entirely described in this document. See
+link:http://gcc.gnu.org/onlinedocs/cpp/[The C preprocessor] for a comprehensive
+documentation.
 
 The primary use of the preprocessing facility is to include definitions
-(especially type definitions) from other `dotgen` specifications. Directives
-may appear anywhere in the source file but are not seen nor interpreted by
-`genom`. For instance, text in files included with a `#include` directive is
-treated as if it appeared in the including file. However, some
-preprocessor `#pragma` directives are available to `genom` (see
-link:pragma{outfilesuffix}[Pragmas]).
+(`#include`) from other `dotgen` specifications or enable conditional
+definitions (`#if` or `#ifdef`). Directives may appear anywhere in the source
+file but are not seen nor interpreted by `genom`. For instance, text in files
+included with a `#include` directive is treated as if it appeared in the
+including file. However, some preprocessor `#pragma` directives are interpreted
+by `genom` (see link:pragma{outfilesuffix}[Pragmas]). Abuse of advanced C
+preprocessor features (like complex macros or stringification) is strongly
+discouraged.
 
 The C preprocessor used by `genom` is `pcpp` from the `pcc` project
 (link:http://pcc.ludd.ltu.se/[]). It is invoked as a separate process from
@@ -25,3 +28,34 @@ link:../manual{outfilesuffix}#_environment_variables[Environment
 variables]. However, note that if you change the default, you will loose some
 of the functionalities provided by `genom-pcpp`, like the
 +link:pragma{outfilesuffix}#pragma_requires[#pragma requires]+ feature.
+
+=== Example
+
+This illustrates the use of the most common `#ifdef`, `#include` and `/* ... */`
+directives.
+
+[source,C]
+.typedefs.gen
+----
+#ifndef TYPEDEFS_GEN
+#define TYPEDEFS_GEN
+
+typedef long integer_value;
+
+#endif /* TYPEDEFS_GEN */
+----
+
+[source,C]
+.component.gen
+----
+#include "typedefs.gen"
+
+/* define a new type */
+struct record {
+  integer_value v;
+};
+----
+
+=== See also
+
+* link:pragma{outfilesuffix}[Pragmas]

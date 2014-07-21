@@ -21,6 +21,7 @@ DOUBLE		double
 EMAIL		email
 ENUM		enum
 EVENT		event
+EXCEPTION	exception
 EXTENDS		extends
 FALSE		FALSE
 FIXED		fixed
@@ -45,6 +46,7 @@ MS		ms
 MULTIPLE	multiple
 NATIVE		native
 OCTET		octet
+OPTIONAL	optional
 OUT		out
 PERIOD		period
 PORT		port

@@ -290,7 +290,7 @@ pattern.
 ==== Examples
 ----
 template options {
--h - --help	{ puts "help option" }
+    -h - --help	{ puts "help option" }
 }
 ----
 

@@ -28,7 +28,8 @@ For GenoM version 3 +
 Revision 2.99.24, {month} {year}
 
 Sara Fleury, Matthieu Herrb <matthieu.herrb@laas.fr>,
-Anthony Mallet <anthony.mallet@laas.fr>, C&eacute;dric Pasteur.
+Anthony Mallet <anthony.mallet@laas.fr>, C&eacute;dric Pasteur,
+Arnaud Degroote <arnaud.degroote@isae.fr>
 
 
 Contents
@@ -36,10 +37,10 @@ Contents
 
 * link:copying{outfilesuffix}[Your rights]
 * link:introduction{outfilesuffix}[Introduction]
-* GenoM overview
+* link:overview{outfilesuffix}[GenoM overview]
 * link:model/index{outfilesuffix}[Component model]
+* link:dotgen/index{outfilesuffix}[Component description file]
+* link:mappings/index{outfilesuffix}[GenoM IDL mappings]
 * A minimal example
 * link:manual{outfilesuffix}[genom3(1) manual]
-* link:dotgen/index{outfilesuffix}[Input file format]
-* link:mappings/index{outfilesuffix}[GenoM IDL mappings]
 * link:templates/index{outfilesuffix}[Templates]

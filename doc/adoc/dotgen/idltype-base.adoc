@@ -1,0 +1,235 @@
+// Generated from ../../src/dotgen/idltype-base.y - manual changes will be lost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+IDL Base types
+--------------
+
+The base types of IDL are boolean values, binary values, signed or unsigned
+integers, floating point and characters. The chapter on
+link:../mappings/index{outfilesuffix}[GenoM IDL mappings] explains how they
+map to the actual programming language.
+
+[[dotgen-rule-base-type-spec]]
+____
+(69) base-type-spec        ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-floating-pt-type[floating-pt-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-octet-type[octet-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-any-type[any-type]
+____
+
+
+
+
+
+
+
+=== Integer types
+
+They represent integer values in the range indicated below.
+
+[[dotgen-rule-integer-type]]
+____
+(70) integer-type          ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-signed-int[signed-int] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-unsigned-int[unsigned-int]
+____
+[[dotgen-rule-signed-int]]
+____
+(71) signed-int            ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-signed-longlong-int[signed-longlong-int] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-signed-long-int[signed-long-int] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-signed-short-int[signed-short-int]
+____
+[[dotgen-rule-unsigned-int]]
+____
+(72) unsigned-int          ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-unsigned-longlong-int[unsigned-longlong-int] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-unsigned-long-int[unsigned-long-int] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-unsigned-short-int[unsigned-short-int]
+____
+[[dotgen-rule-signed-longlong-int]]
+____
+(78) signed-longlong-int   ::= ::
+   "long" "long"
+____
+[[dotgen-rule-signed-long-int]]
+____
+(77) signed-long-int       ::= ::
+   "long"
+____
+[[dotgen-rule-signed-short-int]]
+____
+(76) signed-short-int      ::= ::
+   "short"
+____
+[[dotgen-rule-unsigned-longlong-int]]
+____
+(75) unsigned-longlong-int ::= ::
+   "unsigned" "long" "long"
+____
+[[dotgen-rule-unsigned-long-int]]
+____
+(74) unsigned-long-int     ::= ::
+   "unsigned" "long"
+____
+[[dotgen-rule-unsigned-short-int]]
+____
+(73) unsigned-short-int    ::= ::
+   "unsigned" "short"
+____
+
+.Range of integer types
+[width="60%",cols=",2",frame="topbot"]
+|========================================================================
+|short              | -2^15^ .. 2^15^-1
+|long               | -2^31^ .. 2^31^-1
+|long long          | -2^63^ .. 2^63^-1
+|unsigned short     | 0 .. 2^16^-1
+|unsigned long      | 0 .. 2^32^-1
+|unsigned long long | 0 .. 2^64^-1
+|========================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== Floating point types
+
+They represent floating point values. The `float` type represents IEEE
+single-precision floating point numbers; the `double` type represents
+IEEE double-precision floating point numbers.
+
+[[dotgen-rule-floating-pt-type]]
+____
+(79) floating-pt-type      ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-float-type[float-type] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-double-type[double-type]
+____
+[[dotgen-rule-float-type]]
+____
+(80) float-type            ::= ::
+   "float"
+____
+[[dotgen-rule-double-type]]
+____
+(81) double-type           ::= ::
+   "double"
+____
+
+
+
+
+
+
+
+
+
+
+=== Char types
+
+A char data type that is an 8-bit quantity that encodes a single-byte
+character.
+
+[[dotgen-rule-char-type]]
+____
+(82) char-type             ::= ::
+   "char"
+____
+
+
+
+
+
+
+
+=== Boolean Types
+
+The boolean data type is used to denote a data item that can only take one
+of the values TRUE and FALSE.
+
+[[dotgen-rule-boolean-type]]
+____
+(83) boolean-type          ::= ::
+   "boolean"
+____
+
+
+
+
+
+
+
+=== Octet Types
+
+The octet type represents an 8 bit quantity.
+
+[[dotgen-rule-octet-type]]
+____
+(84) octet-type            ::= ::
+   "octet"
+____
+
+
+
+
+
+
+
+=== Any Types
+
+[CAUTION]
+The `any` type is a generic type that can contain any other type. This is
+not yet implemented in genom, so you must not use it.
+
+[[dotgen-rule-any-type]]
+____
+(85) any-type              ::= ::
+   "any"
+____
+
+
+
+
+// eof

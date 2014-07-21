@@ -57,14 +57,14 @@ Generate mappings for language 'lang'
 +--signature+ ::
 Generate codel signatures in addition to types mappings
 +-MD+ ::
-Generate dependency information (in out.d)
+	Generate dependency information (in out.d)
 +-MF='file'+ ::
 Generate dependency in 'file' instead of out.d
 +-MT='target'+ ::
 Change the target of the dependency rules
 +-h+::
 +--help+ ::
-Print usage summary (this text)
+	Print usage summary (this text)
 
 
 

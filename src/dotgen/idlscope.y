@@ -74,7 +74,7 @@ module_body: /* empty */ { $$ = 0; } | idl_statements;
 /* scopes are created as a side effect of certain declarations (modules,
  * components, interfaces, ...) or types (structures, unions, ...) */
 
-scope_push_struct: identifier
+struct_name: identifier
   {
     $$ = scope_push(@1, $1, SCOPE_STRUCT);
     if (!$$) {
@@ -86,7 +86,7 @@ scope_push_struct: identifier
   }
 ;
 
-scope_push_union: identifier
+union_name: identifier
   {
     $$ = scope_push(@1, $1, SCOPE_UNION);
     if (!$$) {

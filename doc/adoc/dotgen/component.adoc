@@ -31,14 +31,6 @@ A component declaration describes a instance of the `genom` component
 model. It is defined by a unique name (an identifier) that also defines an
 IDL scope for any embedded types.
 
-Components export objects from the `genom` component model, namely:
-link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
-link:port{outfilesuffix}[ports], link:attribute{outfilesuffix}[attributes] or
-link:service[services].
-
-Components may also define new types via IDL statements. These types will
-be defined within the component scope.
-
 [[dotgen-rule-component]]
 ____
 (5) component             ::= ::
@@ -55,6 +47,14 @@ ____
    [ "{" link:grammar{outfilesuffix}#dotgen-rule-exports[exports] "}" ]
 ____
 
+Components export objects from the `genom` component model, namely:
+link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
+link:port{outfilesuffix}[ports], link:service{outfilesuffix}[attributes] or
+link:service{outfilesuffix}[services].
+
+Components may also define new types via IDL statements. Any such types are
+defined within the component scope.
+
 [[dotgen-rule-exports]]
 ____
 (8) exports               ::= ::
@@ -70,20 +70,6 @@ ____
                               | link:grammar{outfilesuffix}#dotgen-rule-port[port] +
                               | link:grammar{outfilesuffix}#dotgen-rule-attribute[attribute] +
                               | link:grammar{outfilesuffix}#dotgen-rule-service[service]
-____
-
-[[dotgen-rule-component-property]]
-____
-(10) component-property    ::= ::
-   ( "doc" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "version" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "lang" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "email" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "requires" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
-                              | "codels-require" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
-                              | "clock-rate" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
-                              | "provides" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] +
-                              | "uses" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] ) ";"
 ____
 
 
@@ -132,17 +118,33 @@ ____
 
 A number of properties can be attached to a component:
 
+[[dotgen-rule-component-property]]
+____
+(10) component-property    ::= ::
+   ( "doc" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "version" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "lang" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "email" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
+                              | "requires" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
+                              | "codels-require" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
+                              | "clock-rate" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
+                              | "provides" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] +
+                              | "uses" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] ) ";"
+____
+
 +doc+::
 A string that describes the functionality of the component.
 
 +version+::
-The component version number, as a string
+The component version number, as a string.
 
 +lang+::
-The programming language of the codels interface.
+The programming language of the codels interface. At the moment, only "c" is
+supported.
 
 +email+::
-A string containing the e-mail address of the author of the component.
+A string containing the contact e-mail address to reach support for the
+component.
 
 +requires+::
 A list of dependencies of the component (see
@@ -173,6 +175,20 @@ direction (e.g. a `port out` is imported as a `port in`). Services are
 imported as `remote` objects that can be accessed via codel parameters
 (see link:codel{outfilesuffix}[Codel declaration]). Other objects are
 imported as-is.
+
+=== Example
+
+This would define an empty component with no service and no functionality:
+
+[source,C]
+----
+component foo {
+  version     "1.0";
+  email       "me@example.com";
+  lang        "c";
+  require     "genom3 >= 2.99.20";
+};
+----
 
 
 

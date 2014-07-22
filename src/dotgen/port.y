@@ -27,16 +27,20 @@
  * ----------------
  *
  * Ports implement the data flow between components as a publish/subscribe
- * model. Ports have a name and a type and can be either `out` (for publishing
- * data) or `in` (for subscribing to a sibling `out` port).
- *
- * The optional `multiple` qualifier defines a dynamic list of ports of
- * the given type, indexed by strings. In this case, ports are created or
- * destroyed dynamically be the codels.
+ * model. Ports have a name and a type. They can be either `out` ports (for
+ * publishing data) or `in` ports (for subscribing to a sibling `out` port).
  *
  * <dotgen-rule-port.adoc
  * <dotgen-rule-opt-multiple.adoc
  * <dotgen-rule-port-dir.adoc
+ *
+ * Ports are by default `single` ports, i.e. they define one type of exported
+ * data. The optional `multiple` qualifier can be used to define a 'dynamic
+ * list' of ports of the given type, instead of a single slot. Suchs ports are
+ * accessed as an array indexed by strings. In this case, ports are created or
+ * destroyed dynamically be the codels. The
+ * link:../mappings/index{outfilesuffix}[IDL mappings] section for ports
+ * explains how this is done.
  */
 port:
   PORT opt_multiple port_dir type_spec identifier semicolon

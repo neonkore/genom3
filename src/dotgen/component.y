@@ -30,22 +30,20 @@
  * model. It is defined by a unique name (an identifier) that also defines an
  * IDL scope for any embedded types.
  *
- * Components export objects from the `genom` component model, namely:
- * link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
- * link:port{outfilesuffix}[ports], link:attribute{outfilesuffix}[attributes] or
- * link:service[services].
- *
- * Components may also define new types via IDL statements. These types will
- * be defined within the component scope.
- *
  * <dotgen-rule-component.adoc
  * <dotgen-rule-component-name.adoc
  * <dotgen-rule-component-body.adoc
  *
+ * Components export objects from the `genom` component model, namely:
+ * link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
+ * link:port{outfilesuffix}[ports], link:service{outfilesuffix}[attributes] or
+ * link:service{outfilesuffix}[services].
+ *
+ * Components may also define new types via IDL statements. Any such types are
+ * defined within the component scope.
+ *
  * <dotgen-rule-exports.adoc
  * <dotgen-rule-export.adoc
- *
- * <dotgen-rule-component-property.adoc
  */
 component: COMPONENT component_name component_body semicolon
   {
@@ -93,17 +91,21 @@ export:
 /*/
  * A number of properties can be attached to a component:
  *
+ * <dotgen-rule-component-property.adoc
+ *
  * +doc+::
  * A string that describes the functionality of the component.
  *
  * +version+::
- * The component version number, as a string
+ * The component version number, as a string.
  *
  * +lang+::
- * The programming language of the codels interface.
+ * The programming language of the codels interface. At the moment, only "c" is
+ * supported.
  *
  * +email+::
- * A string containing the e-mail address of the author of the component.
+ * A string containing the contact e-mail address to reach support for the
+ * component.
  *
  * +requires+::
  * A list of dependencies of the component (see
@@ -134,6 +136,20 @@ export:
  * imported as `remote` objects that can be accessed via codel parameters
  * (see link:codel{outfilesuffix}[Codel declaration]). Other objects are
  * imported as-is.
+ *
+ * === Example
+ *
+ * This would define an empty component with no service and no functionality:
+ *
+ * [source,C]
+ * ----
+ * component foo {
+ *   version     "1.0";
+ *   email       "me@example.com";
+ *   lang        "c";
+ *   require     "genom3 >= 2.99.20";
+ * };
+ * ----
  */
 component_property:
   DOC string_literals semicolon

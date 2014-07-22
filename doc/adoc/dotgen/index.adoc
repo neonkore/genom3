@@ -69,23 +69,26 @@ Basic elements of a `genom3` specification
 * link:idltype{outfilesuffix}[Data type and constant definitions]:
 Definition of new types and constant values
 
+* link:module{outfilesuffix}[Module declaration]:
+Namespace for type definitions
+
 * link:component{outfilesuffix}[Component declaration]
 
 * link:interface{outfilesuffix}[Interface declaration]
 
-* link:ids{outfilesuffix}[IDS declaration]
+* link:ids{outfilesuffix}[IDS declaration]:
+Private, shared global data.
 
-* link:task{outfilesuffix}[Task declaration]
+* link:port{outfilesuffix}[Port declaration]:
+Published and imported data.
 
-* link:port{outfilesuffix}[Port declaration]
+* link:task{outfilesuffix}[Task declaration]:
+Execution context for running actual code.
 
 * link:service{outfilesuffix}[Service declaration]:
-Attributes, functions, activities and their parameters
+Attributes, functions, activities and their parameters.
 
 * link:codel{outfilesuffix}[Codel declaration]
-
-* link:module{outfilesuffix}[Module declaration]:
-Scope type definitions
 
 * link:keywords{outfilesuffix}[Identifiers and reserved keywords]:
 Words with a special meaning

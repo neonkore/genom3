@@ -181,7 +181,7 @@
  * link:interface{outfilesuffix}[interfaces].
  *
  * === See also
- * * link:typespec{outfilesuffix}[Data type description]
+ * * link:idltype{outfilesuffix}[Data type description]
  * * link:component{outfilesuffix}[Component declaration]
  * * link:interface{outfilesuffix}[Interface declaration]
  */

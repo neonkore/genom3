@@ -26,8 +26,43 @@
  * IDS declaration
  * ---------------
  *
+ * The `ids` declaration declares a private, internal data structure.
+ *
+ * The internal data structure stores global data shared by the services.
+ * Access to this structure is controlled by Genom, that takes care of the
+ * proper synchronization between concurrent access.
+ *
+ * An IDS definition is similar to a `struct` definition, and follows this
+ * syntax:
+ *
  * <dotgen-rule-ids.adoc
  * <dotgen-rule-ids-name.adoc
+ * <dotgen-rule-member-list.adoc
+ * <dotgen-rule-member.adoc
+ *
+ * The major difference with a regular `struct` is that an `ids` declaration
+ * can be reopened. Thus, several `ids` statements can be used to define an
+ * internal structure by independent chunks. This is useful for instance in
+ * case of included files.
+ *
+ * === Example
+ *
+ * This would define the `ids` for the component `foo`, using two separate
+ * declarations:
+ *
+ * [source,C]
+ * ----
+ * component foo {
+ *   ids {
+ *     long state;
+ *   };
+ *
+ *   ids {
+ *     double position;
+ *     double velocity;
+ *   };
+ * };
+ * ----
  */
 ids:
   ids_name '{' member_list '}' semicolon

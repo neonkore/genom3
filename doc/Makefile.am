@@ -47,6 +47,7 @@ dist_man_MANS=\
 basesrcs=\
 	adoc/introduction.adoc		\
 	adoc/overview.adoc		\
+	adoc/running.adoc		\
 					\
 	adoc/model/index.adoc		\
 					\

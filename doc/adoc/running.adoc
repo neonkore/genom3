@@ -18,29 +18,21 @@
 //                                      Anthony Mallet on Mon May 13 2012
 //
 
-GenoM Manual
-============
-:revision: 2.99.24
-:month: July
-:year: 2014
+Running GenoM
+-------------
 
-For GenoM version 3 +
-Revision 2.99.24, {month} {year}
+=== Generating the skeleton of the codels
 
-Sara Fleury, Matthieu Herrb <matthieu.herrb@laas.fr>,
-Anthony Mallet <anthony.mallet@laas.fr>, C&eacute;dric Pasteur,
-Arnaud Degroote <arnaud.degroote@isae.fr>
+TBD
 
+=== Selecting a template
 
-Contents
---------
+TBD
 
-* link:copying{outfilesuffix}[Your rights]
-* link:introduction{outfilesuffix}[Introduction]
-* link:overview{outfilesuffix}[GenoM overview]
-* link:model/index{outfilesuffix}[Component model]
-* link:dotgen/index{outfilesuffix}[Component description file]
-* link:mappings/index{outfilesuffix}[GenoM IDL mappings]
-* link:running{outfilesuffix}[Running GenoM]
-* Tutorials
-* link:templates/index{outfilesuffix}[Templates]
+=== Merging changes to existing codels
+
+TBD
+
+=== See also
+
+* link:manual{outfilesuffix}[genom3(1) manual]

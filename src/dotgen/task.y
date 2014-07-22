@@ -26,19 +26,27 @@
  * Task declaration
  * ----------------
  *
+ * Tasks define an execution context suitable for running the codels of
+ * link:service{outfilesuffix}[activities]).
+ *
  * <dotgen-rule-task.adoc
  * <dotgen-rule-opt-properties.adoc
  * <dotgen-rule-properties.adoc
  * <dotgen-rule-property.adoc
  *
- * <dotgen-rule-task-property.adoc
- * <dotgen-rule-codel-property.adoc
+ * A task may optionally define a state machine with
+ * link:codel{outfilesuffix}[codels]. In this case, the state machine runs in
+ * the background as soon as the component starts, independently of any
+ * external service request. The state machine always starts in the `start`
+ * state. If a codel yields to the `ether` state, the state machine stops.
+ * When the component is shutdown, the `stop` codel (if it exists) is always
+ * invoked.
  *
- * Tasks define an execution context suitable for running _activities_ (see
- * link:component[Component declaration]). A task may define a state machine
- * and associated codels (see link:codels[Codel declaration]). The state
- * machine starts in the `start` state when the task is created during
- * component initialization.
+ * In any case, the task is always available for processing external service
+ * requests, no matter if it has its own state machine or not.
+ *
+ * <dotgen-rule-fsm-codel.adoc
+ *
  */
 task:
   TASK identifier opt_properties semicolon
@@ -52,27 +60,35 @@ task:
 ;
 
 /*/
- * Tasks are named and may define the following properties:
+ * The task declaration also defines a few properties like a priority and a
+ * stack size. They are not necessarily used by all templates, but this allows
+ * to target real-time embedded systems.
+ *
+ * <dotgen-rule-task-property.adoc
  *
  * +period+::
  *   The granularity of the codel scheduler. Periodic task will sequence the
- *   codels they manage at that frequency.
+ *   codels they manage at that frequency. If unspecified, the task has no
+ *   period and sequences the codels as fast as possible.
  *
  * +delay+::
- *   The delay from the beginning of each period after which codels are
- *   run. This can be used to delay two tasks running at the same period in the
- *   same component.
+ *   The initial delay before starting the scheduler. This can be used to delay
+ *   two tasks running at the same period in the same component.
  *
  * +priority+::
  *   Can be used to prioritize different tasks whithin the same component.
+ *   Priorites are expressed as a integer between 0 and 255 (0 beeing the
+ *   highest priority and 255 the lowest). This may not
+ *   be supported by all templates.
  *
  * +scheduling real-time+::
  *   This indicates that the task requires real-time scheduling. This may not
  *   be supported by all templates.
  *
  * +stack+::
- *   Defines the required stack size for this task. The stack size should be
- *   big enough to run all codels that the task manages.
+ *   Defines the required stack size for this task (in bytes if no unit is
+ *   given). The stack size should be big enough to run all codels that the
+ *   task manages. This may not be supported by all templates.
  */
 task_property:
   PERIOD const_expr time_unit semicolon
@@ -108,3 +124,38 @@ task_property:
     $$ = prop_newvalue(@1, PROP_STACK, $2);
   }
 ;
+
+/*/
+ * === Example
+ *
+ * The following declaration declares a task with an initialization codel
+ * running only once when the task starts:
+ *
+ * [source,C]
+ * ----
+ * component foo {
+ *   task t {
+ *     codel <start> init_codel() yield ether;
+ *   };
+ * };
+ * ----
+ *
+ * The following declare a periodic task, running some code in the background:
+ *
+ * [source,C]
+ * ----
+ * component foo {
+ *   ids { long data };
+ *
+ *   task t {
+ *     priority 100;
+ *     stack 64k;
+ *     period 50ms;
+ *
+ *     codel <start> do_init(out data) yield compute;
+ *     codel <compute> do_compute(inout data) yield compute, stop;
+ *     codel <stop> do_cleanup(in data) yield ether;
+ *   };
+ * };
+ * ----
+ */

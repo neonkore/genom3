@@ -31,13 +31,60 @@
 /*/
  * === Attribute declaration
  *
+ * Attributes are variables that control the behavior of the component. They
+ * are stored in the `ids` and they can be changed dynamically by the codels
+ * during execution. Genom provides a way to set and get attributes through the
+ * chosen middleware.
+ *
+ * An "attribute" declaration creates a service that can either set or get one
+ * or several attibutes.
+ *
  * <dotgen-rule-attribute.adoc
  * <dotgen-rule-attribute-parameters.adoc
  * <dotgen-rule-attribute-parameter.adoc
  * <dotgen-rule-opt-properties.adoc
  * <dotgen-rule-properties.adoc
  *
+ * Attributes can have a number of properties:
  * <dotgen-rule-service-property.adoc
+ *
+ * +doc+:: A string that describes the functionality of the service.
+ *
+ * +validate+:: A "validate" codel can be declared to check the validity of
+ *   input data and throw an exception in case of a problem. The `validate`
+ *   codel is called before updating the value in the `ids`. The codel can
+ *   throw an exception if the new value is not acceptable. In this case, the
+ *   value of the corresponding `ids` member is not changed. If the codel
+ *   returns no error, the value of the `ids` member is updated.
+ *
+ * === Example
+ *
+ * This would declare an attribute for changing the speed of a moving thing:
+ *
+ * [source,C]
+ * ----
+ * component foo {
+ *   ids { double velocity };
+ *
+ *   exception invalid_speed;
+ *
+ *   attribute SetSpeed(in velocity = 0.0: "Thing velocity")
+ *   {
+ *     doc "Change the velocity of a moving thing";
+ *     validate check_velocity(local in velocity);
+ *     throw invalid_speed;
+ *   };
+ * };
+ * ----
+ *
+ * In this example `SetSpeed` is a setter for the `velocity` variable (`in`
+ * keyword). It is possible to specify a default value ("= 0.0") and a small
+ * documentation string that is used by interactive applications to guide the
+ * user.
+ *
+ * This example is of course not functional. The `velocity` value should
+ * be used by other codels and services as the reference value for actually
+ * controlling the moving thing.
  */
 attribute:
   ATTRIBUTE identifier '(' attribute_parameters ')' opt_properties semicolon

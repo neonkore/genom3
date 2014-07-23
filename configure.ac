@@ -76,10 +76,11 @@ AC_ARG_ENABLE(docgen,
 AC_PATH_PROG(Y2L, [y2l], [:])
 AC_PATH_PROG(A2X, [a2x], [:])
 AC_PATH_PROG(ASCIIDOC, [asciidoc], [:])
+AC_PATH_PROG(SRCHGLT, [source-highlight], [:])
 
 AM_CONDITIONAL([DOCGEN],
   [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$A2X" != ":" \
-                               -a "ASCIIDOC" != ":"])
+                               -a "ASCIIDOC" != ":" -a "$SRCHGLT" != ":"])
 
 # C compiler features
 AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
@@ -210,6 +211,16 @@ else
   else
     summary=["${summary}yes
 	(with ${ASCIIDOC})"]
+  fi
+  summary=["${summary}
+    source-highlight:		"]
+  if test x"$SRCHGLT" = x:; then
+    summary=["${summary}no: missing source-highlight"]
+    summary=["${summary}
+	see http://www.gnu.org/software/src-highlite/"]
+  else
+    summary=["${summary}yes
+	(with ${SRCHGLT})"]
   fi
   summary=["${summary}
     yacc to text:		"]

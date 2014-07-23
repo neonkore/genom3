@@ -26,7 +26,7 @@ package require Tcl 8.5
 namespace eval engine {
     #/
     # `engine` TCL engine command
-    # -----------------------------
+    # ---------------------------
 
     # debug mode
     variable debug		[dotgen genom debug]

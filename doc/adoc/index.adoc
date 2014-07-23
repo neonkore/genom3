@@ -42,5 +42,5 @@ Contents
 * link:dotgen/index{outfilesuffix}[Component description file]
 * link:mappings/index{outfilesuffix}[GenoM IDL mappings]
 * link:running{outfilesuffix}[Running GenoM]
-* Tutorials
+* link:tutorials/index{outfilesuffix}[Tutorials]
 * link:templates/index{outfilesuffix}[Templates]

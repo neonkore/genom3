@@ -59,7 +59,12 @@ basesrcs=\
 					\
 	adoc/mappings/index.adoc	\
 	adoc/mappings/c.adoc		\
-	adoc/mappings/c++.adoc
+	adoc/mappings/c++.adoc		\
+					\
+	adoc/tutorials/index.adoc	\
+	adoc/tutorials/workflow.adoc	\
+	adoc/tutorials/add-function.adoc
+
 
 # transformed source files
 mdatesrcs=\

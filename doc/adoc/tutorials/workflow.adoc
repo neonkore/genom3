@@ -1,0 +1,217 @@
+//
+// Copyright (c) 2014 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Anthony Mallet on Tue Jul 22 2014
+//
+
+Generic genom workflow
+----------------------
+
+This tutorial covers the generic workflow that is needed to develop genom
+components. The goal is to present all the necessary steps by writing a totally
+useless component. More advanced components are described in other
+tutorials. Exactly the same workflow can be applied to them.
+
+
+=== Component definition
+
+For this tutorial, the component description is minimal:
+
+.`empty.gen`
+----
+component empty;
+----
+
+As the name suggests, this defines a totally empty component named `empty`. It
+provides no service, has no output and just does nothing.
+
+The `empty.gen` file should be put in its own directory, for instance
+`~/src/empty-genom3`.
+
+
+=== Codels file
+
+Once the `empty.gen` file is written, an initial skeleton of the component can
+be generated. The skeleton consists in a sample build system and sample
+'codels' source files with stub functions that must be filled in by the user.
+
+Generating an initial skeleton instance is done with the 'skeleton' template:
+
+----
+user@host:~$ genom3 skeleton empty.gen
+creating ./codels/empty_codels.c
+creating ./empty-genom3.pc.in
+creating ./empty-genom3-uninstalled.pc.in
+creating ./bootstrap.sh
+creating ./autoconf/ag_templates.m4
+creating ./configure.ac
+creating ./Makefile.am
+creating ./codels/Makefile.am
+user@host:~$
+----
+
+Except for the file `codels/empty_codels.c`, all the generated file are about
+setting up a build system for the component.
+
+The sample codel file `codels/empty_codels.c` must be edited in order to
+implement the component codels. However, in this example it only contains two
+`#include` directives. This is expected, because the 'empty' component defines
+no codel.
+
+[source,C]
+.`empty_codels.c`
+----
+#include "acempty.h"
+
+#include "empty_c_types.h"
+----
+
+The first `#include` file is 'acempty.h'. This is the `autoconf` generated
+header file that contain architecture-dependent definitions.  The
+second `#include` file, 'empty_c_types.h' is the automatically generated C
+mappings for the types that the component defines. Both files are automatically
+generated at build time, in your build directory.
+
+
+=== Building the codels
+
+Once the codel files have been edited, the component is ready to be built. What
+needs to be built first is the library of codels. This can be done by
+configuring and running the build system using the usual `configure; make; make
+install` steps. Refer to the
+link:https://www.gnu.org/software/autoconf/manual/index.html[autoconf] manual
+for details.
+
+* Bootstrap autoconf
++
+----
+user@host:~$ autoreconf -vi
+----
+
+* Configure the build in a separate 'build' directory
++
+----
+user@host:~$ mkdir build
+user@host:~$ cd build
+user@host:~$ ../configure --prefix=/tmp/empty
+----
+
+* Build and install the codels library
++
+----
+user@host:~$ make install
+----
+
+This populates the `/tmp/empty` directory with the codels library, that is
+needed for compiling the actual component. The codels library was installed in
+`lib/`, the `pkg-config` file in `lib/pkg-config` and the component description
+file in `share/idl`.
+
+----
+user@host:~$ ls -R /tmp/empty
+/tmp/empty/lib:
+libempty_codels-0.so*  libempty_codels.la*  pkgconfig/
+libempty_codels.a      libempty_codels.so@
+
+/tmp/empty/lib/pkgconfig:
+empty-genom3.pc
+
+/tmp/empty/share/idl/empty:
+empty.gen
+----
+
+
+=== Building a component
+
+In order to produce an actual component, one must choose a particular
+'template' that implements a 'server' for a specific middleware. Templates
+are not part of Genom and are developed and distributed separately.
+
+The following command lists available templates on your system:
+
+----
+user@host:~$ genom3 -l
+pocolibs/client/c
+pocolibs/server
+ros/client/c
+ros/client/ros
+ros/server
+genomix/client/c
+openprs/client
+interactive
+mappings
+skeleton
+----
+
+Since it is beyond the scope of this documentation to describe each template,
+only the generic principles are exposed here. Refer to the specific template
+documentation for details.
+
+The following examples use `ros/server` as a template example. Any other
+template name can be substituted.
+
+* Generate the server code in a 'build' directory
++
+----
+user@host:~$ mkdir build-server
+user@host:~$ cd build-server
+user@host:~$ genom3 ros/server ../empty.gen
+----
+
+* Configure the build system
++
+----
+user@host:~$ autoreconf -vi
+user@host:~$ ./configure --prefix=/tmp/empty \
+  PKG_CONFIG_PATH=/tmp/empty${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
+----
++
+[NOTE]
+Since the codels are installed in a non-standard location, `pkg-config` must
+be given the installation path via the `PKG_CONFIG_PATH` variable.
+
+* Build and install the component
++
+----
+user@host:~$ make install
+----
+
+
+=== Building a client
+
+Usually, the generated components can be controlled only via specific clients.
+Most available Genom templates provide such clients.
+
+`TBD:` reference the C client doc
+
+
+=== Building everything in one step
+
+By using the `--with-templates` option of the `configure` script generated by
+the `skeleton`, all the previous configuration and build steps for the codels,
+the server and clients can be done in one single step:
+
+----
+user@host:~$ cd build
+user@host:~$ cd ../configure --prefix=/tmp/empty \
+  --with-templates=ros/server,ros/client/ros
+user@host:~$ make install
+----
+
+This would configure, compile and install the codels and also generate,
+configure compile and install two templates (`ros/server` and `ros/client/ros`
+in this case).

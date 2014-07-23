@@ -1,0 +1,88 @@
+//
+// Copyright (c) 2014 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Anthony Mallet on Tue Jul 22 2014
+//
+
+Simple service
+--------------
+
+This tutorial covers how to write a component providing a simple service.
+
+The simple component will merely provide a single service, computing the sum of
+two floating point values.  Since this is a trivial computation, not requiring
+complex state machine and with a tiny execution time, the service fits the
+'function' model. The component does not need specific execution context, so it
+has no task. Finally, the component has no particular state variables, so no
+'ids' is required.
+
+=== Component definition
+
+Here is the `simple.gen` file that describes the component:
+
+.`simple.gen`
+----
+component simple {
+  lang "c";
+
+  function add(in double x = 0. : "First number",
+               in double y = 0. : "Second number",
+               out double r =:    "Result")
+  {
+    codel simple_add(in x, in y, out r);
+  };
+};
+----
+
+This file defines a component that is named 'simple', using 'C' codels. It has
+one function named 'add'. The 'add' function has two input parameters ('x' and
+'y') that both default to 0.0 and are documented as the 'first number' and the
+'second number'. It has an output parameter 'r' which has no default value and
+is documented as the 'result'. The 'add' function has one C codel,
+'simple_add', that accepts the same parameters as the function itself.
+
+=== Codels file
+
+Once the `simple.gen` file is written, the skeleton of the component can be
+generated. In order to implement the 'simple_add' codel, the sample
+'codels/simple_codels.c' file needs to be edited as follow:
+
+[source,C]
+.`simple_codels.c`
+----
+#include "acsimple.h"
+
+#include "simple_c_types.h"
+
+
+/* --- Function add ----------------------------------------------------- */
+
+/** Codel simple_add of function add.
+ *
+ * Returns genom_ok.
+ */
+genom_event
+simple_add(double x, double y, double *r, genom_context self)
+{
+  *r = x + y;
+  return genom_ok;
+}
+----
+
+The 'simple_add' codel definition simply computes the result of the addition of
+'x' and 'y' and stores the result in the output variable 'r'. The codel returns
+`genom_ok` indicating there was no error.

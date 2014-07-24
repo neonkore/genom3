@@ -81,6 +81,11 @@ AC_PATH_PROG(SRCHGLT, [source-highlight], [:])
 AM_CONDITIONAL([DOCGEN],
   [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$A2X" != ":" \
                                -a "ASCIIDOC" != ":" -a "$SRCHGLT" != ":"])
+AM_CONDITIONAL([DOCBUNDLED],
+  [test -f "$srcdir/doc/genom3.1" -a -f "$srcdir/doc/html/index.html"])
+
+AM_CONDITIONAL([DOCGENORBUNDLED],
+  [AM_COND_IF([DOCGEN],[:],[AM_COND_IF([DOCBUNDLED],[:],[false])])])
 
 # C compiler features
 AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
@@ -185,7 +190,7 @@ summary=["$summary
 
 Documentation generation:"]
 if test x"$enable_docgen" = xno; then
-  if test -f "$srcdir/doc/genom3.1"; then
+  if test -z "$DOCBUNDLED_TRUE"; then
     summary=["${summary}	bundled"]
   else
     summary=["${summary}	no"]

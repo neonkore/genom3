@@ -31,6 +31,7 @@ nobase_dist_doc_DATA=\
 	$(y2tsrcs)				\
 	$(adocsrcs)
 
+if DOCGENORBUNDLED
 nobase_dist_doc_DATA+=$(patsubst adoc/%,html/%,	\
 	$(basesrcs:.adoc=.html)			\
 	$(mdatesrcs:.adoc=.html)		\
@@ -39,6 +40,7 @@ nobase_dist_doc_DATA+=$(patsubst adoc/%,html/%,	\
 
 dist_man_MANS=\
 	genom3.1
+endif
 
 
 # --- Doc source files -----------------------------------------------------

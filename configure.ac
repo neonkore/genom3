@@ -87,6 +87,7 @@ AM_CONDITIONAL([DOCBUNDLED],
 AM_CONDITIONAL([DOCGENORBUNDLED],
   [AM_COND_IF([DOCGEN],[:],[AM_COND_IF([DOCBUNDLED],[:],[false])])])
 
+
 # C compiler features
 AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
   AC_COMPILE_IFELSE([AC_LANG_SOURCE(
@@ -243,3 +244,9 @@ summary=["$summary
 ----------------------------------------------------------------------------"]
 
 AC_MSG_NOTICE([$summary])
+AM_COND_IF([DOCGEN],[:],[
+  if test "$enable_docgen" = yes; then
+    AC_MSG_ERROR(
+      [--enable-docgen was specified but some dependencies are missing])
+  fi
+])

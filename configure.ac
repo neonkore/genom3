@@ -35,6 +35,18 @@ sitetmpldir='${datadir}/${PACKAGE_NAME}/site-templates'
 AC_SUBST(sitetmpldir)
 
 
+# build the genom3 tool or just the runtime (default: tool + runtime)
+AC_ARG_ENABLE(tool,
+	AS_HELP_STRING([--disable-tool], [disable the code generation tool]),
+	[],[enable_tool=yes])
+AM_CONDITIONAL([ENABLE_TOOL], [test "$enable_tool" = yes])
+
+AC_ARG_ENABLE(runtime,
+	AS_HELP_STRING([--disable-runtime], [disable runtime installation]),
+	[],[enable_runtime=yes])
+AM_CONDITIONAL([ENABLE_RUNTIME], [test "$enable_runtime" = yes])
+
+
 # generator engines - only tcl, but provide an option for documentation purpose.
 AC_ARG_ENABLE(tcl,
 	AS_HELP_STRING([--disable-tcl], [don't compile support for Tcl engine]),
@@ -43,30 +55,48 @@ AC_ARG_VAR(TCLSH, [Default tclsh interpreter])
 AM_CONDITIONAL([WITH_TCL], [test "$use_tcl" = yes])
 
 
-# compilers et al.
+# compilers and tools
+AC_PROG_INSTALL
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CXX
-AC_PROG_INSTALL
-AC_PROG_LIBTOOL
+LT_INIT
 
-AC_PROG_LEX
-if test x"$LEX" = x:; then
-   AC_MSG_FAILURE([required lex/flex program could not be found on your system.])
-fi
+if test "$enable_tool" = yes; then
+  AC_PROG_LEX
+  if test x"$LEX" = x:; then
+     AC_MSG_FAILURE([required lex/flex program could not be found.])
+  fi
 
-AC_PROG_YACC
-set -- $YACC
-if ! command -v $1 >/dev/null; then
-   AC_MSG_FAILURE([required yacc/bison program could not be found on your system.])
+  AC_PROG_YACC
+  set -- $YACC
+  if ! command -v $1 >/dev/null; then
+     AC_MSG_FAILURE([required yacc/bison program could not be found.])
+  fi
 fi
 
 # C library
-AC_CONFIG_LIBOBJ_DIR([compat])
-AC_REPLACE_FUNCS([strlcpy strlcat getline])
-AC_CHECK_FUNCS([asprintf vasprintf])
-AC_SEARCH_LIBS([dlopen], [dl])
-AC_HEADER_SYS_WAIT
+if test "$enable_tool" = yes; then
+  AC_CONFIG_LIBOBJ_DIR([compat])
+  AC_REPLACE_FUNCS([strlcpy strlcat getline])
+  AC_CHECK_FUNCS([asprintf vasprintf])
+  AC_SEARCH_LIBS([dlopen], [dl])
+  AC_HEADER_SYS_WAIT
+fi
+
+# C compiler features
+if test "$enable_tool" = yes; then
+  AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE(
+        #define macro(...) func(__VA_ARGS__)
+        int func(int a, ...);
+        int test() { return macro(1, 2, 3); }
+        )], [ ac_cv_have_variadic=yes ], [ ac_cv_have_variadic=no ])])
+  if test $ac_cv_have_variadic = yes ; then
+    AC_DEFINE([HAVE_CPP_VARARG_MACRO_GCC], 1,
+      [Define to 1 if your compiler supports C99 variadic macros])
+  fi
+fi
 
 # documentation (re)generation
 AC_ARG_ENABLE(docgen,
@@ -88,20 +118,8 @@ AM_CONDITIONAL([DOCGENORBUNDLED],
   [AM_COND_IF([DOCGEN],[:],[AM_COND_IF([DOCBUNDLED],[:],[false])])])
 
 
-# C compiler features
-AC_CACHE_CHECK([for C99 variadic macro support], ac_cv_have_variadic, [
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE(
-        #define macro(...) func(__VA_ARGS__)
-        int func(int a, ...);
-        int test() { return macro(1, 2, 3); }
-        )], [ ac_cv_have_variadic=yes ], [ ac_cv_have_variadic=no ])])
-if test $ac_cv_have_variadic = yes ; then
-  AC_DEFINE([HAVE_CPP_VARARG_MACRO_GCC], 1,
-    [Define to 1 if your compiler supports C99 variadic macros])
-fi
-
 # tcl configuration
-if test x"$use_tcl" = xyes; then
+if test x"$enable_tool$use_tcl" = xyesyes; then
   # look for tclConfig.sh
   SC_PATH_TCLCONFIG
   AC_MSG_CHECKING([for threaded tcl])
@@ -171,19 +189,26 @@ summary=["
 ----------------------------------------------------------------------------
 Summary of build options:
 
-Tcl generator engine:		$use_tcl"]
+Runtime installation:		$enable_runtime
 
-if test x"$use_tcl" = xyes; then
+Genom code generator:		$enable_tool"]
+
+if test x"$enable_tool" = xyes; then
   summary=["$summary
+  Tcl generator engine:		$use_tcl"]
+
+  if test x"$use_tcl" = xyes; then
+    summary=["$summary
     version:			$TCL_VERSION
     prefix:			$TCL_PREFIX
     line editing facility:	$have_eltclsh"]
-  if test x"$have_eltclsh" = xyes; then
-    summary=["$summary
+    if test x"$have_eltclsh" = xyes; then
+      summary=["$summary
 	(in $ELTCLSH_DATADIR)"]
-  else
-    summary=["$summary: see
+    else
+      summary=["$summary: see
 	http://homepages.laas.fr/mallet/soft/shell/eltclsh"]
+    fi
   fi
 fi
 

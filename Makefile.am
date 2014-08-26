@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2013 LAAS/CNRS
+# Copyright (c) 2009-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -18,9 +18,12 @@
 #
 ACLOCAL_AMFLAGS = -I autoconf
 
+if ENABLE_RUNTIME
 pkgconfigdir=	$(libdir)/pkgconfig
 pkgconfig_DATA=	genom3.pc genom3-c-client.pc
+endif
 
+if ENABLE_TOOL
 if WITH_TCL
   TCLDIR=\
 	engine/tcl		\
@@ -30,16 +33,24 @@ if WITH_TCL
 	templates/skeleton
 endif
 
-SUBDIRS=\
+  TOOLDIR=\
 	compat			\
 	pcpp			\
 	src			\
 	templates/common	\
 	$(TCLDIR)		\
-	runtime/genom3/c	\
-	runtime/genom3/c++	\
 	doc			\
 	regress
+endif
+if ENABLE_RUNTIME
+  RUNTIMEDIR=\
+	runtime/genom3/c	\
+	runtime/genom3/c++
+endif
+
+SUBDIRS=\
+	$(RUNTIMEDIR)		\
+	$(TOOLDIR)
 
 
 # distcheck configuration
@@ -49,6 +60,7 @@ if WITH_TCL
   DISTCHECK_CONFIGURE_FLAGS+=	--with-tcl="$(TCL_BIN_DIR)"
 endif
 
+if ENABLE_TOOL
 # message
 install-data-hook:
 	@echo '=============================================================='
@@ -57,3 +69,4 @@ install-data-hook:
 	@echo '    Documentation is available in'
 	@echo '    $(docdir)'
 	@echo '=============================================================='
+endif

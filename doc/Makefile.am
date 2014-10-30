@@ -155,7 +155,7 @@ noinst_PROGRAMS= mdate
 mdatetgts=	$(mdatesrcs:=~)
 BUILT_SOURCES+=	$(mdatetgts)
 
-$(mdatetgts): Makefile | mdate
+$(mdatetgts): | Makefile mdate
 $(mdatetgts): $(top_srcdir)/src/dotgen/component.y
 $(mdatetgts): $(top_srcdir)/src/dotgen/task.y
 $(mdatetgts): %~: $(srcdir)/%

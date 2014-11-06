@@ -156,8 +156,8 @@ mdatetgts=	$(mdatesrcs:=~)
 BUILT_SOURCES+=	$(mdatetgts)
 
 $(mdatetgts): | Makefile mdate
-$(mdatetgts): $(top_srcdir)/src/dotgen/component.y
-$(mdatetgts): $(top_srcdir)/src/dotgen/task.y
+$(mdatetgts): $(basesrcs)
+$(mdatetgts): $(adocsrcs)
 $(mdatetgts): %~: $(srcdir)/%
 	@test -d '$(dir $@)' || mkdir -p '$(dir $@)'
 	eval `./mdate $^`;						\

@@ -330,7 +330,7 @@ A 'type' object.
 [[mapping]]
 === `language mapping`: IDL type language mapping
 ____
-`language mapping` ['type']
+`language mapping` ['type'] ['locations']
 ____
 
 Generate and return a string containing the mapping of 'type' for the
@@ -340,6 +340,9 @@ The returned string is a valid source code for the language.
 ==== Arguments
 'type'::
 A 'type' object.
+'locations'::
+A boolean variable controlling the generation of type location information
+(#line directives for cpp).
 
 
 

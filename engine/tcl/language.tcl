@@ -328,7 +328,7 @@ namespace eval language {
   # [[mapping]]
   # === `language mapping`: IDL type language mapping
   # ____
-  # `language mapping` ['type']
+  # `language mapping` ['type'] ['locations']
   # ____
   #
   # Generate and return a string containing the mapping of 'type' for the
@@ -338,12 +338,15 @@ namespace eval language {
   # ==== Arguments
   # 'type'::
   # A 'type' object.
+  # 'locations'::
+  # A boolean variable controlling the generation of type location information
+  # (#line directives for cpp).
   #
-  proc mapping { args } {
+  proc mapping { {types {}} {locations true} } {
     variable current
-    if {![llength $args]} { set args [dotgen types] }
-    foreach type $args {
-      append m [${current}::mapping $type]
+    if {![llength $types]} { set types [dotgen types] }
+    foreach type $types {
+      append m [${current}::mapping $type $locations]
     }
     return $m
   }

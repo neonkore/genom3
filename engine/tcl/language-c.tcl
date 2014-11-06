@@ -47,24 +47,24 @@ namespace eval language::c {
 
     # Return the C mapping of type.
     #
-    proc mapping { type } {
+    proc mapping { type locations } {
       switch -- [$type kind] {
-        {const}		{ append m [genconst $type] }
-        {enum}		{ append m [genenum $type] }
-        {struct}	{ append m [genstruct $type] }
-        {union}		{ append m [genunion $type] }
-        {typedef}	{ append m [gentypedef $type] }
-        {sequence}	{ append m [gensequence $type] }
-        {optional}	{ append m [genoptional $type] }
-        {exception}	{ append m [genexception $type] }
+        {const}		{ append m [genconst $type $locations] }
+        {enum}		{ append m [genenum $type $locations] }
+        {struct}	{ append m [genstruct $type $locations] }
+        {union}		{ append m [genunion $type $locations] }
+        {typedef}	{ append m [gentypedef $type $locations] }
+        {sequence}	{ append m [gensequence $type $locations] }
+        {optional}	{ append m [genoptional $type $locations] }
+        {exception}	{ append m [genexception $type $locations] }
 
         {forward struct} -
-        {forward union}	{ append m [genforward $type] }
+        {forward union}	{ append m [genforward $type $locations] }
 
-        {event}		{ append m [genevent $type] }
-        {port}		{ append m [genport $type] }
-        {remote}	{ append m [genremote $type] }
-        {native}	{ append m [gennative $type] }
+        {event}		{ append m [genevent $type $locations] }
+        {port}		{ append m [genport $type $locations] }
+        {remote}	{ append m [genremote $type $locations] }
+        {native}	{ append m [gennative $type $locations] }
 
         default		{ return "" }
       }
@@ -444,7 +444,7 @@ namespace eval language::c {
 
     # Return the C mapping of a const
     #
-    proc genconst { type } {
+    proc genconst { type locations } {
         if {[catch {$type fullname}]} return ""
 
 	set n [cname [$type fullname]]
@@ -458,7 +458,7 @@ namespace eval language::c {
 	    enum	{ set v [cname $v] }
 	}
 
-	append m [genloc $type]
+        if {$locations} { append m [genloc $type] }
 	append m "\nstatic const $t $n = $v;"
 	return [guard $m $n]
     }
@@ -468,17 +468,17 @@ namespace eval language::c {
 
     # Return the C mapping of an enum.
     #
-    proc genenum { type } {
+    proc genenum { type locations } {
       set n [cname [$type fullname]]
 
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       append m "\ntypedef uint32_t $n;"
       append m "\nenum {"
       set v -1
       set comma {}
       foreach e [$type members] {
         append m "${comma}"
-        append m [genloc $e]
+        if {$locations} { append m [genloc $e] }
         append m "\n  [cname [$e fullname]] =\t[incr v]"
         set comma ,
       }
@@ -491,16 +491,16 @@ namespace eval language::c {
 
     # Return the C mapping of a sequence.
     #
-    proc gensequence { type } {
+    proc gensequence { type locations } {
 	set n [declarator $type]
 
 	set f ""
         switch [[$type type] kind] {
-          sequence { append f [gensequence [$type type]] }
-          optional { append f [genoptional [$type type]] }
+          sequence { append f [gensequence [$type type] $locations] }
+          optional { append f [genoptional [$type type] $locations] }
         }
 
-	append m [genloc $type]
+        if {$locations} { append m [genloc $type] }
 	append m "\ntypedef struct $n {"
 	if {[catch {$type length} l]} {
 	    append m "\n  uint32_t _maximum, _length;"
@@ -532,16 +532,16 @@ namespace eval language::c {
 
     # Return the C mapping of an optional.
     #
-    proc genoptional { type } {
+    proc genoptional { type locations } {
       set n [declarator $type]
 
       set f ""
       switch [[$type type] kind] {
-        sequence { append f [gensequence [$type type]] }
-        optional { append f [genoptional [$type type]] }
+        sequence { append f [gensequence [$type type] $locations] }
+        optional { append f [genoptional [$type type] $locations] }
       }
 
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       append m "\ntypedef struct $n {"
       append m "\n  bool _present;"
       append m "\n  [declarator [$type type] _value];"
@@ -555,20 +555,20 @@ namespace eval language::c {
     # Return the C mapping of a struct. The typedef is output first to handle
     # recursive structures with anonymous sequences.
     #
-    proc genstruct { type } {
+    proc genstruct { type locations } {
 	set n [cname [$type fullname]]
 
-	append m [genloc $type]
+        if {$locations} { append m [genloc $type] }
 	append m "\ntypedef struct $n $n;"
 
 	set f ""
 	set s "\nstruct $n {"
 	foreach e [$type members] {
-	    append s [genloc $e]
+          if {$locations} { append s [genloc $e] }
 	    append s "\n [declarator $e [cname [$e name]]];"
             switch [[$e type] kind] {
-              sequence { append f [gensequence [$e type]] }
-              optional { append f [genoptional [$e type]] }
+              sequence { append f [gensequence [$e type] $locations] }
+              optional { append f [genoptional [$e type] $locations] }
             }
 	}
 	append s "\n};"
@@ -581,24 +581,24 @@ namespace eval language::c {
     # Return the C mapping of a union. The typedef is output first to handle
     # recursive and forward decls.
     #
-    proc genunion { type } {
+    proc genunion { type locations } {
 	set n [cname [$type fullname]]
 	set discr [$type discriminator]
 
-	append m [genloc $type]
+        if {$locations} { append m [genloc $type] }
 	append m "\ntypedef struct $n $n;"
 
 	set f ""
 	append s "\nstruct $n {"
-	append s [genloc $discr]
+        if {$locations} { append s [genloc $discr] }
 	append s "\n [declarator $discr] _d;"
 	append s "\n union {"
 	foreach e [$type members] {
-	    append s [genloc $e]
+            if {$locations} { append s [genloc $e] }
 	    append s "\n  [declarator $e [cname [$e name]]];"
             switch [[$e type] kind] {
-              sequence { append f [gensequence [$e type]] }
-              optional { append f [genoptional [$e type]] }
+              sequence { append f [gensequence [$e type] $locations] }
+              optional { append f [genoptional [$e type] $locations] }
             }
 	}
 	append s "\n } _u;"
@@ -611,27 +611,27 @@ namespace eval language::c {
 
     # Return the C mapping of an exception.
     #
-    proc genexception { type } {
+    proc genexception { type locations } {
       set n [$type cname]
       set f ""
       set s ""
 
       append m "\n#include \"genom3/c/exception.h\""
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       append m "\nconst char genom_extern_weak "
       append m "${n}_id\[\] = \"[$type fullname]\";"
 
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       if {[llength [$type members]]} {
         append m "\ntypedef struct ${n}_detail ${n}_detail;"
 
         append s "\nstruct ${n}_detail {"
         foreach e [$type members] {
-          append s [genloc $e]
+          if {$locations} { append s [genloc $e] }
           append s "\n [declarator $e [$e name]];"
           switch [[$e type] kind] {
-            sequence { append f [gensequence [$e type]] }
-            optional { append f [genoptional [$e type]] }
+            sequence { append f [gensequence [$e type] $locations] }
+            optional { append f [genoptional [$e type] $locations] }
           }
         }
         append s "\n};"
@@ -657,10 +657,10 @@ namespace eval language::c {
 
     # Return the C mapping of forward declaration.
     #
-    proc genforward { type } {
+    proc genforward { type locations } {
 	set n [cname [$type fullname]]
 
-	append m [genloc $type]
+        if {$locations} { append m [genloc $type] }
 	append m "\ntypedef struct $n $n;"
 	return [guard $m $n]
     }
@@ -670,10 +670,10 @@ namespace eval language::c {
 
     # Return the C mapping of an event.
     #
-    proc genevent { type } {
+    proc genevent { type locations } {
       set n [$type cname]
       append m "\n#include \"genom3/c/exception.h\""
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       append m "\nconst char genom_extern_weak $n\[\] = \"[$type fullname]\";"
       return [guard $m $n]
     }
@@ -683,18 +683,18 @@ namespace eval language::c {
 
     # Return the C mapping of a port.
     #
-    proc genport { type } {
+    proc genport { type locations } {
       set n [declarator $type]
       set p [$type port]
       set t [$p datatype]
 
       set f ""
       if {[$t kind] eq "sequence"} {
-        append f [gensequence $t]
+        append f [gensequence $t $locations]
       }
 
       append m "\n#include \"genom3/c/exception.h\""
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       append m "\ntypedef struct $n {"
       switch -- [$p kind]/[$p dir] {
         simple/in {
@@ -735,7 +735,7 @@ namespace eval language::c {
 
     # Return the C mapping of a remote.
     #
-    proc genremote { type } {
+    proc genremote { type locations } {
       set n [declarator $type]
       set r [$type remote]
 
@@ -750,13 +750,13 @@ namespace eval language::c {
         lappend arg $a
 
         if {[[$p type] kind] eq "sequence"} {
-          append f [gensequence [$p type]]
+          append f [gensequence [$p type] $locations]
         }
       }
       lappend arg {genom_context self}
 
       append m "\n#include \"genom3/c/exception.h\""
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       append m "\ntypedef struct $n {"
       append m "\n  genom_event (*call)([join $arg {, }]);"
       append m "\n} $n;"
@@ -768,10 +768,10 @@ namespace eval language::c {
 
     # Return the C mapping of a native.
     #
-    proc gennative { type } {
+    proc gennative { type locations } {
       set n [cname [$type fullname]]
 
-      append m [genloc $type]
+      if {$locations} { append m [genloc $type] }
       append m "\ntypedef struct $n $n;"
 
       return [guard $m $n]
@@ -782,16 +782,16 @@ namespace eval language::c {
 
     # Return the C mapping of a typedef.
     #
-    proc gentypedef { type } {
+    proc gentypedef { type locations } {
 	set n [cname [$type fullname]]
 
 	set f ""
         switch [[$type type] kind] {
-          sequence { append f [gensequence [$type type]] }
-          optional { append f [genoptional [$type type]] }
+          sequence { append f [gensequence [$type type] $locations] }
+          optional { append f [genoptional [$type type] $locations] }
         }
 
-	append m [genloc $type]
+        if {$locations} { append m [genloc $type] }
 	append m "\ntypedef [declarator [$type type] $n];"
 	return $f[guard $m $n]
     }

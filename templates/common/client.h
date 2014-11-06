@@ -46,7 +46,7 @@ foreach h [lsort -unique $hlist] {'>
 /* --- Interface types ----------------------------------------------------- */
 
 <'foreach t $types {'>
-<"[language mapping $t]">
+<"[language mapping $t off]">
 <'}'>
 
 
@@ -57,7 +57,6 @@ foreach h [lsort -unique $hlist] {'>
 /* input of <"[$s name]"> */
 struct genom_<"$comp">_<"[$s name]">_input {
 <'  foreach p [$s parameters in inout] {'>
-#line <"[lindex [$p loc] 1]"> "<"[lindex [$p loc] 0]">"
   <"[[$p type] declarator [$p name]]">;
 <'  }'>
 };
@@ -65,7 +64,6 @@ struct genom_<"$comp">_<"[$s name]">_input {
 /* output of <"[$s name]"> */
 struct genom_<"$comp">_<"[$s name]">_output {
 <'  foreach p [$s parameters out inout] {'>
-#line <"[lindex [$p loc] 1]"> "<"[lindex [$p loc] 0]">"
   <"[[$p type] declarator [$p name]]">;
 <'  }'>
 };

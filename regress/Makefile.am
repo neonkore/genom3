@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2013 LAAS/CNRS
+# Copyright (c) 2009-2014 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -44,7 +44,7 @@ if WITH_TCL
   TESTS+=	tcl-engine/language-c++.test
 endif
 
-TESTS_ENVIRONMENT=	${SHELL} -e
+#TESTS_ENVIRONMENT=	${SHELL} -e
 
 EXTRA_DIST=		${TESTS}
 EXTRA_DIST+=		test.sh

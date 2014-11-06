@@ -328,7 +328,7 @@ namespace eval language {
   # [[mapping]]
   # === `language mapping`: IDL type language mapping
   # ____
-  # `language mangle` ['type']
+  # `language mapping` ['type']
   # ____
   #
   # Generate and return a string containing the mapping of 'type' for the

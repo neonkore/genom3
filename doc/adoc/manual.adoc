@@ -1,7 +1,7 @@
 genom3(1)
 =========
 :revision: 2.99.24
-:month: July
+:month: November
 :year: 2014
 :doctype: manpage
 :revdate: {month} {year}

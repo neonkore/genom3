@@ -421,7 +421,7 @@ bufcat(char **buf, char **end, size_t *len, int quoted, const char *data)
     avail = *len - (*end - *buf);
     if (quoted) {
       for(d = *end; *s && avail; avail--) {
-        if (*s == '"') {
+        if (*s == '"' || *s == '\\') {
           if (avail < 2) {
             avail = 0;
             break;

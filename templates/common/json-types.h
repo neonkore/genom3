@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2012-2014 LAAS/CNRS
+# Copyright (c) 2012-2015 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution and use  in source  and binary  forms,  with or without
@@ -357,8 +357,10 @@ json_print_<"[$t mangle]">(char **json, char **end, size_t *len,
   if ((s = bufcat(json, end, len, 0, "]"))) return s;
 <'    }'>
 <'    char {'>
-  char buf[] = { '"', *data, '"', 0 };
+  char buf[] = { data, 0 };
+  if ((s = bufcat(json, end, len, 0, "\""))) return s;
   if ((s = bufcat(json, end, len, 1, buf))) return s;
+  if ((s = bufcat(json, end, len, 0, "\""))) return s;
 <'    }'>
 <'    string {'>
   if ((s = bufcat(json, end, len, 0, "\""))) return s;

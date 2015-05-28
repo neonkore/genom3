@@ -1,5 +1,18 @@
 GenoM3 - Generator of robotic component
-Copyright (c) 2009-2014 LAAS/CNRS
+Copyright (c) 2009-2015 LAAS/CNRS
+
+			    Changes in genom 2.99.25
+
+Released on May 28th, 2015
+ . Added configure options to install only the runtime or the code generator
+   tool
+ . Fixed Typo in the doc of language::mapping code generator procedure
+ . Added an optional parameter to [language mappings] controlling #line
+   generation
+ . Do not generate #line directives for the IDL mappings of the C client
+ . Fixed json encoding of 'chars' in the common template json library
+ . Miscelaneous bug fixes in the build system
+
 
 			    Changes in genom 2.99.24
 

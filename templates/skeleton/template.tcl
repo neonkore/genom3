@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 LAAS/CNRS
+# Copyright (c) 2010-2015 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -193,7 +193,7 @@ template parse						\
     args [list $input $lang] file top.configure.ac	\
     file configure.ac
 template parse						\
-    args [list $input $idls] file top.Makefile.am	\
+    args [list $input $idls $lang] file top.Makefile.am	\
     file Makefile.am
 template parse						\
     args [list $input $lang] file codels.Makefile.am	\

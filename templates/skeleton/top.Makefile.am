@@ -24,8 +24,8 @@
 #
 
 # check arguments
-if {[llength $argv] != 2} { error "expected argument: input idls" }
-lassign $argv input idls
+if {[llength $argv] != 3} { error "expected argument: input idls lang" }
+lassign $argv input idls lang
 
 # generate copyright notice (if any)
 if {![catch {dotgen input notice} text]} {
@@ -61,4 +61,4 @@ distclean-local:
 merge: merge-interactive
 merge-%:
 	cd ${top_srcdir} && ${GENOM3} <"[dotgen genom cmdline]"> \
-		skeleton -m $* <"$input">
+		skeleton -l '<"$lang">' -m $* <"$input">

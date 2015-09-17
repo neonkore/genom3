@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 LAAS/CNRS
+# Copyright (c) 2010-2015 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -504,7 +504,7 @@ namespace eval language::c {
 	append m "\ntypedef struct $n {"
 	if {[catch {$type length} l]} {
 	    append m "\n  uint32_t _maximum, _length;"
-	    append m "\n  [declarator [$type type] *_buffer];"
+	    append m "\n  [declarator [$type type] (*_buffer)];"
 	    append m "\n  void (*_release)(void *_buffer);"
 	} else {
 	    append m "\n  const uint32_t _maximum;"

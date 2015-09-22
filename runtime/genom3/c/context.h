@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 LAAS/CNRS
+ * Copyright (c) 2014-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -24,7 +24,7 @@
 /*
  * Definition of codels and clients context.
  *
- * genom_context_data is implementation dependant and may be provided by a
+ * genom_context_data is implementation dependent and may be provided by a
  * template to store additional data.
  */
 typedef const struct genom_context_iface * const genom_context;

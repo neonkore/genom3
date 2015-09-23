@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2013,2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -297,16 +297,15 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
 static void
 connectivity(hash_s fsm, comp_s comp, codel_s node, int start)
 {
-  idltype_s sleep, stop, ether;
+  idltype_s stop, ether;
   const char *e;
   codel_s n;
   hiter y;
   int r;
 
-  sleep = scope_findtype(comp_scope(comp), "sleep");
   stop = scope_findtype(comp_scope(comp), "stop");
   ether = scope_findtype(comp_scope(comp), "ether");
-  assert(sleep && stop && ether);
+  assert(stop && ether);
 
   if (start) node->connected.start = 1; else node->connected.stop = 1;
   for(hash_first(codel_yields(node), &y); y.current; hash_next(&y)) {
@@ -318,8 +317,6 @@ connectivity(hash_s fsm, comp_s comp, codel_s node, int start)
       if (!strcmp(e, type_fullname(ether))) {
         node->connected.ether = 1; continue;
       }
-      if (!strcmp(e, type_fullname(ether)) || !strcmp(e, type_fullname(sleep)))
-        continue;
 
       parserror(codel_loc(node), "undefined codel<%s>", e);
       continue;

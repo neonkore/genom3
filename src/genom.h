@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -392,7 +392,7 @@ const char *	prop_strkind(propkind k);
 
 /* --- component ----------------------------------------------------------- */
 
-#define COMPONENT_STD_EVENTS { "ether", "start", "stop", "sleep" }
+#define COMPONENT_STD_EVENTS { "ether", "start", "stop" }
 
 #define COMPONENT_PROP_DEFAULTS {               \
     { PROP_LANG,	"c" },                  \

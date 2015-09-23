@@ -112,7 +112,7 @@ expect out '
 	/^::b1$/ {next}
 	/^::b1::b$/ {next}
 	/^::c::event$/ {next}
-	/^::c::(ok|error|ether|start|stop|sleep)$/ {next}
+	/^::c::(ok|error|ether|start|stop)$/ {next}
 	/^::c::(serialization|disallowed|too_many_activities)$/ {next}
 	/^::c::(bad_transition|port_io|no_such_inport|no_such_outport)$/ {next}
 	/^::c::(remote_io|no_such_remote|no_such_service)$/ {next}

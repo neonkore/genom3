@@ -31,12 +31,17 @@ proc thread-safe-codel { component codel } {
 
   # codel info
   set input [list]
-  foreach p [$codel parameters in inout] {
-    if {[$p src] ne "local"} { lappend input $p }
-  }
   set output [list]
-  foreach p [$codel parameters out inout] {
-    if {[$p src] ne "local"} { lappend output $p }
+  set all [list]
+  foreach p [$codel parameters] {
+    if {[$p src] eq "local"} continue
+    switch -- [$p dir] {
+      in { lappend input $p; lappend all $p }
+      inout { lappend input $p; lappend output $p; lappend all $p }
+      out { lappend output $p; lappend all $p }
+
+      default { error "unsupported direction" }
+    }
   }
 
   if {[catch {$codel task} task]} { set task "" }
@@ -49,7 +54,7 @@ proc thread-safe-codel { component codel } {
     set start [$t fsm ::[$component name]::start]
     if {[llength $start]} {
       foreach c [codel-reachable $t [$start yield]] {
-        lappend conflicts {*}[codel-instersect $input $output $c]
+        lappend conflicts {*}[codel-intersect $input $output $c]
       }
     }
   }
@@ -59,9 +64,26 @@ proc thread-safe-codel { component codel } {
     if {[catch {$s task} t]} { set t "" }
     if {$t == $task} continue
 
+    # service ids parameters
+    foreach p [$s parameters] {
+      if {[$p src] ne "ids"} continue
+      switch -- [$p dir] {
+        in - inout { set check $all }
+        out { set check $output }
+      }
+
+      foreach q $check {
+        if {[parameter-match $p $q]} {
+          lappend conflicts $s
+          break
+        }
+      }
+      if {$s in $conflicts} break
+    }
+
     # validation codels and regular codels
     foreach c [$s validate] {
-      lappend conflicts {*}[codel-instersect $input $output $c]
+      lappend conflicts {*}[codel-intersect $input $output $c]
     }
 
     # do not further consider this service if it interrupts the service to
@@ -72,11 +94,11 @@ proc thread-safe-codel { component codel } {
 
     # regular codels
     foreach c [list {*}[$s validate] {*}[$s codels]] {
-      lappend conflicts {*}[codel-instersect $input $output $c]
+      lappend conflicts {*}[codel-intersect $input $output $c]
     }
   }
 
-  return $conflicts
+  return [lsort -unique $conflicts]
 }
 
 
@@ -115,12 +137,18 @@ proc codel-reachable { obj states {codels {}} } {
   return $codels
 }
 
-proc codel-instersect { input output codel } {
-  set input2 [list]
-  foreach p [$codel parameters in inout] {
-    if {[$p src] ne "local"} { lappend input2 $p }
-  }
+proc codel-intersect { input output codel } {
   set output2 [list]
+  set all2 [list]
+  foreach p [$codel parameters] {
+    if {[$p src] eq "local"} continue
+    switch -- [$p dir] {
+      in { lappend all2 $p }
+      inout - out { lappend output2 $p; lappend all2 $p }
+
+      default { error "unsupported direction" }
+    }
+  }
   foreach p [$codel parameters out inout] {
     if {[$p src] ne "local"} { lappend output2 $p }
   }
@@ -131,7 +159,7 @@ proc codel-instersect { input output codel } {
     }
   }
   foreach p $output {
-    foreach q $input2 {
+    foreach q $all2 {
       if {[parameter-match $p $q]} { return $codel }
     }
   }

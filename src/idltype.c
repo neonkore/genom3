@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -100,6 +100,12 @@ type_new(tloc l, idlkind k, const char *name)
   }
 
   /* add type in the current scope */
+  if (name && strstr(name, "::")) {
+    parserror(l, "cannot create %s %s with scope separator in its name",
+              type_strkind(k), name);
+    errno = ENOENT;
+    return NULL;
+  }
   s = scope_current();
 
   t = malloc(sizeof(*t));

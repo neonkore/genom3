@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2013,2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -373,13 +373,6 @@ comp_addevent(tloc l, const char *name)
   /* reuse if it exists */
   e = type_find(name);
   if (e && type_kind(e) == IDL_EVENT) return e;
-
-  /* prevent creating in other scopes */
-  if (strstr(name, "::")) {
-    parserror(l, "cannot create event %s outside current scope", name);
-    errno = ENOENT;
-    return NULL;
-  }
 
   /* create */
   return type_newbasic(l, name, IDL_EVENT);

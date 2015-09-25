@@ -32,7 +32,7 @@ presented in this section:
 
 [[dotgen-rule-constructed-type]]
 ____
-(92) constructed-type      ::= ::
+(93) constructed-type      ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-struct-type[struct-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-union-type[union-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-enum-type[enum-type]
@@ -47,22 +47,22 @@ ____
 
 [[dotgen-rule-struct-type]]
 ____
-(93) struct-type           ::= ::
+(94) struct-type           ::= ::
    "struct" link:grammar{outfilesuffix}#dotgen-rule-struct-name[struct-name] "{" link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}"
 ____
 [[dotgen-rule-struct-name]]
 ____
-(51) struct-name           ::= ::
+(52) struct-name           ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-member-list]]
 ____
-(94) member-list           ::= ::
+(95) member-list           ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-member[member] ";" } link:grammar{outfilesuffix}#dotgen-rule-member[member] ";"
 ____
 [[dotgen-rule-member]]
 ____
-(95) member                ::= ::
+(96) member                ::= ::
    ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
                               | link:grammar{outfilesuffix}#dotgen-rule-member[member] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
 ____
@@ -153,17 +153,17 @@ struct foo {
 
 [[dotgen-rule-union-type]]
 ____
-(96) union-type            ::= ::
+(97) union-type            ::= ::
    "union" link:grammar{outfilesuffix}#dotgen-rule-union-name[union-name] "switch" "(" link:grammar{outfilesuffix}#dotgen-rule-switch-type-spec[switch-type-spec] ")" "{" link:grammar{outfilesuffix}#dotgen-rule-switch-body[switch-body] "}"
 ____
 [[dotgen-rule-union-name]]
 ____
-(52) union-name            ::= ::
+(53) union-name            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-switch-type-spec]]
 ____
-(97) switch-type-spec      ::= ::
+(98) switch-type-spec      ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
@@ -172,22 +172,22 @@ ____
 ____
 [[dotgen-rule-switch-body]]
 ____
-(98) switch-body           ::= ::
+(99) switch-body           ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-case[case] } link:grammar{outfilesuffix}#dotgen-rule-case[case]
 ____
 [[dotgen-rule-case]]
 ____
-(99) case                  ::= ::
+(100) case                  ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-case-label-list[case-label-list] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator] ";"
 ____
 [[dotgen-rule-case-label-list]]
 ____
-(100) case-label-list       ::= ::
+(101) case-label-list       ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label] } link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label]
 ____
 [[dotgen-rule-case-label]]
 ____
-(101) case-label            ::= ::
+(102) case-label            ::= ::
    ( "case" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
                               | "default" ) ":"
 ____
@@ -325,17 +325,17 @@ Enumerated types consist of ordered lists of identifiers. The syntax is:
 
 [[dotgen-rule-enum-type]]
 ____
-(102) enum-type             ::= ::
+(103) enum-type             ::= ::
    "enum" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "{" link:grammar{outfilesuffix}#dotgen-rule-enumerator-list[enumerator-list] "}"
 ____
 [[dotgen-rule-enumerator-list]]
 ____
-(103) enumerator-list       ::= ::
+(104) enumerator-list       ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator] "," } link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator]
 ____
 [[dotgen-rule-enumerator]]
 ____
-(104) enumerator            ::= ::
+(105) enumerator            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 
@@ -392,7 +392,7 @@ types may also be named using a typedef declaration.
 
 [[dotgen-rule-forward-dcl]]
 ____
-(105) forward-dcl           ::= ::
+(106) forward-dcl           ::= ::
    ( "struct" +
                               | "union" ) link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____

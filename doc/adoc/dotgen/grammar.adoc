@@ -212,32 +212,37 @@ ____
 (36) opt-async             ::= ::
    [ "async" ]
 ____
+[[dotgen-rule-event-name]]
+____
+(37) event-name            ::= ::
+   [ "pause" "::" ] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
 [[dotgen-rule-event-list]]
 ____
-(37) event-list            ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name] "," } link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name]
+(38) event-list            ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-event-name[event-name] "," } link:grammar{outfilesuffix}#dotgen-rule-event-name[event-name]
 ____
 [[dotgen-rule-codel-parameters]]
 ____
-(38) codel-parameters      ::= ::
+(39) codel-parameters      ::= ::
    [ { link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] "," } link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] ]
 ____
 [[dotgen-rule-codel-parameter]]
 ____
-(39) codel-parameter       ::= ::
+(40) codel-parameter       ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-opt-parameter-src[opt-parameter-src] link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] ( link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] +
                               | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
                               | "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] )
 ____
 [[dotgen-rule-codel-property]]
 ____
-(40) codel-property        ::= ::
+(41) codel-property        ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-opt-async[opt-async] "codel" ( link:grammar{outfilesuffix}#dotgen-rule-codel[codel] ";" +
                               | link:grammar{outfilesuffix}#dotgen-rule-fsm-codel[fsm-codel] ";" )
 ____
 [[dotgen-rule-opt-parameter-src]]
 ____
-(41) opt-parameter-src     ::= ::
+(42) opt-parameter-src     ::= ::
    [ "ids" +
                               | "local" +
                               | "port" +
@@ -245,38 +250,38 @@ ____
 ____
 [[dotgen-rule-parameter-dir]]
 ____
-(42) parameter-dir         ::= ::
+(43) parameter-dir         ::= ::
    "in" +
                               | "out" +
                               | "inout"
 ____
 [[dotgen-rule-parameter-variable]]
 ____
-(43) parameter-variable    ::= ::
+(44) parameter-variable    ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
                               | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
                               | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]"
 ____
 [[dotgen-rule-opt-initializer]]
 ____
-(44) opt-initializer       ::= ::
+(45) opt-initializer       ::= ::
    [ "=" link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] ]
 ____
 [[dotgen-rule-initializers]]
 ____
-(45) initializers          ::= ::
+(46) initializers          ::= ::
    [ { link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] "," } link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] ]
 ____
 [[dotgen-rule-initializer]]
 ____
-(46) initializer           ::= ::
+(47) initializer           ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-initializer-value[initializer-value] +
                               | ":" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
                               | link:grammar{outfilesuffix}#dotgen-rule-initializer-value[initializer-value] ":" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals]
 ____
 [[dotgen-rule-initializer-value]]
 ____
-(47) initializer-value     ::= ::
+(48) initializer-value     ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
                               | "{" link:grammar{outfilesuffix}#dotgen-rule-initializers[initializers] "}" +
                               | "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]" "=" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
@@ -288,55 +293,55 @@ ____
 ____
 [[dotgen-rule-module]]
 ____
-(48) module                ::= ::
+(49) module                ::= ::
    "module" link:grammar{outfilesuffix}#dotgen-rule-module-name[module-name] "{" link:grammar{outfilesuffix}#dotgen-rule-module-body[module-body] "}" ";"
 ____
 [[dotgen-rule-module-name]]
 ____
-(49) module-name           ::= ::
+(50) module-name           ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-module-body]]
 ____
-(50) module-body           ::= ::
+(51) module-body           ::= ::
    [ link:grammar{outfilesuffix}#dotgen-rule-idl-statements[idl-statements] ]
 ____
 [[dotgen-rule-struct-name]]
 ____
-(51) struct-name           ::= ::
+(52) struct-name           ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-union-name]]
 ____
-(52) union-name            ::= ::
+(53) union-name            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-exception-name]]
 ____
-(53) exception-name        ::= ::
+(54) exception-name        ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-scoped-name]]
 ____
-(54) scoped-name           ::= ::
+(55) scoped-name           ::= ::
    [ [ link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name] ] "::" ] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-type-spec]]
 ____
-(55) type-spec             ::= ::
+(56) type-spec             ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] +
                               | link:grammar{outfilesuffix}#dotgen-rule-constructed-type-spec[constructed-type-spec]
 ____
 [[dotgen-rule-simple-type-spec]]
 ____
-(56) simple-type-spec      ::= ::
+(57) simple-type-spec      ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-base-type-spec[base-type-spec] +
                               | link:grammar{outfilesuffix}#dotgen-rule-template-type-spec[template-type-spec] +
                               | link:grammar{outfilesuffix}#dotgen-rule-named-type[named-type]
 ____
 [[dotgen-rule-type-dcl]]
 ____
-(57) type-dcl              ::= ::
+(58) type-dcl              ::= ::
    "typedef" link:grammar{outfilesuffix}#dotgen-rule-type-declarator[type-declarator] ";" +
                               | "native" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] ";" +
                               | "exception" link:grammar{outfilesuffix}#dotgen-rule-exception-list[exception-list] ";" +
@@ -345,61 +350,61 @@ ____
 ____
 [[dotgen-rule-type-declarator]]
 ____
-(58) type-declarator       ::= ::
+(59) type-declarator       ::= ::
    ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
                               | link:grammar{outfilesuffix}#dotgen-rule-type-declarator[type-declarator] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
 ____
 [[dotgen-rule-exception-list]]
 ____
-(59) exception-list        ::= ::
+(60) exception-list        ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-exception-dcl[exception-dcl] "," } link:grammar{outfilesuffix}#dotgen-rule-exception-dcl[exception-dcl]
 ____
 [[dotgen-rule-exception-dcl]]
 ____
-(60) exception-dcl         ::= ::
+(61) exception-dcl         ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-exception-name[exception-name] link:grammar{outfilesuffix}#dotgen-rule-opt-member-list[opt-member-list]
 ____
 [[dotgen-rule-opt-member-list]]
 ____
-(61) opt-member-list       ::= ::
+(62) opt-member-list       ::= ::
    [ "{" ( "}" +
                               | link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}" ) ]
 ____
 [[dotgen-rule-named-type]]
 ____
-(62) named-type            ::= ::
+(63) named-type            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name]
 ____
 [[dotgen-rule-declarator]]
 ____
-(63) declarator            ::= ::
+(64) declarator            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-simple-declarator[simple-declarator] +
                               | link:grammar{outfilesuffix}#dotgen-rule-array-declarator[array-declarator]
 ____
 [[dotgen-rule-simple-declarator]]
 ____
-(64) simple-declarator     ::= ::
+(65) simple-declarator     ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-array-declarator]]
 ____
-(65) array-declarator      ::= ::
+(66) array-declarator      ::= ::
    ( link:grammar{outfilesuffix}#dotgen-rule-simple-declarator[simple-declarator] +
                               | link:grammar{outfilesuffix}#dotgen-rule-array-declarator[array-declarator] ) link:grammar{outfilesuffix}#dotgen-rule-fixed-array-size[fixed-array-size]
 ____
 [[dotgen-rule-fixed-array-size]]
 ____
-(66) fixed-array-size      ::= ::
+(67) fixed-array-size      ::= ::
    "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]"
 ____
 [[dotgen-rule-const-dcl]]
 ____
-(67) const-dcl             ::= ::
+(68) const-dcl             ::= ::
    "const" link:grammar{outfilesuffix}#dotgen-rule-const-type[const-type] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "=" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] ";"
 ____
 [[dotgen-rule-const-type]]
 ____
-(68) const-type            ::= ::
+(69) const-type            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
@@ -410,7 +415,7 @@ ____
 ____
 [[dotgen-rule-base-type-spec]]
 ____
-(69) base-type-spec        ::= ::
+(70) base-type-spec        ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-floating-pt-type[floating-pt-type] +
@@ -420,93 +425,93 @@ ____
 ____
 [[dotgen-rule-integer-type]]
 ____
-(70) integer-type          ::= ::
+(71) integer-type          ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-signed-int[signed-int] +
                               | link:grammar{outfilesuffix}#dotgen-rule-unsigned-int[unsigned-int]
 ____
 [[dotgen-rule-signed-int]]
 ____
-(71) signed-int            ::= ::
+(72) signed-int            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-signed-longlong-int[signed-longlong-int] +
                               | link:grammar{outfilesuffix}#dotgen-rule-signed-long-int[signed-long-int] +
                               | link:grammar{outfilesuffix}#dotgen-rule-signed-short-int[signed-short-int]
 ____
 [[dotgen-rule-unsigned-int]]
 ____
-(72) unsigned-int          ::= ::
+(73) unsigned-int          ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-unsigned-longlong-int[unsigned-longlong-int] +
                               | link:grammar{outfilesuffix}#dotgen-rule-unsigned-long-int[unsigned-long-int] +
                               | link:grammar{outfilesuffix}#dotgen-rule-unsigned-short-int[unsigned-short-int]
 ____
 [[dotgen-rule-unsigned-short-int]]
 ____
-(73) unsigned-short-int    ::= ::
+(74) unsigned-short-int    ::= ::
    "unsigned" "short"
 ____
 [[dotgen-rule-unsigned-long-int]]
 ____
-(74) unsigned-long-int     ::= ::
+(75) unsigned-long-int     ::= ::
    "unsigned" "long"
 ____
 [[dotgen-rule-unsigned-longlong-int]]
 ____
-(75) unsigned-longlong-int ::= ::
+(76) unsigned-longlong-int ::= ::
    "unsigned" "long" "long"
 ____
 [[dotgen-rule-signed-short-int]]
 ____
-(76) signed-short-int      ::= ::
+(77) signed-short-int      ::= ::
    "short"
 ____
 [[dotgen-rule-signed-long-int]]
 ____
-(77) signed-long-int       ::= ::
+(78) signed-long-int       ::= ::
    "long"
 ____
 [[dotgen-rule-signed-longlong-int]]
 ____
-(78) signed-longlong-int   ::= ::
+(79) signed-longlong-int   ::= ::
    "long" "long"
 ____
 [[dotgen-rule-floating-pt-type]]
 ____
-(79) floating-pt-type      ::= ::
+(80) floating-pt-type      ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-float-type[float-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-double-type[double-type]
 ____
 [[dotgen-rule-float-type]]
 ____
-(80) float-type            ::= ::
+(81) float-type            ::= ::
    "float"
 ____
 [[dotgen-rule-double-type]]
 ____
-(81) double-type           ::= ::
+(82) double-type           ::= ::
    "double"
 ____
 [[dotgen-rule-char-type]]
 ____
-(82) char-type             ::= ::
+(83) char-type             ::= ::
    "char"
 ____
 [[dotgen-rule-boolean-type]]
 ____
-(83) boolean-type          ::= ::
+(84) boolean-type          ::= ::
    "boolean"
 ____
 [[dotgen-rule-octet-type]]
 ____
-(84) octet-type            ::= ::
+(85) octet-type            ::= ::
    "octet"
 ____
 [[dotgen-rule-any-type]]
 ____
-(85) any-type              ::= ::
+(86) any-type              ::= ::
    "any"
 ____
 [[dotgen-rule-template-type-spec]]
 ____
-(86) template-type-spec    ::= ::
+(87) template-type-spec    ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-sequence-type[sequence-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-optional-type[optional-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-string-type[string-type] +
@@ -514,61 +519,61 @@ ____
 ____
 [[dotgen-rule-sequence-type]]
 ____
-(87) sequence-type         ::= ::
+(88) sequence-type         ::= ::
    "sequence" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ( ">" +
                               | "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" )
 ____
 [[dotgen-rule-optional-type]]
 ____
-(88) optional-type         ::= ::
+(89) optional-type         ::= ::
    "optional" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ">"
 ____
 [[dotgen-rule-string-type]]
 ____
-(89) string-type           ::= ::
+(90) string-type           ::= ::
    "string" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
 ____
 [[dotgen-rule-fixed-type]]
 ____
-(90) fixed-type            ::= ::
+(91) fixed-type            ::= ::
    "fixed" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
 ____
 [[dotgen-rule-constructed-type-spec]]
 ____
-(91) constructed-type-spec ::= ::
+(92) constructed-type-spec ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-constructed-type[constructed-type]
 ____
 [[dotgen-rule-constructed-type]]
 ____
-(92) constructed-type      ::= ::
+(93) constructed-type      ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-struct-type[struct-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-union-type[union-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-enum-type[enum-type]
 ____
 [[dotgen-rule-struct-type]]
 ____
-(93) struct-type           ::= ::
+(94) struct-type           ::= ::
    "struct" link:grammar{outfilesuffix}#dotgen-rule-struct-name[struct-name] "{" link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}"
 ____
 [[dotgen-rule-member-list]]
 ____
-(94) member-list           ::= ::
+(95) member-list           ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-member[member] ";" } link:grammar{outfilesuffix}#dotgen-rule-member[member] ";"
 ____
 [[dotgen-rule-member]]
 ____
-(95) member                ::= ::
+(96) member                ::= ::
    ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
                               | link:grammar{outfilesuffix}#dotgen-rule-member[member] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
 ____
 [[dotgen-rule-union-type]]
 ____
-(96) union-type            ::= ::
+(97) union-type            ::= ::
    "union" link:grammar{outfilesuffix}#dotgen-rule-union-name[union-name] "switch" "(" link:grammar{outfilesuffix}#dotgen-rule-switch-type-spec[switch-type-spec] ")" "{" link:grammar{outfilesuffix}#dotgen-rule-switch-body[switch-body] "}"
 ____
 [[dotgen-rule-switch-type-spec]]
 ____
-(97) switch-type-spec      ::= ::
+(98) switch-type-spec      ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
@@ -577,49 +582,49 @@ ____
 ____
 [[dotgen-rule-switch-body]]
 ____
-(98) switch-body           ::= ::
+(99) switch-body           ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-case[case] } link:grammar{outfilesuffix}#dotgen-rule-case[case]
 ____
 [[dotgen-rule-case]]
 ____
-(99) case                  ::= ::
+(100) case                  ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-case-label-list[case-label-list] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator] ";"
 ____
 [[dotgen-rule-case-label-list]]
 ____
-(100) case-label-list       ::= ::
+(101) case-label-list       ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label] } link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label]
 ____
 [[dotgen-rule-case-label]]
 ____
-(101) case-label            ::= ::
+(102) case-label            ::= ::
    ( "case" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
                               | "default" ) ":"
 ____
 [[dotgen-rule-enum-type]]
 ____
-(102) enum-type             ::= ::
+(103) enum-type             ::= ::
    "enum" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "{" link:grammar{outfilesuffix}#dotgen-rule-enumerator-list[enumerator-list] "}"
 ____
 [[dotgen-rule-enumerator-list]]
 ____
-(103) enumerator-list       ::= ::
+(104) enumerator-list       ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator] "," } link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator]
 ____
 [[dotgen-rule-enumerator]]
 ____
-(104) enumerator            ::= ::
+(105) enumerator            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-forward-dcl]]
 ____
-(105) forward-dcl           ::= ::
+(106) forward-dcl           ::= ::
    ( "struct" +
                               | "union" ) link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-identifier]]
 ____
-(106) identifier            ::= ::
+(107) identifier            ::= ::
    "[A-Za-z-][A-Za-z0-9-]*" +
                               | "s" +
                               | "ms" +
@@ -649,6 +654,7 @@ ____
                               | "codel" +
                               | "validate" +
                               | "yields" +
+                              | "pause" +
                               | "throws" +
                               | "doc" +
                               | "interrupts" +
@@ -671,70 +677,70 @@ ____
 ____
 [[dotgen-rule-identifier-list]]
 ____
-(107) identifier-list       ::= ::
+(108) identifier-list       ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "," } link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-const-expr]]
 ____
-(108) const-expr            ::= ::
+(109) const-expr            ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-or-expr[or-expr]
 ____
 [[dotgen-rule-positive-int-const]]
 ____
-(109) positive-int-const    ::= ::
+(110) positive-int-const    ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr]
 ____
 [[dotgen-rule-or-expr]]
 ____
-(110) or-expr               ::= ::
+(111) or-expr               ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-xor-expr[xor-expr] "|" } link:grammar{outfilesuffix}#dotgen-rule-xor-expr[xor-expr]
 ____
 [[dotgen-rule-xor-expr]]
 ____
-(111) xor-expr              ::= ::
+(112) xor-expr              ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-and-expr[and-expr] "^" } link:grammar{outfilesuffix}#dotgen-rule-and-expr[and-expr]
 ____
 [[dotgen-rule-and-expr]]
 ____
-(112) and-expr              ::= ::
+(113) and-expr              ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-shift-expr[shift-expr] "&" } link:grammar{outfilesuffix}#dotgen-rule-shift-expr[shift-expr]
 ____
 [[dotgen-rule-shift-expr]]
 ____
-(113) shift-expr            ::= ::
+(114) shift-expr            ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-add-expr[add-expr] ( ">>" +
                               | "<<" ) } link:grammar{outfilesuffix}#dotgen-rule-add-expr[add-expr]
 ____
 [[dotgen-rule-add-expr]]
 ____
-(114) add-expr              ::= ::
+(115) add-expr              ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-mult-expr[mult-expr] ( "+" +
                               | "-" ) } link:grammar{outfilesuffix}#dotgen-rule-mult-expr[mult-expr]
 ____
 [[dotgen-rule-mult-expr]]
 ____
-(115) mult-expr             ::= ::
+(116) mult-expr             ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-unary-expr[unary-expr] ( "*" +
                               | "/" +
                               | "%" ) } link:grammar{outfilesuffix}#dotgen-rule-unary-expr[unary-expr]
 ____
 [[dotgen-rule-unary-expr]]
 ____
-(116) unary-expr            ::= ::
+(117) unary-expr            ::= ::
    [ "-" +
                               | "+" +
                               | "~" ] link:grammar{outfilesuffix}#dotgen-rule-primary-expr[primary-expr]
 ____
 [[dotgen-rule-primary-expr]]
 ____
-(117) primary-expr          ::= ::
+(118) primary-expr          ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-literal[literal] +
                               | "(" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] ")" +
                               | link:grammar{outfilesuffix}#dotgen-rule-named-type[named-type]
 ____
 [[dotgen-rule-literal]]
 ____
-(118) literal               ::= ::
+(119) literal               ::= ::
    "TRUE" +
                               | "FALSE" +
                               | integer-literal +
@@ -745,40 +751,40 @@ ____
 ____
 [[dotgen-rule-string-literals]]
 ____
-(119) string-literals       ::= ::
+(120) string-literals       ::= ::
    { string-literal } string-literal
 ____
 [[dotgen-rule-string-list]]
 ____
-(120) string-list           ::= ::
+(121) string-list           ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] "," } link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals]
 ____
 [[dotgen-rule-time-unit]]
 ____
-(121) time-unit             ::= ::
+(122) time-unit             ::= ::
    [ "s" +
                               | "ms" +
                               | "us" ]
 ____
 [[dotgen-rule-size-unit]]
 ____
-(122) size-unit             ::= ::
+(123) size-unit             ::= ::
    [ "k" +
                               | "m" ]
 ____
 [[dotgen-rule-opt-properties]]
 ____
-(123) opt-properties        ::= ::
+(124) opt-properties        ::= ::
    [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
 ____
 [[dotgen-rule-properties]]
 ____
-(124) properties            ::= ::
+(125) properties            ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
 ____
 [[dotgen-rule-property]]
 ____
-(125) property              ::= ::
+(126) property              ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-component-property[component-property] +
                               | link:grammar{outfilesuffix}#dotgen-rule-interface-property[interface-property] +
                               | link:grammar{outfilesuffix}#dotgen-rule-task-property[task-property] +

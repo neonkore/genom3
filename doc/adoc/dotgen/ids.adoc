@@ -48,12 +48,12 @@ ____
 ____
 [[dotgen-rule-member-list]]
 ____
-(94) member-list           ::= ::
+(95) member-list           ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-member[member] ";" } link:grammar{outfilesuffix}#dotgen-rule-member[member] ";"
 ____
 [[dotgen-rule-member]]
 ____
-(95) member                ::= ::
+(96) member                ::= ::
    ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
                               | link:grammar{outfilesuffix}#dotgen-rule-member[member] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
 ____

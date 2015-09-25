@@ -33,17 +33,17 @@ A module definition satisfies the following syntax:
 
 [[dotgen-rule-module]]
 ____
-(48) module                ::= ::
+(49) module                ::= ::
    "module" link:grammar{outfilesuffix}#dotgen-rule-module-name[module-name] "{" link:grammar{outfilesuffix}#dotgen-rule-module-body[module-body] "}" ";"
 ____
 [[dotgen-rule-module-name]]
 ____
-(49) module-name           ::= ::
+(50) module-name           ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 [[dotgen-rule-module-body]]
 ____
-(50) module-body           ::= ::
+(51) module-body           ::= ::
    [ link:grammar{outfilesuffix}#dotgen-rule-idl-statements[idl-statements] ]
 ____
 [[dotgen-rule-idl-statements]]

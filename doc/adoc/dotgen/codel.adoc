@@ -27,36 +27,136 @@
 Codel declaration
 -----------------
 
-[[dotgen-rule-codel]]
+
+
+
+Codels are callbacks to the actual code implementing services in a
+component. There are two kind of codels: `simple codels` and `finite state
+machine codels`.
+
+[[dotgen-rule-codel-property]]
 ____
-(34) codel                 ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-codel-parameters[codel-parameters] ")"
-____
-[[dotgen-rule-fsm-codel]]
-____
-(35) fsm-codel             ::= ::
-   "<" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list] ">" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-codel-parameters[codel-parameters] ")" "yields" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list]
-____
-[[dotgen-rule-codel-parameters]]
-____
-(38) codel-parameters      ::= ::
-   [ { link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] "," } link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] ]
-____
-[[dotgen-rule-codel-parameter]]
-____
-(39) codel-parameter       ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-opt-parameter-src[opt-parameter-src] link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] ( link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
-                              | "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] )
+(41) codel-property        ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-opt-async[opt-async] "codel" ( link:grammar{outfilesuffix}#dotgen-rule-codel[codel] ";" +
+                              | link:grammar{outfilesuffix}#dotgen-rule-fsm-codel[fsm-codel] ";" )
 ____
 [[dotgen-rule-opt-async]]
 ____
 (36) opt-async             ::= ::
    [ "async" ]
 ____
+
+Codels are normally functions that execute in a short amount of time
+compared to the time characteristics of the component. During the execution
+of a codel, the component is typically blocked. If a codel is
+expected to last much longer than the desired reaction time of the
+component, or block until some external event arrives, it can be labelled
+`async`.
+
+
+=== Simple codels
+
+Simple codels are functions associated to service validation callbacks or
+implementing component `functions`.
+
+[[dotgen-rule-codel]]
+____
+(34) codel                 ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-codel-parameters[codel-parameters] ")"
+____
+
+The +identifier+ is the name of the external function implementing the
+codel. +parameters+ are described in the third section.
+
+=== Finite state machine codels
+
+Finite state machine (FSM) codels are functions associated to the execution
+of `activities`.
+
+[[dotgen-rule-fsm-codel]]
+____
+(35) fsm-codel             ::= ::
+   "<" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list] ">" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-codel-parameters[codel-parameters] ")" "yields" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list]
+____
+[[dotgen-rule-event-list]]
+____
+(38) event-list            ::= ::
+   { link:grammar{outfilesuffix}#dotgen-rule-event-name[event-name] "," } link:grammar{outfilesuffix}#dotgen-rule-event-name[event-name]
+____
+[[dotgen-rule-event-name]]
+____
+(37) event-name            ::= ::
+   [ "pause" "::" ] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
+____
+
+In addition to the +identifier+ and +parameters+ described in the previous
+section, FSM codels define the state machine of their corresponding
+`activity`. The state machine is defined with a list of states and possible
+transitions.
+
+The bracketed +event list+, before the codel +identifier+ defines one (or
+more) state of the FSM, and associates the codel with this state (or list of
+states). When the FSM reaches the corresponding state, the codel is
+executed. There are two predefined states : +start+ and +stop+. The +start+
+state is required: this is the state in which the FSM begins its
+execution. The +stop+ state is optional: the FSM goes into this state when
+it receives an external interruption request.
+
+The +event list+ specified after the `yield` keyword statically defines all
+possible transitions from this state to other states. For each possible
+transition, a corresponding state must exist in the activity FSM. There is
+one predefined transition called +ether+: this is the final state of the FSM
+and it is used to indicate the regular termination of the activity. There
+must always exist a path from the +start+ state to the +ether+ state. If a
++stop+ state is defined, a path from +stop+ to +ether+ must also exist.
+The actual transition executed by the FSM depends on the codel function
+return value.
+
+Transitions normally occur immediately, so that the FSM executes as fast as
+possible. This execution can still be explicitely paused, for instance to
+wait until the next period or until something new happens in the
+component. For this purpose, a transition to a new state `s` can optionally
+be defined in the `pause` namespace, by specifying the transition as
+`pause::s`. A `paused` transition means that the FSM will pause its
+execution either until the next period (within periodic tasks), or until a
+new internal event occurs (within tasks with no period). Internal events
+correspond to a +non-paused+ transition of another activity within the
+component, or the successful execution of an `attribute` or `function`.
+
+=== Example
+
+This would declare a FSM with one +main+ state, typically looping until some
+condition is met, and a stop state in case of premature interruption.
+
+[source,C]
+----
+codel<start> do_start()            yield main;
+codel<main>  do_main(in condition) yield pause::main, ether;
+codel<stop>  do_stop()             yield ether;
+----
+
+In this example, the +main+ loop will be paced according to the context in
+which the codels are defined (a periodic task, for instance). Without the
+`paused` transition, the loop would typically eat all the available CPU.
+
+
+=== Codel parameters
+
+[[dotgen-rule-codel-parameters]]
+____
+(39) codel-parameters      ::= ::
+   [ { link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] "," } link:grammar{outfilesuffix}#dotgen-rule-codel-parameter[codel-parameter] ]
+____
+[[dotgen-rule-codel-parameter]]
+____
+(40) codel-parameter       ::= ::
+   link:grammar{outfilesuffix}#dotgen-rule-opt-parameter-src[opt-parameter-src] link:grammar{outfilesuffix}#dotgen-rule-parameter-dir[parameter-dir] ( link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] +
+                              | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
+                              | "::" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] )
+____
 [[dotgen-rule-opt-parameter-src]]
 ____
-(41) opt-parameter-src     ::= ::
+(42) opt-parameter-src     ::= ::
    [ "ids" +
                               | "local" +
                               | "port" +
@@ -64,23 +164,28 @@ ____
 ____
 [[dotgen-rule-parameter-dir]]
 ____
-(42) parameter-dir         ::= ::
+(43) parameter-dir         ::= ::
    "in" +
                               | "out" +
                               | "inout"
 ____
 [[dotgen-rule-parameter-variable]]
 ____
-(43) parameter-variable    ::= ::
+(44) parameter-variable    ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
                               | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
                               | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]"
 ____
-[[dotgen-rule-event-list]]
-____
-(37) event-list            ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name] "," } link:grammar{outfilesuffix}#dotgen-rule-scoped-name[scoped-name]
-____
+
+
+
+
+
+
+
+
+
+
 
 
 

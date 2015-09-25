@@ -37,17 +37,17 @@ ____
 ____
 [[dotgen-rule-opt-properties]]
 ____
-(123) opt-properties        ::= ::
+(124) opt-properties        ::= ::
    [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
 ____
 [[dotgen-rule-properties]]
 ____
-(124) properties            ::= ::
+(125) properties            ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
 ____
 [[dotgen-rule-property]]
 ____
-(125) property              ::= ::
+(126) property              ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-component-property[component-property] +
                               | link:grammar{outfilesuffix}#dotgen-rule-interface-property[interface-property] +
                               | link:grammar{outfilesuffix}#dotgen-rule-task-property[task-property] +

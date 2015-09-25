@@ -35,7 +35,7 @@ ASCII alphabetic character.
 
 [[dotgen-rule-identifier]]
 ____
-(106) identifier            ::= ::
+(107) identifier            ::= ::
    "[A-Za-z-][A-Za-z0-9-]*" +
                               | "s" +
                               | "ms" +
@@ -65,6 +65,7 @@ ____
                               | "codel" +
                               | "validate" +
                               | "yields" +
+                              | "pause" +
                               | "throws" +
                               | "doc" +
                               | "interrupts" +
@@ -87,7 +88,7 @@ ____
 ____
 [[dotgen-rule-identifier-list]]
 ____
-(107) identifier-list       ::= ::
+(108) identifier-list       ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "," } link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
 ____
 

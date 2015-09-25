@@ -31,7 +31,7 @@ IDL Template types
 The template types are:
 [[dotgen-rule-template-type-spec]]
 ____
-(86) template-type-spec    ::= ::
+(87) template-type-spec    ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-sequence-type[sequence-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-optional-type[optional-type] +
                               | link:grammar{outfilesuffix}#dotgen-rule-string-type[string-type] +
@@ -49,7 +49,7 @@ run time).
 
 [[dotgen-rule-sequence-type]]
 ____
-(87) sequence-type         ::= ::
+(88) sequence-type         ::= ::
    "sequence" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ( ">" +
                               | "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" )
 ____
@@ -96,7 +96,7 @@ Optional types represent a value that may or may not be present.
 
 [[dotgen-rule-optional-type]]
 ____
-(88) optional-type         ::= ::
+(89) optional-type         ::= ::
    "optional" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ">"
 ____
 
@@ -117,7 +117,7 @@ A string is similar to a sequence of char.
 
 [[dotgen-rule-string-type]]
 ____
-(89) string-type           ::= ::
+(90) string-type           ::= ::
    "string" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
 ____
 
@@ -149,7 +149,7 @@ The ﬁxed data type represents a fixed-point decimal number
 
 [[dotgen-rule-fixed-type]]
 ____
-(90) fixed-type            ::= ::
+(91) fixed-type            ::= ::
    "fixed" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
 ____
 

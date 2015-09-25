@@ -57,12 +57,12 @@ ____
 ____
 [[dotgen-rule-opt-properties]]
 ____
-(123) opt-properties        ::= ::
+(124) opt-properties        ::= ::
    [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
 ____
 [[dotgen-rule-properties]]
 ____
-(124) properties            ::= ::
+(125) properties            ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
 ____
 
@@ -156,17 +156,17 @@ ____
 ____
 [[dotgen-rule-opt-properties]]
 ____
-(123) opt-properties        ::= ::
+(124) opt-properties        ::= ::
    [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
 ____
 [[dotgen-rule-properties]]
 ____
-(124) properties            ::= ::
+(125) properties            ::= ::
    { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
 ____
 [[dotgen-rule-property]]
 ____
-(125) property              ::= ::
+(126) property              ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-component-property[component-property] +
                               | link:grammar{outfilesuffix}#dotgen-rule-interface-property[interface-property] +
                               | link:grammar{outfilesuffix}#dotgen-rule-task-property[task-property] +
@@ -184,17 +184,6 @@ ____
                               | "after" link:grammar{outfilesuffix}#dotgen-rule-identifier-list[identifier-list] +
                               | "validate" link:grammar{outfilesuffix}#dotgen-rule-codel[codel] +
                               | "local" link:grammar{outfilesuffix}#dotgen-rule-local-variables[local-variables] ) ";"
-____
-[[dotgen-rule-codel-property]]
-____
-(40) codel-property        ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-opt-async[opt-async] "codel" ( link:grammar{outfilesuffix}#dotgen-rule-codel[codel] ";" +
-                              | link:grammar{outfilesuffix}#dotgen-rule-fsm-codel[fsm-codel] ";" )
-____
-[[dotgen-rule-opt-async]]
-____
-(36) opt-async             ::= ::
-   [ "async" ]
 ____
 
 
@@ -269,38 +258,38 @@ ____
 
 [[dotgen-rule-parameter-dir]]
 ____
-(42) parameter-dir         ::= ::
+(43) parameter-dir         ::= ::
    "in" +
                               | "out" +
                               | "inout"
 ____
 [[dotgen-rule-parameter-variable]]
 ____
-(43) parameter-variable    ::= ::
+(44) parameter-variable    ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
                               | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "." link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] +
                               | link:grammar{outfilesuffix}#dotgen-rule-parameter-variable[parameter-variable] "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]"
 ____
 [[dotgen-rule-opt-initializer]]
 ____
-(44) opt-initializer       ::= ::
+(45) opt-initializer       ::= ::
    [ "=" link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] ]
 ____
 [[dotgen-rule-initializers]]
 ____
-(45) initializers          ::= ::
+(46) initializers          ::= ::
    [ { link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] "," } link:grammar{outfilesuffix}#dotgen-rule-initializer[initializer] ]
 ____
 [[dotgen-rule-initializer]]
 ____
-(46) initializer           ::= ::
+(47) initializer           ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-initializer-value[initializer-value] +
                               | ":" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
                               | link:grammar{outfilesuffix}#dotgen-rule-initializer-value[initializer-value] ":" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals]
 ____
 [[dotgen-rule-initializer-value]]
 ____
-(47) initializer-value     ::= ::
+(48) initializer-value     ::= ::
    link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
                               | "{" link:grammar{outfilesuffix}#dotgen-rule-initializers[initializers] "}" +
                               | "[" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "]" "=" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +

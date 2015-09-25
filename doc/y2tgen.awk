@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2010-2012,2014 LAAS/CNRS
+# Copyright (c) 2010-2012,2014-2015 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -63,9 +63,9 @@ function printdef(n, name, rule) {
     print r
     print r > out
 
-    r = sprintf("%s " wrap(rule) "\n____", "(" n ")")
-    print r
-    print r > out
+    print "(" n ") " wrap(rule) "\n____"
+    print "(" n ") " wrap(rule) "\n____" > out
+
     close(out)
 }
 

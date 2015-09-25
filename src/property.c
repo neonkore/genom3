@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -99,7 +99,7 @@ prop_newids(tloc l, idltype_s t)
 
     case IDL_ANY: case IDL_NATIVE:
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION:
-    case IDL_EVENT: case IDL_PORT: case IDL_REMOTE:
+    case IDL_EVENT: case IDL_PAUSE_EVENT: case IDL_PORT: case IDL_REMOTE:
       parserror(l, "invalid %s type for ids",
 		type_strkind(type_kind(type_final(t))));
       return NULL;

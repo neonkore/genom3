@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -317,7 +317,7 @@ const_cast(tloc l, cval *value, idltype_s t)
     case IDL_ANY: case IDL_ENUMERATOR: case IDL_ARRAY: case IDL_SEQUENCE:
     case IDL_STRUCT: case IDL_UNION: case IDL_EXCEPTION:
     case IDL_FORWARD_STRUCT: case IDL_FORWARD_UNION: case IDL_EVENT:
-    case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
+    case IDL_PAUSE_EVENT: case IDL_PORT: case IDL_REMOTE: case IDL_NATIVE:
       parserror(l, "%s%s%s is not a valid constant type",
 		type_strkind(type_kind(t)),
 		type_name(t)?" ":"", type_name(t)?type_name(t):"");

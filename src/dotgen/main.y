@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -99,8 +99,9 @@
 %token <s>	INTERFACE COMPONENT TASK TASK_P FUNCTION ACTIVITY CODEL PORT IN
 %token <s>	OUT INOUT LOCAL IDS ATTRIBUTE INPUT OUTPUT HANDLE VERSION LANG
 %token <s>	EMAIL REQUIRE CODELSREQUIRE PERIOD DELAY PRIORITY STACK VALIDATE
-%token <s>	YIELD THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE SCHEDULING
-%token <s>	ASYNC REMOTE EXTENDS PROVIDES USES MULTIPLE NATIVE EXCEPTION
+%token <s>	YIELD PAUSE THROWS DOC INTERRUPTS BEFORE AFTER CLOCKRATE
+%token <s>	SCHEDULING ASYNC REMOTE EXTENDS PROVIDES USES MULTIPLE NATIVE
+%token <s>	EXCEPTION
 
 %type <i>	specification statement idl_statements idl_statement
 %type <i>	exports export
@@ -147,6 +148,7 @@
 %type <v>	or_expr xor_expr and_expr shift_expr add_expr mult_expr
 %type <v>	literal time_unit size_unit
 %type <s>	scoped_name string_literals identifier
+%type <type>	event_name
 %type <hash>	event_list throw_list identifier_list
 %type <vlist>	string_list
 %type <c>	semicolon

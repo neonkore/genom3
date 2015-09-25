@@ -48,6 +48,7 @@ NATIVE		native
 OCTET		octet
 OPTIONAL	optional
 OUT		out
+PAUSE		pause
 PERIOD		period
 PORT		port
 PRIORITY	priority

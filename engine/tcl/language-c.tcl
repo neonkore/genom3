@@ -61,7 +61,9 @@ namespace eval language::c {
         {forward struct} -
         {forward union}	{ append m [genforward $type $locations] }
 
+        {pause event} -
         {event}		{ append m [genevent $type $locations] }
+
         {port}		{ append m [genport $type $locations] }
         {remote}	{ append m [genremote $type $locations] }
         {native}	{ append m [gennative $type $locations] }

@@ -63,7 +63,7 @@ service_s *	codel_service(codel_s c) { assert(c); return &c->service; }
 void	codel_setkind(codel_s c, codelkind k) { assert(c); c->kind = k; }
 
 static codel_s	codel_find(const char *name);
-static void	connectivity(hash_s fsm, comp_s comp, codel_s node, int start);
+static void	connectivity(hash_s fsm, codel_s node, int start);
 
 
 /* --- codel_create -------------------------------------------------------- */
@@ -75,6 +75,7 @@ codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
              hash_s yields, hash_s params)
 {
   codel_s c;
+  hiter i;
   assert(name && params);
 
   /* prevent duplicates */
@@ -84,6 +85,18 @@ codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
       parserror(l, "conflicting types for codel %s", name);
       parsenoerror(codel_loc(c), " codel %s declared here", name);
       return NULL;
+    }
+  }
+
+  /* triggers must be regular events */
+  if (triggers) {
+    for(hash_first(triggers, &i); i.current; hash_next(&i)) {
+      if (type_kind(i.value) != IDL_EVENT) {
+        parserror(l, "%s %s cannot be used here",
+                  type_strkind(type_kind(i.value)), type_name(i.value));
+        parsenoerror(l, " exepecting regular %s", type_strkind(IDL_EVENT));
+        return NULL;
+      }
     }
   }
 
@@ -222,7 +235,6 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
   hash_s fsm;
   const char *e;
   codel_s c, u;
-  idltype_s ev;
   hiter i, t;
   int s;
 
@@ -236,8 +248,9 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
         c = prop_codel(i.value);
 
         for(hash_first(codel_triggers(c), &t); t.current; hash_next(&t)) {
-          assert(type_kind(t.value) == IDL_EVENT);
-          e = type_fullname(t.value);
+          assert(type_kind(t.value) == IDL_EVENT ||
+                 type_kind(t.value) == IDL_PAUSE_EVENT);
+          e = type_name(t.value);
           s = hash_insert(fsm, e, c, NULL);
           switch(s) {
             case 0: break;
@@ -262,24 +275,19 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
   /* check fsm connectivity if not empty and in a regular component */
   if (hash_first(fsm, &i) || comp_kind(comp) != COMP_REGULAR) return fsm;
 
-  ev = scope_findtype(comp_scope(comp), "start");
-  assert(ev);
-  c = hash_find(fsm, type_fullname(ev));
+  c = hash_find(fsm, "start");
   if (!c) {
-    parserror(l, "undefined codel<%s>", type_fullname(ev));
+    parserror(l, "undefined codel<start>");
     hash_destroy(fsm, 1);
     return NULL;
   }
-  connectivity(fsm, comp, c, 1);
+  connectivity(fsm, c, 1);
 
-  ev = scope_findtype(comp_scope(comp), "stop");
-  assert(ev);
-  c = hash_find(fsm, type_fullname(ev));
+  c = hash_find(fsm, "stop");
   if (c) {
-    connectivity(fsm, comp, c, 0);
+    connectivity(fsm, c, 0);
     if (!c->connected.ether) {
-      parserror(codel_loc(c), "codel<%s> must eventually yield to ether",
-                type_fullname(ev));
+      parserror(codel_loc(c), "codel<stop> must eventually yield to ether");
       hash_destroy(fsm, 1);
       return NULL;
     }
@@ -295,26 +303,22 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
 }
 
 static void
-connectivity(hash_s fsm, comp_s comp, codel_s node, int start)
+connectivity(hash_s fsm, codel_s node, int start)
 {
-  idltype_s stop, ether;
   const char *e;
   codel_s n;
   hiter y;
   int r;
 
-  stop = scope_findtype(comp_scope(comp), "stop");
-  ether = scope_findtype(comp_scope(comp), "ether");
-  assert(stop && ether);
-
   if (start) node->connected.start = 1; else node->connected.stop = 1;
   for(hash_first(codel_yields(node), &y); y.current; hash_next(&y)) {
-    assert(type_kind(y.value) == IDL_EVENT);
-    e = type_fullname(y.value);
+    assert(type_kind(y.value) == IDL_EVENT ||
+           type_kind(y.value) == IDL_PAUSE_EVENT);
+    e = type_name(y.value);
 
     n = hash_find(fsm, e);
     if (!n) {
-      if (!strcmp(e, type_fullname(ether))) {
+      if (!strcmp(e, "ether")) {
         node->connected.ether = 1; continue;
       }
 
@@ -326,7 +330,7 @@ connectivity(hash_s fsm, comp_s comp, codel_s node, int start)
     if (start) n->connected.start = 1; else n->connected.stop = 1;
 
     /* successor has not yet been visited; recurse on it */
-    if (!r) connectivity(fsm, comp, n, start);
+    if (!r) connectivity(fsm, n, start);
 
     if (n->connected.ether) node->connected.ether = 1;
   }

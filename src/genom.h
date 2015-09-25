@@ -265,6 +265,7 @@ typedef enum idlkind {
   IDL_FORWARD_UNION,	/**< forward union declaration */
 
   IDL_EVENT,		/**< event */
+  IDL_PAUSE_EVENT,	/**< pause event */
   IDL_PORT,		/**< port object */
   IDL_REMOTE		/**< rpc object */
 } idlkind;
@@ -393,6 +394,7 @@ const char *	prop_strkind(propkind k);
 /* --- component ----------------------------------------------------------- */
 
 #define COMPONENT_STD_EVENTS { "ether", "start", "stop" }
+#define COMPONENT_PAUSE_EVENT_NS "pause"
 
 #define COMPONENT_PROP_DEFAULTS {               \
     { PROP_LANG,	"c" },                  \
@@ -439,7 +441,7 @@ comp_s		comp_push(tloc l, const char *name, compkind kind);
 comp_s		comp_pop(void);
 int		comp_addprop(tloc l, prop_s p);
 idltype_s	comp_addids(tloc l, scope_s s);
-idltype_s	comp_addevent(tloc l, const char *name);
+idltype_s	comp_addevent(tloc l, idlkind k, const char *name);
 
 int		comp_dumpall(FILE *out);
 int		comp_dump(comp_s c, FILE *out);

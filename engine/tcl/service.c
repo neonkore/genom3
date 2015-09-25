@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012-2014 LAAS/CNRS
+ * Copyright (c) 2010,2012-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -289,14 +289,15 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       if (objc < 3) {
         r = Tcl_NewListObj(0, NULL);
         for(hash_first(service_fsm(s), &i); i.current; hash_next(&i)) {
-          t = type_find(i.key); assert(t);
+          t = scope_findtype(comp_scope(service_comp(s)), i.key);
+          assert(t);
           Tcl_ListObjAppendElement(
             interp, r, Tcl_NewStringObj(type_genref(t), -1));
         }
       } else {
         c = hash_find(service_fsm(s), Tcl_GetString(objv[2]));
         if (!c) {
-          Tcl_Obj *argv[] = { objv[2], Tcl_NewStringObj("fullname", -1) };
+          Tcl_Obj *argv[] = { objv[2], Tcl_NewStringObj("name", -1) };
 
           Tcl_IncrRefCount(argv[1]);
           e = Tcl_EvalObjv(interp, 2, argv, TCL_EVAL_GLOBAL);

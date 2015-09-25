@@ -40,6 +40,7 @@ struct comp_s {
   compkind kind;
   scope_s scope;
   scope_s idsscope;
+  scope_s pausescope;
 
   hash_s props;
   hash_s tasks;
@@ -98,7 +99,7 @@ comp_push(tloc l, const char *name, compkind kind)
 {
   static const char *stdev[] = COMPONENT_STD_EVENTS;
   comp_s c, t;
-  scope_s scomp, spop, sids;
+  scope_s scomp, spop, sids, spause;
   int i;
   assert(name);
 
@@ -129,6 +130,11 @@ comp_push(tloc l, const char *name, compkind kind)
   scope_detach(sids);
   scope_pop();
 
+  /* create pause event scope */
+  spause = scope_push(l, COMPONENT_PAUSE_EVENT_NS, SCOPE_MODULE);
+  if (!spause) goto error;
+  scope_pop();
+
   /* create new component */
   c = malloc(sizeof(*c));
   if (!c) {
@@ -141,6 +147,7 @@ comp_push(tloc l, const char *name, compkind kind)
   c->kind = kind;
   c->scope = scomp;
   c->idsscope = sids;
+  c->pausescope = spause;
   c->props = hash_create(strings(name, " property list", NULL), 2);
   c->tasks = hash_create(strings(name, " tasks", NULL), 1);
   c->ports = hash_create(strings(name, " ports", NULL), 1);
@@ -168,7 +175,7 @@ comp_push(tloc l, const char *name, compkind kind)
   /* create std events for regular components (not interfaces) */
   if (kind == COMP_REGULAR)
     for(i=0; i<sizeof(stdev)/sizeof(stdev[0]); i++)
-      if (!comp_addevent(l, stdev[i])) goto error;
+      if (!comp_addevent(l, IDL_EVENT, stdev[i])) goto error;
 
   /* apply #pragma directives */
   comp_dopragma(c);
@@ -358,24 +365,40 @@ comp_addids(tloc l, scope_s s)
 }
 
 
-/* --- comp_addiev --------------------------------------------------------- */
+/* --- comp_addevent ------------------------------------------------------- */
 
 /** Add an event to a component
  */
 idltype_s
-comp_addevent(tloc l, const char *name)
+comp_addevent(tloc l, idlkind k, const char *name)
 {
   comp_s c = comp_active();
+  scope_s scope;
   idltype_s e;
   assert(c && name);
   assert(c->scope == scope_current());
 
+  if (k == IDL_PAUSE_EVENT && !strcmp(name, "ether")) {
+    parserror(l, "%s state may not be paused", name);
+    return NULL;
+  }
+
+  switch(k) {
+    case IDL_EVENT:		scope = c->scope; break;
+    case IDL_PAUSE_EVENT:	scope = c->pausescope; break;
+    default: assert(!"bad event type");
+  }
+
   /* reuse if it exists */
-  e = type_find(name);
-  if (e && type_kind(e) == IDL_EVENT) return e;
+  e = scope_findtype(scope, name);
+  if (e && type_kind(e) == k) return e;
 
   /* create */
-  return type_newbasic(l, name, IDL_EVENT);
+  if (scope != c->scope) scope_set(scope);
+  e = type_newbasic(l, name, k);
+  if (scope != c->scope) scope_set(c->scope);
+
+  return e;
 }
 
 

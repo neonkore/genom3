@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -282,6 +282,7 @@ chartext	([^\'])|(\\.)
 "stack"		{ yylval->s = string(yytext); return STACK; }
 "validate"	{ yylval->s = string(yytext); return VALIDATE; }
 "yield"s?	{ yylval->s = string(yytext); return YIELD; }
+"pause"		{ yylval->s = string(yytext); return PAUSE; }
 "throw"s?	{ yylval->s = string(yytext); return THROWS; }
 "interrupt"s?	{ yylval->s = string(yytext); return INTERRUPTS; }
 "before"	{ yylval->s = string(yytext); return BEFORE; }

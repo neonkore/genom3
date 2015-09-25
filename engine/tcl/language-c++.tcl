@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 LAAS/CNRS
+# Copyright (c) 2010-2015 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -62,7 +62,9 @@ namespace eval language::c++ {
         {forward struct} -
         {forward union}	{ append m [genforward $type $locations] }
 
+        {pause event} -
         {event}		{ append m [genevent $type $locations] }
+
         {port}		{ append m [genport $type $locations] }
         {remote}	{ append m [genremote $type $locations] }
         {native}	{ append m [gennative $type $locations] }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -117,8 +117,6 @@ attribute:
  * <dotgen-rule-property.adoc
  *
  * <dotgen-rule-service-property.adoc
- * <dotgen-rule-codel-property.adoc
- * <dotgen-rule-opt-async.adoc
  */
 
 service:

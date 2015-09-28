@@ -236,12 +236,14 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
   const char *e;
   codel_s c, u;
   hiter i, t;
+  int start_reqd;
   int s;
 
   /* build fsm */
   fsm = hash_create("fsm", 1);
   if (!fsm) { parserror(l, "not enough memory"); return NULL; }
 
+  start_reqd = 0;
   for(hash_first(props, &i); i.current; hash_next(&i))
     switch(prop_kind(i.value)) {
       case PROP_FSM_CODEL:
@@ -267,6 +269,10 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
               return NULL;
           }
         }
+
+        /* require a start state for services (not for permanent activity) */
+        if (*codel_service(c)) start_reqd |= 1;
+
         break;
 
       default: break;
@@ -276,12 +282,12 @@ codel_fsmcreate(tloc l, comp_s comp, hash_s props)
   if (hash_first(fsm, &i) || comp_kind(comp) != COMP_REGULAR) return fsm;
 
   c = hash_find(fsm, "start");
-  if (!c) {
+  if (start_reqd && !c) {
     parserror(l, "undefined codel<start>");
     hash_destroy(fsm, 1);
     return NULL;
   }
-  connectivity(fsm, c, 1);
+  if (c) connectivity(fsm, c, 1);
 
   c = hash_find(fsm, "stop");
   if (c) {

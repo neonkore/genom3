@@ -222,58 +222,6 @@ Will process the string "test" and save the result in `mydst`.
 
 
 
-[[template_link]]
-=== `template link`: Create symbolic links
-____
-`template link` 'src' 'dst'
-____
-
-Link source file 'src' to destination file 'dst'. If relative, the source
-file 'src' is interpreted as relative to the template directory and 'dst'
-is interpreted as relative to the current output directory. Absolute file
-name can be given to override this behaviour.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 [[template_options]]
 === `template options`: Define template options
 ____

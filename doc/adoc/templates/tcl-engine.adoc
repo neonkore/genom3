@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2009-2013 LAAS/CNRS
+// Copyright (c) 2009-2013,2015 LAAS/CNRS
 // All rights reserved.
 //
 // Permission to use, copy, modify,  and distribute this software for any
@@ -28,8 +28,6 @@ Creating New Templates
 Source additional template code
 * link:cmd-template{outfilesuffix}#template_parse[`template parse`]:
 Generate template content
-* link:cmd-template{outfilesuffix}#template_link[`template link`]:
-Create symbolic links
 * link:cmd-template{outfilesuffix}#template_options[`template options`]:
 Define template options
 * link:cmd-template{outfilesuffix}#template_deps[`template deps`]:

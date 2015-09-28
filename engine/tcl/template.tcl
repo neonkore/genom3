@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 LAAS/CNRS
+# Copyright (c) 2010-2015 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -216,58 +216,6 @@ namespace eval template {
 	return
     }
     namespace export parse
-
-
-    # --- link -------------------------------------------------------------
-
-    #/
-    # [[template_link]]
-    # === `template link`: Create symbolic links
-    # ____
-    # `template link` 'src' 'dst'
-    # ____
-    #
-    # Link source file 'src' to destination file 'dst'. If relative, the source
-    # file 'src' is interpreted as relative to the template directory and 'dst'
-    # is interpreted as relative to the current output directory. Absolute file
-    # name can be given to override this behaviour.
-    #
-    proc link { src dst } {
-        variable deps
-
-	set src [file join [dotgen template dir] $src]
-	set dst [file join [engine pwd] $dst]
-	if {[file normalize $src] == [file normalize $dst]} return
-
-        if {[file normalize $src] ni $deps} {
-          lappend deps [file normalize $src]
-        }
-
-	if {[file exists $dst]} {
-	    if {[lsearch [engine mode] move-if-change] >= 0} {
-		set d [file normalize [file link $dst]]
-		set s [file normalize $src]
-		if {$s == $d} {
-		    template message "$dst is up-to-date"
-		    return
-		}
-	    }
-	    if {[lsearch [engine mode] -overwrite] >= 0} {
-		template fatal "file $dst would be overwritten"
-		return
-	    }
-
-	    template message "overwriting $dst"
-	    file delete $dst
-	} else {
-	    template message "creating link $dst"
-	}
-
-	file mkdir [file dirname $dst]
-	file link $dst $src
-	return
-    }
-    namespace export link
 
 
     # --- options ----------------------------------------------------------

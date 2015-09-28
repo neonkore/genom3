@@ -60,10 +60,11 @@ if {$task ne ""} {'>
 <'      set triggers [join [map {e {return [$e cname]}} [$codel triggers]] {, }]'>
 <"[wrap " * Triggered by $triggers." { * }]">
 <'    }'>
- * Yields to <"[join [map {e {return [$e cname]}} [$codel yields]] {, }]">.
+<'    set yields [join [map {e {return [$e cname]}} [$codel yields]] {, }]'>
+<"[wrap " * Yields to $yields." { *           }]">
 <'    if {[llength [$task throws]]} {'>
 <'      set throws [join [map {e {return [$e cname]}} [$task throws]] {, }]'>
-<"[wrap " * Throws $throws." { * }]">
+<"[wrap " * Throws $throws." { *        }]">
 <'    }'>
  */
 <'
@@ -133,13 +134,14 @@ foreach service [$component services] {
 <"[wrap " * Triggered by $triggers." { * }]">
 <'   }'>
 <'   if {[llength [$codel yields]]} {'>
- * Yields to <"[join [map {e {return [$e cname]}} [$codel yields]] {, }]">.
+<'    set yields [join [map {e {return [$e cname]}} [$codel yields]] {, }]'>
+<"[wrap " * Yields to $yields." { *           }]">
 <'   } else {'>
  * Returns genom_ok.
 <'   }'>
 <'   if {[llength [$service throws]]} {'>
 <'     set throws [join [map {e {return [$e cname]}} [$service throws]] {, }]'>
-<"[wrap " * Throws $throws." { * }]">
+<"[wrap " * Throws $throws." { *        }]">
 <'   }'>
  */
 <'

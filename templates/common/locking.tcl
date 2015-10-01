@@ -57,6 +57,10 @@ proc thread-safe-codel { component codel } {
         lappend conflicts {*}[codel-intersect $input $output $c]
       }
     }
+
+    foreach c [codel-reachable $t stop] {
+      lappend conflicts {*}[codel-intersect $input $output $c]
+    }
   }
 
   # scan all services in other tasks

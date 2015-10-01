@@ -81,7 +81,7 @@ proc thread-safe-codel { component codel } {
       if {$s in $conflicts} break
     }
 
-    # validation codels and regular codels
+    # validation codels
     foreach c [$s validate] {
       lappend conflicts {*}[codel-intersect $input $output $c]
     }
@@ -134,7 +134,7 @@ proc codel-reachable { obj states {codels {}} } {
     lappend codels {*}[codel-reachable $obj [$c yields] $codels]
   }
 
-  return $codels
+  return [lsort -unique $codels]
 }
 
 proc codel-intersect { input output codel } {

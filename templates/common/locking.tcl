@@ -51,7 +51,7 @@ proc thread-safe-codel { component codel } {
     if {$t == $task} continue
 
     # do not consider the start state which is guaranteed to have run already
-    set start [$t fsm ::[$component name]::start]
+    set start [$t fsm start]
     if {[llength $start]} {
       foreach c [codel-reachable $t [$start yield]] {
         lappend conflicts {*}[codel-intersect $input $output $c]

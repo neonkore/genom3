@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 LAAS/CNRS
+ * Copyright (c) 2012-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -350,6 +350,57 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
 }
 
 
+/* --- service_codel_mutex ------------------------------------------------- */
+
+/** Return a list of codels mutually exclusive with this service
+ */
+hash_s
+service_codel_mutex(service_s service)
+{
+  hash_s mutex;
+  const char *tname;
+  hiter i, e;
+  prop_s p;
+
+  mutex = hash_create("mutex", 1);
+  if (!mutex) {
+    parserror(service_loc(service), "not enough memory"); return NULL;
+  }
+
+  p = hash_find(service_props(service), prop_strkind(PROP_TASK));
+  tname = p ? task_name(prop_task(p)) : "";
+
+  /* check permanent activities in other tasks */
+  for(hash_first(comp_tasks(service_comp(service)), &i);
+      i.current; hash_next(&i)) {
+    if (!strcmp(task_name(i.value), tname)) continue;
+
+    assert(task_fsm(i.value));
+    for(hash_first(task_fsm(i.value), &e); e.current; hash_next(&e)) {
+      if (param_list_mutex(codel_params(e.value), service_params(service), 1))
+        hash_insert(mutex, codel_fullname(e.value), e.value, NULL);
+    }
+  }
+
+  /* check services in other tasks */
+  for(hash_first(comp_services(service_comp(service)), &i);
+      i.current; hash_next(&i)) {
+    service_s s = i.value;
+
+    p = hash_find(service_props(s), prop_strkind(PROP_TASK));
+    if (!strcmp(p ? task_name(prop_task(p)) : "", tname)) continue;
+
+    assert(service_fsm(s));
+    for(hash_first(service_fsm(s), &e); e.current; hash_next(&e)) {
+      if (param_list_mutex(codel_params(e.value), service_params(service), 1))
+        hash_insert(mutex, codel_fullname(e.value), e.value, NULL);
+    }
+  }
+
+  return mutex;
+}
+
+
 /* --- service_check ------------------------------------------------------- */
 
 /** sanity checks for a service
@@ -397,6 +448,7 @@ service_check(service_s service)
         break;
     }
   }
+
   return e;
 }
 

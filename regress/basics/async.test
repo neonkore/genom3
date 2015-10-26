@@ -1,0 +1,43 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+cat >run.gen <<EOF
+component c {
+  task t {
+    async codel<start> async_codel() yield ether;
+  };
+};
+EOF
+
+testing 'async codel with no input'
+run 0 ${GENOM_BIN} -n run.gen
+
+cat >run.gen <<EOF
+component c {
+  ids { long v; };
+  task t {
+    async codel<start> async_codel(out v) yield ether;
+  };
+
+  attribute b(in v);
+};
+EOF
+
+testing 'async codel with shared input'
+run 1 ${GENOM_BIN} -n run.gen
+
+cat >run.gen <<EOF
+component c {
+  ids { long v; };
+  task t {
+    async codel<start> async_codel(out v) yield ether;
+  };
+
+  task u {
+    codel<start, stop> async_codel(out v) yield ether;
+  };
+};
+EOF
+
+testing 'async codel authorizing start/stop states in permanent activites'
+run 0 ${GENOM_BIN} -n run.gen

@@ -196,7 +196,7 @@ comp_pop(void)
 {
   comp_s c = active;
   scope_s s;
-  hiter i;
+  hiter i, j;
   int e = 0;
   assert(active);
 
@@ -207,6 +207,24 @@ comp_pop(void)
   /* check services */
   for(hash_first(c->services, &i); i.current; hash_next(&i))
     e |= service_check(i.value);
+
+  /* check codels */
+  for(hash_first(c->tasks, &i); i.current; hash_next(&i))
+    for(hash_first(task_fsm(i.value), &j); j.current; hash_next(&j))
+      if (codel_check(j.value)) e = 1;
+  for(hash_first(c->services, &i); i.current; hash_next(&i)) {
+    for(hash_first(service_props(i.value), &j); j.current; hash_next(&j)) {
+      switch(prop_kind(j.value)) {
+        case PROP_SIMPLE_CODEL:
+        case PROP_VALIDATE:
+          if (codel_check(prop_codel(j.value))) e |= 1;
+          break;
+        default: break;
+      }
+    }
+    for(hash_first(service_fsm(i.value), &j); j.current; hash_next(&j))
+      if (codel_check(j.value)) e |= 1;
+  }
 
   /* pop context */
   s = scope_pop();

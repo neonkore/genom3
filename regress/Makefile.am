@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2014 LAAS/CNRS
+# Copyright (c) 2009-2015 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -23,6 +23,7 @@ TESTS+=	basics/extends.test
 TESTS+=	basics/provides.test
 TESTS+=	basics/interrupts.test
 TESTS+=	basics/initializer.test
+TESTS+=	basics/async.test
 
 TESTS+=	templates/genom.test
 
@@ -37,6 +38,7 @@ if WITH_TCL
   TESTS+=	tcl-engine/service.test
   TESTS+=	tcl-engine/remote.test
   TESTS+=	tcl-engine/codel.test
+  TESTS+=	tcl-engine/mutex.test
   TESTS+=	tcl-engine/component.test
   TESTS+=	tcl-engine/template.test
   TESTS+=	tcl-engine/language.test

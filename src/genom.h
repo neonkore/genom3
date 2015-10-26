@@ -468,6 +468,7 @@ const char *	service_strkind(svckind k);
 
 service_s	service_create(tloc l, svckind kind, const char *name,
                         hash_s params, hash_s props);
+hash_s		service_codel_mutex(service_s service);
 int		service_check(service_s service);
 service_s	service_clone(service_s service);
 void		service_destroy(service_s s);
@@ -540,6 +541,7 @@ typedef enum codelkind {
 
 tloc		codel_loc(codel_s c);
 const char *	codel_name(codel_s c);
+const char *	codel_fullname(codel_s c);
 codelkind	codel_kind(codel_s c);
 hash_s		codel_params(codel_s c);
 hash_s		codel_triggers(codel_s c);
@@ -573,8 +575,11 @@ initer_s	initer_next(initer_s i);
 codel_s		codel_create(tloc l, const char *name, codelkind kind,
 			hash_s triggers, hash_s yields, hash_s params);
 codel_s		codel_clone(codel_s codel);
+hash_s		codel_codel_mutex(codel_s codel);
+hash_s		codel_service_mutex(codel_s codel);
 hash_s		codel_fsmcreate(tloc l, comp_s comp, hash_s props);
 const char *	codel_strkind(codelkind k);
+int		codel_check(codel_s codel);
 
 param_s		param_newids(tloc l, pdir dir, const char *name,
 			clist_s member, initer_s initer);
@@ -595,6 +600,8 @@ initer_s	param_typeiniter(param_s p, idltype_s t);
 
 int		param_equal(param_s p, param_s q);
 int		param_list_equal(hash_s l, hash_s m);
+int		param_mutex(param_s p, param_s q, int invq);
+int		param_list_mutex(hash_s l, hash_s m, int invm);
 const char *	param_strsrc(psrc s);
 const char *	param_strdir(pdir d);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 LAAS/CNRS
+ * Copyright (c) 2010-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -487,6 +487,48 @@ param_list_equal(hash_s l, hash_s m)
   }
   if (i.value || j.value) return 0;
   return 1;
+}
+
+
+/* --- param_mutex --------------------------------------------------------- */
+
+/** check if two parameters access the same resource
+ */
+int
+param_mutex(param_s p, param_s q, int invq)
+{
+  citer i, j;
+  if (!p || !q) return 0;
+
+  if (param_src(p) != param_src(q)) return 0;
+  if (param_src(p) == P_LOCAL) return 0;
+  if (param_dir(p) == P_IN) {
+    if (!invq && param_dir(q) == P_IN) return 0;
+    if (invq && param_dir(q) == P_OUT) return 0;
+  }
+  if (!type_equal(param_base(p), param_base(q))) return 0;
+
+  for(clist_first(param_member(p), &i), clist_first(param_member(q), &j);
+      i.value && j.value;
+      clist_next(&i), clist_next(&j))
+    if (!const_equal(*i.value, *j.value)) return 0;
+
+  return 1;
+}
+
+
+/** check if two list of parameters access the same resource
+ */
+int
+param_list_mutex(hash_s l, hash_s m, int invm)
+{
+  hiter i, j;
+
+  for(hash_first(l, &i); i.current; hash_next(&i))
+    for(hash_first(m, &j); j.current; hash_next(&j))
+      if (param_mutex(i.value, j.value, invm)) return 1;
+
+  return 0;
 }
 
 

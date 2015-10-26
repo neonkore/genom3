@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 LAAS/CNRS
+ * Copyright (c) 2011-2013,2015 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -46,16 +46,18 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum codelidx {
     codelidx_name, codelidx_kind, codelidx_params, codelidx_yields,
-    codelidx_triggers, codelidx_task, codelidx_service, codelidx_cname,
-    codelidx_signature, codelidx_invoke, codelidx_loc, codelidx_class
+    codelidx_triggers, codelidx_task, codelidx_service, codelidx_mutex,
+    codelidx_cname, codelidx_signature, codelidx_invoke, codelidx_loc,
+    codelidx_class
   };
   static const char *args[] = {
     [codelidx_name] = "name", [codelidx_kind] = "kind",
     [codelidx_params] = "parameters", [codelidx_yields] = "yields",
     [codelidx_triggers] = "triggers", [codelidx_task] = "task",
-    [codelidx_service] = "service", [codelidx_cname] = "cname",
-    [codelidx_signature] = "signature", [codelidx_invoke] = "invoke",
-    [codelidx_loc] = "loc", [codelidx_class] = "class", NULL
+    [codelidx_service] = "service", [codelidx_mutex] = "mutex",
+    [codelidx_cname] = "cname", [codelidx_signature] = "signature",
+    [codelidx_invoke] = "invoke", [codelidx_loc] = "loc",
+    [codelidx_class] = "class", NULL
   };
   codel_s c = v;
   Tcl_Obj *r = NULL;
@@ -130,6 +132,35 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       if (*codel_service(c))
 	r = Tcl_NewStringObj(service_genref(*codel_service(c)), -1);
       break;
+
+    case codelidx_mutex: {
+      hiter i;
+      hash_s h = codel_codel_mutex(c);
+      if (!h) {
+        Tcl_AppendResult(interp, "internal error", NULL);
+        return TCL_ERROR;
+      }
+
+      r = Tcl_NewListObj(0, NULL);
+      for(hash_first(h, &i); i.current; hash_next(&i)) {
+        Tcl_ListObjAppendElement(
+          interp, r, Tcl_NewStringObj(codel_genref(i.value), -1));
+      }
+      hash_destroy(h, 1);
+
+      h = codel_service_mutex(c);
+      if (!h) {
+        Tcl_AppendResult(interp, "internal error", NULL);
+        return TCL_ERROR;
+      }
+
+      for(hash_first(h, &i); i.current; hash_next(&i)) {
+        Tcl_ListObjAppendElement(
+          interp, r, Tcl_NewStringObj(service_genref(i.value), -1));
+      }
+      hash_destroy(h, 1);
+      break;
+    }
 
     case codelidx_cname:
     case codelidx_signature:

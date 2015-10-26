@@ -1,0 +1,137 @@
+#!/bin/sh
+. ${0%${0##*/}}../test.sh
+
+mkdir -p run.t
+
+cat >run.gen <<EOF
+component c {
+  ids { long a, b; };
+  attribute set_a(in a);
+  attribute get_a(out a);
+
+  function f1() { codel c1(in a, out b); };
+  function f2() { codel c2(in b, out a); };
+
+  task t {
+    codel<start> c3(in a) yield main;
+    codel<main> c4(in b) yield stop;
+    codel<stop> c5() yield ether;
+  };
+
+  activity a1() {
+    task t;
+    codel<start> c6(in a, out b) yield main;
+    codel<main> c7(in b, out a) yield ether;
+  };
+};
+EOF
+
+# --- codel mutex ----------------------------------------------------------
+#
+testing '[$codel mutex]'
+
+run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
+set comp [dotgen components]
+foreach x [list {*}[$comp tasks] {*}[$comp services]] {
+  foreach c [$x codel] {
+    foreach m [$c mutex] {
+      puts "[$c name] x [$m name]"
+    }
+  }
+}
+EOF
+expect out '
+	/^c1 x c4$/ {next}
+	/^c1 x c6$/ {next}
+	/^c1 x c7$/ {next}
+
+	/^c2 x c3$/ {next}
+	/^c2 x c6$/ {next}
+	/^c2 x c7$/ {next}
+
+	/^c3 x set_a$/ {next}
+	/^c3 x c2$/ {next}
+
+	/^c4 x c1$/ {next}
+
+	/^c6 x set_a$/ {next}
+	/^c6 x c1$/ {next}
+	/^c6 x c2$/ {next}
+
+	/^c7 x set_a$/ {next}
+	/^c7 x get_a$/ {next}
+	/^c7 x c1$/ {next}
+	/^c7 x c2$/ {next}
+
+	{exit 2}
+END	{ if (NR != 16) {exit 2} }
+'
+
+
+# --- service mutex --------------------------------------------------------
+#
+testing '[$service mutex]'
+
+run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
+set comp [dotgen components]
+foreach s [$comp services] {
+  foreach m [$s mutex] {
+    puts "[$s name] x [$m name]"
+  }
+}
+EOF
+expect out '
+	/^set_a x c3$/ {next}
+	/^set_a x c6$/ {next}
+	/^set_a x c7$/ {next}
+
+	/^get_a x c7$/ {next}
+
+	{exit 2}
+END	{ if (NR != 4) {exit 2} }
+'
+
+
+# --- multiple codel references --------------------------------------------
+#
+testing '[$codel mutex] with multiple codel instances'
+
+cat >run.gen <<EOF
+component c {
+  ids { long a; };
+
+  function t() { codel c(out a); };
+
+  task t {
+    codel<start> c(out a) yield ether;
+  };
+
+  activity a() {
+    task t;
+    codel<start> c(out a) yield ether;
+  };
+};
+EOF
+
+run 0  ${GENOM_BIN} interactive -b run.gen <<'EOF'
+set comp [dotgen components]
+foreach x [list {*}[$comp tasks] {*}[$comp services]] {
+  foreach c [$x codel] {
+    if {[catch {[$c task] name} t]} { set t "." }
+    if {[catch {[$c service] name} s]} { set s "." }
+    foreach m [$c mutex] {
+      if {[catch {[$m task] name} mt]} { set mt "." }
+      if {[catch {[$m service] name} ms]} { set ms "." }
+      puts "$t $s [$c name] x $mt $ms [$m name]"
+    }
+  }
+}
+EOF
+expect out '
+	/^. t c x t . c$/ {next}
+	/^. t c x t a c$/ {next}
+	/^t . c x . t c$/ {next}
+	/^t a c x . t c$/ {next}
+	{exit 2}
+END	{ if (NR != 4) {exit 2} }
+'

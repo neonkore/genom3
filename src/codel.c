@@ -65,6 +65,17 @@ void	codel_setkind(codel_s c, codelkind k) { assert(c); c->kind = k; }
 static codel_s	codel_find(const char *name);
 static void	connectivity(hash_s fsm, codel_s node, int start);
 
+const char *
+codel_fullname(codel_s c)
+{
+  assert(c);
+  return strings(
+    c->task ? task_name(c->task) : "", "::",
+    c->service ? service_name(c->service) : "", "::",
+    c->name,
+    NULL);
+}
+
 
 /* --- codel_create -------------------------------------------------------- */
 
@@ -225,6 +236,137 @@ codel_find(const char *name)
 }
 
 
+/* --- codel_codel_mutex --------------------------------------------------- */
+
+/** Return a list of codels mutually exclusive with this one
+ */
+hash_s
+codel_codel_mutex(codel_s codel)
+{
+  hash_s mutex;
+  const char *tname, *sname;
+  comp_s c = NULL;
+  codel_s other;
+  hiter i, e;
+  prop_s p;
+
+  mutex = hash_create("mutex", 1);
+  if (!mutex) { parserror(codel_loc(codel), "not enough memory"); return NULL; }
+
+  if (*codel_service(codel)) {
+    c = service_comp(*codel_service(codel));
+    sname = service_name(*codel_service(codel));
+  } else
+    sname = "";
+  if (*codel_task(codel)) {
+    c = task_comp(*codel_task(codel));
+    tname = task_name(*codel_task(codel));
+  } else
+    tname = "";
+  assert(c);
+
+  /* check permanent activities in other tasks */
+  for(hash_first(comp_tasks(c), &i); i.current; hash_next(&i)) {
+    if (!strcmp(task_name(i.value), tname)) continue;
+
+    assert(task_fsm(i.value));
+    for(hash_first(task_fsm(i.value), &e); e.current; hash_next(&e)) {
+      other = e.value;
+      if (param_list_mutex(codel_params(codel), codel_params(other), 0))
+        hash_insert(mutex, codel_fullname(other), other, NULL);
+    }
+  }
+
+  /* check services in other tasks */
+  for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
+    service_s s = i.value;
+
+    p = hash_find(service_props(s), prop_strkind(PROP_TASK));
+    if (!strcmp(p ? task_name(prop_task(p)) : "", tname)) continue;
+
+    /* simple codels */
+    for(hash_first(service_props(s), &e); e.current; hash_next(&e)) {
+      switch(prop_kind(e.value)) {
+        case PROP_SIMPLE_CODEL:
+        case PROP_VALIDATE:
+          other = prop_codel(e.value);
+          if (param_list_mutex(codel_params(codel), codel_params(other), 0))
+            hash_insert(mutex, codel_fullname(other), other, NULL);
+          break;
+
+        default: break;
+      }
+    }
+
+    /* do not further consider this service if it interrupts the service to
+     * which the given codel belongs */
+    p = hash_find(service_props(s), prop_strkind(PROP_INTERRUPTS));
+    if (p) {
+      int interrupts = 0;
+
+      for(hash_first(prop_hash(p), &e); e.current; hash_next(&e))
+        if (!strcmp(e.value, ALL_SERVICE_NAME) || !strcmp(e.value, sname)) {
+          interrupts = 1;
+          break;
+        }
+      if (interrupts) continue;
+    }
+
+    /* fsm codels */
+    assert(service_fsm(s));
+    for(hash_first(service_fsm(s), &e); e.current; hash_next(&e)) {
+      other = e.value;
+      if (param_list_mutex(codel_params(codel), codel_params(other), 0))
+        hash_insert(mutex, codel_fullname(other), other, NULL);
+    }
+  }
+
+  return mutex;
+}
+
+
+/* --- codel_service_mutex ------------------------------------------------- */
+
+/** Return a list of services mutually exclusive with this codel
+ */
+hash_s
+codel_service_mutex(codel_s codel)
+{
+  hash_s mutex;
+  const char *tname;
+  comp_s c = NULL;
+  hiter i;
+  prop_s p;
+
+  mutex = hash_create("mutex", 1);
+  if (!mutex) { parserror(codel_loc(codel), "not enough memory"); return NULL; }
+
+  if (*codel_service(codel)) {
+    c = service_comp(*codel_service(codel));
+  }
+  if (*codel_task(codel)) {
+    c = task_comp(*codel_task(codel));
+    tname = task_name(*codel_task(codel));
+  } else
+    tname = "";
+  assert(c);
+
+  /* check services in other tasks */
+  for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
+    service_s s = i.value;
+
+    p = hash_find(service_props(s), prop_strkind(PROP_TASK));
+    if (!strcmp(p ? task_name(prop_task(p)) : "", tname)) continue;
+
+    /* service parameters (for attributes/ids access) */
+    if (param_list_mutex(codel_params(codel), service_params(s), 1))
+      hash_insert(mutex, service_name(s), s, NULL);
+  }
+
+  return mutex;
+}
+
+
 /* --- codel_fsmcreate ----------------------------------------------------- */
 
 /** Build a fsm hash from existing codels in a list of properties
@@ -341,6 +483,62 @@ connectivity(hash_s fsm, codel_s node, int start)
     if (n->connected.ether) node->connected.ether = 1;
   }
 }
+
+
+/* --- codel_check --------------------------------------------------------- */
+
+/** sanity checks for a codel
+ */
+int
+codel_check(codel_s codel)
+{
+  int r = 0;
+
+  /* forbid async codels to share data with other tasks */
+  if (codel_kind(codel) == CODEL_ASYNC) {
+    hash_s h;
+    codel_s c;
+    hiter i;
+
+    h = codel_codel_mutex(codel);
+    if (!h) return errno;
+
+    for(hash_first(h, &i); i.current; hash_next(&i)) {
+      c = i.value;
+      if (c->task && !c->service) {
+        /* explicitly allow start & stop states from permanent activities */
+        if (c == hash_find(task_fsm(c->task), "start")) continue;
+        if (!c->connected.start) continue;
+      }
+
+      parserror(codel_loc(codel),
+                "%s codel %s conflicts with codel %s (shared parameters)",
+                codel_strkind(codel_kind(codel)), codel_name(codel),
+                codel_name(c));
+      parsenoerror(codel_loc(c), " codel %s declared here", codel_name(c));
+      r = 1;
+    }
+    hash_destroy(h, 1);
+
+    h = codel_service_mutex(codel);
+    if (!h) return errno;
+
+    for(hash_first(h, &i); i.current; hash_next(&i)) {
+      parserror(codel_loc(codel),
+                "%s codel %s conflicts with %s %s (shared parameters)",
+                codel_strkind(codel_kind(codel)), codel_name(codel),
+                service_strkind(service_kind(i.value)), service_name(i.value));
+      parsenoerror(service_loc(i.value), " %s %s declared here",
+                   service_strkind(service_kind(i.value)),
+                   service_name(i.value));
+      r = 1;
+    }
+    hash_destroy(h, 1);
+  }
+
+  return r;
+}
+
 
 
 /* --- codel_strkind ------------------------------------------------------- */

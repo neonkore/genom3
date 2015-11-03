@@ -21,7 +21,6 @@ tdir=$(tmpldir)/common
 
 dist_t_DATA=\
 	genom.gen			\
-	locking.tcl			\
 	c-client.pc.in			\
 	c-client-uninstalled.pc.in	\
 	client.h			\

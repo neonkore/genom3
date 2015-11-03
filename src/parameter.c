@@ -502,11 +502,12 @@ param_mutex(param_s p, param_s q, int invq)
 
   if (param_src(p) != param_src(q)) return 0;
   if (param_src(p) == P_LOCAL) return 0;
+  if (!type_equal(param_base(p), param_base(q))) return 0;
+  if (param_src(p) == P_PORT) return 1;
   if (param_dir(p) == P_IN) {
     if (!invq && param_dir(q) == P_IN) return 0;
     if (invq && param_dir(q) == P_OUT) return 0;
   }
-  if (!type_equal(param_base(p), param_base(q))) return 0;
 
   for(clist_first(param_member(p), &i), clist_first(param_member(q), &j);
       i.value && j.value;

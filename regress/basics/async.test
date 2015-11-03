@@ -1,6 +1,8 @@
 #!/bin/sh
 . ${0%${0##*/}}../test.sh
 
+# --- async codel with no input --------------------------------------------
+#
 cat >run.gen <<EOF
 component c {
   task t {
@@ -12,6 +14,9 @@ EOF
 testing 'async codel with no input'
 run 0 ${GENOM_BIN} -n run.gen
 
+
+# --- async codel with shared input ----------------------------------------
+#
 cat >run.gen <<EOF
 component c {
   ids { long v; };
@@ -23,9 +28,32 @@ component c {
 };
 EOF
 
-testing 'async codel with shared input'
+testing 'async codel with shared ids input'
 run 1 ${GENOM_BIN} -n run.gen
 
+cat >run.gen <<EOF
+component c {
+  struct port { long v; };
+  port in port p;
+
+  task t {
+    async codel<start> async_codel(in p) yield ether;
+  };
+
+  task u;
+  activity a() {
+    task u;
+    codel<start> a_start(in p) yield ether;
+  };
+};
+EOF
+
+testing 'async codel with shared input port'
+run 1 ${GENOM_BIN} -n run.gen
+
+
+# --- async codel authorizing start/stop states in permanent activites -----
+#
 cat >run.gen <<EOF
 component c {
   ids { long v; };

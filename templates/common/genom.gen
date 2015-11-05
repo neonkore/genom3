@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 LAAS/CNRS
+ * Copyright (c) 2012-2015 LAAS/CNRS
  * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software for any purpose
@@ -44,28 +44,30 @@ interface genom {
 
 
   /* standard "state" port */
-  const unsigned short MAX_TASKS = 8;
-  const unsigned short MAX_ACTIVITIES = 32;
-
   module state {
-    struct time {
-      double last, max, avg;
+    struct stats {
+      float last, max, avg;
+    };
+
+    struct rusage {
+      unsigned long cycles;
+      stats timings;
+      stats load;
+    };
+
+    struct activity {
+      unsigned long id;
+      string<64> name;
     };
 
     struct task {
       string<64> name;
-      time cputime;
-    };
-
-    struct activity {
-      unsigned short id;
-      string<64> name;
-      string<64> state;
+      rusage rusage;
+      sequence<activity> activity;
     };
 
     struct component {
-      sequence<task, MAX_TASKS> task;
-      sequence<activity, MAX_ACTIVITIES> activity;
+      sequence<task> task;
 
       string<33> digest;
       string<31> date;

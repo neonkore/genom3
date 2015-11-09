@@ -1,6 +1,30 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2015 LAAS/CNRS
 
+			    Changes in genom 2.99.26
+
+Released on Nov 9th, 2015
+ . INCOMPATIBLE CHANGE: Introduced 'paused' transitions. This allows to execute
+   multiple states of a periodic activity during the same period. This breaks
+   the behaviour of all activities running in a periodic task. In order to
+   sleep until the next period, activities must now return a 'paused'
+   transition (see documentation). A 'paused' transition in a task with no
+   period behaves as the former special 'sleep' state (waits until another
+   codel runs and returns a regular transition - i.e. not a paused one).
+ . Dropped the special 'sleep' state (superseeded by 'paused' transitions).
+ . Added a new [$codel mutex] template procedure, returning the list of mutually
+   exclusive codels (sharing resources). This helps template in implementing
+   better parallelism.
+ . Do not require a 'start' state for permanent (task) activities. They may
+   define only a 'stop' event.
+ . Check at compile time that 'async' codels do not share any data with other
+   tasks: since they are expected to run in parallel with other codels, this is
+   a mandatory property. As a convenient exception, async codels sharing data
+   with only the start or stop state of other permanent activities are still
+   allowed.
+ . Skeleton template remembers the -l c++ option so that 'make regen' works.
+ . Miscelaneaous bug fixes, in particular in sequences mapping.
+
 			    Changes in genom 2.99.25
 
 Released on May 28th, 2015

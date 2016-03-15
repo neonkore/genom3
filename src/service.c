@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 LAAS/CNRS
+ * Copyright (c) 2012-2016 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -412,7 +412,8 @@ service_check(service_s service)
   int e = 0;
 
   /* build service's fsm */
-  assert(!service->fsm);
+  if (service->fsm) return 0;
+
   service->fsm = codel_fsmcreate(
     service->loc, service->component, service->props);
   if (!service->fsm)

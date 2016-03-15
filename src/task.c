@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 LAAS/CNRS
+ * Copyright (c) 2012-2013,2016 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -175,7 +175,8 @@ int
 task_check(task_s task)
 {
   /* build task's fsm */
-  assert(!task->fsm);
+  if (task->fsm) return 0;
+
   task->fsm = codel_fsmcreate(task->loc, task->component, task->props);
   if (!task->fsm) {
     parsenoerror(task->loc, " in task %s declared here", task->name);

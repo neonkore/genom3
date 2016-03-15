@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013,2015 LAAS/CNRS
+ * Copyright (c) 2009-2013,2015-2016 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -119,7 +119,6 @@ comp_push(tloc l, const char *name, compkind kind)
     }
 
     active = c;
-    comp_dopragma(c);
     xwarnx("reopened %s %s", comp_strkind(kind), c->name);
     return c;
   }

@@ -92,9 +92,8 @@ json_scan_<"[$t mangle]">(<"[$t argument reference data]">, const char **json)
     }
   }
   (*json)++;
-<'
-    }
-    sequence {'>
+<'    }'>
+<'    sequence {'>
   long i;
 
   json_skip_whitespace(*json);
@@ -117,7 +116,6 @@ json_scan_<"[$t mangle]">(<"[$t argument reference data]">, const char **json)
           (*json)++;
           json_skip_whitespace(*json);
         }
-        i++;
       }
       break;
 

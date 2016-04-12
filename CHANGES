@@ -1,5 +1,10 @@
 GenoM3 - Generator of robotic component
-Copyright (c) 2009-2015 LAAS/CNRS
+Copyright (c) 2009-2016 LAAS/CNRS
+
+			    Changes in genom 2.99.27
+
+Released on Apr 12th, 2016
+ . Fix the scanning of json sequences in the common template source files.
 
 			    Changes in genom 2.99.26
 

@@ -277,26 +277,30 @@ codel_codel_mutex(codel_s codel)
     }
   }
 
-  /* check services in other tasks */
+  /* check other services */
   for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
     service_s s = i.value;
 
-    p = hash_find(service_props(s), prop_strkind(PROP_TASK));
-    if (!strcmp(p ? task_name(prop_task(p)) : "", tname)) continue;
+    /* simple codels if the given codel is an fsm codel */
+    if (*codel_task(codel)) {
+      for(hash_first(service_props(s), &e); e.current; hash_next(&e)) {
+        switch(prop_kind(e.value)) {
+          case PROP_SIMPLE_CODEL:
+          case PROP_VALIDATE:
+            other = prop_codel(e.value);
+            if (param_list_mutex(codel_params(codel), codel_params(other), 0))
+              hash_insert(mutex, codel_fullname(other), other, NULL);
+            break;
 
-    /* simple codels */
-    for(hash_first(service_props(s), &e); e.current; hash_next(&e)) {
-      switch(prop_kind(e.value)) {
-        case PROP_SIMPLE_CODEL:
-        case PROP_VALIDATE:
-          other = prop_codel(e.value);
-          if (param_list_mutex(codel_params(codel), codel_params(other), 0))
-            hash_insert(mutex, codel_fullname(other), other, NULL);
-          break;
-
-        default: break;
+          default: break;
+        }
       }
     }
+
+    /* fsm codels in the same task or two simple codels (in no task) cannot
+     * be incompatible */
+    p = hash_find(service_props(s), prop_strkind(PROP_TASK));
+    if (!strcmp(p ? task_name(prop_task(p)) : "", tname)) continue;
 
     /* do not further consider this service if it interrupts the service to
      * which the given codel belongs and the given codel is an fsm codel, i.e.

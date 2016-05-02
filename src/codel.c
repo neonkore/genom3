@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013,2015 LAAS/CNRS
+ * Copyright (c) 2009-2013,2015-2016 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -299,17 +299,20 @@ codel_codel_mutex(codel_s codel)
     }
 
     /* do not further consider this service if it interrupts the service to
-     * which the given codel belongs */
-    p = hash_find(service_props(s), prop_strkind(PROP_INTERRUPTS));
-    if (p) {
-      int interrupts = 0;
+     * which the given codel belongs and the given codel is an fsm codel, i.e.
+     * it runs in a task. */
+    if (*codel_task(codel)) {
+      p = hash_find(service_props(s), prop_strkind(PROP_INTERRUPTS));
+      if (p) {
+        int interrupts = 0;
 
-      for(hash_first(prop_hash(p), &e); e.current; hash_next(&e))
-        if (!strcmp(e.value, ALL_SERVICE_NAME) || !strcmp(e.value, sname)) {
-          interrupts = 1;
-          break;
-        }
-      if (interrupts) continue;
+        for(hash_first(prop_hash(p), &e); e.current; hash_next(&e))
+          if (!strcmp(e.value, ALL_SERVICE_NAME) || !strcmp(e.value, sname)) {
+            interrupts = 1;
+            break;
+          }
+        if (interrupts) continue;
+      }
     }
 
     /* fsm codels */

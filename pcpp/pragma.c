@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012 LAAS/CNRS
+ * Copyright (c) 2011-2012,2016 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -137,7 +137,7 @@ get_pkgconfig_cflags(char **argv)
 
   /* split cflags at whitespace */
   next = 0;
-  for(p = strtok(cflags, " \t"); p; p = strtok(NULL, " \t")) {
+  for(p = strtok(cflags, " \t\n"); p; p = strtok(NULL, " \t\n")) {
     if (next == 'I') {
       next = 0;
       addpkgidir(p);

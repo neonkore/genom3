@@ -1,6 +1,15 @@
 GenoM3 - Generator of robotic component
 Copyright (c) 2009-2016 LAAS/CNRS
 
+			    Changes in genom 2.99.28
+
+Released on Jul 11th, 2016
+ . Fix the computation of mutually exclusive codels for a validation codel.
+ . Fix the IDL mappings for bounded sequences of bounded strings (or arrays).
+ . Also split pkg-config output at newlines, recent versions use this
+   separator.
+
+
 			    Changes in genom 2.99.27
 
 Released on Apr 12th, 2016

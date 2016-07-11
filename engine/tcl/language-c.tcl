@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 LAAS/CNRS
+# Copyright (c) 2010-2016 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -520,7 +520,19 @@ namespace eval language::c {
             append m "\n  $n &operator=(const $n &x) {"
             append m "\n    _length = x._length;"
             append m "\n    for(unsigned i=0; i<_length; i++)"
-            append m "\n      _buffer\[i\] = x._buffer\[i\];"
+            switch -- [[$type type] kind] {
+              string - array {
+                if {[catch {[$type type] length} l]} {
+                  append m "\n      _buffer\[i\] = x._buffer\[i\];"
+                } else {
+                  append m "\n      for(unsigned j=0; j<$l; j++)"
+                  append m "\n        _buffer\[i\]\[j\] = x._buffer\[i\]\[j\];"
+                }
+              }
+              default {
+                append m "\n      _buffer\[i\] = x._buffer\[i\];"
+              }
+            }
             append m "\n    return *this;"
             append m "\n  };"
             append m "\n# endif"

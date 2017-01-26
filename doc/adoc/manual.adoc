@@ -1,8 +1,8 @@
 genom3(1)
 =========
 :revision: 2.99.28
-:month: July
-:year: 2016
+:month: January
+:year: 2017
 :doctype: manpage
 :revdate: {month} {year}
 :man source:   Openrobots

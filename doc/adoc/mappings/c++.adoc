@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2009-2014 LAAS/CNRS
+// Copyright (c) 2009-2014,2017 LAAS/CNRS
 // All rights reserved.
 //
 // Permission to use, copy, modify,  and distribute this software for any
@@ -17,15 +17,17 @@
 //
 //                                      Anthony Mallet on Fri Jun 25 2010
 //
+:cxx: C++
 
-`C++` mappings: From IDL types to `C++` types
----------------------------------------------
+[monospaced]#{cxx}# mappings: From IDL types to [monospaced]#{cxx}# types
+-------------------------------------------------------------------------
 
 [[scoped_name]]
 === Scoped names
 
-The `C++` mappings for scoped names use `C++` scopes.  IDL `module` are
-mapped to `namespace`. For instance, the following IDL:
+The [monospaced]#{cxx}# mappings for scoped names use [monospaced]#{cxx}#
+scopes.  IDL `module` are mapped to `namespace`. For instance, the following
+IDL:
 ----
       module m {
          const string str = "scoped string";
@@ -43,7 +45,7 @@ would map into
 [[constant]]
 === Mapping for constants
 
-`genom3` IDL constants are mapped to a `C++` constant. For
+`genom3` IDL constants are mapped to a [monospaced]#{cxx}# constant. For
 instance, the following IDL:
 ----
    const long longint = 1;
@@ -62,16 +64,17 @@ would map into
 
 The basic data types have the mappings shown in the table below.
 Integer types use the `C99` fixed size integer types as provided
-by the `stdint.h` standard header (since the `C++` `cstdint`
-header is not part of the `C++` at the time of writing this document).
+by the `stdint.h` standard header (since the [monospaced]#{cxx}# `cstdint`
+header is not part of the [monospaced]#{cxx}# at the time of writing this
+document).
 Users do not have to include this header: the template mapping
 generation procedure output the appropriate `#include` directive
 along with the mappings for the integer types.
 
-.Basic data types mappings in `C++`
+.Basic data types mappings in [monospaced]#{cxx}#
 [width="60%",cols="^,1",frame="topbot",options="header"]
 |==================================================================
-| IDL                  | `C++`
+| IDL                  | [monospaced]#{cxx}#
 | `boolean`            | `bool`
 | `unsigned short`     | `uint16_t`
 | `short`              | `int16_t`
@@ -90,9 +93,9 @@ along with the mappings for the integer types.
 [[enumerated_type]]
 === Mapping for enumerated types
 
-The `C++` mapping of an IDL `enum` type is the corresponding `C++`
-`enum`. An additional constant is generated to guarantee that the
-type occupies a 32 bits wide integer.
+The [monospaced]#{cxx}# mapping of an IDL `enum` type is the corresponding
+[monospaced]#{cxx}# `enum`. An additional constant is generated to guarantee
+that the type occupies a 32 bits wide integer.
 
 For instance, the following IDL:
 ----
@@ -116,7 +119,7 @@ would map, according to the scoped names rules, into
 
 `genom3` IDL bounded strings are mapped to nul terminated character
 arrays (i.e., C strings). Unbounded strings are mapped to
-`std::string` provided by the `C++` standard.
+`std::string` provided by the [monospaced]#{cxx}# standard.
 
 For instance, the following OMG IDL declarations:
 ----
@@ -134,8 +137,8 @@ would map into
 [[array]]
 === Mapping for arrays
 
-`genom3` IDL arrays map directly to `C++` arrays. All array indices run from 0 to
-`size-1`.
+`genom3` IDL arrays map directly to [monospaced]#{cxx}# arrays. All array
+indices run from 0 to `size-1`.
 
 For instance, the following IDL:
 ----
@@ -150,8 +153,8 @@ would map into
 [[struct]]
 === Mapping for structure types
 
-`genom3` IDL  structures map directly onto  `C++` `struct`s.  Note that these
-structures may potentially include padding.
+`genom3` IDL  structures map directly onto  [monospaced]#{cxx}# `struct`s.
+Note that these structures may potentially include padding.
 
 For instance, the following IDL:
 ----
@@ -197,9 +200,9 @@ would map into
       };
 ----
 
-Note that the `C++` standard does not allow union members that have a
-non-trivial constructor.  Consequently, the `C++` mapping for such kind
-of unions is not allowed in `genom3` either. This concerns
+Note that the [monospaced]#{cxx}# standard does not allow union members that
+have a non-trivial constructor.  Consequently, the [monospaced]#{cxx}# mapping
+for such kind of unions is not allowed in `genom3` either. This concerns
 `sequence`s and `string`s, and structures or unions that
 contain such a type. You should thus avoid to define such datatypes in
 `genom3` IDL in order to maximize the portability of your definitions.
@@ -209,9 +212,9 @@ contain such a type. You should thus avoid to define such datatypes in
 
 `genom3` IDL sequences mapping differ for bounded or unbouded
 variations of the sequence. The unbounded sequences maps onto the
-`std::vector` template class provided by the `C++` standard.  The
-bounded sequence maps onto a `C++` `genom::bounded_sequence` template
-class. The definition of `genom::bounded_sequence` is very
+`std::vector` template class provided by the [monospaced]#{cxx}# standard.  The
+bounded sequence maps onto a [monospaced]#{cxx}# `genom::bounded_sequence`
+template class. The definition of `genom::bounded_sequence` is very
 similar to `std::array` but provides a variable number of elements.
 
 For instance, the following IDL:
@@ -416,7 +419,7 @@ The remote service is invoked in a synchronous manner.
 [[native]]
 === Mapping for native types
 
-`genom3` IDL native types map to a `C++` `struct`. The mapping
+`genom3` IDL native types map to a [monospaced]#{cxx}# `struct`. The mapping
 provides only a forward declaration, and the user has to provide the
 actual definition.
 
@@ -431,7 +434,7 @@ would map into
 ----
 
 The definition of the structure body is free, and will typically use
-native `C++` types that cannot be described in IDL. When used as a
+native [monospaced]#{cxx}# types that cannot be described in IDL. When used as a
 parameter of a function, a native type will be passed around as a
 pointer on the structure data. Memory management associated with that
 pointer must be handled by the user.
@@ -440,7 +443,7 @@ pointer must be handled by the user.
 [[exception]]
 === Mapping for exceptions
 
-Each defined exception type is defined as a `C++` `struct` that
+Each defined exception type is defined as a [monospaced]#{cxx}# `struct` that
 derives from the generic `genom::exception` type and implements a
 `what()` method returning a unique identifier for the
 exception. Exceptions with members define an additional `struct
@@ -456,7 +459,7 @@ For example:
       };
 ----
 
-yields the following `C++` declarations:
+yields the following [monospaced]#{cxx}# declarations:
 ----
       genom_event foo_id = <unique identifier for exception>;
 
@@ -469,7 +472,7 @@ yields the following `C++` declarations:
       } foo_detail;
 ----
 
-Exceptions must be thrown with the `C++` `throw` operator.
+Exceptions must be thrown with the [monospaced]#{cxx}# `throw` operator.
 
 The identifier for the exception uniquely identifies this exception
 type, so that any data of type `genom_event` can be compared to

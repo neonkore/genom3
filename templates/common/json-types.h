@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2012-2015 LAAS/CNRS
+# Copyright (c) 2012-2015,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution and use  in source  and binary  forms,  with or without
@@ -24,7 +24,6 @@ lang c
 /* C99 standard specifies that format macros must be explicitly requested */
 #define __STDC_FORMAT_MACROS
 
-#include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -373,7 +372,6 @@ json_print_<"[$t mangle]">(char **json, char **end, size_t *len,
       break;
 <'      }'>
     default:
-      assert(!"invalid value in enum <"[$e fullname]">");
       if ((s = bufcat(json, end, len, 0, "\"<invalid>\""))) return s;
       break;
   }

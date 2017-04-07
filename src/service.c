@@ -296,7 +296,6 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
       return NULL;
     }
 
-    s->loc = l;
     s->name = string(name);
     s->kind = kind;
     s->component = comp;
@@ -304,6 +303,7 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
     s->params = params;
     s->fsm = NULL;
   }
+  s->loc = l; /* update location in case of reopening */
 
   /* set codels parent task and service */
   for(hash_first(props, &i); i.current; hash_next(&i))

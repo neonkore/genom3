@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016 LAAS/CNRS
+ * Copyright (c) 2012-2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -252,13 +252,6 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
             break;
 
           case S_ACTIVITY:
-            if (!t) {
-              parserror(prop_loc(i.value),
-                        "%s '%s' with codels must run in a task",
-                        service_strkind(kind), name);
-              parsenoerror(l, " missing task property");
-              e = 1;
-            }
             break;
         }
         break;
@@ -419,7 +412,20 @@ service_check(service_s service)
   if (!service->fsm)
     parsenoerror(service->loc, " in %s %s declared here",
                  service_strkind(service->kind), service->name);
-  else if (service->kind == S_ACTIVITY && hash_first(service->fsm, &i)) {
+
+  /* require task for activities */
+  if (service->kind == S_ACTIVITY &&
+      comp_kind(service_comp(service)) == COMP_REGULAR &&
+      !hash_find(service->props, prop_strkind(PROP_TASK))) {
+    parserror(service->loc, "missing task property for %s '%s'",
+              service_strkind(service->kind), service->name);
+    e = 1;
+  }
+
+  /* require fsm codels for activities */
+  if (service->kind == S_ACTIVITY &&
+      comp_kind(service_comp(service)) == COMP_REGULAR &&
+      hash_first(service->fsm, &i) /* empty fsm */) {
     parserror(service->loc, "undefined codel<start>",
               service_strkind(service->kind), service->name);
     parsenoerror(service->loc, " in %s %s declared here",

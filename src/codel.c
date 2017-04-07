@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013,2015-2016 LAAS/CNRS
+ * Copyright (c) 2009-2013,2015-2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -142,6 +142,7 @@ codel_create(tloc l, const char *name, codelkind kind, hash_s triggers,
 codel_s
 codel_clone(codel_s codel)
 {
+  idltype_s ev;
   codel_s c;
   param_s p;
   hiter i;
@@ -169,7 +170,11 @@ codel_clone(codel_s codel)
 
   c->yields = hash_create("yields list", 0);
   for(hash_first(codel_yields(codel), &i); i.current; hash_next(&i)) {
-    if (hash_insert(c->yields, i.key, i.value, NULL)) {
+
+    ev = comp_addevent(c->loc, type_kind(i.value), type_name(i.value));
+    if (!ev) return NULL;
+
+    if (hash_insert(c->yields, i.key, ev, NULL)) {
       hash_destroy(c->yields, 1); hash_destroy(c->params, 1); free(c);
       return NULL;
     }
@@ -177,7 +182,11 @@ codel_clone(codel_s codel)
 
   c->triggers = hash_create("triggers list", 0);
   for(hash_first(codel_triggers(codel), &i); i.current; hash_next(&i)) {
-    if (hash_insert(c->triggers, i.key, i.value, NULL)) {
+
+    ev = comp_addevent(c->loc, type_kind(i.value), type_name(i.value));
+    if (!ev) return NULL;
+
+    if (hash_insert(c->triggers, i.key, ev, NULL)) {
       hash_destroy(c->triggers, 1); hash_destroy(c->yields, 1);
       hash_destroy(c->params, 1); free(c); return NULL;
     }

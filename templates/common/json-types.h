@@ -68,6 +68,9 @@ json_scan_<"[$t mangle]">(<"[$t argument reference data]">, const char **json)
 <'
     }
     struct - union - exception {'>
+<'      if {![llength [$t members]]} {'>
+  (void)data; /* fix -Wunused-parameter */
+<'      }'>
   json_skip_whitespace(*json);
   if (*((*json)++) != '{') return EINVAL;
   json_skip_whitespace(*json);
@@ -305,13 +308,14 @@ json_print_<"[$t mangle]">(char **json, char **end, size_t *len,
   <"[$t argument value data]">)
 {
   int s;
-<'
-  switch -glob -- [$t kind] {
-    typedef - {* member} {'>
+<'  switch -glob -- [$t kind] {'>
+<'    typedef - {* member} {'>
   if ((s = json_print_<"[[$t type] mangle]">(json, end, len, data))) return s;
-<'
-    }
-    struct - union - exception {'>
+<'    }'>
+<'    struct - union - exception {'>
+<'      if {![llength [$t members]]} {'>
+  (void)data; /* fix -Wunused-parameter */
+<'      }'>
   if ((s = bufcat(json, end, len, 0, "{"))) return s;
 <'
       set sep {}

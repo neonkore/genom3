@@ -349,6 +349,18 @@ Return the value associated with a `const` type.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 [[valuekind]]
 === `$type valuekind`
 

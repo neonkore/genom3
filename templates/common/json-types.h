@@ -65,9 +65,8 @@ json_scan_<"[$t mangle]">(<"[$t argument reference data]">, const char **json)
   switch -glob -- [$t kind] {
     typedef - {* member} {'>
   if ((s = json_scan_<"[[$t type] mangle]">(data, json))) return s;
-<'
-    }
-    struct - union - exception {'>
+<'    }'>
+<'    struct - exception {'>
 <'      if {![llength [$t members]]} {'>
   (void)data; /* fix -Wunused-parameter */
 <'      }'>
@@ -85,6 +84,56 @@ json_scan_<"[$t mangle]">(<"[$t argument reference data]">, const char **json)
              <"[$e pass reference data->[$e name]]">, json))) return s;
     } else
 <'      }'>
+      return EINVAL;
+
+    json_skip_whitespace(*json);
+    if (**json == ',') {
+      (*json)++;
+      json_skip_whitespace(*json);
+    }
+  }
+  (*json)++;
+<'    }'>
+<'    union {'>
+  json_skip_whitespace(*json);
+  if (*((*json)++) != '{') return EINVAL;
+  json_skip_whitespace(*json);
+  while(**json != '}') {
+    if (*((*json)++) != '"') return EINVAL;
+    if (!strncmp(*json, "d\"", 2)) {
+      (*json)+= 2;
+      json_skip_whitespace(*json);
+      if (*((*json)++) != ':') return EINVAL;
+      if ((s = json_scan_<"[[$t discr] mangle]">(
+             <"[[$t discr] pass reference data->_d]">, json))) return s;
+    } else if (!strncmp(*json, "u\"", 2)) {
+      (*json)+= 2;
+      json_skip_whitespace(*json);
+      if (*((*json)++) != ':') return EINVAL;
+      json_skip_whitespace(*json);
+      if (*((*json)++) != '{') return EINVAL;
+      json_skip_whitespace(*json);
+      while(**json != '}') {
+        if (*((*json)++) != '"') return EINVAL;
+<'      foreach e [$t members] {'>
+        if (!strncmp(*json, "<"[$e name]">\"", 1+<"[string length [$e name]]">)) {
+          (*json)+= 1+<"[string length [$e name]]">;
+          json_skip_whitespace(*json);
+          if (*((*json)++) != ':') return EINVAL;
+          if ((s = json_scan_<"[[$e type] mangle]">(
+                 <"[$e pass reference data->_u.[$e name]]">, json))) return s;
+        } else
+<'      }'>
+          return EINVAL;
+
+        json_skip_whitespace(*json);
+        if (**json == ',') {
+          (*json)++;
+          json_skip_whitespace(*json);
+        }
+      }
+      (*json)++;
+    } else
       return EINVAL;
 
     json_skip_whitespace(*json);
@@ -312,7 +361,7 @@ json_print_<"[$t mangle]">(char **json, char **end, size_t *len,
 <'    typedef - {* member} {'>
   if ((s = json_print_<"[[$t type] mangle]">(json, end, len, data))) return s;
 <'    }'>
-<'    struct - union - exception {'>
+<'    struct - exception {'>
 <'      if {![llength [$t members]]} {'>
   (void)data; /* fix -Wunused-parameter */
 <'      }'>
@@ -327,9 +376,30 @@ json_print_<"[$t mangle]">(char **json, char **end, size_t *len,
         set sep ,
       }'>
   if ((s = bufcat(json, end, len, 0, "}"))) return s;
-<'
-    }
-    sequence {'>
+<'    }'>
+<'    union {'>
+  if ((s = bufcat(json, end, len, 0, "{\"d\":"))) return s;
+  if ((s = json_print_<"[[$t discr] mangle]">(json, end, len,
+         <"[[$t discr] pass value data->_d]">))) return s;
+  if ((s = bufcat(json, end, len, 0, ",\"u\":{"))) return s;
+  switch(data->_d) {
+<'      foreach e [$t members] {'>
+<'        foreach v [$e value] {'>
+<'          if {$v != ""} {'>
+    case <"[language::cname $v]">:
+<'          } else {'>
+    default:
+<'          }'>
+<'        }'>
+      if ((s = bufcat(json, end, len, 0, "\"<"[$e name]">\":"))) return s;
+      if ((s = json_print_<"[$e mangle]">(json, end, len,
+             <"[$e pass value data->_u.[$e name]]">))) return s;
+      break;
+<'      }'>
+  }
+  if ((s = bufcat(json, end, len, 0, "}}"))) return s;
+<'    }'>
+<'    sequence {'>
   size_t i;
   if ((s = bufcat(json, end, len, 0, "["))) return s;
   for (i=0; i<data->_length; i++) {

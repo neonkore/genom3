@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -385,7 +385,13 @@ prop_merge(hash_s p, prop_s i, int ignore_dup)
     q = hash_find(p, prop_name(i)); assert(q);
     /* some properties can be merged */
     switch(prop_kind(i)) {
-      case PROP_THROWS: {
+      case PROP_DOC:
+        q->text = strings(prop_text(q), "\n", prop_text(i), NULL);
+        e = 0;
+        break;
+
+      case PROP_THROWS:
+      case PROP_INTERRUPTS: {
         for(hash_first(prop_hash(i), &j); j.current; hash_next(&j)) {
           e = hash_insert(prop_hash(q), j.key, j.value, NULL);
           if (e && e != EEXIST) break; else e = 0;

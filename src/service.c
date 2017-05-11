@@ -458,7 +458,7 @@ service_check(service_s service)
   /* require fsm codels for activities */
   if (service->kind == S_ACTIVITY &&
       comp_kind(service_comp(service)) == COMP_REGULAR &&
-      hash_first(service->fsm, &i) /* empty fsm */) {
+      service->fsm && hash_first(service->fsm, &i) /* empty fsm */) {
     parserror(service->loc, "undefined codel<start>",
               service_strkind(service->kind), service->name);
     parsenoerror(service->loc, " in %s %s declared here",

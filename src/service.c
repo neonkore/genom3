@@ -121,11 +121,13 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
       return NULL;
     }
 
-    /* check parameters */
+    /* check parameters - non local parameters must be in the same order */
     e = 0;
     for(hash_first(params, &i), hash_first(s->params, &j);
         i.current && j.current;
         hash_next(&i), hash_next(&j)) {
+      if (param_dir(i.value) == P_NODIR) continue; /* skip local parameters */
+
       if (strcmp(param_name(i.value), param_name(j.value))) {
         parserror(param_loc(i.value), "parameter %s previously declared as %s",
                   param_name(i.value), param_name(j.value));
@@ -145,6 +147,8 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
       }
     }
     for(;i.current; hash_next(&i)) {
+      if (param_dir(i.value) == P_NODIR) continue; /* skip local parameters */
+
       parserror(param_loc(i.value), "extraneous parameter %s",
                 param_name(i.value));
       parsenoerror(service_loc(s), " service %s first declared here",
@@ -152,12 +156,41 @@ service_create(tloc l, svckind kind, const char *name, hash_s params,
       e = 1;
     }
     for(;j.current; hash_next(&j)) {
+      if (param_dir(i.value) == P_NODIR) continue; /* skip local parameters */
+
       parserror(param_loc(i.value), "missing parameter %s",
                 param_name(j.value));
       parsenoerror(service_loc(s), " service %s first declared here",
                    s->name);
       e = 1;
     }
+
+    /* merge local parameters */
+    assert(!param_locals());
+    param_setlocals(service_params(s));
+    for(hash_first(params, &i); i.current; hash_next(&i)) {
+      if (param_dir(i.value) != P_NODIR) continue; /* skip other parameters */
+
+      for(hash_first(s->params, &j); j.current; hash_next(&j)) {
+        if (!strcmp(param_name(i.value), param_name(j.value))) {
+          if (!param_equal(i.value, j.value)) {
+            parserror(param_loc(i.value),
+                      "parameter %s conflicts with previous declaration",
+                      param_name(i.value));
+            parsenoerror(param_loc(j.value),
+                         " parameter %s first declared here",
+                         param_name(j.value));
+            e = 1;
+          }
+          break;
+        }
+      }
+      if (j.current) continue;
+
+      hash_insert(s->params, param_name(i.value), i.value,
+                  (hrelease_f)param_destroy);
+    }
+    param_setlocals(NULL);
     if (e) return NULL;
 
     /* merge properties */

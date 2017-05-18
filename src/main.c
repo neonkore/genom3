@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 LAAS/CNRS
+ * Copyright (c) 2009-2013,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -454,7 +454,7 @@ rmrfdir(const char *path)
     xwarnx("removed file `%s/%s'", path, e->d_name);
   }
 
-  fchdir(cwd);
+  if (fchdir(cwd)) {}
   close(cwd);
   closedir(d);
 

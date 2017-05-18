@@ -1,4 +1,4 @@
-/*	$Id: cpp.c 2012/04/19 11:52:03 mallet $	*/
+/*	$Id: cpp.c 2017/05/18 15:49:09 mallet $	*/
 
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
@@ -874,7 +874,7 @@ xwarning(usch *s)
 	savch(0);
 	if (ifiles != NULL) {
 		t = sheap("%s:%d: warning: ", ifiles->fname, ifiles->lineno);
-		write (2, t, strlen((char *)t));
+		if (write (2, t, strlen((char *)t))) {}
 	}
 	dummy = write (2, s, strlen((char *)s));
 	dummy = write (2, "\n", 1);

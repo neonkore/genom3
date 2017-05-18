@@ -1,4 +1,4 @@
-/*	$Id: token.c 2012/04/19 00:16:42 tho $	*/
+/*	$Id: token.c 2017/05/18 15:48:19 mallet $	*/
 
 /*
  * Copyright (c) 2004,2009 Anders Magnusson. All rights reserved.
@@ -821,7 +821,7 @@ pushfile(const usch *file, const usch *fn, int idx, void *incs)
 		prinit(initar, ic);
 		initar = NULL;
 		if (dMflag)
-			write(ofd, ic->buffer, strlen((char *)ic->buffer));
+			if (write(ofd, ic->buffer, strlen((char *)ic->buffer))) {}
 		fastscan();
 		prtline();
 		ic->infil = oin;
@@ -856,7 +856,7 @@ prtline()
 			return; /* no output */
 		if (ifiles->lineno == 1) {
 			s = sheap("%s: %s\n", Mfile, ifiles->fname);
-			write(ofd, s, strlen((char *)s));
+			if (write(ofd, s, strlen((char *)s))) {}
 		}
 	} else if (!Pflag)
 		putstr(sheap("\n# %d \"%s\"\n", ifiles->lineno, ifiles->fname));

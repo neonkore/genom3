@@ -43,7 +43,7 @@ component c {
   activity s() { codel<start> c() yield ether; };
 };
 EOF
-run 2 ${GENOM_BIN} -n run.gen
+run 1 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF
 component c {

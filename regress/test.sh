@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2012,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -49,6 +49,7 @@ run() {
 	echo "$@"
 	cat run.out
 	cat run.err
+        echo "exit $s"
 	return 2
     fi
     return 0

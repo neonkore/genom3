@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -47,7 +47,7 @@
   extern char *dotgentext;
 %}
 
-%name-prefix="dotgen"
+%name-prefix "dotgen"
 %pure-parser
 %locations
 

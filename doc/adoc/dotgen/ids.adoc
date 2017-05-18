@@ -1,4 +1,4 @@
-// Generated from ../../src/dotgen/ids.y - manual changes will be lost
+// Generated from ids.y - manual changes will be lost
 
 
 

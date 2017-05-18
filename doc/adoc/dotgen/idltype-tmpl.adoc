@@ -1,4 +1,4 @@
-// Generated from ../../src/dotgen/idltype-tmpl.y - manual changes will be lost
+// Generated from idltype-tmpl.y - manual changes will be lost
 
 
 

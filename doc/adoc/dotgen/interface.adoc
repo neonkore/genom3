@@ -1,4 +1,4 @@
-// Generated from ../../src/dotgen/interface.y - manual changes will be lost
+// Generated from interface.y - manual changes will be lost
 
 
 

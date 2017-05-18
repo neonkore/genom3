@@ -1,4 +1,4 @@
-// Generated from ../../engine/tcl/dotgen.c - manual changes will be lost
+// Generated from dotgen.c - manual changes will be lost
 
 
 

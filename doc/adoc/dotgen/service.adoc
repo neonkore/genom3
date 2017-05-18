@@ -1,4 +1,4 @@
-// Generated from ../../src/dotgen/service.y - manual changes will be lost
+// Generated from service.y - manual changes will be lost
 
 
 

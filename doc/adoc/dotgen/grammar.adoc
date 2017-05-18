@@ -1,4 +1,4 @@
-// Generated from ../src/dotgen.y - manual changes will be lost
+// Generated from dotgen.y - manual changes will be lost
 Grammar reference
 -----------------
 

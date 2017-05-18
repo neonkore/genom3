@@ -1,4 +1,4 @@
-// Generated from ../../engine/tcl/idltype.c - manual changes will be lost
+// Generated from idltype.c - manual changes will be lost
 
 
 

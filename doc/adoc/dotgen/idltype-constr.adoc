@@ -1,4 +1,4 @@
-// Generated from ../../src/dotgen/idltype-constr.y - manual changes will be lost
+// Generated from idltype-constr.y - manual changes will be lost
 
 
 

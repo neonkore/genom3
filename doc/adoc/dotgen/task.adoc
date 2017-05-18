@@ -1,4 +1,4 @@
-// Generated from ../../src/dotgen/task.y - manual changes will be lost
+// Generated from task.y - manual changes will be lost
 
 
 

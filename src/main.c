@@ -204,7 +204,8 @@ main(int argc, char *argv[])
 
   /* create a temporary directory */
   strlcat(runopt.tmpdir, "/genomXXXXXX", sizeof(runopt.tmpdir));
-  strlcpy(runopt.tmpdir, mkdtemp(runopt.tmpdir), sizeof(runopt.tmpdir));
+  if (!mkdtemp(runopt.tmpdir))
+    err(2, "cannot create directory `%s'", runopt.tmpdir);
   xwarnx("created directory `%s'", runopt.tmpdir);
 
   /* if a template is required (not -E or -n), configure template arguments */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -296,6 +296,7 @@ const_cast(tloc l, cval *value, idltype_s t)
     ;
   switch(type_kind(p)) {
     case IDL_BOOL:      s = const_convert(value, CST_BOOL);	break;
+    case IDL_OCTET:
     case IDL_USHORT:
     case IDL_ULONG:
     case IDL_ULONGLONG:	s = const_convert(value, CST_UINT);	break;
@@ -305,7 +306,6 @@ const_cast(tloc l, cval *value, idltype_s t)
     case IDL_FLOAT:
     case IDL_DOUBLE:	s = const_convert(value, CST_FLOAT);	break;
     case IDL_CHAR:
-    case IDL_OCTET:	s = const_convert(value, CST_CHAR);	break;
     case IDL_STRING:	s = const_convert(value, CST_STRING);	break;
     case IDL_ENUM:
       if (value->k == CST_ENUM) {

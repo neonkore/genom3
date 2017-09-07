@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2012 LAAS/CNRS
+# Copyright (c) 2011-2012,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -52,6 +52,7 @@ namespace eval merge {
     set conflicts 0
 
     # iterate over the common sequence between the two files
+    set action ""
     set isrc 0
     set idst 0
     foreach { x1 x2 } [lcs $lsrc $ldst] {
@@ -99,11 +100,15 @@ namespace eval merge {
             append patch \ [join $post "\n "]
             puts $patch
             while 1 {
-              puts -nonewline {Apply this patch [y,n,c,q,?]? }
+              puts -nonewline {Apply this patch [y,n,c,a,q,?]? }
               flush stdout
-              if {[gets stdin act] < 0} { set act q }
-              switch -- $act {
-                y { puts $f [join $srconly "\n"]; break }
+              if {$action != "a"} {
+                if {[gets stdin action] < 0} { set action q }
+              } else {
+                puts "y"
+              }
+              switch -- $action {
+                a - y { puts $f [join $srconly "\n"]; break }
                 n { puts $f [join $dstonly "\n"]; break }
                 c {
                   puts $f "<<<<<<< user version"
@@ -120,6 +125,7 @@ namespace eval merge {
                   puts "y - apply this patch"
                   puts "n - skip this patch"
                   puts "c - generate a conflict marker"
+                  puts "a - answer y to all"
                   puts "q - leave this file unchanged"
                   puts "? - print help"
                 }

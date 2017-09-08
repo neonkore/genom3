@@ -132,7 +132,7 @@ ____
 [[dotgen-rule-port]]
 ____
 (22) port                  ::= ::
-   "port" link:grammar{outfilesuffix}#dotgen-rule-opt-multiple[opt-multiple] link:grammar{outfilesuffix}#dotgen-rule-port-dir[port-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] ";"
+   "port" link:grammar{outfilesuffix}#dotgen-rule-opt-multiple[opt-multiple] link:grammar{outfilesuffix}#dotgen-rule-port-dir[port-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] link:grammar{outfilesuffix}#dotgen-rule-opt-properties[opt-properties] ";"
 ____
 [[dotgen-rule-port-dir]]
 ____

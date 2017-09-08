@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -498,7 +498,7 @@ typedef enum portkind {
 } portkind;
 
 port_s		port_create(tloc l, portdir d, portkind k, const char *name,
-                        idltype_s t);
+                        idltype_s t, hash_s props);
 port_s		port_clone(port_s port, int flipdir);
 void		port_destroy(port_s p);
 
@@ -509,6 +509,7 @@ portkind	port_kind(port_s p);
 comp_s		port_comp(port_s p);
 idltype_s	port_type(port_s p);
 idltype_s	port_datatype(port_s p);
+hash_s		port_props(port_s p);
 const char *	port_strdir(portdir d);
 const char *	port_strkind(portkind k);
 

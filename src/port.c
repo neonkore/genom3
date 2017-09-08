@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012,2014 LAAS/CNRS
+ * Copyright (c) 2011-2012,2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -42,6 +42,7 @@ struct port_s {
   comp_s component;
   idltype_s type;
   idltype_s datatype;
+  hash_s props;
 };
 
 tloc		port_loc(port_s p) { assert(p); return p->loc; }
@@ -51,6 +52,7 @@ portkind	port_kind(port_s p) { assert(p); return p->kind; }
 comp_s		port_comp(port_s p) { assert(p); return p->component; }
 idltype_s	port_type(port_s p) { assert(p); return p->type; }
 idltype_s	port_datatype(port_s p) { assert(p); return p->datatype; }
+hash_s		port_props(port_s p) { assert(p); return p->props; }
 
 
 /* --- port_create --------------------------------------------------------- */
@@ -58,12 +60,14 @@ idltype_s	port_datatype(port_s p) { assert(p); return p->datatype; }
 /** create a port in a component
  */
 port_s
-port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
+port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t,
+            hash_s props)
 {
   comp_s c = comp_active();
   service_s service;
   remote_s remote;
   port_s p;
+  hiter i;
   int e;
   assert(c && name);
 
@@ -93,6 +97,34 @@ port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
     return NULL;
   }
 
+  /* create empty property list if none has been defined */
+  if (!props) {
+    props = hash_create("property list", 0);
+    if (!props) return NULL;
+  }
+
+  /* check unwanted properties */
+  e = 0;
+  for(hash_first(props, &i); i.current; hash_next(&i))
+    switch(prop_kind(i.value)) {
+      case PROP_DOC:
+        /* ok */
+        break;
+
+      case PROP_DELAY: case PROP_SIMPLE_CODEL:
+      case PROP_PERIOD: case PROP_PRIORITY: case PROP_THROWS:
+      case PROP_SCHEDULING: case PROP_STACK: case PROP_FSM_CODEL:
+      case PROP_IDS: case PROP_VERSION: case PROP_LANG: case PROP_EMAIL:
+      case PROP_REQUIRE: case PROP_CODELS_REQUIRE: case PROP_CLOCKRATE:
+      case PROP_TASK: case PROP_VALIDATE: case PROP_INTERRUPTS:
+      case PROP_BEFORE: case PROP_AFTER: case PROP_EXTENDS: case PROP_PROVIDES:
+      case PROP_USES:
+        parserror(prop_loc(i.value), "property %s is not suitable for tasks",
+                  prop_strkind(prop_kind(i.value)));
+        e = 1; break;
+    }
+  if (e) return NULL;
+
   /* create */
   p = malloc(sizeof(*p));
   if (!p) {
@@ -107,6 +139,7 @@ port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
   p->component = c;
   p->datatype = t;
   p->type = type_newport(l, name, p);
+  p->props = props;
   if (!p->type) {
     free(p);
     return NULL;
@@ -138,13 +171,22 @@ port_create(tloc l, portdir d, portkind k, const char *name, idltype_s t)
 port_s
 port_clone(port_s port, int flipdir)
 {
+  hash_s prop;
   portdir d;
+
   switch (port->dir) {
     case PORT_IN:	d = flipdir?PORT_OUT:PORT_IN; break;
     case PORT_OUT:	d = flipdir?PORT_IN:PORT_OUT; break;
   }
 
-  return port_create(port->loc, d, port->kind, port->name, port->datatype);
+  /* clone properties */
+  prop = hash_create("property list", 0);
+  if (!prop ||
+      prop_merge_list(prop, port_props(port), 0/*ignore_dup*/))
+    return NULL;
+
+  return port_create(
+    port->loc, d, port->kind, port->name, port->datatype, prop);
 }
 
 
@@ -155,7 +197,10 @@ port_clone(port_s port, int flipdir)
 void
 port_destroy(port_s p)
 {
-  if (p) free(p);
+  if (p) {
+    hash_destroy(p->props, 1);
+    free(p);
+  }
 }
 
 

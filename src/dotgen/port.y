@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012,2014 LAAS/CNRS
+ * Copyright (c) 2009-2012,2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -43,11 +43,15 @@
  * explains how this is done.
  */
 port:
-  PORT opt_multiple port_dir type_spec identifier semicolon
+  PORT opt_multiple port_dir type_spec identifier opt_properties semicolon
   {
-    if (!$5) { parserror(@1, "dropped port"); break; }
-    if (!$4) { parserror(@1, "dropped '%s' port", $5); break; }
-    if (!port_create(@1, $3, $2, $5, $4))
+    if (!$5 || !$4) {
+      if (!$5) parserror(@1, "dropped port");
+      if (!$4) parserror(@1, "dropped '%s' port", $5);
+      if ($6) hash_destroy($6, 1);
+      break;
+    }
+    if (!port_create(@1, $3, $2, $5, $4, $6))
       parserror(@1, "dropped '%s' port", $5);
   }
 ;

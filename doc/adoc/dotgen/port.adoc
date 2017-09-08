@@ -34,7 +34,7 @@ publishing data) or `in` ports (for subscribing to a sibling `out` port).
 [[dotgen-rule-port]]
 ____
 (22) port                  ::= ::
-   "port" link:grammar{outfilesuffix}#dotgen-rule-opt-multiple[opt-multiple] link:grammar{outfilesuffix}#dotgen-rule-port-dir[port-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] ";"
+   "port" link:grammar{outfilesuffix}#dotgen-rule-opt-multiple[opt-multiple] link:grammar{outfilesuffix}#dotgen-rule-port-dir[port-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] link:grammar{outfilesuffix}#dotgen-rule-opt-properties[opt-properties] ";"
 ____
 [[dotgen-rule-opt-multiple]]
 ____
@@ -55,6 +55,10 @@ accessed as an array indexed by strings. In this case, ports are created or
 destroyed dynamically be the codels. The
 link:../mappings/index{outfilesuffix}[IDL mappings] section for ports
 explains how this is done.
+
+
+
+
 
 
 

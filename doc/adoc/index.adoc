@@ -21,7 +21,7 @@
 GenoM Manual
 ============
 :revision: 2.99.29
-:month: May
+:month: September
 :year: 2017
 
 For GenoM version 3 +

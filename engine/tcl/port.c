@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 LAAS/CNRS
+ * Copyright (c) 2010-2013,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -43,15 +43,17 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   enum portidx {
     portidx_name, portidx_dir, portidx_kind, portidx_comp, portidx_type,
-    portidx_datatype, portidx_throws, portidx_loc, portidx_class
+    portidx_datatype, portidx_doc, portidx_throws, portidx_loc, portidx_class
   };
   static const char *args[] = {
     [portidx_name] = "name", [portidx_dir] = "dir", [portidx_kind] = "kind",
     [portidx_comp] = "component", [portidx_type] = "type",
-    [portidx_datatype] = "datatype", [portidx_throws] = "throws",
-    [portidx_loc] = "loc", [portidx_class] = "class", NULL
+    [portidx_datatype] = "datatype", [portidx_doc] = "doc",
+    [portidx_throws] = "throws", [portidx_loc] = "loc",
+    [portidx_class] = "class", NULL
   };
   port_s p = v;
+  prop_s prop;
   Tcl_Obj *r;
   int s;
 
@@ -89,6 +91,11 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     case portidx_datatype:
       r = port_datatype(p)?
         Tcl_NewStringObj(type_genref(port_datatype(p)), -1) : NULL;
+      break;
+
+    case portidx_doc:
+      prop = hash_find(port_props(p), prop_strkind(PROP_DOC));
+      r = prop ? Tcl_NewStringObj(prop_text(prop), -1) : NULL;
       break;
 
     case portidx_throws: {

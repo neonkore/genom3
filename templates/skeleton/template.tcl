@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 LAAS/CNRS
+# Copyright (c) 2010-2015,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -87,6 +87,9 @@ template usage "Skeleton generation template\n" [regsub -all [join {
   # +-f+::
   # +--force+ ::
   #			Overwrite existing files (use with caution)
+  # +-t+::
+  # +--terse+ ::
+  #			Produce terse output: no documentation is generated
   # +-h+::
   # +--help+ ::
   #			Print usage summary (this text)
@@ -94,6 +97,7 @@ template usage "Skeleton generation template\n" [regsub -all [join {
 
 # defaults: no file overwrite
 engine mode -overwrite -merge-if-change
+set terse no
 
 # parse options
 template options {
@@ -109,6 +113,7 @@ template options {
     engine merge-tool auto; engine mode +merge-if-change
   }
   -f - --force		{ engine mode +overwrite }
+  -t - --terse		{ set terse yes }
   -h - --help		{ puts [template usage]; exit 0 }
 }
 
@@ -182,6 +187,14 @@ foreach c [dotgen components] {
 	file [$c name]-genom3-uninstalled.pc.in
 }
 
+
+# asciidoc template
+if {!$terse} {
+  template parse args [list $input]			\
+      file readme.adoc file README.adoc
+}
+
+
 # generate user build files fragment
 #
 template parse perm a+x					\
@@ -190,11 +203,11 @@ template parse perm a+x					\
 template parse						\
     file ag_templates.m4 file autoconf/ag_templates.m4
 template parse						\
-    args [list $input $lang] file top.configure.ac	\
-    file configure.ac
+    args [list $input $lang $terse]			\
+    file top.configure.ac file configure.ac
 template parse						\
-    args [list $input $idls $lang] file top.Makefile.am	\
-    file Makefile.am
+    args [list $input $idls $lang $terse]		\
+    file top.Makefile.am file Makefile.am
 template parse						\
     args [list $input $lang] file codels.Makefile.am	\
     file codels/Makefile.am

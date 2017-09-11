@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2012 LAAS/CNRS
+# Copyright (c) 2010-2012,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -28,4 +28,5 @@ dist_skel_DATA=		\
 	top.Makefile.am			\
 	component.pc.in			\
 	component-uninstalled.pc.in	\
+	readme.adoc			\
 	template.tcl

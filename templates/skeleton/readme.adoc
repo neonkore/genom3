@@ -1,0 +1,313 @@
+<'
+#
+# Copyright (c) 2017 LAAS/CNRS
+# All rights reserved.
+#
+# Redistribution  and  use  in  source  and binary  forms,  with  or  without
+# modification, are permitted provided that the following conditions are met:
+#
+#   1. Redistributions of  source  code must retain the  above copyright
+#      notice and this list of conditions.
+#   2. Redistributions in binary form must reproduce the above copyright
+#      notice and  this list of  conditions in the  documentation and/or
+#      other materials provided with the distribution.
+#
+# THE SOFTWARE  IS PROVIDED "AS IS"  AND THE AUTHOR  DISCLAIMS ALL WARRANTIES
+# WITH  REGARD   TO  THIS  SOFTWARE  INCLUDING  ALL   IMPLIED  WARRANTIES  OF
+# MERCHANTABILITY AND  FITNESS.  IN NO EVENT  SHALL THE AUTHOR  BE LIABLE FOR
+# ANY  SPECIAL, DIRECT,  INDIRECT, OR  CONSEQUENTIAL DAMAGES  OR  ANY DAMAGES
+# WHATSOEVER  RESULTING FROM  LOSS OF  USE, DATA  OR PROFITS,  WHETHER  IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
+# IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+#                                           Anthony Mallet on Fri Sep  8 2017
+#
+
+# check arguments
+if {[llength $argv] != 1} { error "expected argument: input" }
+lassign $argv input
+
+# generate copyright notice (if any)
+if {![catch {dotgen input notice} text]} {
+  puts //[join [split $text "\n"] "\n//"]
+}
+
+# build header info
+unset -nocomplain title author rev
+foreach comp [dotgen components] {
+  lappend title [$comp name]
+  lappend author [$comp email]
+  lappend rev [$comp version]
+}
+
+'>
+
+// This file was generated from <"$input"> by the <"[dotgen template name]">
+// template. Manual changes should be preserved, although they should
+// rather be added to the "doc" attributes of the genom objects defined in
+// <"$input">.
+
+= <"[join $title {, } ]"> component
+<"[join $author {, } ]">
+<"[join $rev {, } ]">
+:toc: left
+
+// fix default asciidoctor stylesheet issue #2407
+ifdef::backend-html5[]
+++++
+<link rel="stylesheet" href="data:text/css,p{font-size: inherit !important}" >
+++++
+endif::[]
+
+<'foreach comp [dotgen components] {'>
+<'  if {![catch {$comp doc} doc]} {'>
+
+<"$doc">
+<'  }'>
+<'}'>
+
+<'
+# output a parameter description recursively
+proc expand-param { param } {
+  if {[catch {expand-initer [$param initializer]} initer]} {
+    set initer [dict create]
+  }
+  return [expand-type [$param name] [$param type] $initer { *}]
+}
+
+proc expand-type { name type initer prefix {seq {}} } {
+  set kind [$type kind]
+  switch -- $kind {
+    enum - struct - exception { append kind " [$type fullname]" }
+  }
+  if {![catch {$type length} l]} {
+    append kind "<$l>"
+  }
+  switch -glob -- $seq {
+    0  { set kind "optional< $kind >" }
+    -1 { set kind "sequence< $kind >" }
+    ?* { set kind "sequence< $kind, $seq >" }
+  }
+  if {$name != ""} { set label " `$name`" } else { set label "" }
+
+  switch -- [$type kind] {
+    typedef {
+      set out [expand-type $name [$type type] $initer $prefix]
+    }
+
+    struct - exception {
+      set out "$prefix `$kind`$label"
+      catch { append out ": [dict get $initer doc]" }
+      append out "\n"
+      foreach m [$type members] {
+        if {[catch {dict get $initer items [$m name]} i]} {
+          set i [dict create]
+        }
+        append out [expand-type [$m name] [$m type] $i "${prefix}*"]
+      }
+    }
+
+    array {
+      append name "\[[$type length]\]"
+      set out [expand-type $name [$type type] $initer $prefix]
+      if {![catch {dict get $initer items} sub]} {
+        dict for {i v} $sub {
+          append out [expand-type "\[$i\]" [$type type] $v "${prefix}*"]
+        }
+      }
+    }
+
+    sequence {
+      if {[catch {$type length} seq]} {
+        set seq -1
+      }
+      set out [expand-type $name [$type type] $initer $prefix $seq]
+      if {![catch {dict get $initer items} sub]} {
+        dict for {i v} $sub {
+          append out [expand-type "\[$i\]" [$type type] $v "${prefix}*"]
+        }
+      }
+    }
+
+    optional {
+      set out [expand-type $name [$type type] $initer $prefix 0]
+    }
+
+    default {
+      set out "$prefix `$kind`$label"
+      catch { append out " (default `\"[dict get $initer default]\"`)" }
+      catch { append out " [dict get $initer doc]" }
+      if {[$type kind] == "enum"} {
+        set values [list]
+        foreach m [$type members] { lappend values "``[$m name]``" }
+        append out "\u2208 { [join $values {, }] }"
+      }
+      append out "\n"
+    }
+  }
+
+  return $out
+}
+
+proc expand-initer { initer } {
+  set desc [dict create]
+
+  if {![catch {$initer doc} doc]} {
+    dict set desc doc $doc
+  }
+
+  switch -- [$initer kind] {
+    void {}
+
+    compound {
+      foreach i [$initer value] {
+        dict set desc items [$i member] [expand-initer $i]
+      }
+    }
+
+    default {
+      if {![catch {$initer value} value]} {
+        dict set desc default $value
+      }
+    }
+  }
+
+  return $desc
+}
+'>
+
+== Ports
+
+<'foreach comp [dotgen components] {'>
+<'  foreach port [$comp ports] {'>
+<'     set multiple [expr {[$port kind] == "multiple"?"multiple ":""}] '>
+
+=== <"[$port name]"> (<"$multiple"><"[$port dir]">) [[<"[$port name]">]]
+
+
+[.small, width="50%", float=right, cols="1"]
+|===
+a|.Data structure
+[disc]
+<"[expand-type [$port name] [$port datatype] {} { *}]">
+|===
+
+<'    if {![catch {$port doc} doc]} {'>
+<"$doc">
+
+<'    }'>
+'''
+<'  }'>
+<'}'>
+
+== Services
+<'foreach comp [dotgen components] {'>
+<'  foreach service [$comp services] {'>
+
+=== <"[$service name]"> (<"[$service kind]">) [[<"[$service name]">]]
+
+[.small, width="50%", float=right, cols="1"]
+|===
+<'    if {[llength [$service parameter in inout]]} {'>
+a|.Inputs
+[disc]
+<'      foreach i [$service parameter in inout] {'>
+<"[expand-param $i]">
+<'      }'>
+<'    }'>
+<'    if {[llength [$service parameter inout out]]} {'>
+a|.Outputs
+[disc]
+<'      foreach i [$service parameter inout out] {'>
+<"[expand-param $i]">
+<'      }'>
+<'    }'>
+<'    if {[llength [$service throws]]} {'>
+a|.Throws
+[disc]
+<'      foreach e [$service throws] {'>
+<"[expand-type {} $e {} { *}]">
+<'      }'>
+<'    }'>
+<'    if {![catch {$service task}] || [llength [$service interrupts]]} {'>
+a|.Context
+[disc]
+<'      if {![catch {$service task} t]} {'>
+  * In task <<<"[$t name]">>>
+<'        if {![catch {$t period} p]} {'>
+  (frequency <"[expr {1/[$p value]}]"> _Hz_)
+<'        }'>
+<'        set plist [list]'>
+<'        foreach codel [$service codels] {'>
+<'          foreach param [$codel parameters port] {'>
+<'            lappend plist [$param port]'>
+<'          }'>
+<'        }'>
+<'        foreach p [lsort -unique $plist] {'>
+<'          if {[$p dir] == "out"} {'>
+  * Updates port `<<<"[$p name]">>>`
+<'          } else {'>
+  * Reads port `<<<"[$p name]">>>`
+<'          }'>
+<'        }'>
+<'      }'>
+<'      if {[llength [$service interrupts]]} {'>
+<'        foreach i [$service interrupts] {'>
+  * Interrupts `<<<"[$i name]">>>`
+<'        }'>
+<'      }'>
+<'    }'>
+|===
+
+<'    if {![catch {$service doc} doc]} {'>
+<"$doc">
+
+<'    }'>
+'''
+<'  }'>
+<'}'>
+
+== Tasks
+<'foreach comp [dotgen components] {'>
+<'  foreach task [$comp tasks] {'>
+
+=== <"[$task name]"> [[<"[$task name]">]]
+
+[.small, width="50%", float=right, cols="1"]
+|===
+a|.Context
+[disc]
+<'    if {![catch {$task period} p]} {'>
+  * Frequency <"[expr {1/[$p value]}]"> _Hz_
+<'    } else {'>
+  * Free running
+<'    }'>
+<'    set plist [list]'>
+<'    foreach codel [$task codels] {'>
+<'      foreach param [$codel parameters port] {'>
+<'        lappend plist [$param port]'>
+<'      }'>
+<'    }'>
+<'    foreach p [lsort -unique $plist] {'>
+<'      if {[$p dir] == "out"} {'>
+* Updates port `<<<"[$p name]">>>`
+<'      } else {'>
+* Reads port `<<<"[$p name]">>>`
+<'      }'>
+<'    }'>
+<'    if {[llength [$task throws]]} {'>
+a|.Throws
+[disc]
+<'      foreach e [$task throws] {'>
+<"[expand-type {} $e {} { *}]">
+<'      }'>
+<'    }'>
+|===
+
+<'    if {![catch {$task doc} doc]} {'>
+<"$doc">
+
+<'    }'>
+'''
+<'  }'>
+<'}'>

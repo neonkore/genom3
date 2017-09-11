@@ -88,9 +88,22 @@ Output files in dir instead of source directory
 +-f+::
 +--force+ ::
 		Overwrite existing files (use with caution)
++-t+::
++--terse+ ::
+		Produce terse output: no documentation is generated
 +-h+::
 +--help+ ::
 		Print usage summary (this text)
+
+
+
+
+
+
+
+
+
+
 
 
 

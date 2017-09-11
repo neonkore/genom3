@@ -155,12 +155,24 @@ namespace eval merge {
     }
 
     close $f
-
-    # move to final destination
-    file copy -force $tmp $dst
     if {$conflicts} {
       template message "CONFLICTS during merge of $dst"
     }
+
+    # move to final destination
+    if {${engine::move-if-change}} {
+      set t [::open $tmp r]; set d [::open $dst r]
+      while { "[read $t 4096]" == "[read $d 4096]" } {
+        if { [eof $t] && [eof $d] } {
+          close $t; close $d
+          if {!$engine::silent} { puts "$dst was not modified" }
+          return 0
+        }
+      }
+      ::close $t; ::close $d
+    }
+
+    file copy -force $tmp $dst
     return 0
   }
 

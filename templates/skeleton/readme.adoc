@@ -36,7 +36,7 @@ if {![catch {dotgen input notice} text]} {
 unset -nocomplain title author rev
 foreach comp [dotgen components] {
   lappend title [$comp name]
-  lappend author [$comp email]
+  catch { lappend author [$comp email] }
   lappend rev [$comp version]
 }
 
@@ -48,7 +48,9 @@ foreach comp [dotgen components] {
 // <"$input">.
 
 = <"[join $title {, } ]"> component
+<'if {[info exists author]} {'>
 <"[join $author {, } ]">
+<'}'>
 <"[join $rev {, } ]">
 :toc: left
 

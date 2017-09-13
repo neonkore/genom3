@@ -43,7 +43,6 @@ extern struct runopt_s {
   char sysdir[PATH_MAX];/** system files directory */
   char tmpldir[PATH_MAX];/** genom template directory */
   char tmpdir[PATH_MAX];/** temporary directory */
-  int cppdotgen;	/** cpp accepts .gen file extension */
   char cpppath[PATH_MAX];/** genom cpp preprocessor */
 
   const char *genom;	/** Executable path */
@@ -57,7 +56,7 @@ void	xmsg(const char *pfix, const char *fmt, ...);
 
 int	cpp_optappend(const char *opt, int index);
 int	cpp_optrm(int index);
-int	cpp_invoke(const char *in, int out);
+int	cpp_invoke(char *in[], int out);
 char *	cpp_getnotice(const char *in);
 int	cpp_wait(void);
 

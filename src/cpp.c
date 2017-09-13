@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 LAAS/CNRS
+ * Copyright (c) 2009-2012,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -81,10 +81,12 @@ cpp_optrm(int index)
  */
 
 int
-cpp_invoke(const char *in, int out)
+cpp_invoke(char *in[], int out)
 {
+  char inpath[PATH_MAX];
   char *cpp, *p;
   int noptexec;
+  FILE *infile;
   int s, n;
 
   /* get cpp executable */
@@ -113,39 +115,29 @@ cpp_invoke(const char *in, int out)
   }
   free(cpp);
 
-  /* set input file. link to a .c file if needed */
-  if (!runopt.cppdotgen) {
+  /* setup input file containing the #include'd list of input */
+  snprintf(inpath, sizeof(inpath), "%s/input.c", runopt.tmpdir);
+  infile = fopen(inpath, "w");
+  if (!infile) {
+    warnx("cannot cate %s input file", inpath); warn(NULL);
+    errno = EIO; goto err;
+  }
+
+  for(; *in; in++) {
     char rpath[PATH_MAX];
-    char file[PATH_MAX];
 
-    if (!realpath(in, rpath)) {
-      warnx("cannot link input file to `%s'", file); warn(NULL);
+    if (!realpath(*in, rpath)) {
+      warnx("cannot find input file `%s'", *in); warn(NULL);
       errno = EIO; goto err;
     }
-    strlcpy(file, runopt.tmpdir, sizeof(file));
-    strlcat(file, "/", sizeof(file));
-    strlcat(file, basename((char *)in), sizeof(file));
-    strlcat(file, ".c", sizeof(file));
-    s = symlink(rpath, file);
-    xwarnx("linked %s input file to `%s'", in, file);
-    if (s) {
-      warnx("cannot link %s input file to `%s'", in, file); warn(NULL);
-      errno = EIO; goto err;
-    }
-    s = cpp_optappend(file, -1);
 
-    /* add a default -I to the original directory of input */
-    file[0] = '-'; file[1] = 'I'; file[2] = 0;
-    strlcat(file, in, sizeof(file));
-    strlcpy(&file[2], dirname(&file[2]), sizeof(file)-2);
-    s = cpp_optappend(file, noptexec);
-    if (s) {
-      warnx("cannot add search path to input file directory");
-      errno = ENOMEM; goto err;
-    }
-    noptexec++;
-  } else
-    s = cpp_optappend(in, -1);
+    fprintf(infile, "#include \"%s\"\n", rpath);
+  }
+
+  fclose(infile);
+  xwarnx("created input file `%s'", inpath);
+
+  s = cpp_optappend(inpath, -1);
   if (s) {
     warnx("memory exhausted, cannot run cpp");
     errno = ENOMEM; goto err;

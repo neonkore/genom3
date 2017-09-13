@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 LAAS/CNRS
+ * Copyright (c) 2010-2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -278,48 +278,53 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [parseidx_file] = "file", [parseidx_string] = "string", NULL
   };
   int pipefd[2];
-  int k, s;
-  const char *path;
-  const char *notice;
+  int k, s, i;
 
-  if (objc != 3) {
-    Tcl_WrongNumArgs(interp, 1, objv, "file|string data");
+  if (objc < 3) {
+    Tcl_WrongNumArgs(interp, 1, objv, "file|string data ?...?");
     return TCL_ERROR;
   }
 
   s = Tcl_GetIndexFromObj(interp, objv[1], args, "subcommand", 0, &k);
   if (s != TCL_OK) return s;
 
+  nerrors = nwarnings = 0;
+
   switch(k) {
     case parseidx_file: {
-      extern tloc curloc;
+      const char *notice;
+      char *path[objc-1];
 
-      path = Tcl_GetString(objv[2]);
+      for(i = 0; i < objc-2; i++) {
+        path[i] = Tcl_GetString(objv[i+2]);
+
+        notice = cpp_getnotice(path[i]);
+        if (notice) bufcat((char **)&runopt.notice, notice);
+      }
+      path[i] = NULL;
+
       if (pipe(pipefd) < 0) {
         Tcl_AppendResult(interp,
                          "cannot create a pipe to cpp:", strerror(errno), NULL);
         return TCL_ERROR;
       }
       dotgen_input(DG_INPUT_FILE, pipefd[0]);
-      curloc.file = string(path);
-      notice = cpp_getnotice(path);
-      if (notice) bufcat((char **)&runopt.notice, notice);
       cpp_invoke(path, pipefd[1]);
+      s = dotgenparse();
+      if (cpp_wait()) s = 2;
       break;
     }
 
     case parseidx_string:
-      dotgen_input(DG_INPUT_BUFFER, Tcl_GetString(objv[2]));
+      for(i = 2; i < objc; i++) {
+        dotgen_input(DG_INPUT_BUFFER, Tcl_GetString(objv[i]));
+        s = dotgenparse();
+        if (s) break;
+      }
       break;
   }
 
-  nerrors = nwarnings = 0;
-  s = dotgenparse();
-  if (k == parseidx_file) {
-    if (cpp_wait()) s = 2;
-  }
   if (!s) s = dotgen_consolidate();
-
   if (s || nerrors) {
     char msg[128];
     snprintf(msg, sizeof(msg),

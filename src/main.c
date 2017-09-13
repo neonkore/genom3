@@ -93,7 +93,6 @@ main(int argc, char *argv[])
   runopt.cmdline = string("");
   runopt.notice = NULL;
 
-  runopt.cppdotgen = 1;
   s = cpp_optappend("-D__GENOM__=" PACKAGE_VERSION, -1);
   if (s < 0) {
     warnx("cannot set default cpp options");
@@ -136,11 +135,6 @@ main(int argc, char *argv[])
       case 's':
 	strlcpy(runopt.sysdir, optarg, sizeof(runopt.sysdir));
 	runopt.cmdline = strings(runopt.cmdline, " -s ", abspath(optarg), NULL);
-	break;
-
-      case 'r':
-	runopt.cppdotgen = 0;
-	runopt.cmdline = strings(runopt.cmdline, " -r", NULL);
 	break;
 
       case 'l':
@@ -239,7 +233,7 @@ main(int argc, char *argv[])
 
   /* just preprocess input file */
   if (runopt.preproc) {
-    cpp_invoke(argv[0], 1);
+    cpp_invoke(argv, 1);
     status = cpp_wait();
     goto done;
   }
@@ -255,7 +249,7 @@ main(int argc, char *argv[])
       status = 2; goto done;
     }
     dotgen_input(DG_INPUT_FILE, pipefd[0]);
-    cpp_invoke(argv[0], pipefd[1]);
+    cpp_invoke(argv, pipefd[1]);
 
     s = dotgenparse();
     status = cpp_wait();
@@ -347,13 +341,14 @@ parsewarning(tloc l, const char *fmt, ...)
 static void
 usage(FILE *channel, char *argv0)
 {
-  fprintf(channel,
-	  "GenoM " PACKAGE_VERSION " component generator\n\n"
-	  "Usage:\n  %1$s [-l] [-h] [--version]\n"
-	  "  %1$s [-I dir] [-D macro[=value]] [-E|-n] [-v] [-d] file.gen\n"
-	  "  %1$s [general options] template [template options] file.gen\n"
-	  "\n%2$s",
-	  basename(argv0), usage_string);
+  fprintf(
+    channel,
+    "GenoM " PACKAGE_VERSION " component generator\n\n"
+    "Usage:\n  %1$s [-l] [-h] [--version]\n"
+    "  %1$s [-I dir] [-D macro[=value]] [-E|-n] [-v] [-d] file.gen [...]\n"
+    "  %1$s [general options] template [template options] file.gen [...]\n"
+    "\n%2$s",
+    basename(argv0), usage_string);
 }
 
 

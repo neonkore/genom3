@@ -23,9 +23,9 @@ SYNOPSIS
 --------
 *genom3* [*-l*] [*-h*] [*--version*]
 
-*genom3* [*-I* 'dir'] [*-D* 'macro[=value]'] [*-E | -n*] 'file.gen'
+*genom3* [*-I* 'dir'] [*-D* 'macro[=value]'] [*-E | -n*] 'file.gen' [...]
 
-*genom3* ['general options'] 'template' ['template options'] 'file.gen'
+*genom3* ['general options'] 'template' ['template options'] 'file.gen' [...]
 
 
 DESCRIPTION
@@ -80,11 +80,6 @@ GENERAL OPTIONS
 Add the directory 'dir' to the list of directories to be searched
 for included files. The 'dir' argument is passed as-is to the `cpp`
 program via the same *-I* option.
-+
-When *-r* option is in effect (either explicitely passed on the
-command line, or configured by default during the build process), an
-implicit *-I* directive pointing to the directory of the input file
-is appended to the end of the list of searched directories.
 
 *-D*'macro[=value]'::
 // predefine macro, with given value or 1 by default
@@ -153,12 +148,6 @@ is useful if non-standard engines are to be used. The default value is
 // use dir as the directory for temporary files
 Use 'dir' as the temporary directory holding intermediate files. See also the
 environment variable 'TMPDIR'.
-
-*-r*, *--rename*::
-// always invoke cpp with a .c file linked to the input file
-Some 'cpp' programs cannot handle correctly files with a '.gen' extension. This
-option will make genom call cpp with an input file ending in '.c', linked
-to the real input file.
 
 *-v*, *--verbose*::
 // produce verbose output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -478,6 +478,9 @@ dotgen_parsehash(char *buffer, YYLTYPE *yylloc)
   if (n < 1) return;
   if (n < 2) { yylloc->line = line; return; }
   if (!realpath(raw, file)) strcpy(file, raw);
+
+  /* strip artificial input files from tmpdir */
+  if (!strncmp(file, runopt.tmpdir, strlen(runopt.tmpdir))) return;
 
   yylloc->file = string(file);
   yylloc->line = line;

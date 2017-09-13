@@ -52,10 +52,12 @@ foreach comp [dotgen components] {
 <"[join $rev {, } ]">
 :toc: left
 
-// fix default asciidoctor stylesheet issue #2407
+// fix default asciidoctor stylesheet issue #2407 and add hr clear rule
 ifdef::backend-html5[]
+[pass]
 ++++
 <link rel="stylesheet" href="data:text/css,p{font-size: inherit !important}" >
+<link rel="stylesheet" href="data:text/css,hr{clear: both}" >
 ++++
 endif::[]
 
@@ -139,8 +141,8 @@ proc expand-type { name type initer prefix {seq {}} } {
       catch { append out " [dict get $initer doc]" }
       if {[$type kind] == "enum"} {
         set values [list]
-        foreach m [$type members] { lappend values "``[$m name]``" }
-        append out "\u2208 { [join $values {, }] }"
+        foreach m [$type members] { lappend values "`[$m name]`" }
+        append out " \u2208 { [join $values {, }] }"
       }
       append out "\n"
     }
@@ -182,10 +184,11 @@ proc expand-initer { initer } {
 <'  foreach port [$comp ports] {'>
 <'     set multiple [expr {[$port kind] == "multiple"?"multiple ":""}] '>
 
-=== <"[$port name]"> (<"$multiple"><"[$port dir]">) [[<"[$port name]">]]
+[[<"[$port name]">]]
+=== <"[$port name]"> (<"$multiple"><"[$port dir]">)
 
 
-[.small, width="50%", float=right, cols="1"]
+[role="small", width="50%", float="right", cols="1"]
 |===
 a|.Data structure
 [disc]
@@ -204,60 +207,64 @@ a|.Data structure
 <'foreach comp [dotgen components] {'>
 <'  foreach service [$comp services] {'>
 
-=== <"[$service name]"> (<"[$service kind]">) [[<"[$service name]">]]
+[[<"[$service name]">]]
+=== <"[$service name]"> (<"[$service kind]">)
 
-[.small, width="50%", float=right, cols="1"]
+<'    if {[llength [$service parameter]] || [llength [$service throws]] ||'>
+<'        ![catch {$service task}] || [llength [$service interrupts]]} {'>
+[role="small", width="50%", float="right", cols="1"]
 |===
-<'    if {[llength [$service parameter in inout]]} {'>
+<'      if {[llength [$service parameter in inout]]} {'>
 a|.Inputs
 [disc]
-<'      foreach i [$service parameter in inout] {'>
+<'        foreach i [$service parameter in inout] {'>
 <"[expand-param $i]">
+<'        }'>
 <'      }'>
-<'    }'>
-<'    if {[llength [$service parameter inout out]]} {'>
+<'      if {[llength [$service parameter inout out]]} {'>
 a|.Outputs
 [disc]
-<'      foreach i [$service parameter inout out] {'>
+<'        foreach i [$service parameter inout out] {'>
 <"[expand-param $i]">
+<'        }'>
 <'      }'>
-<'    }'>
-<'    if {[llength [$service throws]]} {'>
+<'      if {[llength [$service throws]]} {'>
 a|.Throws
 [disc]
-<'      foreach e [$service throws] {'>
+<'        foreach e [$service throws] {'>
 <"[expand-type {} $e {} { *}]">
+<'        }'>
 <'      }'>
-<'    }'>
-<'    if {![catch {$service task}] || [llength [$service interrupts]]} {'>
+<'      if {![catch {$service task}] || [llength [$service interrupts]]} {'>
 a|.Context
 [disc]
-<'      if {![catch {$service task} t]} {'>
-  * In task <<<"[$t name]">>>
-<'        if {![catch {$t period} p]} {'>
+<'        if {![catch {$service task} t]} {'>
+  * In task `<<<"[$t name]">>>`
+<'          if {![catch {$t period} p]} {'>
   (frequency <"[expr {1/[$p value]}]"> _Hz_)
-<'        }'>
-<'        set plist [list]'>
-<'        foreach codel [$service codels] {'>
-<'          foreach param [$codel parameters port] {'>
-<'            lappend plist [$param port]'>
 <'          }'>
-<'        }'>
-<'        foreach p [lsort -unique $plist] {'>
-<'          if {[$p dir] == "out"} {'>
+<'          set plist [list]'>
+<'          foreach codel [$service codels] {'>
+<'            foreach param [$codel parameters port] {'>
+<'              lappend plist [$param port]'>
+<'            }'>
+<'          }'>
+<'          foreach p [lsort -unique $plist] {'>
+<'            if {[$p dir] == "out"} {'>
   * Updates port `<<<"[$p name]">>>`
-<'          } else {'>
+<'            } else {'>
   * Reads port `<<<"[$p name]">>>`
+<'            }'>
+<'          }'>
+<'        }'>
+<'        if {[llength [$service interrupts]]} {'>
+<'          foreach i [$service interrupts] {'>
+  * Interrupts `<<<"[$i name]">>>`
 <'          }'>
 <'        }'>
 <'      }'>
-<'      if {[llength [$service interrupts]]} {'>
-<'        foreach i [$service interrupts] {'>
-  * Interrupts `<<<"[$i name]">>>`
-<'        }'>
-<'      }'>
-<'    }'>
 |===
+<'    }'>
 
 <'    if {![catch {$service doc} doc]} {'>
 <"$doc">
@@ -271,9 +278,10 @@ a|.Context
 <'foreach comp [dotgen components] {'>
 <'  foreach task [$comp tasks] {'>
 
-=== <"[$task name]"> [[<"[$task name]">]]
+[[<"[$task name]">]]
+=== <"[$task name]">
 
-[.small, width="50%", float=right, cols="1"]
+[role="small", width="50%", float="right", cols="1"]
 |===
 a|.Context
 [disc]

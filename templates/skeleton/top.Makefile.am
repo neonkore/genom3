@@ -70,5 +70,5 @@ merge-%:
 dist_doc_DATA=	README.html README.adoc
 
 %.html: %.adoc
-	$(ASCIIDOCTOR) -b html5 -o $@ $<
+	$(ASCIIDOCTOR) $(ASCIIDOCTOR_ARGS) -b html5 -o $@ $<
 <'}'>

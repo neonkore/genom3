@@ -119,7 +119,7 @@ template options {
 
 # check/process input files
 if {![llength $argv]} { puts [template usage]; exit 2 }
-foreach f $argv { dotgen parse file $f }
+dotgen parse file {*}$argv
 set input [file tail [lindex $argv 0]]
 if {![info exists outdir]} {
   set outdir [file dirname [lindex $argv 0]]

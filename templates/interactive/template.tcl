@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010,2012,2014 LAAS/CNRS
+# Copyright (c) 2010,2012,2014,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -64,9 +64,7 @@ template options {
 }
 
 # process input files
-foreach f $argv {
-  dotgen parse file $f
-}
+dotgen parse file {*}$argv
 
 # provide a default 'interactive' function in case eltclsh cannot be loaded
 proc interactive {} {

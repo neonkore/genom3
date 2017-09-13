@@ -1,6 +1,6 @@
 genom3(1)
 =========
-:revision: 2.99.29
+:revision: 2.99.30
 :month: September
 :year: 2017
 :doctype: manpage

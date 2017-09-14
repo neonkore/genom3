@@ -144,7 +144,7 @@ genom3.1: adoc/manual.adoc
 	  -e 's|^:am docdir:.*|:am docdir: $(docdir)|'			\
 	  -e 's|^:am sitetmpldir:.*|:am sitetmpldir: $(sitetmpldir)|'	\
 	  -e 's|^:am tmpldir:.*|:am tmpldir: $(tmpldir)|'
-	$(A2X) -f manpage genom3.1.adoc
+	$(ASCIIDOCTOR) -b manpage genom3.1.adoc
 
 
 # Compute last modification date of documentation files and a few other meta
@@ -215,7 +215,7 @@ adoc/templates/cmd-dotgen.adoc~: $(top_srcdir)/engine/tcl/dotgen.c
 adoc/templates/cmd-language.adoc~: $(top_srcdir)/engine/tcl/language.tcl
 adoc/templates/cmd-type.adoc~: $(top_srcdir)/engine/tcl/idltype.c
 
-$(adoctgts): Makefile adocgen.awk
+$(adoctgts): Makefile adocgen.awk y2tgen.awk
 $(adoctgts):
 	@test -d '$(dir $@)' || mkdir -p '$(dir $@)'
 	@echo '// $(autogen)' >$@
@@ -224,18 +224,16 @@ $(adoctgts):
 
 
 # Generate html from asciidoc
-# Must work around an issue with leftofver generated images, so build in a
-# temporary directory so that it is easy to clean up after ourselves.
 #
-ASCIIDOC_ARGS=	-b html5
-ASCIIDOC_ARGS+=	-a data-uri
-ASCIIDOC_ARGS+= -a stylesdir=$(abs_srcdir)
+ASCIIDOCTOR_ARGS=	-b html5 -r asciidoctor-diagram
+ASCIIDOCTOR_ARGS+=	-a nofooter -a data-uri
+ASCIIDOCTOR_ARGS+=	-a source-highlighter=coderay -a coderay-css=style
+ASCIIDOCTOR_ARGS+=	-a sidebartoc
+ASCIIDOCTOR_ARGS+=	-a docinfo1 -a docinfodir=$(abs_srcdir)
+ASCIIDOCTOR_ARGS+=	-a imagesdir=$(abs_builddir)
 
-html/%.html: $(srcdir)/adoc/%.adoc $(srcdir)/asciidoc.css
-	@test -d '$@.in' || mkdir -p '$@.in'
-	rm -rf '$@.in/input.adoc' && cp '$<' '$@.in/input.adoc'
-	$(ASCIIDOC) $(ASCIIDOC_ARGS) -o - '$@.in/input.adoc' >$@
-	rm -rf '$@.in'
+html/%.html: $(srcdir)/adoc/%.adoc $(srcdir)/docinfo.html
+	$(ASCIIDOCTOR) $(ASCIIDOCTOR_ARGS) -o $@ '$<'
 endif
 
 

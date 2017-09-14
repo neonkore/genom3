@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012,2014 LAAS/CNRS
+ * Copyright (c) 2009-2012,2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -32,10 +32,13 @@
  * interface, it will typically only declare service prototypes and ports that
  * are to be `provided` or `used` by components.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-interface.adoc
  * <dotgen-rule-interface-scope.adoc
  *
  * <dotgen-rule-interface-property.adoc
+ * ****
  */
 interface: INTERFACE interface_scope component_body semicolon
   {

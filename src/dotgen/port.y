@@ -30,9 +30,12 @@
  * model. Ports have a name and a type. They can be either `out` ports (for
  * publishing data) or `in` ports (for subscribing to a sibling `out` port).
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-port.adoc
  * <dotgen-rule-opt-multiple.adoc
  * <dotgen-rule-port-dir.adoc
+ * ****
  *
  * Ports are by default `single` ports, i.e. they define one type of exported
  * data. The optional `multiple` qualifier can be used to define a 'dynamic

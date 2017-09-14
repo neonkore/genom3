@@ -104,13 +104,22 @@ AC_ARG_ENABLE(docgen,
 	[enable_docgen=$enableval],[enable_docgen=no])
 
 AC_PATH_PROG(Y2L, [y2l], [:])
-AC_PATH_PROG(A2X, [a2x], [:])
-AC_PATH_PROG(ASCIIDOC, [asciidoc], [:])
-AC_PATH_PROG(SRCHGLT, [source-highlight], [:])
+AC_PATH_PROG(ASCIIDOCTOR, [asciidoctor], [:])
+AC_CACHE_CHECK([for asciidoc-diagram extension], [genom_cv_adoc_diagram],
+  [genom_cv_adoc_diagram=no
+   test "$ASCIIDOCTOR" != ":" &&
+     $ASCIIDOCTOR -r asciidoctor-diagram - </dev/null >/dev/null 2>&1 &&
+       genom_cv_adoc_diagram=yes])
+AC_CACHE_CHECK([for coderay extension], [genom_cv_adoc_coderay],
+  [genom_cv_adoc_coderay=no
+   test "$ASCIIDOCTOR" != ":" &&
+     $ASCIIDOCTOR -r coderay - </dev/null >/dev/null 2>&1 &&
+       genom_cv_adoc_coderay=yes])
 
 AM_CONDITIONAL([DOCGEN],
-  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$A2X" != ":" \
-                               -a "ASCIIDOC" != ":" -a "$SRCHGLT" != ":"])
+  [test "$enable_docgen" = yes -a "$Y2L" != ":" -a "$ASCIIDOCTOR" != ":" \
+                               -a "$genom_cv_adoc_diagram" = "yes"       \
+                               -a "$genom_cv_adoc_coderay" = "yes"])
 AM_CONDITIONAL([DOCBUNDLED],
   [test -f "$srcdir/doc/genom3.1" -a -f "$srcdir/doc/html/index.html"])
 
@@ -181,8 +190,6 @@ AC_CONFIG_FILES([
 	pcpp/Makefile
 	regress/Makefile
 ])
-AC_OUTPUT
-
 
 # summary
 summary=["
@@ -224,34 +231,32 @@ if test x"$enable_docgen" = xno; then
   summary=["${summary} (use --enable-docgen to regenerate)"]
 else
   summary=["${summary}
-    a2x:			"]
-  if test x"$A2X" = x:; then
-    summary=["${summary}no: missing a2x"]
+    asciidoctor:		"]
+  if test x"$ASCIIDOCTOR" = x:; then
+    summary=["${summary}no: missing asciidoctor"]
     summary=["${summary}
-	see http://asciidoc.org/"]
+	see http://asciidoctor.org/"]
   else
     summary=["${summary}yes
-	(with ${A2X})"]
+	(with ${ASCIIDOCTOR})"]
   fi
   summary=["${summary}
-    asciidoc:			"]
-  if test x"$ASCIIDOC" = x:; then
-    summary=["${summary}no: missing asciidoc"]
+    asciidoctor-diagram:	"]
+  if test x"$genom_cv_adoc_diagram" = xno; then
+    summary=["${summary}no: missing ruby gem"]
     summary=["${summary}
-	see http://asciidoc.org/"]
+	see http://asciidoctor.org/"]
   else
-    summary=["${summary}yes
-	(with ${ASCIIDOC})"]
+    summary=["${summary}yes"]
   fi
   summary=["${summary}
-    source-highlight:		"]
-  if test x"$SRCHGLT" = x:; then
-    summary=["${summary}no: missing source-highlight"]
+    coderay:			"]
+  if test x"$genom_cv_adoc_coderay" = xno; then
+    summary=["${summary}no: missing ruby gem"]
     summary=["${summary}
-	see http://www.gnu.org/software/src-highlite/"]
+	see http://coderay.rubychan.de/"]
   else
-    summary=["${summary}yes
-	(with ${SRCHGLT})"]
+    summary=["${summary}yes"]
   fi
   summary=["${summary}
     yacc to text:		"]
@@ -268,10 +273,14 @@ fi
 summary=["$summary
 ----------------------------------------------------------------------------"]
 
-AC_MSG_NOTICE([$summary])
+AC_CONFIG_COMMANDS([summary], [AS_ECHO(["$summary"])], [summary='$summary'])
+
 AM_COND_IF([DOCGEN],[:],[
   if test "$enable_docgen" = yes; then
+    AC_MSG_NOTICE([$summary])
     AC_MSG_ERROR(
       [--enable-docgen was specified but some dependencies are missing])
   fi
 ])
+
+AC_OUTPUT

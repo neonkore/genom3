@@ -1,4 +1,8 @@
 // Generated from ids.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -36,27 +40,18 @@ proper synchronization between concurrent access.
 An IDS definition is similar to a `struct` definition, and follows this
 syntax:
 
-[[dotgen-rule-ids]]
-____
-(18) ids                   ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-ids-name[ids-name] "{" link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}" ";"
-____
-[[dotgen-rule-ids-name]]
-____
-(19) ids-name              ::= ::
-   "ids"
-____
-[[dotgen-rule-member-list]]
-____
-(95) member-list           ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-member[member] ";" } link:grammar{outfilesuffix}#dotgen-rule-member[member] ";"
-____
-[[dotgen-rule-member]]
-____
-(96) member                ::= ::
-   ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-member[member] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
-____
+****
+[horizontal]
+(18) `*ids                   ::=*` ::
+   <<grammar#dotgen-rule-ids-name,`ids-name`>> `"{"` <<grammar#dotgen-rule-member-list,`member-list`>> `"}"` `";"`
+(19) `*ids-name              ::=*` ::
+   `"ids"`
+(95) `*member-list           ::=*` ::
+   `{` <<grammar#dotgen-rule-member,`member`>> `";"` `}` <<grammar#dotgen-rule-member,`member`>> `";"`
+(96) `*member                ::=*` ::
+   `(` <<grammar#dotgen-rule-type-spec,`type-spec`>> +
+                              `|` <<grammar#dotgen-rule-member,`member`>> `","` `)` <<grammar#dotgen-rule-declarator,`declarator`>>
+****
 
 The major difference with a regular `struct` is that an `ids` declaration
 can be reopened. Thus, several `ids` statements can be used to define an

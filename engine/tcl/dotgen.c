@@ -38,8 +38,7 @@
 /* --- genom --------------------------------------------------------------- */
 
 /*/
- * `dotgen` TCL engine command
- * -----------------------------
+ * == `dotgen` TCL engine command
  */
 
 /*/
@@ -256,9 +255,9 @@ dg_input_deps(ClientData v, Tcl_Interp *interp, int objc,
 /*/
  * [[dotgen_parse]]
  * === `dotgen parse`: Process additional input
- * ____
+ * ****
  * `dotgen parse {file|string}` 'data'
- * ____
+ * ****
  *
  * Parse additional `.gen` data either from a file or from a string. When
  * parsing is successful, the corresponding objects are exported to the
@@ -343,9 +342,9 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 /*/
  * [[dotgen_types]]
  * === `dotgen types`: Data type definitions from the specification
- * ____
+ * ****
  * `dotgen types` ['pattern']
- * ____
+ * ****
  *
  * This command returns the list of type objects that are defined in the
  * current `.gen` file. This list may be filtered with the optional 'pattern'
@@ -421,9 +420,9 @@ dg_clist(compkind k, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 /*/
  * [[dotgen_components]]
  * === `dotgen components`: Components definitions from the specification
- * ____
+ * ****
  * `dotgen components` ['pattern']
- * ____
+ * ****
  *
  * This command returns the list of components that are defined in the current
  * `.gen` file. This list may be filtered with the optional 'pattern'
@@ -450,9 +449,9 @@ dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 /*/
  * [[dotgen_interfaces]]
  * === `dotgen interfaces`: Interfaces definitions from the specification
- * ____
+ * ****
  * `dotgen interfaces` ['pattern']
- * ____
+ * ****
  *
  * This command returns the list of interfaces that are defined in the current
  * `.gen` file. This list may be filtered with the optional 'pattern'

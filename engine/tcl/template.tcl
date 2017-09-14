@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 LAAS/CNRS
+# Copyright (c) 2010-2015,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -52,9 +52,9 @@ namespace eval template {
     #/
     # [[template_require]]
     # === `template require`: Source additional template code
-    # ____
+    # ****
     # `template require` 'file'
-    # ____
+    # ****
     #
     # Source tcl 'file' and make its content available to the template
     # files. The file name can be absolute or relative. If it is relative, it
@@ -94,10 +94,10 @@ namespace eval template {
     #/
     # [[template_parse]]
     # === `template parse`: Generate template content
-    # ____
+    # ****
     # `template parse` [`args` 'list'] [`perm` 'mode'] [{`file|string|raw`}]
     # 'file' ...]
-    # ____
+    # ****
     #
     # This is the main template function that parses a template source file and
     # instanciate it, writing the result into the current template directory
@@ -223,9 +223,9 @@ namespace eval template {
     #/
     # [[template_options]]
     # === `template options`: Define template options
-    # ____
+    # ****
     # `template options` 'pattern' 'body' `...`
-    # ____
+    # ****
     #
     # Define the list of supported options for the template. Argument is a Tcl
     # switch-like script that must define all supported options. It consists of
@@ -269,9 +269,9 @@ namespace eval template {
     #/
     # [[template_deps]]
     # === `template deps`: Template dependencies
-    # ____
+    # ****
     # `template deps`
-    # ____
+    # ****
     #
     # Return the comprehensive list of template files processed so far. This
     # includes files processed via `template require`, `template
@@ -296,9 +296,9 @@ namespace eval template {
     #/
     # [[template_arg]]
     # === `template arg`: Retrieve options passed to templates
-    # ____
+    # ****
     # `template arg`
-    # ____
+    # ****
     #
     # Return the next argument passed to the template, or raise an error is
     # no argument remains.
@@ -323,9 +323,9 @@ namespace eval template {
     #/
     # [[template_usage]]
     # === `template usage`: Define template help string
-    # ____
+    # ****
     # `template usage` ['string']
-    # ____
+    # ****
     #
     # With a 'string' argument, this procedure defines the template "usage"
     # message. Unless the template redefines a `-h` option with `template
@@ -351,9 +351,9 @@ namespace eval template {
     #/
     # [[template_message]]
     # === `template message`: Print runtime information
-    # ____
+    # ****
     # `template message` ['string']
-    # ____
+    # ****
     #
     # Print 'string' so that it is visible to the end-user. The text is
     # sent on the standard error channel unconditionnaly.
@@ -371,9 +371,9 @@ namespace eval template {
     #/
     # [[template_fatal]]
     # === `template fatal`: Abort template processing
-    # ____
+    # ****
     # `template fatal` ['string']
-    # ____
+    # ****
     #
     # Print an error message and stop. The message indicates the error location
     # as reported by the `TCL` command `[info frame]`.

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2009-2014 LAAS/CNRS
+// Copyright (c) 2009-2014,2017 LAAS/CNRS
 // All rights reserved.
 //
 // Permission to use, copy, modify,  and distribute this software for any
@@ -18,6 +18,10 @@
 //                                      Anthony Mallet on Mon May 31 2010
 //
 //
+
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
 
 Component description file
 --------------------------

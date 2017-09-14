@@ -17,10 +17,10 @@
 //
 //                                      Anthony Mallet on Wed Apr 19 2017
 //
-:cxx: C++
-
-Contents
-========
+[.sidebartoc]
+--
+[discrete]
+== Contents
 
 * link:../copying{outfilesuffix}[Your rights]
 * link:../introduction{outfilesuffix}[Introduction]
@@ -35,3 +35,4 @@ Contents
  - link:mappings{outfilesuffix}[Mappings]
  - link:interactive{outfilesuffix}[Interactive]
  - link:tcl-engine{outfilesuffix}[Creating Templates]
+--

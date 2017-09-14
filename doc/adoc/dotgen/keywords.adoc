@@ -1,4 +1,8 @@
 // Generated from expr.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -33,64 +37,61 @@ An identifier is a sequence of ASCII alphabetic, digit, and
 underscore (`_`) characters.  The first character must be an
 ASCII alphabetic character.
 
-[[dotgen-rule-identifier]]
-____
-(107) identifier            ::= ::
-   "[A-Za-z-][A-Za-z0-9-]*" +
-                              | "s" +
-                              | "ms" +
-                              | "us" +
-                              | "k" +
-                              | "m" +
-                              | "real-time" +
-                              | "interface" +
-                              | "component" +
-                              | "ids" +
-                              | "attribute" +
-                              | "function" +
-                              | "activity" +
-                              | "version" +
-                              | "lang" +
-                              | "email" +
-                              | "requires" +
-                              | "codels-require" +
-                              | "clock-rate" +
-                              | "task" +
-                              | "task" +
-                              | "period" +
-                              | "delay" +
-                              | "priority" +
-                              | "scheduling" +
-                              | "stack" +
-                              | "codel" +
-                              | "validate" +
-                              | "yields" +
-                              | "pause" +
-                              | "throws" +
-                              | "doc" +
-                              | "interrupts" +
-                              | "before" +
-                              | "after" +
-                              | "handle" +
-                              | "port" +
-                              | "in" +
-                              | "out" +
-                              | "inout" +
-                              | "local" +
-                              | "async" +
-                              | "remote" +
-                              | "extends" +
-                              | "provides" +
-                              | "uses" +
-                              | "multiple" +
-                              | "native" +
-                              | "exception"
-____
-[[dotgen-rule-identifier-list]]
-____
-(108) identifier-list       ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "," } link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
+****
+[horizontal]
+(107) `*identifier            ::=*` ::
+   `"[A-Za-z-][A-Za-z0-9-]*"` +
+                              `|` `"s"` +
+                              `|` `"ms"` +
+                              `|` `"us"` +
+                              `|` `"k"` +
+                              `|` `"m"` +
+                              `|` `"real-time"` +
+                              `|` `"interface"` +
+                              `|` `"component"` +
+                              `|` `"ids"` +
+                              `|` `"attribute"` +
+                              `|` `"function"` +
+                              `|` `"activity"` +
+                              `|` `"version"` +
+                              `|` `"lang"` +
+                              `|` `"email"` +
+                              `|` `"requires"` +
+                              `|` `"codels-require"` +
+                              `|` `"clock-rate"` +
+                              `|` `"task"` +
+                              `|` `"task"` +
+                              `|` `"period"` +
+                              `|` `"delay"` +
+                              `|` `"priority"` +
+                              `|` `"scheduling"` +
+                              `|` `"stack"` +
+                              `|` `"codel"` +
+                              `|` `"validate"` +
+                              `|` `"yields"` +
+                              `|` `"pause"` +
+                              `|` `"throws"` +
+                              `|` `"doc"` +
+                              `|` `"interrupts"` +
+                              `|` `"before"` +
+                              `|` `"after"` +
+                              `|` `"handle"` +
+                              `|` `"port"` +
+                              `|` `"in"` +
+                              `|` `"out"` +
+                              `|` `"inout"` +
+                              `|` `"local"` +
+                              `|` `"async"` +
+                              `|` `"remote"` +
+                              `|` `"extends"` +
+                              `|` `"provides"` +
+                              `|` `"uses"` +
+                              `|` `"multiple"` +
+                              `|` `"native"` +
+                              `|` `"exception"`
+(108) `*identifier-list       ::=*` ::
+   `{` <<grammar#dotgen-rule-identifier,`identifier`>> `","` `}` <<grammar#dotgen-rule-identifier,`identifier`>>
+****
 
 Words that are reserved keywords in the dotgen language are valid
 identifiers where their use is not ambiguous.

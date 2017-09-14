@@ -1,4 +1,8 @@
 // Generated from idlscope.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -31,29 +35,20 @@ Module declaration
 
 A module definition satisfies the following syntax:
 
-[[dotgen-rule-module]]
-____
-(49) module                ::= ::
-   "module" link:grammar{outfilesuffix}#dotgen-rule-module-name[module-name] "{" link:grammar{outfilesuffix}#dotgen-rule-module-body[module-body] "}" ";"
-____
-[[dotgen-rule-module-name]]
-____
-(50) module-name           ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
-[[dotgen-rule-module-body]]
-____
-(51) module-body           ::= ::
-   [ link:grammar{outfilesuffix}#dotgen-rule-idl-statements[idl-statements] ]
-____
-[[dotgen-rule-idl-statements]]
-____
-(3) idl-statements        ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement] } link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement]
-____
+****
+[horizontal]
+(49) `*module                ::=*` ::
+   `"module"` <<grammar#dotgen-rule-module-name,`module-name`>> `"{"` <<grammar#dotgen-rule-module-body,`module-body`>> `"}"` `";"`
+(50) `*module-name           ::=*` ::
+   <<grammar#dotgen-rule-identifier,`identifier`>>
+(51) `*module-body           ::=*` ::
+   `[` <<grammar#dotgen-rule-idl-statements,`idl-statements`>> `]`
+(3) `*idl-statements        ::=*` ::
+   `{` <<grammar#dotgen-rule-idl-statement,`idl-statement`>> `}` <<grammar#dotgen-rule-idl-statement,`idl-statement`>>
+****
 
 The only effect of a module is to scope IDL identifiers. It is similar to a
-C++ or Java namespace; it is considered good practice to enclose your type
+{cpp} or Java namespace; it is considered good practice to enclose your type
 definitions inside a module definition to prevent name clashes between
 components.
 

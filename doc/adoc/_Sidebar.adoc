@@ -18,8 +18,10 @@
 //                                      Anthony Mallet on Wed Apr 19 2017
 //
 
-Contents
-========
+[.sidebartoc]
+--
+[discrete]
+== Contents
 
 * link:copying{outfilesuffix}[Your rights]
 * link:introduction{outfilesuffix}[Introduction]
@@ -30,3 +32,4 @@ Contents
 * link:running{outfilesuffix}[Running GenoM]
 * link:tutorials/index{outfilesuffix}[Tutorials]
 * link:templates/index{outfilesuffix}[Templates]
+--

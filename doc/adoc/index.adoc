@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012,2014-2015 LAAS/CNRS
+// Copyright (c) 2012,2014-2015,2017 LAAS/CNRS
 // All rights reserved.
 //
 // Permission to use, copy, modify,  and distribute this software for any
@@ -24,12 +24,15 @@ GenoM Manual
 :month: September
 :year: 2017
 
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 For GenoM version 3 +
 Revision {revision}, {month} {year}
 
-Sara Fleury, Matthieu Herrb <matthieu.herrb@laas.fr>,
-Anthony Mallet <anthony.mallet@laas.fr>, C&eacute;dric Pasteur,
-Arnaud Degroote <arnaud.degroote@isae.fr>
+Sara Fleury, Matthieu Herrb, Anthony Mallet, C&eacute;dric Pasteur,
+Arnaud Degroote
 
 
 Contents

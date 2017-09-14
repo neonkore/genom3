@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -28,7 +28,10 @@
  * ------------------
  *
  * The template types are:
+ * ****
+ * [horizontal]
  * <dotgen-rule-template-type-spec.adoc
+ * ****
  */
 template_type_spec: sequence_type | optional_type | string_type | fixed_type;
 
@@ -39,7 +42,10 @@ template_type_spec: sequence_type | optional_type | string_type | fixed_type;
  * size (which is fixed at compile time) and a length (which is determined at
  * run time).
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-sequence-type.adoc
+ * ****
  *
  * The second parameter in a sequence declaration indicates the maximum size of
  * the sequence. If a positive integer constant is specified for the maximum
@@ -81,7 +87,10 @@ sequence_type:
  *
  * Optional types represent a value that may or may not be present.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-optional-type.adoc
+ * ****
  *
  * The parameter of the 'optional' declaration describes the data type of the
  * value.
@@ -98,7 +107,10 @@ optional_type:
  *
  * A string is similar to a sequence of char.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-string-type.adoc
+ * ****
  *
  * The argument to the string declaration is the maximum size of the string. If
  * a positive integer maximum size is specified, the string is termed a bounded
@@ -126,7 +138,10 @@ string_type:
  *
  * The ﬁxed data type represents a fixed-point decimal number
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-fixed-type.adoc
+ * ****
  *
  * [CAUTION]
  * Fixed types are not properly handled in existing genom

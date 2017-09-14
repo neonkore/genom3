@@ -165,10 +165,13 @@
  * link:preprocessing{outfilesuffix}[Preprocessing]) are handled at the lexical
  * level and do not appear in the grammar.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-specification.adoc
  * <dotgen-rule-statement.adoc
  *
  * <dotgen-rule-idl-statement.adoc
+ * ****
  *
  * IDL statements define link:typedef{outfilesuffix}[types],
  * link:typedef{outfilesuffix}[constants] or link:module{outfilesuffix}[IDL

@@ -1,4 +1,8 @@
 // Generated from port.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -31,22 +35,16 @@ Ports implement the data flow between components as a publish/subscribe
 model. Ports have a name and a type. They can be either `out` ports (for
 publishing data) or `in` ports (for subscribing to a sibling `out` port).
 
-[[dotgen-rule-port]]
-____
-(22) port                  ::= ::
-   "port" link:grammar{outfilesuffix}#dotgen-rule-opt-multiple[opt-multiple] link:grammar{outfilesuffix}#dotgen-rule-port-dir[port-dir] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] link:grammar{outfilesuffix}#dotgen-rule-opt-properties[opt-properties] ";"
-____
-[[dotgen-rule-opt-multiple]]
-____
-(24) opt-multiple          ::= ::
-   [ "multiple" ]
-____
-[[dotgen-rule-port-dir]]
-____
-(23) port-dir              ::= ::
-   "in" +
-                              | "out"
-____
+****
+[horizontal]
+(22) `*port                  ::=*` ::
+   `"port"` <<grammar#dotgen-rule-opt-multiple,`opt-multiple`>> <<grammar#dotgen-rule-port-dir,`port-dir`>> <<grammar#dotgen-rule-type-spec,`type-spec`>> <<grammar#dotgen-rule-identifier,`identifier`>> <<grammar#dotgen-rule-opt-properties,`opt-properties`>> `";"`
+(24) `*opt-multiple          ::=*` ::
+   `[` `"multiple"` `]`
+(23) `*port-dir              ::=*` ::
+   `"in"` +
+                              `|` `"out"`
+****
 
 Ports are by default `single` ports, i.e. they define one type of exported
 data. The optional `multiple` qualifier can be used to define a 'dynamic

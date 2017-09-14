@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -30,13 +30,16 @@
  *
  * A module definition satisfies the following syntax:
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-module.adoc
  * <dotgen-rule-module-name.adoc
  * <dotgen-rule-module-body.adoc
  * <dotgen-rule-idl-statements.adoc
+ * ****
  *
  * The only effect of a module is to scope IDL identifiers. It is similar to a
- * C++ or Java namespace; it is considered good practice to enclose your type
+ * {cpp} or Java namespace; it is considered good practice to enclose your type
  * definitions inside a module definition to prevent name clashes between
  * components.
  */

@@ -17,6 +17,11 @@
 //
 //                                      Anthony Mallet on Fri Jun 25 2010
 //
+
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 GenoM IDL mappings
 ------------------
 
@@ -56,9 +61,7 @@ languages.
 * link:c{outfilesuffix}#native[Native]
 * link:c{outfilesuffix}#exception[Exception]
 
-:cxx: C++
-
-=== [monospaced]#{cxx}# mappings: From IDL types to [monospaced]#{cxx}# types
+=== `{cpp}` mappings: From IDL types to `{cpp}` types
 
 * link:c++{outfilesuffix}#scoped_name[Scoped name]
 * link:c++{outfilesuffix}#constant[Constant]

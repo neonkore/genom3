@@ -1,4 +1,8 @@
 // Generated from idltype-base.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -32,16 +36,16 @@ integers, floating point and characters. The chapter on
 link:../mappings/index{outfilesuffix}[GenoM IDL mappings] explains how they
 map to the actual programming language.
 
-[[dotgen-rule-base-type-spec]]
-____
-(70) base-type-spec        ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-floating-pt-type[floating-pt-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-octet-type[octet-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-any-type[any-type]
-____
+****
+[horizontal]
+(70) `*base-type-spec        ::=*` ::
+   <<grammar#dotgen-rule-boolean-type,`boolean-type`>> +
+                              `|` <<grammar#dotgen-rule-integer-type,`integer-type`>> +
+                              `|` <<grammar#dotgen-rule-floating-pt-type,`floating-pt-type`>> +
+                              `|` <<grammar#dotgen-rule-char-type,`char-type`>> +
+                              `|` <<grammar#dotgen-rule-octet-type,`octet-type`>> +
+                              `|` <<grammar#dotgen-rule-any-type,`any-type`>>
+****
 
 
 
@@ -53,56 +57,32 @@ ____
 
 They represent integer values in the range indicated below.
 
-[[dotgen-rule-integer-type]]
-____
-(71) integer-type          ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-signed-int[signed-int] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-unsigned-int[unsigned-int]
-____
-[[dotgen-rule-signed-int]]
-____
-(72) signed-int            ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-signed-longlong-int[signed-longlong-int] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-signed-long-int[signed-long-int] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-signed-short-int[signed-short-int]
-____
-[[dotgen-rule-unsigned-int]]
-____
-(73) unsigned-int          ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-unsigned-longlong-int[unsigned-longlong-int] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-unsigned-long-int[unsigned-long-int] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-unsigned-short-int[unsigned-short-int]
-____
-[[dotgen-rule-signed-longlong-int]]
-____
-(79) signed-longlong-int   ::= ::
-   "long" "long"
-____
-[[dotgen-rule-signed-long-int]]
-____
-(78) signed-long-int       ::= ::
-   "long"
-____
-[[dotgen-rule-signed-short-int]]
-____
-(77) signed-short-int      ::= ::
-   "short"
-____
-[[dotgen-rule-unsigned-longlong-int]]
-____
-(76) unsigned-longlong-int ::= ::
-   "unsigned" "long" "long"
-____
-[[dotgen-rule-unsigned-long-int]]
-____
-(75) unsigned-long-int     ::= ::
-   "unsigned" "long"
-____
-[[dotgen-rule-unsigned-short-int]]
-____
-(74) unsigned-short-int    ::= ::
-   "unsigned" "short"
-____
+****
+[horizontal]
+(71) `*integer-type          ::=*` ::
+   <<grammar#dotgen-rule-signed-int,`signed-int`>> +
+                              `|` <<grammar#dotgen-rule-unsigned-int,`unsigned-int`>>
+(72) `*signed-int            ::=*` ::
+   <<grammar#dotgen-rule-signed-longlong-int,`signed-longlong-int`>> +
+                              `|` <<grammar#dotgen-rule-signed-long-int,`signed-long-int`>> +
+                              `|` <<grammar#dotgen-rule-signed-short-int,`signed-short-int`>>
+(73) `*unsigned-int          ::=*` ::
+   <<grammar#dotgen-rule-unsigned-longlong-int,`unsigned-longlong-int`>> +
+                              `|` <<grammar#dotgen-rule-unsigned-long-int,`unsigned-long-int`>> +
+                              `|` <<grammar#dotgen-rule-unsigned-short-int,`unsigned-short-int`>>
+(79) `*signed-longlong-int   ::=*` ::
+   `"long"` `"long"`
+(78) `*signed-long-int       ::=*` ::
+   `"long"`
+(77) `*signed-short-int      ::=*` ::
+   `"short"`
+(76) `*unsigned-longlong-int ::=*` ::
+   `"unsigned"` `"long"` `"long"`
+(75) `*unsigned-long-int     ::=*` ::
+   `"unsigned"` `"long"`
+(74) `*unsigned-short-int    ::=*` ::
+   `"unsigned"` `"short"`
+****
 
 .Range of integer types
 [width="60%",cols=",2",frame="topbot"]
@@ -141,22 +121,16 @@ They represent floating point values. The `float` type represents IEEE
 single-precision floating point numbers; the `double` type represents
 IEEE double-precision floating point numbers.
 
-[[dotgen-rule-floating-pt-type]]
-____
-(80) floating-pt-type      ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-float-type[float-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-double-type[double-type]
-____
-[[dotgen-rule-float-type]]
-____
-(81) float-type            ::= ::
-   "float"
-____
-[[dotgen-rule-double-type]]
-____
-(82) double-type           ::= ::
-   "double"
-____
+****
+[horizontal]
+(80) `*floating-pt-type      ::=*` ::
+   <<grammar#dotgen-rule-float-type,`float-type`>> +
+                              `|` <<grammar#dotgen-rule-double-type,`double-type`>>
+(81) `*float-type            ::=*` ::
+   `"float"`
+(82) `*double-type           ::=*` ::
+   `"double"`
+****
 
 
 
@@ -172,11 +146,11 @@ ____
 A char data type that is an 8-bit quantity that encodes a single-byte
 character.
 
-[[dotgen-rule-char-type]]
-____
-(83) char-type             ::= ::
-   "char"
-____
+****
+[horizontal]
+(83) `*char-type             ::=*` ::
+   `"char"`
+****
 
 
 
@@ -189,11 +163,11 @@ ____
 The boolean data type is used to denote a data item that can only take one
 of the values TRUE and FALSE.
 
-[[dotgen-rule-boolean-type]]
-____
-(84) boolean-type          ::= ::
-   "boolean"
-____
+****
+[horizontal]
+(84) `*boolean-type          ::=*` ::
+   `"boolean"`
+****
 
 
 
@@ -205,11 +179,11 @@ ____
 
 The octet type represents an 8 bit quantity.
 
-[[dotgen-rule-octet-type]]
-____
-(85) octet-type            ::= ::
-   "octet"
-____
+****
+[horizontal]
+(85) `*octet-type            ::=*` ::
+   `"octet"`
+****
 
 
 
@@ -223,11 +197,11 @@ ____
 The `any` type is a generic type that can contain any other type. This is
 not yet implemented in genom, so you must not use it.
 
-[[dotgen-rule-any-type]]
-____
-(86) any-type              ::= ::
-   "any"
-____
+****
+[horizontal]
+(86) `*any-type              ::=*` ::
+   `"any"`
+****
 
 
 

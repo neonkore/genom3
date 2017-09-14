@@ -1,4 +1,8 @@
 // Generated from idltype.c - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 

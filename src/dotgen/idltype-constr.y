@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -29,7 +29,10 @@
  * `structs`, `unions` and `enums` are the constructed types. Their syntax is
  * presented in this section:
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-constructed-type.adoc
+ * ****
  */
 
 constructed_type_spec: constructed_type;
@@ -38,10 +41,13 @@ constructed_type: struct_type | union_type | enum_type;
 /*/
  * === Structures
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-struct-type.adoc
  * <dotgen-rule-struct-name.adoc
  * <dotgen-rule-member-list.adoc
  * <dotgen-rule-member.adoc
+ * ****
  *
  * The `identiﬁer` in `struct-type` defines a new legal type. Structure types
  * may also be named using a typedef declaration.
@@ -127,6 +133,8 @@ member:
 /*/
  * === Discriminated unions
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-union-type.adoc
  * <dotgen-rule-union-name.adoc
  * <dotgen-rule-switch-type-spec.adoc
@@ -134,6 +142,7 @@ member:
  * <dotgen-rule-case.adoc
  * <dotgen-rule-case-label-list.adoc
  * <dotgen-rule-case-label.adoc
+ * ****
  *
  * Unions are a cross between the C union and switch statements. Unions must be
  * discriminated; that is, the union header must specify a typed tag field that
@@ -266,9 +275,12 @@ case_label:
  *
  * Enumerated types consist of ordered lists of identifiers. The syntax is:
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-enum-type.adoc
  * <dotgen-rule-enumerator-list.adoc
  * <dotgen-rule-enumerator.adoc
+ * ****
  *
  * A maximum of 2^32^ identifiers may be specified in an enumeration. The order
  * in which the identifiers are named in the specification of an enumeration
@@ -321,7 +333,10 @@ enumerator: identifier
 /*/
  * === Forward declarations
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-forward-dcl.adoc
+ * ****
  *
  */
 

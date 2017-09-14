@@ -37,10 +37,10 @@ template usage "Skeleton generation template\n" [regsub -all [join {
   # same directory as the input .gen file. The `-C` option can be used to
   # specify another output directory.
   #
-  # The `-l c++` option is specific to `C` codels. It generates a skeleton that
-  # compiles the codels with a `C++` compiler. This is useful for invoking
-  # `C++` code from the codels (Note that this is different from having
-  # `C++` codels.)
+  # The `+-l c+++` option is specific to `C` codels. It generates a skeleton
+  # that compiles the codels with a `{cpp}` compiler. This is useful for
+  # invoking `{cpp}` code from the codels (Note that this is different from
+  # having `{cpp}` codels.)
   #
   # Files generated with this template are freely modifiable (and are actually
   # required to be modified in order to provide some real codels). They are

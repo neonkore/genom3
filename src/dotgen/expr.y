@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -32,8 +32,11 @@
  * underscore (`_`) characters.  The first character must be an
  * ASCII alphabetic character.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-identifier.adoc
  * <dotgen-rule-identifier-list.adoc
+ * ****
  *
  * Words that are reserved keywords in the dotgen language are valid
  * identifiers where their use is not ambiguous.

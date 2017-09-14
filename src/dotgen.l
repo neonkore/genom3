@@ -111,9 +111,9 @@ chartext	([^\'])|(\\.)
   * computed.
   *
   * The pragma syntax is as follow:
-  * ____
+  * ****
   * `#pragma requires "` 'package' `[ >=` 'version' `]"`
-  * ____
+  * ****
   *
   * `#pragma requires` accepts a string argument in the form `package [>=
   * version]`. `genom-pcpp` interprets it by running `pkg-config --cflags` on
@@ -143,9 +143,9 @@ chartext	([^\'])|(\\.)
   * common interface to all user defined components.
   *
   * The pragma syntax is as follow:
-  * ____
+  * ****
   * `#pragma provides` 'interface'
-  * ____
+  * ****
   *
   */
 ^[ \t]*#[ \t]*pragma[ \t]+provides?[ \t].*\n {
@@ -164,9 +164,9 @@ chartext	([^\'])|(\\.)
   * described as a raw string here and not interpreted by `genom`.
   *
   * The pragma syntax is as follow:
-  * ____
+  * ****
   * `#pragma masquerade` 'template' 'type' 'data...'
-  * ____
+  * ****
   *
   * The 'template' argument is a free form string that indicates to which
   * template the directives applies. Templates can lookup this name and take

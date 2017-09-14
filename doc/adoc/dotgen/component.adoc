@@ -1,4 +1,8 @@
 // Generated from component.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -31,21 +35,15 @@ A component declaration describes a instance of the `genom` component
 model. It is defined by a unique name (an identifier) that also defines an
 IDL scope for any embedded types.
 
-[[dotgen-rule-component]]
-____
-(5) component             ::= ::
-   "component" link:grammar{outfilesuffix}#dotgen-rule-component-name[component-name] link:grammar{outfilesuffix}#dotgen-rule-component-body[component-body] ";"
-____
-[[dotgen-rule-component-name]]
-____
-(6) component-name        ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
-[[dotgen-rule-component-body]]
-____
-(7) component-body        ::= ::
-   [ "{" link:grammar{outfilesuffix}#dotgen-rule-exports[exports] "}" ]
-____
+****
+[horizontal]
+(5) `*component             ::=*` ::
+   `"component"` <<grammar#dotgen-rule-component-name,`component-name`>> <<grammar#dotgen-rule-component-body,`component-body`>> `";"`
+(6) `*component-name        ::=*` ::
+   <<grammar#dotgen-rule-identifier,`identifier`>>
+(7) `*component-body        ::=*` ::
+   `[` `"{"` <<grammar#dotgen-rule-exports,`exports`>> `"}"` `]`
+****
 
 Components export objects from the `genom` component model, namely:
 link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
@@ -55,22 +53,19 @@ link:service{outfilesuffix}[services].
 Components may also define new types via IDL statements. Any such types are
 defined within the component scope.
 
-[[dotgen-rule-exports]]
-____
-(8) exports               ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-export[export] }
-____
-[[dotgen-rule-export]]
-____
-(9) export                ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-property[property] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-ids[ids] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-task[task] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-port[port] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-attribute[attribute] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-service[service]
-____
+****
+[horizontal]
+(8) `*exports               ::=*` ::
+   `{` <<grammar#dotgen-rule-export,`export`>> `}`
+(9) `*export                ::=*` ::
+   <<grammar#dotgen-rule-idl-statement,`idl-statement`>> +
+                              `|` <<grammar#dotgen-rule-property,`property`>> +
+                              `|` <<grammar#dotgen-rule-ids,`ids`>> +
+                              `|` <<grammar#dotgen-rule-task,`task`>> +
+                              `|` <<grammar#dotgen-rule-port,`port`>> +
+                              `|` <<grammar#dotgen-rule-attribute,`attribute`>> +
+                              `|` <<grammar#dotgen-rule-service,`service`>>
+****
 
 
 
@@ -118,19 +113,19 @@ ____
 
 A number of properties can be attached to a component:
 
-[[dotgen-rule-component-property]]
-____
-(10) component-property    ::= ::
-   ( "doc" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "version" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "lang" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "email" link:grammar{outfilesuffix}#dotgen-rule-string-literals[string-literals] +
-                              | "requires" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
-                              | "codels-require" link:grammar{outfilesuffix}#dotgen-rule-string-list[string-list] +
-                              | "clock-rate" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
-                              | "provides" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] +
-                              | "uses" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] ) ";"
-____
+****
+[horizontal]
+(10) `*component-property    ::=*` ::
+   `(` `"doc"` <<grammar#dotgen-rule-string-literals,`string-literals`>> +
+                              `|` `"version"` <<grammar#dotgen-rule-string-literals,`string-literals`>> +
+                              `|` `"lang"` <<grammar#dotgen-rule-string-literals,`string-literals`>> +
+                              `|` `"email"` <<grammar#dotgen-rule-string-literals,`string-literals`>> +
+                              `|` `"requires"` <<grammar#dotgen-rule-string-list,`string-list`>> +
+                              `|` `"codels-require"` <<grammar#dotgen-rule-string-list,`string-list`>> +
+                              `|` `"clock-rate"` <<grammar#dotgen-rule-const-expr,`const-expr`>> <<grammar#dotgen-rule-time-unit,`time-unit`>> +
+                              `|` `"provides"` <<grammar#dotgen-rule-interface-list,`interface-list`>> +
+                              `|` `"uses"` <<grammar#dotgen-rule-interface-list,`interface-list`>> `)` `";"`
+****
 
 +doc+::
 A string that describes the functionality of the component.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -38,9 +38,12 @@
  * The following set of type specifiers to represent
  * typed values is available:
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-type-spec.adoc
  * <dotgen-rule-simple-type-spec.adoc
  * <dotgen-rule-constructed-type-spec.adoc
+ * ****
  *
  * ==== Subtopics
  *
@@ -92,9 +95,12 @@ simple_type_spec: base_type_spec | template_type_spec | named_type;
  * Type defined with the following syntax can then be used in the component
  * interface definition and anywhere a type value is expected.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-type-dcl.adoc
  * <dotgen-rule-constructed-type.adoc
  * <dotgen-rule-type-declarator.adoc
+ * ****
  *
  * ==== Typedef
  *
@@ -161,9 +167,12 @@ type_declarator:
  * declares an exception, which is an identifier with an optional associated
  * data type.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-exception-list.adoc
  * <dotgen-rule-exception-dcl.adoc
  * <dotgen-rule-opt-member-list.adoc
+ * ****
  *
  * A simple exception declaration would be :
  *
@@ -257,8 +266,11 @@ fixed_array_size: '[' positive_int_const ']'
  * maximal speed allowed for a motor or the physical bounds of a process that
  * will be controlled. The syntax is again very similar to `C` or `C++`:
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-const-dcl.adoc
  * <dotgen-rule-const-type.adoc
+ * ****
  *
  * For example: `const double max_speed = 72.0;`
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -30,9 +30,12 @@
  * model. It is defined by a unique name (an identifier) that also defines an
  * IDL scope for any embedded types.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-component.adoc
  * <dotgen-rule-component-name.adoc
  * <dotgen-rule-component-body.adoc
+ * ****
  *
  * Components export objects from the `genom` component model, namely:
  * link:ids{outfilesuffix}[IDS], link:task{outfilesuffix}[tasks],
@@ -42,8 +45,11 @@
  * Components may also define new types via IDL statements. Any such types are
  * defined within the component scope.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-exports.adoc
  * <dotgen-rule-export.adoc
+ * ****
  */
 component: COMPONENT component_name component_body semicolon
   {
@@ -91,7 +97,10 @@ export:
 /*/
  * A number of properties can be attached to a component:
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-component-property.adoc
+ * ****
  *
  * +doc+::
  * A string that describes the functionality of the component.

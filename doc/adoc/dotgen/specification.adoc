@@ -1,4 +1,8 @@
 // Generated from main.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -166,26 +170,20 @@ statements. `cpp` directives (see
 link:preprocessing{outfilesuffix}[Preprocessing]) are handled at the lexical
 level and do not appear in the grammar.
 
-[[dotgen-rule-specification]]
-____
-(1) specification         ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-statement[statement] }
-____
-[[dotgen-rule-statement]]
-____
-(2) statement             ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-idl-statement[idl-statement] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-component[component] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-interface[interface]
-____
+****
+[horizontal]
+(1) `*specification         ::=*` ::
+   `{` <<grammar#dotgen-rule-statement,`statement`>> `}`
+(2) `*statement             ::=*` ::
+   <<grammar#dotgen-rule-idl-statement,`idl-statement`>> +
+                              `|` <<grammar#dotgen-rule-component,`component`>> +
+                              `|` <<grammar#dotgen-rule-interface,`interface`>>
 
-[[dotgen-rule-idl-statement]]
-____
-(4) idl-statement         ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-module[module] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-const-dcl[const-dcl] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-type-dcl[type-dcl]
-____
+(4) `*idl-statement         ::=*` ::
+   <<grammar#dotgen-rule-module,`module`>> +
+                              `|` <<grammar#dotgen-rule-const-dcl,`const-dcl`>> +
+                              `|` <<grammar#dotgen-rule-type-dcl,`type-dcl`>>
+****
 
 IDL statements define link:typedef{outfilesuffix}[types],
 link:typedef{outfilesuffix}[constants] or link:module{outfilesuffix}[IDL

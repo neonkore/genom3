@@ -1,4 +1,8 @@
 // Generated from task.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -30,31 +34,22 @@ Task declaration
 Tasks define an execution context suitable for running the codels of
 link:service{outfilesuffix}[activities]).
 
-[[dotgen-rule-task]]
-____
-(20) task                  ::= ::
-   "task" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] link:grammar{outfilesuffix}#dotgen-rule-opt-properties[opt-properties] ";"
-____
-[[dotgen-rule-opt-properties]]
-____
-(124) opt-properties        ::= ::
-   [ "{" link:grammar{outfilesuffix}#dotgen-rule-properties[properties] "}" ]
-____
-[[dotgen-rule-properties]]
-____
-(125) properties            ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-property[property] }
-____
-[[dotgen-rule-property]]
-____
-(126) property              ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-component-property[component-property] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-interface-property[interface-property] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-task-property[task-property] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-service-property[service-property] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-codel-property[codel-property] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-throw-property[throw-property]
-____
+****
+[horizontal]
+(20) `*task                  ::=*` ::
+   `"task"` <<grammar#dotgen-rule-identifier,`identifier`>> <<grammar#dotgen-rule-opt-properties,`opt-properties`>> `";"`
+(124) `*opt-properties        ::=*` ::
+   `[` `"{"` <<grammar#dotgen-rule-properties,`properties`>> `"}"` `]`
+(125) `*properties            ::=*` ::
+   `{` <<grammar#dotgen-rule-property,`property`>> `}`
+(126) `*property              ::=*` ::
+   <<grammar#dotgen-rule-component-property,`component-property`>> +
+                              `|` <<grammar#dotgen-rule-interface-property,`interface-property`>> +
+                              `|` <<grammar#dotgen-rule-task-property,`task-property`>> +
+                              `|` <<grammar#dotgen-rule-service-property,`service-property`>> +
+                              `|` <<grammar#dotgen-rule-codel-property,`codel-property`>> +
+                              `|` <<grammar#dotgen-rule-throw-property,`throw-property`>>
+****
 
 A task may optionally define a state machine with
 link:codel{outfilesuffix}[codels]. In this case, the state machine runs in
@@ -67,11 +62,11 @@ invoked.
 In any case, the task is always available for processing external service
 requests, no matter if it has its own state machine or not.
 
-[[dotgen-rule-fsm-codel]]
-____
-(35) fsm-codel             ::= ::
-   "<" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list] ">" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "(" link:grammar{outfilesuffix}#dotgen-rule-codel-parameters[codel-parameters] ")" "yields" link:grammar{outfilesuffix}#dotgen-rule-event-list[event-list]
-____
+****
+[horizontal]
+(35) `*fsm-codel             ::=*` ::
+   `"<"` <<grammar#dotgen-rule-event-list,`event-list`>> `">"` <<grammar#dotgen-rule-identifier,`identifier`>> `"("` <<grammar#dotgen-rule-codel-parameters,`codel-parameters`>> `")"` `"yields"` <<grammar#dotgen-rule-event-list,`event-list`>>
+****
 
 
 
@@ -90,15 +85,15 @@ The task declaration also defines a few properties like a priority and a
 stack size. They are not necessarily used by all templates, but this allows
 to target real-time embedded systems.
 
-[[dotgen-rule-task-property]]
-____
-(21) task-property         ::= ::
-   ( "period" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
-                              | "delay" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] link:grammar{outfilesuffix}#dotgen-rule-time-unit[time-unit] +
-                              | "priority" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] +
-                              | "scheduling" "real-time" +
-                              | "stack" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] link:grammar{outfilesuffix}#dotgen-rule-size-unit[size-unit] ) ";"
-____
+****
+[horizontal]
+(21) `*task-property         ::=*` ::
+   `(` `"period"` <<grammar#dotgen-rule-const-expr,`const-expr`>> <<grammar#dotgen-rule-time-unit,`time-unit`>> +
+                              `|` `"delay"` <<grammar#dotgen-rule-const-expr,`const-expr`>> <<grammar#dotgen-rule-time-unit,`time-unit`>> +
+                              `|` `"priority"` <<grammar#dotgen-rule-positive-int-const,`positive-int-const`>> +
+                              `|` `"scheduling"` `"real-time"` +
+                              `|` `"stack"` <<grammar#dotgen-rule-positive-int-const,`positive-int-const`>> <<grammar#dotgen-rule-size-unit,`size-unit`>> `)` `";"`
+****
 
 +period+::
   The granularity of the codel scheduler. Periodic task will sequence the

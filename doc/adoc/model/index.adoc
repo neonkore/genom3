@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014-2015 LAAS/CNRS
+// Copyright (c) 2014-2015,2017 LAAS/CNRS
 // All rights reserved.
 //
 // Redistribution and use  in source  and binary  forms,  with or without
@@ -15,11 +15,15 @@
 //                                      Anthony Mallet on Wed Jul 16 2014
 //
 
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 Genom component model
 ---------------------
 
 .Overview
-[graphviz]
+[graphviz, genom-component-model, svg, opts="inline"]
 --
 digraph {
 rankdir = BT
@@ -27,51 +31,99 @@ rankdir = BT
 node [
   fontname = "sans"
   fontsize = 10
-  shape = "record"
+  shape = "none"
+  margin = 0
+  width = 0
+  height = 0
 ]
 
 component [
-  label="{Component|name\lprovides\luses\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Component</td></tr>
+    <tr><td align="left" balign="left">name<br/>provides<br/>uses</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 ids [
-  label="{IDS|members\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>IDS</td></tr>
+    <tr><td align="left">members</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 exception [
-  label="{Exception|detail\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Exception</td></tr>
+    <tr><td align="left">detail</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 task [
-  label="{Task|name\lperiod\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Task</td></tr>
+    <tr><td align="left" balign="left">name<br/>period</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 service [
-  label="{Service|name\ltype\linputs\loutputs\llocal variables|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Attribute</td></tr>
+    <tr><td align="left" balign="left">
+name<br/>type<br/>inputs<br/>outputs<br/>local variables</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 attribute [
-  label="{Attribute|name\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Attribute</td></tr>
+    <tr><td align="left">name</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 function [
-  label="{Function|name\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Function</td></tr>
+    <tr><td align="left">name</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 activity [
-  label="{Activity|name\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Activity</td></tr>
+    <tr><td align="left">name</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 port [
-  label="{Port|name\ldirection\l|}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Port</td></tr>
+    <tr><td align="left">name<br align="left"/>direction</td></tr>
+    <tr><td><br/></td></tr>
+  </table>>
 ]
 
 fsm [
-  label="{State Machine||start()\lstop()\l}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>State Machine</td></tr>
+    <tr><td><br/></td></tr>
+    <tr><td align="left">start()<br/>stop()</td></tr>
+  </table>>
 ]
 
 codel [
-  label="{Codel||run()\l}"
+  label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+    <tr><td>Codel</td></tr>
+    <tr><td><br/></td></tr>
+    <tr><td align="left">run()</td></tr>
+  </table>>
 ]
 
 {

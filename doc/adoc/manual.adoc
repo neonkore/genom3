@@ -13,11 +13,13 @@ genom3(1)
 :am sitetmpldir: <prefix>share/genom/site-templates
 :am tmpldir: <prefix>/share/genom/templates
 
-
 NAME
 ----
 genom3 - software component source code generator
 
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
 
 SYNOPSIS
 --------

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 LAAS/CNRS
+# Copyright (c) 2010-2014,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -77,9 +77,9 @@ namespace eval engine {
     #/
     # [[engine_mode]]
     # === `engine mode`: Engine output configuration
-    # ____
+    # ****
     # `engine mode` ['[`+-`]modespec'] ...
-    # ____
+    # ****
     #
     # Configures various engine operating modes. `engine mode` can be invoked
     # without argument to retrieve the current settings for all supported
@@ -120,9 +120,9 @@ namespace eval engine {
     # configuration of all engine modes.
     #
     # ==== Example
-    # ____
+    # ****
     # engine mode -overwrite +move-if-change
-    # ____
+    # ****
     #
     proc mode { args } {
 	variable modes
@@ -161,9 +161,9 @@ namespace eval engine {
     #/
     # [[engine_merge_tool]]
     # === `engine merge-tool`: Automatic merge of generated content
-    # ____
+    # ****
     # `engine merge-tool` 'tool'
-    # ____
+    # ****
     #
     # Changes the engine merge tool. When the engine is in 'merge-if-change'
     # mode (see <<engine_mode,`engine mode`>>), a merge tool is inkoked with
@@ -194,9 +194,9 @@ namespace eval engine {
     #/
     # [[engine_chdir]]
     # === `engine chdir`: Change output directory
-    # ____
+    # ****
     # `engine chdir` 'dir'
-    # ____
+    # ****
     #
     # Change the engine output directory. By default, files are generated in
     # the current directory. This command can be used to generate output in
@@ -221,9 +221,9 @@ namespace eval engine {
 
     #/
     # === `engine pwd`: Get current output directory
-    # ____
+    # ****
     # `engine pwd`
-    # ____
+    # ****
     #
     # ==== Return value
     # The current engine output directory.

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 LAAS/CNRS
+# Copyright (c) 2010-2015,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -31,9 +31,9 @@
 #/
 # [[lang]]
 # === `lang`: Target programming language
-# ____
+# ****
 # `lang` 'language'
-# ____
+# ****
 #
 # Set the current language for procedures that output a language dependent
 # string
@@ -55,9 +55,9 @@ slave alias lang lang
 #/
 # [[comment]]
 # === `comment`: Generate comment strings
-# ____
+# ****
 # `comment` ['-c'] 'text'
-# ____
+# ****
 #
 # Return a string that is a valid comment in the current language.
 #
@@ -83,9 +83,9 @@ slave alias comment comment
 #/
 # [[fileext]]
 # === `fileext`: Cannonical file extension
-# ____
+# ****
 # `fileext` ['-kind']
-# ____
+# ****
 #
 # Return the cannonical file extension for the current language.
 #
@@ -105,9 +105,9 @@ slave alias fileext fileext
 #/
 # [[indent]]
 # === `indent`: Generate indented text
-# ____
+# ****
 # `indent` [#'n'|++|--] ['text' ...]
-# ____
+# ****
 #
 # Output 'text', indented to the current indent level. Each 'text'
 # argument is followed by a newline.
@@ -147,9 +147,9 @@ slave eval [list proc indent [info args indent] [info body indent]]
 #/
 # [[___]]
 # === `---`: Generate filler string
-# ____
+# ****
 # `---` [-'column'] 'text' ... 'filler'
-# ____
+# ****
 #
 # This command, spelled with 3 dashes (`-`), return a string of length
 # 'column' (70 by default), starting with 'text' and filled with the
@@ -187,9 +187,9 @@ slave alias --- ---
 #/
 # [[wrap]]
 # === `wrap`: Chop blocks of text
-# ____
+# ****
 # `wrap` [-'column'] 'text' ['prefix'] ['sep']
-# ____
+# ****
 #
 # Chop a string into lines of length 'column' (70 by default), prefixed
 # with 'prefix' (empty by default). The string is split at spaces by
@@ -245,9 +245,9 @@ namespace eval language {
   #/
   # [[cname]]
   # === `cname`: Cannonical object name
-  # ____
+  # ****
   # `cname` `string|object`
-  # ____
+  # ****
   #
   # Return the cannonical name of the 'string' or the `genom3` 'object',
   # according to the current language.
@@ -276,9 +276,9 @@ namespace eval language {
   #/
   # [[mangle]]
   # === `language mangle`: Unique type name
-  # ____
+  # ****
   # `language mangle` 'type'
-  # ____
+  # ****
   #
   # Return a string containing a universally unique representation of the name
   # of the 'type' object.
@@ -327,9 +327,9 @@ namespace eval language {
   #/
   # [[mapping]]
   # === `language mapping`: IDL type language mapping
-  # ____
+  # ****
   # `language mapping` ['type'] ['locations']
-  # ____
+  # ****
   #
   # Generate and return a string containing the mapping of 'type' for the
   # current language, or of all types if no argument is given.
@@ -359,9 +359,9 @@ namespace eval language {
   #/
   # [[declarator]]
   # === `language declarator`: Code for type declarations
-  # ____
+  # ****
   # `language declarator` 'type' ['var']
-  # ____
+  # ****
   #
   # Return the abstract declarator for 'type' or for a variable 'var'
   # of that type, in the current language.
@@ -385,9 +385,9 @@ namespace eval language {
   #/
   # [[address]]
   # === `language address`: Code for variable addresses
-  # ____
+  # ****
   # `language address` 'type' ['var']
-  # ____
+  # ****
   #
   # Return an expression evaluating to the address of a variable in the current
   # language.
@@ -411,9 +411,9 @@ namespace eval language {
   #/
   # [[dereference]]
   # === `language dereference`: Code for dereferencing variables
-  # ____
+  # ****
   # `language dereference` 'type' 'kind' ['var']
-  # ____
+  # ****
   #
   # Return an expression dereferencing a parameter passed by value or
   # reference, in the current language.
@@ -439,9 +439,9 @@ namespace eval language {
   #/
   # [[argument]]
   # === `language argument`: Code for declaring functions arguments
-  # ____
+  # ****
   # `language argument` 'type' 'kind' ['var']
-  # ____
+  # ****
   #
   # Return an expression that declares a parameter 'var' of type
   # 'type', passed by value or reference according to 'kind'.
@@ -467,9 +467,9 @@ namespace eval language {
   #/
   # [[pass]]
   # === `language pass`: Code for passing functions arguments
-  # ____
+  # ****
   # `language pass` 'type' 'kind' ['var']
-  # ____
+  # ****
   #
   # Return an expression that passes 'var' of type 'type' as a
   # parameter, by value or reference according to 'kind'.
@@ -495,9 +495,9 @@ namespace eval language {
   #/
   # [[member]]
   # === `language member`: Code for accessing structure members
-  # ____
+  # ****
   # `language member` 'type' 'mlist'
-  # ____
+  # ****
   #
   # Return the language construction to access a member of a 'type'.  'mlist'
   # is a list interpreted as follow: if it starts with a letter, 'type' should
@@ -523,9 +523,9 @@ namespace eval language {
   #/
   # [[signature]]
   # === `language signature`: Code for declaring codel signatures
-  # ____
+  # ****
   # `language signature` 'codel' ['separator'] ['location']
-  # ____
+  # ****
   #
   # Return the signature of a codel in the current language. If separator is
   # given, it is a string that is inserted between the return type of the codel
@@ -554,9 +554,9 @@ namespace eval language {
   #/
   # [[invoke]]
   # === `language invoke`: Code for calling codels
-  # ____
+  # ****
   # `language invoke` 'codel' 'params'
-  # ____
+  # ****
   #
   # Return a string corresponding to the invocation of a codel in the current
   # language.

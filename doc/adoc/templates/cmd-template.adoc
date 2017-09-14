@@ -1,4 +1,8 @@
 // Generated from template.tcl - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -53,9 +57,9 @@
 
 [[template_require]]
 === `template require`: Source additional template code
-____
+****
 `template require` 'file'
-____
+****
 
 Source tcl 'file' and make its content available to the template
 files. The file name can be absolute or relative. If it is relative, it
@@ -95,10 +99,10 @@ to the template files.
 
 [[template_parse]]
 === `template parse`: Generate template content
-____
+****
 `template parse` [`args` 'list'] [`perm` 'mode'] [{`file|string|raw`}]
 'file' ...]
-____
+****
 
 This is the main template function that parses a template source file and
 instanciate it, writing the result into the current template directory
@@ -224,9 +228,9 @@ Will process the string "test" and save the result in `mydst`.
 
 [[template_options]]
 === `template options`: Define template options
-____
+****
 `template options` 'pattern' 'body' `...`
-____
+****
 
 Define the list of supported options for the template. Argument is a Tcl
 switch-like script that must define all supported options. It consists of
@@ -270,9 +274,9 @@ This will make the template print the text "help option" whenever -h or
 
 [[template_deps]]
 === `template deps`: Template dependencies
-____
+****
 `template deps`
-____
+****
 
 Return the comprehensive list of template files processed so far. This
 includes files processed via `template require`, `template
@@ -297,9 +301,9 @@ dependency information in a Makefile.
 
 [[template_arg]]
 === `template arg`: Retrieve options passed to templates
-____
+****
 `template arg`
-____
+****
 
 Return the next argument passed to the template, or raise an error is
 no argument remains.
@@ -324,9 +328,9 @@ no argument remains.
 
 [[template_usage]]
 === `template usage`: Define template help string
-____
+****
 `template usage` ['string']
-____
+****
 
 With a 'string' argument, this procedure defines the template "usage"
 message. Unless the template redefines a `-h` option with `template
@@ -352,9 +356,9 @@ usage message defined.
 
 [[template_message]]
 === `template message`: Print runtime information
-____
+****
 `template message` ['string']
-____
+****
 
 Print 'string' so that it is visible to the end-user. The text is
 sent on the standard error channel unconditionnaly.
@@ -372,9 +376,9 @@ sent on the standard error channel unconditionnaly.
 
 [[template_fatal]]
 === `template fatal`: Abort template processing
-____
+****
 `template fatal` ['string']
-____
+****
 
 Print an error message and stop. The message indicates the error location
 as reported by the `TCL` command `[info frame]`.

@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2010-2012,2014-2015 LAAS/CNRS
+# Copyright (c) 2010-2012,2014-2015,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -44,27 +44,29 @@ END {
     names[n] = name
     rules[n] = rule
 
+    print "ifdef::sidebartoc[]"
+    print "include::_Sidebar.adoc[]"
+    print "endif::[]"
+    print ""
     print "Grammar reference"
     print "-----------------"
     print ""
 
+    print "****\n[horizontal]"
     for (i=1; i<=n; i++) {
         printdef(i, names[i], rules[names[i]])
     }
-
-    print "// eof"
+    print "\n****"
 }
 
 function printdef(n, name, rule) {
     if (name == "\";\"") return
 
     out = "dotgen-rule-" name ".adoc"
-    r = "[[dotgen-rule-" name "]]\n____"
-    print r
-    print r > out
 
-    print "(" n ") " wrap(rule) "\n____"
-    print "(" n ") " wrap(rule) "\n____" > out
+    r = "(" n ") " wrap(rule)
+    print "[[dotgen-rule-" name "]]" r
+    print r > out
 
     close(out)
 }
@@ -72,15 +74,15 @@ function printdef(n, name, rule) {
 function wrap(str,	c, i) {
     match(str, /^[^=|]+[=|]/);
     bs_pln = bs_len = RLENGTH;
-    bs_str = substr(str, 1, RLENGTH) " ::\n  ";
+    bs_str = "`*" substr(str, 1, RLENGTH) "*` ::\n  ";
     bs_pre = substr("                                          " \
                     "                                     ", 1, RLENGTH+4);
     c = split(substr(str, RLENGTH + 2), f);
     for (i = 1; i <= c; i++) {
         if (f[i] in rules) {
-            md = "link:grammar{outfilesuffix}#dotgen-rule-" f[i] "[" f[i] "]";
+            md = "<<grammar#dotgen-rule-" f[i] ",`" f[i] "`>>";
         } else {
-            md = f[i];
+            md = "`" f[i] "`";
         }
         if (f[i] == "|") {
             bs_str = bs_str " +\n" bs_pre; bs_len = bs_pln;

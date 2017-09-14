@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -33,8 +33,11 @@
  * component. There are two kind of codels: `simple codels` and `finite state
  * machine codels`.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-codel-property.adoc
  * <dotgen-rule-opt-async.adoc
+ * ****
  *
  * Codels are normally functions that execute in a short amount of time
  * compared to the time characteristics of the component. During the execution
@@ -49,7 +52,10 @@
  * Simple codels are functions associated to service validation callbacks or
  * implementing component `functions`.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-codel.adoc
+ * ****
  *
  * The +identifier+ is the name of the external function implementing the
  * codel. +parameters+ are described in the third section.
@@ -59,9 +65,12 @@
  * Finite state machine (FSM) codels are functions associated to the execution
  * of `activities`.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-fsm-codel.adoc
  * <dotgen-rule-event-list.adoc
  * <dotgen-rule-event-name.adoc
+ * ****
  *
  * In addition to the +identifier+ and +parameters+ described in the previous
  * section, FSM codels define the state machine of their corresponding
@@ -116,11 +125,14 @@
  *
  * === Codel parameters
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-codel-parameters.adoc
  * <dotgen-rule-codel-parameter.adoc
  * <dotgen-rule-opt-parameter-src.adoc
  * <dotgen-rule-parameter-dir.adoc
  * <dotgen-rule-parameter-variable.adoc
+ * ****
  */
 codel:
   identifier '(' codel_parameters ')'

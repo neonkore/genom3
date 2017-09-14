@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012,2014 LAAS/CNRS
+ * Copyright (c) 2009-2012,2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -35,10 +35,13 @@
  * An IDS definition is similar to a `struct` definition, and follows this
  * syntax:
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-ids.adoc
  * <dotgen-rule-ids-name.adoc
  * <dotgen-rule-member-list.adoc
  * <dotgen-rule-member.adoc
+ * ****
  *
  * The major difference with a regular `struct` is that an `ids` declaration
  * can be reopened. Thus, several `ids` statements can be used to define an

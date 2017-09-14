@@ -1,4 +1,7 @@
 // Generated from dotgen.c - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
 
 
 
@@ -39,8 +42,8 @@
 
 
 
-`dotgen` TCL engine command
------------------------------
+
+== `dotgen` TCL engine command
 
 
 
@@ -257,9 +260,9 @@ generate dependency information in a Makefile.
 
 [[dotgen_parse]]
 === `dotgen parse`: Process additional input
-____
+****
 `dotgen parse {file|string}` 'data'
-____
+****
 
 Parse additional `.gen` data either from a file or from a string. When
 parsing is successful, the corresponding objects are exported to the
@@ -344,9 +347,9 @@ a string, data is the string to be parsed.
 
 [[dotgen_types]]
 === `dotgen types`: Data type definitions from the specification
-____
+****
 `dotgen types` ['pattern']
-____
+****
 
 This command returns the list of type objects that are defined in the
 current `.gen` file. This list may be filtered with the optional 'pattern'
@@ -422,9 +425,9 @@ match the pattern will be returned.
 
 [[dotgen_components]]
 === `dotgen components`: Components definitions from the specification
-____
+****
 `dotgen components` ['pattern']
-____
+****
 
 This command returns the list of components that are defined in the current
 `.gen` file. This list may be filtered with the optional 'pattern'
@@ -451,9 +454,9 @@ A list of component objects of class `component`.
 
 [[dotgen_interfaces]]
 === `dotgen interfaces`: Interfaces definitions from the specification
-____
+****
 `dotgen interfaces` ['pattern']
-____
+****
 
 This command returns the list of interfaces that are defined in the current
 `.gen` file. This list may be filtered with the optional 'pattern'

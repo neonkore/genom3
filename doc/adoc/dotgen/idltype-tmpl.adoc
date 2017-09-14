@@ -1,4 +1,8 @@
 // Generated from idltype-tmpl.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -29,14 +33,14 @@ IDL Template types
 ------------------
 
 The template types are:
-[[dotgen-rule-template-type-spec]]
-____
-(87) template-type-spec    ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-sequence-type[sequence-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-optional-type[optional-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-string-type[string-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-fixed-type[fixed-type]
-____
+****
+[horizontal]
+(87) `*template-type-spec    ::=*` ::
+   <<grammar#dotgen-rule-sequence-type,`sequence-type`>> +
+                              `|` <<grammar#dotgen-rule-optional-type,`optional-type`>> +
+                              `|` <<grammar#dotgen-rule-string-type,`string-type`>> +
+                              `|` <<grammar#dotgen-rule-fixed-type,`fixed-type`>>
+****
 
 
 
@@ -47,12 +51,12 @@ A sequence is a one-dimensional array with two characteristics: a maximum
 size (which is fixed at compile time) and a length (which is determined at
 run time).
 
-[[dotgen-rule-sequence-type]]
-____
-(88) sequence-type         ::= ::
-   "sequence" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ( ">" +
-                              | "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" )
-____
+****
+[horizontal]
+(88) `*sequence-type         ::=*` ::
+   `"sequence"` `"<"` <<grammar#dotgen-rule-simple-type-spec,`simple-type-spec`>> `(` `">"` +
+                              `|` `","` <<grammar#dotgen-rule-positive-int-const,`positive-int-const`>> `">"` `)`
+****
 
 The second parameter in a sequence declaration indicates the maximum size of
 the sequence. If a positive integer constant is specified for the maximum
@@ -94,11 +98,11 @@ a single “>>”
 
 Optional types represent a value that may or may not be present.
 
-[[dotgen-rule-optional-type]]
-____
-(89) optional-type         ::= ::
-   "optional" "<" link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] ">"
-____
+****
+[horizontal]
+(89) `*optional-type         ::=*` ::
+   `"optional"` `"<"` <<grammar#dotgen-rule-simple-type-spec,`simple-type-spec`>> `">"`
+****
 
 The parameter of the 'optional' declaration describes the data type of the
 value.
@@ -115,11 +119,11 @@ value.
 
 A string is similar to a sequence of char.
 
-[[dotgen-rule-string-type]]
-____
-(90) string-type           ::= ::
-   "string" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
-____
+****
+[horizontal]
+(90) `*string-type           ::=*` ::
+   `"string"` `[` `"<"` <<grammar#dotgen-rule-positive-int-const,`positive-int-const`>> `">"` `]`
+****
 
 The argument to the string declaration is the maximum size of the string. If
 a positive integer maximum size is specified, the string is termed a bounded
@@ -147,11 +151,11 @@ general types.
 
 The ﬁxed data type represents a fixed-point decimal number
 
-[[dotgen-rule-fixed-type]]
-____
-(91) fixed-type            ::= ::
-   "fixed" [ "<" link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] "," link:grammar{outfilesuffix}#dotgen-rule-positive-int-const[positive-int-const] ">" ]
-____
+****
+[horizontal]
+(91) `*fixed-type            ::=*` ::
+   `"fixed"` `[` `"<"` <<grammar#dotgen-rule-positive-int-const,`positive-int-const`>> `","` <<grammar#dotgen-rule-positive-int-const,`positive-int-const`>> `">"` `]`
+****
 
 [CAUTION]
 Fixed types are not properly handled in existing genom

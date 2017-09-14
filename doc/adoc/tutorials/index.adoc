@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 LAAS/CNRS
+// Copyright (c) 2014,2017 LAAS/CNRS
 // All rights reserved.
 //
 // Permission to use, copy, modify,  and distribute this software for any
@@ -18,8 +18,11 @@
 //                                      Anthony Mallet on Tue Jul 22 2014
 //
 
-Tutorials
----------
+= Tutorials
+
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
 
 This section contains several tutorials that should help you to get started with
 Genom. They are sorted by ascending order of complexity, so they should be read
@@ -30,3 +33,6 @@ Getting used to running genom, generating code and compiling components.
 
 link:add-function{outfilesuffix}[Simple service] ::
 A component with a simple service implemented as a `function`.
+
+<<external-software#,Working with external software>>::
+How to describe external software dependencies in a component.

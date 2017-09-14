@@ -17,10 +17,10 @@
 //
 //                                      Anthony Mallet on Wed Apr 19 2017
 //
-:cxx: C++
-
-Contents
-========
+[.sidebartoc]
+--
+[discrete]
+== Contents
 
 * link:../copying{outfilesuffix}[Your rights]
 * link:../introduction{outfilesuffix}[Introduction]
@@ -29,7 +29,7 @@ Contents
 * link:../dotgen/index{outfilesuffix}[Component description file]
 * [highlight]#link:../mappings/index{outfilesuffix}[GenoM IDL mappings]#
 
- - [monospaced]#C# mappings
+ - `C` mappings
   ** link:c{outfilesuffix}#scoped_name[Scoped name]
   ** link:c{outfilesuffix}#constant[Constant]
   ** link:c{outfilesuffix}#basic_type[Basic type]
@@ -45,7 +45,7 @@ Contents
   ** link:c{outfilesuffix}#native[Native]
   ** link:c{outfilesuffix}#exception[Exception]
 
- - [monospaced]#{cxx}# mappings
+ - `{cpp}` mappings
   ** link:c++{outfilesuffix}#scoped_name[Scoped name]
   ** link:c++{outfilesuffix}#constant[Constant]
   ** link:c++{outfilesuffix}#basic_type[Basic type]
@@ -64,3 +64,4 @@ Contents
 * link:../running{outfilesuffix}[Running GenoM]
 * link:../tutorials/index{outfilesuffix}[Tutorials]
 * link:../templates/index{outfilesuffix}[Templates]
+--

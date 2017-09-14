@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014 LAAS/CNRS
+// Copyright (c) 2014,2017 LAAS/CNRS
 // All rights reserved.
 //
 // Redistribution and use  in source  and binary  forms,  with or without
@@ -14,6 +14,10 @@
 //
 //                                      Matthieu Herrb on Mon Jul 21 2014
 //
+
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
 
 Overview
 --------

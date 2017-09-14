@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -39,14 +39,20 @@
  * An "attribute" declaration creates a service that can either set or get one
  * or several attibutes.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-attribute.adoc
  * <dotgen-rule-attribute-parameters.adoc
  * <dotgen-rule-attribute-parameter.adoc
  * <dotgen-rule-opt-properties.adoc
  * <dotgen-rule-properties.adoc
+ * ****
  *
  * Attributes can have a number of properties:
+ * ****
+ * [horizontal]
  * <dotgen-rule-service-property.adoc
+ * ****
  *
  * +doc+:: A string that describes the functionality of the service.
  *
@@ -108,6 +114,8 @@ attribute:
 /*/
  * === Function and activity declaration
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-service.adoc.adoc
  * <dotgen-rule-service-kind.adoc
  * <dotgen-rule-service-parameters.adoc
@@ -117,6 +125,7 @@ attribute:
  * <dotgen-rule-property.adoc
  *
  * <dotgen-rule-service-property.adoc
+ * ****
  */
 
 service:
@@ -177,6 +186,8 @@ service_property:
 /*/
  * === Function and activity parameters
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-attribute-parameter.adoc
  * <dotgen-rule-service-parameter.adoc
  *
@@ -186,6 +197,7 @@ service_property:
  * <dotgen-rule-initializers.adoc
  * <dotgen-rule-initializer.adoc
  * <dotgen-rule-initializer-value.adoc
+ * ****
  */
 
 attribute_parameters:

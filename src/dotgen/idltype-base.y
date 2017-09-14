@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 LAAS/CNRS
+ * Copyright (c) 2009-2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -31,7 +31,10 @@
  * link:../mappings/index{outfilesuffix}[GenoM IDL mappings] explains how they
  * map to the actual programming language.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-base-type-spec.adoc
+ * ****
  */
 
 base_type_spec:
@@ -43,6 +46,8 @@ base_type_spec:
  *
  * They represent integer values in the range indicated below.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-integer-type.adoc
  * <dotgen-rule-signed-int.adoc
  * <dotgen-rule-unsigned-int.adoc
@@ -52,6 +57,7 @@ base_type_spec:
  * <dotgen-rule-unsigned-longlong-int.adoc
  * <dotgen-rule-unsigned-long-int.adoc
  * <dotgen-rule-unsigned-short-int.adoc
+ * ****
  *
  * .Range of integer types
  * [width="60%",cols=",2",frame="topbot"]
@@ -90,9 +96,12 @@ signed_longlong_int: LONG LONG
  * single-precision floating point numbers; the `double` type represents
  * IEEE double-precision floating point numbers.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-floating-pt-type.adoc
  * <dotgen-rule-float-type.adoc
  * <dotgen-rule-double-type.adoc
+ * ****
  */
 floating_pt_type: float_type | double_type;
 
@@ -108,7 +117,10 @@ double_type: DOUBLE
  * A char data type that is an 8-bit quantity that encodes a single-byte
  * character.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-char-type.adoc
+ * ****
  */
 
 char_type: CHAR
@@ -121,7 +133,10 @@ char_type: CHAR
  * The boolean data type is used to denote a data item that can only take one
  * of the values TRUE and FALSE.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-boolean-type.adoc
+ * ****
  */
 
 boolean_type: BOOLEAN
@@ -133,7 +148,10 @@ boolean_type: BOOLEAN
  *
  * The octet type represents an 8 bit quantity.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-octet-type.adoc
+ * ****
  */
 
 octet_type: OCTET
@@ -147,7 +165,10 @@ octet_type: OCTET
  * The `any` type is a generic type that can contain any other type. This is
  * not yet implemented in genom, so you must not use it.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-any-type.adoc
+ * ****
  */
 
 any_type: ANY

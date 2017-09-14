@@ -18,8 +18,10 @@
 //                                      Anthony Mallet on Wed Apr 19 2017
 //
 
-Contents
-========
+[.sidebartoc]
+--
+[discrete]
+== Contents
 
 * link:../copying{outfilesuffix}[Your rights]
 * link:../introduction{outfilesuffix}[Introduction]
@@ -34,3 +36,4 @@ Contents
  - link:add-function{outfilesuffix}[Simple service]
 
 * link:../templates/index{outfilesuffix}[Templates]
+--

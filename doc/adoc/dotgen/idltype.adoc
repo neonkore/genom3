@@ -1,4 +1,8 @@
 // Generated from idltype.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -39,24 +43,18 @@ link:../mappings/index{outfilesuffix}[GenoM IDL mappings] section.
 The following set of type specifiers to represent
 typed values is available:
 
-[[dotgen-rule-type-spec]]
-____
-(56) type-spec             ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-simple-type-spec[simple-type-spec] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-constructed-type-spec[constructed-type-spec]
-____
-[[dotgen-rule-simple-type-spec]]
-____
-(57) simple-type-spec      ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-base-type-spec[base-type-spec] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-template-type-spec[template-type-spec] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-named-type[named-type]
-____
-[[dotgen-rule-constructed-type-spec]]
-____
-(92) constructed-type-spec ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-constructed-type[constructed-type]
-____
+****
+[horizontal]
+(56) `*type-spec             ::=*` ::
+   <<grammar#dotgen-rule-simple-type-spec,`simple-type-spec`>> +
+                              `|` <<grammar#dotgen-rule-constructed-type-spec,`constructed-type-spec`>>
+(57) `*simple-type-spec      ::=*` ::
+   <<grammar#dotgen-rule-base-type-spec,`base-type-spec`>> +
+                              `|` <<grammar#dotgen-rule-template-type-spec,`template-type-spec`>> +
+                              `|` <<grammar#dotgen-rule-named-type,`named-type`>>
+(92) `*constructed-type-spec ::=*` ::
+   <<grammar#dotgen-rule-constructed-type,`constructed-type`>>
+****
 
 ==== Subtopics
 
@@ -108,28 +106,22 @@ ____
 Type defined with the following syntax can then be used in the component
 interface definition and anywhere a type value is expected.
 
-[[dotgen-rule-type-dcl]]
-____
-(58) type-dcl              ::= ::
-   "typedef" link:grammar{outfilesuffix}#dotgen-rule-type-declarator[type-declarator] ";" +
-                              | "native" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] ";" +
-                              | "exception" link:grammar{outfilesuffix}#dotgen-rule-exception-list[exception-list] ";" +
-                              | link:grammar{outfilesuffix}#dotgen-rule-constructed-type[constructed-type] ";" +
-                              | link:grammar{outfilesuffix}#dotgen-rule-forward-dcl[forward-dcl] ";"
-____
-[[dotgen-rule-constructed-type]]
-____
-(93) constructed-type      ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-struct-type[struct-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-union-type[union-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-enum-type[enum-type]
-____
-[[dotgen-rule-type-declarator]]
-____
-(59) type-declarator       ::= ::
-   ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-type-declarator[type-declarator] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
-____
+****
+[horizontal]
+(58) `*type-dcl              ::=*` ::
+   `"typedef"` <<grammar#dotgen-rule-type-declarator,`type-declarator`>> `";"` +
+                              `|` `"native"` <<grammar#dotgen-rule-identifier,`identifier`>> `";"` +
+                              `|` `"exception"` <<grammar#dotgen-rule-exception-list,`exception-list`>> `";"` +
+                              `|` <<grammar#dotgen-rule-constructed-type,`constructed-type`>> `";"` +
+                              `|` <<grammar#dotgen-rule-forward-dcl,`forward-dcl`>> `";"`
+(93) `*constructed-type      ::=*` ::
+   <<grammar#dotgen-rule-struct-type,`struct-type`>> +
+                              `|` <<grammar#dotgen-rule-union-type,`union-type`>> +
+                              `|` <<grammar#dotgen-rule-enum-type,`enum-type`>>
+(59) `*type-declarator       ::=*` ::
+   `(` <<grammar#dotgen-rule-type-spec,`type-spec`>> +
+                              `|` <<grammar#dotgen-rule-type-declarator,`type-declarator`>> `","` `)` <<grammar#dotgen-rule-declarator,`declarator`>>
+****
 
 ==== Typedef
 
@@ -196,22 +188,16 @@ Exceptions are thrown by services in case of error. The `exception` keyword
 declares an exception, which is an identifier with an optional associated
 data type.
 
-[[dotgen-rule-exception-list]]
-____
-(60) exception-list        ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-exception-dcl[exception-dcl] "," } link:grammar{outfilesuffix}#dotgen-rule-exception-dcl[exception-dcl]
-____
-[[dotgen-rule-exception-dcl]]
-____
-(61) exception-dcl         ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-exception-name[exception-name] link:grammar{outfilesuffix}#dotgen-rule-opt-member-list[opt-member-list]
-____
-[[dotgen-rule-opt-member-list]]
-____
-(62) opt-member-list       ::= ::
-   [ "{" ( "}" +
-                              | link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}" ) ]
-____
+****
+[horizontal]
+(60) `*exception-list        ::=*` ::
+   `{` <<grammar#dotgen-rule-exception-dcl,`exception-dcl`>> `","` `}` <<grammar#dotgen-rule-exception-dcl,`exception-dcl`>>
+(61) `*exception-dcl         ::=*` ::
+   <<grammar#dotgen-rule-exception-name,`exception-name`>> <<grammar#dotgen-rule-opt-member-list,`opt-member-list`>>
+(62) `*opt-member-list       ::=*` ::
+   `[` `"{"` `(` `"}"` +
+                              `|` <<grammar#dotgen-rule-member-list,`member-list`>> `"}"` `)` `]`
+****
 
 A simple exception declaration would be :
 
@@ -305,22 +291,19 @@ Constants define read-only values that are used by the component, like the
 maximal speed allowed for a motor or the physical bounds of a process that
 will be controlled. The syntax is again very similar to `C` or `C++`:
 
-[[dotgen-rule-const-dcl]]
-____
-(68) const-dcl             ::= ::
-   "const" link:grammar{outfilesuffix}#dotgen-rule-const-type[const-type] link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "=" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] ";"
-____
-[[dotgen-rule-const-type]]
-____
-(69) const-type            ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-floating-pt-type[floating-pt-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-octet-type[octet-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-string-type[string-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-named-type[named-type]
-____
+****
+[horizontal]
+(68) `*const-dcl             ::=*` ::
+   `"const"` <<grammar#dotgen-rule-const-type,`const-type`>> <<grammar#dotgen-rule-identifier,`identifier`>> `"="` <<grammar#dotgen-rule-const-expr,`const-expr`>> `";"`
+(69) `*const-type            ::=*` ::
+   <<grammar#dotgen-rule-integer-type,`integer-type`>> +
+                              `|` <<grammar#dotgen-rule-char-type,`char-type`>> +
+                              `|` <<grammar#dotgen-rule-boolean-type,`boolean-type`>> +
+                              `|` <<grammar#dotgen-rule-floating-pt-type,`floating-pt-type`>> +
+                              `|` <<grammar#dotgen-rule-octet-type,`octet-type`>> +
+                              `|` <<grammar#dotgen-rule-string-type,`string-type`>> +
+                              `|` <<grammar#dotgen-rule-named-type,`named-type`>>
+****
 
 For example: `const double max_speed = 72.0;`
 

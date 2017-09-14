@@ -17,15 +17,17 @@
 //
 //                                      Anthony Mallet on Fri Jun 25 2010
 //
-:cxx: C++
 
-[monospaced]#{cxx}# mappings: From IDL types to [monospaced]#{cxx}# types
--------------------------------------------------------------------------
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
+== `{cpp}` mappings: From IDL types to `{cpp}` types
 
 [[scoped_name]]
 === Scoped names
 
-The [monospaced]#{cxx}# mappings for scoped names use [monospaced]#{cxx}#
+The `{cpp}` mappings for scoped names use `{cpp}`
 scopes.  IDL `module` are mapped to `namespace`. For instance, the following
 IDL:
 ----
@@ -45,7 +47,7 @@ would map into
 [[constant]]
 === Mapping for constants
 
-`genom3` IDL constants are mapped to a [monospaced]#{cxx}# constant. For
+`genom3` IDL constants are mapped to a `{cpp}` constant. For
 instance, the following IDL:
 ----
    const long longint = 1;
@@ -64,17 +66,17 @@ would map into
 
 The basic data types have the mappings shown in the table below.
 Integer types use the `C99` fixed size integer types as provided
-by the `stdint.h` standard header (since the [monospaced]#{cxx}# `cstdint`
-header is not part of the [monospaced]#{cxx}# at the time of writing this
+by the `stdint.h` standard header (since the `{cpp}` `cstdint`
+header is not part of the `{cpp}` at the time of writing this
 document).
 Users do not have to include this header: the template mapping
 generation procedure output the appropriate `#include` directive
 along with the mappings for the integer types.
 
-.Basic data types mappings in [monospaced]#{cxx}#
+.Basic data types mappings in `{cpp}`
 [width="60%",cols="^,1",frame="topbot",options="header"]
 |==================================================================
-| IDL                  | [monospaced]#{cxx}#
+| IDL                  | `{cpp}`
 | `boolean`            | `bool`
 | `unsigned short`     | `uint16_t`
 | `short`              | `int16_t`
@@ -93,8 +95,8 @@ along with the mappings for the integer types.
 [[enumerated_type]]
 === Mapping for enumerated types
 
-The [monospaced]#{cxx}# mapping of an IDL `enum` type is the corresponding
-[monospaced]#{cxx}# `enum`. An additional constant is generated to guarantee
+The `{cpp}` mapping of an IDL `enum` type is the corresponding
+`{cpp}` `enum`. An additional constant is generated to guarantee
 that the type occupies a 32 bits wide integer.
 
 For instance, the following IDL:
@@ -119,7 +121,7 @@ would map, according to the scoped names rules, into
 
 `genom3` IDL bounded strings are mapped to nul terminated character
 arrays (i.e., C strings). Unbounded strings are mapped to
-`std::string` provided by the [monospaced]#{cxx}# standard.
+`std::string` provided by the `{cpp}` standard.
 
 For instance, the following OMG IDL declarations:
 ----
@@ -137,7 +139,7 @@ would map into
 [[array]]
 === Mapping for arrays
 
-`genom3` IDL arrays map directly to [monospaced]#{cxx}# arrays. All array
+`genom3` IDL arrays map directly to `{cpp}` arrays. All array
 indices run from 0 to `size-1`.
 
 For instance, the following IDL:
@@ -153,7 +155,7 @@ would map into
 [[struct]]
 === Mapping for structure types
 
-`genom3` IDL  structures map directly onto  [monospaced]#{cxx}# `struct`s.
+`genom3` IDL  structures map directly onto  `{cpp}` `struct`s.
 Note that these structures may potentially include padding.
 
 For instance, the following IDL:
@@ -200,8 +202,8 @@ would map into
       };
 ----
 
-Note that the [monospaced]#{cxx}# standard does not allow union members that
-have a non-trivial constructor.  Consequently, the [monospaced]#{cxx}# mapping
+Note that the `{cpp}` standard does not allow union members that
+have a non-trivial constructor.  Consequently, the `{cpp}` mapping
 for such kind of unions is not allowed in `genom3` either. This concerns
 `sequence`s and `string`s, and structures or unions that
 contain such a type. You should thus avoid to define such datatypes in
@@ -212,8 +214,8 @@ contain such a type. You should thus avoid to define such datatypes in
 
 `genom3` IDL sequences mapping differ for bounded or unbouded
 variations of the sequence. The unbounded sequences maps onto the
-`std::vector` template class provided by the [monospaced]#{cxx}# standard.  The
-bounded sequence maps onto a [monospaced]#{cxx}# `genom::bounded_sequence`
+`std::vector` template class provided by the `{cpp}` standard.  The
+bounded sequence maps onto a `{cpp}` `genom::bounded_sequence`
 template class. The definition of `genom::bounded_sequence` is very
 similar to `std::array` but provides a variable number of elements.
 
@@ -419,7 +421,7 @@ The remote service is invoked in a synchronous manner.
 [[native]]
 === Mapping for native types
 
-`genom3` IDL native types map to a [monospaced]#{cxx}# `struct`. The mapping
+`genom3` IDL native types map to a `{cpp}` `struct`. The mapping
 provides only a forward declaration, and the user has to provide the
 actual definition.
 
@@ -434,7 +436,7 @@ would map into
 ----
 
 The definition of the structure body is free, and will typically use
-native [monospaced]#{cxx}# types that cannot be described in IDL. When used as a
+native `{cpp}` types that cannot be described in IDL. When used as a
 parameter of a function, a native type will be passed around as a
 pointer on the structure data. Memory management associated with that
 pointer must be handled by the user.
@@ -443,7 +445,7 @@ pointer must be handled by the user.
 [[exception]]
 === Mapping for exceptions
 
-Each defined exception type is defined as a [monospaced]#{cxx}# `struct` that
+Each defined exception type is defined as a `{cpp}` `struct` that
 derives from the generic `genom::exception` type and implements a
 `what()` method returning a unique identifier for the
 exception. Exceptions with members define an additional `struct
@@ -459,7 +461,8 @@ For example:
       };
 ----
 
-yields the following [monospaced]#{cxx}# declarations:
+yields the following `{cpp}` declarations:
+[source,cplusplus]
 ----
       genom_event foo_id = <unique identifier for exception>;
 
@@ -472,7 +475,7 @@ yields the following [monospaced]#{cxx}# declarations:
       } foo_detail;
 ----
 
-Exceptions must be thrown with the [monospaced]#{cxx}# `throw` operator.
+Exceptions must be thrown with the `{cpp}` `throw` operator.
 
 The identifier for the exception uniquely identifies this exception
 type, so that any data of type `genom_event` can be compared to

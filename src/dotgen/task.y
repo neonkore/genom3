@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012,2014 LAAS/CNRS
+ * Copyright (c) 2009-2012,2014,2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -29,10 +29,13 @@
  * Tasks define an execution context suitable for running the codels of
  * link:service{outfilesuffix}[activities]).
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-task.adoc
  * <dotgen-rule-opt-properties.adoc
  * <dotgen-rule-properties.adoc
  * <dotgen-rule-property.adoc
+ * ****
  *
  * A task may optionally define a state machine with
  * link:codel{outfilesuffix}[codels]. In this case, the state machine runs in
@@ -45,7 +48,10 @@
  * In any case, the task is always available for processing external service
  * requests, no matter if it has its own state machine or not.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-fsm-codel.adoc
+ * ****
  *
  */
 task:
@@ -64,7 +70,10 @@ task:
  * stack size. They are not necessarily used by all templates, but this allows
  * to target real-time embedded systems.
  *
+ * ****
+ * [horizontal]
  * <dotgen-rule-task-property.adoc
+ * ****
  *
  * +period+::
  *   The granularity of the codel scheduler. Periodic task will sequence the

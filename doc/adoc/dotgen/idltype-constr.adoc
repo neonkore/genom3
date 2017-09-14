@@ -1,4 +1,8 @@
 // Generated from idltype-constr.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -30,13 +34,13 @@ IDL Constructed types
 `structs`, `unions` and `enums` are the constructed types. Their syntax is
 presented in this section:
 
-[[dotgen-rule-constructed-type]]
-____
-(93) constructed-type      ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-struct-type[struct-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-union-type[union-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-enum-type[enum-type]
-____
+****
+[horizontal]
+(93) `*constructed-type      ::=*` ::
+   <<grammar#dotgen-rule-struct-type,`struct-type`>> +
+                              `|` <<grammar#dotgen-rule-union-type,`union-type`>> +
+                              `|` <<grammar#dotgen-rule-enum-type,`enum-type`>>
+****
 
 
 
@@ -45,27 +49,18 @@ ____
 
 === Structures
 
-[[dotgen-rule-struct-type]]
-____
-(94) struct-type           ::= ::
-   "struct" link:grammar{outfilesuffix}#dotgen-rule-struct-name[struct-name] "{" link:grammar{outfilesuffix}#dotgen-rule-member-list[member-list] "}"
-____
-[[dotgen-rule-struct-name]]
-____
-(52) struct-name           ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
-[[dotgen-rule-member-list]]
-____
-(95) member-list           ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-member[member] ";" } link:grammar{outfilesuffix}#dotgen-rule-member[member] ";"
-____
-[[dotgen-rule-member]]
-____
-(96) member                ::= ::
-   ( link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-member[member] "," ) link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator]
-____
+****
+[horizontal]
+(94) `*struct-type           ::=*` ::
+   `"struct"` <<grammar#dotgen-rule-struct-name,`struct-name`>> `"{"` <<grammar#dotgen-rule-member-list,`member-list`>> `"}"`
+(52) `*struct-name           ::=*` ::
+   <<grammar#dotgen-rule-identifier,`identifier`>>
+(95) `*member-list           ::=*` ::
+   `{` <<grammar#dotgen-rule-member,`member`>> `";"` `}` <<grammar#dotgen-rule-member,`member`>> `";"`
+(96) `*member                ::=*` ::
+   `(` <<grammar#dotgen-rule-type-spec,`type-spec`>> +
+                              `|` <<grammar#dotgen-rule-member,`member`>> `","` `)` <<grammar#dotgen-rule-declarator,`declarator`>>
+****
 
 The `identiﬁer` in `struct-type` defines a new legal type. Structure types
 may also be named using a typedef declaration.
@@ -151,46 +146,28 @@ struct foo {
 
 === Discriminated unions
 
-[[dotgen-rule-union-type]]
-____
-(97) union-type            ::= ::
-   "union" link:grammar{outfilesuffix}#dotgen-rule-union-name[union-name] "switch" "(" link:grammar{outfilesuffix}#dotgen-rule-switch-type-spec[switch-type-spec] ")" "{" link:grammar{outfilesuffix}#dotgen-rule-switch-body[switch-body] "}"
-____
-[[dotgen-rule-union-name]]
-____
-(53) union-name            ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
-[[dotgen-rule-switch-type-spec]]
-____
-(98) switch-type-spec      ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-integer-type[integer-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-char-type[char-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-boolean-type[boolean-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-enum-type[enum-type] +
-                              | link:grammar{outfilesuffix}#dotgen-rule-named-type[named-type]
-____
-[[dotgen-rule-switch-body]]
-____
-(99) switch-body           ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-case[case] } link:grammar{outfilesuffix}#dotgen-rule-case[case]
-____
-[[dotgen-rule-case]]
-____
-(100) case                  ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-case-label-list[case-label-list] link:grammar{outfilesuffix}#dotgen-rule-type-spec[type-spec] link:grammar{outfilesuffix}#dotgen-rule-declarator[declarator] ";"
-____
-[[dotgen-rule-case-label-list]]
-____
-(101) case-label-list       ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label] } link:grammar{outfilesuffix}#dotgen-rule-case-label[case-label]
-____
-[[dotgen-rule-case-label]]
-____
-(102) case-label            ::= ::
-   ( "case" link:grammar{outfilesuffix}#dotgen-rule-const-expr[const-expr] +
-                              | "default" ) ":"
-____
+****
+[horizontal]
+(97) `*union-type            ::=*` ::
+   `"union"` <<grammar#dotgen-rule-union-name,`union-name`>> `"switch"` `"("` <<grammar#dotgen-rule-switch-type-spec,`switch-type-spec`>> `")"` `"{"` <<grammar#dotgen-rule-switch-body,`switch-body`>> `"}"`
+(53) `*union-name            ::=*` ::
+   <<grammar#dotgen-rule-identifier,`identifier`>>
+(98) `*switch-type-spec      ::=*` ::
+   <<grammar#dotgen-rule-integer-type,`integer-type`>> +
+                              `|` <<grammar#dotgen-rule-char-type,`char-type`>> +
+                              `|` <<grammar#dotgen-rule-boolean-type,`boolean-type`>> +
+                              `|` <<grammar#dotgen-rule-enum-type,`enum-type`>> +
+                              `|` <<grammar#dotgen-rule-named-type,`named-type`>>
+(99) `*switch-body           ::=*` ::
+   `{` <<grammar#dotgen-rule-case,`case`>> `}` <<grammar#dotgen-rule-case,`case`>>
+(100) `*case                  ::=*` ::
+   <<grammar#dotgen-rule-case-label-list,`case-label-list`>> <<grammar#dotgen-rule-type-spec,`type-spec`>> <<grammar#dotgen-rule-declarator,`declarator`>> `";"`
+(101) `*case-label-list       ::=*` ::
+   `{` <<grammar#dotgen-rule-case-label,`case-label`>> `}` <<grammar#dotgen-rule-case-label,`case-label`>>
+(102) `*case-label            ::=*` ::
+   `(` `"case"` <<grammar#dotgen-rule-const-expr,`const-expr`>> +
+                              `|` `"default"` `)` `":"`
+****
 
 Unions are a cross between the C union and switch statements. Unions must be
 discriminated; that is, the union header must specify a typed tag field that
@@ -323,21 +300,15 @@ union foo switch(long) {
 
 Enumerated types consist of ordered lists of identifiers. The syntax is:
 
-[[dotgen-rule-enum-type]]
-____
-(103) enum-type             ::= ::
-   "enum" link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier] "{" link:grammar{outfilesuffix}#dotgen-rule-enumerator-list[enumerator-list] "}"
-____
-[[dotgen-rule-enumerator-list]]
-____
-(104) enumerator-list       ::= ::
-   { link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator] "," } link:grammar{outfilesuffix}#dotgen-rule-enumerator[enumerator]
-____
-[[dotgen-rule-enumerator]]
-____
-(105) enumerator            ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
+****
+[horizontal]
+(103) `*enum-type             ::=*` ::
+   `"enum"` <<grammar#dotgen-rule-identifier,`identifier`>> `"{"` <<grammar#dotgen-rule-enumerator-list,`enumerator-list`>> `"}"`
+(104) `*enumerator-list       ::=*` ::
+   `{` <<grammar#dotgen-rule-enumerator,`enumerator`>> `","` `}` <<grammar#dotgen-rule-enumerator,`enumerator`>>
+(105) `*enumerator            ::=*` ::
+   <<grammar#dotgen-rule-identifier,`identifier`>>
+****
 
 A maximum of 2^32^ identifiers may be specified in an enumeration. The order
 in which the identifiers are named in the specification of an enumeration
@@ -390,12 +361,12 @@ types may also be named using a typedef declaration.
 
 === Forward declarations
 
-[[dotgen-rule-forward-dcl]]
-____
-(106) forward-dcl           ::= ::
-   ( "struct" +
-                              | "union" ) link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
+****
+[horizontal]
+(106) `*forward-dcl           ::=*` ::
+   `(` `"struct"` +
+                              `|` `"union"` `)` <<grammar#dotgen-rule-identifier,`identifier`>>
+****
 
 
 

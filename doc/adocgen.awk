@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (c) 2012,2014 LAAS/CNRS
+# Copyright (c) 2012,2014,2017 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -17,6 +17,13 @@
 #
 #                                            Anthony Mallet on Fri May 18 2012
 #
+
+BEGIN {
+    print "ifdef::sidebartoc[]"
+    print "include::_Sidebar.adoc[]"
+    print "endif::[]"
+    print ""
+}
 
 /^[ \t]*\/[*]\// {
     sub(/^[ \t]*\/[*]\/[ \t]?/, "");

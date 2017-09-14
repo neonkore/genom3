@@ -1,4 +1,8 @@
 // Generated from interface.y - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
 
 
 
@@ -33,22 +37,16 @@ shared between several components. Although any object can be defined in an
 interface, it will typically only declare service prototypes and ports that
 are to be `provided` or `used` by components.
 
-[[dotgen-rule-interface]]
-____
-(13) interface             ::= ::
-   "interface" link:grammar{outfilesuffix}#dotgen-rule-interface-scope[interface-scope] link:grammar{outfilesuffix}#dotgen-rule-component-body[component-body] ";"
-____
-[[dotgen-rule-interface-scope]]
-____
-(14) interface-scope       ::= ::
-   link:grammar{outfilesuffix}#dotgen-rule-identifier[identifier]
-____
+****
+[horizontal]
+(13) `*interface             ::=*` ::
+   `"interface"` <<grammar#dotgen-rule-interface-scope,`interface-scope`>> <<grammar#dotgen-rule-component-body,`component-body`>> `";"`
+(14) `*interface-scope       ::=*` ::
+   <<grammar#dotgen-rule-identifier,`identifier`>>
 
-[[dotgen-rule-interface-property]]
-____
-(16) interface-property    ::= ::
-   "extends" link:grammar{outfilesuffix}#dotgen-rule-interface-list[interface-list] ";"
-____
+(16) `*interface-property    ::=*` ::
+   `"extends"` <<grammar#dotgen-rule-interface-list,`interface-list`>> `";"`
+****
 
 
 

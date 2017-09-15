@@ -32,8 +32,9 @@
 * link:../running{outfilesuffix}[Running GenoM]
 * [highlight]#link:../tutorials/index{outfilesuffix}[Tutorials]#
 
- - link:workflow{outfilesuffix}[Genom workflow]
- - link:add-function{outfilesuffix}[Simple service]
+ - <<workflow#,Genom workflow>>
+ - <<add-function#,Simple service>>
+ - <<external-software#,Working with external software>>
 
 * link:../templates/index{outfilesuffix}[Templates]
 --

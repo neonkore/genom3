@@ -47,25 +47,26 @@ endif
 
 # static source files
 basesrcs=\
-	adoc/introduction.adoc		\
-	adoc/overview.adoc		\
-	adoc/running.adoc		\
-					\
-	adoc/model/index.adoc		\
-					\
-	adoc/dotgen/index.adoc		\
-	adoc/dotgen/preprocessing.adoc	\
-					\
-	adoc/templates/index.adoc	\
-	adoc/templates/tcl-engine.adoc	\
-					\
-	adoc/mappings/index.adoc	\
-	adoc/mappings/c.adoc		\
-	adoc/mappings/c++.adoc		\
-					\
-	adoc/tutorials/index.adoc	\
-	adoc/tutorials/workflow.adoc	\
-	adoc/tutorials/add-function.adoc
+	adoc/introduction.adoc			\
+	adoc/overview.adoc			\
+	adoc/running.adoc			\
+						\
+	adoc/model/index.adoc			\
+						\
+	adoc/dotgen/index.adoc			\
+	adoc/dotgen/preprocessing.adoc		\
+						\
+	adoc/templates/index.adoc		\
+	adoc/templates/tcl-engine.adoc		\
+						\
+	adoc/mappings/index.adoc		\
+	adoc/mappings/c.adoc			\
+	adoc/mappings/c++.adoc			\
+						\
+	adoc/tutorials/index.adoc		\
+	adoc/tutorials/workflow.adoc		\
+	adoc/tutorials/add-function.adoc	\
+	adoc/tutorials/external-software.adoc
 
 
 # transformed source files
@@ -232,8 +233,9 @@ ASCIIDOCTOR_ARGS+=	-a sidebartoc
 ASCIIDOCTOR_ARGS+=	-a docinfo1 -a docinfodir=$(abs_srcdir)
 ASCIIDOCTOR_ARGS+=	-a imagesdir=$(abs_builddir)
 
-html/%.html: $(srcdir)/adoc/%.adoc $(srcdir)/docinfo.html
-	$(ASCIIDOCTOR) $(ASCIIDOCTOR_ARGS) -o $@ '$<'
+html/%.html: $(srcdir)/adoc/%.adoc docinfo.html
+	$(ASCIIDOCTOR) $(ASCIIDOCTOR_ARGS) -o $@ '$<' 2>&1| \
+	  ${AWK} '/ERROR|WARNING/ {e=2} {print} END {exit e}'
 endif
 
 

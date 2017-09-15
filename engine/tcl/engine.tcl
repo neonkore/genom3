@@ -271,9 +271,11 @@ namespace eval engine {
 		return [chan create write [namespace code [list strchan $dst]]]
 	    }
 	    file|read {
-		set dst [file join [dotgen template dir] $dst]
-		template message "reading $dst"
-		return [::open $dst r]
+              set dst [file join [dotgen template dir] $dst]
+              message "reading $dst"
+              set c [::open $dst r]
+              fconfigure $c -encoding utf-8
+              return $c
 	    }
 	    file|write {
 		# record a move on close
@@ -282,6 +284,7 @@ namespace eval engine {
 
 		set t [mktemp]
 		set c [::open $t w]
+                fconfigure $c -encoding utf-8
 		dict set moc $c [list $t [file join $outdir $dst]]
 
 		template message "generating $dst in $t"

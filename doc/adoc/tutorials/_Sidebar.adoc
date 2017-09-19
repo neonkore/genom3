@@ -34,6 +34,7 @@
 
  - <<workflow#,Genom workflow>>
  - <<add-function#,Simple service>>
+ - <<ids#,IDS (Internal Data Structure)>>
  - <<external-software#,Working with external software>>
 
 * link:../templates/index{outfilesuffix}[Templates]

@@ -1,0 +1,273 @@
+//
+// Copyright (c) 2017 LAAS/CNRS
+// All rights reserved.
+//
+// Permission to use, copy, modify,  and distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE  SOFTWARE  IS  PROVIDED  "AS  IS" AND  THE  AUTHOR  DISCLAIMS  ALL
+// WARRANTIES  WITH  REGARD  TO   THIS  SOFTWARE  INCLUDING  ALL  IMPLIED
+// WARRANTIES  OF MERCHANTABILITY  AND  FITNESS. IN  NO  EVENT SHALL  THE
+// AUTHOR BE  LIABLE FOR ANY SPECIAL, DIRECT,  INDIRECT, OR CONSEQUENTIAL
+// DAMAGES OR ANY DAMAGES WHATSOEVER  RESULTING FROM LOSS OF USE, DATA OR
+// PROFITS,  WHETHER  IN  AN  ACTION  OF CONTRACT,  NEGLIGENCE  OR  OTHER
+// TORTIOUS  ACTION, ARISING  OUT OF  OR IN  CONNECTION WITH  THE  USE OR
+// PERFORMANCE OF THIS SOFTWARE.
+//
+//                                      Anthony Mallet on Tue Sep 19 2017
+//
+
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
+== IDS (Internal Data Structure)
+
+<<../dotgen/ids#,IDS>> is a genom object that can be defined within a
+component in order to store and share private data among different services and
+codels of a component. Private data, in this context, means data that is not
+exported nor visible from the component interface, but used internally to store
+state, temporary computation data, etc. It is similar to the purpose of the
+`private` `{cpp}` keyword.
+
+=== IDS versus _static_ versus _global_
+
+Private data can be defined in several ways, depending on the expected usage of
+the data. When deciding whether to define an IDS, different scenario can be
+considered:
+
+==== Shared data between codels of the same service
+
+In this case, declaring `static` data in the source file where the service
+codels are implemented is sufficient. Since no two codels of the same service
+will ever execute simultaneously, no locking or any synchronization strategies
+need to be implemented. This is the simplest scenario.
+
+NOTE: a `static` definition enforces the private nature of the
+data. Technically, a _global_ definition would also work, just providing less
+guarantees regarding the visibility of data.
+
+==== Shared data between codels of the same tasks
+
+Declaring `static` data in the source file where all the codels of the services
+of the task are defined is also sufficient in this case. No two codels of the
+same task _can_ execute simultaneously (by definition of a task), so no
+synchronization strategies is required.
+
+==== Shared data between codels of different tasks
+
+Codels of different tasks (including codels of functions and attributes) _can_
+execute simultaneously. In order to share data between them, a mere global or
+`static` definition for the data is not sufficient and proper synchronization
+between the codels must be achieved. This is where the IDS definition becomes
+handy, as it handles the synchronization transparently and in an efficient
+manner, depending on which codel access which data.
+
+=== IDS example
+
+In order to demonstate the IDS usage, let's consider two simple services. The
+first one, `counter` will count from 0 some maximum value, at a fixed rate. The
+second one, `reset` will simply reset the current counter value so that
+`counter` starts again from 0. `counter` must be implemented as an activity,
+because it will iterate at a given frequency, while `reset` may be a simple
+function.
+
+It should be obvious that in order to implement these two activities, they must
+share the current counter value. This is easily achieved by using an `IDS`
+declaration inside the component definition, that would look like this:
+
+[source,IDL,linenums]
+.example.gen
+----
+component example {
+  ids { long current; };
+
+  task t { period 1s; };
+
+  activity counter(in long max = 42: "Maximum counter value") {
+    doc "Count from 0 to max";
+    task t;
+
+    codel<start> counter_impl(in max, inout current) yield start, ether;
+  };
+
+  function reset() {
+    codel reset_impl(out current);
+  };
+};
+----
+
+In line 2 of this example, the IDS is declared, along with its content, much
+like a `structure` definition. In this example, a simple integer variable
+`current` is declared.
+
+On line 6 and 13, the two services are declared, with their
+parameters. Activity `counter` takes an integer to define the maximum counter
+value, while `reset` has no parameter.
+
+The interesting parts are on lines 10 and 14, with the codels definitions.  The
+codel `counter_impl` for the `counter` activity needs two parameters: the `max`
+value given as input to the activity, and the private variable `current`, to be
+updated at each step. The different nature of the two parameters are
+automatically recognized by genom. The codel `reset_impl` for the `reset`
+function just need to zero the `current` value from the IDS.
+
+The implementation of these two codels could be the following:
+
+[source,C]
+----
+genom_event
+counter_impl(int32_t max, int32_t *current, const genom_context self)
+{
+  (*current)++;
+  if (*current < max) return example_start; else return example_ether;
+}
+
+genom_event
+reset_impl(int32_t *current, const genom_context self)
+{
+  *current = 0;
+  return genom_ok;
+}
+----
+
+=== Initializing IDS data
+
+The values of the IDS are not initialized to any special value when the
+component starts. Often, though, it is desirable to assign them reasonable
+values. This can be achieved by defined a task start codel, that takes a
+list of IDS members to initialize.
+
+For example:
+
+[source,IDL]
+.example.gen
+----
+component example {
+  ids {
+    long value;
+    double parameter;
+    string data;
+  };
+
+  task t {
+    codel<start> init_ids(out value, out parameter, out data) yield ether;
+  };
+};
+----
+
+`init_ids` will be called during the component startup and can thus initialize
+the designated members, for instance like this:
+
+[source, C]
+----
+genom_event
+init_ids(int32_t *value, double *parameter, char **data,
+         const genom_context self)
+{
+   *value = 0;
+   *parameter = 3.14;
+   *data = strdup("a string ...");
+
+   return example_ether;
+}
+----
+
+When the IDS has many members, it might be more convenient to pass the whole
+IDS as a single parameter. This can be achieved by using the `parameter::name`
+syntax, with an empty `parameter` part and a name of your liking:
+
+[source,IDL]
+.example.gen
+----
+component example {
+  ids {
+    long value;
+    double parameter;
+    string data;
+  };
+
+  task t {
+    codel<start> init_ids(out ::whole_ids) yield ether;
+  };
+};
+----
+
+`init_ids` will then be passed a pointer on the whole IDS structure:
+
+[source, C]
+----
+genom_event
+init_ids(example_ids *whole_ids, const genom_context self)
+{
+   whole_ids->value = 0;
+   whole_ids->parameter = 3.14;
+   whole_ids->data = strdup("a string ...");
+
+   return example_ether;
+}
+----
+
+
+=== Name disambiguation
+
+As it was shown in the previous paragraphs, GenoM automatically recognize the
+codel parameter source when the parameter name is not ambiguous. However, it
+can happen that a member of the IDS has the same name as a service parameter
+(or a port name).
+
+For instance, the following example is ambiguous and leads to some compilation
+errors:
+
+[source,IDL]
+.example.gen
+----
+component example {
+  ids { long value; };
+
+  function set_value(in long value) {
+    codel set_value(in value, out value); /* this is ambiguous */
+  };
+};
+----
+
+[source, shell]
+----
+$ genom3 -n example.gen
+example.gen:5: missing source qualifier for parameter 'value'
+example.gen:2:  ids member value declared here
+example.gen:4:  service parameter value declared here
+example.gen:5: missing source qualifier for parameter 'value'
+example.gen:2:  ids member value declared here
+example.gen:4:  service parameter value declared here
+genom3: 2 errors
+$
+----
+
+In order to distinguish between the `value` parameeter of the function
+`set_value` and the IDS member `value`, two changes must be done to the
+previous example.
+
+ * First, the codel `set_value` must indicate the origin of each value, using
+   one of the `ids`, `local` and `port` keyword. `ids` and `port` designate a
+   parameter from the IDS or a port name, respectively, while `local` refers to
+   the service parameters.
+
+ * Then, since a codel cannot have two parameters with the same name, one of
+   the parameters (or both) must be given another local name, by using the
+   `parameter::name` syntax.
+
+This would be written like so in the component description file:
+
+[source,IDL]
+.example.gen
+----
+component example {
+  ids { long value; };
+
+  function set_value(in long value) {
+    codel set_value(local in value, ids out value::ids_value);
+  };
+};
+----

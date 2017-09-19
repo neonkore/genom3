@@ -28,11 +28,14 @@ This section contains several tutorials that should help you to get started with
 Genom. They are sorted by ascending order of complexity, so they should be read
 in order.
 
-link:workflow{outfilesuffix}[Genom workflow] ::
+<<workflow#,Genom workflow>>::
 Getting used to running genom, generating code and compiling components.
 
-link:add-function{outfilesuffix}[Simple service] ::
+<<add-function#,Simple service>>::
 A component with a simple service implemented as a `function`.
+
+<<ids#,IDS (Internal Data Structure)>>::
+Sharing private data between codels
 
 <<external-software#,Working with external software>>::
 How to describe external software dependencies in a component.

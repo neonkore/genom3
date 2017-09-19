@@ -66,6 +66,7 @@ basesrcs=\
 	adoc/tutorials/index.adoc		\
 	adoc/tutorials/workflow.adoc		\
 	adoc/tutorials/add-function.adoc	\
+	adoc/tutorials/ids.adoc			\
 	adoc/tutorials/external-software.adoc
 
 

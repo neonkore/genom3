@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013,2015-2016 LAAS/CNRS
+ * Copyright (c) 2009-2013,2015-2017 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -221,8 +221,10 @@ comp_pop(void)
         default: break;
       }
     }
-    for(hash_first(service_fsm(i.value), &j); j.current; hash_next(&j))
-      if (codel_check(j.value)) e |= 1;
+    if (service_fsm(i.value)) {
+      for(hash_first(service_fsm(i.value), &j); j.current; hash_next(&j))
+        if (codel_check(j.value)) e |= 1;
+    }
   }
 
   /* pop context */

@@ -272,7 +272,7 @@ namespace eval engine {
 	    }
 	    file|read {
               set dst [file join [dotgen template dir] $dst]
-              message "reading $dst"
+              template message "reading $dst"
               set c [::open $dst r]
               fconfigure $c -encoding utf-8
               return $c

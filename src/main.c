@@ -183,6 +183,16 @@ main(int argc, char *argv[])
   argc -= optind;
   argv += optind;
 
+  /* normalize tmpdir. This is important when TMPDIR or -t options are set to a
+   * path that contains symlinks, because dotgen_parsehash() needs to determine
+   * reliably if input files are within tmpdir or not and normalizes its paths
+   * to compare with tmpdir. */
+  optarg = realpath(runopt.tmpdir, NULL);
+  if (optarg) {
+    strlcpy(runopt.tmpdir, optarg, sizeof(runopt.tmpdir));
+    free(optarg);
+  }
+
   /* just list templates */
   if (runopt.list) {
     char **list, **t;

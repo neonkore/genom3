@@ -1,5 +1,31 @@
 GenoM3 - Generator of robotic component
-Copyright (c) 2009-2016 LAAS/CNRS
+Copyright (c) 2009-2017 LAAS/CNRS
+
+			    Changes in genom 2.99.30
+
+Released on Nov 10th, 2017
+ . Fix conversion of numeric constant to IDL octet type.
+ . Allow documenting a "port", by using a "doc" attribute in a block
+   declaration attached to the port.
+ . Skeleton template generates an optional README.adoc file from the .gen file.
+ . Add a "yes for all" option in the interactive merge action of "skeleton".
+ . Improve skeleton merge mode so that merged but unchanged files are not
+   touched (useful in particular with configure.ac).
+ . Allow parsing multiple input files including the same files (#130).
+ . Add tutorials on "how to use external dependency" and "IDS purpose and
+   usage".
+ . Use asciidoctor instead of asciidoc to generate the static documentation.
+
+
+			    Changes in genom 2.99.29
+
+Released on May 18th, 2017
+ . Don't require a <start> codel for activities defined in an interface.
+ . Fix several issues with unions, in particular in the JSON serialisation.
+ . Allow 'interrupt' and 'doc' properties to be specified in multiple chunks.
+ . Update the `workflow` tutorial.
+ . Improve style of the online doc.
+
 
 			    Changes in genom 2.99.28
 

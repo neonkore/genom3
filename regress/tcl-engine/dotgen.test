@@ -76,7 +76,7 @@ testing '[dotgen template tmpdir]'
 run 0 ${GENOM_BIN} -T run.t interactive -b run.gen <<EOF
 puts [dotgen template tmpdir]
 EOF
-expect out '/^run.t\/genom/ {next}; {exit 2}'
+expect out '/\/run.t\/genom/ {next}; {exit 2}'
 
 
 # --- dotgen input notice --------------------------------------------------

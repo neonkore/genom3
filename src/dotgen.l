@@ -352,8 +352,14 @@ chartext	([^\'])|(\\.)
 
  /* string literals */
 "\""{stringtext}*"\"" {
+  char *p;
+
   /* remove quotes */
   yytext[yyleng-1] = '\0';
+  /* unescape quotes */
+  for(p = yytext + 1; *p; p++)
+    if (*p == '\\' && p[1] == '"') memmove(p, p+1, strlen(p+1)+1/*\0*/);
+
   yylval->s = string(yytext + 1);
   return string_literal;
 }

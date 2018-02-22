@@ -471,6 +471,32 @@ A string representing the name of a variable of type 'type'.
 
 
 
+[[returnvalue]]
+=== `language returnvalue`: Code for declaring functions return value
+****
+`language returnvalue` 'type' 'kind'
+****
+
+Return an expression that declares a return value of type
+'type', returned by value or reference according to 'kind'.
+
+==== Arguments
+'type'::
+A 'type' object.
+'kind'::
+Must be `value` or `reference`.
+
+
+
+
+
+
+
+
+
+
+
+
 [[pass]]
 === `language pass`: Code for passing functions arguments
 ****

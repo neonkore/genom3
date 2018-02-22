@@ -1,4 +1,4 @@
-:year: 2017
+:year: 2018
 
 ifdef::sidebartoc[]
 include::_Sidebar.adoc[]

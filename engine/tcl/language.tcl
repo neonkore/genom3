@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015,2017 LAAS/CNRS
+# Copyright (c) 2010-2015,2017-2018 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -460,6 +460,32 @@ namespace eval language {
   }
   slave alias language::argument language::argument
   namespace export argument
+
+
+  # --- return-value -------------------------------------------------------
+
+  #/
+  # [[returnvalue]]
+  # === `language returnvalue`: Code for declaring functions return value
+  # ****
+  # `language returnvalue` 'type' 'kind'
+  # ****
+  #
+  # Return an expression that declares a return value of type
+  # 'type', returned by value or reference according to 'kind'.
+  #
+  # ==== Arguments
+  # 'type'::
+  # A 'type' object.
+  # 'kind'::
+  # Must be `value` or `reference`.
+  #
+  proc return-value { type kind } {
+    variable current
+    return [${current}::return-value $type $kind]
+  }
+  slave alias language::return-value language::return-value
+  namespace export return-value
 
 
   # --- pass ---------------------------------------------------------------

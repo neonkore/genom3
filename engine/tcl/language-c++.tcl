@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 LAAS/CNRS
+# Copyright (c) 2010-2015,2018 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -253,6 +253,16 @@ namespace eval language::c++ {
               "unknown argument kind \"$kind\": must be value or reference"
         }
       }
+    }
+
+
+    # --- return-value -----------------------------------------------------
+
+    # Return the C++ mapping for declaring a returned value.
+    #
+    proc return-value { type kind } {
+      # default to same as 'argument'
+      return [argument $type $kind]
     }
 
 

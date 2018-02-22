@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014,2017 LAAS/CNRS
+ * Copyright (c) 2010-2014,2017-2018 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -60,8 +60,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     typeidx_length, typeidx_value, typeidx_valuekind, typeidx_members,
     typeidx_discriminator, typeidx_port, typeidx_remote, typeidx_cname,
     typeidx_mangle, typeidx_mapping, typeidx_declarator, typeidx_address,
-    typeidx_deref, typeidx_argument, typeidx_pass, typeidx_digest,
-    typeidx_masquerade, typeidx_loc, typeidx_class
+    typeidx_deref, typeidx_argument, typeidx_retval, typeidx_pass,
+    typeidx_digest, typeidx_masquerade, typeidx_loc, typeidx_class
   };
   static const char *args[] = {
     [typeidx_kind] = "kind", [typeidx_name] = "name",
@@ -76,9 +76,9 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [typeidx_mangle] = "mangle", [typeidx_mapping] = "mapping",
     [typeidx_declarator] = "declarator", [typeidx_address] = "address",
     [typeidx_deref] = "dereference", [typeidx_argument] = "argument",
-    [typeidx_pass] = "pass", [typeidx_digest] = "digest",
-    [typeidx_masquerade] = "masquerade", [typeidx_loc] = "loc",
-    [typeidx_class] = "class", NULL
+    [typeidx_retval] = "return-value", [typeidx_pass] = "pass",
+    [typeidx_digest] = "digest", [typeidx_masquerade] = "masquerade",
+    [typeidx_loc] = "loc", [typeidx_class] = "class", NULL
   };
   idltype_s t = v;
   Tcl_Obj *r = NULL;
@@ -115,10 +115,10 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_WrongNumArgs(interp, 2, objv, "?template?");
       return TCL_ERROR;
     }
-  } else if (i == typeidx_argument || i == typeidx_pass ||
-             i == typeidx_deref) {
-    /* 'argument', 'pass' and 'deref' subcommands can have two additional
-     * parameters */
+  } else if (i == typeidx_argument || i == typeidx_retval ||
+             i == typeidx_pass || i == typeidx_deref) {
+    /* 'argument', 'return-value', 'pass' and 'deref' subcommands can have two
+     * additional parameters */
     if (objc < 3 || objc > 4) {
       Tcl_WrongNumArgs(interp, 2, objv, "kind ?var?");
       return TCL_ERROR;
@@ -544,6 +544,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
      * The argument name.
      */
     case typeidx_argument:
+    case typeidx_retval:
     case typeidx_pass:
     case typeidx_deref: {
       Tcl_Obj *argv[] = {

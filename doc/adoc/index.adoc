@@ -21,8 +21,8 @@
 GenoM Manual
 ============
 :revision: 2.99.30
-:month: November
-:year: 2017
+:month: February
+:year: 2018
 
 ifdef::sidebartoc[]
 include::_Sidebar.adoc[]

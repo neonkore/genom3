@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2017 LAAS/CNRS
+# Copyright (c) 2010-2018 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -264,11 +264,41 @@ namespace eval language::c {
             }
           }
         }
+
         default	{
           template fatal \
               "unknown argument kind \"$kind\": must be value or reference"
         }
       }
+    }
+
+
+    # --- return-value -----------------------------------------------------
+
+    # Return the C mapping for declaring a returned value.
+    #
+    proc return-value { type kind } {
+      switch -- $kind {
+        reference {
+          switch -- [[$type final] kind] {
+            string {
+              # handle char[] explicitly
+              if {![catch { [$type final] length }]} {
+                return "char *"
+              }
+            }
+            string - array {
+              # handle arrays[] explicitly
+              if {![catch { [$type final] length }]} {
+                return [declarator [[$type final] type] *]
+              }
+            }
+          }
+        }
+      }
+
+      # default to same as 'argument'
+      return [argument $type $kind]
     }
 
 

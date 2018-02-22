@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2012-2014 LAAS/CNRS
+# Copyright (c) 2012-2014,2018 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution and use  in source  and binary  forms,  with or without
@@ -155,7 +155,7 @@ void	genom_<"$comp">_client_<"[$p name]">_init_data(
 void	genom_<"$comp">_client_<"[$p name]">_fini_data(
   <"[[$p datatype] argument reference data]">);
 int	genom_<"$comp">_client_<"[$p name]">_json_print(char **json,
-  <"[[$p datatype] argument value data]">);
+  const <"[[$p datatype] argument reference data]">);
 
 <'}'>
 

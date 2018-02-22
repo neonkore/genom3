@@ -601,26 +601,27 @@ namespace eval language::c++ {
       append f "\n#include \"genom3/c++/event.h\""
       if {$locations} { append m [genloc $type] }
       append m "\nstruct $n {"
+      set rval [$t return-value reference]
       switch -- [$p kind]/[$p dir] {
         simple/in {
-          append m "\n  virtual const [$t argument reference] data(void)" \
+          append m "\n  virtual const $rval data(void)" \
               " const = 0;"
           append m "\n  virtual void read(void) = 0;"
         }
         simple/out {
-          append m "\n  virtual [$t argument reference] data(void) const = 0;"
+          append m "\n  virtual $rval data(void) const = 0;"
           append m "\n  virtual void write(void) = 0;"
         }
 
         multiple/in {
           append m \
-              "\n  virtual const [$t argument reference] data(const char *id)" \
+              "\n  virtual const $rval data(const char *id)" \
               " const = 0;"
           append m "\n  virtual void read(const char *id) = 0;"
         }
 
         multiple/out {
-          append m "\n  virtual [$t argument reference] data(const char *id)" \
+          append m "\n  virtual $rval data(const char *id)" \
               " const = 0;"
           append m "\n  virtual void write(const char *id) = 0;"
           append m "\n  virtual void open(const char *id) = 0;"

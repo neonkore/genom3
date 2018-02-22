@@ -740,26 +740,25 @@ namespace eval language::c {
       append m "\n#include \"genom3/c/exception.h\""
       if {$locations} { append m [genloc $type] }
       append m "\ntypedef struct $n {"
+      set rval [$t return-value reference]
       switch -- [$p kind]/[$p dir] {
         simple/in {
-          append m "\n  [$t argument reference] (*data)(genom_context self);"
+          append m "\n  $rval (*data)(genom_context self);"
           append m "\n  genom_event (*read)(genom_context self);"
         }
         simple/out {
-          append m "\n  [$t argument reference] (*data)(genom_context self);"
+          append m "\n  $rval (*data)(genom_context self);"
           append m "\n  genom_event (*write)(genom_context self);"
         }
 
         multiple/in {
-          append m "\n  [$t argument reference] (*data)"
-          append m   "(const char *id, genom_context self);"
+          append m "\n  $rval (*data)(const char *id, genom_context self);"
           append m "\n  genom_event (*read)"
           append m   "(const char *id, genom_context self);"
         }
 
         multiple/out {
-          append m "\n  [$t argument reference] (*data)"
-          append m   "(const char *id, genom_context self);"
+          append m "\n  $rval (*data)(const char *id, genom_context self);"
           append m "\n  genom_event (*write)"
           append m   "(const char *id, genom_context self);"
           append m "\n  genom_event (*open)"

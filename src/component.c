@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013,2015-2017 LAAS/CNRS
+ * Copyright (c) 2009-2013,2015-2018 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -497,7 +497,7 @@ comp_merge(comp_s c, comp_s m, propkind k)
   assert(scope_current() == c->scope && active == c);
   assert(k == PROP_EXTENDS || k == PROP_PROVIDES || k == PROP_USES);
 
-  e = prop_merge_list(c->props, m->props, c->kind != COMP_IFACE/*ignore_dup*/);
+  e = prop_merge_list(c->props, m->props, 0/*ignore_dup*/);
 
   for(hash_first(m->tasks, &i); i.current; hash_next(&i))
     if (!task_clone(i.value) && !e) e = errno;

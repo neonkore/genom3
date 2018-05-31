@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015,2017 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017-2018 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -415,7 +415,7 @@ prop_merge(hash_s p, prop_s i, int ignore_dup)
         e = 0; break;
 
       default:
-        if (ignore_dup) break;
+        if (ignore_dup) { e = 0; break; }
         parserror(prop_loc(i), "duplicate %s declaration", prop_name(i));
         parsenoerror(prop_loc(q), " %s declared here", prop_name(q));
         break;

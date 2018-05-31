@@ -8,6 +8,15 @@ interface j { extends i; };
 EOF
 
 testing 'duplicate extends directives'
+run 0 ${GENOM_BIN} -n run.gen
+
+cat >run.gen <<EOF
+interface i { clock-rate 1; };
+interface j { clock-rate 2; };
+interface k { extends i, j; };
+EOF
+
+testing 'conflicting extends directives'
 run 1 ${GENOM_BIN} -n run.gen
 
 cat >run.gen <<EOF

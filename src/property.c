@@ -390,6 +390,9 @@ prop_merge(hash_s p, prop_s i, int ignore_dup)
         e = 0;
         break;
 
+      case PROP_EXTENDS:
+      case PROP_PROVIDES:
+      case PROP_USES:
       case PROP_THROWS:
       case PROP_INTERRUPTS: {
         for(hash_first(prop_hash(i), &j); j.current; hash_next(&j)) {

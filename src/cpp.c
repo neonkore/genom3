@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012,2017 LAAS/CNRS
+ * Copyright (c) 2009-2012,2017-2018 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -116,7 +116,11 @@ cpp_invoke(char *in[], int out)
   free(cpp);
 
   /* setup input file containing the #include'd list of input */
-  snprintf(inpath, sizeof(inpath), "%s/input.c", runopt.tmpdir);
+  n = snprintf(inpath, sizeof(inpath), "%s/input.c", runopt.tmpdir);
+  if (n >= sizeof(inpath)) {
+    warnx("%s: filename too long", inpath);
+    errno = ENAMETOOLONG; goto err;
+  }
   infile = fopen(inpath, "w");
   if (!infile) {
     warnx("cannot cate %s input file", inpath); warn(NULL);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 LAAS/CNRS
+ * Copyright (c) 2010-2013,2018 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -153,7 +153,7 @@ eng_listtmpldir(const char *base, const char *dir, char ***list, int *n)
 {
   char path[PATH_MAX];
   char ent[PATH_MAX];
-  struct dirent de, *r;
+  struct dirent *de;
   struct stat sb;
   DIR *d;
   char *name, *prefix;
@@ -167,22 +167,21 @@ eng_listtmpldir(const char *base, const char *dir, char ***list, int *n)
   d = opendir(dir);
   if (!d) return;
 
-  /* must use readdir_r() here because eng_findentry() also readdir() */
-  while(!readdir_r(d, &de, &r) && r) {
-    if (!(de.d_type & DT_DIR) && de.d_type != DT_UNKNOWN) continue;
+  while((de = readdir(d))) {
+    if (!(de->d_type & DT_DIR) && de->d_type != DT_UNKNOWN) continue;
 
     strlcpy(path, dir, sizeof(path));
     strlcat(path, "/", sizeof(path));
-    strlcat(path, de.d_name, sizeof(path));
+    strlcat(path, de->d_name, sizeof(path));
     if (stat(path, &sb)) continue;
     if (!(sb.st_mode & S_IFDIR)) continue;
-    if (!strcmp(de.d_name, ".") || !strcmp(de.d_name, "..")) continue;
+    if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, "..")) continue;
 
     *prefix = 0;
-    strlcat(ent, de.d_name, sizeof(ent));
+    strlcat(ent, de->d_name, sizeof(ent));
     eng_listtmpldir(ent, path, list, n);
 
-    xwarnx("looking for template in '%s'", de.d_name);
+    xwarnx("looking for template in '%s'", de->d_name);
     name = eng_findentry(path);
     if (name) {
       char **r;

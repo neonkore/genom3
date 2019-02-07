@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 LAAS/CNRS
+ * Copyright (c) 2013-2014,2019 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -38,7 +38,7 @@
  */
 typedef const char *genom_event;
 
-#define genom_weak __attribute__((weak))
+#define genom_weak __attribute__((weak, visibility ("default")))
 #ifdef __cplusplus
 # define genom_extern_weak extern genom_weak
 #else

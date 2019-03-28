@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2010-2014 LAAS/CNRS
+# Copyright (c) 2010-2014,2019 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -48,6 +48,8 @@ lib<"[$c name]">_codels_la_SOURCES+=	<"[$c name]_[$t name]_codels[fileext]">
 
 lib<"[$c name]">_codels_la_CPPFLAGS=	$(requires_CFLAGS)
 lib<"[$c name]">_codels_la_LDFLAGS=	$(requires_LIBS)
+lib<"[$c name]">_codels_la_CPPFLAGS+=	$(codels_requires_CFLAGS)
+lib<"[$c name]">_codels_la_LDFLAGS+=	$(codels_requires_LIBS)
 lib<"[$c name]">_codels_la_LDFLAGS+=	-release $(PACKAGE_VERSION)
 
 <'}'>

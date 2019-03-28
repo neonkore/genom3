@@ -12,8 +12,10 @@ includedir=${prefix}/codels
 Name: <"[$c name]">-genom3
 Description: <"[$c name]"> interface and codels library
 Version: @PACKAGE_VERSION@
-<'set requires [join [concat [$c require] [$c codels-require]] {, }]'>
-<'if [llength $requires] {'>
-Requires: <"$requires">
+<'if [llength [$c require]] {'>
+Requires: <"[join [$c require]]">
 <'}'>
 Libs: ${libdir}/lib<"[$c name]">_codels.la
+<'if [llength [$c codels-require]] {'>
+Libs.private: @codels_requires_LIBS@
+<'}'>

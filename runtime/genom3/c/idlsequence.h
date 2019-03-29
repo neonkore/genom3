@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012,2018 LAAS/CNRS
+ * Copyright (c) 2010-2012,2018-2019 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution and use  in source  and binary  forms,  with or without
@@ -95,6 +95,6 @@ _genom_resize_buffer(uint32_t length, size_t esize,
   (((sequence)->_buffer = _genom_resize_buffer(				\
     length, sizeof(*(sequence)->_buffer),				\
     &(sequence)->_length, &(sequence)->_maximum,			\
-    (sequence)->_buffer, &(sequence)->_release))?0:(length?-1:0))
+    (sequence)->_buffer, &(sequence)->_release))?0:((length)!=0?-1:0))
 
 #endif /* H_GENOM3_C_IDLSEQUENCE */

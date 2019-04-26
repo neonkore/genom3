@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2012-2015,2017 LAAS/CNRS
+# Copyright (c) 2012-2015,2017,2019 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution and use  in source  and binary  forms,  with or without
@@ -449,14 +449,22 @@ json_print_<"[$t mangle]">(char **json, char **end, size_t *len,
       if ((s = bufcat(json, end, len, 0, "\"<invalid>\""))) return s;
       break;
   }
-<'
-    }
-    float - double {'>
+<'    }'>
+<'    float {'>
+  if (isnan(data)) {
+    if ((s = bufcat(json, end, len, 0, "null"))) return s;
+  } else {
+    char buf[16];
+    sprintf(buf, "%.9g", data);
+    if ((s = bufcat(json, end, len, 0, buf))) return s;
+  }
+<'    }'>
+<'    double {'>
   if (isnan(data)) {
     if ((s = bufcat(json, end, len, 0, "null"))) return s;
   } else {
     char buf[32];
-    sprintf(buf, "%g", data);
+    sprintf(buf, "%.17g", data);
     if ((s = bufcat(json, end, len, 0, buf))) return s;
   }
 <'

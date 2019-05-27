@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014,2017 LAAS/CNRS
+# Copyright (c) 2010-2014,2017,2019 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -157,17 +157,21 @@ noinst_PROGRAMS= mdate
 mdatetgts=	$(mdatesrcs:=~)
 BUILT_SOURCES+=	$(mdatetgts)
 
-$(mdatetgts): | Makefile mdate
+$(mdatetgts): Makefile mdate
 $(mdatetgts): $(basesrcs)
 $(mdatetgts): $(adocsrcs)
 $(mdatetgts): %~: $(srcdir)/%
 	@test -d '$(dir $@)' || mkdir -p '$(dir $@)'
-	eval `./mdate $^`;						\
 	sed <$(srcdir)/$(@:~=) >$@					\
-	  -e 's|^:revision:.*|:revision: ${PACKAGE_VERSION}|'		\
-	  -e 's|^:month:.*|:month: '"$$MONTH"'|'			\
-	  -e 's|^:year:.*|:year: '"$$YEAR"'|'
-	$(call copy_if_change,$@,$(srcdir)/$(@:~=))
+	  -e 's|^:revision:.*|:revision: ${PACKAGE_VERSION}|'
+	if cmp -s '$@' '$(srcdir)/$(@:~=)'; then			\
+	  eval `./mdate $@`;						\
+	  sed <$(srcdir)/$(@:~=) >$@					\
+	    -e 's|^:revision:.*|:revision: ${PACKAGE_VERSION}|'		\
+	    -e 's|^:month:.*|:month: '"$$MONTH"'|'			\
+	    -e 's|^:year:.*|:year: '"$$YEAR"'|';			\
+	  $(call copy_if_change,$@,$(srcdir)/$(@:~=));			\
+	fi
 
 
 # Generate an asciidoc translation of the .gen yacc grammar with y2l. Also,

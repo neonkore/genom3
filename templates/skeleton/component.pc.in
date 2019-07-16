@@ -16,7 +16,7 @@ Name: <"[$c name]">-genom3
 Description: <"[$c name]"> interface and codels library
 Version: @PACKAGE_VERSION@
 <'if [llength [$c require]] {'>
-Requires: <"[join [$c require]]">
+Requires: <"[join [$c require] {, }]">
 <'}'>
 Cflags: -I${includedir} -I${idldir}
 Libs: -L${libdir} -l<"[$c name]">_codels

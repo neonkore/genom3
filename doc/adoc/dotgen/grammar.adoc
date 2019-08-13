@@ -96,7 +96,9 @@ Grammar reference
 [[dotgen-rule-attribute-parameters]](29) `*attribute-parameters  ::=*` ::
    `[` `{` <<grammar#dotgen-rule-attribute-parameter,`attribute-parameter`>> `","` `}` <<grammar#dotgen-rule-attribute-parameter,`attribute-parameter`>> `]`
 [[dotgen-rule-attribute-parameter]](30) `*attribute-parameter   ::=*` ::
-   <<grammar#dotgen-rule-parameter-dir,`parameter-dir`>> <<grammar#dotgen-rule-parameter-variable,`parameter-variable`>> <<grammar#dotgen-rule-opt-initializer,`opt-initializer`>>
+   <<grammar#dotgen-rule-parameter-dir,`parameter-dir`>> `(` <<grammar#dotgen-rule-parameter-variable,`parameter-variable`>> <<grammar#dotgen-rule-opt-initializer,`opt-initializer`>> +
+                              `|` <<grammar#dotgen-rule-parameter-variable,`parameter-variable`>> `"::"` <<grammar#dotgen-rule-identifier,`identifier`>> <<grammar#dotgen-rule-opt-initializer,`opt-initializer`>> +
+                              `|` `"::"` <<grammar#dotgen-rule-identifier,`identifier`>> <<grammar#dotgen-rule-opt-initializer,`opt-initializer`>> `)`
 [[dotgen-rule-service-parameters]](31) `*service-parameters    ::=*` ::
    `[` `{` <<grammar#dotgen-rule-service-parameter,`service-parameter`>> `","` `}` <<grammar#dotgen-rule-service-parameter,`service-parameter`>> `]`
 [[dotgen-rule-service-parameter]](32) `*service-parameter     ::=*` ::

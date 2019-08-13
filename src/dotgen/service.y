@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015,2017 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017,2019 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -238,6 +238,16 @@ attribute_parameter:
   {
     if (!$2) { $$ = NULL; break; }
     $$ = param_newids(@2, $1, NULL, $2, $3);
+  }
+  | parameter_dir parameter_variable COLONCOLON identifier opt_initializer
+  {
+    if (!$2) { $$ = NULL; break; }
+    $$ = param_newids(@2, $1, $4, $2, $5);
+  }
+  | parameter_dir COLONCOLON identifier opt_initializer
+  {
+    if (!$2) { $$ = NULL; break; }
+    $$ = param_newids(@2, $1, $3, NULL, $4);
   }
   | error { $$ = NULL; }
 ;

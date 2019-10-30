@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 LAAS/CNRS
+ * Copyright (c) 2010-2015,2019 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -24,6 +24,7 @@
 #include "acgenom.h"
 
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
 #include <err.h>
@@ -137,10 +138,11 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
   const struct dgcmd *i;
   char path[PATH_MAX];
   Tcl_Interp *interp, *slave;
+  Tcl_DString encoding;
   Tcl_Namespace *n;
   const char **j;
   Tcl_Obj *obj;
-  char *args;
+  char *args, *lang;
   int p, s;
 
   /* create tcl interpreter */
@@ -150,6 +152,33 @@ engine_invoke(const char *tmpl, int argc, const char * const *argv)
     return 127;
   }
   estatus = 2;
+
+  /* set system encoding: guess it from environment or use utf-8 as a
+   * fallback (instead of the default iso8859-1 of TCL). One issue is that
+   * autoconf resets LC_ALL to C, which is mapped to TCL's default
+   * encoding, so Tcl_GetEncodingNameFromEnvironment cannot be used. */
+  lang = getenv("LC_ALL");
+  if (!lang || !*lang)
+    lang = getenv("LC_CTYPE");
+  if (!lang || !*lang)
+    lang = getenv("LANG");
+  if (!lang || !*lang)
+    lang = "utf-8";
+
+  Tcl_DStringInit(&encoding);
+  lang = Tcl_DStringAppend(&encoding, lang, -1);
+  Tcl_UtfToLower(lang);
+
+  if (!Tcl_GetEncoding(NULL, lang)) {
+    /* we didn't recognize the full value as an encoding name. If there is
+     * an encoding subfield, we can try to guess from that */
+    for (; *lang; lang++) if (*lang == '.') { lang++; break; }
+    if (!*lang || !Tcl_GetEncoding(NULL, lang))
+      lang = "utf-8";
+  }
+
+  Tcl_SetSystemEncoding(NULL, lang);
+  Tcl_DStringFree(&encoding);
 
   /* make template arguments available in argc/argv variables */
   obj = Tcl_NewIntObj(argc - 1);

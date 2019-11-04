@@ -21,7 +21,7 @@
 GenoM Manual
 ============
 :revision: 2.99.33
-:month: August
+:month: November
 :year: 2019
 
 ifdef::sidebartoc[]

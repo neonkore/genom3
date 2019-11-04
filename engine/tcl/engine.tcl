@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014,2017 LAAS/CNRS
+# Copyright (c) 2010-2014,2017,2019 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -265,10 +265,14 @@ namespace eval engine {
 	switch -glob -- $type|$mode {
 	    string|read {
 		set ::_tmp $dst
-		return [chan create read [namespace code {strchan _tmp}]]
+              set c [chan create read [namespace code {strchan _tmp}]]
+              chan configure $c -translation binary
+              return $c
 	    }
 	    string|write {
-		return [chan create write [namespace code [list strchan $dst]]]
+              set c [chan create write [namespace code [list strchan $dst]]]
+              chan configure $c -translation binary
+              return $c
 	    }
 	    file|read {
               set dst [file join [dotgen template dir] $dst]
@@ -683,7 +687,7 @@ namespace eval engine {
 
 		if {$m == "write" } { set src {} }
 
-		dict set strchans $c [encoding convertto identity $src]
+		dict set strchans $c $src
 		return {initialize finalize watch read write}
 	    }
 
@@ -691,7 +695,7 @@ namespace eval engine {
 		upvar #0 $var src
 		lassign $args c
 
-		set src [encoding convertfrom identity [dict get $strchans $c]]
+		set src [dict get $strchans $c]
 		dict unset strchans $c
 	    }
 
@@ -709,7 +713,7 @@ namespace eval engine {
 	    write {
 		lassign $args c d
 		dict append strchans $c $d
-		return [string bytelength $d]
+		return [string length $d]
 	    }
 	}
     }

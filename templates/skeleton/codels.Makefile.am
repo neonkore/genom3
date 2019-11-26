@@ -40,17 +40,17 @@ if {![catch {dotgen input notice} text]} {
 <'  dict set hlist $h $if'>
 lib_LTLIBRARIES = lib<"[$c name]">_codels.la
 
-lib<"[$c name]">_codels_la_SOURCES=	<"$h">
-lib<"[$c name]">_codels_la_SOURCES+=	<"[$c name]_codels[fileext]">
+lib<"[$c name]">_codels_la_SOURCES  =	<"$h">
+lib<"[$c name]">_codels_la_SOURCES +=	<"[$c name]_codels[fileext]">
 <'  foreach t [$c tasks] {'>
-lib<"[$c name]">_codels_la_SOURCES+=	<"[$c name]_[$t name]_codels[fileext]">
+lib<"[$c name]">_codels_la_SOURCES +=	<"[$c name]_[$t name]_codels[fileext]">
 <'  }'>
 
-lib<"[$c name]">_codels_la_CPPFLAGS=	$(requires_CFLAGS)
-lib<"[$c name]">_codels_la_LIBADD=	$(requires_LIBS)
+lib<"[$c name]">_codels_la_CPPFLAGS =	$(requires_CFLAGS)
+lib<"[$c name]">_codels_la_LIBADD   =	$(requires_LIBS)
 lib<"[$c name]">_codels_la_CPPFLAGS+=	$(codels_requires_CFLAGS)
-lib<"[$c name]">_codels_la_LIBADD+=	$(codels_requires_LIBS)
-lib<"[$c name]">_codels_la_LDFLAGS=	-release $(PACKAGE_VERSION)
+lib<"[$c name]">_codels_la_LIBADD  +=	$(codels_requires_LIBS)
+lib<"[$c name]">_codels_la_LDFLAGS  =	-release $(PACKAGE_VERSION)
 
 <'}'>
 

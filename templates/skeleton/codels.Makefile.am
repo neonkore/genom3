@@ -47,10 +47,10 @@ lib<"[$c name]">_codels_la_SOURCES+=	<"[$c name]_[$t name]_codels[fileext]">
 <'  }'>
 
 lib<"[$c name]">_codels_la_CPPFLAGS=	$(requires_CFLAGS)
-lib<"[$c name]">_codels_la_LDFLAGS=	$(requires_LIBS)
+lib<"[$c name]">_codels_la_LIBADD=	$(requires_LIBS)
 lib<"[$c name]">_codels_la_CPPFLAGS+=	$(codels_requires_CFLAGS)
-lib<"[$c name]">_codels_la_LDFLAGS+=	$(codels_requires_LIBS)
-lib<"[$c name]">_codels_la_LDFLAGS+=	-release $(PACKAGE_VERSION)
+lib<"[$c name]">_codels_la_LIBADD+=	$(codels_requires_LIBS)
+lib<"[$c name]">_codels_la_LDFLAGS=	-release $(PACKAGE_VERSION)
 
 <'}'>
 

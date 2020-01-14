@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2010-2014,2019 LAAS/CNRS
+# Copyright (c) 2010-2014,2019-2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -58,9 +58,10 @@ lib<"[$c name]">_codels_la_LDFLAGS  =	-release $(PACKAGE_VERSION)
 BUILT_SOURCES=	<"[dict keys $hlist]">
 CLEANFILES=	${BUILT_SOURCES}
 <'dict for {h l} $hlist {'>
+
 <"$h">: ${top_srcdir}/<"$input">
 	${GENOM3} <"[dotgen genom cmdline]"> mappings \
 	  -MD -MF .deps/$@.d -MT $@ --signature -l <"$l"> $< >$@
-<'}'>
 
 -include .deps/<"$h">.d
+<'}'>

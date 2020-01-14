@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2019 LAAS/CNRS
+# Copyright (c) 2009-2020 LAAS/CNRS
 #
 # GenoM autoconf file
 #
@@ -74,6 +74,14 @@ if test "$enable_tool" = yes; then
      AC_MSG_FAILURE([required yacc/bison program could not be found.])
   fi
 fi
+
+AC_CACHE_CHECK([for GNU make], [ac_cv_path_MAKE],
+  [AC_PATH_PROGS_FEATURE_CHECK([MAKE], [make gmake],
+    [case `$ac_path_MAKE --version 2>/dev/null` in
+       *GNU*) ac_cv_path_MAKE=$ac_path_MAKE; ac_path_MAKE_found=:;;
+     esac],
+    [AC_MSG_ERROR([could not find GNU make])])])
+AC_SUBST([MAKE], [$ac_cv_path_MAKE])
 
 # C library
 if test "$enable_tool" = yes; then

@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2010-2014,2017-2019 LAAS/CNRS
+# Copyright (c) 2010-2014,2017-2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -61,6 +61,16 @@ foreach l [lsort -unique $lang] {
   }
 }
 '>
+
+dnl Require GNU make
+AC_CACHE_CHECK([for GNU make], [ac_cv_path_MAKE],
+  [AC_PATH_PROGS_FEATURE_CHECK([MAKE], [make gmake],
+    [case `$ac_path_MAKE --version 2>/dev/null` in
+       *GNU*) ac_cv_path_MAKE=$ac_path_MAKE; ac_path_MAKE_found=:;;
+     esac],
+    [AC_MSG_ERROR([could not find GNU make])])])
+AC_SUBST([MAKE], [$ac_cv_path_MAKE])
+
 
 dnl External packages
 <'set requires [list]'>

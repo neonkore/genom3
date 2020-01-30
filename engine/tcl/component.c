@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 LAAS/CNRS
+ * Copyright (c) 2010-2014,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -50,7 +50,8 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     compidx_name, compidx_doc, compidx_ids, compidx_version, compidx_lang,
     compidx_email, compidx_require, compidx_crequire, compidx_clockrate,
     compidx_throws, compidx_tasks, compidx_ports, compidx_services,
-    compidx_remotes, compidx_types, compidx_digest, compidx_loc, compidx_class
+    compidx_remotes, compidx_codels, compidx_types, compidx_digest,
+    compidx_loc, compidx_class
   };
   static const char *args[] = {
     [compidx_name] = "name", [compidx_doc] = "doc", [compidx_ids] = "ids",
@@ -59,9 +60,9 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     [compidx_crequire] = "codels-require", [compidx_clockrate] = "clock-rate",
     [compidx_throws] = "throws", [compidx_tasks] = "tasks",
     [compidx_ports] = "ports", [compidx_services] = "services",
-    [compidx_remotes] = "remotes", [compidx_types] = "types",
-    [compidx_digest] = "digest", [compidx_loc] = "loc",
-    [compidx_class] = "class", NULL
+    [compidx_remotes] = "remotes", [compidx_codels] = "codels",
+    [compidx_types] = "types", [compidx_digest] = "digest",
+    [compidx_loc] = "loc", [compidx_class] = "class", NULL
   };
   static const propkind argkind[] = {
     [compidx_doc] = PROP_DOC, [compidx_version] = PROP_VERSION,
@@ -82,8 +83,8 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   }
   /* 'ports', 'types' and 'digest' subcommands can have additional parameters,
    * other subcommand don't have any. */
-  if (i != compidx_ports && i != compidx_types && i != compidx_digest &&
-      objc > 2) {
+  if (i != compidx_ports && i != compidx_codels && i != compidx_types &&
+      i != compidx_digest && objc > 2) {
       Tcl_WrongNumArgs(interp, 0, objv, "$component subcommand");
       return TCL_ERROR;
   }
@@ -212,6 +213,69 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
         Tcl_ListObjAppendElement(
           interp, r, Tcl_NewStringObj(remote_genref(i.value), -1));
       }
+      break;
+    }
+
+    case compidx_codels: {
+      enum ckindidx {
+        ckindidx_validate, ckindidx_simple, ckindidx_fsm
+      };
+      static const char *ckindarg[] = {
+        [ckindidx_validate] = "validate", [ckindidx_simple] = "simple",
+        [ckindidx_fsm] = "fsm",
+        NULL
+      };
+      int e, f, k, filter;
+      hiter i, j;
+
+      r = Tcl_NewListObj(0, NULL);
+
+      /* iterate over optional filters */
+      filter = 0;
+      for(f = 2; f < objc; f++) {
+        e = Tcl_GetIndexFromObj(interp, objv[f], ckindarg, "kind", 0, &k);
+        if (e != TCL_OK) return e;
+
+        switch(k) {
+          case ckindidx_validate: filter |= 1; break;
+          case ckindidx_simple: filter |= 2; break;
+          case ckindidx_fsm: filter |= 4; break;
+        }
+      }
+      if (!filter) filter = 7;
+
+      /* tasks */
+      for(hash_first(comp_tasks(c), &i); i.current; hash_next(&i)) {
+        for(hash_first(task_props(i.value), &j); j.current; hash_next(&j)) {
+          switch (prop_kind(j.value)) {
+            case PROP_VALIDATE: k = 1; break;
+            case PROP_SIMPLE_CODEL: k = 2; break;
+            case PROP_FSM_CODEL: k = 4; break;
+            default: k = 0; break;
+          }
+          if (k & filter)
+            Tcl_ListObjAppendElement(
+              interp, r,
+              Tcl_NewStringObj(codel_genref(prop_codel(j.value)), -1));
+        }
+      }
+
+      /* services */
+      for(hash_first(comp_services(c), &i); i.current; hash_next(&i)) {
+        for(hash_first(service_props(i.value), &j); j.current; hash_next(&j)) {
+          switch (prop_kind(j.value)) {
+            case PROP_VALIDATE: k = 1; break;
+            case PROP_SIMPLE_CODEL: k = 2; break;
+            case PROP_FSM_CODEL: k = 4; break;
+            default: k = 0; break;
+          }
+          if (k & filter)
+            Tcl_ListObjAppendElement(
+              interp, r,
+              Tcl_NewStringObj(codel_genref(prop_codel(j.value)), -1));
+        }
+      }
+
       break;
     }
 

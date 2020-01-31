@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014,2017,2019 LAAS/CNRS
+# Copyright (c) 2010-2014,2017,2019-2020 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -104,7 +104,8 @@ adocsrcs=\
 	adoc/templates/cmd-engine.adoc		\
 	adoc/templates/cmd-dotgen.adoc		\
 	adoc/templates/cmd-language.adoc	\
-	adoc/templates/cmd-type.adoc
+	adoc/templates/cmd-type.adoc		\
+	adoc/templates/cmd-codel.adoc
 
 BUILT_SOURCES=
 
@@ -220,6 +221,7 @@ adoc/templates/cmd-engine.adoc~: $(top_srcdir)/engine/tcl/engine.tcl
 adoc/templates/cmd-dotgen.adoc~: $(top_srcdir)/engine/tcl/dotgen.c
 adoc/templates/cmd-language.adoc~: $(top_srcdir)/engine/tcl/language.tcl
 adoc/templates/cmd-type.adoc~: $(top_srcdir)/engine/tcl/idltype.c
+adoc/templates/cmd-codel.adoc~: $(top_srcdir)/engine/tcl/codel.c
 
 $(adoctgts): Makefile adocgen.awk y2tgen.awk
 $(adoctgts):

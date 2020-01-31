@@ -1,0 +1,370 @@
+// Generated from codel.c - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== *$codel* TCL engine command
+
+Those commands manipulate codels objects and return information about
+them. They all take a codels object as their first argument, noted `$codel`
+in the following command descriptions. Such an object is typically returned
+by other procedures.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[name]]
+=== *$codel name*
+
+Return the name of the codel.
+
+
+
+
+
+
+[[kind]]
+=== *$codel kind*
+
+Return the codel kind, among `sync` or `async`.
+
+
+
+
+
+
+[[params]]
+=== *$codel params*
+
+Return the list of codel parameters.
+
+
+
+
+
+
+
+[[yields]]
+=== *$codel yields*
+
+Return the list of link:cmd-type{outfilesuffix}[`events`] that this
+codel can yield to after execution.
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[triggers]]
+=== *$codel triggers*
+
+Return the list of link:cmd-type{outfilesuffix}[`events`] that trigger
+the execution of this codel.
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[task]]
+=== *$codel task*
+
+Return the task of a codel for codels defined in a task, or an error if
+the codel belongs to a service.
+
+
+
+
+
+
+
+[[service]]
+=== *$codel service*
+
+Return the service of a codel for codels defined in a service, or an
+error if the codel belongs to a task.
+
+
+
+
+
+
+
+[[mutex]]
+=== *$codel mutex*
+
+Return a list of link:cmd-codel{outfilesuffix}[`codels`] that may access
+internal resources used by the codel. All these codels cannot run
+simultaneously and are mutually exclusive.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[cname]]
+=== *$codel cname*
+Return the cannonical name of a codel for the current
+link:cmd-language{outfilesuffix}#lang[`language`].
+
+
+
+[[signature]]
+=== *$codel signature*
+Return the signature of a codel for the current
+link:cmd-language{outfilesuffix}#lang[`language`].
+
+
+
+[[invoke]]
+=== *$codel invoke 'params'*
+Return a string corresponding to the invocation of a codel in the current
+link:cmd-language{outfilesuffix}#lang[`language`]. See
+link:cmd-language{outfilesuffix}#invoke[`language invoke`].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[loc]]
+=== *$codel loc*
+Return the location of the definition of the codel in the source file,
+as a triplet { `file` `line` `column` }.
+
+
+
+
+
+
+
+
+
+
+
+
+[[class]]
+=== *$codel class*
+Return the string `codel`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

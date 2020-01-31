@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013,2015 LAAS/CNRS
+ * Copyright (c) 2011-2013,2015,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -38,6 +38,15 @@ static Tcl_Obj *	param_list(Tcl_Interp *interp, codel_s c, int objc,
 
 
 /* --- codel command ------------------------------------------------------- */
+
+/*/
+ * == *$codel* TCL engine command
+ *
+ * Those commands manipulate codels objects and return information about
+ * them. They all take a codels object as their first argument, noted `$codel`
+ * in the following command descriptions. Such an object is typically returned
+ * by other procedures.
+ */
 
 /** Implements the command associated to a codel object.
  */
@@ -88,19 +97,44 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
   }
   switch((enum codelidx)i) {
+    /*/
+     * [[name]]
+     * === *$codel name*
+     *
+     * Return the name of the codel.
+     */
     case codelidx_name:
       r = Tcl_NewStringObj(codel_name(c), -1);
       break;
 
+    /*/
+     * [[kind]]
+     * === *$codel kind*
+     *
+     * Return the codel kind, among `sync` or `async`.
+     */
     case codelidx_kind:
       r = Tcl_NewStringObj(codel_strkind(codel_kind(c)), -1);
       break;
 
+    /*/
+     * [[params]]
+     * === *$codel params*
+     *
+     * Return the list of codel parameters.
+     */
     case codelidx_params:
       r = param_list(interp, c, objc>2?objc-2:0, objv+2);
       if (!r) return TCL_ERROR;
       break;
 
+    /*/
+     * [[yields]]
+     * === *$codel yields*
+     *
+     * Return the list of link:cmd-type{outfilesuffix}[`events`] that this
+     * codel can yield to after execution.
+     */
     case codelidx_yields: {
       hiter i;
 
@@ -112,6 +146,13 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[triggers]]
+     * === *$codel triggers*
+     *
+     * Return the list of link:cmd-type{outfilesuffix}[`events`] that trigger
+     * the execution of this codel.
+     */
     case codelidx_triggers: {
       hiter i;
 
@@ -123,16 +164,38 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[task]]
+     * === *$codel task*
+     *
+     * Return the task of a codel for codels defined in a task, or an error if
+     * the codel belongs to a service.
+     */
     case codelidx_task:
       if (*codel_task(c))
 	r = Tcl_NewStringObj(task_genref(*codel_task(c)), -1);
       break;
 
+    /*/
+     * [[service]]
+     * === *$codel service*
+     *
+     * Return the service of a codel for codels defined in a service, or an
+     * error if the codel belongs to a task.
+     */
     case codelidx_service:
       if (*codel_service(c))
 	r = Tcl_NewStringObj(service_genref(*codel_service(c)), -1);
       break;
 
+    /*/
+     * [[mutex]]
+     * === *$codel mutex*
+     *
+     * Return a list of link:cmd-codel{outfilesuffix}[`codels`] that may access
+     * internal resources used by the codel. All these codels cannot run
+     * simultaneously and are mutually exclusive.
+     */
     case codelidx_mutex: {
       hiter i;
       hash_s h = codel_codel_mutex(c);
@@ -162,8 +225,27 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[cname]]
+     * === *$codel cname*
+     * Return the cannonical name of a codel for the current
+     * link:cmd-language{outfilesuffix}#lang[`language`].
+     */
     case codelidx_cname:
+    /*/
+     * [[signature]]
+     * === *$codel signature*
+     * Return the signature of a codel for the current
+     * link:cmd-language{outfilesuffix}#lang[`language`].
+     */
     case codelidx_signature:
+    /*/
+     * [[invoke]]
+     * === *$codel invoke 'params'*
+     * Return a string corresponding to the invocation of a codel in the current
+     * link:cmd-language{outfilesuffix}#lang[`language`]. See
+     * link:cmd-language{outfilesuffix}#invoke[`language invoke`].
+     */
     case codelidx_invoke: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("language::", -1),
@@ -181,6 +263,12 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[loc]]
+     * === *$codel loc*
+     * Return the location of the definition of the codel in the source file,
+     * as a triplet { `file` `line` `column` }.
+     */
     case codelidx_loc: {
       Tcl_Obj *l[3] = {
 	Tcl_NewStringObj(codel_loc(c).file, -1),
@@ -191,6 +279,11 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[class]]
+     * === *$codel class*
+     * Return the string `codel`.
+     */
     case codelidx_class:
       r = Tcl_NewStringObj("codel", -1);
       break;

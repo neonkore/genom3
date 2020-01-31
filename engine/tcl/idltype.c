@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014,2017-2018 LAAS/CNRS
+ * Copyright (c) 2010-2014,2017-2018,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -42,8 +42,7 @@ static Tcl_Obj *	member_list(Tcl_Interp *interp, idltype_s t,
 /* --- type command -------------------------------------------------------- */
 
 /*/
- * `$type` TCL engine command
- * --------------------------
+ * == *$type* TCL engine command
  *
  * Those commands manipulate IDL type objects and return information about
  * them. They all take a type object as their first argument, noted `$type` in
@@ -132,7 +131,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   switch((enum typeidx)i) {
     /*/
      * [[kind]]
-     * === `$type kind`
+     * === *$type kind*
      *
      * Return a string describing the nature of the IDL type, such as `long`,
      * `double`, `struct` ...
@@ -143,7 +142,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[name]]
-     * === `$type name`
+     * === *$type name*
      *
      * Return the name of the IDL type. No namespace components are included in
      * the result.
@@ -154,7 +153,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[fullname]]
-     * === `$type fullname`
+     * === *$type fullname*
      *
      * Return the fully qualified name of the IDL type. The result includes
      * the namespace hierarchy in which the type is defined and the last
@@ -166,7 +165,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[scope]]
-     * === `$type scope`
+     * === *$type scope*
      *
      * Return the list of lexical scopes in which the type is defined. Each
      * element of the list contains two values: the nature of the scope and its
@@ -189,7 +188,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[fixed]]
-     * === `$type fixed`
+     * === *$type fixed*
      *
      * Return a boolean indicating if the type is of fixed, constant size
      * (true) or not (false).
@@ -200,7 +199,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[final]]
-     * === `$type final`
+     * === *$type final*
      *
      * Return a new type object with all aliases resolved. For `const` types,
      * this returns the type of the constant. For `typedef`, this return the
@@ -213,7 +212,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[parent]]
-     * === `$type parent`
+     * === *$type parent*
      *
      * Return the parent type of a nested type definition, or raise an error if
      * the type is not nested.
@@ -226,7 +225,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[nested]]
-     * === `$type nested`
+     * === *$type nested*
      *
      * Return the nested types defined by the given type
      */
@@ -252,7 +251,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[types]]
-     * === `$type types` ['filter']
+     * === *$type types* ['filter']
      *
      * Return the list of all types that are recursively used by the given
      * type. In other words, this is the list of types that must be known in
@@ -265,7 +264,8 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
      * same rules. Finally, for `array`s or `sequence`s, this returns the type
      * of the array or sequence elements, recursively expanded.
      *
-     * ==== Arguments
+     * .Arguments
+     * [horizontal]
      * 'filter'::
      * The optional filter can be used to filter out some elements from the
      * type list. The filter must be a tcl anonymous function (see tcl
@@ -294,7 +294,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[type]]
-     * === `$type type`
+     * === *$type type*
      *
      * Return the underlying type of a type that contains another type
      * definition. For instance, this procedure invoked on an `array` or
@@ -315,7 +315,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[length]]
-     * === `$type length`
+     * === *$type length*
      *
      * Return the length of an `array`, `sequence` or `string` type.
      */
@@ -333,7 +333,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[value]]
-     * === `$type value`
+     * === *$type value*
      *
      * Return the value associated with a `const` type.
      */
@@ -361,7 +361,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[valuekind]]
-     * === `$type valuekind`
+     * === *$type valuekind*
      *
      * Return the nature of the value associated with a `const` type.
      */
@@ -377,7 +377,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[members]]
-     * === `$type members`
+     * === *$type members*
      *
      * Return a list of types defined by the given `struct`, `union` or `enum`
      * type.
@@ -388,7 +388,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[discriminator]]
-     * === `$type discriminator`
+     * === *$type discriminator*
      *
      * Return the discriminator of the given `union`.
      */
@@ -404,7 +404,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[port]]
-     * === `$type port`
+     * === *$type port*
      *
      * Return the port object referenced by the given `port`.
      */
@@ -420,7 +420,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[remote]]
-     * === `$type remote`
+     * === *$type remote*
      *
      * Return the remote object referenced by the given `remote`.
      */
@@ -436,19 +436,19 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[cname]]
-     * === `$type cname`
+     * === *$type cname*
      *
      * Return a string representing the type name in the current language.
      *
      * [[mangle]]
-     * === `$type mangle`
+     * === *$type mangle*
      *
      * Return a string uniquely describing the given type, suitable for use as
      * an identifier in source code written in the current programming
      * language.
      *
      * [[mapping]]
-     * === `$type mapping`
+     * === *$type mapping*
      *
      * Return an ASCII string representing the implementation (definition) of
      * the given type, suitable for use in source code written in the current
@@ -473,23 +473,25 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[declarator]]
-     * === `$type declarator` ['var']
+     * === *$type declarator* ['var']
      *
      * Return the declarator for $type or for a variable 'var' of that
      * type, in the current language.
      *
-     * ==== Arguments
+     * .Arguments
+     * [horizontal]
      * 'var'::
      * The variable being declared. If not given, an abstract declarator is
      * returned.
      *
      * [[address]]
-     * === `$type address` 'var'
+     * === *$type address* 'var'
      *
      * Return an expression representing the address of a variable of the given
      * type in the current language.
      *
-     * ==== Arguments
+     * .Arguments
+     * [horizontal]
      * 'var'::
      * The variable of which the address must be taken.
      */
@@ -512,34 +514,37 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[argument]]
-     * === `$type argument` `value|reference` ['var']
+     * === *$type argument* *value|reference* ['var']
      *
      * Return an expression that declares a parameter 'var' of the given
      * type, passed by value or reference according to the second parameter.
      *
-     * ==== Arguments
+     * .Arguments
+     * [horizontal]
      * 'var'::
      * The argument name being declared. If not given, an abstract declarator
      * is returned.
      *
      * [[pass]]
-     * === `$type pass` `value|reference` 'var'
+     * === *$type pass* *value|reference* 'var'
      *
      * Return an expression that passes a variable 'var' of the given type
      * as a function parameter. The variable is passed by value or reference
      * according to second argument.
      *
-     * ==== Arguments
+     * .Arguments
+     * [horizontal]
      * 'var'::
      * The variable that must be passed.
      *
      * [[dereference]]
-     * === `$type dereference` `value|reference` 'var'
+     * === *$type dereference* *value|reference* 'var'
      *
      * Return an expression that retrieves the value of a parameter 'var',
      * passed by value or reference according to the second argument.
      *
-     * ==== Arguments
+     * .Arguments
+     * [horizontal]
      * 'var'::
      * The argument name.
      */
@@ -565,7 +570,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[digest]]
-     * === `$type digest`
+     * === *$type digest*
      *
      * Return an ASCII representaion (32 characters) of an MD5 digest of the
      * given type. This is useful for implementing a cheap runtime verification
@@ -590,7 +595,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[masquerade]]
-     * === `$type masquerade`
+     * === *$type masquerade*
      *
      * Return any value defined in a `#pragma masquerade` for that type,
      * if the current template matches the corresponding parameter of the
@@ -629,7 +634,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[loc]]
-     * === `$type loc`
+     * === *$type loc*
      *
      * Return list describing the source location where that type is
      * defined. The list contains three elements: the file name, the line
@@ -648,7 +653,7 @@ type_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[class]]
-     * === `$type class`
+     * === *$type class*
      *
      * Always returns the string "type". Useful to determine at runtime
      * that the object is a type object.

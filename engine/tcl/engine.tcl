@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014,2017,2019 LAAS/CNRS
+# Copyright (c) 2010-2014,2017,2019-2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -25,8 +25,7 @@ package require Tcl 8.5
 
 namespace eval engine {
     #/
-    # `engine` TCL engine command
-    # ---------------------------
+    # == *engine* TCL engine command
 
     # debug mode
     variable debug		[dotgen genom debug]
@@ -76,23 +75,21 @@ namespace eval engine {
 
     #/
     # [[engine_mode]]
-    # === `engine mode`: Engine output configuration
-    # ****
-    # `engine mode` ['[`+-`]modespec'] ...
-    # ****
+    # === *engine mode* [[+-]'modespec'] ...
     #
     # Configures various engine operating modes. `engine mode` can be invoked
     # without argument to retrieve the current settings for all supported
     # modes. The command can also be invoked with one or more mode
     # specification to set these modes (see 'modespec' argument below).
     #
-    # ==== Arguments
+    # .Arguments
+    # [horizontal]
     # 'modespec'::
     # A mode specification string. If `mode` string is prefixed with a
     # dash (`-`), it is turned off. If mode is prefixed with a plus
     # (`+`) or not prefixed, it is turned on. Supported 'modespec'
     # are:
-    #   `overwrite`::: when turned on, newly generated files will overwrite
+    #   'overwrite'::: when turned on, newly generated files will overwrite
     #   existing files without warning. When turned off, the engine will stop
     #   with an error if a newly generated file would overwrite an existing
     #   file. `overwrite` is by default off.
@@ -104,7 +101,7 @@ namespace eval engine {
     #
     #   'merge-if-change'::: when turned on, existing destination files will be
     #   merged with new content by the engine, instead of being overwritten
-    #   (<<engine_merge_tool,`engine merge tool>>). `merge-if-change` is off by
+    #   (<<engine_merge_tool,`engine merge tool`>>). `merge-if-change` is off by
     #   default.
     #
     #   'silent'::: when on, this mode avoids scattering standard output with
@@ -114,15 +111,14 @@ namespace eval engine {
     #   programs generated in the temporary directory. Useful only for
     #   debugging the template.
     #
-    # ==== Return value
-    #
+    # .Return value
     # When called without arguments, the command returs the current
     # configuration of all engine modes.
     #
-    # ==== Example
-    # ****
+    # .Example
+    # ----
     # engine mode -overwrite +move-if-change
-    # ****
+    # ----
     #
     proc mode { args } {
 	variable modes
@@ -160,10 +156,7 @@ namespace eval engine {
 
     #/
     # [[engine_merge_tool]]
-    # === `engine merge-tool`: Automatic merge of generated content
-    # ****
-    # `engine merge-tool` 'tool'
-    # ****
+    # === *engine merge-tool* 'tool'
     #
     # Changes the engine merge tool. When the engine is in 'merge-if-change'
     # mode (see <<engine_mode,`engine mode`>>), a merge tool is inkoked with
@@ -177,7 +170,8 @@ namespace eval engine {
     # the two files and places conflict markers (`<<<<<<<` and `>>>>>>>`) were
     # appropriate in the destination file.
     #
-    # ==== Arguments
+    # .Arguments
+    # [horizontal]
     # 'tool'::
     # The path to the merge tool executable (e.g. `meld`), or one of
     # the builtin keywords `interactive` or `auto`.
@@ -193,16 +187,14 @@ namespace eval engine {
 
     #/
     # [[engine_chdir]]
-    # === `engine chdir`: Change output directory
-    # ****
-    # `engine chdir` 'dir'
-    # ****
+    # === *engine chdir* 'dir'
     #
     # Change the engine output directory. By default, files are generated in
     # the current directory. This command can be used to generate output in
     # any other directory.
     #
-    # ==== Arguments
+    # .Arguments
+    # [horizontal]
     # 'dir'::
     # The new output directory, absolute or relative to the current working
     # directory.
@@ -220,12 +212,8 @@ namespace eval engine {
     # --- pwd --------------------------------------------------------------
 
     #/
-    # === `engine pwd`: Get current output directory
-    # ****
-    # `engine pwd`
-    # ****
+    # === *engine pwd*
     #
-    # ==== Return value
     # The current engine output directory.
     #
     proc pwd { } {

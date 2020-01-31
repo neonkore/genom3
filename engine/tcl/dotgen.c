@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014,2017 LAAS/CNRS
+ * Copyright (c) 2010-2014,2017,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -38,12 +38,12 @@
 /* --- genom --------------------------------------------------------------- */
 
 /*/
- * == `dotgen` TCL engine command
+ * == *dotgen* TCL engine command
  */
 
 /*/
  * [[dotgen_genom]]
- * === `dotgen genom`: Genom program path and command line
+ * === *dotgen genom*
  *
  * Those commands implement access to genom program parameters or general
  * information.
@@ -142,7 +142,7 @@ dg_genom_verbose(ClientData d, Tcl_Interp *interp, int objc,
 
 /*/
  * [[dotgen_template]]
- * === `dotgen template`: Template path and directories
+ * === *dotgen template*
  *
  * Those commands return information about the template currently being parsed.
  */
@@ -201,7 +201,7 @@ dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc,
 
 /*/
  * [[dotgen_input]]
- * === `dotgen input`: Input file name and path
+ * === *dotgen input*
  *
  * Those commands return information about the current genom input file (.gen
  * file).
@@ -254,16 +254,14 @@ dg_input_deps(ClientData v, Tcl_Interp *interp, int objc,
 
 /*/
  * [[dotgen_parse]]
- * === `dotgen parse`: Process additional input
- * ****
- * `dotgen parse {file|string}` 'data'
- * ****
+ * === *dotgen parse* {file|string} 'data'
  *
  * Parse additional `.gen` data either from a file or from a string. When
  * parsing is successful, the corresponding objects are exported to the
  * backend.
  *
- * ==== Arguments
+ * .Arguments
+ * [horizontal]
  * 'file|string':: Specify if parsing from a file or from a string.
  *
  * 'data':: When parsing from a file, data is the file name. When parsing from
@@ -341,23 +339,21 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 /*/
  * [[dotgen_types]]
- * === `dotgen types`: Data type definitions from the specification
- * ****
- * `dotgen types` ['pattern']
- * ****
+ * === *dotgen types* ['pattern']
  *
  * This command returns the list of type objects that are defined in the
  * current `.gen` file. This list may be filtered with the optional 'pattern'
  * argument. Each element of the returned list is a type command that can be
  * used to access detailed information about that particular type object.
  *
- * ==== Arguments
+ * .Arguments
+ * [horizontal]
  * 'pattern'::
  * Filter the type names with 'pattern'. The filter may contain a glob-like
  * pattern (with `*` or `?` wildcards). Only the types whose name
  * match the pattern will be returned.
 
- * ==== Return value
+ * .Return value
  * A list of type objects of class `type`.
  */
 int
@@ -419,10 +415,7 @@ dg_clist(compkind k, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 /*/
  * [[dotgen_components]]
- * === `dotgen components`: Components definitions from the specification
- * ****
- * `dotgen components` ['pattern']
- * ****
+ * === *dotgen components* ['pattern']
  *
  * This command returns the list of components that are defined in the current
  * `.gen` file. This list may be filtered with the optional 'pattern'
@@ -430,13 +423,14 @@ dg_clist(compkind k, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
  * be used to access detailed information about each particular component
  * object.
  *
- * ==== Arguments
+ * .Arguments
+ * [horizontal]
  * 'pattern'::
  * Filter the component name. The filter may contain a glob-like pattern (with
  * `*` or `?` wildcards). Only the components whose name match the
  * pattern will be returned.
  *
- * ==== Return value
+ * .Return value
  * A list of component objects of class `component`.
  */
 int
@@ -448,10 +442,7 @@ dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 /*/
  * [[dotgen_interfaces]]
- * === `dotgen interfaces`: Interfaces definitions from the specification
- * ****
- * `dotgen interfaces` ['pattern']
- * ****
+ * === *dotgen interfaces* ['pattern']
  *
  * This command returns the list of interfaces that are defined in the current
  * `.gen` file. This list may be filtered with the optional 'pattern'
@@ -459,13 +450,13 @@ dg_components(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
  * be used to access detailed information about each particular interface
  * object.
  *
- * ==== Arguments
+ * .Arguments
  * 'pattern'::
  * Filter the interface name. The filter may contain a glob-like pattern (with
  * `*` or `?` wildcards). Only the components whose name match the
  * pattern will be returned.
  *
- * ==== Return value
+ * .Return value
  * A list of interface objects of class `interface`.
  */
 int

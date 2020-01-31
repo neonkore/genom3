@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015,2017-2018 LAAS/CNRS
+# Copyright (c) 2010-2015,2017-2018,2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -23,26 +23,21 @@
 #
 
 #/
-# `language` TCL engine command
-# -----------------------------
+# == *language* TCL engine command
 
 # --- lang -----------------------------------------------------------------
 
 #/
 # [[lang]]
-# === `lang`: Target programming language
-# ****
-# `lang` 'language'
-# ****
+# === *lang* 'language'
 #
 # Set the current language for procedures that output a language dependent
 # string
 #
-# ==== Arguments
-# @item 'language'
-# The language name. Must be one of @code{c} or @code{c++}.
-# @@end args
-# @end deffn
+# .Arguments
+# [horizontal]
+# 'language'::
+# The language name. Must be one of `c` or `c++`.
 #
 proc lang { language } {
   set language::current [language::support $language]
@@ -54,14 +49,12 @@ slave alias lang lang
 
 #/
 # [[comment]]
-# === `comment`: Generate comment strings
-# ****
-# `comment` ['-c'] 'text'
-# ****
+# === *comment* ['-c'] 'text'
 #
 # Return a string that is a valid comment in the current language.
 #
-# ==== Arguments
+# .Arguments
+# [horizontal]
 # 'c'::
 # The string to use as a comment character (overriding current language).
 # 'text'::
@@ -82,15 +75,13 @@ slave alias comment comment
 
 #/
 # [[fileext]]
-# === `fileext`: Cannonical file extension
-# ****
-# `fileext` ['-kind']
-# ****
+# === *fileext* ['-kind']
 #
 # Return the cannonical file extension for the current language.
 #
 #
-# ==== Arguments
+# .Arguments
+# [horizontal]
 # 'kind'::
 # Must be one of the strings `source` or `header`.
 #
@@ -104,17 +95,15 @@ slave alias fileext fileext
 
 #/
 # [[indent]]
-# === `indent`: Generate indented text
-# ****
-# `indent` [#'n'|++|--] ['text' ...]
-# ****
+# === *indent* [#'n'|++|--] ['text' ...]
 #
 # Output 'text', indented to the current indent level. Each 'text'
 # argument is followed by a newline.
 # Indent level can be changed by passing an absolute level with #'n', or
 # incremented or decremented with `++` or `--`.
 #
-# ==== Arguments
+# .Arguments
+# [horizontal]
 # 'text'::
 # The string to output indented.
 #
@@ -146,16 +135,14 @@ slave eval [list proc indent [info args indent] [info body indent]]
 
 #/
 # [[___]]
-# === `---`: Generate filler string
-# ****
-# `---` [-'column'] 'text' ... 'filler'
-# ****
+# === *---* [-'column'] 'text' ... 'filler'
 #
 # This command, spelled with 3 dashes (`-`), return a string of length
 # 'column' (70 by default), starting with 'text' and filled with the
 # last character of the 'filler' string.
 #
-# ==== Arguments
+# .Arguments
+# [horizontal]
 # 'text'::
 # The text to fill.
 # 'filler'::
@@ -186,16 +173,14 @@ slave alias --- ---
 
 #/
 # [[wrap]]
-# === `wrap`: Chop blocks of text
-# ****
-# `wrap` [-'column'] 'text' ['prefix'] ['sep']
-# ****
+# === *wrap* [-'column'] 'text' ['prefix'] ['sep']
 #
 # Chop a string into lines of length 'column' (70 by default), prefixed
 # with 'prefix' (empty by default). The string is split at spaces by
 # default, or at 'sep' if given.
 #
-# ==== Arguments
+# .Arguments
+# [horizontal]
 # 'text'::
 # The text to fill.
 # 'prefix'::
@@ -244,10 +229,7 @@ namespace eval language {
 
   #/
   # [[cname]]
-  # === `cname`: Cannonical object name
-  # ****
-  # `cname` `string|object`
-  # ****
+  # === *cname* string|object
   #
   # Return the cannonical name of the 'string' or the `genom3` 'object',
   # according to the current language.
@@ -257,7 +239,8 @@ namespace eval language {
   # If a codel object is given, this procedure returns the symbol name of the
   # codel for the current language.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'string'::
   # The name to convert.
   # 'object'::
@@ -275,15 +258,13 @@ namespace eval language {
 
   #/
   # [[mangle]]
-  # === `language mangle`: Unique type name
-  # ****
-  # `language mangle` 'type'
-  # ****
+  # === *language mangle* 'type'
   #
   # Return a string containing a universally unique representation of the name
   # of the 'type' object.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   #
@@ -326,16 +307,14 @@ namespace eval language {
 
   #/
   # [[mapping]]
-  # === `language mapping`: IDL type language mapping
-  # ****
-  # `language mapping` ['type'] ['locations']
-  # ****
+  # === *language mapping* ['type'] ['locations']
   #
   # Generate and return a string containing the mapping of 'type' for the
   # current language, or of all types if no argument is given.
   # The returned string is a valid source code for the language.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'locations'::
@@ -358,15 +337,13 @@ namespace eval language {
 
   #/
   # [[declarator]]
-  # === `language declarator`: Code for type declarations
-  # ****
-  # `language declarator` 'type' ['var']
-  # ****
+  # === *language declarator* 'type' ['var']
   #
   # Return the abstract declarator for 'type' or for a variable 'var'
   # of that type, in the current language.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'var'::
@@ -384,15 +361,13 @@ namespace eval language {
 
   #/
   # [[address]]
-  # === `language address`: Code for variable addresses
-  # ****
-  # `language address` 'type' ['var']
-  # ****
+  # === *language address* 'type' ['var']
   #
   # Return an expression evaluating to the address of a variable in the current
   # language.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'var'::
@@ -410,15 +385,13 @@ namespace eval language {
 
   #/
   # [[dereference]]
-  # === `language dereference`: Code for dereferencing variables
-  # ****
-  # `language dereference` 'type' 'kind' ['var']
-  # ****
+  # === *language dereference*' type' 'kind' ['var']
   #
   # Return an expression dereferencing a parameter passed by value or
   # reference, in the current language.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'kind'::
@@ -438,15 +411,13 @@ namespace eval language {
 
   #/
   # [[argument]]
-  # === `language argument`: Code for declaring functions arguments
-  # ****
-  # `language argument` 'type' 'kind' ['var']
-  # ****
+  # === *language argument* 'type' 'kind' ['var']
   #
   # Return an expression that declares a parameter 'var' of type
   # 'type', passed by value or reference according to 'kind'.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'kind'::
@@ -466,15 +437,13 @@ namespace eval language {
 
   #/
   # [[returnvalue]]
-  # === `language returnvalue`: Code for declaring functions return value
-  # ****
-  # `language returnvalue` 'type' 'kind'
-  # ****
+  # === *language returnvalue* 'type' 'kind'
   #
   # Return an expression that declares a return value of type
   # 'type', returned by value or reference according to 'kind'.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'kind'::
@@ -492,15 +461,13 @@ namespace eval language {
 
   #/
   # [[pass]]
-  # === `language pass`: Code for passing functions arguments
-  # ****
-  # `language pass` 'type' 'kind' ['var']
-  # ****
+  # === *language pass* 'type' 'kind' ['var']
   #
   # Return an expression that passes 'var' of type 'type' as a
   # parameter, by value or reference according to 'kind'.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'kind'::
@@ -520,17 +487,15 @@ namespace eval language {
 
   #/
   # [[member]]
-  # === `language member`: Code for accessing structure members
-  # ****
-  # `language member` 'type' 'mlist'
-  # ****
+  # === *language member* 'type' 'mlist'
   #
   # Return the language construction to access a member of a 'type'.  'mlist'
   # is a list interpreted as follow: if it starts with a letter, 'type' should
   # be an aggregate type (like `struct`); if it starts with a numeric digit,
   # 'type' should be an array type (like `sequence`).
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'type'::
   # A 'type' object.
   # 'mlist'::
@@ -548,18 +513,16 @@ namespace eval language {
 
   #/
   # [[signature]]
-  # === `language signature`: Code for declaring codel signatures
-  # ****
-  # `language signature` 'codel' ['separator'] ['location']
-  # ****
+  # === *language signature* $codel ['separator'] ['location']
   #
   # Return the signature of a codel in the current language. If separator is
   # given, it is a string that is inserted between the return type of the codel
   # and the codel name (for instance, a `\n` in C so that the symbol name is
   # guaranteed to be on the first column).
   #
-  # ==== Arguments
-  # 'code'::
+  # .Arguments
+  # [horizontal]
+  # 'codel'::
   # A 'codel' object.
   # 'separator'::
   # A string, inserted between the return type and the codel symbol name.
@@ -579,15 +542,13 @@ namespace eval language {
 
   #/
   # [[invoke]]
-  # === `language invoke`: Code for calling codels
-  # ****
-  # `language invoke` 'codel' 'params'
-  # ****
+  # === *language invoke* $codel 'params'
   #
   # Return a string corresponding to the invocation of a codel in the current
   # language.
   #
-  # ==== Arguments
+  # .Arguments
+  # [horizontal]
   # 'codel'::
   # A 'codel' object.
   # 'params'::

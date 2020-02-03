@@ -1,0 +1,559 @@
+// Generated from component.c - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== *$component* TCL engine command
+
+Those commands manipulate components objects and return information about
+them. They all take a compoent object as their first argument, noted
+`$component` in the following command descriptions. Such an object is
+typically returned by other procedures, such as
+link:cmd-dotgen{outfilesuffix}#dotgen_components[`dotgen components`].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[name]]
+=== *$component name*
+
+Return the name of the component as a string.
+
+
+
+
+
+
+[[doc]]
+=== *$component doc*
+
+Return a string containing the documentation of the component defined
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[clockrate]]
+=== *$component clockrate*
+
+Return a link:cmd-type{outfilesuffix}[numeric floating point constant]
+representing the period of the internal component clock in
+seconds. This is either the value defined in the `clock-rate`
+attributes of the `.gen` description, or the greatest common divisor
+of all the periods of periodic tasks if no `clock-rate` is defined. If
+the component has no periodic tasks, this raises an error.
+
+
+
+
+
+
+
+[[ids]]
+=== *$component ids*
+
+Return the `ids` link:cmd-type{outfilesuffix}[`struct` type] of the
+component.
+
+
+
+
+
+
+
+[[require]]
+=== *$component require*
+
+Return a list of strings containing the requirement of the component
+defined in the `require` attribute of the `.gen` description.
+
+[[crequire]]
+=== *$component codels-require*
+
+Return a list of strings containing the requirement of the component
+defined in the `codels-require` attribute of the `.gen` description.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[throws]]
+=== *$component throws*
+
+Return a list of link:cmd-type{outfilesuffix}[`exceptions`] possibly
+raised by the commponent. This is the concatenation of all exceptions
+defined in the component itself and its tasks and services.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[tasks]]
+=== *$component tasks*
+
+Return the list of link:cmd-task{outfilesuffix}[tasks] defined in the
+commponent.
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[ports]]
+=== *$component ports* [[in|out|simple|multiple] ...]
+
+Return the list of link:cmd-port{outfilesuffix}[ports] defined in the
+commponent. The list may be filtered by a keyword described
+below. Multiple keyword may be given: they are combined with an
+implicit 'or'.
+
+.Arguments
+[horizontal]
+'in':: Return the input ports.
+'out':: Return the output ports.
+'simple':: Return the ports that are not of kind `multiple`.
+'multiple':: Return the ports that are of kind `multiple`.
+
+
+
+
+
+
+
+[[services]]
+=== *$component services*
+
+Return the list of link:cmd-service{outfilesuffix}[services] defined
+in the commponent.
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[remotes]]
+=== *$component remotes*
+
+Return the list of link:cmd-service{outfilesuffix}[remote services]
+defined in the commponent.
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[codels]]
+=== *$component codels* [[validate|simple|fsm] ...]
+
+Return the list of link:cmd-codel{outfilesuffix}[codels] defined in
+the commponent. The list may be filtered by a keyword described
+below. Multiple keyword may be given: they are combined with an
+implicit 'or'.
+
+.Arguments
+[horizontal]
+'validate':: Return the validation codels.
+'simple':: Return the simple codels of functions.
+'fsm':: Return the codels associated with activities and a state
+machine.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[types]]
+=== *$component types* ['visibility'] ['filter']
+
+Return the list of link:cmd-type{outfilesuffix}[types] defined in the
+commponent. The list may be filtered according to a particular
+`visiblity` and a `filter` function.
+
+.Arguments
+[horizontal]
+'visibility':: Must be one of `public`, `private` or `external`.
+'public'::: Return the types that are used in services or ports and
+are thus exposed to clients.
+'private'::: Return the types that are only used internally in the
+component and do not appear in any interface.
+'external'::: Return the types that are used by remote services.
+
+'filter'::
+The optional filter can be used to filter out some elements from the
+type list. The filter must be a tcl anonymous function (see tcl
+`[apply]` command) that accepts one argument that is a genom
+object. It  must return a boolean to indicate whether the type should
+be included (true) or excluded (false).
+
+[[digest]]
+=== *$component digest* ['filter']
+
+Return a string containing a MD5 hash of the commponent. The hash is
+computed using relevant data of ports (name, kind, type) and services
+(name, parameters direction and type). The list of objects used in the
+hash may be filtered according to a particular `filter` function.
+
+.Arguments
+[horizontal]
+'filter'::
+The optional filter must be a tcl anonymous function (see tcl
+`[apply]` command) that accepts one argument that is a genom
+object. It  must return a boolean to indicate whether the object should
+be included (true) or excluded (false) from the hash computation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[loc]]
+=== *$component loc*
+
+Return a list describing the source location where that component is
+defined. The list contains three elements: the file name, the line
+number and the column number.
+
+
+
+
+
+
+
+
+
+
+
+
+[[class]]
+=== *$component class*
+
+Always returns the string "component". Useful to determine at runtime
+that the object is a component object.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

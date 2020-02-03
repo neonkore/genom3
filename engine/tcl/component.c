@@ -41,6 +41,16 @@ static Tcl_Obj *	port_list(Tcl_Interp *interp, comp_s c,
 
 /* --- component command --------------------------------------------------- */
 
+/*/
+ * == *$component* TCL engine command
+ *
+ * Those commands manipulate components objects and return information about
+ * them. They all take a compoent object as their first argument, noted
+ * `$component` in the following command descriptions. Such an object is
+ * typically returned by other procedures, such as
+ * link:cmd-dotgen{outfilesuffix}#dotgen_components[`dotgen components`].
+ */
+
 /** Implements the command associated to a component object.
  */
 int
@@ -94,26 +104,88 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   }
 
   switch((enum compidx)i) {
+    /*/
+     * [[name]]
+     * === *$component name*
+     *
+     * Return the name of the component as a string.
+     */
     case compidx_name:
       r = Tcl_NewStringObj(comp_name(c), -1);
       break;
 
+      /*/
+       * [[doc]]
+       * === *$component doc*
+       *
+       * Return a string containing the documentation of the component defined
+       * in the `doc` attributes of the `.gen` description.
+       *
+       * [[version]]
+       * === *$component version*
+       *
+       * Return a string containing the version of the component defined in
+       * the `version` attribute of the `.gen` description.
+       *
+       * [[lang]]
+       * === *$component lang*
+       *
+       * Return a string containing the programming language of the component
+       * codels defined in the `lang` attribute of the `.gen` description.
+       *
+       * [[email]]
+       * === *$component email*
+       *
+       * Return a string containing the maintainer e-mail of the component
+       * defined in the `email` attribute of the `.gen` description.
+       */
     case compidx_doc: case compidx_version: case compidx_lang:
     case compidx_email:
       p = hash_find(comp_props(c), prop_strkind(argkind[i]));
       r = p ? Tcl_NewStringObj(prop_text(p), -1) : NULL;
       break;
 
+      /*/
+       * [[clockrate]]
+       * === *$component clockrate*
+       *
+       * Return a link:cmd-type{outfilesuffix}[numeric floating point constant]
+       * representing the period of the internal component clock in
+       * seconds. This is either the value defined in the `clock-rate`
+       * attributes of the `.gen` description, or the greatest common divisor
+       * of all the periods of periodic tasks if no `clock-rate` is defined. If
+       * the component has no periodic tasks, this raises an error.
+       */
     case compidx_clockrate:
       p = hash_find(comp_props(c), prop_strkind(argkind[i]));
       r = p ? Tcl_NewStringObj(type_genref(prop_value(p)), -1) : NULL;
       break;
 
+      /*/
+       * [[ids]]
+       * === *$component ids*
+       *
+       * Return the `ids` link:cmd-type{outfilesuffix}[`struct` type] of the
+       * component.
+       */
     case compidx_ids:
       p = hash_find(comp_props(c), prop_strkind(PROP_IDS));
       if (p) r = Tcl_NewStringObj(type_genref(prop_type(p)), -1);
       break;
 
+      /*/
+       * [[require]]
+       * === *$component require*
+       *
+       * Return a list of strings containing the requirement of the component
+       * defined in the `require` attribute of the `.gen` description.
+       *
+       * [[crequire]]
+       * === *$component codels-require*
+       *
+       * Return a list of strings containing the requirement of the component
+       * defined in the `codels-require` attribute of the `.gen` description.
+       */
     case compidx_require: case compidx_crequire:
       r = Tcl_NewListObj(0, NULL);
       p = hash_find(comp_props(c), prop_strkind(argkind[i]));
@@ -129,6 +201,14 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       }
       break;
 
+      /*/
+       * [[throws]]
+       * === *$component throws*
+       *
+       * Return a list of link:cmd-type{outfilesuffix}[`exceptions`] possibly
+       * raised by the commponent. This is the concatenation of all exceptions
+       * defined in the component itself and its tasks and services.
+       */
     case compidx_throws: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("object", -1),
@@ -178,6 +258,13 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[tasks]]
+       * === *$component tasks*
+       *
+       * Return the list of link:cmd-task{outfilesuffix}[tasks] defined in the
+       * commponent.
+       */
     case compidx_tasks: {
       hiter i;
 
@@ -189,11 +276,34 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[ports]]
+       * === *$component ports* [[in|out|simple|multiple] ...]
+       *
+       * Return the list of link:cmd-port{outfilesuffix}[ports] defined in the
+       * commponent. The list may be filtered by a keyword described
+       * below. Multiple keyword may be given: they are combined with an
+       * implicit 'or'.
+       *
+       * .Arguments
+       * [horizontal]
+       * 'in':: Return the input ports.
+       * 'out':: Return the output ports.
+       * 'simple':: Return the ports that are not of kind `multiple`.
+       * 'multiple':: Return the ports that are of kind `multiple`.
+       */
     case compidx_ports:
       r = port_list(interp, c, &objv[2], objc-2);
       if (!r) return TCL_ERROR;
       break;
 
+      /*/
+       * [[services]]
+       * === *$component services*
+       *
+       * Return the list of link:cmd-service{outfilesuffix}[services] defined
+       * in the commponent.
+       */
     case compidx_services: {
       hiter i;
 
@@ -205,6 +315,13 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[remotes]]
+       * === *$component remotes*
+       *
+       * Return the list of link:cmd-service{outfilesuffix}[remote services]
+       * defined in the commponent.
+       */
     case compidx_remotes: {
       hiter i;
 
@@ -216,6 +333,22 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[codels]]
+       * === *$component codels* [[validate|simple|fsm] ...]
+       *
+       * Return the list of link:cmd-codel{outfilesuffix}[codels] defined in
+       * the commponent. The list may be filtered by a keyword described
+       * below. Multiple keyword may be given: they are combined with an
+       * implicit 'or'.
+       *
+       * .Arguments
+       * [horizontal]
+       * 'validate':: Return the validation codels.
+       * 'simple':: Return the simple codels of functions.
+       * 'fsm':: Return the codels associated with activities and a state
+       * machine.
+       */
     case compidx_codels: {
       enum ckindidx {
         ckindidx_validate, ckindidx_simple, ckindidx_fsm
@@ -279,6 +412,46 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[types]]
+       * === *$component types* ['visibility'] ['filter']
+       *
+       * Return the list of link:cmd-type{outfilesuffix}[types] defined in the
+       * commponent. The list may be filtered according to a particular
+       * `visiblity` and a `filter` function.
+       *
+       * .Arguments
+       * [horizontal]
+       * 'visibility':: Must be one of `public`, `private` or `external`.
+       * 'public'::: Return the types that are used in services or ports and
+       * are thus exposed to clients.
+       * 'private'::: Return the types that are only used internally in the
+       * component and do not appear in any interface.
+       * 'external'::: Return the types that are used by remote services.
+       *
+       * 'filter'::
+       * The optional filter can be used to filter out some elements from the
+       * type list. The filter must be a tcl anonymous function (see tcl
+       * `[apply]` command) that accepts one argument that is a genom
+       * object. It  must return a boolean to indicate whether the type should
+       * be included (true) or excluded (false).
+       *
+       * [[digest]]
+       * === *$component digest* ['filter']
+       *
+       * Return a string containing a MD5 hash of the commponent. The hash is
+       * computed using relevant data of ports (name, kind, type) and services
+       * (name, parameters direction and type). The list of objects used in the
+       * hash may be filtered according to a particular `filter` function.
+       *
+       * .Arguments
+       * [horizontal]
+       * 'filter'::
+       * The optional filter must be a tcl anonymous function (see tcl
+       * `[apply]` command) that accepts one argument that is a genom
+       * object. It  must return a boolean to indicate whether the object should
+       * be included (true) or excluded (false) from the hash computation.
+       */
     case compidx_types:
     case compidx_digest: {
       Tcl_Obj *argv[] = {
@@ -297,6 +470,14 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[loc]]
+     * === *$component loc*
+     *
+     * Return a list describing the source location where that component is
+     * defined. The list contains three elements: the file name, the line
+     * number and the column number.
+     */
     case compidx_loc: {
       Tcl_Obj *l[3] = {
 	Tcl_NewStringObj(comp_loc(c).file, -1),
@@ -307,6 +488,13 @@ comp_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[class]]
+     * === *$component class*
+     *
+     * Always returns the string "component". Useful to determine at runtime
+     * that the object is a component object.
+     */
     case compidx_class:
       r = Tcl_NewStringObj(comp_strkind(comp_kind(c)), -1);
       break;

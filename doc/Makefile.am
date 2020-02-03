@@ -105,6 +105,7 @@ adocsrcs=\
 	adoc/templates/cmd-dotgen.adoc		\
 	adoc/templates/cmd-language.adoc	\
 	adoc/templates/cmd-type.adoc		\
+	adoc/templates/cmd-component.adoc	\
 	adoc/templates/cmd-codel.adoc
 
 BUILT_SOURCES=
@@ -221,6 +222,7 @@ adoc/templates/cmd-engine.adoc~: $(top_srcdir)/engine/tcl/engine.tcl
 adoc/templates/cmd-dotgen.adoc~: $(top_srcdir)/engine/tcl/dotgen.c
 adoc/templates/cmd-language.adoc~: $(top_srcdir)/engine/tcl/language.tcl
 adoc/templates/cmd-type.adoc~: $(top_srcdir)/engine/tcl/idltype.c
+adoc/templates/cmd-component.adoc~: $(top_srcdir)/engine/tcl/component.c
 adoc/templates/cmd-codel.adoc~: $(top_srcdir)/engine/tcl/codel.c
 
 $(adoctgts): Makefile adocgen.awk y2tgen.awk

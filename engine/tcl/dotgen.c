@@ -210,7 +210,7 @@ dg_template_tmpdir(ClientData v, Tcl_Interp *interp, int objc,
 /*/ `dotgen input notice`::
  * Return the copyright notice (as text) found in the .gen file. This notice
  * can actually be any text and is the content of the special comment starting
- * with the three caracters `/` `*` `/, near the beginning of
+ * with the three caracters `/` `*` `/`, near the beginning of
  * the .gen file.
  */
 int
@@ -229,7 +229,7 @@ dg_input_notice(ClientData v, Tcl_Interp *interp, int objc,
 /*/ `dotgen input deps`::
  * Return the comprehensive list of input files processed so far. This includes
  * the input `.gen` file itself, plus any other file required, directly or
- * indirectly, via a @code{#include} directive. This list is typically used to
+ * indirectly, via a `#include` directive. This list is typically used to
  * generate dependency information in a Makefile.
  */
 int
@@ -341,10 +341,11 @@ dg_parse(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
  * [[dotgen_types]]
  * === *dotgen types* ['pattern']
  *
- * This command returns the list of type objects that are defined in the
- * current `.gen` file. This list may be filtered with the optional 'pattern'
- * argument. Each element of the returned list is a type command that can be
- * used to access detailed information about that particular type object.
+ * This command returns the list of link:cmd-type{outfilesuffix}[`type
+ * objects`] that are defined in the current `.gen` file. This list may be
+ * filtered with the optional 'pattern' argument. Each element of the returned
+ * list is a type command that can be used to access detailed information about
+ * that particular type object.
  *
  * .Arguments
  * [horizontal]
@@ -417,8 +418,9 @@ dg_clist(compkind k, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
  * [[dotgen_components]]
  * === *dotgen components* ['pattern']
  *
- * This command returns the list of components that are defined in the current
- * `.gen` file. This list may be filtered with the optional 'pattern'
+ * This command returns the list of
+ * link:cmd-component{outfilesuffix}[`components`] that are defined in the
+ * current `.gen` file. This list may be filtered with the optional 'pattern'
  * argument. Each element of the returned list is a component command that can
  * be used to access detailed information about each particular component
  * object.

@@ -1,0 +1,223 @@
+// Generated from port.c - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== *$port* TCL engine command
+
+Those commands manipulate port objects and return information about
+them. They all take a port object as their first argument, noted
+`$port` in the following command descriptions. Such an object is
+typically returned by other procedures, such as
+link:cmd-component{outfilesuffix}#services[`$component ports`].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[name]]
+=== *$port name*
+
+Return the name of the port as a string.
+
+
+
+
+
+
+[[dir]]
+=== *$port dir*
+
+Return `in` or `out` depending on the direction of the port.
+
+
+
+
+
+
+[[kind]]
+=== *$port kind*
+
+Return `simple` or `multiple` depending on the kind of the port.
+
+
+
+
+
+
+[[component]]
+=== *$port component*
+
+Return the link:cmd-component{outfilesuffix}[component object] in which
+the port is defined.
+
+
+
+
+
+
+[[type]]
+=== *$port type*
+
+Return the link:cmd-type{outfilesuffix}[type object] defining the
+port itself. (not the same as `datatype`, see below).
+
+
+
+
+
+
+[[datatype]]
+=== *$port datatype*
+
+Return the link:cmd-type{outfilesuffix}[data type] to be published in
+the port.
+
+
+
+
+
+
+
+[[doc]]
+=== *$port doc*
+
+Return a string containing the documentation of the port defined
+in the `doc` attributes of the `.gen` description.
+
+
+
+
+
+
+
+[[throws]]
+=== *$port throws*
+
+Return a list of link:cmd-type{outfilesuffix}[`exceptions`] possibly
+raised by the port.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[loc]]
+=== *$port loc*
+
+Return a list describing the source location where that port is
+defined. The list contains three elements: the file name, the line
+number and the column number.
+
+
+
+
+
+
+
+
+
+
+
+
+[[class]]
+=== *$port class*
+
+Always returns the string "port". Useful to determine at runtime
+that the object is a port object.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

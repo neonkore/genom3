@@ -106,6 +106,7 @@ adocsrcs=\
 	adoc/templates/cmd-language.adoc	\
 	adoc/templates/cmd-type.adoc		\
 	adoc/templates/cmd-component.adoc	\
+	adoc/templates/cmd-port.adoc		\
 	adoc/templates/cmd-task.adoc		\
 	adoc/templates/cmd-service.adoc		\
 	adoc/templates/cmd-codel.adoc
@@ -225,6 +226,7 @@ adoc/templates/cmd-dotgen.adoc~: $(top_srcdir)/engine/tcl/dotgen.c
 adoc/templates/cmd-language.adoc~: $(top_srcdir)/engine/tcl/language.tcl
 adoc/templates/cmd-type.adoc~: $(top_srcdir)/engine/tcl/idltype.c
 adoc/templates/cmd-component.adoc~: $(top_srcdir)/engine/tcl/component.c
+adoc/templates/cmd-port.adoc~: $(top_srcdir)/engine/tcl/port.c
 adoc/templates/cmd-task.adoc~: $(top_srcdir)/engine/tcl/task.c
 adoc/templates/cmd-service.adoc~: $(top_srcdir)/engine/tcl/service.c
 adoc/templates/cmd-codel.adoc~: $(top_srcdir)/engine/tcl/codel.c

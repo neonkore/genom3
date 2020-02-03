@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013,2017 LAAS/CNRS
+ * Copyright (c) 2010-2013,2017,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -36,6 +36,17 @@
 
 /* --- port command -------------------------------------------------------- */
 
+/*/
+ * == *$port* TCL engine command
+ *
+ * Those commands manipulate port objects and return information about
+ * them. They all take a port object as their first argument, noted
+ * `$port` in the following command descriptions. Such an object is
+ * typically returned by other procedures, such as
+ * link:cmd-component{outfilesuffix}#services[`$component ports`].
+ */
+
+
 /** Implements the command associated to a port object.
  */
 int
@@ -68,36 +79,89 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     if (s != TCL_OK) return s;
   }
   switch(i) {
+    /*/
+     * [[name]]
+     * === *$port name*
+     *
+     * Return the name of the port as a string.
+     */
     case portidx_name:
       r = Tcl_NewStringObj(port_name(p), -1);
       break;
 
+      /*/
+       * [[dir]]
+       * === *$port dir*
+       *
+       * Return `in` or `out` depending on the direction of the port.
+       */
     case portidx_dir:
       r = Tcl_NewStringObj(port_strdir(port_dir(p)), -1);
       break;
 
+      /*/
+       * [[kind]]
+       * === *$port kind*
+       *
+       * Return `simple` or `multiple` depending on the kind of the port.
+       */
     case portidx_kind:
       r = Tcl_NewStringObj(port_strkind(port_kind(p)), -1);
       break;
 
+      /*/
+       * [[component]]
+       * === *$port component*
+       *
+       * Return the link:cmd-component{outfilesuffix}[component object] in which
+       * the port is defined.
+       */
     case portidx_comp:
       r = Tcl_NewStringObj(comp_genref(port_comp(p)), -1);
       break;
 
+      /*/
+       * [[type]]
+       * === *$port type*
+       *
+       * Return the link:cmd-type{outfilesuffix}[type object] defining the
+       * port itself. (not the same as `datatype`, see below).
+       */
     case portidx_type:
       r = port_type(p)? Tcl_NewStringObj(type_genref(port_type(p)), -1) : NULL;
       break;
 
+      /*/
+       * [[datatype]]
+       * === *$port datatype*
+       *
+       * Return the link:cmd-type{outfilesuffix}[data type] to be published in
+       * the port.
+       */
     case portidx_datatype:
       r = port_datatype(p)?
         Tcl_NewStringObj(type_genref(port_datatype(p)), -1) : NULL;
       break;
 
+      /*/
+       * [[doc]]
+       * === *$port doc*
+       *
+       * Return a string containing the documentation of the port defined
+       * in the `doc` attributes of the `.gen` description.
+       */
     case portidx_doc:
       prop = hash_find(port_props(p), prop_strkind(PROP_DOC));
       r = prop ? Tcl_NewStringObj(prop_text(prop), -1) : NULL;
       break;
 
+      /*/
+       * [[throws]]
+       * === *$port throws*
+       *
+       * Return a list of link:cmd-type{outfilesuffix}[`exceptions`] possibly
+       * raised by the port.
+       */
     case portidx_throws: {
       prop_s t;
       hiter i;
@@ -113,6 +177,14 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[loc]]
+     * === *$port loc*
+     *
+     * Return a list describing the source location where that port is
+     * defined. The list contains three elements: the file name, the line
+     * number and the column number.
+     */
     case portidx_loc: {
       Tcl_Obj *l[3] = {
 	Tcl_NewStringObj(port_loc(p).file, -1),
@@ -123,6 +195,13 @@ port_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[class]]
+     * === *$port class*
+     *
+     * Always returns the string "port". Useful to determine at runtime
+     * that the object is a port object.
+     */
     case portidx_class:
       r = Tcl_NewStringObj("port", -1);
       break;

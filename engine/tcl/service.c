@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012-2015 LAAS/CNRS
+ * Copyright (c) 2010,2012-2015,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -33,6 +33,16 @@
 
 
 /* --- service command ----------------------------------------------------- */
+
+/*/
+ * == *$service* TCL engine command
+ *
+ * Those commands manipulate service objects and return information about
+ * them. They all take a service object as their first argument, noted
+ * `$service` in the following command descriptions. Such an object is
+ * typically returned by other procedures, such as
+ * link:cmd-component{outfilesuffix}#services[`$component services`].
+ */
 
 /** Implements the command associated to a service object.
  */
@@ -91,23 +101,69 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
   }
   switch(i) {
+    /*/
+     * [[name]]
+     * === *$service name*
+     *
+     * Return the name of the service as a string.
+     */
     case serviceidx_name:
       r = Tcl_NewStringObj(service_name(s), -1);
       break;
 
+      /*/
+       * [[kind]]
+       * === *$service kind*
+       *
+       * Return a string that is either `attribute`, `function` or `activity`
+       * depending on the kind of service.
+       */
     case serviceidx_kind:
       r = Tcl_NewStringObj(service_strkind(service_kind(s)), -1);
       break;
 
+      /*/
+       * [[component]]
+       * === *$service component*
+       *
+       * Return the link:cmd-component{outfilesuffix}[component object] in which
+       * the service is defined.
+       */
     case serviceidx_comp:
       r = Tcl_NewStringObj(comp_genref(service_comp(s)), -1);
       break;
 
+      /*/
+       * [[doc]]
+       * === *$service doc*
+       *
+       * Return a string containing the documentation of the service defined
+       * in the `doc` attributes of the `.gen` description.
+       */
     case serviceidx_doc:
       p = hash_find(service_props(s), prop_strkind(PROP_DOC));
       r = p ? Tcl_NewStringObj(prop_text(p), -1) : NULL;
       break;
 
+      /*/
+       * [[before]]
+       * === *$service before*
+       *
+       * Return a list of services that cannot run until this service has
+       * been executed sucessfully at least once.
+       *
+       * [[after]]
+       * === *$service after*
+       *
+       * Return a list of services that must must have been successfully
+       * executed at least once before this service can run.
+       *
+       * [[interrupts]]
+       * === *$service interrupts*
+       *
+       * Return a list of services that will be interrupted whenever this
+       * service is executed.
+       */
     case serviceidx_before: case serviceidx_after:
     case serviceidx_interrupts: {
       comp_s c = service_comp(s);
@@ -133,12 +189,27 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[task]]
+       * === *$service task*
+       *
+       * Return the link:cmd-task{outfilesuffix}[task object] in which
+       * the service is defined, or an error if the service has no task context
+       * (i.e. the service is an `attribute` or a `function).
+       */
     case serviceidx_task:
       p = hash_find(service_props(s), prop_strkind(PROP_TASK));
       if (p)
 	r = Tcl_NewStringObj(task_genref(prop_task(p)), -1);
       break;
 
+      /*/
+       * [[throws]]
+       * === *$service throws*
+       *
+       * Return a list of link:cmd-type{outfilesuffix}[`exceptions`] possibly
+       * raised by the service.
+       */
     case serviceidx_throws: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("object", -1),
@@ -198,13 +269,29 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[codels]]
+       * === *$component codels* [[validate|simple|fsm] ...]
+       *
+       * Return the list of link:cmd-codel{outfilesuffix}[codels] defined in
+       * the service. The list may be filtered by a keyword described
+       * below. Multiple keyword may be given: they are combined with an
+       * implicit 'or'.
+       *
+       * .Arguments
+       * [horizontal]
+       * 'validate':: Return the validation codels.
+       * 'simple':: Return the simple codels of functions.
+       * 'fsm':: Return the codels associated with activities and a state
+       * machine.
+       */
     case serviceidx_codels: {
       enum ckindidx {
-        ckindidx_simple, ckindidx_fsm
+        ckindidx_validate, ckindidx_simple, ckindidx_fsm
       };
       static const char *ckindarg[] = {
-        [ckindidx_simple] = "simple", [ckindidx_fsm] = "fsm",
-        NULL
+        [ckindidx_validate] = "validate", [ckindidx_simple] = "simple",
+        [ckindidx_fsm] = "fsm", NULL
       };
       int f, d, sc;
       hiter j;
@@ -212,7 +299,8 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       r = Tcl_NewListObj(0, NULL);
 
       for(hash_first(service_props(s), &j); j.current; hash_next(&j)) {
-        if (prop_kind(j.value) != PROP_SIMPLE_CODEL &&
+        if (prop_kind(j.value) != PROP_VALIDATE &&
+            prop_kind(j.value) != PROP_SIMPLE_CODEL &&
             prop_kind(j.value) != PROP_FSM_CODEL) continue;
 
         /* iterate over optional filters */
@@ -222,6 +310,9 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
           if (e != TCL_OK) return e;
 
           switch(d) {
+            case ckindidx_validate:
+              if (prop_kind(j.value) == PROP_VALIDATE) f = 1;
+              break;
             case ckindidx_simple:
               if (prop_kind(j.value) == PROP_SIMPLE_CODEL) f = 1;
               break;
@@ -237,6 +328,22 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[params]]
+     * === *$service params* [[local|in|out|inout] ...]
+     *
+     * Return the list of parameters of the service. One or several direction
+     * filter may be specified to filter the list according to the or'ed
+     * combination of the directions.
+     *
+     * .Arguments
+     * [horizontal]
+     * 'local':: The parameters that are private to the running instance of the
+     * service.
+     * 'in':: The parameters that input to the service.
+     * 'out':: The parameters that output by the service.
+     * 'inout':: The parameters that both input to and output by the service.
+     */
     case serviceidx_params: {
       enum servicepdiridx {
         svcpdiridx_nodir, svcpdiridx_in, svcpdiridx_out, svcpdiridx_inout
@@ -282,6 +389,18 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[fsm]]
+       * === *$service fsm* ['state']
+       *
+       * When called without argument, `$service fsm` returns the list of
+       * link:cmd-type{outfilesuffix}[states] defined in the finite state
+       * machine of the service.
+       *
+       * When called with one of the states as argument, the procedure returns
+       * the link:cmd-codel{outfilesuffix}[codel] object associated with that
+       * state.
+       */
     case serviceidx_fsm: {
       idltype_s t;
       codel_s c;
@@ -316,6 +435,14 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[mutex]]
+     * === *$service mutex*
+     *
+     * Return a list of link:cmd-codel{outfilesuffix}[`codels`] that may access
+     * internal resources used by the service. All these codels cannot run
+     * when the service is running.
+     */
     case serviceidx_mutex: {
       hiter i;
       hash_s h = service_codel_mutex(s);
@@ -333,6 +460,14 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[digest]]
+       * === *$service digest*
+       *
+       * Return a string containing a MD5 hash of the service. The hash is
+       * computed using the service name and the ordered list of parameters
+       * direction and type.
+       */
     case serviceidx_digest: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("object", -1),
@@ -350,6 +485,14 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[loc]]
+     * === *$service loc*
+     *
+     * Return a list describing the source location where that service is
+     * defined. The list contains three elements: the file name, the line
+     * number and the column number.
+     */
     case serviceidx_loc: {
       Tcl_Obj *l[3] = {
 	Tcl_NewStringObj(service_loc(s).file, -1),
@@ -360,6 +503,13 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[class]]
+     * === *$service class*
+     *
+     * Always returns the string "service". Useful to determine at runtime
+     * that the object is a service object.
+     */
     case serviceidx_class:
       r = Tcl_NewStringObj("service", -1);
       break;

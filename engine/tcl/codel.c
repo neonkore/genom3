@@ -192,9 +192,10 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
      * [[mutex]]
      * === *$codel mutex*
      *
-     * Return a list of link:cmd-codel{outfilesuffix}[`codels`] that may access
-     * internal resources used by the codel. All these codels cannot run
-     * simultaneously and are mutually exclusive.
+     * Return a list of link:cmd-codel{outfilesuffix}[`codels`] and
+     * link:cmd-service{outfilesuffix}[`services`] that may access internal
+     * resources used by the codel. All these codels cannot run simultaneously
+     * and are mutually exclusive.
      */
     case codelidx_mutex: {
       hiter i;

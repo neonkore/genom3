@@ -41,5 +41,6 @@
 *** link:cmd-language{outfilesuffix}[`language` command]
 *** link:cmd-type{outfilesuffix}[`$type` command]
 *** link:cmd-component{outfilesuffix}[`$component` command]
+*** link:cmd-task{outfilesuffix}[`$task` command]
 *** link:cmd-codel{outfilesuffix}[`$codel` command]
 --

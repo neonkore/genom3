@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010,2012-2015 LAAS/CNRS
+ * Copyright (c) 2010,2012-2015,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -32,6 +32,16 @@
 
 
 /* --- task command -------------------------------------------------------- */
+
+/*/
+ * == *$task* TCL engine command
+ *
+ * Those commands manipulate tasks objects and return information about
+ * them. They all take a task object as their first argument, noted
+ * `$task` in the following command descriptions. Such an object is
+ * typically returned by other procedures, such as
+ * link:cmd-component{outfilesuffix}#tasks[`$component tasks`].
+ */
 
 /** Implements the command associated to a task object.
  */
@@ -80,25 +90,79 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
     }
   }
   switch(i) {
+    /*/
+     * [[name]]
+     * === *$task name*
+     *
+     * Return the name of the task as a string.
+     */
     case taskidx_name:
       r = Tcl_NewStringObj(task_name(t), -1);
       break;
 
+      /*/
+       * [[component]]
+       * === *$task component*
+       *
+       * Return the link:cmd-component{outfilesuffix}[component object] in which
+       * the task is defined.
+       */
     case taskidx_comp:
       r = Tcl_NewStringObj(comp_genref(task_comp(t)), -1);
       break;
 
+      /*/
+       * [[doc]]
+       * === *$task doc*
+       *
+       * Return a string containing the documentation of the component defined
+       * in the `doc` attributes of the `.gen` description.
+       */
     case taskidx_doc: case taskidx_scheduling:
       p = hash_find(task_props(t), prop_strkind(argkind[i]));
       r = p ? Tcl_NewStringObj(prop_text(p), -1) : NULL;
       break;
 
+      /*/
+       * [[period]]
+       * === *$task period*
+       *
+       * Return a link:cmd-type{outfilesuffix}[numeric floating point constant]
+       * representing the period of the task in seconds. If the task has no
+       * period, this raises an error.
+       *
+       * [[delay]]
+       * === *$task delay*
+       *
+       * Return a link:cmd-type{outfilesuffix}[numeric floating point constant]
+       * representing the initial delay of a task in seconds.
+       *
+       * [[priority]]
+       * === *$task priority*
+       *
+       * Return a link:cmd-type{outfilesuffix}[integer constant]
+       * representing the task scheduling priority.
+       *
+       * [[stack]]
+       * === *$task stack*
+       *
+       * Return a link:cmd-type{outfilesuffix}[integer constant]
+       * representing the stack size of the task.
+       */
     case taskidx_period: case taskidx_delay:
     case taskidx_priority: case taskidx_stack:
       p = hash_find(task_props(t), prop_strkind(argkind[i]));
       r = p ? Tcl_NewStringObj(type_genref(prop_value(p)), -1) : NULL;
       break;
 
+      /*/
+       * [[throws]]
+       * === *$task throws*
+       *
+       * Return a list of link:cmd-type{outfilesuffix}[`exceptions`] possibly
+       * raised by the task. This is the concatenation of all exceptions
+       * defined in the task itself and its services.
+       */
     case taskidx_throws: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("object", -1),
@@ -137,6 +201,13 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[services]]
+       * === *$task services*
+       *
+       * Return the list of link:cmd-service{outfilesuffix}[services] defined
+       * in the commponent.
+       */
     case taskidx_services: {
       hiter i;
       prop_s p;
@@ -152,6 +223,13 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[codels]]
+       * === *$task codels*
+       *
+       * Return the list of link:cmd-codel{outfilesuffix}[codels] defined
+       * in the task.
+       */
     case taskidx_codels: {
       hiter i;
 
@@ -165,6 +243,18 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+      /*/
+       * [[fsm]]
+       * === *$task fsm* ['state']
+       *
+       * When called without argument, `$task fsm` returns the list of
+       * link:cmd-type{outfilesuffix}[states] defined in the finite state
+       * machine of the task.
+       *
+       * When called with one of the states as argument, the procedure returns
+       * the link:cmd-codel{outfilesuffix}[codel] object associated with that
+       * state.
+       */
     case taskidx_fsm: {
       idltype_s e;
       codel_s c;
@@ -199,6 +289,14 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[loc]]
+     * === *$task loc*
+     *
+     * Return a list describing the source location where that task is
+     * defined. The list contains three elements: the file name, the line
+     * number and the column number.
+     */
     case taskidx_loc: {
       Tcl_Obj *l[3] = {
 	Tcl_NewStringObj(task_loc(t).file, -1),
@@ -209,6 +307,13 @@ task_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[class]]
+     * === *$task class*
+     *
+     * Always returns the string "task". Useful to determine at runtime
+     * that the object is a task object.
+     */
     case taskidx_class:
       r = Tcl_NewStringObj("task", -1);
       break;

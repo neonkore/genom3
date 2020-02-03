@@ -124,25 +124,25 @@ Return the name of the component as a string.
 === *$component doc*
 
 Return a string containing the documentation of the component defined
+in the `doc` attributes of the `.gen` description.
 
+[[version]]
+=== *$component version*
 
+Return a string containing the version of the component defined in
+the `version` attribute of the `.gen` description.
 
+[[lang]]
+=== *$component lang*
 
+Return a string containing the programming language of the component
+codels defined in the `lang` attribute of the `.gen` description.
 
+[[email]]
+=== *$component email*
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+Return a string containing the maintainer e-mail of the component
+defined in the `email` attribute of the `.gen` description.
 
 
 

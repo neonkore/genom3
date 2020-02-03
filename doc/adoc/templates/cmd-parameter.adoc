@@ -1,0 +1,412 @@
+// Generated from parameter.c - manual changes will be lost
+ifdef::sidebartoc[]
+include::_Sidebar.adoc[]
+endif::[]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== *$param* TCL engine command
+
+Those commands manipulate parameter objects and return information about
+them. They all take a parameter object as their first argument, noted
+`$param` in the following command descriptions. Such an object is
+typically returned by other procedures, such as
+link:cmd-codel{outfilesuffix}#params[`$codel params`].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[name]]
+=== *$param name*
+
+Return the name of the parameter as a string.
+
+
+
+
+
+
+[[src]]
+=== *$param src*
+
+Return a string indicating the origin of the parameter:
+[horizontal]
+`ids`:: defined in the IDS.
+`local`:: defined locally for a running instance of a service.
+`port`:: for port objects passed as a parameter.
+`remote`:: for remote objects passed as a parameter.
+
+
+
+
+
+
+[[dir]]
+=== *$param dir*
+
+Return a string indicating the direction of the parameter:
+[horizontal]
+`local`:: defined locally for a running instance of a service.
+`in`:: passed as input.
+`out`:: passed as output.
+`inout`:: passed as input and output.
+
+
+
+
+
+
+[[member]]
+=== *$param member*
+
+For `ids` parameters, this returns a valid string in the current
+programming language to access the parameter inside the IDS.
+For other kinds of parameters, this raises an error.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[base]]
+=== *$param base*
+
+This returns the type of the source of the parameter. For `local`
+parameters, this is the type of the local parameter in the service
+definition. For IDS parameters, this is the `ids` type. For `port` or
+`remote` kinds, this is the port or remote object.
+
+
+
+
+
+
+[[type]]
+=== *$param type*
+
+This returns the type object of the parameter.
+
+
+
+
+
+
+[[port]]
+=== *$param port*
+
+This returns the port object of `port` parameters.
+
+
+
+
+
+
+
+
+
+
+
+
+[[remote]]
+=== *$param remote*
+
+This returns the remote object of `remote` parameters.
+
+
+
+
+
+
+
+
+
+[[param]]
+=== *$param param*
+
+This returns the service parameter of `local` parameters passed to a
+codel.
+
+
+
+
+
+
+
+
+
+[[initializer]]
+=== *$param initializer*
+
+This returns the initializer object associated to the parameter, or an
+error if there is no initializer.
+
+An initializer object defines the following methods:
+
+[horizontal]
+`member`:: A valid string in the current programming language to access
+the initialized member of the parameter.
+`doc`:: The documentation of this initializer.
+`kind`:: The data type of the default value of the parameter, or the
+string `compound` for recursive initializers.
+`value`:: This is either a link:cmd-type{outfilesuffix}[constant value
+object] of the type `kind`, or a recursively defined initializer object
+if `kind` is equal to `compound`.
+`loc`:: Returns the source location as a triplet.
+`class`:: Always returns "initializer".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[loc]]
+=== *$param loc*
+
+Return a list describing the source location where that parameter is
+defined. The list contains three elements: the file name, the line
+number and the column number.
+
+
+
+
+
+
+
+
+
+
+
+
+[[class]]
+=== *$param class*
+
+Always returns the string "parameter". Useful to determine at runtime
+that the object is a parameter object.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// eof

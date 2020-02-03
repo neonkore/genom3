@@ -109,7 +109,8 @@ adocsrcs=\
 	adoc/templates/cmd-port.adoc		\
 	adoc/templates/cmd-task.adoc		\
 	adoc/templates/cmd-service.adoc		\
-	adoc/templates/cmd-codel.adoc
+	adoc/templates/cmd-codel.adoc		\
+	adoc/templates/cmd-parameter.adoc
 
 BUILT_SOURCES=
 
@@ -230,6 +231,7 @@ adoc/templates/cmd-port.adoc~: $(top_srcdir)/engine/tcl/port.c
 adoc/templates/cmd-task.adoc~: $(top_srcdir)/engine/tcl/task.c
 adoc/templates/cmd-service.adoc~: $(top_srcdir)/engine/tcl/service.c
 adoc/templates/cmd-codel.adoc~: $(top_srcdir)/engine/tcl/codel.c
+adoc/templates/cmd-parameter.adoc~: $(top_srcdir)/engine/tcl/parameter.c
 
 $(adoctgts): Makefile adocgen.awk y2tgen.awk
 $(adoctgts):

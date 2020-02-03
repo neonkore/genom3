@@ -45,4 +45,5 @@
 *** link:cmd-task{outfilesuffix}[`$task` command]
 *** link:cmd-service{outfilesuffix}[`$service` command]
 *** link:cmd-codel{outfilesuffix}[`$codel` command]
+*** link:cmd-parameter{outfilesuffix}[`$param` command]
 --

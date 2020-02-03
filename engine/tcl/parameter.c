@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 LAAS/CNRS
+ * Copyright (c) 2010-2013,2020 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -35,6 +35,16 @@
 
 
 /* --- param command ------------------------------------------------------- */
+
+/*/
+ * == *$param* TCL engine command
+ *
+ * Those commands manipulate parameter objects and return information about
+ * them. They all take a parameter object as their first argument, noted
+ * `$param` in the following command descriptions. Such an object is
+ * typically returned by other procedures, such as
+ * link:cmd-codel{outfilesuffix}#params[`$codel params`].
+ */
 
 /** Implements the command associated to a param object.
  */
@@ -80,18 +90,54 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
   }
 
   switch(i) {
+    /*/
+     * [[name]]
+     * === *$param name*
+     *
+     * Return the name of the parameter as a string.
+     */
     case paramidx_name:
       r = Tcl_NewStringObj(param_name(p), -1);
       break;
 
+    /*/
+     * [[src]]
+     * === *$param src*
+     *
+     * Return a string indicating the origin of the parameter:
+     * [horizontal]
+     * `ids`:: defined in the IDS.
+     * `local`:: defined locally for a running instance of a service.
+     * `port`:: for port objects passed as a parameter.
+     * `remote`:: for remote objects passed as a parameter.
+     */
     case paramidx_src:
       r = Tcl_NewStringObj(param_strsrc(param_src(p)), -1);
       break;
 
+    /*/
+     * [[dir]]
+     * === *$param dir*
+     *
+     * Return a string indicating the direction of the parameter:
+     * [horizontal]
+     * `local`:: defined locally for a running instance of a service.
+     * `in`:: passed as input.
+     * `out`:: passed as output.
+     * `inout`:: passed as input and output.
+     */
     case paramidx_dir:
       r = Tcl_NewStringObj(param_strdir(param_dir(p)), -1);
       break;
 
+    /*/
+     * [[member]]
+     * === *$param member*
+     *
+     * For `ids` parameters, this returns a valid string in the current
+     * programming language to access the parameter inside the IDS.
+     * For other kinds of parameters, this raises an error.
+     */
     case paramidx_member: {
       Tcl_Obj *argv[] = {
         Tcl_NewStringObj("language::member", -1),
@@ -123,14 +169,35 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[base]]
+     * === *$param base*
+     *
+     * This returns the type of the source of the parameter. For `local`
+     * parameters, this is the type of the local parameter in the service
+     * definition. For IDS parameters, this is the `ids` type. For `port` or
+     * `remote` kinds, this is the port or remote object.
+     */
     case paramidx_base:
       r = Tcl_NewStringObj(type_genref(param_base(p)), -1);
       break;
 
+    /*/
+     * [[type]]
+     * === *$param type*
+     *
+     * This returns the type object of the parameter.
+     */
     case paramidx_type:
       r = Tcl_NewStringObj(type_genref(param_type(p)), -1);
       break;
 
+    /*/
+     * [[port]]
+     * === *$param port*
+     *
+     * This returns the port object of `port` parameters.
+     */
     case paramidx_port:
       switch(param_src(p)) {
 	case P_PORT:
@@ -141,6 +208,12 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       }
       break;
 
+    /*/
+     * [[remote]]
+     * === *$param remote*
+     *
+     * This returns the remote object of `remote` parameters.
+     */
     case paramidx_remote:
       if (param_src(p) == P_REMOTE)
         r = Tcl_NewStringObj(remote_genref(param_remote(p)), -1);
@@ -148,6 +221,13 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
         r = NULL;
       break;
 
+    /*/
+     * [[param]]
+     * === *$param param*
+     *
+     * This returns the service parameter of `local` parameters passed to a
+     * codel.
+     */
     case paramidx_param:
       if (param_src(p) == P_LOCAL && param_param(p))
         r = Tcl_NewStringObj(param_genref(param_param(p)), -1);
@@ -155,6 +235,27 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
         r = NULL;
       break;
 
+    /*/
+     * [[initializer]]
+     * === *$param initializer*
+     *
+     * This returns the initializer object associated to the parameter, or an
+     * error if there is no initializer.
+     *
+     * An initializer object defines the following methods:
+     *
+     * [horizontal]
+     * `member`:: A valid string in the current programming language to access
+     * the initialized member of the parameter.
+     * `doc`:: The documentation of this initializer.
+     * `kind`:: The data type of the default value of the parameter, or the
+     * string `compound` for recursive initializers.
+     * `value`:: This is either a link:cmd-type{outfilesuffix}[constant value
+     * object] of the type `kind`, or a recursively defined initializer object
+     * if `kind` is equal to `compound`.
+     * `loc`:: Returns the source location as a triplet.
+     * `class`:: Always returns "initializer".
+     */
     case paramidx_initer:
       r = NULL;
       if (objc == 2) {
@@ -179,6 +280,14 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       }
       break;
 
+    /*/
+     * [[loc]]
+     * === *$param loc*
+     *
+     * Return a list describing the source location where that parameter is
+     * defined. The list contains three elements: the file name, the line
+     * number and the column number.
+     */
     case paramidx_loc: {
       Tcl_Obj *l[3] = {
 	Tcl_NewStringObj(param_loc(p).file, -1),
@@ -189,6 +298,13 @@ param_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       break;
     }
 
+    /*/
+     * [[class]]
+     * === *$param class*
+     *
+     * Always returns the string "parameter". Useful to determine at runtime
+     * that the object is a parameter object.
+     */
     case paramidx_class:
       r = Tcl_NewStringObj("parameter", -1);
       break;

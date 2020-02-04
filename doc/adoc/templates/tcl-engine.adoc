@@ -113,7 +113,17 @@ Code for calling codels
 
 ==== Object manipulation procedures
 
-* link:cmd-type{outfilesuffix}[`$type methods`]:
+* link:cmd-type{outfilesuffix}[`$type`]:
 IDL Type manipulation procedures
-* link:cmd-codel{outfilesuffix}[`$codel methods`]:
+* link:cmd-component{outfilesuffix}[`$component`]:
+Component manipulation procedures
+* link:cmd-port{outfilesuffix}[`$port`]:
+Port manipulation procedures
+* link:cmd-task{outfilesuffix}[`$task`]:
+Task manipulation procedures
+* link:cmd-service{outfilesuffix}[`$service`]:
+Service manipulation procedures
+* link:cmd-codel{outfilesuffix}[`$codel`]:
 Codel manipulation procedures
+* link:cmd-parameter{outfilesuffix}[`$param`]
+Codels and services parameters manipulation procedures

@@ -124,7 +124,7 @@ Return the codel kind, among `sync` or `async`.
 
 
 [[params]]
-=== *$codel params*
+=== *$codel parameters*
 
 Return the list of codel parameters.
 

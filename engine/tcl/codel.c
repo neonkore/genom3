@@ -119,7 +119,7 @@ codel_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
     /*/
      * [[params]]
-     * === *$codel params*
+     * === *$codel parameters*
      *
      * Return the list of codel parameters.
      */

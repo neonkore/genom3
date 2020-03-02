@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2018 LAAS/CNRS
+# Copyright (c) 2010-2018,2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -536,7 +536,7 @@ namespace eval language::c {
 	append m "\ntypedef struct $n {"
 	if {[catch {$type length} l]} {
 	    append m "\n  uint32_t _maximum, _length;"
-	    append m "\n  [declarator [$type type] (*_buffer)];"
+	    append m "\n  [declarator [$type type] *_buffer];"
 	    append m "\n  void (*_release)(void *_buffer);"
 	} else {
 	    append m "\n  const uint32_t _maximum;"
@@ -880,6 +880,9 @@ namespace eval language::c {
       } else {
         set pre [string range $type 0 $b-1]
         set post [string range $type $b end]
+        if {[string index $name 0] eq "*"} {
+          set name "($name)"
+        }
       }
 
       if {[string index $pre end] eq "*"} {

@@ -271,7 +271,7 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
       /*/
        * [[codels]]
-       * === *$component codels* [[validate|simple|fsm] ...]
+       * === *$service codels* [[validate|simple|fsm] ...]
        *
        * Return the list of link:cmd-codel{outfilesuffix}[codels] defined in
        * the service. The list may be filtered by a keyword described

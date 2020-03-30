@@ -102,11 +102,6 @@ link:cmd-component{outfilesuffix}#services[`$component services`].
 
 
 
-
-
-
-
-
 [[name]]
 === *$service name*
 
@@ -276,7 +271,7 @@ raised by the service.
 
 
 [[codels]]
-=== *$component codels* [[validate|simple|fsm] ...]
+=== *$service codels* [[validate|simple|fsm] ...]
 
 Return the list of link:cmd-codel{outfilesuffix}[codels] defined in
 the service. The list may be filtered by a keyword described

@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2010-2013 LAAS/CNRS
+# Copyright (c) 2010-2013,2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -119,13 +119,13 @@ if {$task eq ""} {
 
 foreach service [$component services] {
   if {[catch {$service task} t]} { set t "" }
-  if {$t != $task || [llength [$service codels]] == 0} {
+  if {$t != $task || [llength [$service codels simple fsm]] == 0} {
     continue
   } '>
 
 
 /* <"[--- [string toupper [$service kind] 0] [$service name] ------------]"> */
-<' foreach codel [$service codels] {'>
+<' foreach codel [$service codels simple fsm] {'>
 
 /** Codel <"[$codel name]"> of <"[$service kind]"> <"[$service name]">.
  *

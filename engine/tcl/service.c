@@ -87,14 +87,9 @@ service_cmd(ClientData v, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
       Tcl_WrongNumArgs(interp, 0, objv, "$service fsm ?event?");
       return TCL_ERROR;
     }
-  } else if (i == serviceidx_codels) {
-    if (objc > 3) {
-      Tcl_WrongNumArgs(interp, 0, objv, "$service codel ?simple|fsm?");
-      return TCL_ERROR;
-    }
-  } else if (i != serviceidx_params) {
-    /* 'parameters' subcommand can have unlimited additional parameters, other
-     * subcommand don't have any. */
+  } else if (i != serviceidx_params && i != serviceidx_codels) {
+    /* 'parameters' and 'codels' subcommand can have unlimited additional
+     * parameters, other subcommand don't have any. */
     if (objc > 2) {
       Tcl_WrongNumArgs(interp, 0, objv, "$service subcommand");
       return TCL_ERROR;

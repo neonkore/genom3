@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009-2014 LAAS/CNRS
+# Copyright (c) 2009-2014,2020 LAAS/CNRS
 # All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software for any purpose
@@ -24,6 +24,9 @@ pkgconfig_DATA=	genom3.pc genom3-c-client.pc
 endif
 
 if ENABLE_TOOL
+  dist_bin_SCRIPTS=\
+	profundis
+
 if WITH_TCL
   TCLDIR=\
 	engine/tcl		\

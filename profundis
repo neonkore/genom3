@@ -1,0 +1,2122 @@
+#!/bin/sh
+# -*- tcl -*- \
+exec tclsh "$0" "$@"
+#
+# Copyright (c) 2020 LAAS/CNRS
+# All rights reserved.
+#
+# Redistribution  and  use  in  source  and binary  forms,  with  or  without
+# modification, are permitted provided that the following conditions are met:
+#
+#   1. Redistributions of  source  code must retain the  above copyright
+#      notice and this list of conditions.
+#   2. Redistributions in binary form must reproduce the above copyright
+#      notice and  this list of  conditions in the  documentation and/or
+#      other materials provided with the distribution.
+#
+# THE SOFTWARE  IS PROVIDED "AS IS"  AND THE AUTHOR  DISCLAIMS ALL WARRANTIES
+# WITH  REGARD   TO  THIS  SOFTWARE  INCLUDING  ALL   IMPLIED  WARRANTIES  OF
+# MERCHANTABILITY AND  FITNESS.  IN NO EVENT  SHALL THE AUTHOR  BE LIABLE FOR
+# ANY  SPECIAL, DIRECT,  INDIRECT, OR  CONSEQUENTIAL DAMAGES  OR  ANY DAMAGES
+# WHATSOEVER  RESULTING FROM  LOSS OF  USE, DATA  OR PROFITS,  WHETHER  IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR  OTHER TORTIOUS ACTION, ARISING OUT OF OR
+# IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+#                                           Anthony Mallet on Fri Apr 17 2020
+#
+package require Tcl 8.6
+
+variable profundis 1.0
+
+# --- usage ----------------------------------------------------------------
+#
+proc usage { channel code } {
+  puts $channel [format [join {
+    "GenoM3 profiling data visualization toolkit"
+    ""
+    "Usage:"
+    "  %1$s [-h] [-v]"
+    "  %1$s [-s] [<file> ...]"
+    ""
+    "Options:"
+    "  -s, --stats=out  generate statistics for input files to stdout or to the"
+    "                   named file, without starting a graphical interface"
+    "  -v, --version    print %1$s version number"
+    "  -h, --help       print usage summary (this text)"
+  } \n] [file tail [info script]]]
+
+  exit $code
+}
+
+
+# --- help -----------------------------------------------------------------
+#
+proc help {} {
+  tk_messageBox -type ok -icon info -message [join {
+    "GenoM3 profiling data visualization toolkit"
+    ""
+    "Key bindings:"
+    ""
+    "q			Quit"
+    "f			Load file"
+    ""
+    "a			Reset zoom"
+    "-			Zoom out"
+    "=			Zoom in"
+    ""
+    "<Shift>			Don't snap timeline cursor to nearby items"
+    "<Control>			Measure time from current cursor position"
+    ""
+    "<Home>			Trim data left from cursor position"
+    "<End>			Trim data right from cursor position"
+    "<Del>			Reset trim positions"
+    ""
+    "<Button-1>		Drag timeline horizontally"
+    "<Button-2>, <MouseWheel>	Zoom timeline in and out"
+    "<Button-3>		Select timeline region and zoom to selection"
+  } \n]
+}
+
+
+# --- gui ------------------------------------------------------------------
+#
+namespace eval gui {
+  # preferences
+  variable itemfont	{"DejaVu Sans" 10}
+  variable labelfont	{"DejaVu Sans" 9}
+  variable rulerfont	{"DejaVu Sans" 10}
+  variable detailfont	{"DejaVu Sans" 10}
+  variable headingfont	{"DejaVu Sans" 11 bold}
+  variable uifont	{"DejaVu Sans" 10}
+
+  variable cursorfg	#c09090
+  variable treffg	#0090b0
+
+  variable eventbg	#c1f3c5
+  variable rulerbg	#e5e1d3
+  variable timelinebg	#ffffff
+  variable selectbg	#e2f2ff
+  variable rangebg	#f0f0f0
+
+
+  # - gui::init - create windows
+  #
+  proc init {} {
+    variable eventheight; variable rulerheight
+    variable treew; variable detailsw
+
+    global hpane statbar timeline ruler hscroll
+
+    package require Tk 8.6
+    wm deiconify .
+    wm protocol . WM_DELETE_WINDOW { set ::forever false }
+
+    # fonts
+    foreach font [info vars ::gui::*font] {
+      font create [namespace tail $font] {*}[font actual [set $font]]
+    }
+    set eventheight [font metrics itemfont -linespace]
+    set rulerheight [expr {12+[font metrics rulerfont -linespace]}]
+
+    # styles
+    ttk::style theme use clam
+
+    ttk::style configure white.TFrame -background white
+    ttk::style configure TButton -width -3
+    ttk::style configure . -font uifont
+    option add *font uifont
+    option add *Dialog.msg.wrapLength 0
+    font configure TkIconFont {*}[font actual uifont]
+
+    ttk::style layout TMinilabel {
+      Label.padding -sticky nswe -border 0 -children {
+        Label.label -sticky nswe
+      }
+    }
+    ttk::style configure TMinilabel \
+        -font rulerfont -foreground #444 -background #e0e0e0
+
+    ttk::style layout TMinibutton {
+      Button.border -sticky news -border 1 -children {
+        Button.padding -sticky news -children {
+          Button.label -sticky news}}}
+    ttk::style configure TMinibutton \
+        -font [list {*}[font actual labelfont] -weight bold] \
+        -relief raised -shiftrelief 1 -anchor center -padding 0 -width -2
+    ttk::style map TMinibutton \
+        -relief {pressed sunken} \
+        -background {pressed #bab5ab} \
+        -lightcolor {pressed #bab5ab} -darkcolor {pressed #bab5ab}
+
+    ttk::style layout Treeview {Treeview.padding -sticky nswe -children {
+      Treeview.treearea -sticky nswe}}
+    ttk::style configure Treeview \
+        -font itemfont -borderwidth 0 \
+        -rowheight [expr {2 + $eventheight}]
+    ttk::style map Treeview \
+        -foreground [list !selected black selected #002155] \
+        -background [list !selected white selected $gui::selectbg]
+    ttk::style configure Heading \
+        -font headingfont \
+        -padding [list 0 [expr {
+          ($rulerheight - [font metrics headingfont -linespace])/2}]] \
+        -relief flat -background white
+
+    ttk::style configure TScrollbar -arrowsize 14
+    ttk::style configure Sash -sashthickness 4
+
+    # menu bar
+    menu .menu -background #f0f0f0
+
+    menu .menu.file
+    .menu add cascade -label "File" -menu .menu.file
+    .menu.file add command -label "Load profiling data" \
+        -command { ::gui::openf }
+    .menu.file add separator
+    .menu.file add command -label "Export current statistics" \
+        -command { ::gui::exportf }
+    .menu.file add separator
+    .menu.file add command -label "Quit" -command {set ::forever false}
+
+    menu .menu.help
+    .menu add cascade -label "Help" -menu .menu.help
+    .menu.help add command -label "Key bindings" -command { help }
+
+    . configure -menu .menu
+    bind . q { set ::forever false }
+    bind . f { ::gui::openf }
+    bind . a { ::zoom::reset }
+    bind . <space> { ::gui::hscroll scroll 1 units }
+    bind . n { ::gui::hscroll scroll 1 units }
+    bind . p { ::gui::hscroll scroll -1 units }
+
+    # toplevel frame
+    ttk::frame .main -padding 2
+    pack .main -expand 1 -fill both
+
+    # paned windows
+    ttk::panedwindow .main.vsplit -orient vertical
+    pack .main.vsplit -expand 1 -fill both
+
+    set hpane .main.events
+    ttk::panedwindow $hpane -orient horizontal
+    .main.vsplit add $hpane -weight 1
+
+    # event tree
+    ttk::frame $hpane.services -style white.TFrame \
+        -width 150 -borderwidth 2 -relief sunken
+    $hpane add $hpane.services -weight 0
+
+    set statbar $hpane.services.statbar
+    ttk::frame $statbar \
+        -style white.TFrame
+    ttk::button $statbar.cycle -text "\u21b7" \
+        -style TMinibutton -command { ::tree::statview cycle }
+    pack $statbar.cycle -side right -padx {0 2}
+    ttk::button $statbar.exect -text "\u2194" \
+        -style TMinibutton -command { ::tree::statview exect }
+    pack $statbar.exect -side right
+    ttk::button $statbar.global -text "\u221e" \
+        -style TMinibutton -command { ::tree::statview full }
+    pack $statbar.global -side right -padx {0 2}
+    ttk::button $statbar.local -text "\u26f6" \
+        -style TMinibutton -command { ::tree::statview disp }
+    pack $statbar.local -side right
+    bind $statbar <Map> { ::tree::statview }
+
+    ttk::button $hpane.services.expand -textvariable ::tree::expand \
+        -style TMinibutton -command { ::tree::minmaxwidth }
+
+    set treew $hpane.services.tree
+    ttk::treeview $treew \
+        -columns {min emin max emax avg stddev #} \
+        -displaycolumns {min max avg stddev #} \
+        -xscrollcommand { ::tree::hview $hpane.services.tscroll } \
+        -yscrollcommand {
+          apply {args {
+            $::hpane.time.vscroll set {*}$args
+            ::timeline::eselect
+          }}}
+
+    $treew heading #0 -text "Services"
+    $treew column #0 -stretch yes -width 150 -minwidth 150
+    set w [font measure itemfont "  000.0 mm "]
+    foreach c {min max avg stddev #} {
+      $treew heading $c -text [string totitle $c] -anchor e
+      $treew column $c -stretch no -width $w -anchor e
+    }
+    bind $treew <Configure> { ::tree::configure }
+    bind $treew <ButtonPress-1> { ::tree::focus %x %y }
+    bind $treew <Motion> {
+      ::events::detail [$::gui::treew identify item %x %y]
+    }
+    bind $treew <Leave> { ::events::detail {} }
+    bind $treew <<TreeviewSelect>> { ::timeline::eselect }
+    bind $treew <<TreeviewOpen>> {
+      ::timeline::draw noruler
+      ::events::merge
+      ::events::stats
+    }
+    bind $treew <<TreeviewClose>> {
+      ::timeline::draw noruler
+      ::events::merge
+      ::events::stats
+    }
+
+    ttk::scrollbar $hpane.services.tscroll \
+        -orient horizontal -command [list $treew xview]
+
+    grid propagate $hpane.services off
+    grid $statbar $hpane.services.expand -sticky news
+    grid $treew - -sticky news
+    grid $hpane.services.tscroll - -sticky sew
+    grid columnconfigure $hpane.services 0 -weight 1
+    grid rowconfigure $hpane.services $treew -weight 1
+
+    # timeline
+    ttk::frame $hpane.time \
+        -borderwidth 2 -relief sunken
+    $hpane add $hpane.time -weight 1
+
+    ttk::label $hpane.time.rulerdate -style TMinilabel -textvariable rulerdate \
+        -padding {5 0} -anchor center -background $gui::rulerbg \
+        -font [list {*}[font actual rulerfont] -weight bold]
+    ttk::label $hpane.time.rulerres -style TMinilabel -textvariable rulerres \
+        -padding {5 0} -anchor center -background $gui::rulerbg
+    ttk::button $hpane.time.zoom+ -text "+" \
+        -style TMinibutton -command { zoom::+ [expr {$::timeline::width/2}] }
+    ttk::button $hpane.time.unzoom -text "\u21ba" \
+        -style TMinibutton -command { zoom::pop }
+    ttk::button $hpane.time.zoom- -text "-" \
+        -style TMinibutton -command { zoom::- [expr {$::timeline::width/2}] }
+    set ruler $hpane.time.ruler
+    canvas $ruler \
+        -height $gui::rulerheight \
+        -highlightthickness 0 -background $gui::rulerbg
+    set timeline $hpane.time.line
+    canvas $timeline \
+        -width $timeline::width -height $timeline::height \
+        -highlightthickness 0 -background $gui::timelinebg
+
+    bind $timeline <Configure> {timeline::configure %w %h}
+
+    bind $hpane.time.rulerdate <Enter> { cursor::enter %x }
+    bind $hpane.time.rulerdate <Motion> { cursor::move %x %y }
+    bind $hpane.time.rulerdate <Shift-Motion> { cursor::move %x %y off }
+    bind $hpane.time.rulerdate <Leave> { cursor::leave }
+    bind $timeline <Enter> { cursor::enter %x; focus %W }
+    bind $timeline <Motion> { cursor::move %x %y }
+    bind $timeline <Shift-Motion> { cursor::move %x %y off }
+    bind $timeline <Shift_L> { cursor::enter %x }
+    bind $timeline <Shift_R> { cursor::enter %x }
+    bind $timeline <KeyRelease-Shift_L> { cursor::move %x %y }
+    bind $timeline <KeyRelease-Shift_R> { cursor::move %x %y }
+    bind $timeline <Control_L> { cursor::measure-start %x %y }
+    bind $timeline <Control_R> { cursor::measure-start %x %y }
+    bind $timeline <Shift-Control_L> { cursor::measure-start %x %y off }
+    bind $timeline <Shift-Control_R> { cursor::measure-start %x %y off }
+    bind $timeline <KeyRelease-Control_L> { cursor::measure-stop %x }
+    bind $timeline <KeyRelease-Control_R> { cursor::measure-stop %x }
+    bind $timeline <Leave> { cursor::leave }
+    bind $ruler <Enter> { cursor::enter %x }
+    bind $ruler <Motion> { cursor::move %x %y off }
+    bind $ruler <Leave> { cursor::leave }
+
+    bind $ruler <B1-Enter> break
+    bind $ruler <B1-Leave> break
+    bind $ruler <ButtonPress-1> { cursor::drag-start %x }
+    bind $ruler <B1-Motion> { cursor::drag-move %x %y }
+    bind $ruler <ButtonRelease-1> { cursor::drag-stop %x %y }
+    bind $timeline <B1-Enter> break
+    bind $timeline <B1-Leave> break
+    bind $timeline <ButtonPress-1> { cursor::drag-start %x }
+    bind $timeline <B1-Motion> { cursor::drag-move %x %y }
+    bind $timeline <ButtonRelease-1> { cursor::drag-stop %x %y }
+
+    bind $timeline <ButtonPress-3> { cursor::range-start %x %y }
+    bind $timeline <Shift-ButtonPress-3> { cursor::range-start %x %y off }
+    bind $timeline <B3-Motion> { cursor::range-extend %x %y }
+    bind $timeline <Shift-B3-Motion> { cursor::range-extend %x %y off }
+    bind $timeline <ButtonRelease-3> { cursor::range-stop }
+    bind $timeline <B3-Key-Escape> { cursor::range-cancel }
+
+    bind $ruler <Button-4> {zoom::+ %x}
+    bind $ruler <Button-5> {zoom::- %x}
+    bind $timeline <ButtonPress-2> {zoom::drag start %x %y}
+    bind $timeline <B2-Motion> {zoom::drag move %x %y}
+    bind $timeline <Button-4> {zoom::+ %x}
+    bind $timeline <Button-5> {zoom::- %x}
+    bind $timeline <Key-Home> { cursor::trim left %x }
+    bind $timeline <Key-End> { cursor::trim right %x }
+    bind $timeline <Key-Delete> { ::timeline::autorange; ::zoom::reset }
+    bind . <Key-minus> { zoom::- [expr {$timeline::width/2}] }
+    bind . <Key-equal> { zoom::+ [expr {$timeline::width/2}] }
+    bind . <Key-Escape> { zoom::pop }
+
+    # scrolls
+    set hscroll $hpane.time.hscroll
+    ttk::scrollbar $hscroll -orient horizontal -command gui::hscroll
+    ttk::scrollbar $hpane.time.vscroll -orient vertical -command {
+      apply {args {
+        $::gui::treew yview {*}$args
+        ::timeline::draw noruler
+      }}
+    }
+    grid $hpane.time.rulerdate $hpane.time.rulerres \
+        $hpane.time.zoom+ $hpane.time.unzoom \
+        $hpane.time.zoom- - -sticky nswe
+    grid $ruler - - - - - -sticky new
+    grid $timeline - - - - $hpane.time.vscroll -sticky nsew
+    grid $hscroll - - - - x -sticky sew
+    grid rowconfigure $hpane.time $timeline -weight 1
+    grid columnconfigure $hpane.time 0 -weight 1
+
+    # details
+    ttk::frame .main.details -padding 1 -relief sunken
+    .main.vsplit add .main.details -weight 0
+
+    set detailsw .main.details.text
+    text $detailsw -height 1 -font detailfont -bd 0 -wrap word
+    bindtags $detailsw {$detailsw . all}
+    $detailsw tag configure bold \
+        -font [list {*}[font actual detailfont] -weight bold]
+    pack $detailsw -expand 1 -fill both -side left
+  }
+
+
+  # - gui::maketree - build treeview items according to events list
+  #
+  proc maketree {} {
+    variable ::events::data
+    variable ::gui::treew
+
+    foreach item [lsort [array names data]] {
+      set parent [list]
+      foreach k [lassign $item key] {
+        lappend key $k
+
+        if {![$treew exists $key]} {
+          $treew insert $parent end \
+              -id $key -text [lrange $key [llength $parent] end] \
+              -open false
+        }
+        set parent $key
+      }
+    }
+  }
+
+
+  # - gui::treeitems - return open (or all) tree items
+  #
+  proc treeitems { {all no} {root {}} } {
+    variable ::gui::treew
+
+    set elist [list]
+    foreach item [$treew children $root] {
+      if {[$treew item $item -open]} {
+        if {$all} { lappend elist $item }
+        lappend elist {*}[treeitems $all $item]
+      } else {
+        lappend elist $item
+      }
+    }
+
+    return $elist
+  }
+
+
+  # - gui::hscroll - move timeline scrollbar either to dragged position or to
+  # next selected item
+  #
+  proc hscroll { args } {
+    variable ::timeline::tmin; variable ::timeline::tmax
+    variable ::timeline::disp0; variable ::timeline::disp1
+    variable ::timeline::dt; variable ::timeline::ddisp
+
+    switch [lindex $args 0] {
+      moveto {
+        set r [lindex $args 1]
+        set t0 [expr {$tmin + int($r*$dt)}]
+      }
+
+      scroll {
+        variable ::gui::treew
+
+        set sel [$treew selection]
+
+        switch -- [lindex $args 1][lindex $args 2] {
+          1units {
+            set t0 [expr {$disp0 + $ddisp/4}]
+            set t0 [::events::nexttime $t0 $sel]
+            set t0 [expr {$t0 - $ddisp/4}]
+          }
+          -1units {
+            set t0 [expr {$disp0 + $ddisp/4}]
+            set t0 [::events::prevtime $t0 $sel]
+            set t0 [expr {$t0 - $ddisp/4}]
+          }
+
+          1pages {
+            set t0 $disp1
+            set t0 [::events::nexttime $t0 $sel]
+            set t0 [expr {$t0 - $ddisp/4}]
+          }
+          -1pages {
+            set t0 [expr {$disp0 - $ddisp/2}]
+            set t0 [::events::prevtime $t0 $sel]
+            set t0 [expr {$t0 - $ddisp/4}]
+          }
+        }
+      }
+    }
+
+    if {abs($t0) < inf} {
+      ::timeline::display $t0 [expr {$t0 + $ddisp}]
+    }
+  }
+
+
+  # - gui::labelsz - get string width when displayed with labelfont
+  #
+  proc labelsz { str } {
+    variable labelsz
+
+    try {
+      return $labelsz($str)
+    } on error {} {
+      set labelsz($str) [font measure labelfont $str]
+      return $labelsz($str)
+    }
+  }
+
+
+  # - gui::openf - pop a file selection window and read events from selected
+  # files
+  #
+  proc openf { args } {
+    if {![llength $args]} {
+      set args [tk_getOpenFile -filetypes {
+        {{GenoM3 profiling data} .out}
+        {All *}
+      } -defaultextension .out -multiple yes]
+    }
+
+    foreach f $args {
+      set cb [::events::openf $f]
+
+      trace add variable $cb write {apply {{var args} {
+        variable ::gui::detailsw
+
+        $detailsw delete 1.0 end
+        $detailsw insert 1.0 [set $var]
+      }}}
+      trace add variable $cb unset {apply {{args} {
+        ::gui::maketree
+        ::timeline::autorange
+      }}}
+    }
+  }
+
+
+  # - gui::exportf - pop a file selection window and write statistics to the
+  # selected file
+  #
+  proc exportf { args } {
+    if {![llength $args]} {
+      set args [tk_getSaveFile -filetypes {
+        {{GenoM3 profiling statistics} .sum}
+        {All *}
+      } -defaultextension .sum -initialfile profundis]
+    }
+
+    foreach f $args {
+      set chan [open $f w]
+
+      ::events::hpstats $chan
+      ::events::pstats $chan
+      close $chan
+    }
+  }
+}
+
+
+# --- tree -----------------------------------------------------------------
+#
+namespace eval tree {
+  variable statrange disp statkind exect
+  variable expand
+
+  # - tree::configure - update tree pane size
+  #
+  proc configure {} {
+    ::timeline::draw noruler
+  }
+
+
+  # - tree::hview - update horizontal viewport
+  #
+  proc hview { scroll x0 x1 } {
+    variable ::gui::treew
+    global statbar
+
+    variable expand [expr {$x1 - $x0 > 0.9 ?  "«" : "»"}]
+    $scroll set $x0 $x1
+
+    set dw [winfo width $treew]
+    set w1 [expr {$x1*$dw/($x1-$x0)}]
+    set c0w [$treew column #0 -width]
+    if {$w1 > $c0w} {
+      grid $statbar
+    } else {
+      grid remove $statbar
+    }
+  }
+
+
+  # - tree::focus - update viewport to display item at x y
+  #
+  proc focus { x y } {
+    variable ::events::data
+    variable ::gui::treew
+
+    set item [$treew identify item $x $y]
+    if {$item ni [array names data]} return
+
+    switch [$treew identify column $x $y] {
+      \#1 { set e [$treew set $item 1] }
+      \#2 { set e [$treew set $item 3] }
+      default return
+    }
+    if {![dict size $e]} return
+
+    set d0 [dict get $e enter]
+    set d3 [dict get $e leave]
+
+    ::timeline::display \
+        [expr {$d0 - ($d3-$d0)/4}] [expr {$d3 + ($d3-$d0)/4}]
+  }
+
+
+  # - tree::minmaxwidth - maximize or minimize treeview width
+  #
+  proc minmaxwidth {} {
+    variable expand
+    variable ::gui::treew
+    global hpane
+
+    switch -- $expand {
+      » {
+        lassign [$treew xview] x0 x1
+        set w [winfo width $treew]
+        $hpane sashpos 0 [expr {round($w/($x1 - $x0))+2}]
+      }
+
+      « {
+        $treew xview 0
+        $hpane sashpos 0 [$treew column #0 -width]
+      }
+    }
+  }
+
+
+  # - tree::statview - configure displayed stats
+  #
+  proc statview { {what ""} } {
+    variable statrange; variable statkind
+    global statbar
+
+    switch $what {
+      disp - full {
+        set statrange $what
+        ::events::stats
+
+      }
+      exect - cycle {
+        set statkind $what
+        ::events::stats
+      }
+    }
+
+    switch $statrange {
+      disp { $statbar.local state pressed; $statbar.global state !pressed }
+      full { $statbar.local state !pressed; $statbar.global state pressed }
+    }
+    switch $statkind {
+      exect { $statbar.exect state pressed; $statbar.cycle state !pressed }
+      cycle { $statbar.exect state !pressed; $statbar.cycle state pressed }
+    }
+  }
+
+
+  # - tree::detail - display stats for an item
+  #
+  proc detail { item value } {
+    variable statkind
+    variable ::gui::treew
+
+    if {![info exists treew]} return
+
+    if {![dict size $value]} {
+      $treew item $item -values [list]
+      return
+    }
+
+    dict with value {
+      switch $statkind {
+        exect {
+          $treew item $item -values \
+              [list \
+                   [::timeline::deltafmt $min yes] $emin \
+                   [::timeline::deltafmt $max yes] $emax \
+                   [::timeline::deltafmt $avg yes] \
+                   [::timeline::deltafmt $stddev yes] \
+                   $count]
+        }
+        cycle {
+          if {$pcount > 0} {
+            $treew item $item -values \
+                [list \
+                     [::timeline::deltafmt $pmin yes] $pemin \
+                     [::timeline::deltafmt $pmax yes] $pemax \
+                     [::timeline::deltafmt $pavg yes] \
+                     [::timeline::deltafmt $pstddev yes] \
+                     $pcount]
+          } else {
+            $treew item $item -values [list]
+          }
+        }
+      }
+    }
+  }
+}
+
+
+# --- timeline -------------------------------------------------------------
+#
+namespace eval timeline {
+  variable tref 0	t0 0		t1 1000000000
+
+  variable tmin $t0	tmax $t1
+  variable dt [expr {$tmax - $tmin}]
+
+  variable disp0 $tmin	disp1 $tmax	ddisp $dt
+
+  variable width 800	height 200	voffset 0
+  variable step 1
+
+
+  # - timeline::autorange - adjust viewport to min-max
+  #
+  proc autorange {} {
+    variable tref; variable t0; variable t1
+    variable disp0; variable disp1; variable ddisp
+    variable ::events::ts
+
+    set min inf
+    set max -inf
+    foreach k [array names ts] {
+      set e1 [lindex $ts($k) 0 0]
+      set e3 [lindex $ts($k) end end]
+      if {$min > $e1} { set min $e1 }
+      if {$max < $e3} { set max $e3 }
+    }
+    if {$min >= inf} return
+
+    if {$disp1 >= $t1} {
+      if {$disp0 <= $t0} {
+        set disp0 [expr {$min - ($max - $min)/100}]
+        set disp1 [expr {$max + ($max - $min)/100}]
+      } else {
+        set disp1 [expr {$max + $ddisp/100}]
+        set disp0 [expr {$disp1 - $ddisp}]
+      }
+    } elseif {$disp0 <= $t0} {
+      set disp0 [expr {$min - $ddisp/100}]
+      set disp1 [expr {$disp0 + $ddisp}]
+    }
+
+    set tref $min
+    set t0 $min
+    set t1 $max
+
+    display $disp0 $disp1
+  }
+
+
+  # - timeline::display - update displayed range
+  #
+  proc display { min max } {
+    variable disp0; variable disp1
+    variable t0; variable t1
+
+    variable disp0 $min disp1 $max ddisp [expr {$max - $min}]
+
+    variable tmin [expr {$t0 - $ddisp/4}]
+    variable tmax [expr {$t1 + $ddisp/4}]
+    variable dt [expr {$tmax - $tmin}]
+
+    global hscroll
+
+    if {$disp0 < $tmin} {
+      set disp0 $tmin
+      set disp1 [expr {$disp0 + $ddisp}]
+    }
+    if {$disp1 > $tmax} {
+      set disp1 $tmax
+      set disp0 [expr {$disp1 - $ddisp}]
+      if {$disp0 < $tmin} {
+        set disp0 $tmin
+        set ddisp $dt
+      }
+    }
+
+    $hscroll set \
+        [expr {($disp0 - $tmin)/double($dt)}] \
+        [expr {($disp1 - $tmin)/double($dt)}]
+    set-resolution
+    ::events::merge
+    ::events::stats
+    draw
+  }
+
+  proc set-resolution { } {
+    variable ddisp
+    variable step; variable pstep; variable width
+
+    set r [expr {max(1,int(pow(10,ceil(log10($ddisp*3.0/$width)))))}]
+    if {$r == $step} return
+
+    set step $r
+    set pstep [expr {$step * $width / double($ddisp)}]
+
+    global rulerres
+    if {$r <= 100} {
+      set rulerres "${r}ns/div"
+    } elseif {$r <= 100000} {
+      set rulerres "[expr {$r/1000}]\ub5s/div"
+    } elseif {$r <= 100000000} {
+      set rulerres "[expr {$r/1000000}]ms/div"
+    } else {
+      set rulerres "[expr {$r/1000000000}]s/div"
+    }
+
+    return
+  }
+
+
+  # - timeline::configure - update widths infos
+  #
+  proc configure { w h } {
+    global timeline ruler
+    variable width $w height $h
+    variable voffset [expr {[winfo y $timeline] - [winfo y $ruler]}]
+
+    set-resolution
+    ::events::merge
+    eselect
+    draw
+  }
+
+  proc time2pix { t } {
+    variable disp0; variable ddisp; variable width
+
+    return [expr {($t-$disp0)*$width/double($ddisp)}]
+  }
+
+  proc pix2time { p } {
+    variable disp0; variable ddisp; variable width
+
+    return [expr {$disp0 + int($p * $ddisp/$width)}]
+  }
+
+  proc timefmt { t } {
+    variable tref
+
+    return [deltafmt [expr {$t - $tref}]]
+  }
+
+
+  # - timeline::deltafmt - format time interval in human readable units
+  #
+  proc deltafmt { dt {round no}} {
+    if {$dt < 0} { set sign "-" } else { set sign "" }
+    set min [expr {abs($dt) / 60000000000}]
+    set s [expr {(abs($dt) % 60000000000) / 1000000000}]
+    set ns [expr {abs($dt) % 1000000000}]
+
+    set ms [expr {$ns / 1000000 % 1000}]
+    set us [expr {$ns / 1000 % 1000}]
+    set ns [expr {$ns % 1000}]
+
+    if {$min == 0} {
+      set min ""
+    } else {
+      set min "$min\u2009min "
+    }
+    if {$s == 0} {
+      if {$ms == 0} {
+        if {$us == 0} {
+          return "$sign$min$ns\u2009ns"
+        } else {
+          if {$round} {
+            set ns [string range "00$ns" end-2 end-2]
+          } else {
+            set ns [string range "00$ns" end-2 end]
+          }
+          return "$sign$min$us.$ns\u2009\ub5s"
+        }
+      } else {
+        if {$round} {
+          set us [string range "00$us" end-2 end-2]
+          return "$sign$min$ms.$us\u2009ms"
+        } else {
+          set ns [string range "00$ns" end-2 end]
+          set us [string range "00$us" end-2 end]
+          return "$sign$min$ms.$us\u2009$ns\u2009ms"
+        }
+      }
+    } else {
+      if {$round} {
+        set ms [string range "00$ms" end-2 end-2]
+        return "$sign$min$s.$ms\u2009s"
+      } else {
+        set ns [string range "00$ns" end-2 end]
+        set us [string range "00$us" end-2 end]
+        set ms [string range "00$ms" end-2 end]
+        return "$sign$min$s.$ms\u2009$us\u2009$ns\u2009s"
+      }
+    }
+  }
+
+
+  # - timeline::closest - find and item close to cursor location
+  #
+  proc closest { x y limit } {
+    global timeline
+
+    set item ""
+    set p $x
+    set dist inf
+
+    foreach i [$timeline find overlapping \
+                   [expr {$x-$limit}] [expr {$y-$gui::eventheight/2}] \
+                   [expr {$x+$limit}] [expr {$y+$gui::eventheight/2}]] {
+      if {"events" ni [$timeline gettags $i]} continue
+
+      foreach {ix iy} [$timeline coords $i] {
+        set d [expr {abs($ix - $x)}]
+        if {$d < $dist} {
+          set item $i
+          set p $ix
+          set dist $d
+        }
+      }
+    }
+
+    if {$dist > $limit} { set p $x }
+    return [list $item $p]
+  }
+
+
+  # - timeline::eselect - draw tree selection below items
+  #
+  proc eselect { } {
+    variable ::gui::treew
+    global timeline
+
+    set wmin [expr {-$timeline::width/2}]
+    set wmax [expr {3*$timeline::width/2}]
+
+    $timeline delete selection
+    foreach item [$treew selection] {
+      set b [$treew bbox $item]
+      if {$b eq ""} continue
+
+      set h0 [expr {[lindex $b 1] - $::timeline::voffset}]
+      set h1 [expr {$h0 + [lindex $b 3]}]
+
+      $timeline create rectangle $wmin $h0 $wmax $h1 \
+          -fill $gui::selectbg -outline {} -tags selection
+    }
+    $timeline lower selection
+  }
+
+
+  # - timeline::ruler - draw the timeline ruler
+  #
+  proc ruler {} {
+    variable disp0; variable disp1; variable ddisp
+    variable tref; variable t0; variable step; variable pstep
+    variable width
+
+    global ruler
+
+    set dmin [expr {$disp0 - $ddisp/2}]
+    set dmax [expr {$disp1 + $ddisp/2}]
+    set wmin [expr {-$width/2}]
+    set wmax [expr {3*$width/2}]
+
+    set h [expr {$::gui::rulerheight - 1}]
+
+    $ruler xview moveto 0
+    $ruler delete ruler region
+
+    set s [expr {1+($dmin - $t0)/$step}]
+    set first [expr {$t0 + $s*$step}]
+    for { set t $first } { $t <= $dmax } { incr t $step; incr s } {
+      set x [time2pix $t]
+
+      set l [expr {3 + ($s % 5 ? 0:3) + ($s % 10 ? 0:3)}]
+      if {$l > 6} {
+        if {$pstep > 7 || $s % 20 == 0} {
+          $ruler create text $x [expr {$h-$l}] \
+              -anchor s -text [expr {($t-$t0)/1e9}] \
+              -font rulerfont -tags ruler
+        }
+      }
+
+      $ruler create line $x [expr {$h-$l}] $x $h \
+          -fill black -width 1 -tags ruler
+    }
+
+    $ruler create line $wmin $h $wmax $h \
+        -fill black -width 1 -tags ruler
+
+    if {$tref != $t0 && $tref > $dmin && $tref < $dmax} {
+      set x [timeline::time2pix $tref]
+      $ruler create line $x 0 $x $h -fill $::gui::treffg -tags region
+    }
+
+
+    $ruler raise cursor
+  }
+
+
+  # - timeline::draw - draw the timeline
+  #
+  proc draw { args } {
+    variable drawitems
+    if {"noruler" ni $args} { set drawitems ruler }
+
+    coroutine async-draw apply {{} {
+      variable ::timeline::tref
+      variable ::timeline::t0; variable ::timeline::t1
+      variable ::timeline::tmin; variable ::timeline::tmax
+      variable ::timeline::width; variable ::timeline::voffset
+      variable ::timeline::drawitems
+
+      variable ::events::merged
+
+      variable ::gui::eventheight; variable ::gui::treew
+
+      global timeline
+      global dtags
+
+      set self [info coroutine]
+      after cancel $self
+      after cancel after 0 $self
+      after idle $self
+      yield
+
+      if {"ruler" in $drawitems} {
+        ::timeline::ruler
+        set drawitems [list]
+        after idle after 0 $self
+        yield
+      }
+
+      set runtime [clock micro]
+
+      $timeline xview moveto 0
+      $timeline delete events labels grid region
+
+      set w $width
+      set wmin [expr {-$w/2}]
+      set wmax [expr {3*$w/2}]
+
+      foreach s [array names merged] {
+
+        set b [$treew bbox $s]
+        if {$b eq ""} continue
+        set h [expr {[lindex $b 1] + [lindex $b 3]/2 - $voffset}]
+        set h0 [expr {$h - $eventheight/2}]
+        set h1 [expr {$h + $eventheight/2 - 1}]
+        set ha0 [expr {$h - $eventheight/2 + 2}]
+        set ha1 [expr {$h + $eventheight/2 - 2}]
+
+        $timeline create line $wmin $h $wmax $h \
+            -fill "#e9e9e9" -tags grid
+        foreach e $merged($s) {
+          set e1 [dict get $e enter]
+          set e2 [dict get $e start]
+          set e3 [dict get $e leave]
+          if {$e3 < $t0} continue
+          if {$e1 > $t1} continue
+
+          set x1 [timeline::time2pix $e1]
+          set x2 [timeline::time2pix $e2]
+          set x3 [timeline::time2pix $e3]
+
+          set x1 [expr {min(max($x1,$wmin),$wmax)}]
+          set x2 [expr {min(max($x2,$wmin),$wmax)}]
+          set x3 [expr {min(max($x3,$wmin),$wmax)}]
+
+          if {$x3 - $x1 < 3} {
+            set id [$timeline create rectangle $x1 $h0 $x3 $h1 \
+                        -fill black -tags events]
+            set dtags($id) $e
+            continue
+          }
+
+          set from [dict get $e from]
+
+          $timeline create line $x1 $ha0 $x1 $ha1 \
+              -fill black -tags labels
+          set id [$timeline create line $x1 $h $x2 $h \
+                      -fill black -tags events]
+          set dtags($id) $e
+
+          if {$from eq ""} {
+            set id [$timeline create rectangle $x2 $h0 $x3 $h1 \
+                        -fill "grey40" -outline black -tags events]
+          } else {
+            set id [$timeline create rectangle $x2 $h0 $x3 $h1 \
+                        -fill $gui::eventbg -outline black -tags events]
+            if {[dict get $e cycle]} {
+              $timeline create rectangle $x2 $h0 [expr {$x2+2}] $h1 \
+                  -fill orange -outline black -tags labels
+            }
+            if {$x3 - $x2 > 20} {
+              if {$x3 - $x2 > [::gui::labelsz $from]} {
+                $timeline create text [expr {($x2+$x3)/2}] $h \
+                    -text $from -font labelfont -tags labels
+              }
+            }
+          }
+          set dtags($id) $e
+        }
+
+        # check runtime every 100 items
+        if {[incr iterations] > 100} {
+          set iterations 0
+          if {[clock micro] - $runtime > 1000} {
+            after idle after 0 $self
+            yield
+            set runtime [clock micro]
+          }
+        }
+      }
+
+      if {$t0 > $tmin} {
+        set x [expr {min($wmax, [timeline::time2pix $t0])-1}]
+        $timeline create rectangle $wmin 0 $x $timeline::height \
+            -fill "#e9e9e9" -outline "" -stipple gray50 -tags region
+      }
+      if {$t1 < $tmax} {
+        set x [expr {max($wmin, [timeline::time2pix $t1])+1}]
+        $timeline create rectangle $x 0 $wmax $timeline::height \
+            -fill "#e9e9e9" -outline "" -stipple gray50 -tags region
+      }
+      if {$tref != $t0 && $tref > $tmin && $tref < $tmax} {
+        set x [timeline::time2pix $tref]
+        $timeline create line $x 0 $x $timeline::height \
+            -fill $::gui::treffg -tags region
+      }
+
+      catch { $timeline lower grid events }
+      $timeline raise cursor
+    }}
+  }
+}
+
+
+# --- zoom -----------------------------------------------------------------
+#
+namespace eval zoom {
+  variable stack [list]
+
+  proc + { x } { push +; step $x 0.9091 }
+  proc - { x } { push -; step $x 1.1 }
+
+
+  # - zoom::drag - adjust zoom level according to mouse motion
+  #
+  proc drag { action x y } {
+    variable dragging
+
+    switch $action {
+      start {
+        push
+        set dragging(x) $x
+        set dragging(y) $y
+      }
+
+      move {
+        step $dragging(x) [expr {pow(1.01, $y-$dragging(y))}]
+        set dragging(y) $y
+      }
+    }
+  }
+
+
+  # - zoom::step - zoom by increments
+  #
+  proc step { x gain } {
+    variable ::timeline::ddisp; variable ::timeline::width
+
+    set gdelta [expr {$ddisp * $gain}]
+    if {$gdelta < 100} return
+
+    set pivot [::timeline::pix2time $x]
+    set r [expr {$gdelta * $x / $width}]
+
+    ::timeline::display \
+        [expr {$pivot - int($r)}] [expr {$pivot + int($gdelta - $r)}]
+  }
+
+
+  # - zoom::reset - set the viewport to max range
+  #
+  proc reset {} {
+    variable ::timeline::t0; variable ::timeline::t1
+    global timeline
+
+    set w [expr {($t1 - $t0)/100}]
+    set min [expr {$t0 - $w}]
+    set max [expr {$t1 + $w}]
+
+    push
+    ::timeline::display $min $max
+  }
+
+
+  # - zoom::push - remember current viewport
+  #
+  proc push { {what ""} } {
+    variable stack
+
+    if {$what eq "" || $what ne [lindex $stack end 0]} {
+      variable ::timeline::disp0; variable ::timeline::disp1
+
+      lappend stack [list $what $disp0 $disp1]
+      if {[llength $stack] > 50} {
+        set stack [lrange $stack 1 end]
+      }
+    }
+
+    return
+  }
+
+
+  # - zoom::pop - restore previous viewport
+  #
+  proc pop {} {
+    variable stack
+
+    if {[llength $stack] == 0} return
+    set z [lindex $stack end]
+    set stack [lrange $stack 0 end-1]
+
+    ::timeline::display [lindex $z 1] [lindex $z 2]
+  }
+}
+
+
+# --- cursor ---------------------------------------------------------------
+#
+namespace eval cursor {
+  variable citem ""
+
+  # - cursor::date - format current cursor timestamp
+  #
+  proc date { x } {
+    global rulerdate
+
+    set rulerdate [timeline::timefmt [timeline::pix2time $x]]
+    return
+  }
+
+
+  # - cursor::snap - move vertical guide to closest item in a range
+  #
+  proc snap { x y } {
+    variable citem
+    variable ::gui::detailsw
+
+    global dtags
+
+    lassign [timeline::closest $x $y 10] item p
+    if {$citem eq $item} { return $p }
+    set citem $item
+
+    if {$item eq ""} {
+      $detailsw replace 1.0 end ""
+    } else {
+      global timeline
+
+      set e [set dtags($item)]
+      set t1 [dict get $e enter]
+      set t2 [dict get $e start]
+      set t3 [dict get $e leave]
+      set from [dict get $e from]
+      set s [dict get $e service]
+      if {$s eq "-"} { set s [dict get $e task] }
+
+      $detailsw delete 1.0 end
+      if {$from eq ""} {
+        $detailsw insert 1.0 "multiple events - zoom in for details"
+      } else {
+        $detailsw insert 1.0 \
+            "[dict get $e instance] $s \u2022" {} \
+            " $from" bold " ([dict get $e codel])" {} \
+            " \u2022 " {} enter bold " [timeline::timefmt $t1]" {} \
+            " ([timeline::deltafmt [expr {$t2 - $t1}]])" {} \
+            " \u2022 " {} start bold " [timeline::timefmt $t2]" {} \
+            " ([timeline::deltafmt [expr {$t3 - $t2}]])" {} \
+            " \u2022 " {} leave bold " [timeline::timefmt $t3]" {} \
+            " \u2192 [dict get $e to]"
+      }
+    }
+    return $p
+  }
+
+
+  # - cursor::trim - trim data left or right
+  #
+  proc trim { side x } {
+    variable ::timeline::tref
+    variable ::timeline::t0; variable ::timeline::t1
+    variable ::timeline::disp0; variable ::timeline::disp1
+
+    set x [::timeline::pix2time $x]
+    if {$x < $disp0 || $x > $disp1} return
+
+    switch $side {
+      left {
+        if {$x > $t1} { ::timeline::autorange; return }
+        set tref $x
+        set t0 $x
+      }
+      right {
+        if {$x < $t0} { ::timeline::autorange; return }
+        set t1 $x
+      }
+    }
+
+    ::timeline::display $disp0 $disp1
+  }
+
+
+  # - cursor::enter - create vertical guide
+  #
+  proc enter { x } {
+    global timeline ruler
+
+    date $x
+    $ruler delete cursor
+    $timeline delete cursor
+    $ruler create line $x 0 $x $gui::rulerheight \
+        -fill $::gui::cursorfg -tags cursor
+    $timeline create line $x 0 $x $timeline::height \
+        -fill $::gui::cursorfg -tags cursor
+  }
+
+
+  # - cursor::move - adjust vertical guide position
+  #
+  proc move { x y {snap on} } {
+    global timeline ruler
+
+    if {$snap} { set x [snap $x $y] } else { snap $x $y }
+
+    date $x
+    $ruler coords cursor $x 0 $x $timeline::height
+    $timeline coords cursor $x 0 $x $timeline::height
+
+    return $x
+  }
+
+
+  # - cursor::leave - remove vertical guide
+  #
+  proc leave {} {
+    global timeline ruler rulerdate
+
+    $ruler delete cursor
+    $timeline delete cursor
+    set rulerdate ""
+  }
+
+
+  # - cursor::drag - move timeline horizontally
+  #
+  proc drag-start { x } {
+    global timeline ruler
+
+    $timeline xview moveto 0
+    $ruler xview moveto 0
+    $timeline scan mark $x 0
+    $ruler scan mark $x 0
+  }
+
+  proc drag-move { x y } {
+    variable ::timeline::tmin; variable ::timeline::tmax
+    variable ::timeline::dt; variable ::timeline::ddisp
+    variable ::timeline::width
+    global timeline ruler hscroll
+
+    $timeline scan dragto $x 0 1
+    $ruler scan dragto $x 0 1
+
+    set x0 [expr {int([$timeline canvasx 0])}]
+    set xmin [timeline::time2pix $tmin]
+    set xmax [timeline::time2pix $tmax]
+
+    if {$x0 <= $xmin} {
+      incr x [expr {-int(($xmin - $x0))}]
+      $timeline scan dragto $x 0 1
+      $ruler scan dragto $x 0 1
+      set x0 [expr {int([$timeline canvasx 0])}]
+    } elseif {$x0 + $width >= $xmax} {
+      incr x [expr {int(($x0 + $width - $xmax))}]
+      $timeline scan dragto $x 0 1
+      $ruler scan dragto $x 0 1
+      set x0 [expr {int([$timeline canvasx 0])}]
+    }
+
+    set d0 [timeline::pix2time $x0]
+    set d1 [expr {$ddisp + $d0}]
+    $hscroll set \
+        [expr {($d0 - $tmin)/double($dt)}] [expr {($d1 - $tmin)/double($dt)}]
+
+    # if dragging much, reset and redraw
+    if {abs($x0) > $width/2} {
+      drag-stop $x $y
+      drag-start $x
+    }
+  }
+
+  proc drag-stop { x y } {
+    global timeline ruler
+
+    set x0 [expr {int([$timeline canvasx 0])}]
+    set t0 [timeline::pix2time $x0]
+
+    ::timeline::display $t0 [expr {$::timeline::ddisp + $t0}]
+
+    move $x $y
+  }
+
+
+  # - cursor::range - select horizontal timeline region
+  #
+  proc range-start { x y {snap on}} {
+    global timeline
+
+    set x [move $x $y $snap]
+    $timeline create rectangle $x 0 $x $timeline::height \
+        -width 0 -fill $gui::rangebg -tags range
+    $timeline lower range
+
+    variable range [list $x 0 $x $timeline::height]
+  }
+
+  proc range-extend { x y {snap on}} {
+    variable range
+    global timeline
+
+    set x [move $x $y $snap]
+    set range [lreplace $range 2 2 $x]
+    $timeline coords range $range
+  }
+
+  proc range-stop {} {
+    global timeline
+
+    set c [$timeline coords range]
+    $timeline delete range
+
+    if {[lindex $c 0] < [lindex $c 2]} {
+      set t0 [timeline::pix2time [lindex $c 0]]
+      set t1 [timeline::pix2time [lindex $c 2]]
+      if {$t1 - $t0 > 100} {
+        zoom::push
+        ::timeline::display $t0 $t1
+      }
+    }
+  }
+
+  proc range-cancel {} {
+    global timeline
+
+    $timeline delete range
+  }
+
+
+  # - cursor::measure - measure horizontal timeline span
+  #
+  proc measure-start { x y {snap on}} {
+    variable ::timeline::tref
+    global timeline
+
+    set x [move $x $y $snap]
+    set tref [timeline::pix2time $x]
+    date $x
+    ::timeline::draw
+  }
+
+  proc measure-stop { x } {
+    variable ::timeline::tref; variable ::timeline::t0
+    global timeline
+
+    set tref $t0
+    date $x
+    ::timeline::draw
+  }
+}
+
+
+# --- events ---------------------------------------------------------------
+#
+namespace eval events {
+  variable data
+  variable ts
+
+  variable merged
+
+  # - events::openf - async read a file until eof
+  #
+  proc openf { name } {
+    set chan [open $name r]
+    set reader ::async-readf-$chan
+    variable $reader $name
+
+    coroutine $reader apply {{ chan name } {
+      variable ::events::data; variable ::events::ts
+      variable ::gui::hasgui
+
+      # start in background
+      set self [info coroutine]
+      after idle $self
+      yield
+      set runtime [clock milli]
+
+      # read file by line
+      set keys [list]
+      while {[gets $chan line] >= 0} {
+        # split line, check elements
+        set r [lassign $line \
+                   enter start leave instance task service codel from to]
+        if {[llength $r] > 0} continue
+
+        # convert timestamps to nanosecond integer
+        if {[scan $enter "%u.%u" s ns] != 2} continue
+        set enter [expr {$s * 1000000000 + $ns}]
+        if {[scan $start "%u.%u" s ns] != 2} continue
+        set start [expr {$s * 1000000000 + $ns}]
+        if {[scan $leave "%u.%u" s ns] != 2} continue
+        set leave [expr {$s * 1000000000 + $ns}]
+
+        # create event
+        set event [dict create \
+                       enter $enter start $start leave $leave \
+                       cycle 0 \
+                       instance $instance task $task \
+                       service $service codel $codel \
+                       from $from to $to]
+        set times [list $enter $start $leave]
+
+        # append
+        set key $instance
+        foreach k [list $task $service $from] {
+          lappend key $k
+          if {$key ni $keys} { lappend keys $key }
+
+          lappend data($key) $event
+          lappend ts($key) $times
+        }
+
+        # check runtime every 100 lines
+        if {[incr lines] % 100 == 0} {
+          if {[clock milli] - $runtime > 10} {
+            set $self "$name read $lines events"
+            after idle after 0 $self
+            yield
+            set runtime [clock milli]
+          }
+        }
+      }
+
+      # sort new entries by timestamp, estimate cycle start flag at service
+      # level (it does not make much sense at task or codel level)
+      foreach k $keys {
+        # sort
+        set idx [lsort -unique -indices -integer -index 0 $ts($k)]
+        set data($k) [lmap i $idx { lindex $data($k) $i }]
+        set ts($k) [lmap i $idx { lindex $ts($k) $i }]
+
+        # cycle estimation
+        ::events::cycleflag $k
+
+        after idle after 0 $self
+        yield
+      }
+
+      # release and signal
+      close $chan
+      unset $self
+    }} $chan [file tail $name]
+
+    return $reader
+  }
+
+
+  # - events::cycleflag - estimate cycle start for periodic tasks
+  #
+  proc cycleflag { item } {
+    variable data; variable ts
+
+    # cycle can be estimated only for services
+    if {[llength $item] != 3} return
+
+    set cycle 0
+    set data($item) [lmap e $data($item) {
+      # cycle start flag
+      if {[string match *::start [dict get $e from]]} { set cycle -1 }
+
+      # update
+      if {$cycle} { dict set e cycle $cycle }
+
+      # update cycle flag for next item
+      set cycle [string match *::pause::* [dict get $e to]]
+
+      set e
+    }]
+
+    return
+  }
+
+
+  # - events::merge - async fuse events according to current display resolution
+  #
+  proc merge {} {
+    coroutine async-merge apply {{} {
+      variable ::timeline::t0; variable ::timeline::t1
+      variable ::timeline::disp0; variable ::timeline::disp1
+      variable ::timeline::ddisp; variable ::timeline::width
+
+      variable ::events::data; variable ::events::ts
+      variable ::events::merged
+
+      variable ::gui::treew
+
+      # start in background
+      set self [info coroutine]
+      after cancel $self
+      after cancel after 0 $self
+      after idle $self
+      yield
+      set runtime [clock micro]
+
+      # get time range and events
+      set tmin [expr {max($t0, $disp0 - $ddisp/2)}]
+      set tmax [expr {min($t1, $disp1 + $ddisp/2)}]
+      set minp [expr {2.5*$ddisp/$width}]
+      set elist [::gui::treeitems]
+
+      # delete closed tree items
+      foreach k [array names merged] {
+        if {$k ni $elist} { array unset merged $k }
+      }
+
+      # iterate over open tree items
+      foreach k $elist {
+
+        # get displayed range
+        set imin [lsearch -integer -bisect -index end $ts($k) $tmin]
+        set imax [lsearch -integer -bisect -index 0 $ts($k) $tmax]
+        if {$imin >= $imax} {
+          set merged($k) [list]
+          continue
+        }
+
+        set l [list]
+        set events [lassign [lrange $data($k) $imin+1 $imax] c]
+        set c1 [dict get $c enter]
+        set c3 [dict get $c leave]
+        set fused no
+
+        foreach e $events {
+          # check runtime every 100 items
+          if {[incr iterations] > 100} {
+            set iterations 0
+            if {[clock micro] - $runtime > 1000} {
+              after idle after 0 $self
+              yield
+              set runtime [clock micro]
+            }
+          }
+
+          set e1 [dict get $e enter]
+          set e3 [dict get $e leave]
+
+          if {$c3 - $c1 >= $minp && !$fused} {
+            lappend l $c
+            set c $e
+            set c1 $e1
+            set c3 $e3
+            continue
+          }
+          if {$e3 - $e1 < $minp && $e1 - $c3 < $minp} {
+            dict set c leave [dict get $e leave]
+            set c3 $e3
+            if {!$fused} {
+              dict set c from ""
+              set fused yes
+            }
+            continue
+          }
+
+          lappend l $c
+          set c $e
+          set c1 $e1
+          set c3 $e3
+          set fused no
+        }
+        lappend l $c
+
+        set merged($k) $l
+      }
+
+      ::timeline::draw noruler
+    }}
+  }
+
+
+  # - events::nexttime - return next event time
+  #
+  proc nexttime { t {among {}}} {
+    variable ::events::ts
+
+    if {[llength $among] == 0} { set among [array names ts] }
+
+    set tn +inf
+    foreach k $among {
+      set i [lsearch -integer -bisect -index 0 $ts($k) $t]
+      foreach t1 [lindex $ts($k) $i+1 0] {
+        if {$t1 < $tn} { set tn $t1 }
+      }
+    }
+
+    return $tn
+  }
+
+
+  # - events::prevtime - return previous event time
+  #
+  proc prevtime { t {among {}}} {
+    variable ::events::ts
+
+    if {[llength $among] == 0} { set among [array names ts] }
+
+    set tp -inf
+    foreach k $among {
+      set i [lsearch -integer -bisect -index end $ts($k) $t]
+      foreach t1 [lindex $ts($k) $i 0] {
+        if {$t1 > $tp} { set tp $t1 }
+      }
+    }
+
+    return $tp
+  }
+
+
+  # - events::stats - async compute codels statistics for the current display
+  #
+  proc stats {} {
+    set task ::async-stats
+    variable $task running
+
+    coroutine $task apply {{} {
+      variable ::events::data; variable ::events::ts
+      variable ::events::stats
+
+      variable ::tree::statrange
+
+      variable ::gui::treew
+
+      # start in background
+      set self [info coroutine]
+      after cancel $self
+      after cancel after 0 $self
+      after idle $self
+      yield
+      set runtime [clock micro]
+
+      # get relevant time range (displayed or full)
+      switch $statrange {
+        disp {
+          set tmin [expr {max($::timeline::disp0, $::timeline::t0)}]
+          set tmax [expr {min($::timeline::disp1, $::timeline::t1)}]
+          set elist [::gui::treeitems yes]
+        }
+        full {
+          set tmin $::timeline::t0
+          set tmax $::timeline::t1
+          set elist [::gui::treeitems yes]
+        }
+        batch {
+          set tmin -inf
+          set tmax +inf
+          set elist [array names data]
+        }
+      }
+
+      # delete closed tree items
+      foreach k [array names stats] {
+        if {$k ni $elist} { array unset stats $k }
+      }
+
+      # iterate over tree items
+      foreach k $elist {
+
+        # get elements in range
+        if {$tmin > -inf} {
+          set imin [lsearch -integer -bisect -index end $ts($k) $tmin]
+          set imax [lsearch -integer -bisect -index 0 $ts($k) $tmax]
+          if {$imin >= $imax} {
+            array unset stats $k
+            ::tree::detail $k {}
+            continue
+          }
+        } else {
+          set imin -1
+          set imax [llength $ts($k)]
+        }
+
+        # check if already valid
+        if {$k in [array names stats]} {
+          if {[dict get $stats($k) imin] == $imin &&
+              [dict get $stats($k) imax] == $imax} {
+            ::tree::detail $k $stats($k)
+            continue
+          }
+        }
+
+        # compute
+        set count 0; set sum 0; set sumsq 0
+        set min inf; set max -inf
+        set emin [dict create]; set emax [dict create]
+        set tx [dict create]
+
+        set pcount 0; set psum 0; set psumsq 0
+        set pe1 -inf; set pmin inf; set pmax -inf
+        set pemin [dict create]; set pemax [dict create]
+
+        set ccount 0; set csum 0; set csumsq 0
+        set ce1 -inf; set cmin inf; set cmax -inf
+        set cemin [dict create]; set cemax [dict create]
+
+        foreach e [lrange $data($k) $imin+1 $imax] {
+          # check runtime every 100 items
+          if {[incr iterations] > 100} {
+            set iterations 0
+            if {[clock micro] - $runtime > 1000} {
+              after idle after 0 $self
+              yield
+              set runtime [clock micro]
+            }
+          }
+
+          # exec
+          incr count
+          set cycle [dict get $e cycle]
+          set e1 [dict get $e start]
+          set e3 [dict get $e leave]
+          set dt [expr {$e3 - $e1}]
+          incr sum $dt
+          incr sumsq [expr {$dt * $dt}]
+          if {$min > $dt} { set min $dt; set emin $e }
+          if {$max < $dt} { set max $dt; set emax $e }
+          dict update tx [dict get $e from] from {
+            dict incr from [dict get $e to]
+          }
+
+          if {$ce1 != -inf && $cycle > 0} {
+            # cycle
+            incr ccount
+            set dt [expr {$e1 - $ce1}]
+            incr csum $dt
+            incr csumsq [expr {$dt * $dt}]
+            if {$cmin > $dt} { set cmin $dt; set cemin $e }
+            if {$cmax < $dt} { set cmax $dt; set cemax $e }
+          } elseif {$pe1 != -inf && $ccount == 0} {
+            # period
+            incr pcount
+            set dt [expr {$e1 - $pe1}]
+            incr psum $dt
+            incr psumsq [expr {$dt * $dt}]
+            if {$pmin > $dt} { set pmin $dt; set pemin $e }
+            if {$pmax < $dt} { set pmax $dt; set pemax $e }
+          }
+
+          set pe1 $e1
+          if {$cycle} { set ce1 $e1 }
+        }
+
+        set avg [expr {int($sum / double($count))}]
+        set stddev [expr {
+          int(sqrt(($sumsq - $sum * $sum / double($count)) / $count)) }]
+
+        if {$ccount} {
+          set pcount $ccount
+          set pmin $cmin
+          set pmax $cmax
+          set pemin $cemin
+          set pemax $cemax
+          set pavg [expr {int($csum / double($ccount))}]
+          set pstddev [expr {
+            int(sqrt(($csumsq - $csum*$csum/double($ccount)) / $ccount)) }]
+        } elseif {$pcount} {
+          set pavg [expr {int($psum / double($pcount))}]
+          set pstddev [expr {
+            int(sqrt(($psumsq - $psum*$psum/double($pcount)) / $pcount)) }]
+        } else {
+          set pavg inf
+          set pstddev inf
+        }
+
+        set stat [dict create \
+                      imin $imin imax $imax \
+                      count $count min $min max $max \
+                      emin $emin emax $emax \
+                      avg $avg stddev $stddev tx $tx \
+                      pcount $pcount pmin $pmin pmax $pmax \
+                      pemin $pemin pemax $pemax \
+                      pavg $pavg pstddev $pstddev]
+        set stats($k) $stat
+        ::tree::detail $k $stat
+      }
+
+      # signal
+      unset $self
+    }}
+
+    return $task
+  }
+
+
+  # - events::detail - display statistics for item
+  #
+  proc detail { item } {
+    variable stats
+    variable ::gui::detailsw
+
+    $detailsw delete 1.0 end
+    if {$item ni [array names stats]} return
+
+    set total [dict get $stats($item) count]
+    set detail [list "$total transition[expr {$total>1?"s":""}]" heading]
+    dict for {from tos} [dict get $stats($item) tx] {
+      set t [list]
+      dict for {to count} $tos {
+        set p [format "%.1f" [expr {100.*$count/$total}]]
+        lappend t " $to $p% ($count)"
+      }
+      lappend detail " \u2022 " {} "$from \u2192" bold [join $t ,] {}
+    }
+    $detailsw insert 1.0 {*}$detail
+  }
+
+
+  # - events::hpstats - print human-readable statistics summary
+  #
+  proc hpstats { chan } {
+    variable ::events::data; variable ::events::stats
+
+    # macro to print counters
+    set logcounter {{chan indent stats} {
+      upvar $stats s
+
+      dict with s {
+        puts -nonewline $chan "#$indent×$count exec  "
+        puts -nonewline $chan "  min [::timeline::deltafmt $min yes]"
+        puts -nonewline $chan "  max [::timeline::deltafmt $max yes]"
+        puts -nonewline $chan "  avg [::timeline::deltafmt $avg yes]"
+        puts -nonewline $chan "  std [::timeline::deltafmt $stddev yes]"
+        puts $chan ""
+        if {$pcount} {
+          puts -nonewline $chan "#$indent"
+          puts -nonewline $chan "×$pcount cycle[expr {$pcount>1?"s":" "}]"
+          puts -nonewline $chan "  min [::timeline::deltafmt $pmin yes]"
+          puts -nonewline $chan "  max [::timeline::deltafmt $pmax yes]"
+          puts -nonewline $chan "  avg [::timeline::deltafmt $pavg yes]"
+          puts -nonewline $chan "  std [::timeline::deltafmt $pstddev yes]"
+          puts $chan ""
+        }
+      }
+      puts $chan "#"
+    }}
+
+    puts $chan "# --- Summary ----------------------------------------------"
+    puts $chan "#"
+
+    set tasks [lsort [lmap k [array names ::events::stats] {
+      if {[llength $k] != 2} continue else { set k }
+    }]]
+    foreach task $tasks {
+      set total [dict get $stats($task) count]
+      puts $chan "# $task"
+      dict for {from tos} [dict get $stats($task) tx] {
+        dict for {to count} $tos {
+          set p [format "%.1f" [expr {100.*$count/$total}]]
+          puts $chan "#     $from -> $to $p% ($count/$total)"
+        }
+      }
+      apply $logcounter $chan "   " stats($task)
+
+      set services [lsort [lmap k [array names ::events::stats "$task *"] {
+        if {[llength $k] != 3} continue else { set k }
+      }]]
+      foreach service $services {
+        set total [dict get $stats($service) count]
+        puts $chan "#   [lindex $service end]"
+        dict for {from tos} [dict get $stats($service) tx] {
+          dict for {to count} $tos {
+            set p [format "%.1f" [expr {100.*$count/$total}]]
+            puts $chan "#       $from -> $to $p% ($count/$total)"
+          }
+        }
+        apply $logcounter $chan "     " stats($service)
+
+        foreach item [lsort [array names ::events::stats "$service *"]] {
+          set from [lindex $item end]
+          set codel [dict get [lindex $data($item) 0] codel]
+          set total [dict get $stats($item) count]
+
+          puts $chan "#     $from ($codel)"
+          dict for {from tos} [dict get $stats($item) tx] {
+            dict for {to count} $tos {
+              set p [format "%.1f" [expr {100.*$count/$total}]]
+              puts $chan "#         -> $to $p% ($count/$total)"
+            }
+          }
+
+          apply $logcounter $chan "       " stats($item)
+        }
+      }
+      puts $chan "#"
+    }
+  }
+
+  # - events::pstats - print statistics
+  #
+  proc pstats { chan } {
+    variable ::events::data; variable ::events::stats
+
+    # cycle exec times
+    puts $chan \
+        "# exec instance task service state codel count min max avg std (ns)"
+    foreach item [lsort [array names ::events::stats]] {
+      if {[llength $item] == 4} {
+        set codel [dict get [lindex $data($item) 0] codel]
+      } else {
+        set codel *
+      }
+      set k [lrange [linsert $item end * *] 0 3]
+      dict with stats($item) {
+        puts $chan "exec $k $codel $count $min $max $avg $stddev"
+      }
+    }
+    puts $chan ""
+
+    # cycle times
+    puts $chan \
+        "# cycle instance task service state codel count min max avg std (ns)"
+    foreach item [lsort [array names ::events::stats]] {
+      if {[llength $item] == 4} {
+        set codel [dict get [lindex $data($item) 0] codel]
+      } else {
+        set codel *
+      }
+      set k [lrange [linsert $item end * *] 0 3]
+      dict with stats($item) {
+        if {!$pcount} continue
+        puts $chan "cycle $k $codel $pcount $pmin $pmax $pavg $pstddev"
+      }
+    }
+    puts $chan ""
+
+    # transitions
+    puts $chan "# trans instance task service state codel from to count/total"
+    foreach item [lsort [array names ::events::stats]] {
+      if {[llength $item] == 4} {
+        set codel [dict get [lindex $data($item) 0] codel]
+      } else {
+        set codel *
+      }
+      set k [lrange [linsert $item end * *] 0 3]
+      set total [dict get $stats($item) count]
+      dict for {from tos} [dict get $stats($item) tx] {
+        dict for {to count} $tos {
+          puts $chan "trans $k $codel $from $to $count/$total"
+        }
+      }
+    }
+  }
+}
+
+
+# --- main -----------------------------------------------------------------
+#
+
+# process command line
+set stats no
+
+while {[llength $argv]} {
+  set arg [lindex $argv 0]
+  set optarg ""
+  regexp -- {(--?.+)=(.+)} $arg m arg optarg
+
+  switch -glob -- $arg {
+    -s - --stats { set stats yes; set statout $optarg }
+
+    -v - --version { puts $::profundis; exit 0 }
+    -h - --help { usage stdout 0 }
+
+    -- { set argv [lreplace $argv 0 0]; break }
+    -* { puts stderr "unknown option $arg"; usage stderr 2 }
+
+    default break
+  }
+
+  set argv [lreplace $argv 0 0]
+}
+
+# generate statistics
+if {$stats} {
+  if {![llength $argv]} { puts stderr "no input files"; exit 2 }
+
+  foreach f $argv {
+    set cb [::events::openf $f]
+    while {[info exists $cb]} { vwait $cb }
+  }
+
+  variable ::tree::statrange batch
+  set cb [::events::stats]
+  while {[info exists $cb]} { vwait $cb }
+
+  if {$statout eq ""} {
+    ::events::hpstats stdout
+    ::events::pstats stdout
+  } else {
+    ::gui::exportf $statout
+  }
+  exit 0
+}
+
+# hi gui
+gui::init
+gui::openf {*}$argv
+vwait forever
+exit

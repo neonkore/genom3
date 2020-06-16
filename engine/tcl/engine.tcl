@@ -394,9 +394,10 @@ namespace eval engine {
       while { ![eof $in] } {
         # read input by chunks of 4k, and avoid stopping on a tag limit
         append raw [read $in 4096]
-        while { [string equal {<} [string index $raw end]] } {
+        while { [string first < $raw end-1] >= 0 ||
+                [string first > $raw end] >= 0 } {
           if [eof $in] break
-          append raw [read $in 1]
+          append raw [read $in 2]
         }
 
         # look for complete tags - x is the full match including markers, o
@@ -406,9 +407,6 @@ namespace eval engine {
 
           # get match indices (x is overwritten)
           regexp -indices $markup(full) $raw x io it ic
-
-          # no \n has been discarded yet
-          set nldiscarded 0
 
           # flush raw data before opening tag, if any
           if {[lindex $x 0] > 0} {
@@ -427,9 +425,12 @@ namespace eval engine {
             # update current line number in the template file
             incr linenum [linecount $notag]
 
-            # if the character immediately preceeding the opening <'
-            # tag  is a \n, it is discarded.
-            if {$o == "'" && [string index $notag end] == "\n"} {
+            # if the character immediately preceeding the opening and following
+            # the closing <' tag is a \n, discard the first.
+            set nldiscarded 0
+            if {"$o$c" eq "''" &&
+                [string index $notag end] eq "\n" &&
+                [string index $raw [lindex $x 1]+1] eq "\n"} {
               set notag [string range $notag 0 end-1]
               incr nldiscarded
             }
@@ -466,15 +467,7 @@ namespace eval engine {
           # update current line number in the template file
           incr linenum [linecount $t]
 
-          # discard processed source text - if the character immediately
-          # following the closing '> tag is a \n, it is discarded, except
-          # if a similar \n was discarded before the tag.
-          if {!$nldiscarded &&
-              $c == "'" && [string index $raw [lindex $x 1]+1] == "\n"} {
-            lset x 1 [expr [lindex $x 1] + 1]
-            puts -nonewline $tfile "\n"
-            incr linenum
-          }
+          # discard processed source text
           set raw [string replace $raw 0 [lindex $x 1]]
         }
 

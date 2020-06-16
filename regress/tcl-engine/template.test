@@ -127,7 +127,7 @@ expect data '/^genom '${PACKAGE_VERSION}'$/ {next}; {exit 2}'
 
 # parse file, single quote marker
 cat >run.t/file.tcl <<'EOF'
-<'set v [dotgen genom version]; puts $v'>
+<'set v [dotgen genom version]; puts -nonewline $v'>
 EOF
 cat >run.t/template.tcl <<EOF
 engine mode +overwrite

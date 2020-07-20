@@ -49,10 +49,16 @@ struct prof_event {
 };
 
 /* API */
-int		genom_<"$comp">_prof_init(const char *instance,
+#ifdef __cplusplus
+extern "C" {
+#endif
+  int		genom_<"$comp">_prof_init(const char *instance,
                         const char *filename, int autolog);
-void		genom_<"$comp">_prof_fini(void);
-void		genom_<"$comp">_prof_record(struct prof_event *event);
+  void		genom_<"$comp">_prof_fini(void);
+  void		genom_<"$comp">_prof_record(struct prof_event *event);
+#ifdef __cplusplus
+}
+#endif
 
 #define genom_<"$comp">_prof_decl(event)        \
   struct prof_event event

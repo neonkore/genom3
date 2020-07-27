@@ -559,7 +559,7 @@ namespace eval tree {
     variable ::gui::treew
     global statbar
 
-    variable expand [expr {$x1 - $x0 > 0.9 ?  "«" : "»"}]
+    variable expand [expr {$x1 - $x0 > 0.9 ?  "\u00ab" : "\u00bb"}]
     $scroll set $x0 $x1
 
     set dw [winfo width $treew]
@@ -605,13 +605,15 @@ namespace eval tree {
     global hpane
 
     switch -- $expand {
-      » {
+      \u00bb {
+        # »
         lassign [$treew xview] x0 x1
         set w [winfo width $treew]
         $hpane sashpos 0 [expr {round($w/($x1 - $x0))+2}]
       }
 
-      « {
+      \u00ab {
+        # «
         $treew xview 0
         $hpane sashpos 0 [$treew column #0 -width]
       }

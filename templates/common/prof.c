@@ -143,14 +143,14 @@ genom_<"$comp">_prof_record(struct prof_event *event)
   unsigned int head = atomic_fetch_add(&pcontext.eventq.head, 1);
   struct prof_item *i = &pcontext.eventq.item[head % PROF_EVQ_SIZE];
 
-  /* must be dirty by construction */
-  assert(__builtin_expect(atomic_load(&i->dirty), true));
-
   /* the queue shall not be full */
   while (__builtin_expect(
            head >= atomic_load(&pcontext.eventq.tail) + PROF_EVQ_SIZE,
            0))
     sched_yield();
+
+  /* must be dirty by construction */
+  assert(__builtin_expect(atomic_load(&i->dirty), true));
 
   /* store to the queue and mark as clean */
   i->event = *event;

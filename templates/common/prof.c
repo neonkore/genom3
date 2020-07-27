@@ -53,6 +53,9 @@ int genom_<"$comp">_prof_enable = 0;
 /* --- local data ---------------------------------------------------------- */
 
 #define PROF_EVQ_SIZE	512 /* events */
+#if PROF_EVQ_SIZE & (PROF_EVQ_SIZE-1)
+# error "PROF_EVQ_SIZE must be a power of two"
+#endif
 
 struct prof_item {
   atomic_bool dirty;

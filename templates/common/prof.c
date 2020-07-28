@@ -22,16 +22,12 @@
 #                                           Anthony Mallet on Wed Apr 15 2020
 #
 
-if {[llength $argv] != 1} { error "expected arguments: component" }
-lassign $argv component
-
-# compute handy shortcuts
-set comp [$component name]
+# default event queue size
+set qsize 512
+if {[llength $argv] == 1} { lassign $argv qsize }
 
 lang c
 '>
-#include "autoconf/acheader.h"
-
 #include <assert.h>
 #include <err.h>
 #include <errno.h>
@@ -46,13 +42,15 @@ lang c
 #include <unistd.h>
 
 #include "genom3/c/exception.h"
-#include "<"$comp">_prof.h"
+#include "prof.h"
 
-int genom_<"$comp">_prof_enable = 0;
+int genom_prof_enable = 0;
 
 /* --- local data ---------------------------------------------------------- */
 
-#define PROF_EVQ_SIZE	512 /* events */
+/* event queue size */
+#define PROF_EVQ_SIZE	(<"$qsize">)
+
 #if PROF_EVQ_SIZE & (PROF_EVQ_SIZE-1)
 # error "PROF_EVQ_SIZE must be a power of two"
 #endif
@@ -63,7 +61,6 @@ struct prof_item {
 };
 
 static struct {
-  const char *instance;
   FILE *fout;
   bool autolog;
   pthread_t writer;
@@ -77,22 +74,20 @@ static struct {
 static inline void	prof_log(const struct timespec *tenter,
                                 const struct timespec *tstart,
                                 const struct timespec *tleave,
-                                const char *task, const char *service,
-                                const char *codel, const char *from,
-                                const char *to);
-static void *		genom_<"$comp">_prof_writer(void *data);
+                                const char *instance, const char *task,
+                                const char *service, const char *codel,
+                                const char *from, const char *to);
+static void *		prof_writer(void *data);
 
 
-/* <"[--- genom_${comp}_prof_init ---------------------------------------]"> */
+/* --- genom_prof_init ----------------------------------------------------- */
 
 int
-genom_<"$comp">_prof_init(const char *instance, const char *filename,
-                          int autolog)
+genom_prof_init(const char *filename, int autolog)
 {
-  if (!genom_<"$comp">_prof_enable) return 0;
+  if (!genom_prof_enable) return 0;
 
   /* init context */
-  pcontext.instance = instance;
   pcontext.fout = NULL;
   pcontext.autolog = !!autolog;
   pcontext.eventq.item = malloc(PROF_EVQ_SIZE * sizeof(*pcontext.eventq.item));
@@ -115,8 +110,7 @@ genom_<"$comp">_prof_init(const char *instance, const char *filename,
   if (pcontext.fout == NULL) { warn("%s", path); goto err; }
 
   /* writer thread */
-  if (pthread_create(
-        &pcontext.writer, NULL, genom_<"$comp">_prof_writer, NULL)) {
+  if (pthread_create(&pcontext.writer, NULL, prof_writer, NULL)) {
     warn("profiling writer thread");
     goto err;
   }
@@ -132,7 +126,7 @@ err: {
 }
 
 
-/* <"[--- genom_${comp}_prof_record -------------------------------------]"> */
+/* --- genom_prof_record --------------------------------------------------- */
 
 /* lock-free multiple writer push: multiple threads may increment the head
  * pointer, so it must be incremented before writing an item contents. The
@@ -140,7 +134,7 @@ err: {
  * an item until it is marked as not dirty. */
 
 void
-genom_<"$comp">_prof_record(struct prof_event *event)
+genom_prof_record(struct prof_event *event)
 {
   /* next free item */
   unsigned int head = atomic_fetch_add(&pcontext.eventq.head, 1);
@@ -161,17 +155,17 @@ genom_<"$comp">_prof_record(struct prof_event *event)
 }
 
 
-/* <"[--- genom_${comp}_prof_fini ---------------------------------------]"> */
+/* --- genom_prof_fini ----------------------------------------------------- */
 
 void
-genom_<"$comp">_prof_fini(void)
+genom_prof_fini(void)
 {
   struct timespec tenter, tleave;
 
-  if (!genom_<"$comp">_prof_enable) return;
+  if (!genom_prof_enable) return;
 
   /* disable profiling */
-  genom_<"$comp">_prof_enable = 0;
+  genom_prof_enable = 0;
 
   /* wait for writer */
   pthread_cancel(pcontext.writer);
@@ -186,7 +180,7 @@ genom_<"$comp">_prof_fini(void)
 
     assert(__builtin_expect(!atomic_load(&i->dirty), true));
     prof_log(&i->event.tenter, &i->event.tstart, &i->event.tleave,
-             i->event.task, i->event.service, i->event.codel,
+             i->event.instance, i->event.task, i->event.service, i->event.codel,
              i->event.from, i->event.to);
   }
 
@@ -194,7 +188,7 @@ genom_<"$comp">_prof_fini(void)
   if (pcontext.autolog) {
     clock_gettime(CLOCK_REALTIME, &tleave);
     prof_log(&tenter, &tenter, &tleave,
-             "profiling", "writer", "genom_<"$comp">_prof_writer",
+             "genom", "profiling", "writer", "prof_writer",
              "wakeup", "done");
   }
   fclose(pcontext.fout);
@@ -208,24 +202,24 @@ static inline void
 prof_log(const struct timespec *tenter,
          const struct timespec *tstart,
          const struct timespec *tleave,
-         const char *task, const char *service, const char *codel,
-         const char *from, const char *to)
+         const char *instance, const char *task, const char *service,
+         const char *codel, const char *from, const char *to)
 {
   fprintf(pcontext.fout,
           "%lld.%.9ld %lld.%.9ld %lld.%.9ld %s %s %s %s %s %s\n",
           (long long)tenter->tv_sec, tenter->tv_nsec,
           (long long)tstart->tv_sec, tstart->tv_nsec,
           (long long)tleave->tv_sec, tleave->tv_nsec,
-          pcontext.instance, task, service, codel,
+          instance, task, service, codel,
           from ? from : "::genom::ok",
           to ? to : "::genom::ok");
 }
 
 
-/* <"[--- genom_${comp}_prof_writer -------------------------------------]"> */
+/* --- prof_writer --------------------------------------------------------- */
 
-void *
-genom_<"$comp">_prof_writer(void *unused)
+static void *
+prof_writer(void *unused)
 {
   struct timespec tsleep = { .tv_sec = 0, .tv_nsec = 10000000 /* 10ms */ };
   unsigned int tail = atomic_load(&pcontext.eventq.tail);
@@ -250,7 +244,7 @@ genom_<"$comp">_prof_writer(void *unused)
       if (pcontext.autolog) {
         clock_gettime(CLOCK_REALTIME, &tleave);
         prof_log(&tenter, &tenter, &tleave,
-                 "profiling", "writer", "genom_<"$comp">_prof_writer",
+                 "genom", "profiling", "writer", "prof_writer",
                  "wakeup", "sleep");
       }
 
@@ -287,7 +281,7 @@ genom_<"$comp">_prof_writer(void *unused)
 
     /* log data */
     prof_log(&i->event.tenter, &i->event.tstart, &i->event.tleave,
-             i->event.task, i->event.service, i->event.codel,
+             i->event.instance, i->event.task, i->event.service, i->event.codel,
              i->event.from, i->event.to);
 
     /* mark as processed */

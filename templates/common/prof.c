@@ -69,6 +69,7 @@ static struct {
     struct prof_item *item;
     atomic_uint head, tail;
   } eventq;
+  unsigned int gauge;
 } pcontext;
 
 static inline void	prof_log(const struct timespec *tenter,
@@ -93,6 +94,7 @@ genom_prof_init(const char *filename, int autolog)
   pcontext.eventq.item = malloc(PROF_EVQ_SIZE * sizeof(*pcontext.eventq.item));
   if (pcontext.eventq.item == NULL) { warn("malloc"); return 1; }
 
+  pcontext.gauge = 0;
   atomic_store(&pcontext.eventq.head, 0);
   atomic_store(&pcontext.eventq.tail, 0);
   for(unsigned i = 0; i < PROF_EVQ_SIZE; i++)
@@ -190,6 +192,8 @@ genom_prof_fini(void)
     prof_log(&tenter, &tenter, &tleave,
              "genom", "profiling", "writer", "prof_writer",
              "wakeup", "done");
+    warnx("profiling events queue peak usage: %.1f%%",
+          100. * pcontext.gauge / PROF_EVQ_SIZE);
   }
   fclose(pcontext.fout);
   free(pcontext.eventq.item);
@@ -273,6 +277,10 @@ prof_writer(void *unused)
         tsleep.tv_nsec -= tsleep.tv_nsec/5;
         if (tsleep.tv_nsec < 1000000) tsleep.tv_nsec = 1000000;
       }
+
+      /* update fill gauge */
+      if (pcontext.gauge < qlen)
+        pcontext.gauge = qlen;
     }
 
     /* wait for the dirty flag to clear */

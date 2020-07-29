@@ -1621,6 +1621,7 @@ namespace eval events {
       after cancel after 0 $self
       after idle $self
       yield
+      set yields 0
       set runtime [clock micro]
 
       # get time range and events
@@ -1656,6 +1657,7 @@ namespace eval events {
           if {[incr iterations] > 100} {
             set iterations 0
             if {[clock micro] - $runtime > 1000} {
+              incr yields
               after idle after 0 $self
               yield
               set runtime [clock micro]
@@ -1691,6 +1693,12 @@ namespace eval events {
         lappend l $c
 
         set merged($k) $l
+
+        # redisplay if merging for more than 200ms
+        if {$yields > 200} {
+          set yields 0
+          ::timeline::draw noruler
+        }
       }
 
       ::timeline::draw noruler

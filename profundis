@@ -482,10 +482,9 @@ namespace eval gui {
     variable labelsz
 
     try {
-      return $labelsz($str)
+      set labelsz($str)
     } on error {} {
       set labelsz($str) [font measure labelfont $str]
-      return $labelsz($str)
     }
   }
 
@@ -587,10 +586,10 @@ namespace eval tree {
       \#2 { set e [$treew set $item 3] }
       default return
     }
-    if {![dict size $e]} return
+    if {![llength $e]} return
 
-    set d0 [dict get $e enter]
-    set d3 [dict get $e leave]
+    set d0 [lindex $e $::events::ienter]
+    set d3 [lindex $e $::events::ileave]
 
     ::timeline::display \
         [expr {$d0 - ($d3-$d0)/4}] [expr {$d3 + ($d3-$d0)/4}]
@@ -712,13 +711,13 @@ namespace eval timeline {
   proc autorange {} {
     variable tref; variable t0; variable t1
     variable disp0; variable disp1; variable ddisp
-    variable ::events::ts
+    variable ::events::data
 
     set min inf
     set max -inf
-    foreach k [array names ts] {
-      set e1 [lindex $ts($k) 0 0]
-      set e3 [lindex $ts($k) end end]
+    foreach k [array names data] {
+      set e1 [lindex $data($k) 0 $::events::ienter]
+      set e3 [lindex $data($k) end $::events::ileave]
       if {$min > $e1} { set min $e1 }
       if {$max < $e3} { set max $e3 }
     }
@@ -1049,9 +1048,9 @@ namespace eval timeline {
         $timeline create line $wmin $h $wmax $h \
             -fill "#e9e9e9" -tags grid
         foreach e $merged($s) {
-          set e1 [dict get $e enter]
-          set e2 [dict get $e start]
-          set e3 [dict get $e leave]
+          set e1 [lindex $e $::events::ienter]
+          set e2 [lindex $e $::events::istart]
+          set e3 [lindex $e $::events::ileave]
           if {$e3 < $t0} continue
           if {$e1 > $t1} continue
 
@@ -1070,7 +1069,7 @@ namespace eval timeline {
             continue
           }
 
-          set from [dict get $e from]
+          set from [lindex $e $::events::ifrom]
 
           $timeline create line $x1 $ha0 $x1 $ha1 \
               -fill black -tags labels
@@ -1084,7 +1083,7 @@ namespace eval timeline {
           } else {
             set id [$timeline create rectangle $x2 $h0 $x3 $h1 \
                         -fill $gui::eventbg -outline black -tags events]
-            if {[dict get $e cycle]} {
+            if {[lindex $e $::events::icycle]} {
               $timeline create rectangle $x2 $h0 [expr {$x2+2}] $h1 \
                   -fill orange -outline black -tags labels
             }
@@ -1257,26 +1256,26 @@ namespace eval cursor {
       global timeline
 
       set e [set dtags($item)]
-      set t1 [dict get $e enter]
-      set t2 [dict get $e start]
-      set t3 [dict get $e leave]
-      set from [dict get $e from]
-      set s [dict get $e service]
-      if {$s eq "-"} { set s [dict get $e task] }
+      set t1 [lindex $e $::events::ienter]
+      set t2 [lindex $e $::events::istart]
+      set t3 [lindex $e $::events::ileave]
+      set from [lindex $e $::events::ifrom]
+      set s [lindex $e $::events::iservice]
+      if {$s eq "-"} { set s [lindex $e $::events::itask] }
 
       $detailsw delete 1.0 end
       if {$from eq ""} {
         $detailsw insert 1.0 "multiple events - zoom in for details"
       } else {
         $detailsw insert 1.0 \
-            "[dict get $e instance] $s \u2022" {} \
-            " $from" bold " ([dict get $e codel])" {} \
+            "[lindex $e $::events::iinstance] $s \u2022" {} \
+            " $from" bold " ([lindex $e $::events::icodel])" {} \
             " \u2022 " {} enter bold " [timeline::timefmt $t1]" {} \
             " ([timeline::deltafmt [expr {$t2 - $t1}]])" {} \
             " \u2022 " {} start bold " [timeline::timefmt $t2]" {} \
             " ([timeline::deltafmt [expr {$t3 - $t2}]])" {} \
             " \u2022 " {} leave bold " [timeline::timefmt $t3]" {} \
-            " \u2192 [dict get $e to]"
+            " \u2192 [lindex $e $::events::ito]"
       }
     }
     return $p
@@ -1482,9 +1481,14 @@ namespace eval cursor {
 #
 namespace eval events {
   variable data
-  variable ts
-
   variable merged
+
+  # indices inside records lists
+  variable ienter 0	istart 1	ileave 2
+  variable iinstance 3	itask 4		iservice 5	icodel 6
+  variable ifrom 7	ito 8
+  variable icycle 9
+
 
   # - events::openf - async read a file until eof
   #
@@ -1494,7 +1498,8 @@ namespace eval events {
     variable $reader $name
 
     coroutine $reader apply {{ chan name } {
-      variable ::events::data; variable ::events::ts
+      variable ::events::data
+      variable ::events::ienter
       variable ::gui::hasgui
 
       # start in background
@@ -1520,13 +1525,12 @@ namespace eval events {
         set leave [expr {$s * 1000000000 + $ns}]
 
         # create event
-        set event [dict create \
-                       enter $enter start $start leave $leave \
-                       cycle 0 \
-                       instance $instance task $task \
-                       service $service codel $codel \
-                       from $from to $to]
-        set times [list $enter $start $leave]
+        set event [list \
+                       $enter $start $leave \
+                       [literal $instance] [literal $task] \
+                       [literal $service] [literal $codel] \
+                       [literal $from] [literal $to] \
+                       0]
 
         # append
         set key $instance
@@ -1535,7 +1539,6 @@ namespace eval events {
           if {$key ni $keys} { lappend keys $key }
 
           lappend data($key) $event
-          lappend ts($key) $times
         }
 
         # check runtime every 100 lines
@@ -1555,9 +1558,7 @@ namespace eval events {
         set $self "$name post-processing $k events"
 
         # sort
-        set idx [lsort -unique -indices -integer -index 0 $ts($k)]
-        set data($k) [lmap i $idx { lindex $data($k) $i }]
-        set ts($k) [lmap i $idx { lindex $ts($k) $i }]
+        set data($k) [lsort -unique -integer -index $ienter $data($k)]
 
         # cycle estimation
         ::events::cycleflag $k
@@ -1579,24 +1580,26 @@ namespace eval events {
   # - events::cycleflag - estimate cycle start for periodic tasks
   #
   proc cycleflag { item } {
-    variable data; variable ts
+    variable data
+    variable ifrom; variable ito; variable icycle
 
     # cycle can be estimated only for services
     if {[llength $item] != 3} return
 
+    set idx 0
     set cycle 0
-    set data($item) [lmap e $data($item) {
+    foreach e $data($item) {
       # cycle start flag
-      if {[string match *::start [dict get $e from]]} { set cycle -1 }
+      if {[string match *::start [lindex $e $ifrom]]} { set cycle -1 }
 
       # update
-      if {$cycle} { dict set e cycle $cycle }
+      if {$cycle} { lset data($item) $idx $icycle $cycle }
 
       # update cycle flag for next item
-      set cycle [string match *::pause::* [dict get $e to]]
+      set cycle [string match *::pause::* [lindex $e $ito]]
 
-      set e
-    }]
+      incr idx
+    }
 
     return
   }
@@ -1610,7 +1613,9 @@ namespace eval events {
       variable ::timeline::disp0; variable ::timeline::disp1
       variable ::timeline::ddisp; variable ::timeline::width
 
-      variable ::events::data; variable ::events::ts
+      variable ::events::ienter; variable ::events::ileave
+      variable ::events::ifrom
+      variable ::events::data
       variable ::events::merged
 
       variable ::gui::treew
@@ -1639,8 +1644,8 @@ namespace eval events {
       foreach k $elist {
 
         # get displayed range
-        set imin [lsearch -integer -bisect -index end $ts($k) $tmin]
-        set imax [lsearch -integer -bisect -index 0 $ts($k) $tmax]
+        set imin [lsearch -integer -bisect -index $ileave $data($k) $tmin]
+        set imax [lsearch -integer -bisect -index $ienter $data($k) $tmax]
         if {$imin >= $imax} {
           set merged($k) [list]
           continue
@@ -1648,8 +1653,8 @@ namespace eval events {
 
         set l [list]
         set events [lassign [lrange $data($k) $imin+1 $imax] c]
-        set c1 [dict get $c enter]
-        set c3 [dict get $c leave]
+        set c1 [lindex $c $ienter]
+        set c3 [lindex $c $ileave]
         set fused no
 
         foreach e $events {
@@ -1664,8 +1669,8 @@ namespace eval events {
             }
           }
 
-          set e1 [dict get $e enter]
-          set e3 [dict get $e leave]
+          set e1 [lindex $e $ienter]
+          set e3 [lindex $e $ileave]
 
           if {$c3 - $c1 >= $minp && !$fused} {
             lappend l $c
@@ -1675,10 +1680,10 @@ namespace eval events {
             continue
           }
           if {$e3 - $e1 < $minp && $e1 - $c3 < $minp} {
-            dict set c leave [dict get $e leave]
+            lset c $ileave $e3
             set c3 $e3
             if {!$fused} {
-              dict set c from ""
+              lset c $ifrom ""
               set fused yes
             }
             continue
@@ -1709,14 +1714,14 @@ namespace eval events {
   # - events::nexttime - return next event time
   #
   proc nexttime { t {among {}}} {
-    variable ::events::ts
+    variable ::events::data
 
-    if {[llength $among] == 0} { set among [array names ts] }
+    if {[llength $among] == 0} { set among [array names data] }
 
     set tn +inf
     foreach k $among {
-      set i [lsearch -integer -bisect -index 0 $ts($k) $t]
-      foreach t1 [lindex $ts($k) $i+1 0] {
+      set i [lsearch -integer -bisect -index $::events::ienter $data($k) $t]
+      foreach t1 [lindex $data($k) $i+1 $::events::ienter] {
         if {$t1 < $tn} { set tn $t1 }
       }
     }
@@ -1728,14 +1733,14 @@ namespace eval events {
   # - events::prevtime - return previous event time
   #
   proc prevtime { t {among {}}} {
-    variable ::events::ts
+    variable ::events::data
 
-    if {[llength $among] == 0} { set among [array names ts] }
+    if {[llength $among] == 0} { set among [array names data] }
 
     set tp -inf
     foreach k $among {
-      set i [lsearch -integer -bisect -index end $ts($k) $t]
-      foreach t1 [lindex $ts($k) $i 0] {
+      set i [lsearch -integer -bisect -index $::events::ileave $data($k) $t]
+      foreach t1 [lindex $data($k) $i $::events::ienter] {
         if {$t1 > $tp} { set tp $t1 }
       }
     }
@@ -1751,8 +1756,11 @@ namespace eval events {
     variable $task running
 
     coroutine $task apply {{} {
-      variable ::events::data; variable ::events::ts
+      variable ::events::data
       variable ::events::stats
+      variable ::events::ienter; variable ::events::istart
+      variable ::events::ileave; variable ::events::icycle
+      variable ::events::ifrom; variable ::events::ito
 
       variable ::tree::statrange
 
@@ -1795,8 +1803,8 @@ namespace eval events {
 
         # get elements in range
         if {$tmin > -inf} {
-          set imin [lsearch -integer -bisect -index end $ts($k) $tmin]
-          set imax [lsearch -integer -bisect -index 0 $ts($k) $tmax]
+          set imin [lsearch -integer -bisect -index $ileave $data($k) $tmin]
+          set imax [lsearch -integer -bisect -index $ienter $data($k) $tmax]
           if {$imin >= $imax} {
             array unset stats $k
             ::tree::detail $k {}
@@ -1804,7 +1812,7 @@ namespace eval events {
           }
         } else {
           set imin -1
-          set imax [llength $ts($k)]
+          set imax [llength $data($k)]
         }
 
         # check if already valid
@@ -1819,16 +1827,16 @@ namespace eval events {
         # compute
         set count 0; set sum 0; set sumsq 0
         set min inf; set max -inf
-        set emin [dict create]; set emax [dict create]
+        set emin [list]; set emax [list]
         set tx [dict create]
 
         set pcount 0; set psum 0; set psumsq 0
         set pe1 -inf; set pmin inf; set pmax -inf
-        set pemin [dict create]; set pemax [dict create]
+        set pemin [list]; set pemax [list]
 
         set ccount 0; set csum 0; set csumsq 0
         set ce1 -inf; set cmin inf; set cmax -inf
-        set cemin [dict create]; set cemax [dict create]
+        set cemin [list]; set cemax [list]
 
         foreach e [lrange $data($k) $imin+1 $imax] {
           # check runtime every 100 items
@@ -1843,16 +1851,16 @@ namespace eval events {
 
           # exec
           incr count
-          set cycle [dict get $e cycle]
-          set e1 [dict get $e start]
-          set e3 [dict get $e leave]
+          set cycle [lindex $e $icycle]
+          set e1 [lindex $e $istart]
+          set e3 [lindex $e $ileave]
           set dt [expr {$e3 - $e1}]
           incr sum $dt
           incr sumsq [expr {$dt * $dt}]
           if {$min > $dt} { set min $dt; set emin $e }
           if {$max < $dt} { set max $dt; set emax $e }
-          dict update tx [dict get $e from] from {
-            dict incr from [dict get $e to]
+          dict update tx [lindex $e $ifrom] from {
+            dict incr from [lindex $e $ito]
           }
 
           if {$ce1 != -inf && $cycle > 0} {
@@ -1946,6 +1954,7 @@ namespace eval events {
   #
   proc hpstats { chan } {
     variable ::events::data; variable ::events::stats
+    variable ::events::icodel
 
     # macro to print counters
     set logcounter {{chan indent stats} {
@@ -2004,7 +2013,7 @@ namespace eval events {
 
         foreach item [lsort [array names ::events::stats "$service *"]] {
           set from [lindex $item end]
-          set codel [dict get [lindex $data($item) 0] codel]
+          set codel [lindex $data($item) 0 $icodel]
           set total [dict get $stats($item) count]
 
           puts $chan "#     $from ($codel)"
@@ -2026,13 +2035,14 @@ namespace eval events {
   #
   proc pstats { chan } {
     variable ::events::data; variable ::events::stats
+    variable ::events::icodel
 
     # cycle exec times
     puts $chan \
         "# exec instance task service state codel count min max avg std (ns)"
     foreach item [lsort [array names ::events::stats]] {
       if {[llength $item] == 4} {
-        set codel [dict get [lindex $data($item) 0] codel]
+        set codel [lindex $data($item) 0 $icodel]
       } else {
         set codel *
       }
@@ -2048,7 +2058,7 @@ namespace eval events {
         "# cycle instance task service state codel count min max avg std (ns)"
     foreach item [lsort [array names ::events::stats]] {
       if {[llength $item] == 4} {
-        set codel [dict get [lindex $data($item) 0] codel]
+        set codel [lindex $data($item) 0 $icodel]
       } else {
         set codel *
       }
@@ -2064,7 +2074,7 @@ namespace eval events {
     puts $chan "# trans instance task service state codel from to count/total"
     foreach item [lsort [array names ::events::stats]] {
       if {[llength $item] == 4} {
-        set codel [dict get [lindex $data($item) 0] codel]
+        set codel [lindex $data($item) 0 $icodel]
       } else {
         set codel *
       }
@@ -2076,6 +2086,21 @@ namespace eval events {
         }
       }
     }
+  }
+}
+
+
+# --- misc -----------------------------------------------------------------
+
+# - literal - reuse strings accross objects
+#
+proc literal { str } {
+  variable literal
+
+  try {
+    set literal($str)
+  } on error {} {
+    set literal($str) $str
   }
 }
 

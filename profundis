@@ -26,7 +26,7 @@ exec tclsh "$0" "$@"
 #
 package require Tcl 8.6
 
-variable profundis 1.0
+variable profundis 1.1
 
 # --- usage ----------------------------------------------------------------
 #

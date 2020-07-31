@@ -277,8 +277,11 @@ prof_writer(void *unused)
         tsleep.tv_nsec -= tsleep.tv_nsec/5;
         if (tsleep.tv_nsec < 1000000) tsleep.tv_nsec = 1000000;
       }
+    }
 
-      /* update fill gauge */
+    /* update fill gauge */
+    if (pcontext.autolog) {
+      qlen = atomic_load(&pcontext.eventq.head) - tail;
       if (pcontext.gauge < qlen)
         pcontext.gauge = qlen;
     }

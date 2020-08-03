@@ -143,10 +143,45 @@ genom_prof_record(struct prof_event *event)
   struct prof_item *i = &pcontext.eventq.item[head % PROF_EVQ_SIZE];
 
   /* the queue shall not be full */
-  while (__builtin_expect(
-           head >= atomic_load(&pcontext.eventq.tail) + PROF_EVQ_SIZE,
-           0))
-    sched_yield();
+  if (__builtin_expect(
+        head >= atomic_load(&pcontext.eventq.tail) + PROF_EVQ_SIZE,
+        0)) {
+    struct prof_event qfull;
+
+    /* in autlog mode, log sleep time (on behalf of the caller) */
+    if (pcontext.autolog) {
+      /* this will require an extra slot, so acquire it here before sleeping
+       * for both slots */
+      head = atomic_fetch_add(&pcontext.eventq.head, 1);
+
+      qfull = (struct prof_event){
+        .instance = event->instance,
+        .task = event->task,
+        .service = event->service,
+        .codel = "genom_prof_record",
+        .from = "profiling",
+        .to = "wakeup"
+      };
+      genom_prof_enter(&qfull);
+
+      /* warn user */
+      warnx("profiling queue full");
+    }
+
+    /* sleep */
+    while (head >= atomic_load(&pcontext.eventq.tail) + PROF_EVQ_SIZE)
+      sched_yield();
+
+    /* in autolog mode, record sleep event */
+    if (pcontext.autolog) {
+      struct prof_item *s = &pcontext.eventq.item[head % PROF_EVQ_SIZE];
+
+      assert(__builtin_expect(atomic_load(&s->dirty), true));
+      genom_prof_leave(&qfull);
+      s->event = qfull;
+      atomic_store(&s->dirty, false);
+    }
+  }
 
   /* must be dirty by construction */
   assert(__builtin_expect(atomic_load(&i->dirty), true));

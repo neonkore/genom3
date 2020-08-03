@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014,2017 LAAS/CNRS
+# Copyright (c) 2010-2014,2017,2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -67,7 +67,7 @@ template usage "Mappings generation template\n" [regsub -all [join {
 } {\1}]
 
 # defaults
-variable sign		[list]
+variable sign		off
 variable deps		off
 variable dfile		"out.d"
 variable dtarget	""
@@ -75,7 +75,7 @@ engine mode +silent
 
 # parse options
 template options {
-	 --signature	{ set sign [list file codels.h] }
+	 --signature	{ set sign on }
     -l - --language	{ set lang [template arg] }
     -MD			{ set deps on }
     -MF			{ set dfile [template arg] }
@@ -93,6 +93,7 @@ append header " Source file: $argv\n"
 if {![catch {dotgen input notice} notice]} {
   append header $notice
 }
+set out [comment $header]
 
 # set default language
 if {![info exists lang]} {
@@ -106,11 +107,17 @@ if {![info exists lang]} {
 }
 lang $lang
 
-# generate types definitions
-set out ""
-template parse							\
-    raw [comment $header]\n string [language mapping] {*}$sign	\
-    string out
+# get types and codels if needed
+set objs [dotgen types]
+if {$sign} {
+  foreach c [dotgen components] {
+    lappend objs {*}[$c codels]
+  }
+}
+
+# generate definitions
+template parse string [language mapping $objs] string mappings
+append out "\n$mappings"
 
 # dependencies
 if {$dtarget == ""} { set dtarget $out }

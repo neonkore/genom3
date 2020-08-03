@@ -307,10 +307,10 @@ namespace eval language {
 
   #/
   # [[mapping]]
-  # === *language mapping* ['type'] ['locations']
+  # === *language mapping* ['objects'] ['locations']
   #
-  # Generate and return a string containing the mapping of 'type' for the
-  # current language, or of all types if no argument is given.
+  # Generate and return a string containing the mapping of 'type' or 'codel'
+  # objects for the current language, or of all types if no argument is given.
   # The returned string is a valid source code for the language.
   #
   # .Arguments
@@ -321,13 +321,11 @@ namespace eval language {
   # A boolean variable controlling the generation of type location information
   # (#line directives for cpp).
   #
-  proc mapping { {types {}} {locations true} } {
+  proc mapping { {objects {}} {locations true} } {
     variable current
-    if {![llength $types]} { set types [dotgen types] }
-    foreach type $types {
-      append m [${current}::mapping $type $locations]
-    }
-    return $m
+    if {![llength $objects]} { set objects [dotgen types] }
+
+    return [${current}::mapping $objects $locations]
   }
   slave alias language::mapping language::mapping
   namespace export mapping

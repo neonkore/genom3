@@ -45,30 +45,46 @@ namespace eval language::c {
 
     # --- mapping ----------------------------------------------------------
 
-    # Return the C mapping of type.
+    # Return the C mapping of types or codels
     #
-    proc mapping { type locations } {
-      switch -- [$type kind] {
-        {const}		{ append m [genconst $type $locations] }
-        {enum}		{ append m [genenum $type $locations] }
-        {struct}	{ append m [genstruct $type $locations] }
-        {union}		{ append m [genunion $type $locations] }
-        {typedef}	{ append m [gentypedef $type $locations] }
-        {sequence}	{ append m [gensequence $type $locations] }
-        {optional}	{ append m [genoptional $type $locations] }
-        {exception}	{ append m [genexception $type $locations] }
+    proc mapping { objects locations } {
+      set m ""
 
-        {forward struct} -
-        {forward union}	{ append m [genforward $type $locations] }
+      foreach obj $objects {
+        switch -- [$obj class] {
+          type {
+            switch -- [$obj kind] {
+              {const}		{ append m [genconst $obj $locations] }
+              {enum}		{ append m [genenum $obj $locations] }
+              {struct}		{ append m [genstruct $obj $locations] }
+              {union}		{ append m [genunion $obj $locations] }
+              {typedef}		{ append m [gentypedef $obj $locations] }
+              {sequence}	{ append m [gensequence $obj $locations] }
+              {optional}	{ append m [genoptional $obj $locations] }
+              {exception}	{ append m [genexception $obj $locations] }
 
-        {pause event} -
-        {event}		{ append m [genevent $type $locations] }
+              {forward struct} -
+              {forward union}	{ append m [genforward $obj $locations] }
 
-        {port}		{ append m [genport $type $locations] }
-        {remote}	{ append m [genremote $type $locations] }
-        {native}	{ append m [gennative $type $locations] }
+              {pause event} -
+              {event}		{ append m [genevent $obj $locations] }
 
-        default		{ return "" }
+              {port}		{ append m [genport $obj $locations] }
+              {remote}		{ append m [genremote $obj $locations] }
+              {native}		{ append m [gennative $obj $locations] }
+            }
+          }
+
+          codel {
+            append m "\n#ifdef __cplusplus"
+            append m "\nextern \"C\" {"
+            append m "\n#endif"
+            append m "\n[signature $obj " " $locations];"
+            append m "\n#ifdef __cplusplus"
+            append m "\n}"
+            append m "\n#endif"
+          }
+        }
       }
 
       set p ""

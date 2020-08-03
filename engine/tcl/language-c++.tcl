@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015,2018 LAAS/CNRS
+# Copyright (c) 2010-2015,2018,2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -44,37 +44,47 @@ namespace eval language::c++ {
 
     # --- mapping ----------------------------------------------------------
 
-    # Generate and return the C++ mapping of types matching the glob pattern
+    # Generate and return the C++ mapping of types or codels
     #
-    proc mapping { type locations } {
-      # Nested types which are defined within the scope of another type trigger
-      # the generation of the enclosing type.
-      while {![catch {$type parent} p]} { set type $p }
+    proc mapping { objects locations } {
+      set m ""
 
-      switch -- [$type kind] {
-        {const}		{ append m [genconst $type $locations] }
-        {enum}		{ append m [genenum $type $locations] }
-        {struct}	{ append m [genstruct $type $locations] }
-        {union}		{ append m [genunion $type $locations] }
-        {typedef}	{ append m [gentypedef $type $locations] }
-        {exception}	{ append m [genexception $type $locations] }
+      foreach obj $objects {
+        switch -- [$obj class] {
+          type {
+            # Nested types which are defined within the scope of another type
+            # trigger the generation of the enclosing type.
+            while {![catch {$obj parent} p]} { set obj $p }
 
-        {forward struct} -
-        {forward union}	{ append m [genforward $type $locations] }
+            switch -- [$obj kind] {
+              {const}		{ append m [genconst $obj $locations] }
+              {enum}		{ append m [genenum $obj $locations] }
+              {struct}		{ append m [genstruct $obj $locations] }
+              {union}		{ append m [genunion $obj $locations] }
+              {typedef}		{ append m [gentypedef $obj $locations] }
+              {exception}	{ append m [genexception $obj $locations] }
 
-        {pause event} -
-        {event}		{ append m [genevent $type $locations] }
+              {forward struct} -
+              {forward union}	{ append m [genforward $obj $locations] }
 
-        {port}		{ append m [genport $type $locations] }
-        {remote}	{ append m [genremote $type $locations] }
-        {native}	{ append m [gennative $type $locations] }
+              {pause event} -
+              {event}		{ append m [genevent $obj $locations] }
 
-        default		{ return "" }
+              {port}		{ append m [genport $obj $locations] }
+              {remote}		{ append m [genremote $obj $locations] }
+              {native}		{ append m [gennative $obj $locations] }
+            }
+          }
+
+          codel {
+            append m "\n[signature $obj " " $locations];"
+          }
+        }
       }
 
       set p ""
       if {[regexp {u?int(8|16|32|64)_t} $m]} {
-        append p "\n#include <stdint.h>"
+        append p "\n#include <cstdint>"
       }
       if {[regexp {std::string} $m]} {
         append p "\n#include <string>"

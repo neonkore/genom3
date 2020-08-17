@@ -51,7 +51,28 @@ proc usage { channel code } {
 
 # --- help -----------------------------------------------------------------
 #
-proc help {} {
+proc helpbutton {} {
+  tk_messageBox -type ok -icon info -message [join {
+    "GenoM3 profiling data visualization toolkit"
+    ""
+    "Meaning of button symbols:"
+    ""
+    "\u00bb		Expand treeview horizontally to show statistics"
+    "\u00ab		Minimize treeview to hide statistics"
+    ""
+    "\u26f6		Compute statistics for current view only"
+    "\u221e		Compute statistics for all data"
+    ""
+    "\u2194		Display execution times"
+    "\u21b7		Display cycle times (periods)"
+    ""
+    "+		Zoom in"
+    "\u21ba		Previous zoom level"
+    "-		Zoom out"
+  } \n]
+}
+
+proc helpkey {} {
   tk_messageBox -type ok -icon info -message [join {
     "GenoM3 profiling data visualization toolkit"
     ""
@@ -180,7 +201,8 @@ namespace eval gui {
 
     menu .menu.help
     .menu add cascade -label "Help" -menu .menu.help
-    .menu.help add command -label "Key bindings" -command { help }
+    .menu.help add command -label "Buttons" -command { helpbutton }
+    .menu.help add command -label "Key bindings" -command { helpkey }
 
     . configure -menu .menu
     bind . q { set ::forever false }

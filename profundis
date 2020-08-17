@@ -234,6 +234,7 @@ namespace eval gui {
         -xscrollcommand { ::tree::hview $hpane.services.tscroll } \
         -yscrollcommand {
           apply {args {
+            ::timeline::draw noruler
             $::hpane.time.vscroll set {*}$args
             ::timeline::eselect
           }}}
@@ -356,12 +357,9 @@ namespace eval gui {
     # scrolls
     set hscroll $hpane.time.hscroll
     ttk::scrollbar $hscroll -orient horizontal -command gui::hscroll
-    ttk::scrollbar $hpane.time.vscroll -orient vertical -command {
-      apply {args {
-        $::gui::treew yview {*}$args
-        ::timeline::draw noruler
-      }}
-    }
+    ttk::scrollbar $hpane.time.vscroll -orient vertical \
+        -command [list $treew yview]
+
     grid $hpane.time.rulerdate $hpane.time.rulerres \
         $hpane.time.zoom+ $hpane.time.unzoom \
         $hpane.time.zoom- - -sticky nswe

@@ -85,6 +85,9 @@ proc helpkey {} {
     "-			Zoom out"
     "=			Zoom in"
     ""
+    "x			Expand all items"
+    "X			Close all items"
+    ""
     "<Shift>			Don't snap timeline cursor to nearby items"
     "<Control>			Measure time from current cursor position"
     ""
@@ -211,6 +214,8 @@ namespace eval gui {
     bind . <space> { ::gui::hscroll scroll 1 units }
     bind . n { ::gui::hscroll scroll 1 units }
     bind . p { ::gui::hscroll scroll -1 units }
+    bind . x { ::tree::expand on }
+    bind . X { ::tree::expand off }
 
     # toplevel frame
     ttk::frame .main -padding 2
@@ -569,6 +574,23 @@ namespace eval tree {
   #
   proc configure {} {
     ::timeline::draw noruler
+  }
+
+
+  # - tree::expand - open/close all tree items
+  #
+  proc expand { status {root {}} } {
+    variable ::gui::treew
+
+    $treew item $root -open $status
+    foreach item [$treew children $root] {
+      expand $status $item
+    }
+
+    if {$root eq ""} {
+      ::events::merge
+      ::events::stats
+    }
   }
 
 

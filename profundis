@@ -26,7 +26,7 @@ exec tclsh "$0" "$@"
 #
 package require Tcl 8.6
 
-variable profundis 1.1
+variable profundis 1.2
 
 # --- usage ----------------------------------------------------------------
 #
@@ -870,6 +870,15 @@ namespace eval timeline {
     variable disp0; variable ddisp; variable width
 
     return [expr {$disp0 + int($p * $ddisp/$width)}]
+  }
+
+  proc time2s { args } {
+    set f [list]
+    foreach t $args {
+      lappend f [format {%d.%09d} \
+                     [expr {$t / 1000000000}] [expr {$t % 1000000000}]]
+    }
+    return $f
   }
 
   proc timefmt { t } {
@@ -2081,7 +2090,7 @@ namespace eval events {
 
     # cycle exec times
     puts $chan \
-        "# exec instance task service state codel count min max avg std (ns)"
+        "# exec instance task service state codel count min max avg std"
     foreach item [lsort [array names ::events::stats]] {
       if {[llength $item] == 4} {
         set codel [lindex $data($item) 0 $icodel]
@@ -2090,14 +2099,15 @@ namespace eval events {
       }
       set k [lrange [linsert $item end * *] 0 3]
       dict with stats($item) {
-        puts $chan "exec $k $codel $count $min $max $avg $stddev"
+        set times [::timeline::time2s $min $max $avg $stddev]
+        puts $chan "exec $k $codel $count $times"
       }
     }
     puts $chan ""
 
     # cycle times
     puts $chan \
-        "# cycle instance task service state codel count min max avg std (ns)"
+        "# cycle instance task service state codel count min max avg std"
     foreach item [lsort [array names ::events::stats]] {
       if {[llength $item] == 4} {
         set codel [lindex $data($item) 0 $icodel]
@@ -2107,7 +2117,8 @@ namespace eval events {
       set k [lrange [linsert $item end * *] 0 3]
       dict with stats($item) {
         if {!$pcount} continue
-        puts $chan "cycle $k $codel $pcount $pmin $pmax $pavg $pstddev"
+        set times [::timeline::time2s $pmin $pmax $pavg $pstddev]
+        puts $chan "cycle $k $codel $pcount $times"
       }
     }
     puts $chan ""

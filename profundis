@@ -433,7 +433,7 @@ namespace eval gui {
 
     set elist [list]
     foreach item [$treew children $root] {
-      if {[$treew item $item -open]} {
+      if {[$treew item $item -open] && [llength [$treew children $item]] } {
         if {$all} { lappend elist $item }
         lappend elist {*}[treeitems $all $item]
       } else {

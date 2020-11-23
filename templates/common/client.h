@@ -1,5 +1,5 @@
 <'
-# Copyright (c) 2012-2014,2018 LAAS/CNRS
+# Copyright (c) 2012-2014,2018,2020 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution and use  in source  and binary  forms,  with or without
@@ -101,6 +101,7 @@ char *			genom_<"$comp">_client_json_error(genom_client h,
 typedef void (*<"$comp">_<"[$s name]">_cb)(
   genom_client h,
   int rqstid,
+  int done,
   genom_event report,
   struct genom_<"$comp">_<"[$s name]">_output *out,
   const void *exdetail,

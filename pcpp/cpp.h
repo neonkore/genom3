@@ -90,7 +90,7 @@ extern int bidx;
 extern char spechr[];
 
 /* definition for include file info */
-struct includ {
+extern struct includ {
 	struct includ *next;
 	const usch *fname;	/* current fn, changed if #line found */
 	const usch *orgfn;	/* current fn, not changed */

@@ -74,6 +74,9 @@ usch *Mfile;
 struct initar *initar;
 int readmac, lastoch;
 
+/* include files */
+struct includ *ifiles;
+
 /* include dirs */
 struct incs {
 	struct incs *next;

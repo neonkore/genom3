@@ -1,5 +1,3 @@
-/*	$Id: cpp.c 2017/05/18 15:49:09 mallet $	*/
-
 /*
  * Copyright (c) 2004,2010 Anders Magnusson (ragge@ludd.luth.se).
  * All rights reserved.

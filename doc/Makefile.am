@@ -170,7 +170,7 @@ $(mdatetgts): %~: $(srcdir)/%
 	@test -d '$(dir $@)' || mkdir -p '$(dir $@)'
 	sed <$(srcdir)/$(@:~=) >$@					\
 	  -e 's|^:revision:.*|:revision: ${PACKAGE_VERSION}|'
-	if cmp -s '$@' '$(srcdir)/$(@:~=)'; then			\
+	if ! cmp -s '$@' '$(srcdir)/$(@:~=)'; then			\
 	  eval `./mdate $@`;						\
 	  sed <$(srcdir)/$(@:~=) >$@					\
 	    -e 's|^:revision:.*|:revision: ${PACKAGE_VERSION}|'		\

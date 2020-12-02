@@ -1,5 +1,5 @@
-:revision: 2.99.33
-:year: 2019
+:revision: 2.99.39
+:year: 2020
 
 ifdef::sidebartoc[]
 include::_Sidebar.adoc[]

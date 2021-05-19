@@ -116,7 +116,7 @@ be defined in the `pause` namespace, by specifying the transition as
 execution either until the next period (within periodic tasks), or until a
 new internal event occurs (within tasks with no period). Internal events
 correspond to a +non-paused+ transition of another activity within the
-component, or the successful execution of an `attribute` or `function`.
+component, or the execution of an `attribute` or `function`.
 
 === Example
 

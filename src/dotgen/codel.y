@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015,2017 LAAS/CNRS
+ * Copyright (c) 2009-2015,2017,2021 LAAS/CNRS
  * All rights reserved.
  *
  * Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -104,7 +104,7 @@
  * execution either until the next period (within periodic tasks), or until a
  * new internal event occurs (within tasks with no period). Internal events
  * correspond to a +non-paused+ transition of another activity within the
- * component, or the successful execution of an `attribute` or `function`.
+ * component, or the execution of an `attribute` or `function`.
  *
  * === Example
  *

@@ -1,6 +1,6 @@
 <'
 #
-# Copyright (c) 2017 LAAS/CNRS
+# Copyright (c) 2017,2022 LAAS/CNRS
 # All rights reserved.
 #
 # Redistribution  and  use  in  source  and binary  forms,  with  or  without
@@ -87,16 +87,18 @@ proc expand-type { name type initer prefix {seq {}} } {
   if {![catch {$type length} l]} {
     append kind "<$l>"
   }
-  switch -glob -- $seq {
-    0  { set kind "optional< $kind >" }
-    -1 { set kind "sequence< $kind >" }
-    ?* { set kind "sequence< $kind, $seq >" }
+  foreach s [lreverse $seq] {
+    switch -glob -- $s {
+      0  { set kind "optional< $kind >" }
+      -1 { set kind "sequence< $kind >" }
+      ?* { set kind "sequence< $kind, $s >" }
+    }
   }
   if {$name != ""} { set label " `$name`" } else { set label "" }
 
   switch -- [$type kind] {
     typedef {
-      set out [expand-type $name [$type type] $initer $prefix]
+      set out [expand-type $name [$type type] $initer $prefix $seq]
     }
 
     struct - exception {
@@ -113,7 +115,7 @@ proc expand-type { name type initer prefix {seq {}} } {
 
     array {
       append name "\[[$type length]\]"
-      set out [expand-type $name [$type type] $initer $prefix]
+      set out [expand-type $name [$type type] $initer $prefix $seq]
       if {![catch {dict get $initer items} sub]} {
         dict for {i v} $sub {
           append out [expand-type "\[$i\]" [$type type] $v "${prefix}*"]
@@ -122,9 +124,10 @@ proc expand-type { name type initer prefix {seq {}} } {
     }
 
     sequence {
-      if {[catch {$type length} seq]} {
-        set seq -1
+      if {[catch {$type length} l]} {
+        set l -1
       }
+      lappend seq $l
       set out [expand-type $name [$type type] $initer $prefix $seq]
       if {![catch {dict get $initer items} sub]} {
         dict for {i v} $sub {
